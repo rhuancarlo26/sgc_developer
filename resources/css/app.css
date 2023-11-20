@@ -1,0 +1,8 @@
+.dropdown-item:hover {
+    background-color: var(--tblr-active-bg) !important;
+}
+
+.fill-current {
+    fill: currentColor;
+}
+
