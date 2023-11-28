@@ -8,11 +8,9 @@ import {IconSearch, IconEraser, IconPlus} from '@tabler/icons-vue';
 import {onMounted} from "vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 
-
 defineProps({
     roles: Object
 })
-
 
 let searchForm = useForm({searchColumn: "", searchValue: null});
 
@@ -68,7 +66,7 @@ const search = () => {
                         <IconEraser/>
                     </button>
                     <button class="btn btn-primary mx-2" title="Pesquisar" :disabled="searchForm.processing">
-                        <IconSearch />
+                        <IconSearch/>
                     </button>
                     <Link class="btn btn-success" :href="route('cadastros.perfis.formulario')">
                         <IconPlus class="me-2"/>

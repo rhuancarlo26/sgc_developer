@@ -17,6 +17,7 @@ const props = defineProps({
     }
 });
 
+
 const form = useForm({name: '', permissions: [], ...props.role})
 
 if (props.role.permissions) {

@@ -74,7 +74,7 @@ const search = () => {
             </form>
 
             <!-- Listagem-->
-            <Table :columns="['Name', 'Email', 'Perfis', 'Cadastrado em']" :records="users" table-class="table-hover"  >
+            <Table :columns="['Name', 'Email', 'Perfis', 'Cadastrado em']" :records="users" table-class="table-hover" >
                 <template #body="{item}">
                     <tr class="cursor-pointer" @click="router.get(route('cadastros.usuarios.formulario', item.id))">
                         <td>{{ item.name }}</td>

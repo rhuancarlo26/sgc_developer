@@ -2,7 +2,7 @@
 
 defineProps({
     prefix: {type: String},
-    icon: {type: Function},
+    icon: {type: [Function, Object]},
     title: {type: String}
 })
 </script>
