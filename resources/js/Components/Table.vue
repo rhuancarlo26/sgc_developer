@@ -16,7 +16,7 @@ const props = defineProps({
 const recordsState = ref({...props.records});
 
 function updateRecordsState(records) {
-    recordsState.vluae = {...records}
+    recordsState.value = {...records}
 }
 
 </script>
