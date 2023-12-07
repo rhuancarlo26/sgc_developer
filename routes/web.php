@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Roles\RolesController;
-use App\Http\Controllers\Users\UsersController;
+use App\Domain\Profile\ProfileController;
+use App\Domain\Roles\Controllers\RoleController;
+use App\Domain\Users\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -55,15 +55,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Usuários
             Route::prefix('usuarios')->group(function () {
 
-                Route::get('/', [UsersController::class, 'index'])
+                Route::get('/', [UserController::class, 'index'])
                     ->name('cadastros.usuarios.listagem');
-                Route::get('/formulario/{user?}', [UsersController::class, 'create'])
+                Route::get('/formulario/{user?}', [UserController::class, 'create'])
                     ->name('cadastros.usuarios.formulario');
-                Route::post('/criar', [UsersController::class, 'store'])
+                Route::post('/criar', [UserController::class, 'store'])
                     ->name('cadastros.usuarios.criar');
-                Route::patch('/atualizar/{user}', [UsersController::class, 'update'])
+                Route::patch('/atualizar/{user}', [UserController::class, 'update'])
                     ->name('cadastros.usuarios.atualizar');
-                Route::delete('/deletar/{user}', [UsersController::class, 'destroy'])
+                Route::delete('/deletar/{user}', [UserController::class, 'destroy'])
                     ->name('cadastros.usuarios.deletar');
 
             });
@@ -71,15 +71,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Perfis
             Route::prefix('perfis')->group(function () {
 
-                Route::get('/', [RolesController::class, 'index'])
+                Route::get('/', [RoleController::class, 'index'])
                     ->name('cadastros.perfis.listagem');
-                Route::get('/formulario/{role?}', [RolesController::class, 'form'])
+                Route::get('/formulario/{role?}', [RoleController::class, 'form'])
                     ->name('cadastros.perfis.formulario');
-                Route::post('/criar', [RolesController::class, 'store'])
+                Route::post('/criar', [RoleController::class, 'store'])
                     ->name('cadastros.perfis.criar');
-                Route::patch('/atualizar/{role}', [RolesController::class, 'update'])
+                Route::patch('/atualizar/{role}', [RoleController::class, 'update'])
                     ->name('cadastros.perfis.atualizar');
-                Route::delete('/deletar/{role}', [RolesController::class, 'destroy'])
+                Route::delete('/deletar/{role}', [RoleController::class, 'destroy'])
                     ->name('cadastros.perfis.deletar');
 
 
