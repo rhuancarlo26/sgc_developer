@@ -13,14 +13,6 @@ const page = usePage();
 
 const flash = ref({});
 
-const fixBrokenBootstrapModals = () => {
-
-    document.body.classList.remove('modal-open')
-    document.body.style.all = null;
-    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove())
-
-}
-
 const clearFlashAlertAfter = (seconds) => {
     setTimeout(
         () => flash.value = {},
@@ -42,11 +34,7 @@ watch(
 );
 
 
-watch(
-    () => page.url,
-    fixBrokenBootstrapModals,
-    {immediate: true}
-)
+
 
 </script>
 
@@ -80,11 +68,10 @@ watch(
             <!-- Page body -->
             <div class="page-body">
                 <div class="container-xl">
-                    <slot/>
+                    <slot  />
                 </div>
             </div>
 
-            <!-- <PageFooter/>-->
         </div>
     </div>
 

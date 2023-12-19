@@ -27,7 +27,7 @@ const mergedOptions = {...defaultOptions, ...props.options}
 
 const show = (request) => {
 
-    const modal = modalRef.value.getInstance();
+    const modal = modalRef.value.getBsModal();
 
     modal.show();
 
@@ -58,7 +58,7 @@ const show = (request) => {
 
 <template>
 
-    <Modal ref="modalRef" dialog-class="modal-dialog-centered">
+    <Modal ref="modalRef" modal-dialog-class="modal-dialog-centered">
         <template #body>
             <div class="d-flex align-items-center gap-2">
                 <IconExclamationCircle class="text-warning" size="36"/>
