@@ -82,8 +82,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::delete('/deletar/{role}', [RoleController::class, 'destroy'])
                     ->name('cadastros.perfis.deletar');
 
-
-
             });
 
         });

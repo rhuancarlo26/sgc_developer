@@ -14,7 +14,7 @@ const form = useForm({
 const confirmDeleteUserModal = ref(null)
 
 const confirmUserDeletion = () => {
-    confirmDeleteUserModal.value.getInstance().show();
+    confirmDeleteUserModal.value.getBsModal().show();
     nextTick(() => passwordInput.value.focus());
 };
 
@@ -28,7 +28,7 @@ const deleteUser = () => {
 };
 
 const closeModal = () => {
-    confirmDeleteUserModal.value.getInstance().hide();
+    confirmDeleteUserModal.value.getBsModal().hide();
     form.clearErrors()
     form.reset();
 };
