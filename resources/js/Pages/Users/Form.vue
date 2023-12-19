@@ -6,7 +6,6 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import {IconDeviceFloppy, IconTrash} from "@tabler/icons-vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
-import {onMounted} from "vue";
 
 const props = defineProps({
     roles: {type: Array},
@@ -25,20 +24,22 @@ if (props.user.roles) {
 }
 
 
+
 const saveUser = () => {
-    const formTrasnform = (data) => {
+
+    const formTransform = (data) => {
         return {id: data.id, name: data.name, roles: data.roles, email: data.email}
     }
 
     if (props.user.id) {
 
-        form.transform(formTrasnform)
+        form.transform(formTransform)
             .patch(route('cadastros.usuarios.atualizar', props.user.id));
 
         return;
     }
 
-    form.transform(formTrasnform)
+    form.transform(formTransform)
         .post(route('cadastros.usuarios.criar'));
 }
 

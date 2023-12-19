@@ -2,9 +2,9 @@
 import {onMounted, ref} from "vue";
 
 defineProps({
-    size: String,
     title: String,
-    dialogClass: String,
+    modalDialogClass: String,
+    modalClass: String,
     options: Object
 })
 
@@ -15,19 +15,19 @@ onMounted(() => {
     bootstrapModal = new bootstrap.Modal(modalEl.value, {})
 })
 
-function getInstance() {
+function getBsModal() {
     return bootstrapModal;
 }
 
 
-defineExpose({getInstance});
+defineExpose({getBsModal});
 
 </script>
 
 
 <template>
-    <div class="modal fade" id="teste" ref="modalEl" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" :class="`${size} ${dialogClass}`">
+    <div class="modal fade" id="teste" ref="modalEl" tabindex="-1" aria-hidden="true" :class="modalClass">
+        <div class="modal-dialog" :class="`${modalDialogClass}`">
             <div class="modal-content">
                 <div class="modal-header" v-if="title">
                     <h5 class="modal-title">
