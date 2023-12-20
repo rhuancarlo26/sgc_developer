@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 trait Deletable
 {
     /**
-     * Delete the Role from the database
+     * Delete the Model from the database
      *
      * @param Model $model
      * @return bool
