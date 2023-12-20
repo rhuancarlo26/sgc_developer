@@ -66,6 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::delete('/deletar/{user}', [UserController::class, 'destroy'])
                     ->name('cadastros.usuarios.deletar');
 
+
             });
 
             // Perfis
@@ -83,6 +84,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('cadastros.perfis.deletar');
 
             });
+
 
         });
 

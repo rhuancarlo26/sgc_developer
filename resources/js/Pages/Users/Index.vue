@@ -1,10 +1,10 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import {Head, Link, useForm, useRemember} from "@inertiajs/vue3";
+import {Head, useForm} from "@inertiajs/vue3";
 import Table from '@/Components/Table.vue';
 import {dateTimeFormat} from '@/Utils/DateTimeUtils.js'
 import {router} from '@inertiajs/vue3'
-import {IconSearch, IconEraser, IconPlus} from '@tabler/icons-vue';
+import {IconSearch, IconEraser} from '@tabler/icons-vue';
 import {onMounted} from "vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 
@@ -30,7 +30,7 @@ const search = () => {
 
 <template>
 
-    <Head title="Cadastros > Uuários"/>
+    <Head title="Cadastros > Usuários"/>
 
     <AuthenticatedLayout>
 
@@ -68,13 +68,13 @@ const search = () => {
                         <IconEraser/>
                     </button>
                     <button class="btn btn-primary ms-2" title="Pesquisar" :disabled="searchForm.processing">
-                        <IconSearch />
+                        <IconSearch/>
                     </button>
                 </div>
             </form>
 
             <!-- Listagem-->
-            <Table :columns="['Name', 'Email', 'Perfis', 'Cadastrado em']" :records="users" table-class="table-hover" >
+            <Table :columns="['Name', 'Email', 'Perfis', 'Cadastrado em']" :records="users" table-class="table-hover">
                 <template #body="{item}">
                     <tr class="cursor-pointer" @click="router.get(route('cadastros.usuarios.formulario', item.id))">
                         <td>{{ item.name }}</td>

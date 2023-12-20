@@ -3,13 +3,14 @@
 namespace App\Domain\Roles\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreRoleRequest extends FormRequest
 {
     public function rules(): array
     {
         return [
-            'name' => 'required|max:256|unique:roles,name',
+            'name' => 'required|max:256|string|unique:roles,name',
             'permissions' => 'required|array|min:1'
         ];
     }
