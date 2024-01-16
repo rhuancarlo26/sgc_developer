@@ -1,8 +1,8 @@
 <?php
 
 use App\Domain\Profile\ProfileController;
-use App\Domain\Roles\Controllers\RoleController;
-use App\Domain\Users\Controllers\UserController;
+use App\Domain\Role\Controllers\RoleController;
+use App\Domain\User\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

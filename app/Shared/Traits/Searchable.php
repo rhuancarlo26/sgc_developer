@@ -46,4 +46,16 @@ trait Searchable
     {
         return $this->model::all($columns);
     }
+
+    /**
+     * Get all the models from the database with pagination
+     *
+     * @param array $columns
+     * @param int $limit
+     * @return Collection
+     */
+    public function paginateAll(array $columns = ['*'], int $limit = 15): Collection
+    {
+        return $this->model::query()->select($columns)->paginate($limit);
+    }
 }

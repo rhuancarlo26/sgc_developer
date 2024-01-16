@@ -7,14 +7,20 @@ import Alert from "@/Components/Alert.vue";
 import Menu from "./Partials/Menu.vue";
 import TopBar from "./Partials/TopBar.vue";
 import {usePage} from '@inertiajs/vue3'
-import {ref, watch} from "vue";
+import {ref, watch, nextTick} from "vue";
 
 const page = usePage();
 
 const flash = ref({});
 
+defineProps({
+    containerType: {type: String, default: 'container-fluid'}
+})
+
+let timeoutId = null;
+
 const clearFlashAlertAfter = (seconds) => {
-    setTimeout(
+    timeoutId = setTimeout(
         () => flash.value = {},
         seconds * 1000
     );
@@ -23,16 +29,22 @@ const clearFlashAlertAfter = (seconds) => {
 watch(
     () => page.props,
     (pageProps) => {
-        flash.value = pageProps.flash;
 
-        if (flash.value.message) {
-            clearFlashAlertAfter(5);
-        }
+        flash.value = {};
+
+        nextTick(() => {
+            flash.value = pageProps.flash;
+
+            if (flash.value.message) {
+                clearTimeout(timeoutId);
+                clearFlashAlertAfter(5);
+            }
+        })
+
 
     },
     {immediate: true}
 );
-
 
 
 
