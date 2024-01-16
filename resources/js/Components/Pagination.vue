@@ -1,6 +1,7 @@
 <script setup>
 import axios from "axios";
 import {Link} from '@inertiajs/vue3';
+import AxiosErrorHandler from "@/Utils/AxiosErrorHandler.js";
 
 defineProps({
     records: {type: Object, default: {data: [], links: []}},
@@ -11,16 +12,36 @@ defineProps({
 
 const emit = defineEmits(['pageChange']);
 
-function fetchPageData(link) {
+const getUrlWithSearchParams = (url) => {
 
-    if (!link) {
-        return;
+    if (!url) {
+        return '#';
     }
 
-    axios.get(link).then(r => {
-        emit('pageChange', r.data);
+    const urlObj = new URL(url);
+
+    Object.keys(route().params).forEach(key => {
+
+        if (!urlObj.searchParams.has(key)) {
+            urlObj.searchParams.append(key, route().params[key]);
+        }
+
     });
+
+    return urlObj.toString();
 }
+
+const
+    fetchPageData = (url) => {
+
+        if (!url) {
+            return;
+        }
+
+        axios.get(getUrlWithSearchParams(url)).then(r => {
+            emit('pageChange', r.data);
+        }).catch(AxiosErrorHandler);
+    }
 
 </script>
 
@@ -41,7 +62,7 @@ function fetchPageData(link) {
                         v-html="link.label"/>
                 <Link v-else
                       class="page-link" :class="{disabled: !link.url}"
-                      :href="link.url ?? '#'"
+                      :href="getUrlWithSearchParams(link.url)"
                       :only="only"
                       v-html="link.label"/>
             </li>

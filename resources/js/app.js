@@ -10,13 +10,17 @@ import {can, hasRole, canSeePrefix} from './Utils/PermissionUtils.js';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+import "vue-toastification/dist/index.css";
+import Toast from "vue-toastification";
+
 createInertiaApp({
     title: (title) => `${appName}: ${title}`,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
     setup({el, App, props, plugin}) {
         return createApp({render: () => h(App, props)})
             .use(plugin)
-            .use(ZiggyVue, Ziggy)
+            .use(Toast)
+            .use(ZiggyVue)
             .mixin({methods: {can, hasRole, canSeePrefix}})
             .mount(el);
     },

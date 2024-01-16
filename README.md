@@ -19,3 +19,8 @@ onde a stack do front-end foi substituída por uma adaptação do [Tabler Dashbo
 - Crie uma chave p/ a aplicação: `php artisan key:generate`
 - Execute as migrações de bancos de dados: `php artisan migrate`
 - Crie um usuário 'Super Admin' para o primeiro acesso: `php artisan create:super-admin`
+
+# Comandos
+- Criar service: `php artisan make:model-service App/Domain/Example/Services/ExampleService`;
+- Criar Página Vue: `php artisan make:vue-page-component Example/ComponentName`
+- Restante dos comandos do `php artisan make:` devem estar seguidos do namespace completo do arquivo. Ex: `php artisan make:controller App/Domain/Example/Controllers/ExampleController`

@@ -17,4 +17,15 @@ trait Deletable
         return $model->delete();
     }
 
+    /**
+     * Delete the Model from the database
+     *
+     * @param Model $model
+     * @return bool
+     */
+    public function forceDelete(Model $model): bool
+    {
+        return $model->forceDelete();
+    }
+
 }
