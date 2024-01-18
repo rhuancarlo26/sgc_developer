@@ -40,7 +40,7 @@ class RoleController extends Controller
      * @param Role $role
      * @return Response
      */
-    public function form(Role $role): Response
+    public function create(Role $role): Response
     {
         return Inertia::render('Role/Form', [
             'role' => $role->load('permissions'),

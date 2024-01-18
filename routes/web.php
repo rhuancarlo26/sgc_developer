@@ -74,7 +74,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
                 Route::get('/', [RoleController::class, 'index'])
                     ->name('cadastros.perfis.listagem');
-                Route::get('/formulario/{role?}', [RoleController::class, 'form'])
+                Route::get('/formulario/{role?}', [RoleController::class, 'create'])
                     ->name('cadastros.perfis.formulario');
                 Route::post('/criar', [RoleController::class, 'store'])
                     ->name('cadastros.perfis.criar');
