@@ -164,7 +164,7 @@ return [
          * Application Service Providers...
          */
         \App\Shared\Providers\AppServiceProvider::class,
-        \App\Domain\Auth\Providers\AuthServiceProvider::class,
+        \App\Shared\Base\Auth\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         \App\Shared\Providers\EventServiceProvider::class,
         \App\Shared\Providers\RouteServiceProvider::class,
