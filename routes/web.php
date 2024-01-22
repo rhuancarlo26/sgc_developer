@@ -91,6 +91,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
                 Route::get('/', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
                     ->name('contratos.gestao.listagem');
+                Route::get('/excel', [App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController::class, 'excelExport'])
+                    ->name('contratos.gestao.excel_export');
             });
         });
 
