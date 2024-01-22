@@ -51,7 +51,7 @@ onMounted(() => {
 
       <!-- Listagem-->
       <Table :columns="['UF', 'BR', 'N° do Contrato', 'CNPJ', 'Contratada', 'Processo SEI', 'Situação', 'Ação']"
-        :records="contratos" table-class="table-hover" :excelRoute="'teste'">
+        :records="contratos" table-class="table-hover" :excelRoute="route('contratos.gestao.excel_export')">
         <template #body="{ item }">
           <tr class="cursor-pointer">
             <td></td>
