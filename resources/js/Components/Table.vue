@@ -1,22 +1,23 @@
 <script setup>
 
 import Pagination from "@/Components/Pagination.vue";
-import {ref} from "vue";
+import { ref } from "vue";
 
 const props = defineProps({
     columns: Array,
-    records: {type: Object, default: {data: [], links: []}},
+    records: { type: Object, default: { data: [], links: [] } },
     tableClass: String,
     rowClass: String,
-    inertiaPagination: {type: Boolean, default: true},
-    only: {type: Array, default: []},
-    axiosPagination: {type: Boolean, default: false}
+    inertiaPagination: { type: Boolean, default: true },
+    only: { type: Array, default: [] },
+    axiosPagination: { type: Boolean, default: false },
+    excelRoute: String
 });
 
-const recordsState = ref({...props.records});
+const recordsState = ref({ ...props.records });
 
 function updateRecordsState(records) {
-    recordsState.value = {...records}
+    recordsState.value = { ...records }
 }
 
 </script>
@@ -26,32 +27,25 @@ function updateRecordsState(records) {
         <div class="table-responsive">
             <table class="table card-table table-bordered" :class="tableClass">
                 <thead>
-                <tr>
-                    <th v-for="column in columns">{{ column }}</th>
-                </tr>
+                    <tr>
+                        <th v-for="column in columns" :key="column">{{ column }}</th>
+                    </tr>
                 </thead>
                 <tbody>
-                <slot v-if="recordsState.data.length"
-                      v-for="(record, i) in recordsState.data"
-                      name="body"
-                      :key="i"
-                      :item="record"/>
+                    <slot v-if="recordsState.data.length" v-for="(record, i) in recordsState.data" name="body" :key="i"
+                        :item="record" />
 
-                <tr v-else>
-                    <td :colspan="columns.length" class="text-center py-3">
-                        Nenhum registro encontrado
-                    </td>
-                </tr>
+                    <tr v-else>
+                        <td :colspan="columns.length" class="text-center py-3">
+                            Nenhum registro encontrado
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
         <div class="card-footer" v-if="recordsState.data.length">
-            <Pagination :records="recordsState"
-                        @pageChange="updateRecordsState"
-                        :inertiaPagination="inertiaPagination"
-                        :axiosPagination="axiosPagination"
-                        :only="only"
-            />
+            <Pagination :records="recordsState" @pageChange="updateRecordsState" :inertiaPagination="inertiaPagination"
+                :axiosPagination="axiosPagination" :only="only" :excelRoute="excelRoute" />
 
         </div>
     </div>
