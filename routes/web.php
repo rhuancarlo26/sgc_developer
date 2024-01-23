@@ -49,6 +49,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard', fn() => Inertia::render('Dashboard'))
             ->name('dashboard');
 
+
+        // Contratos
+        Route::prefix('contratos')->group(function () {
+
+            Route::get('/gestao', [UserController::class, 'gestao'])
+                ->name('contratos.gestao');
+            Route::get('/estudo', [UserController::class, 'estudo'])
+                ->name('contratos.estudo');
+            Route::get('/regularizacao', [UserController::class, 'regularizacao'])
+                ->name('contratos.regularizacao');
+        });
+
+        // Licenças
+        Route::get('/licencas', fn() => Inertia::render('Licencas'))
+        ->name('licencas');
+
+        // Ambiente Geo
+        Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))
+        ->name('ambienteGeo');
+
         // Cadastros
         Route::prefix('cadastros')->group(function () {
 
