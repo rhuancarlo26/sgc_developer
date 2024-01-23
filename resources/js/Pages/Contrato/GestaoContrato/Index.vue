@@ -11,10 +11,6 @@ defineProps({
   contratos: Object
 })
 
-onMounted(() => {
-  console.log(window.location.search);
-});
-
 </script>
 
 <template>
@@ -28,7 +24,7 @@ onMounted(() => {
           { route: '#', label: 'Gestão de Contratos' }
         ]" />
         <div>
-          <Link class="btn btn-success" :href="'#'">
+          <Link class="btn btn-success" :href="route('contratos.gestao.create')">
           Importar Contrato
           </Link>
           <Link class="btn btn-success" :href="'#'">

@@ -22,12 +22,13 @@ return new class extends Migration
             $table->text('objeto');
             $table->date('data_inicio_vigencia');
             $table->date('data_termino_vigencia');
-            $table->string('situacao', 15);
+            $table->string('situacao');
             $table->string('edital', 20);
             $table->string('tipo_licitacao', 20);
-            $table->string('mobilidade');
+            $table->string('modalidade');
             $table->string('unidade_gestora');
             $table->string('fiscal_contrato');
+            $table->string('snv');
             $table->float('preco_inicial');
             $table->float('total_aditivo');
             $table->float('total_reajuste');
