@@ -68,7 +68,7 @@ class MakeModelService extends Command
 
         try {
 
-            \File::makeDirectory(path: $path, mode: 0774, recursive: true,);
+            \File::makeDirectory(path: $path, mode: 0774, recursive: true, force: true);
 
             $fullPath = $path . DIRECTORY_SEPARATOR . "$className.php";
 

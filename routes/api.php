@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('auth_token', [\App\Domain\Auth\Controllers\ApiAuthController::class, 'authenticate']);
+Route::post('auth_token', [\App\Shared\Base\Auth\Controllers\ApiAuthController::class, 'authenticate']);
 
 Route::middleware(['auth:sanctum', 'route-permission'])->group(function () {
 
