@@ -38,7 +38,7 @@ class MakeViewComponent extends Command
 
         try {
 
-            \File::makeDirectory(path: $path, mode: 0774, recursive: true);
+            \File::makeDirectory(path: $path, mode: 0774, recursive: true, force: true);
             \File::put($fullPath, file_get_contents(base_path('stubs/') . 'vue-component.stub'));
 
             $this->output->success("Component created at $fullPath");
