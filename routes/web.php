@@ -49,6 +49,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
             ->name('dashboard');
 
+
+        // Contratos
+        Route::prefix('contratos')->group(function () {
+
+            // Gestão
+            Route::prefix('gestao')->group(function () {
+
+                Route::get('/', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
+                    ->name('contratos.gestao.listagem');
+                Route::get('/excel', [App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController::class, 'excelExport'])
+                    ->name('contratos.gestao.excel_export');
+            });
+        });
+
+        // Licenças
+        Route::get('/licencas', fn() => Inertia::render('Licencas'))
+        ->name('licencas');
+
+        // Ambiente Geo
+        Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))
+        ->name('ambienteGeo');
+
         // Cadastros
         Route::prefix('cadastros')->group(function () {
 
@@ -82,20 +104,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('cadastros.perfis.deletar');
             });
         });
-
-        // Contratos
-        Route::prefix('contratos')->group(function () {
-
-            // Usuários
-            Route::prefix('gestao')->group(function () {
-
-                Route::get('/', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
-                    ->name('contratos.gestao.listagem');
-                Route::get('/excel', [App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController::class, 'excelExport'])
-                    ->name('contratos.gestao.excel_export');
-            });
-        });
-
 
         Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index'])
             ->name('logs');
