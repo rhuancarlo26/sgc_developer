@@ -53,12 +53,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Contratos
         Route::prefix('contratos')->group(function () {
 
-            Route::get('/gestao', [UserController::class, 'gestao'])
-                ->name('contratos.gestao');
-            Route::get('/estudo', [UserController::class, 'estudo'])
-                ->name('contratos.estudo');
-            Route::get('/regularizacao', [UserController::class, 'regularizacao'])
-                ->name('contratos.regularizacao');
+            // Gestão
+            Route::prefix('gestao')->group(function () {
+
+                Route::get('/', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
+                    ->name('contratos.gestao.listagem');
+                Route::get('/excel', [App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController::class, 'excelExport'])
+                    ->name('contratos.gestao.excel_export');
+            });
         });
 
         // Licenças
@@ -102,20 +104,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('cadastros.perfis.deletar');
             });
         });
-
-        // Contratos
-        Route::prefix('contratos')->group(function () {
-
-            // Usuários
-            Route::prefix('gestao')->group(function () {
-
-                Route::get('/', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
-                    ->name('contratos.gestao.listagem');
-                Route::get('/excel', [App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController::class, 'excelExport'])
-                    ->name('contratos.gestao.excel_export');
-            });
-        });
-
 
         Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index'])
             ->name('logs');

@@ -11,7 +11,7 @@ import '@tabler/core/dist/js/tabler.min.js';
             <div class="container container-tight py-4">
                 <div class="text-center">
                     <Link :href="$page.props.app_url">
-                        <ApplicationLogo class="w-25 fill-current navbar-brand navbar-brand-autodark"/>
+                        <ApplicationLogo class="w-100 fill-current navbar-brand navbar-brand-autodark"/>
                     </Link>
                 </div>
 
