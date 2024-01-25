@@ -23,54 +23,56 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                         <div class="col">
                             <ul class="navbar-nav">
 
+                                <!-- Dashboard -->
                                 <NavLink
                                     route-name="dashboard"
                                     title="Dashboard"
-                                    :icon="IconLayoutDashboard" />
+                                    :icon="IconLayoutDashboard" 
+                                    />
 
                                 <!-- Contratos -->
                                 <NavLink 
                                     route-name="contratos.gestao.listagem" 
+                                    active-on-route-prefix="contratos.*"
                                     title="Contratos" 
-                                    :icon="IconFileCertificate" 
-                                />
+                                    :icon="IconFileCertificate"
+                                    />
 
                                 <!-- Licenças -->
                                 <NavLink
                                     route-name="licencas"
                                     title="Licenças"
-                                    :icon="IconFileCheck" />
+                                    :icon="IconFileCheck" 
+                                    />
 
                                 <!-- Ambiente Geo -->
                                 <NavLink
                                     route-name="ambienteGeo"
                                     title="Ambiente Geo"
-                                    :icon="IconWorld" />
+                                    :icon="IconWorld" 
+                                    />
 
                                 <!-- Cadastros -->
                                 <NavDropdown
                                     prefix="cadastros.*"
                                     title="Cadastros"
-                                    :icon="IconClipboardList">
+                                    :icon="IconClipboardList"
+                                    >
 
                                     <!-- Usuários -->
                                     <NavDropdownLink
                                         route-name="cadastros.usuarios.listagem"
                                         active-on-route-prefix="cadastros.usuarios.*"
-                                        title="Usuários" />
+                                        title="Usuários" 
+                                        />
 
                                     <!-- Perfis -->
                                     <NavDropdownLink
                                         route-name="cadastros.perfis.listagem"
                                         active-on-route-prefix="cadastros.perfis.*"
-                                        title="Perfis" />
-
-
+                                        title="Perfis" 
+                                        />
                                 </NavDropdown>
-
-                                <!-- Dashboard -->
-                                <NavLink route-name="contratos.gestao.listagem" active-on-route-prefix="contratos.*"
-                                    title="Contratos" :icon="IconLayoutDashboard" />
 
                             </ul>
                         </div>
