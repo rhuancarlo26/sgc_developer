@@ -8,9 +8,9 @@ import { Head } from '@inertiajs/vue3';
     <Head title="Dashboard" />
 
     <AuthenticatedLayout>
-        <template #header>
+        <!-- <template #header>
             <h2 class="m-0">Dashboard</h2>
-        </template>
+        </template> -->
 
         <div class="card card-body">
             <h3>Bem vindo, {{ $page.props.auth.user.name}}!</h3>
