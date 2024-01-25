@@ -46,7 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('route-permission')->group(function () {
 
         // Dashboard (Home page)
-        Route::get('/dashboard', fn() => Inertia::render('Dashboard'))
+        Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
             ->name('dashboard');
 
 
@@ -85,8 +85,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('cadastros.usuarios.atualizar');
                 Route::delete('/deletar/{user}', [UserController::class, 'destroy'])
                     ->name('cadastros.usuarios.deletar');
-
-
             });
 
             // Perfis
@@ -102,17 +100,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('cadastros.perfis.atualizar');
                 Route::delete('/deletar/{role}', [RoleController::class, 'destroy'])
                     ->name('cadastros.perfis.deletar');
-
             });
+        });
 
+        // Contratos
+        Route::prefix('contratos')->group(function () {
 
+            // Usuários
+            Route::prefix('gestao')->group(function () {
+
+                Route::get('/', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
+                    ->name('contratos.gestao.listagem');
+                Route::get('/excel', [App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController::class, 'excelExport'])
+                    ->name('contratos.gestao.excel_export');
+            });
         });
 
 
         Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index'])
             ->name('logs');
-
-
     });
 });
 
