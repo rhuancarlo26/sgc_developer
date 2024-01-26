@@ -91,17 +91,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Busca Contrato SIMDNIT
             Route::get('contrato/{nr_contrato}', fn (Request $request) => Http::retry(3, 1000)->withoutVerifying()->get("https://servicos.dnit.gov.br/DPP/api/contrato/dnit/{$request->nr_contrato}")->json('data'))->name('contratos.get_contrato');
 
-            // Usuários
+            // Gestão de Contrato
             Route::prefix('gestao')->group(function () {
 
                 Route::get('/', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
                     ->name('contratos.gestao.listagem');
-                Route::get('/create', [App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController::class, 'create'])
+                Route::get('/create/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController::class, 'create'])
                     ->name('contratos.gestao.create');
                 Route::post('/store', [App\Domain\Contrato\GestaoContrato\Controller\StoreContratoController::class, 'store'])
                     ->name('contratos.gestao.store');
+                Route::delete('/delete/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoController::class, 'destroy'])
+                    ->name('contratos.gestao.delete');
                 Route::get('/excel', [App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController::class, 'excelExport'])
                     ->name('contratos.gestao.excel_export');
+                Route::post('/get_coordenada', [App\Domain\Contrato\GestaoContrato\Controller\GetCoordenadaController::class, 'getCoordenada'])
+                    ->name('contratos.gestao.get_coordenada');
+                Route::post('/store_trecho', [App\Domain\Contrato\GestaoContrato\Controller\StoreTrechoContratoController::class, 'storeTrecho'])
+                    ->name('contratos.gestao.store_trecho');
+                Route::delete('/delete_trecho/{trecho?}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyTrechoContratoController::class, 'destroyTrecho'])
+                    ->name('contratos.gestao.delete_trecho');
             });
         });
 
