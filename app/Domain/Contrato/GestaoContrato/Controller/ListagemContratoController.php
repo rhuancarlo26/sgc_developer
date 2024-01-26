@@ -22,6 +22,7 @@ class ListagemContratoController extends Controller
         return Inertia::render('Contrato/GestaoContrato/Index', [
             'contratos' => $this->listagemContrato
                 ->search(...$searchParams)
+                ->with(['situacao'])
                 ->paginate()
                 ->appends($searchParams)
         ]);
