@@ -1,8 +1,8 @@
 <?php
 
-use App\Domain\Profile\ProfileController;
-use App\Domain\Role\Controllers\RoleController;
-use App\Domain\User\Controllers\UserController;
+use App\Shared\Base\Profile\ProfileController;
+use App\Shared\Base\Role\Controllers\RoleController;
+use App\Shared\Base\User\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
