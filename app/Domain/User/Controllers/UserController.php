@@ -18,8 +18,7 @@ class UserController extends Controller
     public function __construct(
         private readonly UserService $userService,
         private readonly RoleService $roleService
-    )
-    {
+    ) {
     }
 
     /**
@@ -32,7 +31,7 @@ class UserController extends Controller
 
         return Inertia::render('User/Index', [
             'users' => $this->userService
-                ->search(... $searchParams)
+                ->search(...$searchParams)
                 ->with(['roles'])
                 ->paginate()
                 ->appends($searchParams)

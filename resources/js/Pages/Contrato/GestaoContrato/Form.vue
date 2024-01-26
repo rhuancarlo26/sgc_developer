@@ -186,11 +186,10 @@ const getDadosContrato = () => {
 const salvarContrato = () => {
   form.transform((data) => Object.assign({}, data))
 
-  // if (props.user.id) {
-
-  //     form.patch(route('cadastros.usuarios.atualizar', props.user.id));
-  //     return;
-  // }
+  if (props.contrato.id) {
+    form.patch(route('contratos.gestao.atualizar', props.contrato.id));
+    return;
+  }
 
   form.post(route('contratos.gestao.store'), {
     preserveScroll: true
@@ -198,6 +197,7 @@ const salvarContrato = () => {
 }
 
 const salvarTrecho = () => {
+  form_trecho.contrato_id = props.contrato.id;
   form_trecho.transform((data) => Object.assign({}, data))
 
   // if (props.user.id) {
