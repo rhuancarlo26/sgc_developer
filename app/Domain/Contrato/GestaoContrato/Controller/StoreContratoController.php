@@ -14,12 +14,13 @@ class StoreContratoController extends Controller
 {
   public function store(Request $request)
   {
-    if (Contrato::create([
+    if ($contrato = Contrato::create([
       ...$request->all(),
       'user_id' => Auth::user()->id,
-      'contrato_tipo_id' => $request->contrato_tipo['id']
+      'tipo_id' => $request->tipo['id'],
+      'situacao_id' => $request->situacao['id'],
     ])) {
-      return to_route('contratos.gestao.listagem')->with('message', [
+      return to_route('contratos.gestao.create', $contrato->id)->with('message', [
         'type' => 'success',
         'content' => "Contrato criado com sucesso"
       ]);

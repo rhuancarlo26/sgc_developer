@@ -14,6 +14,8 @@ defineProps({
 
 const emit = defineEmits(['pageChange']);
 
+const paramsURL = window.location.search;
+
 const getUrlWithSearchParams = (url) => {
 
     if (!url) {
@@ -57,8 +59,8 @@ const
         <div class="d-flex">
             <!-- Excel Export -->
             <div>
-                <a v-if="excelRoute" class="btn btn-outline-primary" :href="`${excelRoute}`">
-                    <IconTableShare /> Excel
+                <a v-if="excelRoute" class="btn btn-primary me-2" :href="`${excelRoute}${paramsURL}`">
+                    <IconTableShare class="me-2" /> Excel
                 </a>
             </div>
 
