@@ -1,19 +1,14 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import Table from '@/Components/Table.vue';
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
 import { IconDots } from "@tabler/icons-vue";
-import { onMounted } from "vue";
 
-defineProps({
+const props = defineProps({
   contratos: Object
 })
-
-onMounted(() => {
-  console.log(window.location.search);
-});
 
 </script>
 
@@ -28,12 +23,11 @@ onMounted(() => {
           { route: '#', label: 'Gestão de Contratos' }
         ]" />
         <div>
-          <Link class="btn btn-success" :href="'#'">
+          <Link class="btn btn-success me-2" :href="route('contratos.gestao.create')">
           Importar Contrato
           </Link>
-          <Link class="btn btn-success" :href="'#'">
-          Mapa dos Contratos
-          </Link>
+          <button type="button" class="btn btn-success">Mapa dos Contratos</button>
+
         </div>
       </div>
     </template>
@@ -53,15 +47,17 @@ onMounted(() => {
       <Table :columns="['UF', 'BR', 'N° do Contrato', 'CNPJ', 'Contratada', 'Processo SEI', 'Situação', 'Ação']"
         :records="contratos" table-class="table-hover" :excelRoute="route('contratos.gestao.excel_export')">
         <template #body="{ item }">
-          <tr class="cursor-pointer">
-            <td></td>
-            <td></td>
+          <tr class="cursor-pointer" @click="router.get(route('contratos.gestao.create', item.id))">
+            <td class="w-8"><span v-for="uf in item.ufs" :key="uf" class="badge bg-warning text-white m-1">{{ uf }}</span>
+            </td>
+            <td class="w-8"><span v-for="br in item.brs" :key="br" class="badge bg-warning text-white m-1">{{ br }}</span>
+            </td>
             <td>{{ item.numero_contrato }}</td>
             <td>{{ item.cnpj }}</td>
             <td>{{ item.contratada }}</td>
             <td>{{ item.processo_sei }}</td>
-            <td>{{ item.situacao }}</td>
-            <td>
+            <td>{{ item.situacao?.nome }}</td>
+            <td @click.stop>
               <span class="dropdown">
                 <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown"
                   aria-expanded="false">
@@ -71,12 +67,6 @@ onMounted(() => {
                   <a class="dropdown-item" href="#">
                     Visualizar
                   </a>
-                  <a class="dropdown-item" href="#">
-                    Editar
-                  </a>
-                  <a class="dropdown-item" href="#">
-                    Excluir
-                  </a>
                 </div>
               </span>
 
@@ -85,6 +75,5 @@ onMounted(() => {
         </template>
       </Table>
     </div>
-
   </AuthenticatedLayout>
 </template>
