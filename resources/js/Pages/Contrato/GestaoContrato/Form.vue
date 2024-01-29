@@ -187,7 +187,10 @@ const salvarContrato = () => {
   form.transform((data) => Object.assign({}, data))
 
   if (props.contrato.id) {
-    form.patch(route('contratos.gestao.atualizar', props.contrato.id));
+    form.patch(route('contratos.gestao.atualizar', props.contrato.id), {
+      preserveScroll: true
+    });
+
     return;
   }
 
@@ -201,7 +204,10 @@ const salvarTrecho = () => {
   form_trecho.transform((data) => Object.assign({}, data))
 
   if (form_trecho.id) {
-    form_trecho.patch(route('contratos.gestao.update_trecho', form_trecho.id));
+    form_trecho.patch(route('contratos.gestao.update_trecho', form_trecho.id), {
+      preserveScroll: true
+    });
+
     return;
   }
 
@@ -252,7 +258,7 @@ const editarTrecho = (trecho) => {
             <div class="col">
               <InputLabel value="Tipo de Contrato" for="tipo" />
               <select name="tipo" id="tipo" class="form-control" v-model="form.tipo">
-                <option v-for="tipo_contrato in tipos" :key="tipo_contrato" :value="tipo_contrato">{{
+                <option v-for="tipo_contrato in tipos" :key="tipo_contrato.id" :value="tipo_contrato">{{
                   tipo_contrato.nome }}</option>
               </select>
               <InputError :message="form.errors.tipo" />
@@ -386,146 +392,147 @@ const editarTrecho = (trecho) => {
       </form>
     </div>
 
-    <div class="card mb-4">
-      <form @submit.prevent="salvarTrecho()" :disabled="form_trecho.processing">
-        <div class="card-header">
-          <h3 class="my-0">Trecho</h3>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col">
-              <InputLabel value="UF" for="uf" />
-              <select name="uf" id="uf" class="form-control" v-model="form_trecho.uf">
-                <option v-for="uf in ufs" :key="uf.id" :value="uf">{{ uf.uf }}</option>
-              </select>
-              <InputError :message="form_trecho.errors.uf_id" />
-            </div>
-            <div class="col">
-              <InputLabel value="Rodovia" for="rodovia" />
-              <select name="rodovia" id="rodovia" class="form-control" v-model="form_trecho.rodovia">
-                <option v-for="rodovia in uf_rodovias" :key="rodovia.id" :value="rodovia">{{ rodovia.rodovia }}
-                </option>
-              </select>
-              <InputError :message="form_trecho.errors.rodovia_id" />
-            </div>
-            <div class="col">
-              <InputLabel value="Km Inicial" for="km_inicial" />
-              <input type="number" step="any" id="km_inicial" name="km_inicial" class="form-control"
-                v-model="form_trecho.km_inicial" />
-              <InputError :message="form_trecho.errors.km_inicial" />
-            </div>
-            <div class="col">
-              <InputLabel value="Km Final" for="km_final" />
-              <input type="number" step="any" id="km_final" name="km_final" class="form-control"
-                v-model="form_trecho.km_final" />
-              <InputError :message="form_trecho.errors.km_final" />
-            </div>
-            <div class="col">
-              <InputLabel value="Tipo" for="trecho_tipo" />
-              <div class="row g-2">
-                <div class="col">
-                  <select name="trecho_tipo" id="trecho_tipo" class="form-control" v-model="form_trecho.trecho_tipo">
-                    <option value="B">B</option>
-                    <option value="U">U</option>
-                    <option value="A">A</option>
-                    <option value="C">C</option>
-                    <option value="N">N</option>
-                    <option value="V">V</option>
-                  </select>
-                </div>
-                <div class="col-auto">
-                  <button type="submit" class="btn btn-icon btn-success">
-                    <IconPlus />
-                  </button>
-                </div>
-                <div class="col-auto">
-                  <button type="button" class="btn btn-icon btn-danger">
-                    <IconPlus />
-                  </button>
-                </div>
+    <div v-if="contrato.id">
+      <div class="card mb-4">
+        <form @submit.prevent="salvarTrecho()" :disabled="form_trecho.processing">
+          <div class="card-header">
+            <h3 class="my-0">Trecho</h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col">
+                <InputLabel value="UF" for="uf" />
+                <select name="uf" id="uf" class="form-control" v-model="form_trecho.uf">
+                  <option v-for="uf in ufs" :key="uf.id" :value="uf">{{ uf.uf }}</option>
+                </select>
+                <InputError :message="form_trecho.errors.uf" />
               </div>
-              <InputError :message="form_trecho.errors.trecho_tipo" />
+              <div class="col">
+                <InputLabel value="Rodovia" for="rodovia" />
+                <select name="rodovia" id="rodovia" class="form-control" v-model="form_trecho.rodovia">
+                  <option v-for="rodovia in uf_rodovias" :key="rodovia.id" :value="rodovia">{{ rodovia.rodovia }}
+                  </option>
+                </select>
+                <InputError :message="form_trecho.errors.rodovia" />
+              </div>
+              <div class="col">
+                <InputLabel value="Km Inicial" for="km_inicial" />
+                <input type="number" step="any" id="km_inicial" name="km_inicial" class="form-control"
+                  v-model="form_trecho.km_inicial" />
+                <InputError :message="form_trecho.errors.km_inicial" />
+              </div>
+              <div class="col">
+                <InputLabel value="Km Final" for="km_final" />
+                <input type="number" step="any" id="km_final" name="km_final" class="form-control"
+                  v-model="form_trecho.km_final" />
+                <InputError :message="form_trecho.errors.km_final" />
+              </div>
+              <div class="col">
+                <InputLabel value="Tipo" for="trecho_tipo" />
+                <div class="row g-2">
+                  <div class="col">
+                    <select name="trecho_tipo" id="trecho_tipo" class="form-control" v-model="form_trecho.trecho_tipo">
+                      <option value="B">B</option>
+                      <option value="U">U</option>
+                      <option value="A">A</option>
+                      <option value="C">C</option>
+                      <option value="N">N</option>
+                      <option value="V">V</option>
+                    </select>
+                  </div>
+                  <div class="col-auto">
+                    <button type="submit" class="btn btn-icon btn-success">
+                      <IconPlus />
+                    </button>
+                  </div>
+                  <div class="col-auto">
+                    <button type="button" class="btn btn-icon btn-danger">
+                      <IconPlus />
+                    </button>
+                  </div>
+                </div>
+                <InputError :message="form_trecho.errors.trecho_tipo" />
+              </div>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
 
-      <div class="card-body">
-        <div class="table-responsive mb-4">
-          <table class="table card-table table-bordered table-hover">
-            <thead>
-              <tr>
-                <th>UF</th>
-                <th>BR</th>
-                <th>Km Inicial</th>
-                <th>Km Final</th>
-                <th>Tipo</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="trecho in contrato.trechos" :key="trecho.id" class="cursor-pointer">
-                <td>{{ trecho.uf?.uf }}</td>
-                <td>{{ trecho.rodovia?.rodovia }}</td>
-                <td>{{ trecho.km_inicial }}</td>
-                <td>{{ trecho.km_final }}</td>
-                <td>{{ trecho.trecho_tipo }}</td>
-                <td class="w-1">
-                  <div class="d-flex">
-                    <button @click="zoomTrecho(trecho.coordenada)" type="button" class="btn btn-icon btn-primary me-2"
-                      :disabled="form.processing">
-                      <IconMapPin />
-                    </button>
-                    <button @click="editarTrecho(trecho)" type="button" class="btn btn-icon btn-info me-2"
-                      :disabled="form.processing">
-                      <IconPencil />
-                    </button>
-                    <LinkConfirmation v-slot="confirmation"
-                      :options="{ text: 'Contratos removidos não podem ser restaurados' }">
-                      <Link :onBefore="confirmation.show" :href="route('contratos.gestao.delete_trecho', trecho.id)"
-                        method="DELETE" as="button" type="button" class="btn btn-icon btn-danger">
-                      <IconTrash />
-                      </Link>
-                    </LinkConfirmation>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="card-body">
+          <div class="table-responsive mb-4">
+            <table class="table card-table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>UF</th>
+                  <th>BR</th>
+                  <th>Km Inicial</th>
+                  <th>Km Final</th>
+                  <th>Tipo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="trecho in contrato.trechos" :key="trecho.id" class="cursor-pointer">
+                  <td>{{ trecho.uf?.uf }}</td>
+                  <td>{{ trecho.rodovia?.rodovia }}</td>
+                  <td>{{ trecho.km_inicial }}</td>
+                  <td>{{ trecho.km_final }}</td>
+                  <td>{{ trecho.trecho_tipo }}</td>
+                  <td class="w-1">
+                    <div class="d-flex">
+                      <button @click="zoomTrecho(trecho.coordenada)" type="button" class="btn btn-icon btn-primary me-2"
+                        :disabled="form.processing">
+                        <IconMapPin />
+                      </button>
+                      <button @click="editarTrecho(trecho)" type="button" class="btn btn-icon btn-info me-2"
+                        :disabled="form.processing">
+                        <IconPencil />
+                      </button>
+                      <LinkConfirmation v-slot="confirmation"
+                        :options="{ text: 'Contratos removidos não podem ser restaurados' }">
+                        <Link :onBefore="confirmation.show" :href="route('contratos.gestao.delete_trecho', trecho.id)"
+                          method="DELETE" as="button" type="button" class="btn btn-icon btn-danger">
+                        <IconTrash />
+                        </Link>
+                      </LinkConfirmation>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <textarea name="coordenada" id="coordenada" class="form-control" rows="4"
+              :value="coordenadas.map(subarray => subarray[0]).join(',')"></textarea>
+          </div>
         </div>
-        <div>
-          <textarea name="coordenada" id="coordenada" class="form-control" rows="4"
-            :value="coordenadas.map(subarray => subarray[0]).join(',')"></textarea>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between">
+          <h3 class="my-0">Mapa</h3>
+          <button @click="zoomFitBounds()" class="btn btn-icon btn-success">
+            <IconMap />
+          </button>
+        </div>
+        <div class="card-body">
+          <Map ref="mapContainer" :manualRender="false" :height="'350px'" />
+        </div>
+      </div>
+
+      <!-- Ações -->
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-end gap-2">
+            <LinkConfirmation v-slot="confirmation" :options="{ text: 'Contratos removidos não podem ser restaurados' }">
+              <Link :onBefore="confirmation.show" :href="route('contratos.gestao.delete', contrato.id)" method="DELETE"
+                as="button" type="button" class="btn btn-danger">
+              <IconTrash />
+              Deletar
+              </Link>
+            </LinkConfirmation>
+          </div>
         </div>
       </div>
     </div>
-
-    <div class="card mb-4">
-      <div class="card-header d-flex justify-content-between">
-        <h3 class="my-0">Mapa</h3>
-        <button @click="zoomFitBounds()" class="btn btn-icon btn-success">
-          <IconMap />
-        </button>
-      </div>
-      <div class="card-body">
-        <Map ref="mapContainer" :manualRender="false" :height="'350px'" />
-      </div>
-    </div>
-
-    <!-- Ações -->
-    <div v-if="contrato.id" class="card">
-      <div class="card-body">
-        <div class="d-flex justify-content-end gap-2">
-          <LinkConfirmation v-slot="confirmation" :options="{ text: 'Contratos removidos não podem ser restaurados' }">
-            <Link :onBefore="confirmation.show" :href="route('contratos.gestao.delete', contrato.id)" method="DELETE"
-              as="button" type="button" class="btn btn-danger">
-            <IconTrash />
-            Deletar
-            </Link>
-          </LinkConfirmation>
-        </div>
-      </div>
-    </div>
-
   </AuthenticatedLayout>
 </template>

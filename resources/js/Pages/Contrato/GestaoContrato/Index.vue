@@ -12,6 +12,7 @@ import { onMounted } from "vue";
 import axios from "axios";
 import { nextTick } from "vue";
 import { computed } from "vue";
+import { IconEye } from "@tabler/icons-vue";
 
 const props = defineProps({
   contratos: Object
@@ -118,18 +119,9 @@ const modalTechoMap = (contrato, trecho) => {
             <td>{{ item.processo_sei }}</td>
             <td>{{ item.situacao?.nome }}</td>
             <td @click.stop>
-              <span class="dropdown">
-                <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <IconDots />
-                </button>
-                <div class="dropdown-menu dropdown-menu-end" style="">
-                  <a class="dropdown-item" href="#">
-                    Visualizar
-                  </a>
-                </div>
-              </span>
-
+              <button type="button" class="btn btn-icon btn-primary">
+                <IconEye />
+              </button>
             </td>
           </tr>
         </template>
@@ -139,9 +131,6 @@ const modalTechoMap = (contrato, trecho) => {
     <Modal ref="modalMapa" title="Mapa agluma coisa" modal-dialog-class="modal-xl">
       <template #body>
         <Map ref="mapaTrecho" height="300px" :manual-render="true" />
-      </template>
-      <template #footer>
-        Rodapé
       </template>
     </Modal>
 
