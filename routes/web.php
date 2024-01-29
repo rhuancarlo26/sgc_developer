@@ -108,8 +108,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.gestao.excel_export');
                 Route::post('/get_coordenada', [App\Domain\Contrato\GestaoContrato\Controller\GetCoordenadaController::class, 'getCoordenada'])
                     ->name('contratos.gestao.get_coordenada');
+                Route::get('/get_geo_json', [App\Domain\Contrato\GestaoContrato\Controller\GetGeoJsonController::class, 'getGeoJson'])
+                    ->name('contratos.gestao.get_geo_json');
                 Route::post('/store_trecho', [App\Domain\Contrato\GestaoContrato\Controller\StoreTrechoContratoController::class, 'storeTrecho'])
                     ->name('contratos.gestao.store_trecho');
+                Route::patch('/atualizar_trecho/{trecho}', [App\Domain\Contrato\GestaoContrato\Controller\UpdateTrechoContratoController::class, 'updateTrecho'])
+                    ->name('contratos.gestao.update_trecho');
                 Route::delete('/delete_trecho/{trecho?}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyTrechoContratoController::class, 'destroyTrecho'])
                     ->name('contratos.gestao.delete_trecho');
             });
