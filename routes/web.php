@@ -110,11 +110,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.gestao.get_coordenada');
                 Route::get('/get_geo_json', [App\Domain\Contrato\GestaoContrato\Controller\GetGeoJsonController::class, 'getGeoJson'])
                     ->name('contratos.gestao.get_geo_json');
-                Route::post('/store_trecho', [App\Domain\Contrato\GestaoContrato\Controller\StoreTrechoContratoController::class, 'storeTrecho'])
+                Route::post('/store_trecho', [App\Domain\Contrato\GestaoContrato\Controller\StoreContratoTrechoController::class, 'storeTrecho'])
                     ->name('contratos.gestao.store_trecho');
-                Route::patch('/atualizar_trecho/{trecho}', [App\Domain\Contrato\GestaoContrato\Controller\UpdateTrechoContratoController::class, 'updateTrecho'])
+                Route::patch('/atualizar_trecho/{trecho}', [App\Domain\Contrato\GestaoContrato\Controller\UpdateContratoTrechoController::class, 'updateTrecho'])
                     ->name('contratos.gestao.update_trecho');
-                Route::delete('/delete_trecho/{trecho?}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyTrechoContratoController::class, 'destroyTrecho'])
+                Route::delete('/delete_trecho/{trecho?}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoTrechoController::class, 'destroyTrecho'])
                     ->name('contratos.gestao.delete_trecho');
             });
         });

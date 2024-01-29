@@ -2,6 +2,7 @@
 
 namespace App\Domain\Contrato\GestaoContrato\Controller;
 
+use App\Domain\Contrato\GestaoContrato\Requests\UpdateContratoRequest;
 use App\Models\Contrato;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class UpdateContratoController extends Controller
 {
-  public function update(Contrato $contrato, Request $request)
+  public function update(Contrato $contrato, UpdateContratoRequest $request)
   {
     if ($contrato->update([
       ...$request->all(),

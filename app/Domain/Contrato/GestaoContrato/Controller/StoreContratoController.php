@@ -2,6 +2,7 @@
 
 namespace App\Domain\Contrato\GestaoContrato\Controller;
 
+use App\Domain\Contrato\GestaoContrato\Requests\StoreContratoRequest;
 use App\Models\Contrato;
 use App\Models\ContratoTipo;
 use App\Shared\Http\Controllers\Controller;
@@ -12,7 +13,7 @@ use Inertia\Inertia;
 
 class StoreContratoController extends Controller
 {
-  public function store(Request $request)
+  public function store(StoreContratoRequest $request)
   {
     if ($contrato = Contrato::create([
       ...$request->all(),

@@ -2,14 +2,15 @@
 
 namespace App\Domain\Contrato\GestaoContrato\Controller;
 
+use App\Domain\Contrato\GestaoContrato\Requests\UpdateContratoTrechoRequest;
 use App\Models\contratoTrecho;
 use App\Models\SvnSegGeoV2;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class StoreTrechoContratoController extends Controller
+class UpdateContratoTrechoController extends Controller
 {
-  public function storeTrecho(Request $request)
+  public function updateTrecho(contratoTrecho $trecho, UpdateContratoTrechoRequest $request)
   {
     $coordenada = SvnSegGeoV2::getGeoJson(
       $request->uf['uf'],
@@ -19,15 +20,15 @@ class StoreTrechoContratoController extends Controller
       $request->trecho_tipo ?? 'B'
     );
 
-    if (contratoTrecho::create([
+    if ($trecho->update([
       ...$request->all(),
       'uf_id' => $request->uf['id'],
       'rodovia_id' => $request->rodovia['id'],
       'coordenada' => $coordenada
     ])) {
-      return to_route('contratos.gestao.create', $request->contrato_id)->with('message', [
+      return to_route('contratos.gestao.create', $trecho->contrato_id)->with('message', [
         'type' => 'success',
-        'content' => "Trecho criado com sucesso"
+        'content' => "Trecho do contrato atualizado com sucesso"
       ]);
     }
   }
