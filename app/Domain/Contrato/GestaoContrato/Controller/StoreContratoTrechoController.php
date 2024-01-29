@@ -2,14 +2,14 @@
 
 namespace App\Domain\Contrato\GestaoContrato\Controller;
 
+use App\Domain\Contrato\GestaoContrato\Requests\StoreContratoTrechoRequest;
 use App\Models\contratoTrecho;
 use App\Models\SvnSegGeoV2;
 use App\Shared\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 
-class StoreTrechoContratoController extends Controller
+class StoreContratoTrechoController extends Controller
 {
-  public function storeTrecho(Request $request)
+  public function storeTrecho(StoreContratoTrechoRequest $request)
   {
     $coordenada = SvnSegGeoV2::getGeoJson(
       $request->uf['uf'],
@@ -27,7 +27,7 @@ class StoreTrechoContratoController extends Controller
     ])) {
       return to_route('contratos.gestao.create', $request->contrato_id)->with('message', [
         'type' => 'success',
-        'content' => "Trecho criado com sucesso"
+        'content' => "Trecho do contrato criado com sucesso"
       ]);
     }
   }

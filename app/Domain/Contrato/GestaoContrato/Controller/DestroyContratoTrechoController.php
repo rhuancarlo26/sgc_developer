@@ -8,7 +8,7 @@ use App\Models\contratoTrecho;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 
-class DestroyTrechoContratoController extends Controller
+class DestroyContratoTrechoController extends Controller
 {
   public function __construct(private readonly TrechoContratoService $trechoContratoService)
   {
