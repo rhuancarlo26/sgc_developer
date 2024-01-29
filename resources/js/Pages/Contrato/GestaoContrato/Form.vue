@@ -200,15 +200,18 @@ const salvarTrecho = () => {
   form_trecho.contrato_id = props.contrato.id;
   form_trecho.transform((data) => Object.assign({}, data))
 
-  // if (props.user.id) {
-
-  //     form.patch(route('cadastros.usuarios.atualizar', props.user.id));
-  //     return;
-  // }
+  if (form_trecho.id) {
+    form_trecho.patch(route('contratos.gestao.update_trecho', form_trecho.id));
+    return;
+  }
 
   form_trecho.post(route('contratos.gestao.store_trecho'), {
     preserveScroll: true
   });
+}
+
+const editarTrecho = (trecho) => {
+  Object.assign(form_trecho, trecho)
 }
 </script>
 
@@ -435,6 +438,11 @@ const salvarTrecho = () => {
                     <IconPlus />
                   </button>
                 </div>
+                <div class="col-auto">
+                  <button type="button" class="btn btn-icon btn-danger">
+                    <IconPlus />
+                  </button>
+                </div>
               </div>
               <InputError :message="form_trecho.errors.trecho_tipo" />
             </div>
@@ -468,7 +476,8 @@ const salvarTrecho = () => {
                       :disabled="form.processing">
                       <IconMapPin />
                     </button>
-                    <button type="button" class="btn btn-icon btn-info me-2" :disabled="form.processing">
+                    <button @click="editarTrecho(trecho)" type="button" class="btn btn-icon btn-info me-2"
+                      :disabled="form.processing">
                       <IconPencil />
                     </button>
                     <LinkConfirmation v-slot="confirmation"

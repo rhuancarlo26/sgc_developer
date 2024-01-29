@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 
 defineProps({
     title: String,
@@ -19,8 +19,12 @@ function getBsModal() {
     return bootstrapModal;
 }
 
+function getElement() {
+    return modalEl.value;
+}
 
-defineExpose({getBsModal});
+
+defineExpose({ getBsModal, getElement });
 
 </script>
 
@@ -36,10 +40,10 @@ defineExpose({getBsModal});
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                    <slot name="body"/>
+                    <slot name="body" />
                 </div>
                 <div class="modal-footer" v-if="$slots.footer">
-                    <slot name="footer"/>
+                    <slot name="footer" />
                 </div>
             </div>
         </div>
