@@ -14,6 +14,7 @@ import axios from "axios";
 import { IconPencil } from "@tabler/icons-vue";
 import { IconMapPin } from "@tabler/icons-vue";
 import { onMounted } from "vue";
+import { IconX } from "@tabler/icons-vue";
 
 const props = defineProps({
   ufs: {
@@ -24,6 +25,9 @@ const props = defineProps({
   },
   tipos: {
     type: Array
+  },
+  tipo: {
+    type: Object
   },
   situacoes: {
     type: Array
@@ -39,7 +43,7 @@ let uf_rodovias = [];
 const toast = useToast();
 const form = useForm({
   numero_contrato: null,
-  tipo: null,
+  tipo_id: null,
   cnpj: null,
   contratada: null,
   objeto: null,
@@ -60,7 +64,8 @@ const form = useForm({
   ...props.contrato
 });
 const form_trecho = useForm({
-  contrato_id: props.contrato.id,
+  contrato_id: null,
+  tipo_id: null,
   uf: {},
   rodovia: {},
   km_inicial: null,
@@ -167,6 +172,7 @@ const getDadosContrato = () => {
       form.processo_sei = response.data[0].NU_PROCESSO;
       form.data_inicio_vigencia = YYYYmmdd(response.data[0].DT_INICIO);
       form.data_termino_vigencia = YYYYmmdd(response.data[0].DT_TERMINO_VIGENCIA);
+      form.situacao = response.data[0].DS_FAS_CONTRATO;
       form.edital = response.data[0].NU_EDITAL;
       form.tipo_licitacao = response.data[0].TIPO_LICITACAO;
       form.edital = response.data[0].NU_EDITAL;
@@ -184,10 +190,14 @@ const getDadosContrato = () => {
 }
 
 const salvarContrato = () => {
+  form.tipo_id = props.tipo.id;
+
   form.transform((data) => Object.assign({}, data))
 
   if (props.contrato.id) {
-    form.patch(route('contratos.gestao.atualizar', props.contrato.id));
+    form.patch(route('contratos.gestao.atualizar', props.contrato.id), {
+      preserveScroll: true
+    });
     return;
   }
 
@@ -198,6 +208,8 @@ const salvarContrato = () => {
 
 const salvarTrecho = () => {
   form_trecho.contrato_id = props.contrato.id;
+  form_trecho.tipo_id = props.tipo.id;
+
   form_trecho.transform((data) => Object.assign({}, data))
 
   if (form_trecho.id) {
@@ -213,6 +225,10 @@ const salvarTrecho = () => {
 const editarTrecho = (trecho) => {
   Object.assign(form_trecho, trecho)
 }
+
+const limparFormTrecho = () => {
+  Object.assign(form_trecho, {})
+}
 </script>
 
 <template>
@@ -223,7 +239,7 @@ const editarTrecho = (trecho) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb :links="[
-          { route: route('contratos.gestao.listagem'), label: 'Gestão de Contratos' },
+          { route: route('contratos.gestao.listagem', tipo.id), label: 'Gestão de Contratos' },
           { route: '#', label: 'Formulário' }
         ]" />
       </div>
@@ -251,54 +267,52 @@ const editarTrecho = (trecho) => {
             </div>
             <div class="col">
               <InputLabel value="Tipo de Contrato" for="tipo" />
-              <select name="tipo" id="tipo" class="form-control" v-model="form.tipo">
-                <option v-for="tipo_contrato in tipos" :key="tipo_contrato" :value="tipo_contrato">{{
-                  tipo_contrato.nome }}</option>
-              </select>
+              <input id="tipo" name="tipo" :value="tipo.nome" class="form-control" disabled />
               <InputError :message="form.errors.tipo" />
             </div>
           </div>
           <div class="row mb-4">
             <div class="col-4">
               <InputLabel value="CNPJ" for="cnpj" />
-              <input type="text" id="cnpj" name="cnpj" class="form-control" v-model="form.cnpj" />
+              <input type="text" id="cnpj" name="cnpj" class="form-control" v-model="form.cnpj" disabled />
               <InputError :message="form.errors.cnpj" />
             </div>
             <div class="col">
               <InputLabel value="Empresa" for="contratada" />
-              <input type="text" id="contratada" name="contratada" class="form-control" v-model="form.contratada" />
+              <input type="text" id="contratada" name="contratada" class="form-control" v-model="form.contratada"
+                disabled />
               <InputError :message="form.errors.contratada" />
             </div>
           </div>
           <div class="row mb-4">
             <div class="col">
               <InputLabel value="Objeto do Contrato" for="objeto" />
-              <textarea name="objeto" id="objeto" class="form-control" rows="5" v-model="form.objeto"></textarea>
+              <textarea name="objeto" id="objeto" class="form-control" rows="5" v-model="form.objeto" disabled></textarea>
+              <InputError :message="form.errors.objeto" />
             </div>
           </div>
           <div class="row">
             <div class="col">
               <InputLabel value="Numero do Processo" for="processo_sei" />
-              <input type="text" id="processo_sei" name="processo_sei" class="form-control" v-model="form.processo_sei" />
+              <input type="text" id="processo_sei" name="processo_sei" class="form-control" v-model="form.processo_sei"
+                disabled />
               <InputError :message="form.errors.processo_sei" />
             </div>
             <div class="col">
               <InputLabel value="Início da Vigência" for="data_inicio_vigencia" />
               <input type="date" id="data_inicio_vigencia" name="data_inicio_vigencia" class="form-control"
-                v-model="form.data_inicio_vigencia" />
+                v-model="form.data_inicio_vigencia" disabled />
               <InputError :message="form.errors.data_inicio_vigencia" />
             </div>
             <div class="col">
               <InputLabel value="Término da Vigência" for="data_termino_vigencia" />
               <input type="date" id="data_termino_vigencia" name="data_termino_vigencia" class="form-control"
-                v-model="form.data_termino_vigencia" />
+                v-model="form.data_termino_vigencia" disabled />
               <InputError :message="form.errors.data_termino_vigencia" />
             </div>
             <div class="col">
               <InputLabel value="Situação" for="situacao" />
-              <select id="situacao" name="situacao" class="form-control" v-model="form.situacao">
-                <option v-for="situacao in situacoes" :key="situacao.id" :value="situacao">{{ situacao.nome }}</option>
-              </select>
+              <input type="text" id="situacao" name="situacao" class="form-control" v-model="form.situacao" disabled />
               <InputError :message="form.errors.situacao" />
             </div>
           </div>
@@ -310,18 +324,19 @@ const editarTrecho = (trecho) => {
           <div class="row">
             <div class="col">
               <InputLabel value="Edital" for="edital" />
-              <input type="text" id="edital" name="edital" class="form-control" v-model="form.edital" />
+              <input type="text" id="edital" name="edital" class="form-control" v-model="form.edital" disabled />
               <InputError :message="form.errors.edital" />
             </div>
             <div class="col">
               <InputLabel value="Tipo de Licitação" for="tipo_licitacao" />
               <input type="text" id="tipo_licitacao" name="tipo_licitacao" class="form-control"
-                v-model="form.tipo_licitacao" />
+                v-model="form.tipo_licitacao" disabled />
               <InputError :message="form.errors.tipo_licitacao" />
             </div>
             <div class="col">
               <InputLabel value="Modalidade" for="modalidade" />
-              <input type="text" id="modalidade" name="modalidade" class="form-control" v-model="form.modalidade" />
+              <input type="text" id="modalidade" name="modalidade" class="form-control" v-model="form.modalidade"
+                disabled />
               <InputError :message="form.errors.modalidade" />
             </div>
           </div>
@@ -334,13 +349,13 @@ const editarTrecho = (trecho) => {
             <div class="col">
               <InputLabel value="Unidade Gestora" for="unidade_gestora" />
               <input type="text" id="unidade_gestora" name="unidade_gestora" class="form-control"
-                v-model="form.unidade_gestora" />
+                v-model="form.unidade_gestora" disabled />
               <InputError :message="form.errors.unidade_gestora" />
             </div>
             <div class="col">
               <InputLabel value="Fiscal do Contrato" for="fiscal_contrato" />
               <input type="text" id="fiscal_contrato" name="fiscal_contrato" class="form-control"
-                v-model="form.fiscal_contrato" />
+                v-model="form.fiscal_contrato" disabled />
               <InputError :message="form.errors.fiscal_contrato" />
             </div>
           </div>
@@ -357,20 +372,20 @@ const editarTrecho = (trecho) => {
             </div>
             <div class="col">
               <InputLabel value="Preço Inicial" for="preco_inicial" />
-              <input type="text" id="preco_inicial" name="preco_inicial" class="form-control"
-                v-model="form.preco_inicial" />
+              <input type="text" id="preco_inicial" name="preco_inicial" class="form-control" v-model="form.preco_inicial"
+                disabled />
               <InputError :message="form.errors.preco_inicial" />
             </div>
             <div class="col">
               <InputLabel value="Preço Aditivos" for="total_aditivo" />
-              <input type="text" id="total_aditivo" name="total_aditivo" class="form-control"
-                v-model="form.total_aditivo" />
+              <input type="text" id="total_aditivo" name="total_aditivo" class="form-control" v-model="form.total_aditivo"
+                disabled />
               <InputError :message="form.errors.total_aditivo" />
             </div>
             <div class="col">
               <InputLabel value="Preço Reajuste" for="total_reajuste" />
               <input type="text" id="total_reajuste" name="total_reajuste" class="form-control"
-                v-model="form.total_reajuste" />
+                v-model="form.total_reajuste" disabled />
               <InputError :message="form.errors.total_reajuste" />
             </div>
           </div>
@@ -438,9 +453,9 @@ const editarTrecho = (trecho) => {
                     <IconPlus />
                   </button>
                 </div>
-                <div class="col-auto">
-                  <button type="button" class="btn btn-icon btn-danger">
-                    <IconPlus />
+                <div v-if="form_trecho.id" class="col-auto">
+                  <button @click="limparFormTrecho()" type="button" class="btn btn-icon btn-danger">
+                    <IconX />
                   </button>
                 </div>
               </div>
@@ -482,8 +497,9 @@ const editarTrecho = (trecho) => {
                     </button>
                     <LinkConfirmation v-slot="confirmation"
                       :options="{ text: 'Contratos removidos não podem ser restaurados' }">
-                      <Link :onBefore="confirmation.show" :href="route('contratos.gestao.delete_trecho', trecho.id)"
-                        method="DELETE" as="button" type="button" class="btn btn-icon btn-danger">
+                      <Link :onBefore="confirmation.show"
+                        :href="route('contratos.gestao.delete_trecho', [tipo.id, trecho.id])" method="DELETE" as="button"
+                        type="button" class="btn btn-icon btn-danger">
                       <IconTrash />
                       </Link>
                     </LinkConfirmation>

@@ -25,7 +25,7 @@ class DestroyContratoController extends Controller
   {
     $this->listagemContrato->delete($contrato);
 
-    return to_route('contratos.gestao.listagem')->with('message', [
+    return to_route('contratos.gestao.listagem', $contrato->tipo_id)->with('message', [
       'type' => 'info',
       'content' => "Contrato deletado com sucesso"
     ]);
