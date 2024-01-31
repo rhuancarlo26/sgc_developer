@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tipo_id')->constrained('contrato_tipos', 'id')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnDelete();
-            $table->foreignId('situacao_id')->constrained('contrato_situacoes', 'id')->cascadeOnDelete();
             $table->string('numero_contrato', 13);
             $table->string('cnpj', 18);
             $table->string('contratada');
@@ -23,6 +22,7 @@ return new class extends Migration
             $table->text('objeto');
             $table->date('data_inicio_vigencia');
             $table->date('data_termino_vigencia');
+            $table->string('situacao');
             $table->string('edital', 20);
             $table->string('tipo_licitacao', 20);
             $table->string('modalidade');
