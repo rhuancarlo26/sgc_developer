@@ -9,8 +9,7 @@ class StoreContratoRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'tipo' => 'required',
-      'situacao' => 'required',
+      'tipo_id' => 'required',
       'numero_contrato' => 'required',
       'cnpj' => 'required',
       'contratada' => 'required',
@@ -18,6 +17,7 @@ class StoreContratoRequest extends FormRequest
       'objeto' => 'required',
       'data_inicio_vigencia' => 'required',
       'data_termino_vigencia' => 'required',
+      'situacao' => 'required',
       'edital' => 'required',
       'tipo_licitacao' => 'required',
       'modalidade' => 'required',

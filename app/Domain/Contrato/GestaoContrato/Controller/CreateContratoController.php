@@ -3,7 +3,6 @@
 namespace App\Domain\Contrato\GestaoContrato\Controller;
 
 use App\Models\Contrato;
-use App\Models\ContratoSituacao;
 use App\Models\ContratoTipo;
 use App\Models\Rodovia;
 use App\Models\Uf;
@@ -14,16 +13,14 @@ use Inertia\Inertia;
 
 class CreateContratoController extends Controller
 {
-    public function create(Contrato|null $contrato)
+    public function create(ContratoTipo $tipo, Contrato|null $contrato)
     {
         $ufs = Cache::rememberForever('ufs', fn () => Uf::all());
         $rodovias = Cache::rememberForever('rodovias', fn () => Rodovia::all());
         $tipos = Cache::rememberForever('contrato_tipos', fn () => ContratoTipo::all());
-        $situacoes = Cache::rememberForever('contrato_situacoes', fn () => ContratoSituacao::all());
 
         if ($contrato) {
             $contrato->load([
-                'situacao',
                 'tipo',
                 'trechos',
                 'trechos.uf',
@@ -35,8 +32,8 @@ class CreateContratoController extends Controller
             'ufs' => $ufs,
             'rodovias' => $rodovias,
             'tipos' => $tipos,
-            'situacoes' => $situacoes,
-            'contrato' => $contrato
+            'contrato' => $contrato,
+            'tipo' => $tipo
         ]);
     }
 }
