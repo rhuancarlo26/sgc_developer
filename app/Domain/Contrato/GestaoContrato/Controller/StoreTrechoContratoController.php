@@ -25,7 +25,7 @@ class StoreTrechoContratoController extends Controller
       'rodovia_id' => $request->rodovia['id'],
       'coordenada' => $coordenada
     ])) {
-      return to_route('contratos.gestao.create', $request->contrato_id)->with('message', [
+      return to_route('contratos.gestao.create', ['tipo' => $request->tipo_id, 'contrato' => $request->contrato_id])->with('message', [
         'type' => 'success',
         'content' => "Trecho criado com sucesso"
       ]);

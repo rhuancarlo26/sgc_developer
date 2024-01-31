@@ -32,9 +32,22 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
 
                                 </NavDropdown>
 
-                                <!-- Dashboard -->
-                                <NavLink route-name="contratos.gestao.listagem" active-on-route-prefix="contratos.*"
-                                    title="Contratos" :icon="IconLayoutDashboard" />
+                                <!-- Contratos -->
+                                <NavDropdown prefix="contratos.*" title="Contratos" :icon="IconLayoutDashboard">
+
+                                    <!-- Gestão Ambiental -->
+                                    <NavDropdownLink route-name="contratos.gestao.listagem" route-param="1"
+                                        active-on-route-prefix="contratos.gestao.*" title="Gestão Ambiental" />
+
+                                    <!-- Estudo Ambiental -->
+                                    <NavDropdownLink route-name="contratos.gestao.listagem" route-param="2"
+                                        active-on-route-prefix="contratos.gestao.*" title="Estudo Ambiental" />
+
+                                    <!-- Regularização Ambiental -->
+                                    <NavDropdownLink route-name="contratos.gestao.listagem" route-param="3"
+                                        active-on-route-prefix="contratos.gestao.*" title="Regularização Ambiental" />
+
+                                </NavDropdown>
 
                             </ul>
                         </div>
