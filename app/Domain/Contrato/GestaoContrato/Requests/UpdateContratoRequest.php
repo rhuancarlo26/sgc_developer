@@ -26,8 +26,7 @@ class UpdateContratoRequest extends FormRequest
       'total_aditivo' => 'required',
       'total_reajuste' => 'required',
       'total' => 'required',
-      'tipo.id' => 'required',
-      'situacao.id' => 'required'
+      'tipo_id' => 'required'
     ];
   }
 

@@ -3,7 +3,7 @@
 namespace App\Domain\Contrato\GestaoContrato\Controller;
 
 use App\Domain\Contrato\GestaoContrato\Services\ListagemContratoService;
-use App\Models\Contrato;
+use App\Models\ContratoTipo;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,16 +15,17 @@ class ListagemContratoController extends Controller
     {
     }
 
-    public function index(Request $request): Response
+    public function index(ContratoTipo $tipo, Request $request): Response
     {
         $searchParams = $request->all('searchColumn', 'searchValue');
 
         return Inertia::render('Contrato/GestaoContrato/Index', [
             'contratos' => $this->listagemContrato
                 ->search(...$searchParams)
-                ->with(['situacao'])
+                ->where('tipo_id', $tipo->id)
                 ->paginate()
-                ->appends($searchParams)
+                ->appends($searchParams),
+            'tipo' => $tipo
         ]);
     }
 }
