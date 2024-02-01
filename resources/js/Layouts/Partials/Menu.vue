@@ -40,7 +40,7 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
 
                                 <!-- Licenças -->
                                 <NavLink
-                                    route-name="licencas"
+                                    route-name="licenca.index"
                                     title="Licenças"
                                     :icon="IconFileCheck" 
                                     />
