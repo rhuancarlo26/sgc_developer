@@ -9,7 +9,8 @@ class UpdateContratoTrechoRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'contrato' => 'required',
+      'contrato_id' => 'required',
+      'tipo_id' => 'required',
       'uf' => 'required',
       'rodovia' => 'required',
       'km_inicial' => 'required',

@@ -1,8 +1,8 @@
 <?php
 
-use App\Domain\Profile\ProfileController;
-use App\Domain\Role\Controllers\RoleController;
-use App\Domain\User\Controllers\UserController;
+use App\Shared\Base\Profile\ProfileController;
+use App\Shared\Base\Role\Controllers\RoleController;
+use App\Shared\Base\User\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -66,12 +66,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
         // Licenças
-        Route::get('/licencas', fn() => Inertia::render('Licencas'))
-        ->name('licencas');
+        Route::get('/licencas', fn () => Inertia::render('Licencas'))
+            ->name('licencas');
 
         // Ambiente Geo
-        Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))
-        ->name('ambienteGeo');
+        Route::get('/ambienteGeo', fn () => Inertia::render('AmbienteGeo'))
+            ->name('ambienteGeo');
 
         // Cadastros
         Route::prefix('cadastros')->group(function () {
@@ -116,9 +116,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Gestão de Contrato
             Route::prefix('gestao')->group(function () {
 
-                Route::get('/', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
+                Route::get('/{tipo}', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
                     ->name('contratos.gestao.listagem');
-                Route::get('/create/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController::class, 'create'])
+                Route::get('/create/{tipo}/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController::class, 'create'])
                     ->name('contratos.gestao.create');
                 Route::post('/store', [App\Domain\Contrato\GestaoContrato\Controller\StoreContratoController::class, 'store'])
                     ->name('contratos.gestao.store');
@@ -130,13 +130,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.gestao.excel_export');
                 Route::post('/get_coordenada', [App\Domain\Contrato\GestaoContrato\Controller\GetCoordenadaController::class, 'getCoordenada'])
                     ->name('contratos.gestao.get_coordenada');
-                Route::get('/get_geo_json', [App\Domain\Contrato\GestaoContrato\Controller\GetGeoJsonController::class, 'getGeoJson'])
+                Route::post('/get_geo_json', [App\Domain\Contrato\GestaoContrato\Controller\GetGeoJsonController::class, 'getGeoJson'])
                     ->name('contratos.gestao.get_geo_json');
                 Route::post('/store_trecho', [App\Domain\Contrato\GestaoContrato\Controller\StoreContratoTrechoController::class, 'storeTrecho'])
                     ->name('contratos.gestao.store_trecho');
                 Route::patch('/atualizar_trecho/{trecho}', [App\Domain\Contrato\GestaoContrato\Controller\UpdateContratoTrechoController::class, 'updateTrecho'])
                     ->name('contratos.gestao.update_trecho');
-                Route::delete('/delete_trecho/{trecho?}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoTrechoController::class, 'destroyTrecho'])
+                Route::delete('/delete_trecho/{tipo}/{trecho}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoTrechoController::class, 'destroyTrecho'])
                     ->name('contratos.gestao.delete_trecho');
             });
         });

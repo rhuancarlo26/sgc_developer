@@ -3,7 +3,7 @@
 namespace App\Domain\Contrato\GestaoContrato\Services;
 
 use App\Models\contratoTrecho;
-use App\Shared\BaseClasses\BaseModelService;
+use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 
 class TrechoContratoService extends BaseModelService
