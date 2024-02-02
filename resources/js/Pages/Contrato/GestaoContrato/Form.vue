@@ -217,7 +217,7 @@ const salvarTrecho = () => {
             preserveScroll: true
         });
 
-        limparTrecho();
+        limparFormTrecho();
 
         return;
     }
@@ -226,12 +226,13 @@ const salvarTrecho = () => {
         preserveScroll: true
     });
 
-    limparTrecho();
+    limparFormTrecho();
 
 }
 
-const limparTrecho = () => {
-    form_trecho.uf = {},
+const limparFormTrecho = () => {
+    form_trecho.id = null,
+        form_trecho.uf = {},
         form_trecho.km_inicial = null,
         form_trecho.km_final = null,
         form_trecho.trecho_tipo = null
