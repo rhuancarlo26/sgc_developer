@@ -415,14 +415,14 @@ const limparFormTrecho = () => {
             <div class="row">
               <div class="col">
                 <InputLabel value="UF" for="uf" />
-                <select name="uf" id="uf" class="form-control" v-model="form_trecho.uf">
+                <select name="uf" id="uf" class="form-control form-select" v-model="form_trecho.uf">
                   <option v-for="uf in ufs" :key="uf.id" :value="uf">{{ uf.uf }}</option>
                 </select>
                 <InputError :message="form_trecho.errors.uf_id" />
               </div>
               <div class="col">
                 <InputLabel value="Rodovia" for="rodovia" />
-                <select name="rodovia" id="rodovia" class="form-control" v-model="form_trecho.rodovia">
+                <select name="rodovia" id="rodovia" class="form-control form-select" v-model="form_trecho.rodovia">
                   <option v-for="rodovia in uf_rodovias" :key="rodovia.id" :value="rodovia">{{ rodovia.rodovia
                   }}
                   </option>
@@ -445,7 +445,8 @@ const limparFormTrecho = () => {
                 <InputLabel value="Tipo" for="trecho_tipo" />
                 <div class="row g-2">
                   <div class="col">
-                    <select name="trecho_tipo" id="trecho_tipo" class="form-control" v-model="form_trecho.trecho_tipo">
+                    <select name="trecho_tipo" id="trecho_tipo" class="form-control form-select"
+                      v-model="form_trecho.trecho_tipo">
                       <option value="B">B</option>
                       <option value="U">U</option>
                       <option value="A">A</option>

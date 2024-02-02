@@ -100,14 +100,14 @@ const modalTechoMap = (contrato, trecho) => {
 </script>
 
 <template>
-  <Head title="Gestão de Contratos" />
+  <Head :title="`Gestão de Contratos - ${tipo.nome}`" />
 
   <AuthenticatedLayout>
 
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-          { route: '#', label: 'Gestão de Contratos' }
+          { route: '#', label: `Gestão de Contratos - ${tipo.nome}` }
         ]" />
         <div>
           <Link class="btn btn-success me-2" :href="route('contratos.gestao.create', tipo.id)">
