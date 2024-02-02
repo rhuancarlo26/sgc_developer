@@ -241,9 +241,6 @@ const editarTrecho = (trecho) => {
     Object.assign(form_trecho, trecho)
 }
 
-const limparFormTrecho = () => {
-    Object.assign(form_trecho, {})
-}
 </script>
 
 <template>
