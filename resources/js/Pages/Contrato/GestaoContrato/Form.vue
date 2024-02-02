@@ -415,7 +415,7 @@ const limparFormTrecho = () => {
                 </div>
                 <div class="card-body">
                   <div class="d-flex justify-content-end">
-                    <button @click="salvarContrato()" type="button" class="btn btn-primary" :disabled="form.processing">
+                    <button @click="salvarContrato()" type="button" class="btn btn-success" :disabled="form.processing">
                       <IconDeviceFloppy class="me-2" />
                       Salvar
                     </button>
