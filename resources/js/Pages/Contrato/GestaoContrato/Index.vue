@@ -13,6 +13,8 @@ import { computed } from "vue";
 import { IconEye } from "@tabler/icons-vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconSettings } from "@tabler/icons-vue";
+import { IconDots } from "@tabler/icons-vue";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 const props = defineProps({
   contratos: Object,
@@ -149,7 +151,7 @@ const modalTechoMap = (contrato, trecho) => {
       <Table :columns="['UF', 'BR', 'N° do Contrato', 'CNPJ', 'Contratada', 'Processo SEI', 'Situação', 'Ação']"
         :records="contratos" table-class="table-hover">
         <template #body="{ item }">
-          <tr class="cursor-pointer" @click="router.get(route('contratos.gestao.create', [item.tipo_id, item.id]))">
+          <tr>
             <td class="w-8"><span v-for="uf in item.ufs" :key="uf" class="badge bg-warning text-white m-1">{{ uf }}</span>
             </td>
             <td class="w-8"><span v-for="br in item.brs" :key="br" class="badge bg-warning text-white m-1">{{ br }}</span>
@@ -159,10 +161,28 @@ const modalTechoMap = (contrato, trecho) => {
             <td>{{ item.contratada }}</td>
             <td>{{ item.processo_sei }}</td>
             <td>{{ item.situacao }}</td>
-            <td @click.stop>
-              <button @click="abrirVisualizarContrato(item)" class="btn btn-icon btn-primary">
-                <IconEye />
+            <td>
+              <!-- Contratos -->
+              <button type="button" class="btn btn-icon btn-success dropdown-toggle" data-bs-boundary="viewport"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <IconDots />
               </button>
+              <div class="dropdown-menu dropdown-menu-end">
+                <a @click="abrirVisualizarContrato(item)" class="dropdown-item" href="javascript:void(0)">
+                  Visualizar
+                </a>
+                <a class="dropdown-item" :href="route('contratos.gestao.create', [item.tipo_id, item.id])">
+                  Editar
+                </a>
+                <a class="dropdown-item" href="javascript:void(0)">
+                  <LinkConfirmation v-slot="confirmation"
+                    :options="{ text: 'Contratos removidos não podem ser restaurados' }">
+                    <Link :onBefore="confirmation.show" :href="route('contratos.gestao.delete', item.id)" method="DELETE">
+                    Excluir
+                    </Link>
+                  </LinkConfirmation>
+                </a>
+              </div>
             </td>
           </tr>
         </template>

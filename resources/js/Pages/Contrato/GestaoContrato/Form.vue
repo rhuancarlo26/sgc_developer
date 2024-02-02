@@ -553,19 +553,6 @@ const limparFormTrecho = () => {
           <Map ref="mapContainer" :height="'350px'" />
         </div>
       </div>
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex justify-content-end gap-2">
-            <LinkConfirmation v-slot="confirmation" :options="{ text: 'Contratos removidos não podem ser restaurados' }">
-              <Link :onBefore="confirmation.show" :href="route('contratos.gestao.delete', contrato.id)" method="DELETE"
-                as="button" type="button" class="btn btn-danger">
-              <IconTrash />
-              Deletar
-              </Link>
-            </LinkConfirmation>
-          </div>
-        </div>
-      </div>
     </div>
   </AuthenticatedLayout>
 </template>
