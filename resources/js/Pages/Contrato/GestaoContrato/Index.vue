@@ -111,12 +111,12 @@ const modalTechoMap = (contrato, trecho) => {
           { route: '#', label: 'Gestão de Contratos' }
         ]" />
         <div>
-          <Link class="btn btn-success me-2" :href="route('contratos.gestao.create', tipo.id)">
+          <Link class="btn btn-info me-2" :href="route('contratos.gestao.create', tipo.id)">
           Importar contrato
           </Link>
 
           <!-- Contratos -->
-          <button type="button" class="btn btn-icon btn-success dropdown-toggle" data-bs-boundary="viewport"
+          <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
             data-bs-toggle="dropdown" aria-expanded="false">
             <IconSettings />
           </button>
@@ -153,14 +153,16 @@ const modalTechoMap = (contrato, trecho) => {
           <tr>
             <td class="w-8">
               <p v-if="item.ufs">
-                <span v-for="uf in item.ufs.split(',')" :key="uf" class="badge bg-warning text-white m-1">{{
-                  uf }}</span>
+                <span v-for="uf in item.ufs.split(',')" :key="uf" class="badge bg-warning text-white m-1">
+                    {{ uf }}
+                </span>
               </p>
             </td>
             <td class="w-8">
               <p v-if="item.brs">
-                <span v-for="br in item.brs.split(',')" :key="br" class="badge bg-warning text-white m-1">{{
-                  br }}</span>
+                <span v-for="br in item.brs.split(',')" :key="br" class="badge bg-warning text-white m-1">
+                    {{ br }}
+                </span>
               </p>
             </td>
             <td>{{ item.numero_contrato }}</td>
@@ -170,7 +172,7 @@ const modalTechoMap = (contrato, trecho) => {
             <td>{{ item.situacao }}</td>
             <td>
               <!-- Contratos -->
-              <button type="button" class="btn btn-icon btn-success dropdown-toggle" data-bs-boundary="viewport"
+              <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
                 data-bs-toggle="dropdown" aria-expanded="false">
                 <IconDots />
               </button>
