@@ -3,7 +3,6 @@
 namespace App\Domain\Contrato\GestaoContrato\Controller;
 
 use App\Domain\Contrato\GestaoContrato\Services\ListagemContratoService;
-use App\Models\Contrato;
 use App\Shared\Http\Controllers\Controller;
 use App\Shared\Traits\ModelExports;
 use Illuminate\Http\Request;
@@ -32,7 +31,7 @@ class ExcelExportContratoController extends Controller
 
         return Excel::download(
             new ModelExports($contratos, [
-                'UF', 'BR', 'numero_contrato', 'cnpj', 'contratada', 'processo_sei', 'situacao', 'created_at', 'updated_at'
+                'ufs', 'brs', 'numero_contrato', 'cnpj', 'contratada', 'processo_sei', 'situacao', 'created_at', 'updated_at'
             ]),
             'Contratos.xlsx'
         );

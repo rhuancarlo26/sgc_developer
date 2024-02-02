@@ -15,6 +15,7 @@ import { IconPencil } from "@tabler/icons-vue";
 import { IconMapPin } from "@tabler/icons-vue";
 import { onMounted } from "vue";
 import { IconX } from "@tabler/icons-vue";
+import { IconDoorExit } from "@tabler/icons-vue";
 
 const props = defineProps({
   ufs: {
@@ -195,15 +196,11 @@ const salvarContrato = () => {
   form.transform((data) => Object.assign({}, data))
 
   if (props.contrato.id) {
-    form.patch(route('contratos.gestao.atualizar', props.contrato.id), {
-      preserveScroll: true
-    });
+    form.patch(route('contratos.gestao.atualizar', props.contrato.id));
     return;
   }
 
-  form.post(route('contratos.gestao.store'), {
-    preserveScroll: true
-  });
+  form.post(route('contratos.gestao.store'));
 }
 
 const salvarTrecho = () => {
@@ -240,171 +237,193 @@ const limparFormTrecho = () => {
   <AuthenticatedLayout>
 
     <template #header>
-      <div class="w-100 d-flex justify-content-between">
+      <div class="w-100 d-flex justify-content-between align-self-center">
         <Breadcrumb :links="[
           { route: route('contratos.gestao.listagem', tipo.id), label: 'Gestão de Contratos' },
           { route: '#', label: 'Formulário' }
         ]" />
+        <Link class="btn btn-info" :href="route('contratos.gestao.listagem', tipo.id)">
+        <IconDoorExit class="me-2" />
+        Voltar
+        </Link>
       </div>
     </template>
 
     <div class="card mb-4">
-      <form @submit.prevent="salvarContrato()" :disabled="form.processing">
+      <div class="card">
         <div class="card-header">
-          <h3 class="my-0">Dados Básicos</h3>
+          <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a href="#tabs-home-1" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab">Dados
+                Básicos</a>
+            </li>
+            <li v-if="contrato.id" class="nav-item" role="presentation">
+              <a href="#tabs-profile-1" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+                tabindex="-1">Trechos</a>
+            </li>
+          </ul>
         </div>
         <div class="card-body">
-          <div class="row mb-4">
-            <div class="col">
-              <InputLabel value="Contrato" for="contrato" class="form-label" />
-              <div class="row g-2">
-                <div class="col">
-                  <input type="text" id="contrato" name="contrato" class="form-control" v-model="form.numero_contrato" />
+          <div class="tab-content">
+            <div class="tab-pane active show" id="tabs-home-1" role="tabpanel">
+              <form @submit.prevent="salvarContrato()" :disabled="form.processing">
+                <div class="card-header">
+                  <h3 class="my-0">Dados Básicos</h3>
                 </div>
-                <div class="col-auto">
-                  <button @click="getDadosContrato()" type="button" class="btn btn-primary">
-                    Buscar
-                  </button>
+                <div class="card-body">
+                  <div class="row mb-4">
+                    <div class="col">
+                      <InputLabel value="Contrato" for="contrato" class="form-label" />
+                      <div class="row g-2">
+                        <div class="col">
+                          <input type="text" id="contrato" name="contrato" class="form-control"
+                            v-model="form.numero_contrato" />
+                        </div>
+                        <div class="col-auto">
+                          <button @click="getDadosContrato()" type="button" class="btn btn-primary">
+                            Buscar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Tipo de Contrato" for="tipo" />
+                      <input id="tipo" name="tipo" :value="tipo.nome" class="form-control" disabled />
+                      <InputError :message="form.errors.tipo" />
+                    </div>
+                  </div>
+                  <div class="row mb-4">
+                    <div class="col-4">
+                      <InputLabel value="CNPJ" for="cnpj" />
+                      <input type="text" id="cnpj" name="cnpj" class="form-control" v-model="form.cnpj" disabled />
+                      <InputError :message="form.errors.cnpj" />
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Empresa" for="contratada" />
+                      <input type="text" id="contratada" name="contratada" class="form-control" v-model="form.contratada"
+                        disabled />
+                      <InputError :message="form.errors.contratada" />
+                    </div>
+                  </div>
+                  <div class="row mb-4">
+                    <div class="col">
+                      <InputLabel value="Objeto do Contrato" for="objeto" />
+                      <textarea name="objeto" id="objeto" class="form-control" rows="5" v-model="form.objeto"
+                        disabled></textarea>
+                      <InputError :message="form.errors.objeto" />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col">
+                      <InputLabel value="Numero do Processo" for="processo_sei" />
+                      <input type="text" id="processo_sei" name="processo_sei" class="form-control"
+                        v-model="form.processo_sei" disabled />
+                      <InputError :message="form.errors.processo_sei" />
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Início da Vigência" for="data_inicio_vigencia" />
+                      <input type="date" id="data_inicio_vigencia" name="data_inicio_vigencia" class="form-control"
+                        v-model="form.data_inicio_vigencia" disabled />
+                      <InputError :message="form.errors.data_inicio_vigencia" />
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Término da Vigência" for="data_termino_vigencia" />
+                      <input type="date" id="data_termino_vigencia" name="data_termino_vigencia" class="form-control"
+                        v-model="form.data_termino_vigencia" disabled />
+                      <InputError :message="form.errors.data_termino_vigencia" />
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Situação" for="situacao" />
+                      <input type="text" id="situacao" name="situacao" class="form-control" v-model="form.situacao"
+                        disabled />
+                      <InputError :message="form.errors.situacao" />
+                    </div>
+                  </div>
                 </div>
-              </div>
+                <div class="card-header">
+                  <h3 class="my-0">Licitação</h3>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col">
+                      <InputLabel value="Edital" for="edital" />
+                      <input type="text" id="edital" name="edital" class="form-control" v-model="form.edital" disabled />
+                      <InputError :message="form.errors.edital" />
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Tipo de Licitação" for="tipo_licitacao" />
+                      <input type="text" id="tipo_licitacao" name="tipo_licitacao" class="form-control"
+                        v-model="form.tipo_licitacao" disabled />
+                      <InputError :message="form.errors.tipo_licitacao" />
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Modalidade" for="modalidade" />
+                      <input type="text" id="modalidade" name="modalidade" class="form-control" v-model="form.modalidade"
+                        disabled />
+                      <InputError :message="form.errors.modalidade" />
+                    </div>
+                  </div>
+                </div>
+                <div class="card-header">
+                  <h3 class="my-0">Fiscalização</h3>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col">
+                      <InputLabel value="Unidade Gestora" for="unidade_gestora" />
+                      <input type="text" id="unidade_gestora" name="unidade_gestora" class="form-control"
+                        v-model="form.unidade_gestora" disabled />
+                      <InputError :message="form.errors.unidade_gestora" />
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Fiscal do Contrato" for="fiscal_contrato" />
+                      <input type="text" id="fiscal_contrato" name="fiscal_contrato" class="form-control"
+                        v-model="form.fiscal_contrato" disabled />
+                      <InputError :message="form.errors.fiscal_contrato" />
+                    </div>
+                  </div>
+                </div>
+                <div class="card-header">
+                  <h3 class="my-0">Valores</h3>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col">
+                      <InputLabel value="SNV" for="snv" />
+                      <input type="text" id="snv" name="snv" class="form-control" v-model="form.snv" />
+                      <InputError :message="form.errors.snv" />
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Preço Inicial" for="preco_inicial" />
+                      <input type="text" id="preco_inicial" name="preco_inicial" class="form-control"
+                        v-model="form.preco_inicial" disabled />
+                      <InputError :message="form.errors.preco_inicial" />
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Preço Aditivos" for="total_aditivo" />
+                      <input type="text" id="total_aditivo" name="total_aditivo" class="form-control"
+                        v-model="form.total_aditivo" disabled />
+                      <InputError :message="form.errors.total_aditivo" />
+                    </div>
+                    <div class="col">
+                      <InputLabel value="Preço Reajuste" for="total_reajuste" />
+                      <input type="text" id="total_reajuste" name="total_reajuste" class="form-control"
+                        v-model="form.total_reajuste" disabled />
+                      <InputError :message="form.errors.total_reajuste" />
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="d-flex justify-content-end">
+                    <button @click="salvarContrato()" type="button" class="btn btn-success" :disabled="form.processing">
+                      <IconDeviceFloppy class="me-2" />
+                      Salvar
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
-            <div class="col">
-              <InputLabel value="Tipo de Contrato" for="tipo" />
-              <input id="tipo" name="tipo" :value="tipo.nome" class="form-control" disabled />
-              <InputError :message="form.errors.tipo" />
-            </div>
-          </div>
-          <div class="row mb-4">
-            <div class="col-4">
-              <InputLabel value="CNPJ" for="cnpj" />
-              <input type="text" id="cnpj" name="cnpj" class="form-control" v-model="form.cnpj" disabled />
-              <InputError :message="form.errors.cnpj" />
-            </div>
-            <div class="col">
-              <InputLabel value="Empresa" for="contratada" />
-              <input type="text" id="contratada" name="contratada" class="form-control" v-model="form.contratada"
-                disabled />
-              <InputError :message="form.errors.contratada" />
-            </div>
-          </div>
-          <div class="row mb-4">
-            <div class="col">
-              <InputLabel value="Objeto do Contrato" for="objeto" />
-              <textarea name="objeto" id="objeto" class="form-control" rows="5" v-model="form.objeto" disabled></textarea>
-              <InputError :message="form.errors.objeto" />
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <InputLabel value="Numero do Processo" for="processo_sei" />
-              <input type="text" id="processo_sei" name="processo_sei" class="form-control" v-model="form.processo_sei"
-                disabled />
-              <InputError :message="form.errors.processo_sei" />
-            </div>
-            <div class="col">
-              <InputLabel value="Início da Vigência" for="data_inicio_vigencia" />
-              <input type="date" id="data_inicio_vigencia" name="data_inicio_vigencia" class="form-control"
-                v-model="form.data_inicio_vigencia" disabled />
-              <InputError :message="form.errors.data_inicio_vigencia" />
-            </div>
-            <div class="col">
-              <InputLabel value="Término da Vigência" for="data_termino_vigencia" />
-              <input type="date" id="data_termino_vigencia" name="data_termino_vigencia" class="form-control"
-                v-model="form.data_termino_vigencia" disabled />
-              <InputError :message="form.errors.data_termino_vigencia" />
-            </div>
-            <div class="col">
-              <InputLabel value="Situação" for="situacao" />
-              <input type="text" id="situacao" name="situacao" class="form-control" v-model="form.situacao" disabled />
-              <InputError :message="form.errors.situacao" />
-            </div>
-          </div>
-        </div>
-        <div class="card-header">
-          <h3 class="my-0">Licitação</h3>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col">
-              <InputLabel value="Edital" for="edital" />
-              <input type="text" id="edital" name="edital" class="form-control" v-model="form.edital" disabled />
-              <InputError :message="form.errors.edital" />
-            </div>
-            <div class="col">
-              <InputLabel value="Tipo de Licitação" for="tipo_licitacao" />
-              <input type="text" id="tipo_licitacao" name="tipo_licitacao" class="form-control"
-                v-model="form.tipo_licitacao" disabled />
-              <InputError :message="form.errors.tipo_licitacao" />
-            </div>
-            <div class="col">
-              <InputLabel value="Modalidade" for="modalidade" />
-              <input type="text" id="modalidade" name="modalidade" class="form-control" v-model="form.modalidade"
-                disabled />
-              <InputError :message="form.errors.modalidade" />
-            </div>
-          </div>
-        </div>
-        <div class="card-header">
-          <h3 class="my-0">Fiscalização</h3>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col">
-              <InputLabel value="Unidade Gestora" for="unidade_gestora" />
-              <input type="text" id="unidade_gestora" name="unidade_gestora" class="form-control"
-                v-model="form.unidade_gestora" disabled />
-              <InputError :message="form.errors.unidade_gestora" />
-            </div>
-            <div class="col">
-              <InputLabel value="Fiscal do Contrato" for="fiscal_contrato" />
-              <input type="text" id="fiscal_contrato" name="fiscal_contrato" class="form-control"
-                v-model="form.fiscal_contrato" disabled />
-              <InputError :message="form.errors.fiscal_contrato" />
-            </div>
-          </div>
-        </div>
-        <div class="card-header">
-          <h3 class="my-0">Valores</h3>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col">
-              <InputLabel value="SNV" for="snv" />
-              <input type="text" id="snv" name="snv" class="form-control" v-model="form.snv" />
-              <InputError :message="form.errors.snv" />
-            </div>
-            <div class="col">
-              <InputLabel value="Preço Inicial" for="preco_inicial" />
-              <input type="text" id="preco_inicial" name="preco_inicial" class="form-control" v-model="form.preco_inicial"
-                disabled />
-              <InputError :message="form.errors.preco_inicial" />
-            </div>
-            <div class="col">
-              <InputLabel value="Preço Aditivos" for="total_aditivo" />
-              <input type="text" id="total_aditivo" name="total_aditivo" class="form-control" v-model="form.total_aditivo"
-                disabled />
-              <InputError :message="form.errors.total_aditivo" />
-            </div>
-            <div class="col">
-              <InputLabel value="Preço Reajuste" for="total_reajuste" />
-              <input type="text" id="total_reajuste" name="total_reajuste" class="form-control"
-                v-model="form.total_reajuste" disabled />
-              <InputError :message="form.errors.total_reajuste" />
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="d-flex justify-content-end">
-            <button @click="salvarContrato()" type="button" class="btn btn-primary" :disabled="form.processing">
-              <IconDeviceFloppy class="me-2" />
-              Salvar
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <div v-if="contrato.id">
+            <div class="tab-pane" id="tabs-profile-1" role="tabpanel">
 
       <div class="card mb-4">
         <form @submit.prevent="salvarTrecho()" :disabled="form_trecho.processing">
@@ -471,78 +490,68 @@ const limparFormTrecho = () => {
           </div>
         </form>
 
-        <div class="card-body">
-          <div class="table-responsive mb-4">
-            <table class="table card-table table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th>UF</th>
-                  <th>BR</th>
-                  <th>Km Inicial</th>
-                  <th>Km Final</th>
-                  <th>Tipo</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="trecho in contrato.trechos" :key="trecho.id" class="cursor-pointer">
-                  <td>{{ trecho.uf?.uf }}</td>
-                  <td>{{ trecho.rodovia?.rodovia }}</td>
-                  <td>{{ trecho.km_inicial }}</td>
-                  <td>{{ trecho.km_final }}</td>
-                  <td>{{ trecho.trecho_tipo }}</td>
-                  <td class="w-1">
-                    <div class="d-flex">
-                      <button @click="zoomTrecho(trecho.coordenada)" type="button" class="btn btn-icon btn-primary me-2"
-                        :disabled="form.processing">
-                        <IconMapPin />
-                      </button>
-                      <button @click="editarTrecho(trecho)" type="button" class="btn btn-icon btn-info me-2"
-                        :disabled="form.processing">
-                        <IconPencil />
-                      </button>
-                      <LinkConfirmation v-slot="confirmation"
-                        :options="{ text: 'Contratos removidos não podem ser restaurados' }">
-                        <Link :onBefore="confirmation.show"
-                          :href="route('contratos.gestao.delete_trecho', [tipo.id, trecho.id])" method="DELETE"
-                          as="button" type="button" class="btn btn-icon btn-danger">
-                        <IconTrash />
-                        </Link>
-                      </LinkConfirmation>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+                <div class="card-body">
+                  <div class="table-responsive mb-4">
+                    <table class="table card-table table-bordered table-hover">
+                      <thead>
+                        <tr>
+                          <th>UF</th>
+                          <th>BR</th>
+                          <th>Km Inicial</th>
+                          <th>Km Final</th>
+                          <th>Tipo</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="trecho in contrato.trechos" :key="trecho.id" class="cursor-pointer">
+                          <td>{{ trecho.uf?.uf }}</td>
+                          <td>{{ trecho.rodovia?.rodovia }}</td>
+                          <td>{{ trecho.km_inicial }}</td>
+                          <td>{{ trecho.km_final }}</td>
+                          <td>{{ trecho.trecho_tipo }}</td>
+                          <td class="w-1">
+                            <div class="d-flex">
+                              <button @click="zoomTrecho(trecho.coordenada)" type="button"
+                                class="btn btn-icon btn-primary me-2" :disabled="form.processing">
+                                <IconMapPin />
+                              </button>
+                              <button @click="editarTrecho(trecho)" type="button" class="btn btn-icon btn-info me-2"
+                                :disabled="form.processing">
+                                <IconPencil />
+                              </button>
+                              <LinkConfirmation v-slot="confirmation"
+                                :options="{ text: 'Contratos removidos não podem ser restaurados' }">
+                                <Link :onBefore="confirmation.show"
+                                  :href="route('contratos.gestao.delete_trecho', [tipo.id, trecho.id])" method="DELETE"
+                                  as="button" type="button" class="btn btn-icon btn-danger">
+                                <IconTrash />
+                                </Link>
+                              </LinkConfirmation>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
-        <div class="card mb-4">
-          <div class="card-header d-flex justify-content-between">
-            <h3 class="my-0">Mapa</h3>
-            <button @click="zoomFitBounds()" class="btn btn-icon btn-success">
-              <IconMap />
-            </button>
-          </div>
-          <div class="card-body">
-            <Map ref="mapContainer" :manualRender="false" :height="'350px'" />
-          </div>
-        </div>
-
-        <!-- Ações -->
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-end gap-2">
-              <LinkConfirmation v-slot="confirmation"
-                :options="{ text: 'Contratos removidos não podem ser restaurados' }">
-                <Link :onBefore="confirmation.show" :href="route('contratos.gestao.delete', contrato.id)" method="DELETE"
-                  as="button" type="button" class="btn btn-danger">
-                <IconTrash />
-                Deletar
-                </Link>
-              </LinkConfirmation>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="contrato.id">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between">
+          <h3 class="my-0">Mapa</h3>
+          <button @click="zoomFitBounds()" class="btn btn-icon btn-success">
+            <IconMap />
+          </button>
+        </div>
+        <div class="card-body">
+          <Map ref="mapContainer" :height="'350px'" />
         </div>
       </div>
     </div>
