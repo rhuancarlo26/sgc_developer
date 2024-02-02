@@ -10,8 +10,10 @@ import Map from "@/Components/Map.vue";
 import { onMounted } from "vue";
 import axios from "axios";
 import { computed } from "vue";
-import { IconEye } from "@tabler/icons-vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+import { IconSettings } from "@tabler/icons-vue";
+import { IconDots } from "@tabler/icons-vue";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 const props = defineProps({
     contratos: Object,
@@ -99,20 +101,32 @@ const modalTechoMap = (contrato, trecho) => {
 </script>
 
 <template>
-    <Head title="Gestão de Contratos" />
+    <Head :title="`Gestão de Contratos - ${tipo.nome}`" />
 
     <AuthenticatedLayout>
 
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-                    { route: '#', label: 'Gestão de Contratos' }
+                    { route: '#', label: `Gestão de Contratos - ${tipo.nome}` }
                 ]" />
                 <div>
-                    <Link class="btn btn-success me-2" :href="route('contratos.gestao.create', tipo.id)">
-                    Importar Contrato
+                    <Link class="btn btn-info me-2" :href="route('contratos.gestao.create', tipo.id)">
+                    Importar contrato
                     </Link>
-                    <button @click="abrirMapa()" type="button" class="btn btn-success">Mapa dos Contratos</button>
+          <!-- Contratos -->
+          <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            <IconSettings />
+          </button>
+          <div class="dropdown-menu dropdown-menu-end">
+            <a @click="abrirMapa()" class="dropdown-item" href="javascript:void(0)">
+              Mapa dos contratos
+            </a>
+            <a class="dropdown-item" :href="route('contratos.gestao.excel_export')">
+              Exportar excel
+            </a>
+          </div>
 
                 </div>
             </div>
@@ -133,34 +147,48 @@ const modalTechoMap = (contrato, trecho) => {
 
             <!-- Listagem-->
             <Table :columns="['UF', 'BR', 'N° do Contrato', 'CNPJ', 'Contratada', 'Processo SEI', 'Situação', 'Ação']"
-                :records="contratos" table-class="table-hover" :excelRoute="route('contratos.gestao.excel_export')">
+                :records="contratos" table-class="table-hover" >
                 <template #body="{ item }">
-                    <tr class="cursor-pointer"
-                        @click="router.get(route('contratos.gestao.create', [item.tipo_id, item.id]))">
-                        <td class="w-8"><span v-for="uf in item.ufs" :key="uf" class="badge bg-warning text-white m-1">{{ uf
+                    <tr >
+                        <td class="w-8"><p v-if="item.ufs">
+                <span v-for="uf in item.ufs.split(',')" :key="uf" class="badge bg-warning text-white m-1">{{ uf
                         }}</span>
-                        </td>
-                        <td class="w-8"><span v-for="br in item.brs" :key="br" class="badge bg-warning text-white m-1">{{ br
-                        }}</span>
+                        </p>
+            </td>
+                        <td class="w-8"><p v-if="item.brs">
+                <span v-for="br in item.brs.split(',')" :key="br" class="badge bg-warning text-white m-1">{{ br
+                        }}</span></p>
                         </td>
                         <td>{{ item.numero_contrato }}</td>
                         <td>{{ item.cnpj }}</td>
                         <td>{{ item.contratada }}</td>
                         <td>{{ item.processo_sei }}</td>
                         <td>{{ item.situacao }}</td>
-                        <td @click.stop>
-                            <button @click="abrirVisualizarContrato(item)" class="btn btn-icon btn-primary">
-                                <IconEye />
-                            </button>
+                        <td >
+              <!-- Contratos -->
+                            <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                                <IconDots />
+                            </button><div class="dropdown-menu dropdown-menu-end">
+                <a @click="abrirVisualizarContrato(item)" class="dropdown-item" href="javascript:void(0)">
+                  Visualizar
+                </a>
+                <a class="dropdown-item" :href="route('contratos.gestao.create', [item.tipo_id, item.id])">
+                  Editar
+                </a>
+                <a class="dropdown-item" :href="route('contratos.gestao.delete', item.id)">
+                  Excluir
+                </a>
+              </div>
                         </td>
                     </tr>
                 </template>
             </Table>
         </div>
 
-        <Modal ref="modalMapa" title="Mapa agluma coisa" modal-dialog-class="modal-xl">
+        <Modal ref="modalMapa" title="Mapa dos trechos de todos os contratos" modal-dialog-class="modal-xl">
             <template #body>
-                <Map ref="mapaTrecho" height="300px" :manual-render="true" />
+                <Map ref="mapaTrecho" height="500px" :manual-render="true" />
             </template>
         </Modal>
 
@@ -196,7 +224,7 @@ const modalTechoMap = (contrato, trecho) => {
                                     timeStyle: 'short'
                                 })
                             }}</span>
-                            <span class="col"><strong>Situação: </strong>{{ contratoClicado.situacao?.nome }}</span>
+                            <span class="col"><strong>Situação: </strong>{{ contratoClicado.situacao }}</span>
                         </div>
                     </div>
 

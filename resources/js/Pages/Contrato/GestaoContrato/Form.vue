@@ -15,6 +15,7 @@ import { IconPencil } from "@tabler/icons-vue";
 import { IconMapPin } from "@tabler/icons-vue";
 import { onMounted } from "vue";
 import { IconX } from "@tabler/icons-vue";
+import { IconDoorExit } from "@tabler/icons-vue";
 
 const props = defineProps({
     ufs: {
@@ -195,15 +196,12 @@ const salvarContrato = () => {
     form.transform((data) => Object.assign({}, data))
 
     if (props.contrato.id) {
-        form.patch(route('contratos.gestao.atualizar', props.contrato.id), {
-            preserveScroll: true
-        });
+        form.patch(route('contratos.gestao.atualizar', props.contrato.id));
+
         return;
     }
 
-    form.post(route('contratos.gestao.store'), {
-        preserveScroll: true
-    });
+    form.post(route('contratos.gestao.store'));
 }
 
 const salvarTrecho = () => {
@@ -250,16 +248,36 @@ const editarTrecho = (trecho) => {
     <AuthenticatedLayout>
 
         <template #header>
-            <div class="w-100 d-flex justify-content-between">
+            <div class="w-100 d-flex justify-content-between align-self-center">
                 <Breadcrumb :links="[
                     { route: route('contratos.gestao.listagem', tipo.id), label: 'Gestão de Contratos' },
                     { route: '#', label: 'Formulário' }
                 ]" />
+        <Link class="btn btn-info" :href="route('contratos.gestao.listagem', tipo.id)">
+        <IconDoorExit class="me-2" />
+        Voltar
+        </Link>
             </div>
         </template>
 
         <div class="card mb-4">
-            <form @submit.prevent="salvarContrato()" :disabled="form.processing">
+            <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a href="#tabs-home-1" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab">Dados
+                Básicos</a>
+            </li>
+            <li v-if="contrato.id" class="nav-item" role="presentation">
+              <a href="#tabs-profile-1" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+                tabindex="-1">Trechos</a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="tab-content">
+            <div class="tab-pane active show" id="tabs-home-1" role="tabpanel">
+              <form @submit.prevent="salvarContrato()" :disabled="form.processing">
                 <div class="card-header">
                     <h3 class="my-0">Dados Básicos</h3>
                 </div>
@@ -410,7 +428,7 @@ const editarTrecho = (trecho) => {
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-end">
-                        <button @click="salvarContrato()" type="button" class="btn btn-primary" :disabled="form.processing">
+                        <button @click="salvarContrato()" type="button" class="btn btn-success" :disabled="form.processing">
                             <IconDeviceFloppy class="me-2" />
                             Salvar
                         </button>
@@ -419,7 +437,7 @@ const editarTrecho = (trecho) => {
             </form>
         </div>
 
-        <div v-if="contrato.id">
+        <div class="tab-pane" id="tabs-profile-1" role="tabpanel">
 
             <div class="card mb-4">
                 <form @submit.prevent="salvarTrecho()" :disabled="form_trecho.processing">
@@ -430,14 +448,14 @@ const editarTrecho = (trecho) => {
                         <div class="row">
                             <div class="col">
                                 <InputLabel value="UF" for="uf" />
-                                <select name="uf" id="uf" class="form-control" v-model="form_trecho.uf">
+                                <select name="uf" id="uf" class="form-controlform-select" v-model="form_trecho.uf">
                                     <option v-for="uf in ufs" :key="uf.id" :value="uf">{{ uf.uf }}</option>
                                 </select>
                                 <InputError :message="form_trecho.errors.uf_id" />
                             </div>
                             <div class="col">
                                 <InputLabel value="Rodovia" for="rodovia" />
-                                <select name="rodovia" id="rodovia" class="form-control" v-model="form_trecho.rodovia">
+                                <select name="rodovia" id="rodovia" class="form-controlform-select" v-model="form_trecho.rodovia">
                                     <option v-for="rodovia in uf_rodovias" :key="rodovia.id" :value="rodovia">{{
                                         rodovia.rodovia
                                     }}
@@ -461,7 +479,7 @@ const editarTrecho = (trecho) => {
                                 <InputLabel value="Tipo" for="trecho_tipo" />
                                 <div class="row g-2">
                                     <div class="col">
-                                        <select name="trecho_tipo" id="trecho_tipo" class="form-control"
+                                        <select name="trecho_tipo" id="trecho_tipo" class="form-controlform-select"
                                             v-model="form_trecho.trecho_tipo">
                                             <option value="B">B</option>
                                             <option value="U">U</option>
@@ -534,7 +552,14 @@ const editarTrecho = (trecho) => {
                     </div>
                 </div>
 
-                <div class="card mb-4">
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="contrato.id">
+      <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between">
                         <h3 class="my-0">Mapa</h3>
                         <button @click="zoomFitBounds()" class="btn btn-icon btn-success">
@@ -542,24 +567,8 @@ const editarTrecho = (trecho) => {
                         </button>
                     </div>
                     <div class="card-body">
-                        <Map ref="mapContainer" :manualRender="false" :height="'350px'" />
-                    </div>
-                </div>
+                        <Map ref="mapContainer" :height="'350px'" />
 
-                <!-- Ações -->
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-end gap-2">
-                            <LinkConfirmation v-slot="confirmation"
-                                :options="{ text: 'Contratos removidos não podem ser restaurados' }">
-                                <Link :onBefore="confirmation.show" :href="route('contratos.gestao.delete', contrato.id)"
-                                    method="DELETE" as="button" type="button" class="btn btn-danger">
-                                <IconTrash />
-                                Deletar
-                                </Link>
-                            </LinkConfirmation>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
