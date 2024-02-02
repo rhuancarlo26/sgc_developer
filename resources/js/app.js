@@ -10,6 +10,9 @@ import { can, hasRole, canSeePrefix } from "./Utils/PermissionUtils.js";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
+// Maska
+import { vMaska } from 'maska';
+
 import "vue-toastification/dist/index.css";
 import Toast from "vue-toastification";
 
@@ -28,6 +31,7 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(Toast)
+            .directive("maska", vMaska)
             .use(ZiggyVue)
             .mixin({ data: () => ({ L: leaflet }) })
             .mixin({ methods: { can, hasRole, canSeePrefix } })

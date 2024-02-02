@@ -288,7 +288,8 @@ const editarTrecho = (trecho) => {
                     <div class="row mb-4">
                         <div class="col-4">
                             <InputLabel value="CNPJ" for="cnpj" />
-                            <input type="text" id="cnpj" name="cnpj" class="form-control" v-model="form.cnpj" disabled />
+                            <input type="text" id="cnpj" name="cnpj" v-maska data-maska="##.###.###/####-##"
+                                class="form-control" v-model="form.cnpj" disabled />
                             <InputError :message="form.errors.cnpj" />
                         </div>
                         <div class="col">
