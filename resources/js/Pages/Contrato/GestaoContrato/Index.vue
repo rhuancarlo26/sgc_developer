@@ -151,9 +151,17 @@ const modalTechoMap = (contrato, trecho) => {
         :records="contratos" table-class="table-hover">
         <template #body="{ item }">
           <tr>
-            <td class="w-8"><span v-for="uf in item.ufs" :key="uf" class="badge bg-warning text-white m-1">{{ uf }}</span>
+            <td class="w-8">
+              <p v-if="item.ufs">
+                <span v-for="uf in item.ufs.split(',')" :key="uf" class="badge bg-warning text-white m-1">{{
+                  uf }}</span>
+              </p>
             </td>
-            <td class="w-8"><span v-for="br in item.brs" :key="br" class="badge bg-warning text-white m-1">{{ br }}</span>
+            <td class="w-8">
+              <p v-if="item.brs">
+                <span v-for="br in item.brs.split(',')" :key="br" class="badge bg-warning text-white m-1">{{
+                  br }}</span>
+              </p>
             </td>
             <td>{{ item.numero_contrato }}</td>
             <td>{{ item.cnpj }}</td>
