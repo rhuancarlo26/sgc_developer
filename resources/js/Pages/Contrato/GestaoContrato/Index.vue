@@ -10,7 +10,6 @@ import Map from "@/Components/Map.vue";
 import { onMounted } from "vue";
 import axios from "axios";
 import { computed } from "vue";
-import { IconEye } from "@tabler/icons-vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconSettings } from "@tabler/icons-vue";
 import { IconDots } from "@tabler/icons-vue";
@@ -174,13 +173,8 @@ const modalTechoMap = (contrato, trecho) => {
                 <a class="dropdown-item" :href="route('contratos.gestao.create', [item.tipo_id, item.id])">
                   Editar
                 </a>
-                <a class="dropdown-item" href="javascript:void(0)">
-                  <LinkConfirmation v-slot="confirmation"
-                    :options="{ text: 'Contratos removidos não podem ser restaurados' }">
-                    <Link :onBefore="confirmation.show" :href="route('contratos.gestao.delete', item.id)" method="DELETE">
-                    Excluir
-                    </Link>
-                  </LinkConfirmation>
+                <a class="dropdown-item" :href="route('contratos.gestao.delete', item.id)">
+                  Excluir
                 </a>
               </div>
             </td>
