@@ -124,7 +124,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.gestao.store');
                 Route::patch('/atualizar/{contrato}', [App\Domain\Contrato\GestaoContrato\Controller\UpdateContratoController::class, 'update'])
                     ->name('contratos.gestao.atualizar');
-                Route::delete('/delete/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoController::class, 'destroy'])
+                Route::get('/delete/{contrato}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoController::class, 'destroy'])
                     ->name('contratos.gestao.delete');
                 Route::get('/excel', [App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController::class, 'excelExport'])
                     ->name('contratos.gestao.excel_export');
