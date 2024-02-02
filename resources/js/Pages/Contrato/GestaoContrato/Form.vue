@@ -424,70 +424,71 @@ const limparFormTrecho = () => {
               </form>
             </div>
             <div class="tab-pane" id="tabs-profile-1" role="tabpanel">
-              <div class="card mb-4">
-                <form @submit.prevent="salvarTrecho()" :disabled="form_trecho.processing">
-                  <div class="card-header">
-                    <h3 class="my-0">Trecho</h3>
+
+      <div class="card mb-4">
+        <form @submit.prevent="salvarTrecho()" :disabled="form_trecho.processing">
+          <div class="card-header">
+            <h3 class="my-0">Trecho</h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col">
+                <InputLabel value="UF" for="uf" />
+                <select name="uf" id="uf" class="form-control form-select" v-model="form_trecho.uf">
+                  <option v-for="uf in ufs" :key="uf.id" :value="uf">{{ uf.uf }}</option>
+                </select>
+                <InputError :message="form_trecho.errors.uf_id" />
+              </div>
+              <div class="col">
+                <InputLabel value="Rodovia" for="rodovia" />
+                <select name="rodovia" id="rodovia" class="form-control form-select" v-model="form_trecho.rodovia">
+                  <option v-for="rodovia in uf_rodovias" :key="rodovia.id" :value="rodovia">{{ rodovia.rodovia
+                  }}
+                  </option>
+                </select>
+                <InputError :message="form_trecho.errors.rodovia_id" />
+              </div>
+              <div class="col">
+                <InputLabel value="Km Inicial" for="km_inicial" />
+                <input type="number" step="any" id="km_inicial" name="km_inicial" class="form-control"
+                  v-model="form_trecho.km_inicial" />
+                <InputError :message="form_trecho.errors.km_inicial" />
+              </div>
+              <div class="col">
+                <InputLabel value="Km Final" for="km_final" />
+                <input type="number" step="any" id="km_final" name="km_final" class="form-control"
+                  v-model="form_trecho.km_final" />
+                <InputError :message="form_trecho.errors.km_final" />
+              </div>
+              <div class="col">
+                <InputLabel value="Tipo" for="trecho_tipo" />
+                <div class="row g-2">
+                  <div class="col">
+                    <select name="trecho_tipo" id="trecho_tipo" class="form-control form-select"
+                      v-model="form_trecho.trecho_tipo">
+                      <option value="B">B</option>
+                      <option value="U">U</option>
+                      <option value="A">A</option>
+                      <option value="C">C</option>
+                      <option value="N">N</option>
+                      <option value="V">V</option>
+                    </select>
                   </div>
-                  <div class="card-body">
-                    <div class="row">
-                      <div class="col">
-                        <InputLabel value="UF" for="uf" />
-                        <select name="uf" id="uf" class="form-control" v-model="form_trecho.uf">
-                          <option v-for="uf in ufs" :key="uf.id" :value="uf">{{ uf.uf }}</option>
-                        </select>
-                        <InputError :message="form_trecho.errors.uf_id" />
-                      </div>
-                      <div class="col">
-                        <InputLabel value="Rodovia" for="rodovia" />
-                        <select name="rodovia" id="rodovia" class="form-control" v-model="form_trecho.rodovia">
-                          <option v-for="rodovia in uf_rodovias" :key="rodovia.id" :value="rodovia">{{ rodovia.rodovia
-                          }}
-                          </option>
-                        </select>
-                        <InputError :message="form_trecho.errors.rodovia_id" />
-                      </div>
-                      <div class="col">
-                        <InputLabel value="Km Inicial" for="km_inicial" />
-                        <input type="number" step="any" id="km_inicial" name="km_inicial" class="form-control"
-                          v-model="form_trecho.km_inicial" />
-                        <InputError :message="form_trecho.errors.km_inicial" />
-                      </div>
-                      <div class="col">
-                        <InputLabel value="Km Final" for="km_final" />
-                        <input type="number" step="any" id="km_final" name="km_final" class="form-control"
-                          v-model="form_trecho.km_final" />
-                        <InputError :message="form_trecho.errors.km_final" />
-                      </div>
-                      <div class="col">
-                        <InputLabel value="Tipo" for="trecho_tipo" />
-                        <div class="row g-2">
-                          <div class="col">
-                            <select name="trecho_tipo" id="trecho_tipo" class="form-control"
-                              v-model="form_trecho.trecho_tipo">
-                              <option value="B">B</option>
-                              <option value="U">U</option>
-                              <option value="A">A</option>
-                              <option value="C">C</option>
-                              <option value="N">N</option>
-                              <option value="V">V</option>
-                            </select>
-                          </div>
-                          <div class="col-auto">
-                            <button type="submit" class="btn btn-icon btn-success">
-                              <IconPlus />
-                            </button>
-                          </div>
-                          <div v-if="form_trecho.id" class="col-auto">
-                            <button @click="limparFormTrecho()" type="button" class="btn btn-icon btn-danger">
-                              <IconX />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  <div class="col-auto">
+                    <button type="submit" class="btn btn-icon btn-success">
+                      <IconPlus />
+                    </button>
                   </div>
-                </form>
+                  <div v-if="form_trecho.id" class="col-auto">
+                    <button @click="limparFormTrecho()" type="button" class="btn btn-icon btn-danger">
+                      <IconX />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
 
                 <div class="card-body">
                   <div class="table-responsive mb-4">
