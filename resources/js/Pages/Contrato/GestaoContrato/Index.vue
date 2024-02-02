@@ -189,9 +189,9 @@ const modalTechoMap = (contrato, trecho) => {
       </Table>
     </div>
 
-    <Modal ref="modalMapa" title="Mapa agluma coisa" modal-dialog-class="modal-xl">
+    <Modal ref="modalMapa" title="Mapa dos trechos de todos os contratos" modal-dialog-class="modal-xl">
       <template #body>
-        <Map ref="mapaTrecho" height="300px" :manual-render="true" />
+        <Map ref="mapaTrecho" height="500px" :manual-render="true" />
       </template>
     </Modal>
 
