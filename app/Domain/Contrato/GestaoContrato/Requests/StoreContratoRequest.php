@@ -23,7 +23,6 @@ class StoreContratoRequest extends FormRequest
       'modalidade' => 'required',
       'unidade_gestora' => 'required',
       'fiscal_contrato' => 'required',
-      'snv' => 'required',
       'preco_inicial' => 'required',
       'total_aditivo' => 'required',
       'total_reajuste' => 'required',

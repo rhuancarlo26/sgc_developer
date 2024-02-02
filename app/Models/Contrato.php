@@ -40,7 +40,7 @@ class Contrato extends Model
                     $uf ? array_push($ufs, trim($uf)) : '';
                 }
 
-                return array_unique($ufs);
+                return implode(",", array_unique($ufs));
             }
         );
     }
@@ -57,7 +57,7 @@ class Contrato extends Model
                     $rodovia ? array_push($rodovias, trim($rodovia)) : '';
                 }
 
-                return array_unique($rodovias);
+                return implode(",", array_unique($rodovias));
             }
         );
     }
