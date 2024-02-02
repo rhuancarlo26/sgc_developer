@@ -232,9 +232,9 @@ const salvarTrecho = () => {
 
 const limparTrecho = () => {
     form_trecho.uf = {},
-        form_trecho.km_inicial = {},
-        form_trecho.km_final = {},
-        form_trecho.trecho_tipo = {}
+        form_trecho.km_inicial = null,
+        form_trecho.km_final = null,
+        form_trecho.trecho_tipo = null
 }
 
 const editarTrecho = (trecho) => {
