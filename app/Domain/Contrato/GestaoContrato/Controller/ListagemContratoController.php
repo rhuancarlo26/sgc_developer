@@ -25,7 +25,7 @@ class ListagemContratoController extends Controller
                 ->where('tipo_id', $tipo->id)
                 ->paginate()
                 ->appends($searchParams),
-            'tipo' => $tipo
+            'tipo' => $tipo,
         ]);
     }
 }
