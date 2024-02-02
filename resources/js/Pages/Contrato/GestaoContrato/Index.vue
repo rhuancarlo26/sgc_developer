@@ -98,6 +98,10 @@ const modalTechoMap = (contrato, trecho) => {
   `;
 }
 
+const formatarCnpj = (cnpj) => {
+    return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+}
+
 </script>
 
 <template>
@@ -160,7 +164,7 @@ const modalTechoMap = (contrato, trecho) => {
                         }}</span></p>
                         </td>
                         <td>{{ item.numero_contrato }}</td>
-                        <td>{{ item.cnpj }}</td>
+                        <td>{{ formatarCnpj(item.cnpj) }}</td>
                         <td>{{ item.contratada }}</td>
                         <td>{{ item.processo_sei }}</td>
                         <td>{{ item.situacao }}</td>
