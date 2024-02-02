@@ -219,7 +219,7 @@ const modalTechoMap = (contrato, trecho) => {
               <span class="col"><strong>Término da Vigência: </strong>{{
                 dateTimeFormat(contratoClicado.data_termino_vigencia ?? null, { dateStyle: 'short', timeStyle: 'short' })
               }}</span>
-              <span class="col"><strong>Situação: </strong>{{ contratoClicado.situacao?.nome }}</span>
+              <span class="col"><strong>Situação: </strong>{{ contratoClicado.situacao }}</span>
             </div>
           </div>
 
