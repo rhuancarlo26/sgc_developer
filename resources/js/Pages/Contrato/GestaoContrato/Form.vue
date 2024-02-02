@@ -15,6 +15,7 @@ import { IconPencil } from "@tabler/icons-vue";
 import { IconMapPin } from "@tabler/icons-vue";
 import { onMounted } from "vue";
 import { IconX } from "@tabler/icons-vue";
+import { IconDoorExit } from "@tabler/icons-vue";
 
 const props = defineProps({
   ufs: {
@@ -236,11 +237,15 @@ const limparFormTrecho = () => {
   <AuthenticatedLayout>
 
     <template #header>
-      <div class="w-100 d-flex justify-content-between">
+      <div class="w-100 d-flex justify-content-between align-self-center">
         <Breadcrumb :links="[
           { route: route('contratos.gestao.listagem', tipo.id), label: 'Gestão de Contratos' },
           { route: '#', label: 'Formulário' }
         ]" />
+        <Link class="btn btn-info" :href="route('contratos.gestao.listagem', tipo.id)">
+        <IconDoorExit class="me-2" />
+        Voltar
+        </Link>
       </div>
     </template>
 
