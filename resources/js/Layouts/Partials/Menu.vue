@@ -1,6 +1,13 @@
 <script setup>
 
-import {IconClipboardList, IconLayoutDashboard} from "@tabler/icons-vue"
+import {
+    IconClipboardList,
+    IconLayoutDashboard,
+    IconFileCheck,
+    IconFileCertificate,
+    IconWorld
+} from "@tabler/icons-vue"
+
 import NavLink from "@/Components/NavLink.vue";
 import NavDropdown from "@/Components/NavDropdown.vue";
 import NavDropdownLink from "@/Components/NavDropdownLink.vue";
@@ -17,31 +24,45 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                             <ul class="navbar-nav">
 
                                 <!-- Dashboard -->
-                                <NavLink
-                                    route-name="dashboard"
-                                    title="Dashboard"
-                                    :icon="IconLayoutDashboard"/>
+                                <NavLink route-name="dashboard" title="Dashboard" :icon="IconLayoutDashboard" />
 
-                                <!-- Cadastros -->
-                                <NavDropdown
-                                    prefix="cadastros.*"
-                                    title="Cadastros"
-                                    :icon="IconClipboardList">
+                                <!-- Contratos -->
+                                <NavDropdown prefix="contratos.*" title="Contratos" :icon="IconLayoutDashboard">
 
-                                    <!-- Usuários -->
-                                    <NavDropdownLink
-                                        route-name="cadastros.usuarios.listagem"
-                                        active-on-route-prefix="cadastros.usuarios.*"
-                                        title="Usuários"/>
+                                    <!-- Gestão Ambiental -->
+                                    <NavDropdownLink route-name="contratos.gestao.listagem" param-name="tipo"
+                                        route-param="1" active-on-route-prefix="contratos.gestao.*"
+                                        title="Gestão Ambiental" />
 
-                                    <!-- Perfis -->
-                                    <NavDropdownLink
-                                        route-name="cadastros.perfis.listagem"
-                                        active-on-route-prefix="cadastros.perfis.*"
-                                        title="Perfis"/>
+                                    <!-- Estudo Ambiental -->
+                                    <NavDropdownLink route-name="contratos.gestao.listagem" param-name="tipo"
+                                        route-param="2" active-on-route-prefix="contratos.gestao.*"
+                                        title="Estudo Ambiental" />
+
+                                    <!-- Regularização Ambiental -->
+                                    <NavDropdownLink route-name="contratos.gestao.listagem" param-name="tipo"
+                                        route-param="3" active-on-route-prefix="contratos.gestao.*"
+                                        title="Regularização Ambiental" />
 
                                 </NavDropdown>
 
+                                <!-- Licenças -->
+                                <NavLink route-name="licencas" title="Licenças" :icon="IconFileCheck" />
+
+                                <!-- Ambiente Geo -->
+                                <NavLink route-name="ambienteGeo" title="Ambiente Geo" :icon="IconWorld" />
+
+                                <!-- Cadastros -->
+                                <NavDropdown prefix="cadastros.*" title="Cadastros" :icon="IconClipboardList">
+
+                                    <!-- Usuários -->
+                                    <NavDropdownLink route-name="cadastros.usuarios.listagem"
+                                        active-on-route-prefix="cadastros.usuarios.*" title="Usuários" />
+
+                                    <!-- Perfis -->
+                                    <NavDropdownLink route-name="cadastros.perfis.listagem"
+                                        active-on-route-prefix="cadastros.perfis.*" title="Perfis" />
+                                </NavDropdown>
                             </ul>
                         </div>
                     </div>
