@@ -25,6 +25,7 @@
         "maska": "^2.1.11",
         "sweetalert2": "^11.10.1",
         "v-mask": "^2.3.0",
+        "vue-select": "^4.0.0-beta.6",
         "vue-toastification": "^2.0.0-rc.5"
     }
 }
