@@ -121,23 +121,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Gestão de Contrato
             Route::prefix('gestao')->group(function () {
 
-                Route::get('/', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
+                Route::get('/{tipo}', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
                     ->name('contratos.gestao.listagem');
-                Route::get('/create/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController::class, 'create'])
+                Route::get('/create/{tipo}/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController::class, 'create'])
                     ->name('contratos.gestao.create');
                 Route::post('/store', [App\Domain\Contrato\GestaoContrato\Controller\StoreContratoController::class, 'store'])
                     ->name('contratos.gestao.store');
                 Route::patch('/atualizar/{contrato}', [App\Domain\Contrato\GestaoContrato\Controller\UpdateContratoController::class, 'update'])
                     ->name('contratos.gestao.atualizar');
-                Route::delete('/delete/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoController::class, 'destroy'])
+                Route::get('/delete/{contrato}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoController::class, 'destroy'])
                     ->name('contratos.gestao.delete');
                 Route::get('/excel', [App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController::class, 'excelExport'])
                     ->name('contratos.gestao.excel_export');
                 Route::post('/get_coordenada', [App\Domain\Contrato\GestaoContrato\Controller\GetCoordenadaController::class, 'getCoordenada'])
                     ->name('contratos.gestao.get_coordenada');
-                Route::post('/store_trecho', [App\Domain\Contrato\GestaoContrato\Controller\StoreTrechoContratoController::class, 'storeTrecho'])
+                Route::post('/get_geo_json', [App\Domain\Contrato\GestaoContrato\Controller\GetGeoJsonController::class, 'getGeoJson'])
+                    ->name('contratos.gestao.get_geo_json');
+                Route::post('/store_trecho', [App\Domain\Contrato\GestaoContrato\Controller\StoreContratoTrechoController::class, 'storeTrecho'])
                     ->name('contratos.gestao.store_trecho');
-                Route::delete('/delete_trecho/{trecho?}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyTrechoContratoController::class, 'destroyTrecho'])
+                Route::patch('/atualizar_trecho/{trecho}', [App\Domain\Contrato\GestaoContrato\Controller\UpdateContratoTrechoController::class, 'updateTrecho'])
+                    ->name('contratos.gestao.update_trecho');
+                Route::delete('/delete_trecho/{tipo}/{trecho}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoTrechoController::class, 'destroyTrecho'])
                     ->name('contratos.gestao.delete_trecho');
             });
         });

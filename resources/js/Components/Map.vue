@@ -28,19 +28,21 @@ onMounted(() => {
 });
 
 const renderMapa = () => {
-  // Renderiza Mapa vazio
-  map = L.map(mapContainer.value, { renderer: L.canvas() }).setView(
-    ["-10.6007767", "-63.6037797"],
-    4.5
-  );
+  if (!map) {
+    // Renderiza Mapa vazio
+    map = L.map(mapContainer.value, { renderer: L.canvas() }).setView(
+      ["-10.6007767", "-63.6037797"],
+      4.5
+    );
 
-  // Adiciona Tiles do OpenStreetMap
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 18,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-    id: "mapbox.streets",
-    fadeAnimation: true,
-  }).addTo(map);
+    // Adiciona Tiles do OpenStreetMap
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+      id: "mapbox.streets",
+      fadeAnimation: true,
+    }).addTo(map);
+  }
 }
 
 // Caso poupupAndEvent seja true. Linestring array vai ter [0] como coordenadas e [1] como texto do popup,
