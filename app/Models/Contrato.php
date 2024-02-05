@@ -23,11 +23,6 @@ class Contrato extends Model
         return $this->belongsTo(ContratoTipo::class, 'tipo_id');
     }
 
-    public function situacao(): BelongsTo
-    {
-        return $this->belongsTo(ContratoSituacao::class, 'situacao_id');
-    }
-
     public function trechos(): HasMany
     {
         return $this->hasMany(contratoTrecho::class, 'contrato_id');
@@ -45,7 +40,7 @@ class Contrato extends Model
                     $uf ? array_push($ufs, trim($uf)) : '';
                 }
 
-                return array_unique($ufs);
+                return implode(",", array_unique($ufs));
             }
         );
     }
@@ -62,7 +57,7 @@ class Contrato extends Model
                     $rodovia ? array_push($rodovias, trim($rodovia)) : '';
                 }
 
-                return array_unique($rodovias);
+                return implode(",", array_unique($rodovias));
             }
         );
     }
