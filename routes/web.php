@@ -123,7 +123,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
                 Route::get('/{tipo}', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
                     ->name('contratos.gestao.listagem');
-                Route::get('/create/{tipo}/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController::class, 'create'])
+                Route::get('/create/{tipo?}/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController::class, 'create'])
                     ->name('contratos.gestao.create');
                 Route::post('/store', [App\Domain\Contrato\GestaoContrato\Controller\StoreContratoController::class, 'store'])
                     ->name('contratos.gestao.store');
