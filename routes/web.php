@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+// Licença
+use App\Domain\Licenca\Controller\CreateLicencaController;
+use App\Domain\Licenca\Controller\ListagemLicencaController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -66,12 +70,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
         // Licenças
-        Route::get('/licencas', fn () => Inertia::render('Licencas'))
-            ->name('licencas');
+        Route::prefix('licenca')->group(function () {
+            Route::get('/', [ListagemLicencaController::class, 'index'])->name('licenca.index');
+            Route::get('/create', [CreateLicencaController::class, 'index'])->name('licenca.create');
+        });
 
         // Ambiente Geo
-        Route::get('/ambienteGeo', fn () => Inertia::render('AmbienteGeo'))
-            ->name('ambienteGeo');
+        Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))->name('ambienteGeo');
 
         // Cadastros
         Route::prefix('cadastros')->group(function () {
@@ -118,7 +123,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
                 Route::get('/{tipo}', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
                     ->name('contratos.gestao.listagem');
-                Route::get('/create/{tipo}/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController::class, 'create'])
+                Route::get('/create/{tipo?}/{contrato?}', [App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController::class, 'create'])
                     ->name('contratos.gestao.create');
                 Route::post('/store', [App\Domain\Contrato\GestaoContrato\Controller\StoreContratoController::class, 'store'])
                     ->name('contratos.gestao.store');
