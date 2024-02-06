@@ -47,7 +47,7 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                 </NavDropdown>
 
                                 <!-- Licenças -->
-                                <NavLink route-name="licencas" title="Licenças" :icon="IconFileCheck" />
+                                <NavLink route-name="licenca.index" title="Licenças" :icon="IconFileCheck" />
 
                                 <!-- Ambiente Geo -->
                                 <NavLink route-name="ambienteGeo" title="Ambiente Geo" :icon="IconWorld" />

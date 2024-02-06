@@ -6,7 +6,7 @@ import '@tabler/core/dist/js/tabler.min.js';
 </script>
 
 <template>
-    <div class="d-flex flex-column guest">
+    <div class="d-flex flex-column guest container-auth">
         <div class="page page-center">
             <div class="container container-tight py-4">
                 <div class="text-center">
@@ -26,7 +26,14 @@ import '@tabler/core/dist/js/tabler.min.js';
 </template>
 
 <style scoped>
+.container-auth {
+    background-image: url('/img/background/bg_login.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
+}
 .page {
     min-height: 90vh !important
 }
+
 </style>
