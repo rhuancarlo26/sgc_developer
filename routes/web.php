@@ -9,8 +9,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Licença
-use App\Domain\Licenca\Controller\CreateLicencaController;
 use App\Domain\Licenca\Controller\ListagemLicencaController;
+use App\Domain\Licenca\Controller\CreateLicencaController;
+use App\Domain\Licenca\Controller\StoreLicencaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,26 +55,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Dashboard (Home page)
         Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
             ->name('dashboard');
-
-
-        // Contratos
-        Route::prefix('contratos')->group(function () {
-
-            // Gestão
-            Route::prefix('gestao')->group(function () {
-
-                Route::get('/', [App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController::class, 'index'])
-                    ->name('contratos.gestao.listagem');
-                Route::get('/excel', [App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController::class, 'excelExport'])
-                    ->name('contratos.gestao.excel_export');
-            });
-        });
-
-        // Licenças
-        Route::prefix('licenca')->group(function () {
-            Route::get('/', [ListagemLicencaController::class, 'index'])->name('licenca.index');
-            Route::get('/create', [CreateLicencaController::class, 'index'])->name('licenca.create');
-        });
 
         // Ambiente Geo
         Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))->name('ambienteGeo');
@@ -144,6 +125,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::delete('/delete_trecho/{tipo}/{trecho}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoTrechoController::class, 'destroyTrecho'])
                     ->name('contratos.gestao.delete_trecho');
             });
+        });
+
+        // Licenças
+        Route::prefix('licenca')->group(function () {
+            Route::get('/', [ListagemLicencaController::class, 'index'])->name('licenca.index');
+            Route::get('/create', [CreateLicencaController::class, 'index'])->name('licenca.create');
+            Route::post('/store', [StoreLicencaController::class, 'index'])->name('licenca.store');
         });
 
 
