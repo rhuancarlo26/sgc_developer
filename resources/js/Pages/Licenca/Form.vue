@@ -26,63 +26,10 @@
                         <!-- Tipo de Contrato: -->
                         <div class="col-4">
                             <InputLabel value="Tipo de Contrato:" for="tipo" />
-                            <select name="tipo" id="tipo" class="form-control" v-model="form.tipo">
-                                <option value="1">
-                                    AA - Autorização Ambiental
-                                </option>
-                                <option value="2">
-                                    AFF - Autorização Ambiental de Funcionamento
-                                </option>
-                                <option value="3">
-                                    ASV - Autorização de Supressão de Vegetação
-                                </option>
-                                <option value="4">
-                                    LAR - Licença Ambiental de Regularização
-                                </option>
-                                <option value="5">
-                                    LAU - Licença Ambiental Única
-                                </option>
-                                <option value="6">
-                                    LI - Licença de Instalação
-                                </option>
-                                <option value="7">
-                                    LIO - Licença de Instalação e Operação
-                                </option>
-                                <option value="8">
-                                    LP - Licença Prévia
-                                </option>
-                                <option value="9">
-                                    LIP - Licença Prévia e de Instalação
-                                </option>
-                                <option value="10">
-                                    LO - Licença de Operação
-                                </option>
-                                <option value="11">
-                                    AAP - Autorização Ambiental Preliminar
-                                </option>
-                                <option value="12">
-                                    ABio - Autorização de Captura, Coleta e Transporte de Material Biológico
-                                </option>
-                                <option value="13">
-                                    ACCT - Alterada para ABio
-                                </option>
-                                <option value="14">
-                                    DEC - DEC
-                                </option>
-                                <option value="15">
-                                    LA - Licença Ambiental
-                                </option>
-                                <option value="16">
-                                    LL - Licença LL
-                                </option>
-                                <option value="17">
-                                    LS - Licença Simplificada
-                                </option>
-                                <option value="18">
-                                    DL - Dispensa de Licenciamento
-                                </option>
-                                <option value="19">
-                                    AAP - Autorização Ambiental Preliminar
+                            <select name="tipo" id="tipo" class="form-select" v-model="form.tipo_id">
+                                <option :value="null"> -- SELECIONE -- </option>
+                                <option :value="tipo.id" v-for="tipo in tipos">
+                                    {{tipo.sigla}} - {{tipo.nome}}
                                 </option>
                             </select>
                             <InputError :message="form.errors.tipo" />
@@ -91,7 +38,8 @@
                         <!-- Renovação/Retificação: -->
                         <div class="col-4">
                             <InputLabel value="Renovação/Retificação:" for="status" />
-                            <select name="status" id="status" class="form-control" v-model="form.status">
+                            <select name="status" id="status" class="form-select" v-model="form.status">
+                                <option :value="null" disabled> Nova Licença </option>
                                 <option value="Renovada">
                                     Renovação
                                 </option>
@@ -102,36 +50,48 @@
                             <InputError :message="form.errors.status" />
                         </div>
                         
+                        <!-- Busca Licença: -->
+                        <div class="col-4" v-if="form.status != null">
+                            <InputLabel value="Busca Licença:" for="numero_licenca" />
+                            <div class="d-flex">
+                                <input type="text" id="numero_licenca" name="numero_licenca" class="form-control me-2" v-model="form.numero_licenca" />
+                                <button type="button" class="btn btn-primary" @click="bucaLicenca()">
+                                    <IconSearch/>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ROW 2 -->
+                    <div class="row mb-4">
                         <!-- Modal: -->
-                        <div class="col-4">
+                        <div class="col-3">
                             <InputLabel value="Modal:" for="modal" />
-                                <select name="modal" id="modal" class="form-control" v-model="form.modal">
+                                <select name="modal" id="modal" class="form-select" v-model="form.modal">
+                                    <option :value="null"> -- SELECIONE -- </option>
                                     <option value="1">Rodoviario</option>
                                     <option value="2">Aquaviario</option>
                                     <option value="3">Ferroviario</option>
                                 </select>
                             <InputError :message="form.errors.modal" />
                         </div>
-                    </div>
 
-                    <!-- ROW 2 -->
-                    <div class="row mb-4">
                         <!-- N° Licença: -->
-                        <div class="col-4">
+                        <div class="col-3">
                             <InputLabel value="N° Licença:" for="numero_licenca" />
                             <input type="text" id="numero_licenca" name="numero_licenca" class="form-control" v-model="form.numero_licenca" />
                             <InputError :message="form.errors.numero_licenca" />
                         </div>
                         
                         <!-- N° SEI: -->
-                        <div class="col-4">
+                        <div class="col-3">
                             <InputLabel value="N° SEI:" for="numero_sei" />
                             <input type="text" id="numero_sei" name="numero_sei" class="form-control" v-model="form.numero_sei" />
                             <InputError :message="form.errors.numero_sei" />
                         </div>
                         
                         <!-- Processo DNIT: -->
-                        <div class="col-4">
+                        <div class="col-3">
                             <InputLabel value="Processo DNIT:" for="processo_dnit" />
                             <input type="text" id="processo_dnit" name="processo_dnit" class="form-control" v-model="form.processo_dnit" />
                             <InputError :message="form.errors.processo_dnit" />
@@ -198,21 +158,27 @@
                         <!-- Dias para Renovação: -->
                         <div class="col-3">
                             <InputLabel value="Dias para Renovação:" for="dias_renovacao" />
-                            <input type="text" id="dias_renovacao" name="dias_renovacao" class="form-control" v-model="form.dias_renovacao" />
+                                <select name="dias_renovacao" id="dias_renovacao" class="form-select" v-model="form.dias_renovacao">
+                                    <option :value="null"> -- SELECIONE -- </option>
+                                    <option value="30">30</option>
+                                    <option value="60">60</option>
+                                    <option value="90">90</option>
+                                    <option value="120">120</option>
+                                </select>
                             <InputError :message="form.errors.dias_renovacao" />
                         </div>
 
                         <!-- Para Requerimento: -->
                         <div class="col-3">
-                            <InputLabel value="Para Requerimento:" for="requerimento" />
-                            <input type="text" id="requerimento" name="requerimento" class="form-control" v-model="form.requerimento" />
+                            <InputLabel value="Para Requerimento:" for="requerimento"/>
+                            <input type="date" id="requerimento" name="requerimento" class="form-control" v-model="form.requerimento" />
                             <InputError :message="form.errors.requerimento" />
                         </div>
 
                         <!-- Para Renovação: -->
                         <div class="col-3">
-                            <InputLabel value="Para Renovação:" for="renovacao" />
-                            <input type="text" id="renovacao" name="renovacao" class="form-control" v-model="form.renovacao" />
+                            <InputLabel value="Para Renovação:" for="renovacao"/>
+                            <input type="date" id="renovacao" name="renovacao" class="form-control" v-model="form.renovacao" />
                             <InputError :message="form.errors.renovacao" />
                         </div>
                     </div>
@@ -238,6 +204,44 @@
                     </div>
 
                     <!-- ROW 8 -->
+                    <div class="row mb-4" v-if="form.tipo == 3">
+                        <!-- Área em APP(ha): -->
+                        <div class="col-2">
+                            <InputLabel value="Área em APP(ha):" for="in_app" />
+                            <input type="text" id="in_app" name="in_app" class="form-control" v-model="form.in_app" />
+                            <InputError :message="form.errors.in_app" />
+                        </div>
+
+                        <!-- Área fora APP(ha): -->
+                        <div class="col-2">
+                            <InputLabel value="Área fora APP(ha):" for="out_app" />
+                            <input type="text" id="out_app" name="out_app" class="form-control" v-model="form.out_app" />
+                            <InputError :message="form.errors.out_app" />
+                        </div>
+
+                        <!-- Área Total (ha): -->
+                        <div class="col-2">
+                            <InputLabel value="Área fora APP(ha):" for="total_app" />
+                            <input type="text" id="total_app" name="total_app" class="form-control" v-model="form.total_app" />
+                            <InputError :message="form.errors.total_app" />
+                        </div>
+
+                        <!-- Volume(m³): -->
+                        <div class="col-2">
+                            <InputLabel value="Volume(m³):" for="volume" />
+                            <input type="text" id="volume" name="volume" class="form-control" v-model="form.volume" />
+                            <InputError :message="form.errors.volume" />
+                        </div>
+     
+                        <!-- Sinaflor: -->
+                        <div class="col-4">
+                            <InputLabel value="Sinaflor:" for="sinaflor" />
+                            <input type="text" id="sinaflor" name="sinaflor" class="form-control" v-model="form.sinaflor" />
+                            <InputError :message="form.errors.sinaflor" />
+                        </div>
+                    </div>
+
+                    <!-- ROW # -->
                     <div class="row mb-4">
                         <!-- Data da Publicação: -->
                         <div class="col-3">
@@ -251,10 +255,10 @@
                 <!-- CARD-FOOTER -->
                 <div class="card-footer">
                     <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-secondary me-2" @click="salvarContrato()" :disabled="form.processing">
+                        <button type="button" class="btn btn-secondary me-2" @click="salvarContrato()">
                             <IconArrowLeft class="me-2"/> Voltar
                         </button>
-                        <button type="button" class="btn btn-primary" @click="salvarContrato()" :disabled="form.processing">
+                        <button type="button" class="btn btn-primary" @click="salvarLicenca()">
                             <IconDeviceFloppy class="me-2"/> Salvar
                         </button>
                     </div>
@@ -265,6 +269,7 @@
 </template>
 
 <script setup>
+    // IMPORTS
     import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
     import { Head, useForm } from "@inertiajs/vue3";
     import { IconDeviceFloppy, IconArrowLeft } from "@tabler/icons-vue";
@@ -272,12 +277,66 @@
     import InputLabel from "@/Components/InputLabel.vue";
     import InputError from "@/Components/InputError.vue";
     import Breadcrumb from "@/Components/Breadcrumb.vue";
+import { IconSearch } from "@tabler/icons-vue";
 
+    // PROPS
     const props = defineProps({
-        licencas: Object
-    })
+        tipos: {
+            type: Array
+        },
+    });
 
-    const form = useForm({});
+    // FORM
+    const form = useForm({
+        contratos_id: 1,
+        obs_renovacao: 'teste',
+        arquivo_licenca: 'teste',
+        file_shape: 'teste',
+        nome_file_shape: 'teste',
+        local_shape: 'teste',
+        arquivo_requerimento: 'teste',
+        geo_json: 'teste',
+
+        
+        tipo_id: null,
+        status: null,
+        modal: null,
+        numero_licenca: null,
+        numero_sei: null,
+        processo_dnit: null,
+        data_emissao: null,
+        vencimento: null,
+        emissor: null,
+        empreendimento: null,
+        inicio_subtrecho: null,
+        fim_subtrecho: null,
+        extensao: null,
+        dias_renovacao: null,
+        requerimento: null,
+        renovacao: null,
+        fiscal: null,
+        observacoes: null,
+        data_publicacao: null,
+
+        // form.tipo == 3
+        in_app: null,
+        out_app: null,
+        total_app: null,
+        volume: null,
+        sinaflor: null,
+
+        ...props.licenca
+    });
+    
+    // FUNCTIONS
+    const salvarLicenca = () => {
+        form.transform((data) => Object.assign({}, data))
+
+        console.log(form);
+        form.post(route('licenca.store'));
+    }
+
+    // OTHERS
 </script>
 
 <style scoped>
