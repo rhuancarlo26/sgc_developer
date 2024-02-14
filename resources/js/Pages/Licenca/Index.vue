@@ -47,7 +47,7 @@
                         </td>
                         <!-- Tipo -->
                         <td>
-                            {{ item.tipo }}
+                            {{item.tipo.sigla}} - {{item.tipo.nome}}
                         </td>
                         <!-- Nº Licença -->
                         <td>
@@ -63,43 +63,28 @@
                         </td>
                         <!-- Data da Emissão -->
                         <td>
-                            {{ item.data_emissao }}
+                            {{ dateTimeFormat(item.data_emissao) }}
                         </td>
                         <!-- Status -->
                         <td>
-                            <a href="javascript:void(0)" v-if="item.novo_ver_id" @click="openNotificacao(i)">
-                                <span class="badge outline-badge-info">
+                            <a href="javascript:void(0)">
+                                <span class="badge text-bg-success">
+                                    Vigente
+                                </span>
+                                <span class="badge text-bg-warning">
+                                    Em Análise
+                                </span>
+                                <span class="badge text-bg-danger">
+                                    Vencida
+                                </span>
+                                <span class="badge text-bg-info">
                                     Não Vigente
                                 </span>
                             </a>
-                            <span v-else-if="item.requerimento_id" class="badge outline-badge-secondary">
-                                Em Análise
-                            </span>
-                            <span v-else-if="dtAlerta(item.vencimento) <= 149" class="badge outline-badge-danger">
-                                Vencida
-                            </span>
-                            <span v-else="dtAlerta(item.vencimento)" class="badge outline-badge-success">
-                                Vigente
-                            </span>
                         </td>
                         <!-- Vencimento -->
                         <td>
-                            <a v-if="item.novo_ver_id">
-                            </a>
-                            <a v-else-if="dtAlerta(item.vencimento) <= 149" tabindex="0" class="bs-popover"
-                            :title="tituloPropover(item.numero_licenca)" data-container="body" data-trigger="hover"
-                            data-placement="left" :data-content="textoPropover(item.vencimento)">
-                                <span class=" badge badge-danger mb-2 me-4">
-                                    {{item.vencimento_f}}
-                                </span>
-                            </a>
-                            <a v-else tabindex="0" class="bs-popover" :title="tituloPropover(item.numero_licenca)"
-                            data-container="body" data-trigger="hover" data-placement="left"
-                            :data-content="textoPropover(item.vencimento)">
-                                <span class="badge badge-success mb-2 me-4">
-                                    {{ item.vencimento_f}}
-                                </span>
-                            </a>
+                            {{ dateTimeFormat(item.vencimento) }}
                         </td>
                         <!-- Processo DNIT -->
                         <td>
@@ -134,6 +119,7 @@
     import Breadcrumb from "@/Components/Breadcrumb.vue";
     import ModelSearchForm from "@/Components/ModelSearchForm.vue";
     import { IconDots, IconShip, IconCar, IconTrain } from "@tabler/icons-vue";
+    import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 
     const props = defineProps({
         licencas: Object
