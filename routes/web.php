@@ -13,6 +13,9 @@ use App\Domain\Licenca\Controller\ListagemLicencaController;
 use App\Domain\Licenca\Controller\CreateLicencaController;
 use App\Domain\Licenca\Controller\StoreLicencaController;
 
+// Licença/Condicionante
+use App\Domain\Licenca\Condicionante\Controller\IndexCondicionanteController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -57,7 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('dashboard');
 
         // Ambiente Geo
-        Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))->name('ambienteGeo');
+        Route::get('/ambienteGeo', fn () => Inertia::render('AmbienteGeo'))->name('ambienteGeo');
 
         // Cadastros
         Route::prefix('cadastros')->group(function () {
@@ -132,6 +135,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [ListagemLicencaController::class, 'index'])->name('licenca.index');
             Route::get('/create', [CreateLicencaController::class, 'index'])->name('licenca.create');
             Route::post('/store', [StoreLicencaController::class, 'index'])->name('licenca.store');
+
+            Route::prefix('condicionante')->group(function () {
+                Route::get('/{licenca}', [IndexCondicionanteController::class, 'index'])->name('licenca.condicionante.index');
+            });
         });
 
 
