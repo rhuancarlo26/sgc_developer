@@ -5,16 +5,13 @@
 
         <template #header>
             <div class="w-100 d-flex justify-content-between">
-                <Breadcrumb 
-                    class="align-self-center" 
-                    :links="[ { route: '#', label: 'Gestão de Licenças' } ]" 
-                    />
+                <Breadcrumb class="align-self-center" :links="[{ route: '#', label: 'Gestão de Licenças' }]" />
                 <div class="container-buttons">
                     <Link class="btn btn-success me-2" :href="route('licenca.create')">
-                        Cadastrar Licenças
+                    Cadastrar Licenças
                     </Link>
                     <Link class="btn btn-success me-2" :href="route('contratos.gestao.create')">
-                        Licenças Arquivos
+                    Licenças Arquivos
                     </Link>
                     <button type="button" class="btn btn-success">
                         Mapa das Licenças
@@ -35,19 +32,20 @@
             }" />
 
             <!-- Listagem-->
-            <Table :columns="['Modal', 'Tipo', 'Nº Licença', 'Empreendimento', 'Emissor', 'Data da Emissão', 'Status', 'Vencimento', 'Processo DNIT', 'Ação']"
+            <Table
+                :columns="['Modal', 'Tipo', 'Nº Licença', 'Empreendimento', 'Emissor', 'Data da Emissão', 'Status', 'Vencimento', 'Processo DNIT', 'Ação']"
                 :records="licencas" table-class="table-hover" :excelRoute="route('contratos.gestao.excel_export')">
                 <template #body="{ item }">
                     <tr class="cursor-pointer" @click="router.get(route('contratos.gestao.create', item.id))">
                         <!-- Modal -->
                         <td>
-                            <IconCar    v-if="item.modal == 1"/>
-                            <IconShip   v-if="item.modal == 2"/>
-                            <IconTrain  v-if="item.modal == 3"/>
+                            <IconCar v-if="item.modal == 1" />
+                            <IconShip v-if="item.modal == 2" />
+                            <IconTrain v-if="item.modal == 3" />
                         </td>
                         <!-- Tipo -->
                         <td>
-                            {{item.tipo.sigla}} - {{item.tipo.nome}}
+                            {{ item.tipo.sigla }} - {{ item.tipo.nome }}
                         </td>
                         <!-- Nº Licença -->
                         <td>
@@ -101,6 +99,9 @@
                                     <a class="dropdown-item" href="#">
                                         Visualizar
                                     </a>
+                                    <a class="dropdown-item" :href="route('licenca.condicionante.index', item.id)">
+                                        Condicionante
+                                    </a>
                                 </div>
                             </span>
 
@@ -113,21 +114,22 @@
 </template>
 
 <script setup>
-    import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-    import { Head, Link, router } from "@inertiajs/vue3";
-    import Table from '@/Components/Table.vue';
-    import Breadcrumb from "@/Components/Breadcrumb.vue";
-    import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-    import { IconDots, IconShip, IconCar, IconTrain } from "@tabler/icons-vue";
-    import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { Head, Link, router } from "@inertiajs/vue3";
+import Table from '@/Components/Table.vue';
+import Breadcrumb from "@/Components/Breadcrumb.vue";
+import ModelSearchForm from "@/Components/ModelSearchForm.vue";
+import { IconDots, IconShip, IconCar, IconTrain } from "@tabler/icons-vue";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 
-    const props = defineProps({
-        licencas: Object
-    })
+const props = defineProps({
+    licencas: Object
+})
 </script>
 
 <style scoped>
-    .container-buttons a, .container-buttons button{
-        margin: 0px 5px;
-    }
+.container-buttons a,
+.container-buttons button {
+    margin: 0px 5px;
+}
 </style>
