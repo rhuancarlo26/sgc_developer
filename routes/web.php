@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use App\Domain\Licenca\Controller\ListagemLicencaController;
 use App\Domain\Licenca\Controller\CreateLicencaController;
 use App\Domain\Licenca\Controller\StoreLicencaController;
+use App\Domain\Licenca\Controller\UpdateLicencaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -129,9 +130,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Licenças
         Route::prefix('licenca')->group(function () {
-            Route::get('/', [ListagemLicencaController::class, 'index'])->name('licenca.index');
-            Route::get('/create', [CreateLicencaController::class, 'index'])->name('licenca.create');
-            Route::post('/store', [StoreLicencaController::class, 'index'])->name('licenca.store');
+            Route::get('/',                     [ListagemLicencaController::class,  'index'])->name('licenca.index');
+            Route::get('/create/{licenca?}',    [CreateLicencaController::class,    'index'])->name('licenca.create');
+            Route::post('/store',               [StoreLicencaController::class,     'index'])->name('licenca.store');
+            Route::patch('/update/{licenca}',   [UpdateLicencaController::class,    'index'])->name('licenca.update');
         });
 
 
