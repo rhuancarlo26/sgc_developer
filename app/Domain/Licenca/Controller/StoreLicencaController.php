@@ -2,7 +2,7 @@
 
 namespace App\Domain\Licenca\Controller;
 
-use App\Domain\Licenca\Request\StoreLicencaRequest;
+use App\Domain\Licenca\Requests\StoreLicencaRequest;
 use App\Models\Licenca;
 use App\Models\LicencaTipo;
 use App\Shared\Http\Controllers\Controller;
