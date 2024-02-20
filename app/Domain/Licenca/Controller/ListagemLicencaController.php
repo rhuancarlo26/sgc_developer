@@ -21,7 +21,7 @@ class ListagemLicencaController extends Controller
         return Inertia::render('Licenca/Index', [
             'licencas' => $this->listagemLicenca
                 ->search(...$searchParams)
-                ->with('tipo')
+                ->with(['tipo', 'requerimentos'])
                 ->paginate()
                 ->appends($searchParams),
         ]);
