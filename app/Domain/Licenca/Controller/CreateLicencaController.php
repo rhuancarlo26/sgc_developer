@@ -2,23 +2,24 @@
 
 namespace App\Domain\Licenca\Controller;
 
+use App\Domain\Licenca\Services\LicencaTipoService;
 use App\Shared\Http\Controllers\Controller;
 use App\Models\Licenca;
-use App\Models\LicencaTipo;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class CreateLicencaController extends Controller
 {
-    public function index(Licenca|null $licenca)
+    public function __construct(private readonly LicencaTipoService $licencaTipoService)
     {
-        $tipos = Cache::rememberForever('licenca_tipo', function () {
-            return LicencaTipo::select('id', 'sigla', 'nome')->get();
-        });
-        
-        return Inertia::render('Licenca/Form', [
-            'tipos'     => $tipos,
-            'licenca'   => $licenca
+    }
+
+    public function index(Licenca|null $licenca): \Inertia\Response
+    {
+        $tipos = $this->licencaTipoService->getLicencaTipo();
+
+        return Inertia::render(component: 'Licenca/Form', props: [
+            'tipos'   => $tipos,
+            'licenca' => $licenca
         ]);
     }
 }
