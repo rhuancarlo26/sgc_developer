@@ -158,7 +158,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::prefix('requerimento')->group(function () {
                 Route::post('/store', [StoreRequerimentoController::class, 'store'])->name('licenca.requerimento.store');
                 Route::get('/visualizar/{requerimento}', [visualizarRequerimentoController::class, 'visualizar'])->name('licenca.requerimento.visualizar');
-                Route::get('/destroy/{requerimento}', [DestroyRequerimentoController::class, 'destroy'])->name('licenca.requerimento.destroy');
+                Route::delete('/destroy/{requerimento}', [DestroyRequerimentoController::class, 'destroy'])->name('licenca.requerimento.destroy');
             });
         });
 

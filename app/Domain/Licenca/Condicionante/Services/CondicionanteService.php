@@ -62,8 +62,9 @@ class CondicionanteService extends BaseModelService
 
         $this->modelClass::create($value);
       }
-    } catch (\Throwable $th) {
-      //throw $th;
+        return ['type' => 'success', 'content' => 'Condicionante alterado com sucesso!'];
+    } catch (\Exception $th) {
+        return ['type' => 'error', 'content' => $th->getMessage()];
     }
   }
 }

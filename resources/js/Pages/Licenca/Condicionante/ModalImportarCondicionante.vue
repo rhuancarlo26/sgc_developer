@@ -1,6 +1,6 @@
 <script setup>
 import Modal from "@/Components/Modal.vue";
-import { useForm } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 import { IconSearch } from "@tabler/icons-vue";
 import axios from "axios";
 import { ref } from "vue";
@@ -30,9 +30,11 @@ const buscarLicenca = () => {
 }
 
 const salvarImportacao = () => {
-  axios.post(route('licenca.condicionante.store_importacao'), { condicionantes: condicionantes.value, licenca: props.licenca }).then(r => {
-    modalImportarCondicionante.value.getBsModal().hide();
-  });
+  router.post(route('licenca.condicionante.store_importacao'), { condicionantes: condicionantes.value, licenca: props.licenca }, {
+    onSuccess: () => {
+      modalImportarCondicionante.value.getBsModal().hide();
+    }
+  })
 }
 
 defineExpose({ abrirModal });

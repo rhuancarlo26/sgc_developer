@@ -15,7 +15,7 @@ class StoreCondicionanteController extends Controller
 
   public function store(StoreCondicionanteRequest $request): RedirectResponse
   {
-    $response = $this->condicionanteService->store($request->except(['id']));
+    $response = $this->condicionanteService->store($request->all());
 
     return to_route('licenca.condicionante.index', ['licenca' => $request->licenca_id])->with('message', $response);
   }

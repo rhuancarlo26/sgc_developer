@@ -57,7 +57,9 @@ const editarCondicionante = (item) => {
     <div class="card card-body space-y-3">
       <!-- Pesquisa-->
       <ModelSearchForm :search-columns="{
-        'id': 'id'
+        'numero_condicionante': 'N° condicionante',
+        'decricao': 'Descrição',
+        'prazo': 'Prazo'
       }" />
 
       <!-- Listagem-->

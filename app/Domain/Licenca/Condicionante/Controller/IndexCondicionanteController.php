@@ -19,10 +19,10 @@ class IndexCondicionanteController extends Controller
   {
     $searchParams = $request->all('searchColumn', 'searchValue');
 
-    $condicionantes = $this->condicionanteService->listarCondicionantes($licenca->only(['id']), $searchParams);
+    $condicionantes = $this->condicionanteService->listarCondicionantes($licenca, $searchParams);
 
     return Inertia::render('Licenca/Condicionante/Index', [
-      'licenca' => $licenca->only(['id']),
+      'licenca' => $licenca,
       'condicionantes' => $condicionantes
     ]);
   }
