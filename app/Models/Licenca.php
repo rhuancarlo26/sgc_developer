@@ -16,10 +16,13 @@ class Licenca extends Model
 
     protected $guarded = ['id', 'created_at'];
 
-    // protected $appends = ['ufs', 'brs'];
-
     public function tipo(): BelongsTo
     {
         return $this->belongsTo(LicencaTipo::class, 'tipo_id', 'id');
+    }
+
+    public function condicionantes(): HasMany
+    {
+        return $this->hasMany(LicencaCondicionante::class, 'licenca_id');
     }
 }
