@@ -11,7 +11,6 @@ let arquivos = ref({});
 const modalRequerimento = ref();
 
 const abrirModal = (item) => {
-  console.log('item', item);
   licenca.value = item;
 
   modalRequerimento.value.getBsModal().show();
@@ -19,7 +18,19 @@ const abrirModal = (item) => {
 
 const salvarRequerimento = () => {
   router.post(route('licenca.requerimento.store'), { arquivos: arquivos.value, licenca_id: licenca.value.id }, {
-    preserveScroll: true
+    preserveScroll: true,
+    onSuccess: (r) => {
+      licenca.value.requerimentos = r.props.flash.message.requerimentos;
+    }
+  })
+}
+
+const excluirRequerimento = (requerimento_id, index) => {
+  router.delete(route('licenca.requerimento.destroy', requerimento_id), {
+    preserveScroll: true,
+    onSuccess: () => {
+      licenca.value.requerimentos.splice(index, 1);
+    }
   })
 }
 
@@ -43,7 +54,7 @@ defineExpose({ abrirModal });
         </div>
       </div>
       <div v-if="licenca?.requerimentos?.length" class="table-responsive">
-        <table width="100%" class="table table-hover non-hover">
+        <table class="table table-hover non-hover">
           <thead>
             <tr>
               <th>Nome</th>
@@ -51,7 +62,7 @@ defineExpose({ abrirModal });
             </tr>
           </thead>
           <tbody>
-            <tr v-for="requerimento in licenca.requerimentos" :key="requerimento.id">
+            <tr v-for="requerimento, index in licenca.requerimentos" :key="requerimento.id">
               <td>{{ requerimento.nome }}</td>
               <td>
                 <span class="dropdown">
@@ -64,7 +75,8 @@ defineExpose({ abrirModal });
                       :href="route('licenca.requerimento.visualizar', requerimento.id)">
                       Visualizar
                     </a>
-                    <a class="dropdown-item" :href="route('licenca.requerimento.destroy', requerimento.id)">
+                    <a @click="excluirRequerimento(requerimento.id, index)" class="dropdown-item"
+                      href="javascript:void(0)">
                       Excluir
                     </a>
                   </div>

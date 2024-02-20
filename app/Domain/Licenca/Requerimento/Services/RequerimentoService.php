@@ -31,7 +31,9 @@ class RequerimentoService extends BaseModelService
         }
       }
 
-      return ['type' => 'success', 'content' => 'Requerimentos cadastrados com sucesso!'];
+      $requerimentos = LicencaRequerimento::where('licenca_id', $licenca_id)->get();
+
+      return ['type' => 'success', 'content' => 'Requerimentos cadastrados com sucesso!', 'requerimentos' => $requerimentos];
     } catch (\Exception $th) {
       return ['type' => 'error', 'content' => $th->getMessage()];
     }

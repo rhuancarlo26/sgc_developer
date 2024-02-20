@@ -79,7 +79,6 @@ defineExpose({ abrirModal, editarCondicionante });
       </div>
     </template>
     <template #footer>
-      <button class="btn btn-secondary">Fechar</button>
       <button @click="salvarCondicionante()" class="btn btn-success">Salvar</button>
     </template>
   </Modal>
