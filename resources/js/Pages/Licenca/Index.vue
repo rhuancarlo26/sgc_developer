@@ -74,6 +74,7 @@
                                 <span class="badge text-bg-warning">
                                     Em Análise
                                 </span>
+                                <br>
                                 <span class="badge text-bg-danger">
                                     Vencida
                                 </span>
@@ -98,12 +99,14 @@
                                     <IconDots />
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end" style="">
-                                    <a class="dropdown-item" href="#">
+                                    <a @click="abrirVisualizarContrato(item)" class="dropdown-item" href="javascript:void(0)">
                                         Visualizar
+                                    </a>
+                                    <a class="dropdown-item" :href="route('licenca.create', item.id)">
+                                        Editar
                                     </a>
                                 </div>
                             </span>
-
                         </td>
                     </tr>
                 </template>
@@ -113,6 +116,7 @@
 </template>
 
 <script setup>
+    // IMPORTS
     import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
     import { Head, Link, router } from "@inertiajs/vue3";
     import Table from '@/Components/Table.vue';
@@ -120,10 +124,24 @@
     import ModelSearchForm from "@/Components/ModelSearchForm.vue";
     import { IconDots, IconShip, IconCar, IconTrain } from "@tabler/icons-vue";
     import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+    import axios from "axios";
 
+    // PROPS
     const props = defineProps({
         licencas: Object
     })
+
+    // FUNCTIONS
+    const editarLicenca = (id) => {
+        axios.patch(route('licenca.update', { licenca: id }))
+            .then(response => {
+                // Lógica após a edição
+                console.log("response: ", response)
+            })
+            .catch(error => {
+                console.error("Error editing license:", error);
+            });
+    }
 </script>
 
 <style scoped>

@@ -110,7 +110,8 @@
                         <!-- Vencimento: -->
                         <div class="col-3">
                             <InputLabel value="Vencimento:" for="vencimento"/>
-                            <input type="date" id="vencimento" name="vencimento" class="form-control" v-model="form.vencimento" />
+                            <input type="date" id="vencimento" name="vencimento" class="form-control" v-model="form.vencimento" 
+                            @change="atualizarDatasPrazos"/>
                             <InputError :message="form.errors.vencimento" />
                         </div>
 
@@ -151,14 +152,16 @@
                         <!-- Extensão: -->
                         <div class="col-3">
                             <InputLabel value="Extensão:" for="extensao" />
-                            <input type="text" id="extensao" name="extensao" class="form-control" v-model="form.extensao" />
+                            <input type="text" id="extensao" name="extensao" class="form-control" v-model="form.extensao" disabled readonly/>
                             <InputError :message="form.errors.extensao" />
                         </div>
 
                         <!-- Dias para Renovação: -->
                         <div class="col-3">
                             <InputLabel value="Dias para Renovação:" for="dias_renovacao" />
-                                <select name="dias_renovacao" id="dias_renovacao" class="form-select" v-model="form.dias_renovacao">
+                                <select name="dias_renovacao" id="dias_renovacao" class="form-select" 
+                                v-model="form.dias_renovacao" @change="atualizarDatasPrazos"
+                                :disabled="form.vencimento == null || form.vencimento == ''">
                                     <option :value="null"> -- SELECIONE -- </option>
                                     <option value="30">30</option>
                                     <option value="60">60</option>
@@ -168,17 +171,17 @@
                             <InputError :message="form.errors.dias_renovacao" />
                         </div>
 
-                        <!-- Para Requerimento: -->
+                        <!-- Prazo Final Para Requerimento: -->
                         <div class="col-3">
-                            <InputLabel value="Para Requerimento:" for="requerimento"/>
-                            <input type="date" id="requerimento" name="requerimento" class="form-control" v-model="form.requerimento" />
+                            <InputLabel value="Prazo Final Para Requerimento:" for="requerimento"/>
+                            <input type="date" id="requerimento" name="requerimento" class="form-control" v-model="form.requerimento" disabled readonly/>
                             <InputError :message="form.errors.requerimento" />
                         </div>
 
                         <!-- Para Renovação: -->
                         <div class="col-3">
                             <InputLabel value="Para Renovação:" for="renovacao"/>
-                            <input type="date" id="renovacao" name="renovacao" class="form-control" v-model="form.renovacao" />
+                            <input type="date" id="renovacao" name="renovacao" class="form-control" v-model="form.renovacao" disabled readonly/>
                             <InputError :message="form.errors.renovacao" />
                         </div>
                     </div>
@@ -204,7 +207,7 @@
                     </div>
 
                     <!-- ROW 8 -->
-                    <div class="row mb-4" v-if="form.tipo == 3">
+                    <div class="row mb-4" v-if="form.tipo_id == 3">
                         <!-- Área em APP(ha): -->
                         <div class="col-2">
                             <InputLabel value="Área em APP(ha):" for="in_app" />
@@ -221,7 +224,7 @@
 
                         <!-- Área Total (ha): -->
                         <div class="col-2">
-                            <InputLabel value="Área fora APP(ha):" for="total_app" />
+                            <InputLabel value="Área Total(ha):" for="total_app" />
                             <input type="text" id="total_app" name="total_app" class="form-control" v-model="form.total_app" />
                             <InputError :message="form.errors.total_app" />
                         </div>
@@ -258,8 +261,11 @@
                         <button type="button" class="btn btn-secondary me-2" @click="salvarContrato()">
                             <IconArrowLeft class="me-2"/> Voltar
                         </button>
-                        <button type="button" class="btn btn-primary" @click="salvarLicenca()">
+                        <button v-if="!licenca.id" type="button" class="btn btn-primary" @click="salvarLicenca()">
                             <IconDeviceFloppy class="me-2"/> Salvar
+                        </button>
+                        <button v-else type="button" class="btn btn-primary" @click="salvarLicenca()">
+                            <IconDeviceFloppy class="me-2"/> Editar
                         </button>
                     </div>
                 </div>
@@ -277,25 +283,31 @@
     import InputLabel from "@/Components/InputLabel.vue";
     import InputError from "@/Components/InputError.vue";
     import Breadcrumb from "@/Components/Breadcrumb.vue";
-import { IconSearch } from "@tabler/icons-vue";
+    import { IconSearch } from "@tabler/icons-vue";
 
     // PROPS
     const props = defineProps({
         tipos: {
             type: Array
         },
+        licenca: {
+            type: Array
+        },
     });
 
     // FORM
     const form = useForm({
-        contratos_id: 1,
-        obs_renovacao: 'teste',
-        arquivo_licenca: 'teste',
-        file_shape: 'teste',
-        nome_file_shape: 'teste',
-        local_shape: 'teste',
-        arquivo_requerimento: 'teste',
-        geo_json: 'teste',
+        // SEM REFERENCIAS POR ENQUANTO
+        obs_renovacao: null,
+        nome_file_shape: null,
+        local_shape: null,
+        arquivo_requerimento: null,
+        geo_json: null,
+        
+        // NULOS NA TABELA
+        file_shape: null,
+        arquivo_licenca: null,
+
 
         
         tipo_id: null,
@@ -332,8 +344,31 @@ import { IconSearch } from "@tabler/icons-vue";
     const salvarLicenca = () => {
         form.transform((data) => Object.assign({}, data))
 
-        console.log(form);
+        if (props.licenca.id) {
+            form.patch(route('licenca.update', props.licenca.id));
+
+            return;
+        }
+
         form.post(route('licenca.store'));
+    }
+
+    const atualizarDatasPrazos = () => {
+            const dataVencimento = form.vencimento;
+            const dias = parseInt(form.dias_renovacao);
+            const dataRequerimento = dias && dataVencimento ? calcularDataPrazos(dataVencimento, dias) : '';
+            const dataRenovacao = dias && dataVencimento ? calcularDataPrazos(dataRequerimento, 60) : '';
+            
+            form.requerimento = dataRequerimento
+            form.renovacao = dataRenovacao
+    }
+
+    const calcularDataPrazos = (data, dias) => {
+        const dataParam = new Date(data);
+        const newDate = new Date(dataParam.getTime() - dias * 24 * 60 * 60 * 1000);
+        const formatoData = newDate.toISOString().split('T')[0];
+
+        return formatoData;
     }
 
     // OTHERS
