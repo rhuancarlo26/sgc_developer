@@ -3,25 +3,19 @@
 namespace App\Domain\Licenca\Controller;
 
 use App\Domain\Licenca\Requests\StoreLicencaRequest;
-use App\Models\Licenca;
-use App\Models\LicencaTipo;
+use App\Domain\Licenca\Services\LicencaService;
 use App\Shared\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 
 class StoreLicencaController extends Controller
 {
-    public function index(StoreLicencaRequest $request)
+    public function __construct(private readonly LicencaService $listagemLicenca)
+    { }
+
+    public function index(StoreLicencaRequest $request): \Illuminate\Http\RedirectResponse
     {
-        if ($licenca = Licenca::create([
-            ...$request->all(),
-            'user_id' => Auth::user()->id,
-        ])) {
-            $tipos = Cache::rememberForever('licenca_tipo', fn () => LicencaTipo::all());
-            return to_route('licenca.create', ['licenca' => $licenca, 'tipos' => $tipos])->with('message', [
-                'type' => 'success',
-                'content' => "Licença criada com sucesso"
-            ]);
-        }
+        $parameters = $this->listagemLicenca->create(post: $request->validated());
+
+        return to_route(route: 'licenca.create', parameters: $parameters['licenca'])
+            ->with('message', $parameters['request']);
     }
 }
