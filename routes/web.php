@@ -15,6 +15,11 @@ use App\Domain\Licenca\Controller\StoreLicencaController;
 
 // Licença/Condicionante
 use App\Domain\Licenca\Condicionante\Controller\IndexCondicionanteController;
+use App\Domain\Licenca\Condicionante\Controller\StoreCondicionanteController;
+use App\Domain\Licenca\Condicionante\Controller\StoreImportacaoCondicionanteController;
+use App\Domain\Licenca\Condicionante\Controller\UpdateCondicionanteController;
+use App\Domain\Licenca\Condicionante\Controller\BuscarLicencaCondicionanteController;
+use App\Domain\Licenca\Condicionante\Controller\DestroyCondicionanteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -138,6 +143,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             Route::prefix('condicionante')->group(function () {
                 Route::get('/{licenca}', [IndexCondicionanteController::class, 'index'])->name('licenca.condicionante.index');
+                Route::post('/buscar_licenca', [BuscarLicencaCondicionanteController::class, 'buscarLicencaCondicionante'])->name('licenca.condicionante.buscar_licenca');
+                Route::post('/store', [StoreCondicionanteController::class, 'store'])->name('licenca.condicionante.store');
+                Route::post('/store_importacao', [StoreImportacaoCondicionanteController::class, 'storeImportacao'])->name('licenca.condicionante.store_importacao');
+                Route::patch('/update/{condicionante}', [UpdateCondicionanteController::class, 'update'])->name('licenca.condicionante.update');
+                Route::get('/destroy/{condicionante}', [DestroyCondicionanteController::class, 'destroy'])
+                    ->name('licenca.condicionante.destroy');
             });
         });
 
