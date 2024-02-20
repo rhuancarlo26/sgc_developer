@@ -20,6 +20,10 @@ use App\Domain\Licenca\Condicionante\Controller\StoreImportacaoCondicionanteCont
 use App\Domain\Licenca\Condicionante\Controller\UpdateCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\BuscarLicencaCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\DestroyCondicionanteController;
+use App\Domain\Licenca\Requerimento\Controller\DestroyRequerimentoController;
+// Licença/Requerimento
+use App\Domain\Licenca\Requerimento\Controller\StoreRequerimentoController;
+use App\Domain\Licenca\Requerimento\Controller\visualizarRequerimentoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -149,6 +153,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::patch('/update/{condicionante}', [UpdateCondicionanteController::class, 'update'])->name('licenca.condicionante.update');
                 Route::get('/destroy/{condicionante}', [DestroyCondicionanteController::class, 'destroy'])
                     ->name('licenca.condicionante.destroy');
+            });
+
+            Route::prefix('requerimento')->group(function () {
+                Route::post('/store', [StoreRequerimentoController::class, 'store'])->name('licenca.requerimento.store');
+                Route::get('/visualizar/{requerimento}', [visualizarRequerimentoController::class, 'visualizar'])->name('licenca.requerimento.visualizar');
+                Route::get('/destroy/{requerimento}', [DestroyRequerimentoController::class, 'destroy'])->name('licenca.requerimento.destroy');
             });
         });
 

@@ -102,6 +102,10 @@
                                     <a class="dropdown-item" :href="route('licenca.condicionante.index', item.id)">
                                         Condicionante
                                     </a>
+                                    <a @click="abrirModalRequerimento(item)" class="dropdown-item"
+                                        href="javascript:void(0)">
+                                        Adicionar requerimento
+                                    </a>
                                 </div>
                             </span>
 
@@ -110,6 +114,8 @@
                 </template>
             </Table>
         </div>
+
+        <Modal ref="refModalRequerimento" />
     </AuthenticatedLayout>
 </template>
 
@@ -121,15 +127,19 @@ import Breadcrumb from "@/Components/Breadcrumb.vue";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
 import { IconDots, IconShip, IconCar, IconTrain } from "@tabler/icons-vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+import Modal from "./Requerimento/ModalRequerimento.vue";
+import { ref } from "vue";
 
 const props = defineProps({
     licencas: Object
 })
+
+const refModalRequerimento = ref(null);
+
+const abrirModalRequerimento = (item) => {
+    refModalRequerimento.value.abrirModal(item);
+}
+
 </script>
 
-<style scoped>
-.container-buttons a,
-.container-buttons button {
-    margin: 0px 5px;
-}
-</style>
+<style scoped></style>

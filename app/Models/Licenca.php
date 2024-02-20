@@ -25,4 +25,9 @@ class Licenca extends Model
     {
         return $this->hasMany(LicencaCondicionante::class, 'licenca_id');
     }
+
+    public function requerimentos(): HasMany
+    {
+        return $this->hasMany(LicencaRequerimento::class, 'licenca_id');
+    }
 }
