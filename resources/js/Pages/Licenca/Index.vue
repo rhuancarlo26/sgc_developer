@@ -13,7 +13,7 @@
                     <Link class="btn btn-success me-2" :href="route('contratos.gestao.create')">
                     Licenças Arquivos
                     </Link>
-                    <button type="button" class="btn btn-success">
+                    <button @click="abrirMapaGeral()" type="button" class="btn btn-success">
                         Mapa das Licenças
                     </button>
                 </div>
@@ -96,7 +96,7 @@
                                     <IconDots />
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end" style="">
-                                    <a class="dropdown-item" href="#">
+                                    <a @click="abrirModalVisualizar(item)" class="dropdown-item" href="javascript:void(0)">
                                         Visualizar
                                     </a>
                                     <a class="dropdown-item" :href="route('licenca.condicionante.index', item.id)">
@@ -115,7 +115,9 @@
             </Table>
         </div>
 
-        <Modal ref="refModalRequerimento" />
+        <ModalRequerimento ref="refModalRequerimento" />
+        <ModalVisualizar ref="refModalVisualizar" />
+        <ModalMapaGeral ref="refModalMapaGeral" />
     </AuthenticatedLayout>
 </template>
 
@@ -127,7 +129,9 @@ import Breadcrumb from "@/Components/Breadcrumb.vue";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
 import { IconDots, IconShip, IconCar, IconTrain } from "@tabler/icons-vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
-import Modal from "./Requerimento/ModalRequerimento.vue";
+import ModalRequerimento from "./Requerimento/ModalRequerimento.vue";
+import ModalVisualizar from "./ModalVisualizar.vue";
+import ModalMapaGeral from "./ModalMapaGeral.vue";
 import { ref } from "vue";
 
 const props = defineProps({
@@ -135,9 +139,19 @@ const props = defineProps({
 })
 
 const refModalRequerimento = ref(null);
+const refModalVisualizar = ref(null);
+const refModalMapaGeral = ref(null);
 
 const abrirModalRequerimento = (item) => {
     refModalRequerimento.value.abrirModal(item);
+}
+
+const abrirModalVisualizar = (item) => {
+    refModalVisualizar.value.abrirModal(item);
+}
+
+const abrirMapaGeral = () => {
+    refModalMapaGeral.value.abrirModal();
 }
 
 </script>
