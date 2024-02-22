@@ -111,7 +111,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('contratos')->group(function () {
 
             // Busca Contrato SIMDNIT
-            Route::get('contrato/{nr_contrato}', fn (Request $request) => Http::retry(3, 1000)->withoutVerifying()->get("https://servicos.dnit.gov.br/DPP/api/contrato/dnit/{$request->nr_contrato}")->json('data'))->name('contratos.get_contrato');
+            Route::get('/contrato/{nr_contrato}', [App\Domain\Contrato\GestaoContrato\Controller\GetContratoDnitController::class, 'getContrato'])
+                ->name('contratos.get_contrato');
 
             // Gestão de Contrato
             Route::prefix('gestao')->group(function () {
