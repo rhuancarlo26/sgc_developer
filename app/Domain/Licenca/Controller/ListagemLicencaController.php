@@ -19,8 +19,8 @@ class ListagemLicencaController extends Controller
         $searchParams = $request->all(keys: ['searchColumn', 'searchValue']);
 
         return Inertia::render(
-            component: 'Licenca/Index',
-            props: $this->listagemLicenca->get(searchParams: $searchParams)
+        component: 'Licenca/Index',
+        props: $this->listagemLicenca->get(searchParams: $searchParams)
         );
     }
 }
