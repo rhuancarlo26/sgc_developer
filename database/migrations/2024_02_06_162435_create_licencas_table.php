@@ -30,7 +30,7 @@ return new class extends Migration
             $table->string('renovacao')->nullable();
             $table->string('requerimento')->nullable();
             $table->string('fiscal')->nullable();
-            $table->text('obs_renovacao')->nullable();
+            $table->text('observacoes')->nullable();
             $table->string('data_publicacao')->nullable();
             $table->string('in_app')->nullable();
             $table->string('out_app')->nullable();
