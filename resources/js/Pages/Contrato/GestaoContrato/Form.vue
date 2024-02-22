@@ -152,33 +152,35 @@ const getDadosContrato = () => {
     // Tenta buscar dados do contrato
     axios.get(route('contratos.get_contrato', nr_contrato))
         .then(response => {
-
             // Contrato Não Localizado
-            if (!response.data.length) {
-                toast.error("Servidor fora de serviço");
+            if (!response.data?.data?.length) {
+                toast.error("Não foi possível achar o contrato");
+                const contrato = form.numero_contrato;
+                form.reset();
+                form.numero_contrato = contrato
                 return;
             }
 
             // Armazena retorno do contrato
             toast.success("Contrato encontrado!");
-            form.cnpj = response.data[0].NU_CNPJ_CPF;
-            form.numero_contrato = response.data[0].NU_CON_FORMATADO;
-            form.contratada = response.data[0].NO_EMPRESA;
-            form.objeto = response.data[0].DS_OBJETO;
-            form.processo_sei = response.data[0].NU_PROCESSO;
-            form.data_inicio_vigencia = YYYYmmdd(response.data[0].DT_INICIO);
-            form.data_termino_vigencia = YYYYmmdd(response.data[0].DT_TERMINO_VIGENCIA);
-            form.situacao = response.data[0].DS_FAS_CONTRATO;
-            form.edital = response.data[0].NU_EDITAL;
-            form.tipo_licitacao = response.data[0].TIPO_LICITACAO;
-            form.edital = response.data[0].NU_EDITAL;
-            form.modalidade = response.data[0].MODALIDADE_LICITACAO;
-            form.unidade_gestora = response.data[0].SG_UND_GESTORA;
-            form.fiscal_contrato = response.data[0].NM_FISCAL;
-            form.preco_inicial = response.data[0].Valor_Inicial;
-            form.total_aditivo = response.data[0].Valor_Total_de_Aditivos;
-            form.total_reajuste = response.data[0].Valor_Total_de_Reajuste;
-            form.total = response.data[0].Valor_Inicial_Adit_Reajustes;
+            form.cnpj = response.data.data[0].NU_CNPJ_CPF;
+            form.numero_contrato = response.data.data[0].NU_CON_FORMATADO;
+            form.contratada = response.data.data[0].NO_EMPRESA;
+            form.objeto = response.data.data[0].DS_OBJETO;
+            form.processo_sei = response.data.data[0].NU_PROCESSO;
+            form.data_inicio_vigencia = YYYYmmdd(response.data.data[0].DT_INICIO);
+            form.data_termino_vigencia = YYYYmmdd(response.data.data[0].DT_TERMINO_VIGENCIA);
+            form.situacao = response.data.data[0].DS_FAS_CONTRATO;
+            form.edital = response.data.data[0].NU_EDITAL;
+            form.tipo_licitacao = response.data.data[0].TIPO_LICITACAO;
+            form.edital = response.data.data[0].NU_EDITAL;
+            form.modalidade = response.data.data[0].MODALIDADE_LICITACAO;
+            form.unidade_gestora = response.data.data[0].SG_UND_GESTORA;
+            form.fiscal_contrato = response.data.data[0].NM_FISCAL;
+            form.preco_inicial = response.data.data[0].Valor_Inicial;
+            form.total_aditivo = response.data.data[0].Valor_Total_de_Aditivos;
+            form.total_reajuste = response.data.data[0].Valor_Total_de_Reajuste;
+            form.total = response.data.data[0].Valor_Inicial_Adit_Reajustes;
         })
         .catch(response => {
             return console.log(response);
