@@ -9,14 +9,14 @@ use Illuminate\Http\RedirectResponse;
 
 class StoreCondicionanteController extends Controller
 {
-  public function __construct(private readonly CondicionanteService $condicionanteService)
-  {
-  }
+    public function __construct(private readonly CondicionanteService $condicionanteService)
+    {
+    }
 
-  public function store(StoreCondicionanteRequest $request): RedirectResponse
-  {
-    $response = $this->condicionanteService->store($request->all());
-
-    return to_route('licenca.condicionante.index', ['licenca' => $request->licenca_id])->with('message', $response);
-  }
+    public function store(StoreCondicionanteRequest $request): RedirectResponse
+    {
+        $response = $this->condicionanteService->store($request->all());
+        return to_route(route: 'licenca.condicionante.index', parameters: $response['licenca'])
+            ->with('message', $response['request']);
+    }
 }

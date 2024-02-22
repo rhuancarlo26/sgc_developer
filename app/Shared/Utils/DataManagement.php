@@ -31,19 +31,17 @@ class DataManagement
         ];
     }
 
-    public function update($entity, $infos): array
+    public function update($entity, $infos, $id): array
     {
-        $entity = new $entity($infos);
-
-        try {
-            $model   = $entity->update([...$infos, 'user_id' => Auth::user()->id]);
+//        try {
+            $model   = $entity::find($id)->update([...$infos, 'user_id' => Auth::user()->id]);
             $type    = 'success';
             $content = 'Registro atualizado!';
-        } catch (\Exception) {
-            $model   = null;
-            $type    = 'error';
-            $content = 'Falha ao atualizar!';
-        }
+//        } catch (\Exception) {
+//            $model   = null;
+//            $type    = 'error';
+//            $content = 'Falha ao atualizar!';
+//        }
 
         return [
             'model'   => $model,

@@ -10,14 +10,15 @@ use Illuminate\Http\RedirectResponse;
 
 class UpdateCondicionanteController extends Controller
 {
-  public function __construct(private readonly CondicionanteService $condicionanteService)
-  {
-  }
+    public function __construct(private readonly CondicionanteService $condicionanteService)
+    {
+    }
 
-  public function update(LicencaCondicionante $condicionante, UpdateCondicionanteRequest $request): RedirectResponse
-  {
-    $response = $this->condicionanteService->update($condicionante->id, $request->all());
+    public function update(UpdateCondicionanteRequest $request): RedirectResponse
+    {
+        $response = $this->condicionanteService->update($request->all());
 
-    return to_route('licenca.condicionante.index', ['licenca' => $condicionante->licenca_id])->with('message', $response);
-  }
+        return to_route(route: 'licenca.condicionante.index', parameters: $response['licenca'])
+            ->with('message', $response['request']);
+    }
 }

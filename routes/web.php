@@ -147,9 +147,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/create/{licenca?}',    [CreateLicencaController::class,    'index'])->name('licenca.create');
             Route::post('/store',               [StoreLicencaController::class,     'index'])->name('licenca.store');
             Route::patch('/update/{licenca}',   [UpdateLicencaController::class,    'index'])->name('licenca.update');
-            Route::get('/', [ListagemLicencaController::class, 'index'])->name('licenca.index');
-            Route::get('/create', [CreateLicencaController::class, 'index'])->name('licenca.create');
-            Route::post('/store', [StoreLicencaController::class, 'index'])->name('licenca.store');
 
             Route::prefix('trecho')->group(function () {
                 Route::post('/get_coordenada_trecho', [GetCoordenadaTrechoController::class, 'getCoordenadaTrecho'])->name('licenca.trecho.get_coordenada_trecho');

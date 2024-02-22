@@ -42,7 +42,7 @@ class LicencaService extends BaseModelService
     {
         $licencaTipoService = new LicencaTipoService();
 
-        $licenca = $this->dataManagement->update(entity: $this->modelClass, infos: $post);
+        $licenca = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
 
         return [
             'licenca' => [
