@@ -1,17 +1,17 @@
 <template>
-    <Head title="Gestão de Licenças" />
+    <Head title="Gestão de Licenças"/>
 
     <AuthenticatedLayout>
 
         <template #header>
             <div class="w-100 d-flex justify-content-between">
-                <Breadcrumb class="align-self-center" :links="[{ route: '#', label: 'Gestão de Licenças' }]" />
+                <Breadcrumb class="align-self-center" :links="[{ route: '#', label: 'Gestão de Licenças' }]"/>
                 <div class="container-buttons">
                     <Link class="btn btn-success me-2" :href="route('licenca.create')">
-                    Cadastrar Licenças
+                        Cadastrar Licenças
                     </Link>
                     <Link class="btn btn-success me-2" :href="route('contratos.gestao.create')">
-                    Licenças Arquivos
+                        Licenças Arquivos
                     </Link>
                     <button @click="abrirMapaGeral()" type="button" class="btn btn-success">
                         Mapa das Licenças
@@ -29,7 +29,7 @@
                 'contratada': 'Contratada',
                 'processo_sei': 'Processo SEI',
                 'situacao': 'Situação'
-            }" />
+            }"/>
 
             <!-- Listagem-->
             <Table
@@ -39,9 +39,9 @@
                     <tr class="cursor-pointer" @click="router.get(route('contratos.gestao.create', item.id))">
                         <!-- Modal -->
                         <td>
-                            <IconCar v-if="item.modal == 1" />
-                            <IconShip v-if="item.modal == 2" />
-                            <IconTrain v-if="item.modal == 3" />
+                            <IconCar v-if="item.modal == 1"/>
+                            <IconShip v-if="item.modal == 2"/>
+                            <IconTrain v-if="item.modal == 3"/>
                         </td>
                         <!-- Tipo -->
                         <td>
@@ -72,6 +72,7 @@
                                 <span class="badge text-bg-warning">
                                     Em Análise
                                 </span>
+                                <br>
                                 <span class="badge text-bg-danger">
                                     Vencida
                                 </span>
@@ -92,47 +93,50 @@
                         <td @click.stop>
                             <span class="dropdown">
                                 <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <IconDots />
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <IconDots/>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end" style="">
-                                    <a @click="abrirModalVisualizar(item)" class="dropdown-item" href="javascript:void(0)">
+                                     <a class="dropdown-item" :href="route('licenca.create', item.id)">
+                                        Editar
+                                    </a>
+                                    <a @click="abrirModalVisualizar(item)" class="dropdown-item"
+                                       href="javascript:void(0)">
                                         Visualizar
                                     </a>
                                     <a class="dropdown-item" :href="route('licenca.condicionante.index', item.id)">
                                         Condicionante
                                     </a>
                                     <a @click="abrirModalRequerimento(item)" class="dropdown-item"
-                                        href="javascript:void(0)">
+                                       href="javascript:void(0)">
                                         Adicionar requerimento
                                     </a>
                                 </div>
                             </span>
-
                         </td>
                     </tr>
                 </template>
             </Table>
         </div>
 
-        <ModalRequerimento ref="refModalRequerimento" />
-        <ModalVisualizar ref="refModalVisualizar" />
-        <ModalMapaGeral ref="refModalMapaGeral" />
+        <ModalRequerimento ref="refModalRequerimento"/>
+        <ModalVisualizar ref="refModalVisualizar"/>
+        <ModalMapaGeral ref="refModalMapaGeral"/>
     </AuthenticatedLayout>
 </template>
 
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
+import {Head, Link, router} from "@inertiajs/vue3";
 import Table from '@/Components/Table.vue';
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import { IconDots, IconShip, IconCar, IconTrain } from "@tabler/icons-vue";
-import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+import {IconDots, IconShip, IconCar, IconTrain} from "@tabler/icons-vue";
+import {dateTimeFormat} from "@/Utils/DateTimeUtils";
 import ModalRequerimento from "./Requerimento/ModalRequerimento.vue";
 import ModalVisualizar from "./ModalVisualizar.vue";
 import ModalMapaGeral from "./ModalMapaGeral.vue";
-import { ref } from "vue";
+import {ref} from "vue";
 
 const props = defineProps({
     licencas: Object
@@ -142,6 +146,7 @@ const refModalRequerimento = ref(null);
 const refModalVisualizar = ref(null);
 const refModalMapaGeral = ref(null);
 
+// FUNCTIONS
 const abrirModalRequerimento = (item) => {
     refModalRequerimento.value.abrirModal(item);
 }
@@ -154,6 +159,16 @@ const abrirMapaGeral = () => {
     refModalMapaGeral.value.abrirModal();
 }
 
+const editarLicenca = (id) => {
+    axios.patch(route('licenca.update', {licenca: id}))
+        .then(response => {
+            // Lógica após a edição
+            console.log("response: ", response)
+        })
+        .catch(error => {
+            console.error("Error editing license:", error);
+        });
+}
 </script>
 
 <style scoped></style>
