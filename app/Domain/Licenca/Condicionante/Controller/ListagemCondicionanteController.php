@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class IndexCondicionanteController extends Controller
+class ListagemCondicionanteController extends Controller
 {
   public function __construct(private readonly CondicionanteService $condicionanteService)
   {

@@ -4,6 +4,9 @@ import { router, useForm } from "@inertiajs/vue3";
 import { IconSearch } from "@tabler/icons-vue";
 import axios from "axios";
 import { ref } from "vue";
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 const props = defineProps({
   licenca: { Object }
@@ -25,7 +28,12 @@ const abrirModal = () => {
 
 const buscarLicenca = () => {
   axios.post(route('licenca.condicionante.buscar_licenca'), form).then(r => {
-    condicionantes.value = r.data;
+    if (!r.data.condicionantes.length) {
+      toast.error('Nenhuma condicionante encontrada!');
+      return
+    }
+
+    condicionantes.value = r.data.condicionantes;
   });
 }
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Licenca extends Model
 {
@@ -24,6 +25,11 @@ class Licenca extends Model
     public function condicionantes(): HasMany
     {
         return $this->hasMany(LicencaCondicionante::class, 'licenca_id');
+    }
+
+    public function documento(): HasOne
+    {
+        return $this->hasOne(LicencaDocumento::class, 'licenca_id');
     }
 
     public function requerimentos(): HasMany

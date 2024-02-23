@@ -14,6 +14,7 @@ class CondicionanteService extends BaseModelService
     use Searchable, Deletable;
 
     protected string $modelClass = LicencaCondicionante::class;
+    protected string $modelClassLicenca = Licenca::class;
 
     public function listarCondicionantes($licenca, $searchParams)
     {
@@ -44,20 +45,20 @@ class CondicionanteService extends BaseModelService
 
     public function buscarLicenca($request)
     {
-        return Licenca::with(['condicionantes'])->where('numero_licenca', $request['numero_licenca'])->firstOrFail();
+        return $this->modelClassLicenca::with(['condicionantes'])->where('numero_licenca', $request['numero_licenca'])->firstOrFail();
     }
 
     public function storeImportacao($request)
     {
-        try {
-            foreach ($request['condicionantes'] as $value) {
-                $value['licenca_id'] = $request['licenca']['id'];
+        foreach ($request['condicionantes'] as $value) {
+            $value['licenca_id'] = $request['licenca']['id'];
 
-                $this->modelClass::create($value);
-            }
-            return ['type' => 'success', 'content' => 'Condicionante alterado com sucesso!'];
-        } catch (\Exception $th) {
-            return ['type' => 'error', 'content' => $th->getMessage()];
+            $condicionante = $this->dataManagement->create(entity: $this->modelClass, infos: $value);
         }
+
+        return [
+            'licenca' => $request['licenca']['id'],
+            'request' => $condicionante['request']
+        ];
     }
 }
