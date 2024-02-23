@@ -17,7 +17,7 @@ class LicencaService extends BaseModelService
     {
         return [
             'licencas' => $this->search(...$searchParams)
-                ->with(relations: 'tipo')
+                ->with(relations: ['tipo', 'requerimentos', 'documento'])
                 ->paginate()
                 ->appends($searchParams)
         ];
@@ -52,5 +52,4 @@ class LicencaService extends BaseModelService
             'request' => $licenca['request']
         ];
     }
-
 }
