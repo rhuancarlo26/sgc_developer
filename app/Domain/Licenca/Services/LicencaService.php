@@ -13,12 +13,13 @@ class LicencaService extends BaseModelService
 
     protected string $modelClass = Licenca::class;
 
-    public function get(array $searchParams): array
+    public function get(array $searchParams, bool $arquivado): array
     {
         return [
             'licencas' => $this->search(...$searchParams)
                 ->with(relations: ['tipo', 'requerimentos', 'documento'])
-                ->paginate()
+                ->where('arquivado', $arquivado)
+                ->paginate(10)
                 ->appends($searchParams)
         ];
     }

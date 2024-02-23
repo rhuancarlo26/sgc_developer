@@ -21,6 +21,8 @@ use App\Domain\Licenca\Condicionante\Controller\UpdateCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\BuscarLicencaCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\DestroyCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\ListagemCondicionanteController;
+use App\Domain\Licenca\Controller\GerenciarLicencaController;
+use App\Domain\Licenca\Controller\GetLicencaController;
 use App\Domain\Licenca\Requerimento\Controller\DestroyRequerimentoController;
 // Licença/Requerimento
 use App\Domain\Licenca\Requerimento\Controller\StoreRequerimentoController;
@@ -149,6 +151,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/create/{licenca?}',    [CreateLicencaController::class,    'index'])->name('licenca.create');
             Route::post('/store',               [StoreLicencaController::class,     'index'])->name('licenca.store');
             Route::patch('/update/{licenca}',   [UpdateLicencaController::class,    'index'])->name('licenca.update');
+            Route::post('/get_licenca',         [GetLicencaController::class,       'index'])->name('licenca.get_licenca');
+            Route::patch('/gerenciar_licenca/{licenca}',   [GerenciarLicencaController::class, 'index'])->name('licenca.gerenciar_licenca');
 
             Route::prefix('trecho')->group(function () {
                 Route::post('/get_coordenada_trecho', [GetCoordenadaTrechoController::class, 'getCoordenadaTrecho'])->name('licenca.trecho.get_coordenada_trecho');
