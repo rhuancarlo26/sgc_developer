@@ -48,7 +48,7 @@ class CondicionanteService extends BaseModelService
         return $this->modelClassLicenca::with(['condicionantes'])->where('numero_licenca', $request['numero_licenca'])->firstOrFail();
     }
 
-    public function storeImportacao($request)
+    public function storeImportacao($request): array
     {
         foreach ($request['condicionantes'] as $value) {
             $value['licenca_id'] = $request['licenca']['id'];
