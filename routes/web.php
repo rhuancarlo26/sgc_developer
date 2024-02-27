@@ -29,7 +29,7 @@ use App\Domain\Licenca\Requerimento\Controller\StoreRequerimentoController;
 use App\Domain\Licenca\Requerimento\Controller\visualizarRequerimentoController;
 use App\Domain\Licenca\Trecho\Controller\GetCoordenadaTrechoController;
 // Licença/Documetno
-use App\Domain\Licenca\Documento\Controller\visualizarDocumentoController;
+use App\Domain\Licenca\Documento\Controller\VisualizarDocumentoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -169,7 +169,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             });
 
             Route::prefix('documento')->group(function () {
-                Route::get('/visualizar/{documento}', [visualizarDocumentoController::class, 'visualizar'])->name('licenca.documento.visualizar');
+                Route::get('/visualizar/{documento}', [VisualizarDocumentoController::class, 'visualizar'])->name('licenca.documento.visualizar');
             });
 
             Route::prefix('requerimento')->group(function () {

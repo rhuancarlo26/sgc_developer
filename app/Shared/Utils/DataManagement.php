@@ -33,15 +33,15 @@ class DataManagement
 
     public function update($entity, $infos, $id): array
     {
-//        try {
+        try {
             $model   = $entity::find($id)->update([...$infos, 'user_id' => Auth::user()->id]);
             $type    = 'success';
             $content = 'Registro atualizado!';
-//        } catch (\Exception) {
-//            $model   = null;
-//            $type    = 'error';
-//            $content = 'Falha ao atualizar!';
-//        }
+        } catch (\Exception) {
+            $model   = null;
+            $type    = 'error';
+            $content = 'Falha ao atualizar!';
+        }
 
         return [
             'model'   => $model,
