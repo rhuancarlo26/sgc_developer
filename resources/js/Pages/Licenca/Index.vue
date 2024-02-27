@@ -50,7 +50,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="licenca, index in licencas.data" :key="licenca.id">
+                        <tr v-for="licenca, index in  licencas.data " :key="licenca.id">
                             <td>
                                 <IconCar v-if="licenca.modal == 1" />
                                 <IconShip v-if="licenca.modal == 2" />
@@ -73,23 +73,46 @@
                             </td>
                             <td>
                                 <a href="javascript:void(0)">
-                                    <span class="badge text-bg-success">
+                                    <span v-if="licenca.requerimentos.length" class="badge text-bg-primary">
+                                        Em Análise
+                                    </span>
+                                    <span v-else-if="dtAlerta(licenca.vencimento) <= 0" class="badge text-bg-danger">
+                                        Vencida
+                                    </span>
+                                    <span v-else class="badge text-bg-success">
+                                        Vigente
+                                    </span>
+                                    <!-- <span class="badge text-bg-success">
                                         Vigente
                                     </span>
                                     <span class="badge text-bg-warning">
                                         Em Análise
                                     </span>
                                     <br>
-                                    <span class="badge text-bg-danger">
-                                        Vencida
-                                    </span>
                                     <span class="badge text-bg-info">
                                         Não Vigente
-                                    </span>
+                                    </span> -->
                                 </a>
                             </td>
                             <td>
-                                {{ dateTimeFormat(licenca.vencimento) }}
+                                <a href="javascript:void(0)">
+                                    <span v-if="dtAlerta(licenca.vencimento) <= 0" class="badge text-bg-danger">
+                                        {{ dateTimeFormat(licenca.vencimento) }}
+                                    </span>
+                                    <span v-else class="badge text-bg-success">
+                                        {{ dateTimeFormat(licenca.vencimento) }}
+                                    </span>
+                                    <!-- <span class="badge text-bg-success">
+                                        Vigente
+                                    </span>
+                                    <span class="badge text-bg-warning">
+                                        Em Análise
+                                    </span>
+                                    <br>
+                                    <span class="badge text-bg-info">
+                                        Não Vigente
+                                    </span> -->
+                                </a>
                             </td>
                             <td>
                                 {{ licenca.processo_dnit }}
@@ -143,7 +166,8 @@
                         registros.
                     </p>
                     <ul class="pagination mb-0 mt-2">
-                        <li v-for="(link, i) in licencas.links" :key="i" class="page-item" :class="getLinkCSSClass(link)">
+                        <li v-for="( link, i ) in  licencas.links " :key="i" class="page-item"
+                            :class="getLinkCSSClass(link)">
                             <button class="page-link" :class="getLinkCSSClass(link)" @click="getLicenca(link.url)"
                                 v-html="link.label">
                             </button>
@@ -190,6 +214,19 @@ watch(() => arquivado.value, () => {
 })
 
 // FUNCTIONS
+const dtAlerta = (data) => {
+    console.log('data', data);
+    if (data) {
+        const data_licenca = new Date(data);
+        const hoje = new Date();
+        const dia = 1000 * 60 * 60 * 24;
+
+        const resultado = (data_licenca - hoje) / dia;
+
+        return Math.round(resultado);
+    }
+}
+
 const getLicenca = (link = null) => {
     axios.post(link ?? route('licenca.get_licenca'), { arquivado: arquivado.value }).then(r => {
         licencas.value = r.data.licencas;
