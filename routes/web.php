@@ -32,6 +32,35 @@ use App\Domain\Licenca\LicencaSegmento\AppModule\Controller\GetUFLicencaSegmento
 */
 
 
+// Licença/Condicionante
+use App\Domain\Licenca\Condicionante\Controller\StoreCondicionanteController;
+use App\Domain\Licenca\Condicionante\Controller\StoreImportacaoCondicionanteController;
+use App\Domain\Licenca\Condicionante\Controller\UpdateCondicionanteController;
+use App\Domain\Licenca\Condicionante\Controller\BuscarLicencaCondicionanteController;
+use App\Domain\Licenca\Condicionante\Controller\DestroyCondicionanteController;
+use App\Domain\Licenca\Condicionante\Controller\ListagemCondicionanteController;
+use App\Domain\Licenca\Controller\GerenciarLicencaController;
+use App\Domain\Licenca\Controller\GetLicencaController;
+use App\Domain\Licenca\Requerimento\Controller\DestroyRequerimentoController;
+// Licença/Requerimento
+use App\Domain\Licenca\Requerimento\Controller\StoreRequerimentoController;
+use App\Domain\Licenca\Requerimento\Controller\visualizarRequerimentoController;
+use App\Domain\Licenca\Trecho\Controller\GetCoordenadaTrechoController;
+// Licença/Documetno
+use App\Domain\Licenca\Documento\Controller\VisualizarDocumentoController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+
 // Dashboard Redirect
 Route::get('/', function () {
 
@@ -64,7 +93,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('dashboard');
 
         // Ambiente Geo
-        Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))->name('ambienteGeo');
+        Route::get('/ambienteGeo', fn () => Inertia::render('AmbienteGeo'))->name('ambienteGeo');
 
         // Cadastros
         Route::prefix('cadastros')->group(function () {
@@ -147,6 +176,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::patch('/update_segmento/{segmento}',     [UpdateLicencaSegmentoController::class, 'index'])->name('licenca_segmento.update');
             Route::delete('/delete_segmento/{segmento}',    [DeleteLicencaSegmentoController::class,'index'])->name('licenca_segmento.delete');
             Route::get('/get_uf_segmento',                  [GetUFLicencaSegmentoController::class, 'index'])->name('licenca_segmento.get_uf');
+            Route::post('/get_licenca',         [GetLicencaController::class,       'index'])->name('licenca.get_licenca');
+            Route::patch('/gerenciar_licenca/{licenca}',   [GerenciarLicencaController::class, 'index'])->name('licenca.gerenciar_licenca');
+
+            // Trecho
+            Route::prefix('trecho')->group(function () {
+                Route::post('/get_coordenada_trecho', [GetCoordenadaTrechoController::class, 'getCoordenadaTrecho'])->name('licenca.trecho.get_coordenada_trecho');
+            });
+            
+            // Condicionante
+            Route::prefix('condicionante')->group(function () {
+                Route::get('/{licenca}', [ListagemCondicionanteController::class, 'index'])->name('licenca.condicionante.index');
+                Route::post('/buscar_licenca', [BuscarLicencaCondicionanteController::class, 'buscarLicencaCondicionante'])->name('licenca.condicionante.buscar_licenca');
+                Route::post('/store', [StoreCondicionanteController::class, 'store'])->name('licenca.condicionante.store');
+                Route::post('/store_importacao', [StoreImportacaoCondicionanteController::class, 'storeImportacao'])->name('licenca.condicionante.store_importacao');
+                Route::patch('/update/{condicionante}', [UpdateCondicionanteController::class, 'update'])->name('licenca.condicionante.update');
+                Route::get('/destroy/{condicionante}', [DestroyCondicionanteController::class, 'destroy'])
+                    ->name('licenca.condicionante.destroy');
+            });
+
+            Route::prefix('documento')->group(function () {
+                Route::get('/visualizar/{documento}', [VisualizarDocumentoController::class, 'visualizar'])->name('licenca.documento.visualizar');
+            });
+
+            Route::prefix('requerimento')->group(function () {
+                Route::post('/store', [StoreRequerimentoController::class, 'store'])->name('licenca.requerimento.store');
+                Route::get('/visualizar/{requerimento}', [visualizarRequerimentoController::class, 'visualizar'])->name('licenca.requerimento.visualizar');
+                Route::delete('/destroy/{requerimento}', [DestroyRequerimentoController::class, 'destroy'])->name('licenca.requerimento.destroy');
+            });
         });
 
 

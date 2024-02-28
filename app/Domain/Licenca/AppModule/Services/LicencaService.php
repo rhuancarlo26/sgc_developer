@@ -14,12 +14,13 @@ class LicencaService extends BaseModelService
 
     protected string $modelClass = Licenca::class;
 
-    public function get(array $searchParams): array
+    public function get(array $searchParams, bool $arquivado): array
     {
         return [
             'licencas' => $this->search(...$searchParams)
-                ->with(relations: 'tipo')
-                ->paginate()
+                ->with(relations: ['tipo', 'requerimentos', 'documento'])
+                ->where('arquivado', $arquivado)
+                ->paginate(10)
                 ->appends($searchParams)
         ];
     }
@@ -43,7 +44,7 @@ class LicencaService extends BaseModelService
     {
         $licencaTipoService = new LicencaTipoService();
 
-        $licenca = $this->dataManagement->update(entity: $this->modelClass, infos: $post);
+        $licenca = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
 
         return [
             'licenca' => [

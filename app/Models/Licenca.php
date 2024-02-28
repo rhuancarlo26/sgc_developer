@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Licenca extends Model
 {
@@ -17,5 +19,20 @@ class Licenca extends Model
     public function tipo(): BelongsTo
     {
         return $this->belongsTo(LicencaTipo::class, 'licenca_tipo_id', 'id');
+    }
+
+    public function condicionantes(): HasMany
+    {
+        return $this->hasMany(LicencaCondicionante::class, 'licenca_id');
+    }
+
+    public function documento(): HasOne
+    {
+        return $this->hasOne(LicencaDocumento::class, 'licenca_id');
+    }
+
+    public function requerimentos(): HasMany
+    {
+        return $this->hasMany(LicencaRequerimento::class, 'licenca_id');
     }
 }

@@ -34,17 +34,10 @@ class DataManagement
         ];
     }
 
-    public function update($entity, $infos): array
+    public function update($entity, $infos, $id): array
     {
         try {
-            $model = $entity::find($infos['id']);
-    
-            if (!$model) {
-                throw new \Exception('Registro não encontrado.');
-            }
-    
-            dd( $model->update([...$infos, 'user_id' => Auth::user()->id]) );
-    
+            $model   = $entity::find($id)->update([...$infos, 'user_id' => Auth::user()->id]);
             $type    = 'success';
             $content = 'Registro atualizado!';
         } catch (\Exception $e) {
