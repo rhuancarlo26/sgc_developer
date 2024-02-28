@@ -33,21 +33,21 @@ use App\Domain\Licenca\LicencaSegmento\AppModule\Controller\GetUFLicencaSegmento
 
 
 // Licença/Condicionante
-use App\Domain\Licenca\Condicionante\Controller\StoreCondicionanteController;
-use App\Domain\Licenca\Condicionante\Controller\StoreImportacaoCondicionanteController;
-use App\Domain\Licenca\Condicionante\Controller\UpdateCondicionanteController;
-use App\Domain\Licenca\Condicionante\Controller\BuscarLicencaCondicionanteController;
-use App\Domain\Licenca\Condicionante\Controller\DestroyCondicionanteController;
-use App\Domain\Licenca\Condicionante\Controller\ListagemCondicionanteController;
-use App\Domain\Licenca\Controller\GerenciarLicencaController;
-use App\Domain\Licenca\Controller\GetLicencaController;
-use App\Domain\Licenca\Requerimento\Controller\DestroyRequerimentoController;
+use App\Domain\Licenca\AppModule\Condicionante\Controller\StoreCondicionanteController;
+use App\Domain\Licenca\AppModule\Condicionante\Controller\StoreImportacaoCondicionanteController;
+use App\Domain\Licenca\AppModule\Condicionante\Controller\UpdateCondicionanteController;
+use App\Domain\Licenca\AppModule\Condicionante\Controller\BuscarLicencaCondicionanteController;
+use App\Domain\Licenca\AppModule\Condicionante\Controller\DestroyCondicionanteController;
+use App\Domain\Licenca\AppModule\Condicionante\Controller\ListagemCondicionanteController;
+use App\Domain\Licenca\AppModule\Controller\GerenciarLicencaController;
+use App\Domain\Licenca\AppModule\Controller\GetLicencaController;
+use App\Domain\Licenca\AppModule\Requerimento\Controller\DestroyRequerimentoController;
 // Licença/Requerimento
-use App\Domain\Licenca\Requerimento\Controller\StoreRequerimentoController;
-use App\Domain\Licenca\Requerimento\Controller\visualizarRequerimentoController;
-use App\Domain\Licenca\Trecho\Controller\GetCoordenadaTrechoController;
+use App\Domain\Licenca\AppModule\Requerimento\Controller\StoreRequerimentoController;
+use App\Domain\Licenca\AppModule\Requerimento\Controller\visualizarRequerimentoController;
+use App\Domain\Licenca\AppModule\Trecho\Controller\GetCoordenadaTrechoController;
 // Licença/Documetno
-use App\Domain\Licenca\Documento\Controller\VisualizarDocumentoController;
+use App\Domain\Licenca\AppModule\Documento\Controller\VisualizarDocumentoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -176,14 +176,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::patch('/update_segmento/{segmento}',     [UpdateLicencaSegmentoController::class, 'index'])->name('licenca_segmento.update');
             Route::delete('/delete_segmento/{segmento}',    [DeleteLicencaSegmentoController::class,'index'])->name('licenca_segmento.delete');
             Route::get('/get_uf_segmento',                  [GetUFLicencaSegmentoController::class, 'index'])->name('licenca_segmento.get_uf');
-            Route::post('/get_licenca',         [GetLicencaController::class,       'index'])->name('licenca.get_licenca');
-            Route::patch('/gerenciar_licenca/{licenca}',   [GerenciarLicencaController::class, 'index'])->name('licenca.gerenciar_licenca');
+            Route::post('/get_licenca',                     [GetLicencaController::class,       'index'])->name('licenca.get_licenca');
+            Route::patch('/gerenciar_licenca/{licenca}',    [GerenciarLicencaController::class, 'index'])->name('licenca.gerenciar_licenca');
 
             // Trecho
             Route::prefix('trecho')->group(function () {
                 Route::post('/get_coordenada_trecho', [GetCoordenadaTrechoController::class, 'getCoordenadaTrecho'])->name('licenca.trecho.get_coordenada_trecho');
             });
-            
+
             // Condicionante
             Route::prefix('condicionante')->group(function () {
                 Route::get('/{licenca}', [ListagemCondicionanteController::class, 'index'])->name('licenca.condicionante.index');
