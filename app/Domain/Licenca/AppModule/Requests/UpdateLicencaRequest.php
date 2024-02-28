@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Domain\Licenca\Requests;
+namespace App\Domain\Licenca\AppModule\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreLicencaRequest extends FormRequest
+class UpdateLicencaRequest extends FormRequest
 {
   public function rules(): array
   {
     return [
       // 'contratos_id'       => 'required',
-      // 'tipo_id'            => 'required',
+      // 'licenca_tipo_id'    => 'required',
       // 'status'             => 'required',
       // 'modal'              => 'required',
       // 'numero_licenca'     => 'required',
