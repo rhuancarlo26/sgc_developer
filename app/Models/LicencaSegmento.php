@@ -13,4 +13,13 @@ class LicencaSegmento extends Model
 
   protected $guarded = ['id', 'created_at'];
 
+  protected $fillable = [
+    'licenca_id',
+    'rodovia',
+    'uf_inicial',
+    'uf_final',
+    'km_inicial',
+    'km_final',
+    'extensao',
+  ];
 }

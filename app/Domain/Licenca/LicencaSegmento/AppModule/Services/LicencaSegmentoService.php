@@ -39,7 +39,7 @@ class LicencaSegmentoService extends BaseModelService
 
     public function update(array $post): array
     {
-        $licencaSegmento = $this->dataManagement->update(entity: $this->modelClass, infos: $post);
+        $licencaSegmento = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
 
         $licenca = Licenca::where('id', $post['licenca_id'])->first();
         $licencaTipoService = new LicencaTipoService();
