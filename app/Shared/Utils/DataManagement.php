@@ -12,6 +12,9 @@ class DataManagement
 
     public function create($entity, $infos): array
     {
+        // $debugSQL = $entity::create([...$infos, 'user_id' => Auth::user()->id]);
+        // dd($debugSQL);
+
         try {
             $model   = $entity::create([...$infos, 'user_id' => Auth::user()->id]);
             $type    = 'success';
@@ -33,16 +36,48 @@ class DataManagement
 
     public function update($entity, $infos): array
     {
-        $entity = new $entity($infos);
-
         try {
-            $model   = $entity->update([...$infos, 'user_id' => Auth::user()->id]);
+            $model = $entity::find($infos['id']);
+    
+            if (!$model) {
+                throw new \Exception('Registro não encontrado.');
+            }
+    
+            dd( $model->update([...$infos, 'user_id' => Auth::user()->id]) );
+    
             $type    = 'success';
             $content = 'Registro atualizado!';
+        } catch (\Exception $e) {
+            $model   = null;
+            $type    = 'error';
+            $content = $e->getMessage();
+        }
+    
+        return [
+            'model'   => $model,
+            'request' => [
+                'type'    => $type,
+                'content' => $content,
+            ]
+        ];
+    }
+    
+
+    public function delete($entity, $infos)
+    {
+        // $newEntity  = new $entity;
+        // $debugSQL = $newEntity->where($infos)->delete();
+        // dd($debugSQL);
+
+        try {
+            $newEntity  = new $entity;
+            $model      = $newEntity->where($infos)->delete();
+            $type       = 'success';
+            $content    = 'Registro excluido!';
         } catch (\Exception) {
             $model   = null;
             $type    = 'error';
-            $content = 'Falha ao atualizar!';
+            $content = 'Falha ao excluir!';
         }
 
         return [
@@ -52,11 +87,6 @@ class DataManagement
                 'content' => $content,
             ]
         ];
-    }
-
-    public function delete($entity, $infos)
-    {
-
     }
 
 }

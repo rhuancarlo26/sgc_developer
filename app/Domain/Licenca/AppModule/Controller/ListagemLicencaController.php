@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\Licenca\Controller;
+namespace App\Domain\Licenca\AppModule\Controller;
 
-use App\Domain\Licenca\Services\LicencaService;
+use App\Domain\Licenca\AppModule\Services\LicencaService;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

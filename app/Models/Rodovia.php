@@ -10,4 +10,9 @@ class Rodovia extends Model
     use HasFactory;
 
     protected $table = 'rodovias';
+
+    public function uf()
+    {
+        return $this->belongsTo(Uf::class, 'uf_id');
+    }
 }

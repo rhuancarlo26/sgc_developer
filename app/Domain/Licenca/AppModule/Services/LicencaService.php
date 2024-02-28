@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Domain\Licenca\Services;
+namespace App\Domain\Licenca\AppModule\Services;
 
 use App\Models\Licenca;
+use App\Models\LicencaSegmento;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -26,7 +27,7 @@ class LicencaService extends BaseModelService
     public function create(array $post): array
     {
         $licencaTipoService = new LicencaTipoService();
-
+        
         $licenca = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
 
         return [
@@ -52,5 +53,4 @@ class LicencaService extends BaseModelService
             'request' => $licenca['request']
         ];
     }
-
 }

@@ -9,10 +9,28 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Licença
-use App\Domain\Licenca\Controller\ListagemLicencaController;
-use App\Domain\Licenca\Controller\CreateLicencaController;
-use App\Domain\Licenca\Controller\StoreLicencaController;
-use App\Domain\Licenca\Controller\UpdateLicencaController;
+use App\Domain\Licenca\AppModule\Controller\ListagemLicencaController;
+use App\Domain\Licenca\AppModule\Controller\CreateLicencaController;
+use App\Domain\Licenca\AppModule\Controller\StoreLicencaController;
+use App\Domain\Licenca\AppModule\Controller\SearchLicencaController;
+use App\Domain\Licenca\AppModule\Controller\UpdateLicencaController;
+// Licença Segmento
+use App\Domain\Licenca\LicencaSegmento\AppModule\Controller\StoreLicencaSegmentoController;
+use App\Domain\Licenca\LicencaSegmento\AppModule\Controller\UpdateLicencaSegmentoController;
+use App\Domain\Licenca\LicencaSegmento\AppModule\Controller\DeleteLicencaSegmentoController;
+use App\Domain\Licenca\LicencaSegmento\AppModule\Controller\GetUFLicencaSegmentoController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
 
 // Dashboard Redirect
 Route::get('/', function () {
@@ -122,6 +140,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/create/{licenca?}',    [CreateLicencaController::class,    'index'])->name('licenca.create');
             Route::post('/store',               [StoreLicencaController::class,     'index'])->name('licenca.store');
             Route::patch('/update/{licenca}',   [UpdateLicencaController::class,    'index'])->name('licenca.update');
+            Route::get('/search/{licenca?}',    [SearchLicencaController::class,    'index'])->name('licenca.search')->where('licenca', '(.*)');
+            
+            // Licença Segmento
+            Route::post('/store_segmento',                  [StoreLicencaSegmentoController::class, 'index'])->name('licenca_segmento.store');
+            Route::patch('/update_segmento/{segmento}',     [UpdateLicencaSegmentoController::class, 'index'])->name('licenca_segmento.update');
+            Route::delete('/delete_segmento/{segmento}',    [DeleteLicencaSegmentoController::class,'index'])->name('licenca_segmento.delete');
+            Route::get('/get_uf_segmento',                  [GetUFLicencaSegmentoController::class, 'index'])->name('licenca_segmento.get_uf');
         });
 
 
