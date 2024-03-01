@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\Licenca\Condicionante\Controller;
+namespace App\Domain\Licenca\Condicionante\AppModule\Controller;
 
-use App\Domain\Licenca\Condicionante\Services\CondicionanteService;
+use App\Domain\Licenca\Condicionante\AppModule\Services\CondicionanteService;
 use App\Models\LicencaCondicionante;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -13,7 +13,7 @@ class DestroyCondicionanteController extends Controller
   {
   }
 
-  public function destroy(LicencaCondicionante $condicionante): RedirectResponse
+  public function index(LicencaCondicionante $condicionante): RedirectResponse
   {
     try {
       $this->condicionanteService->delete($condicionante);

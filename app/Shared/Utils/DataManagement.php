@@ -12,8 +12,7 @@ class DataManagement
 
     public function create($entity, $infos): array
     {
-        // $debugSQL = $entity::create([...$infos, 'user_id' => Auth::user()->id]);
-        // dd($debugSQL);
+        // dd($entity::create([...$infos, 'user_id' => Auth::user()->id]));
 
         try {
             $model   = $entity::create([...$infos, 'user_id' => Auth::user()->id]);
@@ -45,7 +44,7 @@ class DataManagement
             $type    = 'error';
             $content = $e->getMessage();
         }
-    
+
         return [
             'model'   => $model,
             'request' => [

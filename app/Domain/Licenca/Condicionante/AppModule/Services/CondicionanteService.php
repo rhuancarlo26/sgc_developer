@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Licenca\Condicionante\Services;
+namespace App\Domain\Licenca\Condicionante\AppModule\Services;
 
 use App\Models\Licenca;
 use App\Models\LicencaCondicionante;

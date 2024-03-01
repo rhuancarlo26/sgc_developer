@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\Licenca\Requerimento\Controller;
+namespace App\Domain\Licenca\Requerimento\AppModule\Controller;
 
-use App\Domain\Licenca\Requerimento\Services\RequerimentoService;
+use App\Domain\Licenca\Requerimento\AppModule\Services\RequerimentoService;
 use App\Models\LicencaRequerimento;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +15,7 @@ class DestroyRequerimentoController extends Controller
   {
   }
 
-  public function destroy(LicencaRequerimento $requerimento): RedirectResponse
+  public function index(LicencaRequerimento $requerimento): RedirectResponse
   {
     try {
       Storage::delete($requerimento->caminho);

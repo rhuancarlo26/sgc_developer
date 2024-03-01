@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Licenca\Condicionante\Request;
+namespace App\Domain\Licenca\Condicionante\AppModule\Request;
 
 use Illuminate\Foundation\Http\FormRequest;
 

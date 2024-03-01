@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\Licenca\Condicionante\Controller;
+namespace App\Domain\Licenca\Condicionante\AppModule\Controller;
 
-use App\Domain\Licenca\Condicionante\Services\CondicionanteService;
+use App\Domain\Licenca\Condicionante\AppModule\Services\CondicionanteService;
 use App\Models\Licenca;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
