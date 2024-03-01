@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\Licenca\Condicionante\Controller;
+namespace App\Domain\Licenca\Condicionante\AppModule\Controller;
 
-use App\Domain\Licenca\Condicionante\Services\CondicionanteService;
+use App\Domain\Licenca\Condicionante\AppModule\Services\CondicionanteService;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,7 +13,7 @@ class BuscarLicencaCondicionanteController extends Controller
   {
   }
 
-  public function buscarLicencaCondicionante(Request $request): JsonResponse
+  public function index(Request $request): JsonResponse
   {
     return response()->json($this->condicionanteService->buscarLicenca($request->all()));
   }

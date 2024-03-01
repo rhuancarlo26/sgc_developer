@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('licenca_id')->constrained('licenca', 'id')->cascadeOnDelete();
             $table->string('rodovia')->nullable();
-            $table->string('uf_incial')->nullable();
+            $table->string('uf_inicial')->nullable();
             $table->string('uf_final')->nullable();
             $table->string('km_inicial')->nullable();
             $table->string('km_final')->nullable();

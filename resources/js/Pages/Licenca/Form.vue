@@ -540,7 +540,7 @@
             type: Array
         },
         licenca: {
-            type: Array
+            type: Object
         },
         licencaSegmento: {
             type: Array
@@ -604,7 +604,7 @@
 
     const abrirSalvarSegmento = () => {
         formSegmento.id         = null,
-        formSegmento.licenca_id = form.id,
+        formSegmento.licenca_id = props.licenca.id,
         formSegmento.rodovia    = null,
         formSegmento.uf_inicial = null,
         formSegmento.uf_final   = null,
@@ -617,7 +617,7 @@
 
     const abrirEditarSegmento = (item) => {
         formSegmento.id         = item.id,
-        formSegmento.licenca_id = item.licenca_id,
+        formSegmento.licenca_id = props.licenca.id,
         formSegmento.rodovia    = item.rodovia;
         formSegmento.uf_inicial = item.uf_inicial;
         formSegmento.uf_final   = item.uf_final;
@@ -653,12 +653,10 @@
         formSegmento.transform((data) => Object.assign({}, data))
 
         if(editarLicencaSegmento) {
-            console.log("pastel");
             formSegmento.patch(route('licenca_segmento.update', formSegmento));
             return
         }
-
-        console.log("adsokiodsaipsad")
+        console.log(formSegmento)
         formSegmento.post(route('licenca_segmento.store'));
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Licenca\Requerimento\Services;
+namespace App\Domain\Licenca\Requerimento\AppModule\Services;
 
 use App\Models\LicencaRequerimento;
 use App\Shared\Abstract\BaseModelService;
