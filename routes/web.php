@@ -143,6 +143,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::delete('/delete_trecho/{tipo}/{trecho}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoTrechoController::class, 'destroyTrecho'])
                     ->name('contratos.gestao.delete_trecho');
             });
+
+            Route::prefix('{contrato}/contratada')->group(function () {
+                Route::get('/', [App\Domain\Contrato\Contratada\Controller\ContratoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.index');
+                Route::get('/dados_gerais', [App\Domain\Contrato\Contratada\Controller\DadosGeraisContratadaController::class, 'index'])
+                    ->name('contratos.contratada.dados_gerais.index');
+            });
         });
 
         // Licenças
