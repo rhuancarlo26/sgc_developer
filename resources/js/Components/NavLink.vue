@@ -3,7 +3,7 @@ import { Link } from "@inertiajs/vue3";
 
 defineProps({
     routeName: { type: String },
-    param: { type: String },
+    param: { type: Number },
     title: { type: String },
     icon: { type: Function },
     activeOnRoutePrefix: { type: String }
