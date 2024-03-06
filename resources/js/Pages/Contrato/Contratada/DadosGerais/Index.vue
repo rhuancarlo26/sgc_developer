@@ -1,24 +1,20 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
-import Table from '@/Components/Table.vue';
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import Modal from "@/Components/Modal.vue";
-import { ref } from "vue";
-import Map from "@/Components/Map.vue";
-import { onMounted } from "vue";
-import axios from "axios";
-import { computed } from "vue";
-import { dateTimeFormat } from "@/Utils/DateTimeUtils";
-import { IconSettings } from "@tabler/icons-vue";
-import { IconDots } from "@tabler/icons-vue";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import Navbar from "../Navbar.vue";
+import { Head } from "@inertiajs/vue3";
+import TabDadosContratuais from "./DadosContratuais/TabDadosContratuais.vue";
+import { ref } from "vue";
+
+const mapaTabDadosContratuais = ref();
 
 const props = defineProps({
   contrato: Object
 })
+
+const visualizarMapa = () => {
+  mapaTabDadosContratuais.value.visualizarTrecho();
+}
 
 </script>
 
@@ -43,30 +39,61 @@ const props = defineProps({
       <template #body>
         <ul class="nav nav-tabs card-header-tabs nav-fill" data-bs-toggle="tabs" role="tablist">
           <li class="nav-item" role="presentation">
-            <a href="#tabs-home-5" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab">Dados
-              Contratuais</a>
+            <a @click="visualizarMapa()" href="#dadosContratuais" class="nav-link active" data-bs-toggle="tab"
+              aria-selected="true" role="tab">Dados contratuais</a>
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#tabs-profile-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Introdução</a>
-          </li>
-          <li class="nav-item" role="presentation">
-            <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Empreendimento</a>
+            <a href="#tabs-profile-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+              tabindex="-1">Profile</a>
           </li>
           <li class="nav-item" role="presentation">
             <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Licenciamento</a>
+              role="tab">Activity</a>
           </li>
           <li class="nav-item" role="presentation">
             <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Hitórico</a>
+              role="tab">Activity</a>
           </li>
           <li class="nav-item" role="presentation">
             <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Anexos</a>
+              role="tab">Activity</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
+              role="tab">Activity</a>
           </li>
         </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane active show" id="dadosContratuais" role="tabpanel">
+            <TabDadosContratuais :contrato="contrato" ref="mapaTabDadosContratuais" />
+          </div>
+          <div class="tab-pane" id="tabs-profile-5" role="tabpanel">
+            <h4>Profile tab</h4>
+            <div>Fringilla egestas nunc quis tellus diam rhoncus ultricies tristique enim at diam, sem nunc amet,
+              pellentesque id egestas velit sed</div>
+          </div>
+          <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
+            <h4>Activity tab</h4>
+            <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
+              nibh habitant senectus</div>
+          </div>
+          <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
+            <h4>Activity tab</h4>
+            <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
+              nibh habitant senectus</div>
+          </div>
+          <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
+            <h4>Activity tab</h4>
+            <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
+              nibh habitant senectus</div>
+          </div>
+          <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
+            <h4>Activity tab</h4>
+            <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
+              nibh habitant senectus</div>
+          </div>
+        </div>
       </template>
     </Navbar>
 
