@@ -2,10 +2,10 @@
 
 namespace App\Domain\Licenca\LicencaSegmento\AppModule\Controller;
 
-use App\Domain\Licenca\LicencaSegmento\AppModule\Requests\StoreLicencaSegmentoRequest;
 use App\Domain\Licenca\LicencaSegmento\AppModule\Services\LicencaSegmentoService;
 use App\Models\LicencaSegmento;
 use App\Shared\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class UpdateLicencaSegmentoController extends Controller
 {
@@ -13,9 +13,9 @@ class UpdateLicencaSegmentoController extends Controller
     {
     }
 
-    public function index(LicencaSegmento $segmento): \Illuminate\Http\RedirectResponse
+    public function index(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $parameters = $this->licencaSegmentoService->update(post: $segmento->getAttributes());
+        $parameters = $this->licencaSegmentoService->update(post: $request->All());
 
         return to_route(
                 route: 'licenca.create', 
