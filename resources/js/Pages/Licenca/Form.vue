@@ -588,6 +588,7 @@
     });
     
     const formSegmento = useForm({
+        id: null,
         licenca_id: form.id,
         rodovia: null,
         uf_inicial: null,
