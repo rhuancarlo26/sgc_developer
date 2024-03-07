@@ -5,6 +5,7 @@ import Navbar from "../Navbar.vue";
 import { Head } from "@inertiajs/vue3";
 import TabDadosContratuais from "./DadosContratuais/TabDadosContratuais.vue";
 import { ref } from "vue";
+import TabIntroducao from "./Introducao/TabIntroducao.vue";
 
 const mapaTabDadosContratuais = ref();
 
@@ -43,8 +44,8 @@ const visualizarMapa = () => {
               aria-selected="true" role="tab">Dados contratuais</a>
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#tabs-profile-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
-              tabindex="-1">Profile</a>
+            <a href="#introducao" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+              tabindex="-1">Introdução</a>
           </li>
           <li class="nav-item" role="presentation">
             <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
@@ -68,10 +69,8 @@ const visualizarMapa = () => {
           <div class="tab-pane active show" id="dadosContratuais" role="tabpanel">
             <TabDadosContratuais :contrato="contrato" ref="mapaTabDadosContratuais" />
           </div>
-          <div class="tab-pane" id="tabs-profile-5" role="tabpanel">
-            <h4>Profile tab</h4>
-            <div>Fringilla egestas nunc quis tellus diam rhoncus ultricies tristique enim at diam, sem nunc amet,
-              pellentesque id egestas velit sed</div>
+          <div class="tab-pane" id="introducao" role="tabpanel">
+            <TabIntroducao :contrato="contrato" />
           </div>
           <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
             <h4>Activity tab</h4>
