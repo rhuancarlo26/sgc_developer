@@ -144,11 +144,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.gestao.delete_trecho');
             });
 
-            Route::prefix('{contrato}/contratada')->group(function () {
-                Route::get('/', [App\Domain\Contrato\Contratada\Controller\ContratoContratadaController::class, 'index'])
+            Route::prefix('/contratada')->group(function () {
+                Route::get('{contrato}/', [App\Domain\Contrato\Contratada\Controller\ContratoContratadaController::class, 'index'])
                     ->name('contratos.contratada.index');
-                Route::get('/dados_gerais', [App\Domain\Contrato\Contratada\Controller\DadosGeraisContratadaController::class, 'index'])
+                Route::get('{contrato}/dados_gerais', [App\Domain\Contrato\Contratada\Controller\DadosGeraisContratadaController::class, 'index'])
                     ->name('contratos.contratada.dados_gerais.index');
+                Route::post('/store_introducao', [App\Domain\Contrato\Contratada\Controller\StoreIntroducaoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.store_introducao.index');
+                Route::patch('/update_introducao/{introducao}', [App\Domain\Contrato\Contratada\Controller\UpdateIntroducaoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.update_introducao.index');
             });
         });
 
