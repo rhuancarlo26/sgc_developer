@@ -16,7 +16,8 @@ class DadosGeraisContratadaController extends Controller
       $contrato->load([
         'trechos',
         'trechos.uf',
-        'trechos.rodovia'
+        'trechos.rodovia',
+        'introducao'
       ]);
     }
     return Inertia::render('Contrato/Contratada/DadosGerais/Index', [
