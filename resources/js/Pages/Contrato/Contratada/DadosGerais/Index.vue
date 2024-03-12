@@ -6,11 +6,14 @@ import { Head } from "@inertiajs/vue3";
 import TabDadosContratuais from "./DadosContratuais/TabDadosContratuais.vue";
 import { ref } from "vue";
 import TabIntroducao from "./Introducao/TabIntroducao.vue";
+import TabLicenciamento from "./Licenciamento/TabLicenciamento.vue";
+import TabHistorico from "./Historico/TabHistorico.vue";
 
 const mapaTabDadosContratuais = ref();
 
-const props = defineProps({
-  contrato: Object
+defineProps({
+  contrato: Object,
+  numero_licencas: Array
 })
 
 const visualizarMapa = () => {
@@ -48,20 +51,20 @@ const visualizarMapa = () => {
               tabindex="-1">Introdução</a>
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Activity</a>
+            <a href="#empreendimento" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
+              role="tab">Empreendimento</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#licenciamento" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
+              role="tab">Licenciamento</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#historico" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
+              role="tab">Histórico</a>
           </li>
           <li class="nav-item" role="presentation">
             <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Activity</a>
-          </li>
-          <li class="nav-item" role="presentation">
-            <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Activity</a>
-          </li>
-          <li class="nav-item" role="presentation">
-            <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Activity</a>
+              role="tab">Anexos</a>
           </li>
         </ul>
 
@@ -72,20 +75,16 @@ const visualizarMapa = () => {
           <div class="tab-pane" id="introducao" role="tabpanel">
             <TabIntroducao :contrato="contrato" />
           </div>
-          <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
+          <div class="tab-pane" id="empreendimento" role="tabpanel">
             <h4>Activity tab</h4>
             <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
               nibh habitant senectus</div>
           </div>
-          <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
-            <h4>Activity tab</h4>
-            <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
-              nibh habitant senectus</div>
+          <div class="tab-pane" id="licenciamento" role="tabpanel">
+            <TabLicenciamento :contrato="contrato" :numero_licencas="numero_licencas" />
           </div>
-          <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
-            <h4>Activity tab</h4>
-            <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
-              nibh habitant senectus</div>
+          <div class="tab-pane" id="historico" role="tabpanel">
+            <TabHistorico :contrato="contrato" />
           </div>
           <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
             <h4>Activity tab</h4>
