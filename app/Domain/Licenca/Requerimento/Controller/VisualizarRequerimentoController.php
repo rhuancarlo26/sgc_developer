@@ -8,7 +8,7 @@ use App\Shared\Utils\ArquivoUtils;
 
 class VisualizarRequerimentoController extends Controller
 {
-    public function visualizar(LicencaRequerimento $requerimento): \Illuminate\Http\Response
+    public function index(LicencaRequerimento $requerimento): \Illuminate\Http\Response
     {
         $arquivo = new ArquivoUtils();
         return $arquivo->visualizar($requerimento->caminho);

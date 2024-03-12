@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Domain\Licenca\Services;
+namespace App\Domain\Licenca\AppModule\Services;
 
 use App\Models\Licenca;
+use App\Models\LicencaSegmento;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -13,7 +14,7 @@ class LicencaService extends BaseModelService
 
     protected string $modelClass = Licenca::class;
 
-    public function get(array $searchParams, bool $arquivado): array
+    public function get(array $searchParams, bool $arquivado = false): array
     {
         return [
             'licencas' => $this->search(...$searchParams)

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Licenca\Services;
+namespace App\Domain\Licenca\AppModule\Services;
 
 use App\Models\LicencaTipo;
 use Illuminate\Support\Facades\Cache;

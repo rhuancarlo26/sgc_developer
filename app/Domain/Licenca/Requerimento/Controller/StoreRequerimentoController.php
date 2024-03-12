@@ -13,7 +13,7 @@ class StoreRequerimentoController extends Controller
   {
   }
 
-  public function store(Request $request): RedirectResponse
+  public function index(Request $request): RedirectResponse
   {
     $response = $this->requerimentoService->store($request->arquivos, $request->licenca_id);
 
