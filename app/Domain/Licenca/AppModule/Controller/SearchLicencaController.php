@@ -12,16 +12,15 @@ class SearchLicencaController extends Controller
 {
     public function index($numeroLicenca = null)
     {
+        $licenca = null;
         if ($numeroLicenca) {
             $licenca = Licenca::where('numero_licenca', $numeroLicenca)->first();
-        } else {
-            $licenca = null;
         }
 
         $tipos = Cache::rememberForever('licenca_tipo', function () {
             return LicencaTipo::select('id', 'sigla', 'nome')->get();
         });
-        
+
         return Inertia::render('Licenca/Form', [
             'tipos'     => $tipos,
             'licenca'   => $licenca

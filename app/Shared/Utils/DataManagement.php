@@ -12,8 +12,6 @@ class DataManagement
 
     public function create($entity, $infos): array
     {
-        // dd($entity::create([...$infos, 'user_id' => Auth::user()->id]));
-
         try {
             $model   = $entity::create([...$infos, 'user_id' => Auth::user()->id]);
             $type    = 'success';
@@ -53,27 +51,20 @@ class DataManagement
             ]
         ];
     }
-    
 
-    public function delete($entity, $infos)
+
+    public function delete($entity, $infos): array
     {
-        // $newEntity  = new $entity;
-        // $debugSQL = $newEntity->where($infos)->delete();
-        // dd($debugSQL);
-
         try {
-            $newEntity  = new $entity;
-            $model      = $newEntity->where($infos)->delete();
+            $entity->where($infos)->delete();
             $type       = 'success';
             $content    = 'Registro excluido!';
         } catch (\Exception) {
-            $model   = null;
             $type    = 'error';
             $content = 'Falha ao excluir!';
         }
 
         return [
-            'model'   => $model,
             'request' => [
                 'type'    => $type,
                 'content' => $content,
