@@ -7,7 +7,6 @@ use App\Models\LicencaCondicionante;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
-use PhpParser\Node\Expr\Cast\Object_;
 
 class CondicionanteService extends BaseModelService
 {
@@ -16,7 +15,7 @@ class CondicionanteService extends BaseModelService
     protected string $modelClass = LicencaCondicionante::class;
     protected string $modelClassLicenca = Licenca::class;
 
-    public function listarCondicionantes($licenca, $searchParams)
+    public function listarCondicionantes($licenca, $searchParams): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return $this->search(...$searchParams)
             ->where('licenca_id', $licenca['id'])

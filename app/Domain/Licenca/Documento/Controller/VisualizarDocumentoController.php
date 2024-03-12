@@ -8,7 +8,7 @@ use App\Shared\Utils\ArquivoUtils;
 
 class VisualizarDocumentoController extends Controller
 {
-    public function visualizar(LicencaDocumento $documento)
+    public function index(LicencaDocumento $documento)
     {
         $arquivo = new ArquivoUtils();
         return $arquivo->visualizar($documento->caminho);

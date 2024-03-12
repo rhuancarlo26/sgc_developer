@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('licenca', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnDelete();
-            $table->foreignId('tipo_id')->constrained('licenca_tipo', 'id')->cascadeOnDelete();
+            $table->foreignId('licenca_tipo_id')->constrained('licenca_tipo', 'id')->cascadeOnDelete();
             $table->string('numero_licenca')->nullable();
             $table->string('modal')->nullable();
             $table->date('data_emissao')->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('processo_dnit')->nullable();
             $table->string('inicio_subtrecho')->nullable();
             $table->string('fim_subtrecho')->nullable();
-            $table->string('extensao')->nullable();
+            $table->string('soma_extensao')->nullable();
             $table->string('emissor')->nullable();
             $table->string('empreendimento')->nullable();
             $table->string('dias_renovacao')->nullable();
