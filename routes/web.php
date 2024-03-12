@@ -149,6 +149,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::delete('/delete_trecho/{tipo}/{trecho}', [App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoTrechoController::class, 'destroyTrecho'])
                     ->name('contratos.gestao.delete_trecho');
             });
+
+            Route::prefix('/contratada')->group(function () {
+                Route::get('{contrato}/', [App\Domain\Contrato\Contratada\Controller\ContratoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.index');
+                Route::get('{contrato}/dados_gerais', [App\Domain\Contrato\Contratada\Controller\DadosGeraisContratadaController::class, 'index'])
+                    ->name('contratos.contratada.dados_gerais.index');
+                Route::post('/store_introducao', [App\Domain\Contrato\Contratada\Introducao\Controller\StoreIntroducaoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.store_introducao.index');
+                Route::patch('/update_introducao/{introducao}', [App\Domain\Contrato\Contratada\Introducao\Controller\UpdateIntroducaoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.update_introducao.index');
+                Route::post('/store_licenciamento', [App\Domain\Contrato\Contratada\Licenciamento\Controller\StoreLicenciamentoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.store_licenciamento');
+                Route::get('/delete_licenciamento/{licenciamento}', [App\Domain\Contrato\Contratada\Licenciamento\Controller\DeleteLicenciamentoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.delete_licenciamento');
+                Route::post('/store_licenciamento_observacao', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\StoreLicenciamentoObservacaoController::class, 'index'])
+                    ->name('contratos.contratada.store_licenciamento_observacao');
+                Route::patch('/update_licenciamento_observacao/{observacao}', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\UpdateLicenciamentoObservacaoController::class, 'index'])
+                    ->name('contratos.contratada.update_licenciamento_observacao');
+                Route::post('/delete_licenciamento_observacao/{observacao}', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\DeleteLicenciamentoObservacaoController::class, 'index'])
+                    ->name('contratos.contratada.delete_licenciamento_observacao');
+            });
         }); // FIM CONTRATOS
 
         // Licenças

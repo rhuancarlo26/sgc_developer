@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Contrato extends Model
 {
@@ -26,6 +27,21 @@ class Contrato extends Model
     public function trechos(): HasMany
     {
         return $this->hasMany(contratoTrecho::class, 'contrato_id');
+    }
+
+    public function introducao(): HasOne
+    {
+        return $this->hasOne(ContratoIntroducao::class, 'contrato_id');
+    }
+
+    public function licenciamentos()
+    {
+        return $this->hasManyThrough(Licenca::class, ContratoLicenca::class, 'contrato_id', 'id', 'id', 'licenca_id');
+    }
+
+    public function licenciamento_observacoes()
+    {
+        return $this->hasMany(ContratoLicencaObservacao::class, 'contrato_id');
     }
 
     public function ufs(): Attribute
