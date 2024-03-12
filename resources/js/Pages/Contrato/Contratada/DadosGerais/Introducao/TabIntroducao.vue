@@ -6,45 +6,22 @@ import { useToast } from "vue-toastification";
 
 const toast = useToast();
 
-
 const props = defineProps({
   contrato: Object
 })
 
 const form = useForm({
   id: null,
-  contrato_id: null,
+  contrato_id: props.contrato.id,
   nome: null,
   ...props.contrato.introducao
 });
 
 const enviarIntroducao = () => {
   if (form.id) {
-    axios.patch(route('contratos.contratada.update_introducao.index', form.id), form)
-      .then(response => {
-        if (response.data.type === 'success') {
-          Object.assign(form, response.data.introducao);
-          toast.success('Introdução alterada com sucesso!')
-        } else {
-          toast.error('Falha ao alterar a introdução')
-        }
-      }).catch(response => {
-        console.log('teste', response);
-        toast.error('Falha ao cadastrar a introdução')
-      });
+    form.patch(route('contratos.contratada.update_introducao.index', form.id));
   } else {
-    axios.post(route('contratos.contratada.store_introducao.index'), { contrato_id: props.contrato.id, form: form })
-      .then(response => {
-        if (response.data.type === 'success') {
-          Object.assign(form, response.data.introducao);
-          toast.success('Introdução cadastrado com sucesso!')
-        } else {
-          toast.error('Falha ao cadastrar a introdução')
-        }
-      }).catch(response => {
-        console.log('teste', response);
-        toast.error('Falha ao cadastrar a introdução')
-      });
+    form.post(route('contratos.contratada.store_introducao.index'));
   }
 };
 

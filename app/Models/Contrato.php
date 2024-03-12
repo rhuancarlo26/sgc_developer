@@ -29,9 +29,19 @@ class Contrato extends Model
         return $this->hasMany(contratoTrecho::class, 'contrato_id');
     }
 
-    function introducao(): HasOne
+    public function introducao(): HasOne
     {
         return $this->hasOne(ContratoIntroducao::class, 'contrato_id');
+    }
+
+    public function licenciamentos()
+    {
+        return $this->hasManyThrough(Licenca::class, ContratoLicenca::class, 'contrato_id', 'id', 'id', 'licenca_id');
+    }
+
+    public function licenciamento_observacoes()
+    {
+        return $this->hasMany(ContratoLicencaObservacao::class, 'contrato_id');
     }
 
     public function ufs(): Attribute

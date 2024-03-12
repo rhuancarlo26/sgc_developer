@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Domain\Contrato\Contratada\Controller;
+namespace App\Domain\Contrato\Contratada\Introducao\Controller;
 
+use App\Domain\Contrato\Contratada\Introducao\Services\IntroducaoService;
 use App\Domain\Contrato\GestaoContrato\Requests\StoreContratoRequest;
 use App\Models\Contrato;
 use App\Models\ContratoIntroducao;
@@ -14,12 +15,14 @@ use Inertia\Inertia;
 
 class UpdateIntroducaoContratadaController extends Controller
 {
+  public function __construct(private readonly IntroducaoService $introducaoService)
+  {
+  }
+
   public function index(ContratoIntroducao $introducao, Request $request)
   {
-    if ($introducao->update($request->all())) {
-      return response()->json(['type' => 'success', 'introducao' => $introducao]);
-    }
+    $response = $this->introducaoService->update($request->all());
 
-    return response()->json(data: ['type' => 'error'], status: 500);
+    return to_route('contratos.contratada.dados_gerais.index', ['contrato' => $request->contrato_id])->with('message', $response['request']);
   }
 }
