@@ -37,10 +37,10 @@ class DataManagement
             $model   = $entity::find($id)->update([...$infos, 'user_id' => Auth::user()->id]);
             $type    = 'success';
             $content = 'Registro atualizado!';
-        } catch (\Exception) {
+        } catch (\Exception $e) {
             $model   = null;
             $type    = 'error';
-            $content = 'Falha ao atualizar!';
+            $content = $e->getMessage();
         }
 
         return [
@@ -52,9 +52,24 @@ class DataManagement
         ];
     }
 
-    public function delete($entity, $infos)
-    {
 
+    public function delete($entity, $infos): array
+    {
+        try {
+            $entity->where($infos)->delete();
+            $type       = 'success';
+            $content    = 'Registro excluido!';
+        } catch (\Exception) {
+            $type    = 'error';
+            $content = 'Falha ao excluir!';
+        }
+
+        return [
+            'request' => [
+                'type'    => $type,
+                'content' => $content,
+            ]
+        ];
     }
 
 }
