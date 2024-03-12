@@ -7,14 +7,14 @@
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[{ route: '#', label: 'Gestão de Licenças' }]" />
                 <div class="container-buttons">
-                    <Link class="btn btn-success me-2" :href="route('licenca.create')">
+                    <Link class="btn btn-info me-2" :href="route('licenca.create')">
                     Cadastrar Licenças
                     </Link>
                     <button @click="arquivado = !arquivado" class="btn me-2"
-                        :class="arquivado ? 'btn-success' : 'btn-outline-success'">
+                        :class="arquivado ? 'btn-info' : 'btn-outline-info'">
                         Licenças Arquivados
                     </button>
-                    <button @click="abrirMapaGeral()" type="button" class="btn btn-success">
+                    <button @click="abrirMapaGeral()" type="button" class="btn btn-info">
                         Mapa das Licenças
                     </button>
                 </div>
@@ -57,7 +57,7 @@
                                 <IconTrain v-if="licenca.modal == 3" />
                             </td>
                             <td>
-                                {{ licenca.tipo.sigla }} - {{ licenca.tipo.nome }}
+<!--                                {{ licenca.tipo.sigla }} - {{ licenca.tipo.nome }}-->
                             </td>
                             <td>
                                 {{ licenca.numero_licenca }}
@@ -215,7 +215,6 @@ watch(() => arquivado.value, () => {
 
 // FUNCTIONS
 const dtAlerta = (data) => {
-    console.log('data', data);
     if (data) {
         const data_licenca = new Date(data);
         const hoje = new Date();

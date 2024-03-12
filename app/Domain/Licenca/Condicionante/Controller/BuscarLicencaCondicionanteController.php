@@ -13,7 +13,7 @@ class BuscarLicencaCondicionanteController extends Controller
   {
   }
 
-  public function buscarLicencaCondicionante(Request $request): JsonResponse
+  public function index(Request $request): JsonResponse
   {
     return response()->json($this->condicionanteService->buscarLicenca($request->all()));
   }

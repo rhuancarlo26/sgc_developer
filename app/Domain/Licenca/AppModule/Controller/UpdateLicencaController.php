@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Domain\Licenca\Controller;
+namespace App\Domain\Licenca\AppModule\Controller;
 
-use App\Domain\Licenca\Requests\UpdateLicencaRequest;
-use App\Domain\Licenca\Services\LicencaService;
+use App\Domain\Licenca\AppModule\Requests\UpdateLicencaRequest;
+use App\Domain\Licenca\AppModule\Services\LicencaService;
 use App\Shared\Http\Controllers\Controller;
 
 class UpdateLicencaController extends Controller
