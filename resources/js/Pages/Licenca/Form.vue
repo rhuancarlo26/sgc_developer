@@ -177,7 +177,7 @@
                                 <!-- Extensão: -->
                                 <div class="col-3">
                                     <InputLabel value="Extensão:" for="extensao" />
-                                    <input type="text" id="soma_extensao" name="soma_extensao" class="form-control" v-model="form.soma_extensao" disabled readonly/>
+                                    <input type="text" id="soma_extensao" name="soma_extensao" class="form-control" v-model="somaExtensao" disabled readonly/>
                                     <InputError :message="form.errors.soma_extensao" />
                                 </div>
 
@@ -548,6 +548,13 @@
     });
 
     // VARIAVEIS
+    const somaExtensao = props.licencaSegmento.reduce((total, formSegmento) => {
+        const extensao = parseFloat(formSegmento.extensao);
+        if (!isNaN(extensao)) {
+            total += extensao;
+        }
+        return total;
+    }, 0);
     const titleTableLicencaSegmento = ['BR', 'UF Inicial', 'UF Final', 'KM Inicial', 'KM Final', 'Extensão', 'Ação'];
     let arrayBrs = props.brs;
     let uniqueRodovias = [...new Set(arrayBrs.map(br => br.rodovia.trim()))];
@@ -691,6 +698,7 @@
     }
 
     // OTHERS
+
 </script>
 
 <style scoped>
