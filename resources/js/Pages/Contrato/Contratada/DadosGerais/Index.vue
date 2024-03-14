@@ -8,12 +8,16 @@ import { ref } from "vue";
 import TabIntroducao from "./Introducao/TabIntroducao.vue";
 import TabLicenciamento from "./Licenciamento/TabLicenciamento.vue";
 import TabHistorico from "./Historico/TabHistorico.vue";
+import TabAnexo from "./Anexo/TabAnexo.vue";
+import TabEmpreendimento from "./Empreendimento/TabEmpreendimento.vue";
 
 const mapaTabDadosContratuais = ref();
 
 defineProps({
   contrato: Object,
-  numero_licencas: Array
+  numero_licencas: Array,
+  ufs: Array,
+  rodovias: Array
 })
 
 const visualizarMapa = () => {
@@ -63,7 +67,7 @@ const visualizarMapa = () => {
               role="tab">Histórico</a>
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
+            <a href="#anexo" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
               role="tab">Anexos</a>
           </li>
         </ul>
@@ -76,9 +80,7 @@ const visualizarMapa = () => {
             <TabIntroducao :contrato="contrato" />
           </div>
           <div class="tab-pane" id="empreendimento" role="tabpanel">
-            <h4>Activity tab</h4>
-            <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
-              nibh habitant senectus</div>
+            <TabEmpreendimento :contrato="contrato" :ufs="ufs" :rodovias="rodovias" />
           </div>
           <div class="tab-pane" id="licenciamento" role="tabpanel">
             <TabLicenciamento :contrato="contrato" :numero_licencas="numero_licencas" />
@@ -86,10 +88,8 @@ const visualizarMapa = () => {
           <div class="tab-pane" id="historico" role="tabpanel">
             <TabHistorico :contrato="contrato" />
           </div>
-          <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
-            <h4>Activity tab</h4>
-            <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
-              nibh habitant senectus</div>
+          <div class="tab-pane" id="anexo" role="tabpanel">
+            <TabAnexo :contrato="contrato" />
           </div>
         </div>
       </template>

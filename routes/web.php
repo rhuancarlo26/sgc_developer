@@ -169,6 +169,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.contratada.update_licenciamento_observacao');
                 Route::post('/delete_licenciamento_observacao/{observacao}', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\DeleteLicenciamentoObservacaoController::class, 'index'])
                     ->name('contratos.contratada.delete_licenciamento_observacao');
+                Route::post('/store_historico', [App\Domain\Contrato\Contratada\Historico\Controller\StoreHistoricoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.store_historico');
+                Route::patch('/update_historico', [App\Domain\Contrato\Contratada\Historico\Controller\UpdateHistoricoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.update_historico');
+                Route::post('/store_anexo', [App\Domain\Contrato\Contratada\Anexo\Controller\StoreAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.store_anexo');
+                Route::post('/update_anexo', [App\Domain\Contrato\Contratada\Anexo\Controller\UpdateAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.update_anexo');
+                Route::get('/visualizar/{anexo}', [App\Domain\Contrato\Contratada\Anexo\Controller\VisualizarAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.visualizar_anexo');
+                Route::post('/store_empreendimento_trecho', [App\Domain\Contrato\Contratada\Empreendimento\Controller\StoreContratadaEmpreendimentoTrechoController::class, 'index'])
+                    ->name('contratos.contratada.store_empreendimento_trecho');
+                Route::patch('/update_empreendimento_trecho', [App\Domain\Contrato\Contratada\Empreendimento\Controller\UpdateContratadaEmpreendimentoTrechoController::class, 'index'])
+                    ->name('contratos.contratada.update_empreendimento_trecho');
             });
         }); // FIM CONTRATOS
 
