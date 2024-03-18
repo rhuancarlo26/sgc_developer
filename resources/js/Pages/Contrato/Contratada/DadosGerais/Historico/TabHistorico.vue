@@ -1,6 +1,6 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
-import { useForm } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import { IconDots } from '@tabler/icons-vue';
 
 const props = defineProps({
@@ -24,6 +24,11 @@ const enviarObservacao = () => {
     });
   }
 }
+
+const excluirObservacao = (observacao_id) => {
+  router.delete(route('contratos.contratada.destroy_historico', observacao_id));
+}
+
 </script>
 
 <template>
@@ -58,7 +63,7 @@ const enviarObservacao = () => {
                 <a @click="Object.assign(form, observacao)" class="dropdown-item" href="javascript:void(0)">
                   Editar
                 </a>
-                <a class="dropdown-item" href="javascript:void(0)">
+                <a @click="excluirObservacao(observacao.id)" class="dropdown-item" href="javascript:void(0)">
                   Excluir
                 </a>
               </div>

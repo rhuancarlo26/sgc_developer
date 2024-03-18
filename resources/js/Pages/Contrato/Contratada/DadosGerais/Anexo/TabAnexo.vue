@@ -1,6 +1,6 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
-import { useForm } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import { IconDots } from '@tabler/icons-vue';
 
 const props = defineProps({
@@ -33,6 +33,11 @@ const salvarAnexo = () => {
     });
   }
 }
+
+const excluirAnexo = (anexo_id) => {
+  router.delete(route('contratos.contratada.destroy_anexo', anexo_id));
+}
+
 </script>
 <template>
   <div class="row mb-4">
@@ -82,6 +87,9 @@ const salvarAnexo = () => {
                 </a>
                 <a @click="Object.assign(form, anexo)" class="dropdown-item" href="javascript:void(0)">
                   Editar
+                </a>
+                <a @click="excluirAnexo(anexo.id)" class="dropdown-item" href="javascript:void(0)">
+                  Excluir
                 </a>
               </div>
             </span>
