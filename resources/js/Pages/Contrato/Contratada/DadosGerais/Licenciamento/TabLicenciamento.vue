@@ -43,6 +43,10 @@ const salvarObservacao = () => {
   }
 }
 
+const excluirObservacao = (observacao_id) => {
+  router.delete(route('contratos.contratada.delete_licenciamento_observacao', observacao_id));
+}
+
 const editarObservacao = (observacao) => {
   Object.assign(form_observacao, observacao);
 }
@@ -206,7 +210,7 @@ const dtAlerta = (data) => {
                 <a @click="editarObservacao(observacao)" class="dropdown-item" href="javascript:void(0)">
                   Editar
                 </a>
-                <a class="dropdown-item" href="javascript:void(0)">
+                <a @click="excluirObservacao(observacao.id)" class="dropdown-item" href="javascript:void(0)">
                   Excluir
                 </a>
               </div>

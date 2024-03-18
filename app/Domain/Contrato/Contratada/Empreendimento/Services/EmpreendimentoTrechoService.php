@@ -33,4 +33,13 @@ class EmpreendimentoTrechoService extends BaseModelService
       'request' => $introducao['request']
     ];
   }
+
+  public function destroy($request)
+  {
+    $introducao = $this->dataManagement->delete(entity: $this->modelClass, infos: $request);
+
+    return [
+      'request' => $introducao['request']
+    ];
+  }
 }

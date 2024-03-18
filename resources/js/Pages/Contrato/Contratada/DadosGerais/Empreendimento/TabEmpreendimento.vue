@@ -1,7 +1,7 @@
 <script setup>
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
-import { useForm } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 import { IconDots, IconPlus, IconX } from "@tabler/icons-vue";
 import { watch } from "vue";
 
@@ -47,6 +47,10 @@ const salvarTrecho = () => {
       onSuccess: () => form_trecho.reset()
     });
   }
+}
+
+const excluirTrecho = (trecho) => {
+  router.delete(route('contratos.contratada.destroy_empreendimento_trecho', trecho.id));
 }
 
 </script>
@@ -139,7 +143,7 @@ const salvarTrecho = () => {
                 <a @click="Object.assign(form_trecho, trecho)" class="dropdown-item" href="javascript:void(0)">
                   Editar
                 </a>
-                <a class="dropdown-item" href="javascript:void(0)">
+                <a @click="excluirTrecho(trecho)" class="dropdown-item" href="javascript:void(0)">
                   Excluir
                 </a>
               </div>
