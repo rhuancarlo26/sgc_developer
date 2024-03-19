@@ -161,7 +161,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.contratada.update_introducao.index');
                 Route::post('/store_licenciamento', [App\Domain\Contrato\Contratada\Licenciamento\Controller\StoreLicenciamentoContratadaController::class, 'index'])
                     ->name('contratos.contratada.store_licenciamento');
-                Route::get('/delete_licenciamento/{licenciamento}', [App\Domain\Contrato\Contratada\Licenciamento\Controller\DeleteLicenciamentoContratadaController::class, 'index'])
+                Route::post('/delete_licenciamento/{licenca}', [App\Domain\Contrato\Contratada\Licenciamento\Controller\DeleteLicenciamentoContratadaController::class, 'index'])
                     ->name('contratos.contratada.delete_licenciamento');
                 Route::post('/store_licenciamento_observacao', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\StoreLicenciamentoObservacaoController::class, 'index'])
                     ->name('contratos.contratada.store_licenciamento_observacao');

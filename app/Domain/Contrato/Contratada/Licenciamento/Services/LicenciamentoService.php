@@ -23,6 +23,25 @@ class LicenciamentoService extends BaseModelService
     ];
   }
 
+  public function deleteLicenciamento($licenca, $request)
+  {
+    try {
+      $this->modelClass::Where('licenca_id', $licenca->id)->where('contrato_id', $request['contrato_id'])->firstOrFail()->delete();
+
+      $response = [
+        'type' => 'success',
+        'content' => 'Licenciamento deletado com sucesso!'
+      ];
+    } catch (\Exception $e) {
+      $response = [
+        'type' => 'error',
+        'content' => $e->getMessage()
+      ];
+    }
+
+    return $response;
+  }
+
   public function licenciamentos($contrato_id)
   {
     return $this->modelClass::Where('contrato_id', $contrato_id)->get();
