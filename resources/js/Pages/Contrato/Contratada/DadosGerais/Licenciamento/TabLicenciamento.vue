@@ -34,6 +34,10 @@ const salvarLicenca = () => {
   form.post(route('contratos.contratada.store_licenciamento'));
 }
 
+const excluirLicenciamento = (licenca_id) => {
+  router.post(route('contratos.contratada.delete_licenciamento', licenca_id), { contrato_id: props.contrato.id })
+}
+
 const salvarObservacao = () => {
   if (form_observacao.id) {
     form_observacao.patch(route('contratos.contratada.update_licenciamento_observacao', form_observacao.id));
@@ -169,6 +173,9 @@ const dtAlerta = (data) => {
                 <a v-if="licenca.documento?.id" class="dropdown-item" target="_blank"
                   :href="route('licenca.documento.visualizar', licenca.documento.id)">
                   Visualizar PDF
+                </a>
+                <a @click="excluirLicenciamento(licenca.id)" class="dropdown-item" href="javascript:void(0)">
+                  Excluir
                 </a>
               </div>
             </span>
