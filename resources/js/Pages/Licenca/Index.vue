@@ -8,7 +8,7 @@
                 <Breadcrumb class="align-self-center" :links="[{ route: '#', label: 'Gestão de Licenças' }]" />
                 <div class="container-buttons">
                     <Link class="btn btn-info me-2" :href="route('licenca.create')">
-                    Cadastrar Licenças
+                        Cadastrar Licenças
                     </Link>
                     <button @click="arquivado = !arquivado" class="btn me-2"
                         :class="arquivado ? 'btn-info' : 'btn-outline-info'">
