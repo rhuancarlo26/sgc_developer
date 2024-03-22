@@ -9,7 +9,7 @@ import ModalNovoServico from "../Modais/ModalNovoServico.vue";
 </script>
 
 <template>
-    <div class="w-100 d-flex justify-content-end my-2">
+    <div class="w-100 d-flex justify-content-end mb-4">
         <div class="container-buttons">
             <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalNovoServico">
                 Novo Serviço
