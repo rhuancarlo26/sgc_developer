@@ -8,12 +8,17 @@ import { ref } from "vue";
 import TabIntroducao from "./Introducao/TabIntroducao.vue";
 import TabLicenciamento from "./Licenciamento/TabLicenciamento.vue";
 import TabHistorico from "./Historico/TabHistorico.vue";
+import TabAnexo from "./Anexo/TabAnexo.vue";
+import TabEmpreendimento from "./Empreendimento/TabEmpreendimento.vue";
+import { IconCircleCheck, IconCircleX } from "@tabler/icons-vue";
 
 const mapaTabDadosContratuais = ref();
 
 defineProps({
   contrato: Object,
-  numero_licencas: Array
+  numero_licencas: Array,
+  ufs: Array,
+  rodovias: Array
 })
 
 const visualizarMapa = () => {
@@ -43,28 +48,63 @@ const visualizarMapa = () => {
       <template #body>
         <ul class="nav nav-tabs card-header-tabs nav-fill" data-bs-toggle="tabs" role="tablist">
           <li class="nav-item" role="presentation">
-            <a @click="visualizarMapa()" href="#dadosContratuais" class="nav-link active" data-bs-toggle="tab"
-              aria-selected="true" role="tab">Dados contratuais</a>
+            <a @click="visualizarMapa()" href="#dadosContratuais" class="nav-link active d-flex justify-content-between"
+              data-bs-toggle="tab" aria-selected="true" role="tab">
+              <span>
+                Dados contratuais
+              </span>
+              <IconCircleCheck />
+            </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#introducao" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
-              tabindex="-1">Introdução</a>
+            <a href="#introducao" class="nav-link d-flex justify-content-between" data-bs-toggle="tab"
+              aria-selected="false" role="tab" tabindex="-1">
+              <span>
+                Introdução
+              </span>
+              <IconCircleCheck v-if="contrato.introducao" />
+              <IconCircleX v-else />
+            </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#empreendimento" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Empreendimento</a>
+            <a href="#empreendimento" class="nav-link d-flex justify-content-between" data-bs-toggle="tab"
+              aria-selected="false" tabindex="-1" role="tab">
+              <span>
+                Empreendimento
+              </span>
+              <IconCircleCheck v-if="contrato.empreendimento_trechos.length" />
+              <IconCircleX v-else />
+            </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#licenciamento" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Licenciamento</a>
+            <a href="#licenciamento" class="nav-link d-flex justify-content-between" data-bs-toggle="tab"
+              aria-selected="false" tabindex="-1" role="tab">
+              <span>
+                Licenciamento
+              </span>
+              <IconCircleCheck v-if="contrato.licenciamentos.length" />
+              <IconCircleX v-else />
+            </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#historico" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Histórico</a>
+            <a href="#historico" class="nav-link d-flex justify-content-between" data-bs-toggle="tab"
+              aria-selected="false" tabindex="-1" role="tab">
+              <span>
+                Histórico
+              </span>
+              <IconCircleCheck v-if="contrato.historico.length" />
+              <IconCircleX v-else />
+            </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#tabs-activity-5" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1"
-              role="tab">Anexos</a>
+            <a href="#anexo" class="nav-link d-flex justify-content-between" data-bs-toggle="tab" aria-selected="false"
+              tabindex="-1" role="tab">
+              <span>
+                Anexos
+              </span>
+              <IconCircleCheck v-if="contrato.anexos.length" />
+              <IconCircleX v-else />
+            </a>
           </li>
         </ul>
 
@@ -76,9 +116,7 @@ const visualizarMapa = () => {
             <TabIntroducao :contrato="contrato" />
           </div>
           <div class="tab-pane" id="empreendimento" role="tabpanel">
-            <h4>Activity tab</h4>
-            <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
-              nibh habitant senectus</div>
+            <TabEmpreendimento :contrato="contrato" :ufs="ufs" :rodovias="rodovias" />
           </div>
           <div class="tab-pane" id="licenciamento" role="tabpanel">
             <TabLicenciamento :contrato="contrato" :numero_licencas="numero_licencas" />
@@ -86,10 +124,8 @@ const visualizarMapa = () => {
           <div class="tab-pane" id="historico" role="tabpanel">
             <TabHistorico :contrato="contrato" />
           </div>
-          <div class="tab-pane" id="tabs-activity-5" role="tabpanel">
-            <h4>Activity tab</h4>
-            <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan
-              nibh habitant senectus</div>
+          <div class="tab-pane" id="anexo" role="tabpanel">
+            <TabAnexo :contrato="contrato" />
           </div>
         </div>
       </template>
