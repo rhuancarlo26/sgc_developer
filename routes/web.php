@@ -162,14 +162,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.contratada.update_introducao.index');
                 Route::post('/store_licenciamento', [App\Domain\Contrato\Contratada\Licenciamento\Controller\StoreLicenciamentoContratadaController::class, 'index'])
                     ->name('contratos.contratada.store_licenciamento');
-                Route::get('/delete_licenciamento/{licenciamento}', [App\Domain\Contrato\Contratada\Licenciamento\Controller\DeleteLicenciamentoContratadaController::class, 'index'])
+                Route::post('/delete_licenciamento/{licenca}', [App\Domain\Contrato\Contratada\Licenciamento\Controller\DeleteLicenciamentoContratadaController::class, 'index'])
                     ->name('contratos.contratada.delete_licenciamento');
                 Route::post('/store_licenciamento_observacao', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\StoreLicenciamentoObservacaoController::class, 'index'])
                     ->name('contratos.contratada.store_licenciamento_observacao');
                 Route::patch('/update_licenciamento_observacao/{observacao}', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\UpdateLicenciamentoObservacaoController::class, 'index'])
                     ->name('contratos.contratada.update_licenciamento_observacao');
-                Route::post('/delete_licenciamento_observacao/{observacao}', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\DeleteLicenciamentoObservacaoController::class, 'index'])
+                Route::delete('/delete_licenciamento_observacao/{observacao}', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\DeleteLicenciamentoObservacaoController::class, 'index'])
                     ->name('contratos.contratada.delete_licenciamento_observacao');
+                Route::post('/store_historico', [App\Domain\Contrato\Contratada\Historico\Controller\StoreHistoricoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.store_historico');
+                Route::patch('/update_historico', [App\Domain\Contrato\Contratada\Historico\Controller\UpdateHistoricoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.update_historico');
+                Route::delete('/destroy_historico/{historico}', [App\Domain\Contrato\Contratada\Historico\Controller\DestroyHistoricoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.destroy_historico');
+                Route::post('/store_anexo', [App\Domain\Contrato\Contratada\Anexo\Controller\StoreAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.store_anexo');
+                Route::post('/update_anexo', [App\Domain\Contrato\Contratada\Anexo\Controller\UpdateAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.update_anexo');
+                Route::delete('/destroy_anexo/{anexo}', [App\Domain\Contrato\Contratada\Anexo\Controller\DestroyAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.destroy_anexo');
+                Route::get('/visualizar/{anexo}', [App\Domain\Contrato\Contratada\Anexo\Controller\VisualizarAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.visualizar_anexo');
+                Route::post('/store_empreendimento_trecho', [App\Domain\Contrato\Contratada\Empreendimento\Controller\StoreContratadaEmpreendimentoTrechoController::class, 'index'])
+                    ->name('contratos.contratada.store_empreendimento_trecho');
+                Route::patch('/update_empreendimento_trecho', [App\Domain\Contrato\Contratada\Empreendimento\Controller\UpdateContratadaEmpreendimentoTrechoController::class, 'index'])
+                    ->name('contratos.contratada.update_empreendimento_trecho');
+                Route::delete('/destroy_empreendimento_trecho/{trecho}', [App\Domain\Contrato\Contratada\Empreendimento\Controller\DestroyContratadaEmpreendimentoTrechoController::class, 'index'])
+                    ->name('contratos.contratada.destroy_empreendimento_trecho');
             });
         }); // FIM CONTRATOS
 
