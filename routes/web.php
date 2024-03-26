@@ -184,6 +184,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.contratada.recurso.equipamento.destroy');
                 Route::delete('recurso/equipamento/destroy_equipamento/{equipamento}', [App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\DestroyEquipamentoRecursoController::class, 'index'])
                     ->name('contratos.contratada.recurso.equipamento.destroy_equipamento');
+
+                Route::get('{contrato}/recurso/veiculo', [App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\ListagemVeiculoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.veiculo.index');
+                Route::get('{contrato}/recurso/veiculo/create/{veiculo?}', [App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\CreateVeiculoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.veiculo.create');
+                Route::post('recurso/veiculo/store', [App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\StoreVeiculoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.veiculo.store');
+                Route::post('recurso/veiculo/store_documento', [App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\StoreDocumentoVeiculoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.veiculo.store_documento');
+                Route::get('recurso/veiculo/visualizar/{documento}', [App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\VisualizarDocumentoVeiculoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.veiculo.visualizar');
+                Route::delete('{contrato}/recurso/veiculo/destroy/{documento}', [App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\DestroyDocumentoVeiculoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.veiculo.destroy');
+                Route::delete('recurso/veiculo/destroy_veiculo/{veiculo}', [App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\DestroyVeiculoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.veiculo.destroy_veiculo');
             });
         }); // FIM CONTRATOS
 
