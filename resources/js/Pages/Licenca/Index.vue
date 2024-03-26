@@ -79,7 +79,7 @@
                                     <span v-else-if="dtAlerta(licenca.vencimento) <= 0" class="badge text-bg-danger">
                                         Vencida
                                     </span>
-                                    <span v-else class="badge text-bg-success">
+                                    <span v-else-if="licenca.vencimento !== '' && licenca.vencimento !== null" class="badge text-bg-success">
                                         Vigente
                                     </span>
                                     <!-- <span class="badge text-bg-success">
