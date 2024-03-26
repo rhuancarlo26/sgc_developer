@@ -57,7 +57,7 @@
                                 <IconTrain v-if="licenca.modal == 3" />
                             </td>
                             <td>
-                                {{ licenca.tipo.sigla }} - {{ licenca.tipo.nome }}
+                                {{ licenca.tipo?.sigla }} - {{ licenca.tipo?.nome }}
                             </td>
                             <td>
                                 {{ licenca.numero_licenca }}
@@ -117,7 +117,7 @@
                             <td>
                                 {{ licenca.processo_dnit }}
                             </td>
-                            <td @click.stop>
+                            <td>
                                 <span class="dropdown">
                                     <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport"
                                         data-bs-toggle="dropdown" aria-expanded="false">
