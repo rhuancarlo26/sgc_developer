@@ -13,7 +13,7 @@ class StoreImportacaoCondicionanteController extends Controller
   {
   }
 
-  public function storeImportacao(Request $request): RedirectResponse
+  public function index(Request $request): RedirectResponse
   {
     $response = $this->condicionanteService->storeImportacao($request->all());
 
