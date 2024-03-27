@@ -199,6 +199,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.contratada.recurso.veiculo.destroy');
                 Route::delete('recurso/veiculo/destroy_veiculo/{veiculo}', [App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\DestroyVeiculoRecursoController::class, 'index'])
                     ->name('contratos.contratada.recurso.veiculo.destroy_veiculo');
+
+                Route::get('{contrato}/recurso/rh', [App\Domain\Contrato\Contratada\Recurso\Rh\Controller\ListagemRhRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.rh.index');
+                Route::get('{contrato}/recurso/rh/create/{rh?}', [App\Domain\Contrato\Contratada\Recurso\Rh\Controller\CreateRhRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.rh.create');
+                Route::post('recurso/rh/store', [App\Domain\Contrato\Contratada\Recurso\Rh\Controller\StoreRhRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.rh.store');
+                Route::patch('recurso/rh/update/{rh}', [App\Domain\Contrato\Contratada\Recurso\Rh\Controller\UpdateRhRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.rh.update');
+                Route::post('recurso/rh/store_documento', [App\Domain\Contrato\Contratada\Recurso\Rh\Controller\StoreDocumentoRhRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.rh.store_documento');
+                Route::get('recurso/rh/visualizar/{documento}', [App\Domain\Contrato\Contratada\Recurso\Rh\Controller\VisualizarDocumentoRhRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.rh.visualizar');
+                Route::delete('{contrato}/recurso/rh/destroy/{documento}', [App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyDocumentoRhRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.rh.destroy');
+                Route::delete('recurso/rh/destroy_rh/{rh}', [App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyRhRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.rh.destroy_rh');
             });
         }); // FIM CONTRATOS
 

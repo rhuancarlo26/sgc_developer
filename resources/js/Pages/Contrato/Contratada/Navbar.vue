@@ -23,8 +23,8 @@ const props = defineProps({
           <!-- Contratos -->
           <NavDropdown prefix="contratos.*" title="Recuros" :icon="IconLayoutDashboard">
             <!-- Gestão Ambiental -->
-            <NavDropdownLink route-name="contratos.gestao.listagem" param-name="tipo" route-param="1"
-              active-on-route-prefix="contratos.gestao.*" title="RH" />
+            <NavDropdownLink route-name="contratos.contratada.recurso.rh.index" param-name="contrato"
+              :route-param="contrato.id" title="RH" />
 
             <!-- Equipamentos -->
             <NavDropdownLink route-name="contratos.contratada.recurso.equipamento.index" param-name="contrato"
