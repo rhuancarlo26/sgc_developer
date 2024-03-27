@@ -76,7 +76,7 @@
                                 <span v-else-if="dtAlerta(item.vencimento) <= 0" class="badge text-bg-danger">
                                     Vencida
                                 </span>
-                                <span v-else class="badge text-bg-success">
+                                <span v-else-if="item.vencimento !== '' && item.vencimento !== null" class="badge text-bg-success">
                                     Vigente
                                 </span>
                             </a>
@@ -86,7 +86,7 @@
                                 <span v-if="dtAlerta(item.vencimento) <= 0" class="badge text-bg-danger">
                                     {{ dateTimeFormat(item.vencimento) }}
                                 </span>
-                                <span v-else class="badge text-bg-success">
+                                <span v-else-if="item.vencimento !== '' && item.vencimento !== null" class="badge text-bg-success">
                                     {{ dateTimeFormat(item.vencimento) }}
                                 </span>
                             </a>
