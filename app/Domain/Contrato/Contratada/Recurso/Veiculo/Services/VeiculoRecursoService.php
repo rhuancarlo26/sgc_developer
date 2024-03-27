@@ -17,11 +17,12 @@ class VeiculoRecursoService extends BaseModelService
   protected string $modelClass = RecursoVeiculo::class;
   protected string $modelClassDocumento = RecursoVeiculoDocumento::class;
 
-  public function listagemVeiculos($searchParams)
+  public function listagemVeiculos($contrato, $searchParams)
   {
     return [
       'veiculos' => $this->search(...$searchParams)
         ->with(['codigo', 'documentos'])
+        ->where('contrato_id', $contrato->id)
         ->paginate()
         ->appends($searchParams)
     ];
