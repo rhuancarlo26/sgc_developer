@@ -13,7 +13,7 @@ class StoreCondicionanteController extends Controller
     {
     }
 
-    public function store(StoreCondicionanteRequest $request): RedirectResponse
+    public function index(StoreCondicionanteRequest $request): RedirectResponse
     {
         $response = $this->condicionanteService->store($request->all());
         return to_route(route: 'licenca.condicionante.index', parameters: $response['licenca'])

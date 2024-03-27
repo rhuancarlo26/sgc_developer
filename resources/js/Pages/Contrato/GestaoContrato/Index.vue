@@ -118,19 +118,19 @@ const formatarCnpj = (cnpj) => {
                     <Link class="btn btn-info me-2" :href="route('contratos.gestao.create', tipo.id)">
                     Importar contrato
                     </Link>
-          <!-- Contratos -->
-          <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
-            data-bs-toggle="dropdown" aria-expanded="false">
-            <IconSettings />
-          </button>
-          <div class="dropdown-menu dropdown-menu-end">
-            <a @click="abrirMapa()" class="dropdown-item" href="javascript:void(0)">
-              Mapa dos contratos
-            </a>
-            <a class="dropdown-item" :href="route('contratos.gestao.excel_export')">
-              Exportar excel
-            </a>
-          </div>
+                    <!-- Contratos -->
+                    <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <IconSettings />
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a @click="abrirMapa()" class="dropdown-item" href="javascript:void(0)">
+                            Mapa dos contratos
+                        </a>
+                        <a class="dropdown-item" :href="route('contratos.gestao.excel_export')">
+                            Exportar excel
+                        </a>
+                    </div>
 
                 </div>
             </div>
@@ -151,39 +151,48 @@ const formatarCnpj = (cnpj) => {
 
             <!-- Listagem-->
             <Table :columns="['UF', 'BR', 'N° do Contrato', 'CNPJ', 'Contratada', 'Processo SEI', 'Situação', 'Ação']"
-                :records="contratos" table-class="table-hover" >
+                :records="contratos" table-class="table-hover">
                 <template #body="{ item }">
-                    <tr >
-                        <td class="w-8"><p v-if="item.ufs">
-                <span v-for="uf in item.ufs.split(',')" :key="uf" class="badge bg-warning text-white m-1">{{ uf
-                        }}</span>
-                        </p>
-            </td>
-                        <td class="w-8"><p v-if="item.brs">
-                <span v-for="br in item.brs.split(',')" :key="br" class="badge bg-warning text-white m-1">{{ br
-                        }}</span></p>
+                    <tr>
+                        <td class="w-8">
+                            <p v-if="item.ufs">
+                                <span v-for="uf in item.ufs.split(',')" :key="uf" class="badge bg-warning text-white m-1">{{
+                                    uf
+                                }}</span>
+                            </p>
+                        </td>
+                        <td class="w-8">
+                            <p v-if="item.brs">
+                                <span v-for="br in item.brs.split(',')" :key="br" class="badge bg-warning text-white m-1">{{
+                                    br
+                                }}</span>
+                            </p>
                         </td>
                         <td>{{ item.numero_contrato }}</td>
                         <td>{{ formatarCnpj(item.cnpj) }}</td>
                         <td>{{ item.contratada }}</td>
                         <td>{{ item.processo_sei }}</td>
                         <td>{{ item.situacao }}</td>
-                        <td >
-              <!-- Contratos -->
-                            <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
-                data-bs-toggle="dropdown" aria-expanded="false">
+                        <td>
+                            <!-- Contratos -->
+                            <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
+                                data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
                                 <IconDots />
-                            </button><div class="dropdown-menu dropdown-menu-end">
-                <a @click="abrirVisualizarContrato(item)" class="dropdown-item" href="javascript:void(0)">
-                  Visualizar
-                </a>
-                <a class="dropdown-item" :href="route('contratos.gestao.create', [item.tipo_id, item.id])">
-                  Editar
-                </a>
-                <a class="dropdown-item" :href="route('contratos.gestao.delete', item.id)">
-                  Excluir
-                </a>
-              </div>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <a class="dropdown-item" :href="route('contratos.contratada.index', item.id)">
+                                    Entrar
+                                </a>
+                                <a @click="abrirVisualizarContrato(item)" class="dropdown-item" href="javascript:void(0)">
+                                    Visualizar
+                                </a>
+                                <a class="dropdown-item" :href="route('contratos.gestao.create', [item.tipo_id, item.id])">
+                                    Editar
+                                </a>
+                                <a class="dropdown-item" :href="route('contratos.gestao.delete', item.id)">
+                                    Excluir
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 </template>

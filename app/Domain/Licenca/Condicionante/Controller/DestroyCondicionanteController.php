@@ -13,7 +13,7 @@ class DestroyCondicionanteController extends Controller
   {
   }
 
-  public function destroy(LicencaCondicionante $condicionante): RedirectResponse
+  public function index(LicencaCondicionante $condicionante): RedirectResponse
   {
     try {
       $this->condicionanteService->delete($condicionante);
