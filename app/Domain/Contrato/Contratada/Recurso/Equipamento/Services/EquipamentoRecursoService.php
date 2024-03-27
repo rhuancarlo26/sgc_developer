@@ -17,11 +17,12 @@ class EquipamentoRecursoService extends BaseModelService
   protected string $modelClass = RecursoEquipamento::class;
   protected string $modelClassDocumento = RecursoEquipamentoDocumento::class;
 
-  public function ListagemEquipamentos($searchParams)
+  public function ListagemEquipamentos($contrato, $searchParams)
   {
     return [
       'equipamentos' => $this->search(...$searchParams)
         ->with(['documentos'])
+        ->where('contrato_id', $contrato->id)
         ->paginate()
         ->appends($searchParams)
     ];

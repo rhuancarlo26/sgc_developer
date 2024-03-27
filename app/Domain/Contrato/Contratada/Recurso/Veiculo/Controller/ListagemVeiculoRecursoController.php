@@ -18,7 +18,7 @@ class ListagemVeiculoRecursoController extends Controller
   {
     $searchParams = $request->all('searchColumn', 'searchValue');
 
-    $response = $this->veiculoRecursoService->listagemVeiculos($searchParams);
+    $response = $this->veiculoRecursoService->listagemVeiculos($contrato, $searchParams);
 
     return Inertia::render('Contrato/Contratada/Recurso/Veiculo/Index', [
       'contrato' => $contrato,
