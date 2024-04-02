@@ -19,12 +19,10 @@ class ListagemContratoController extends Controller
     {
         $searchParams = $request->all('searchColumn', 'searchValue');
 
+        $contratos = $this->listagemContrato->ListagemContratos($tipo, $searchParams);
+
         return Inertia::render('Contrato/GestaoContrato/Index', [
-            'contratos' => $this->listagemContrato
-                ->search(...$searchParams)
-                ->where('tipo_id', $tipo->id)
-                ->paginate()
-                ->appends($searchParams),
+            ...$contratos,
             'tipo' => $tipo,
         ]);
     }
