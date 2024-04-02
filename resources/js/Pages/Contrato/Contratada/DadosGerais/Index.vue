@@ -108,24 +108,26 @@ const visualizarMapa = () => {
           </li>
         </ul>
 
-        <div class="tab-content">
-          <div class="tab-pane active show" id="dadosContratuais" role="tabpanel">
-            <TabDadosContratuais :contrato="contrato" ref="mapaTabDadosContratuais" />
-          </div>
-          <div class="tab-pane" id="introducao" role="tabpanel">
-            <TabIntroducao :contrato="contrato" />
-          </div>
-          <div class="tab-pane" id="empreendimento" role="tabpanel">
-            <TabEmpreendimento :contrato="contrato" :ufs="ufs" :rodovias="rodovias" />
-          </div>
-          <div class="tab-pane" id="licenciamento" role="tabpanel">
-            <TabLicenciamento :contrato="contrato" :numero_licencas="numero_licencas" />
-          </div>
-          <div class="tab-pane" id="historico" role="tabpanel">
-            <TabHistorico :contrato="contrato" />
-          </div>
-          <div class="tab-pane" id="anexo" role="tabpanel">
-            <TabAnexo :contrato="contrato" />
+        <div class="card-body" style="margin-top: 15px;">
+          <div class="tab-content">
+            <div class="tab-pane active show" id="dadosContratuais" role="tabpanel">
+              <TabDadosContratuais :contrato="contrato" ref="mapaTabDadosContratuais" />
+            </div>
+            <div class="tab-pane" id="introducao" role="tabpanel">
+              <TabIntroducao :contrato="contrato" />
+            </div>
+            <div class="tab-pane" id="empreendimento" role="tabpanel">
+              <TabEmpreendimento :contrato="contrato" :ufs="ufs" :rodovias="rodovias" />
+            </div>
+            <div class="tab-pane" id="licenciamento" role="tabpanel">
+              <TabLicenciamento :contrato="contrato" :numero_licencas="numero_licencas" />
+            </div>
+            <div class="tab-pane" id="historico" role="tabpanel">
+              <TabHistorico :contrato="contrato" />
+            </div>
+            <div class="tab-pane" id="anexo" role="tabpanel">
+              <TabAnexo :contrato="contrato" />
+            </div>
           </div>
         </div>
       </template>
