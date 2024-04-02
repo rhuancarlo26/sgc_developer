@@ -18,7 +18,7 @@ class Licenca extends Model
 
     public function tipo(): BelongsTo
     {
-        return $this->belongsTo(LicencaTipo::class, 'licenca_tipo_id', 'id');
+        return $this->belongsTo(LicencaTipo::class, 'tipo_id', 'id');
     }
 
     public function condicionantes(): HasMany

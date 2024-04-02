@@ -1,12 +1,12 @@
 <?php
 
-use App\Domain\Licenca\AppModule\Controller\CreateLicencaController;
-use App\Domain\Licenca\AppModule\Controller\GerenciarLicencaController;
-use App\Domain\Licenca\AppModule\Controller\GetLicencaController;
-use App\Domain\Licenca\AppModule\Controller\IndexController;
-use App\Domain\Licenca\AppModule\Controller\SearchLicencaController;
-use App\Domain\Licenca\AppModule\Controller\StoreLicencaController;
-use App\Domain\Licenca\AppModule\Controller\UpdateLicencaController;
+use App\Domain\Licenca\app\Controller\CreateLicencaController;
+use App\Domain\Licenca\app\Controller\GerenciarLicencaController;
+use App\Domain\Licenca\app\Controller\GetLicencaController;
+use App\Domain\Licenca\app\Controller\IndexController;
+use App\Domain\Licenca\app\Controller\SearchLicencaController;
+use App\Domain\Licenca\app\Controller\StoreLicencaController;
+use App\Domain\Licenca\app\Controller\UpdateLicencaController;
 use App\Domain\Licenca\Condicionante\Controller\BuscarLicencaCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\DestroyCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\ListagemCondicionanteController;
@@ -14,19 +14,17 @@ use App\Domain\Licenca\Condicionante\Controller\StoreCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\StoreImportacaoCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\UpdateCondicionanteController;
 use App\Domain\Licenca\Documento\Controller\VisualizarDocumentoController;
+use App\Domain\Licenca\LicencaSegmento\Controller\DeleteLicencaSegmentoController;
+use App\Domain\Licenca\LicencaSegmento\Controller\GetUFLicencaSegmentoController;
+use App\Domain\Licenca\LicencaSegmento\Controller\StoreLicencaSegmentoController;
+use App\Domain\Licenca\LicencaSegmento\Controller\UpdateLicencaSegmentoController;
 use App\Domain\Licenca\Requerimento\Controller\DestroyRequerimentoController;
 use App\Domain\Licenca\Requerimento\Controller\StoreRequerimentoController;
 use App\Domain\Licenca\Requerimento\Controller\visualizarRequerimentoController;
-use App\Domain\Licenca\Requerimento\LicencaSegmento\Controller\DeleteLicencaSegmentoController;
-use App\Domain\Licenca\Requerimento\LicencaSegmento\Controller\GetUFLicencaSegmentoController;
-use App\Domain\Licenca\Requerimento\LicencaSegmento\Controller\StoreLicencaSegmentoController;
-use App\Domain\Licenca\Requerimento\LicencaSegmento\Controller\UpdateLicencaSegmentoController;
 use App\Domain\Licenca\Trecho\Controller\GetCoordenadaTrechoController;
 use App\Shared\Base\Profile\ProfileController;
 use App\Shared\Base\Role\Controllers\RoleController;
 use App\Shared\Base\User\Controllers\UserController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -121,7 +119,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('contratos')->group(function () {
 
             // Busca Contrato SIMDNIT
-            Route::get('contrato/{nr_contrato}', fn (Request $request) => Http::retry(3, 1000)->withoutVerifying()->get("https://servicos.dnit.gov.br/DPP/api/contrato/dnit/{$request->nr_contrato}")->json('data'))->name('contratos.get_contrato');
+            Route::get('/contrato/{nr_contrato}', [App\Domain\Contrato\GestaoContrato\Controller\GetContratoDnitController::class, 'getContrato'])
+                ->name('contratos.get_contrato');
 
             // Gestão de Contrato
             Route::prefix('gestao')->group(function () {
@@ -151,9 +150,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             });
 
             Route::prefix('/contratada')->group(function () {
-                Route::get('{contrato}/', [App\Domain\Contrato\Contratada\Controller\ContratoContratadaController::class, 'index'])
+                Route::get('{contrato}/', [\App\Domain\Contrato\Contratada\app\Controller\ContratoContratadaController::class, 'index'])
                     ->name('contratos.contratada.index');
-                Route::get('{contrato}/dados_gerais', [App\Domain\Contrato\Contratada\Controller\DadosGeraisContratadaController::class, 'index'])
+                Route::get('{contrato}/dados_gerais', [\App\Domain\Contrato\Contratada\app\Controller\DadosGeraisContratadaController::class, 'index'])
                     ->name('contratos.contratada.dados_gerais.index');
                 Route::get('{contrato}/servicos', [App\Domain\Contrato\Contratada\Controller\ServicosContratadaController::class, 'index'])
                     ->name('contratos.contratada.servicos.index');
@@ -163,32 +162,54 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.contratada.update_introducao.index');
                 Route::post('/store_licenciamento', [App\Domain\Contrato\Contratada\Licenciamento\Controller\StoreLicenciamentoContratadaController::class, 'index'])
                     ->name('contratos.contratada.store_licenciamento');
-                Route::get('/delete_licenciamento/{licenciamento}', [App\Domain\Contrato\Contratada\Licenciamento\Controller\DeleteLicenciamentoContratadaController::class, 'index'])
+                Route::post('/delete_licenciamento/{licenca}', [App\Domain\Contrato\Contratada\Licenciamento\Controller\DeleteLicenciamentoContratadaController::class, 'index'])
                     ->name('contratos.contratada.delete_licenciamento');
                 Route::post('/store_licenciamento_observacao', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\StoreLicenciamentoObservacaoController::class, 'index'])
                     ->name('contratos.contratada.store_licenciamento_observacao');
                 Route::patch('/update_licenciamento_observacao/{observacao}', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\UpdateLicenciamentoObservacaoController::class, 'index'])
                     ->name('contratos.contratada.update_licenciamento_observacao');
-                Route::post('/delete_licenciamento_observacao/{observacao}', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\DeleteLicenciamentoObservacaoController::class, 'index'])
+                Route::delete('/delete_licenciamento_observacao/{observacao}', [App\Domain\Contrato\Contratada\Licenciamento\Observacao\Controller\DeleteLicenciamentoObservacaoController::class, 'index'])
                     ->name('contratos.contratada.delete_licenciamento_observacao');
+                Route::post('/store_historico', [App\Domain\Contrato\Contratada\Historico\Controller\StoreHistoricoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.store_historico');
+                Route::patch('/update_historico', [App\Domain\Contrato\Contratada\Historico\Controller\UpdateHistoricoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.update_historico');
+                Route::delete('/destroy_historico/{historico}', [App\Domain\Contrato\Contratada\Historico\Controller\DestroyHistoricoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.destroy_historico');
+                Route::post('/store_anexo', [App\Domain\Contrato\Contratada\Anexo\Controller\StoreAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.store_anexo');
+                Route::post('/update_anexo', [App\Domain\Contrato\Contratada\Anexo\Controller\UpdateAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.update_anexo');
+                Route::delete('/destroy_anexo/{anexo}', [App\Domain\Contrato\Contratada\Anexo\Controller\DestroyAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.destroy_anexo');
+                Route::get('/visualizar/{anexo}', [App\Domain\Contrato\Contratada\Anexo\Controller\VisualizarAnexoContratadaController::class, 'index'])
+                    ->name('contratos.contratada.visualizar_anexo');
+                Route::post('/store_empreendimento_trecho', [App\Domain\Contrato\Contratada\Empreendimento\Controller\StoreContratadaEmpreendimentoTrechoController::class, 'index'])
+                    ->name('contratos.contratada.store_empreendimento_trecho');
+                Route::patch('/update_empreendimento_trecho', [App\Domain\Contrato\Contratada\Empreendimento\Controller\UpdateContratadaEmpreendimentoTrechoController::class, 'index'])
+                    ->name('contratos.contratada.update_empreendimento_trecho');
+                Route::delete('/destroy_empreendimento_trecho/{trecho}', [App\Domain\Contrato\Contratada\Empreendimento\Controller\DestroyContratadaEmpreendimentoTrechoController::class, 'index'])
+                    ->name('contratos.contratada.destroy_empreendimento_trecho');
             });
         }); // FIM CONTRATOS
 
         // Licenças
         Route::prefix('licenca')->group(function () {
             // Licença
-            Route::get('/',                   [IndexController::class,           'index'])->name('licenca.index');
-            Route::get('/create/{licenca?}',  [CreateLicencaController::class,   'index'])->name('licenca.create');
-            Route::post('/store',             [StoreLicencaController::class,    'index'])->name('licenca.store');
-            Route::patch('/update/{licenca}', [UpdateLicencaController::class,   'index'])->name('licenca.update');
-            Route::get('/search/{licenca?}',  [SearchLicencaController::class,   'index'])->name('licenca.search')->where('licenca', '(.*)');
+            Route::get('/',                   [IndexController::class,         'index'])->name('licenca.index');
+            Route::get('/arquivo/{arquivo}',  [IndexController::class,         'index'])->name('licenca.arquivo');
+            Route::get('/create/{licenca?}',  [CreateLicencaController::class, 'index'])->name('licenca.create');
+            Route::post('/store',             [StoreLicencaController::class,  'index'])->name('licenca.store');
+            Route::patch('/update/{licenca}', [UpdateLicencaController::class, 'index'])->name('licenca.update');
+            Route::get('/search/{licenca?}',  [SearchLicencaController::class, 'index'])->name('licenca.search')->where('licenca', '(.*)');
+            Route::patch('/gerenciar-licenca/{licenca}', [GerenciarLicencaController::class, 'index'])->name('licenca.gerenciar-licenca');
+
             // Licença Segmento
             Route::post('/store_segmento',               [StoreLicencaSegmentoController::class,  'index'])->name('licenca_segmento.store');
             Route::patch('/update_segmento/{segmento}',  [UpdateLicencaSegmentoController::class, 'index'])->name('licenca_segmento.update');
             Route::delete('/delete_segmento/{segmento}', [DeleteLicencaSegmentoController::class, 'index'])->name('licenca_segmento.delete');
             Route::get('/get_uf_segmento',               [GetUFLicencaSegmentoController::class,  'index'])->name('licenca_segmento.get_uf');
             Route::post('/get_licenca',                  [GetLicencaController::class,            'index'])->name('licenca.get_licenca');
-            Route::patch('/gerenciar_licenca/{licenca}', [GerenciarLicencaController::class,      'index'])->name('licenca.gerenciar_licenca');
             // Trecho
             Route::prefix('trecho')->group(function () {
                 Route::post('/get_coordenada_trecho', [GetCoordenadaTrechoController::class, 'index'])->name('licenca.trecho.get_coordenada_trecho');
