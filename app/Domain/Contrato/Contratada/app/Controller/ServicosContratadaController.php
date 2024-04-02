@@ -11,28 +11,28 @@ use Inertia\Response;
 
 class ServicosContratadaController extends Controller
 {
-  public function index(Contrato $contrato): Response
-  {
-    $numero_licencas = Licenca::all(['id', 'numero_licenca']);
+    public function index(Contrato $contrato): Response
+    {
+        $numero_licencas = Licenca::all(['id', 'numero_licenca']);
 
-    if ($contrato) {
-      $contrato->load([
-        'trechos',
-        'trechos.uf',
-        'trechos.rodovia',
-        'introducao',
-        'licenciamentos',
-        'licenciamentos.requerimentos',
-        'licenciamentos.tipo',
-        'licenciamentos.documento',
-        'licenciamento_observacoes',
-      ]);
+        if ($contrato) {
+            $contrato->load([
+                'trechos',
+                'trechos.uf',
+                'trechos.rodovia',
+                'introducao',
+                'licenciamentos',
+                'licenciamentos.requerimentos',
+                'licenciamentos.tipo',
+                'licenciamentos.documento',
+                'licenciamento_observacoes',
+            ]);
+        }
+
+        return Inertia::render('Contrato/Contratada/Servicos/Index', [
+            'contrato' => $contrato,
+            'numero_licencas' => $numero_licencas
+        ]);
+
     }
-
-    return Inertia::render('Contrato/Contratada/Servicos/Index', [
-      'contrato' => $contrato,
-      'numero_licencas' => $numero_licencas
-    ]);
-
-  }
 }
