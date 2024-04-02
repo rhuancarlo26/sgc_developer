@@ -21,5 +21,6 @@ class LicencaSegmento extends Model
     'km_inicial',
     'km_final',
     'extensao',
+    'coordenada'
   ];
 }

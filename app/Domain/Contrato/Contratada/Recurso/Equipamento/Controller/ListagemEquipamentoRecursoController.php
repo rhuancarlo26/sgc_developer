@@ -19,7 +19,7 @@ class ListagemEquipamentoRecursoController extends Controller
   {
     $searchParams = $request->all('searchColumn', 'searchValue');
 
-    $response = $this->equimentoRecursoService->ListagemEquipamentos($searchParams);
+    $response = $this->equimentoRecursoService->ListagemEquipamentos($contrato, $searchParams);
 
     return Inertia::render('Contrato/Contratada/Recurso/Equipamento/Index', [
       'contrato' => $contrato,

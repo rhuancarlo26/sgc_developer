@@ -1,26 +1,25 @@
 <?php
 
-namespace App\Domain\Contrato\Contratada\Recurso\Equipamento\Services;
+namespace App\Domain\Contrato\Contratada\Recurso\Rh\Services;
 
-use App\Models\Contrato;
-use App\Models\RecursoEquipamento;
-use App\Models\RecursoEquipamentoDocumento;
+use App\Models\RecursoRh;
+use App\Models\RecursoRhDocumento;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use Illuminate\Support\Facades\Storage;
 
-class EquipamentoRecursoService extends BaseModelService
+class RhRecursoService extends BaseModelService
 {
   use Searchable, Deletable;
 
-  protected string $modelClass = RecursoEquipamento::class;
-  protected string $modelClassDocumento = RecursoEquipamentoDocumento::class;
+  protected string $modelClass = RecursoRh::class;
+  protected string $modelClassDocumento = RecursoRhDocumento::class;
 
-  public function ListagemEquipamentos($contrato, $searchParams)
+  public function listagemRh($contrato, $searchParams)
   {
     return [
-      'equipamentos' => $this->search(...$searchParams)
+      'rhs' => $this->search(...$searchParams)
         ->with(['documentos'])
         ->where('contrato_id', $contrato->id)
         ->paginate()
@@ -28,27 +27,36 @@ class EquipamentoRecursoService extends BaseModelService
     ];
   }
 
-  public function salvarEquipamento($request)
+  public function salvarRh($request)
   {
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
     return [
-      'equipamento' => $response['model'],
+      'rh' => $response['model']['id'],
       'request' => $response['request']
     ];
   }
 
-  public function salvarDocumentoEquipamento($request)
+  public function updateRh($request)
+  {
+    $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+
+    return [
+      'request' => $response['request']
+    ];
+  }
+
+  public function salvarDocumentoRh($request)
   {
     try {
       foreach ($request['documentos'] as $key => $value) {
         if ($value->isvalid()) {
           $nome = $value->getClientOriginalName();
           $tipo = $value->extension();
-          $caminho = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Equipamento' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $nome);
+          $caminho = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $nome);
 
           $this->modelClassDocumento::create([
-            'equipamento_id' => $request['equipamento_id'],
+            'recurso_rh_id' => $request['recurso_rh_id'],
             'nome' => $nome,
             'tipo' => $tipo,
             'caminho' => $caminho
@@ -62,10 +70,10 @@ class EquipamentoRecursoService extends BaseModelService
     }
   }
 
-  public function destroyEquipamento($equipamento)
+  public function destroyRh($rh)
   {
     try {
-      $documentos = $this->modelClassDocumento::Where('equipamento_id', $equipamento->id)->get();
+      $documentos = $this->modelClassDocumento::Where('recurso_rh_id', $rh->id)->get();
 
       foreach ($documentos as $value) {
         Storage::delete($value->caminho);
