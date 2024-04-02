@@ -687,11 +687,18 @@
     }
 
     const calcularExtensao = () => {
-        const kmInicial = parseInt(formSegmento.km_inicial);
+        const kmInicial = parseInt(formSegmento.km_inicial) || null;
         const kmFinal = parseInt(formSegmento.km_final);
 
+        if (!kmFinal) {
+            return; 
+        }
+        if (!kmInicial && kmFinal) {
+            alert("Insira o valor de KM Inicial antes de inserir KM Final.");
+            return;
+        }
         if (kmFinal < kmInicial) {
-            alert("O valor de Km Final não pode ser menor que Km Inicial. Por favor, corrija.");
+            alert("O valor de Km Final não pode ser menor que KM Inicial. Por favor, corrija.");
         } else {
             formSegmento.extensao = kmFinal - kmInicial;
         }
