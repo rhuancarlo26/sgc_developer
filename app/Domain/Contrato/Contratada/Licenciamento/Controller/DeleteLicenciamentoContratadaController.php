@@ -4,7 +4,9 @@ namespace App\Domain\Contrato\Contratada\Licenciamento\Controller;
 
 use App\Domain\Contrato\Contratada\Licenciamento\Services\LicenciamentoService;
 use App\Models\ContratoLicenca;
+use App\Models\Licenca;
 use App\Shared\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class DeleteLicenciamentoContratadaController extends Controller
 {
@@ -12,23 +14,10 @@ class DeleteLicenciamentoContratadaController extends Controller
   {
   }
 
-  public function index(ContratoLicenca $licenciamento)
+  public function index(Licenca $licenca, Request $request)
   {
-    dd($licenciamento);
-    try {
-      $this->licenciamentoService->delete($licenciamento);
+    $response = $this->licenciamentoService->deleteLicenciamento($licenca, $request->all());
 
-      $response = [
-        'type' => 'success',
-        'content' => 'Licenciamento deletado com sucesso!'
-      ];
-    } catch (\Exception $th) {
-      $response = [
-        'type' => 'error',
-        'content' => $th->getMessage()
-      ];
-    }
-
-    return to_route('contratos.contratada.dados_gerais.index', ['contrato' => $licenciamento->contrato_id])->with('message', $response);
+    return to_route('contratos.contratada.dados_gerais.index', ['contrato' => $request->contrato_id])->with('message', $response);
   }
 }
