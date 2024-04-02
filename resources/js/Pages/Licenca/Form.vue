@@ -664,7 +664,6 @@
             formSegmento.patch(route('licenca_segmento.update', formSegmento));
             return
         }
-        console.log(formSegmento)
         formSegmento.post(route('licenca_segmento.store'));
     }
 
