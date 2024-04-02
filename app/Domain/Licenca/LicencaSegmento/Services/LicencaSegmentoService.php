@@ -6,6 +6,9 @@ use App\Domain\Licenca\app\Services\LicencaBRService;
 use App\Domain\Licenca\app\Services\LicencaTipoService;
 use App\Models\Licenca;
 use App\Models\LicencaSegmento;
+use App\Models\Rodovia;
+use App\Models\SvnSegGeoV2;
+use App\Models\Uf;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -18,7 +21,21 @@ class LicencaSegmentoService extends BaseModelService
 
     public function create(array $post): array
     {
-        $licencaSegmento = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
+        $uf = Uf::where('estado', $post['uf_inicial'])->first();
+        $rodovia = Rodovia::where('rodovia', $post['rodovia'])->where('uf_id', $uf->id)->first();
+
+        $coordenada = SvnSegGeoV2::getGeoJson(
+            $uf->uf,
+            $rodovia->rodovia,
+            $post['km_inicial'],
+            $post['km_final'],
+            'B'
+        );
+
+        $licencaSegmento = $this->dataManagement->create(entity: $this->modelClass, infos: [
+            'coordenada' => $coordenada,
+            ...$post
+        ]);
 
         $licenca = Licenca::where('id', $post['licenca_id'])->first();
         $licencaTipoService = new LicencaTipoService();
@@ -84,5 +101,4 @@ class LicencaSegmentoService extends BaseModelService
             'ufs' => $licencaBRService->getLicencaUF($rodovia)
         ];
     }
-
 }
