@@ -16,20 +16,14 @@ class DeleteLicenciamentoObservacaoController extends Controller
 
   public function index(ContratoLicencaObservacao $observacao)
   {
+    $contrato_id = $observacao->contrato_id;
+
     try {
       $this->licenciamentoObservacaoService->delete($observacao);
 
-      $response = [
-        'type' => 'success',
-        'content' => 'Licenciamento deletado com sucesso!'
-      ];
-    } catch (\Exception $th) {
-      $response = [
-        'type' => 'error',
-        'content' => $th->getMessage()
-      ];
+      return to_route('contratos.contratada.dados_gerais.index', ['contrato' => $contrato_id])->with('message', ['type' => 'success', 'content' => 'Registro atualizado!']);
+    } catch (\Exception $e) {
+      return to_route('contratos.contratada.dados_gerais.index', ['contrato' => $contrato_id])->with('message', ['type' => 'error', 'content' => $e->getMessage()]);
     }
-
-    return to_route('contratos.contratada.dados_gerais.index', ['contrato' => $observacao->contrato_id])->with('message', $response);
   }
 }

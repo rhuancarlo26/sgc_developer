@@ -29,6 +29,11 @@ class Contrato extends Model
         return $this->hasMany(contratoTrecho::class, 'contrato_id');
     }
 
+    public function empreendimento_trechos(): HasMany
+    {
+        return $this->hasMany(ContratoEmpreendimentoTrecho::class, 'contrato_id');
+    }
+
     public function introducao(): HasOne
     {
         return $this->hasOne(ContratoIntroducao::class, 'contrato_id');
@@ -37,6 +42,16 @@ class Contrato extends Model
     public function licenciamentos()
     {
         return $this->hasManyThrough(Licenca::class, ContratoLicenca::class, 'contrato_id', 'id', 'id', 'licenca_id');
+    }
+
+    public function historico()
+    {
+        return $this->hasMany(ContratoHistorico::class, 'contrato_id');
+    }
+
+    public function anexos()
+    {
+        return $this->hasMany(ContratoAnexo::class, 'contrato_id');
     }
 
     public function licenciamento_observacoes()
