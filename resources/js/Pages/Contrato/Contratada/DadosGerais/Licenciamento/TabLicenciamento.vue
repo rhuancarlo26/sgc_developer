@@ -34,6 +34,10 @@ const salvarLicenca = () => {
   form.post(route('contratos.contratada.store_licenciamento'));
 }
 
+const excluirLicenciamento = (licenca_id) => {
+  router.post(route('contratos.contratada.delete_licenciamento', licenca_id), { contrato_id: props.contrato.id })
+}
+
 const salvarObservacao = () => {
   if (form_observacao.id) {
     form_observacao.patch(route('contratos.contratada.update_licenciamento_observacao', form_observacao.id));
@@ -41,6 +45,10 @@ const salvarObservacao = () => {
   } else {
     form_observacao.post(route('contratos.contratada.store_licenciamento_observacao'));
   }
+}
+
+const excluirObservacao = (observacao_id) => {
+  router.delete(route('contratos.contratada.delete_licenciamento_observacao', observacao_id));
 }
 
 const editarObservacao = (observacao) => {
@@ -112,7 +120,7 @@ const dtAlerta = (data) => {
             <IconTrain v-if="licenca.modal == 3" />
           </td>
           <td>
-            {{ licenca.tipo.sigla }} - {{ licenca.tipo.nome }}
+            {{ licenca.tipo?.sigla }} - {{ licenca.tipo?.nome }}
           </td>
           <td>
             {{ licenca.numero_licenca }}
@@ -166,6 +174,9 @@ const dtAlerta = (data) => {
                   :href="route('licenca.documento.visualizar', licenca.documento.id)">
                   Visualizar PDF
                 </a>
+                <a @click="excluirLicenciamento(licenca.id)" class="dropdown-item" href="javascript:void(0)">
+                  Excluir
+                </a>
               </div>
             </span>
           </td>
@@ -206,7 +217,7 @@ const dtAlerta = (data) => {
                 <a @click="editarObservacao(observacao)" class="dropdown-item" href="javascript:void(0)">
                   Editar
                 </a>
-                <a class="dropdown-item" href="javascript:void(0)">
+                <a @click="excluirObservacao(observacao.id)" class="dropdown-item" href="javascript:void(0)">
                   Excluir
                 </a>
               </div>

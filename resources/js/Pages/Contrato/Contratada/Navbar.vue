@@ -14,7 +14,7 @@ const props = defineProps({
 <template>
   <div class="card card-body space-y-3">
     <div class="d-flex">
-      <div class="col-2">
+      <div class="col">
         <ul class="navbar-nav">
           <!-- Dashboard -->
           <navLink route-name="contratos.contratada.dados_gerais.index" :param="contrato.id" title="Dados Gerais"
@@ -35,14 +35,14 @@ const props = defineProps({
               active-on-route-prefix="contratos.gestao.*" title="Veículos" />
           </NavDropdown>
 
-          <navLink route-name="contratos.contratada.dados_gerais.index" :param="contrato.id" title="Serviços"
+          <navLink route-name="contratos.contratada.servicos.index" :param="contrato.id" title="Serviços"
             :icon="IconLayoutDashboard" />
 
           <navLink route-name="contratos.contratada.dados_gerais.index" :param="contrato.id" title="Cronograma"
             :icon="IconLayoutDashboard" />
         </ul>
       </div>
-      <div class="col">
+      <div class="col-11">
         <slot name="body" />
       </div>
     </div>
