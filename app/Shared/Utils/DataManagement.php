@@ -16,10 +16,12 @@ class DataManagement
             $model   = $entity::create([...$infos, 'user_id' => Auth::user()->id]);
             $type    = 'success';
             $content = 'Registro cadastrado!';
-        } catch (\Exception) {
+            $error = '';
+        } catch (\Exception $e) {
             $model   = null;
             $type    = 'error';
             $content = 'Falha ao cadastrar!';
+            $error   = $e->getMessage();
         }
 
         return [
@@ -27,6 +29,7 @@ class DataManagement
             'request' => [
                 'type'    => $type,
                 'content' => $content,
+                'error' => $error
             ]
         ];
     }
