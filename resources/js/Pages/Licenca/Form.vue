@@ -5,9 +5,9 @@
 
         <template #header>
             <div class="w-100 d-flex justify-content-between">
-                <Breadcrumb 
-                    class="align-self-center" 
-                    :links="[ { route: '#', label: 'Cadastro de Licenças' } ]" 
+                <Breadcrumb
+                    class="align-self-center"
+                    :links="[ { route: '#', label: 'Cadastro de Licenças' } ]"
                     />
             </div>
         </template>
@@ -19,7 +19,7 @@
                     <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
                         <!-- TAB - DADOS BASICOS -->
                         <li class="nav-item" role="presentation">
-                            <a href="#tab-dadosBasicos" class="nav-link active" data-bs-toggle="tab" 
+                            <a href="#tab-dadosBasicos" class="nav-link active" data-bs-toggle="tab"
                             aria-selected="true" role="tab">
                                 Dados Básicos
                             </a>
@@ -40,7 +40,7 @@
                         </li>
                     </ul>
                 </div>
-                
+
                 <!-- CARD-BODY -->
                 <div class="card-body">
                     <div class="tab-content">
@@ -50,8 +50,8 @@
                             <div class="row mb-4">
                                 <!-- Tipo de Contrato: -->
                                 <div class="col-4">
-                                    <InputLabel value="Tipo de Contrato:" for="licenca_tipo_id" />
-                                    <select name="licenca_tipo_id" id="licenca_tipo_id" class="form-select" v-model="form.licenca_tipo_id">
+                                    <InputLabel value="Tipo de Contrato:" for="tipo_id" />
+                                    <select name="tipo_id" id="tipo_id" class="form-select" v-model="form.tipo_id">
                                         <option :value="null"> -- SELECIONE -- </option>
                                         <option :value="tipo.id" v-for="tipo in tipos">
                                             {{tipo.sigla}} - {{tipo.nome}}
@@ -59,7 +59,7 @@
                                     </select>
                                     <InputError :message="form.errors.tipo" />
                                 </div>
-                                
+
                                 <!-- Renovação/Retificação: -->
                                 <div class="col-4">
                                     <InputLabel value="Renovação/Retificação:" for="status" />
@@ -86,7 +86,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- ROW 2 -->
                             <div class="row mb-4">
                                 <!-- Modal: -->
@@ -100,21 +100,21 @@
                                         </select>
                                     <InputError :message="form.errors.modal" />
                                 </div>
-        
+
                                 <!-- N° Licença: -->
                                 <div class="col-3">
                                     <InputLabel value="N° Licença:" for="numero_licenca" />
                                     <input type="text" id="numero_licenca" name="numero_licenca" class="form-control" v-model="form.numero_licenca" />
                                     <InputError :message="form.errors.numero_licenca" />
                                 </div>
-                                
+
                                 <!-- N° SEI: -->
                                 <div class="col-3">
                                     <InputLabel value="N° SEI:" for="numero_sei" />
                                     <input type="text" id="numero_sei" name="numero_sei" class="form-control" v-model="form.numero_sei" />
                                     <InputError :message="form.errors.numero_sei" />
                                 </div>
-                                
+
                                 <!-- Processo DNIT: -->
                                 <div class="col-3">
                                     <InputLabel value="Processo DNIT:" for="processo_dnit" />
@@ -122,7 +122,7 @@
                                     <InputError :message="form.errors.processo_dnit" />
                                 </div>
                             </div>
-        
+
                             <!-- ROW 3 -->
                             <div class="row mb-4">
                                 <!-- Data da Emissão: -->
@@ -131,22 +131,22 @@
                                     <input type="date" id="data_emissao" name="data_emissao" class="form-control" v-model="form.data_emissao" />
                                     <InputError :message="form.errors.data_emissao" />
                                 </div>
-        
+
                                 <!-- Vencimento: -->
                                 <div class="col-3">
                                     <InputLabel value="Vencimento:" for="vencimento"/>
-                                    <input type="date" id="vencimento" name="vencimento" class="form-control" v-model="form.vencimento" 
+                                    <input type="date" id="vencimento" name="vencimento" class="form-control" v-model="form.vencimento"
                                     @change="atualizarDatasPrazos"/>
                                     <InputError :message="form.errors.vencimento" />
                                 </div>
-        
+
                                 <!-- Emissor: -->
                                 <div class="col-3">
                                     <InputLabel value="Emissor:" for="emissor" />
                                     <input type="text" id="emissor" name="emissor" class="form-control" v-model="form.emissor" />
                                     <InputError :message="form.errors.emissor" />
                                 </div>
-        
+
                                 <!-- Empreendimento: -->
                                 <div class="col-3">
                                     <InputLabel value="Empreendimento:" for="empreendimento" />
@@ -154,7 +154,7 @@
                                     <InputError :message="form.errors.empreendimento" />
                                 </div>
                             </div>
-        
+
                             <!-- ROW 4 -->
                             <div class="row mb-4">
                                 <!-- Início do Sub-Trecho (PNV): -->
@@ -163,7 +163,7 @@
                                     <input type="text" id="inicio_subtrecho" name="inicio_subtrecho" class="form-control" v-model="form.inicio_subtrecho" />
                                     <InputError :message="form.errors.inicio_subtrecho" />
                                 </div>
-        
+
                                 <!-- Fim do Sub-Trecho (PNV): -->
                                 <div class="col-6">
                                     <InputLabel value="Fim do Sub-Trecho (PNV):" for="fim_subtrecho" />
@@ -171,7 +171,7 @@
                                     <InputError :message="form.errors.fim_subtrecho" />
                                 </div>
                             </div>
-        
+
                             <!-- ROW 5 -->
                             <div class="row mb-4">
                                 <!-- Extensão: -->
@@ -184,7 +184,7 @@
                                 <!-- Dias para Renovação: -->
                                 <div class="col-3">
                                     <InputLabel value="Dias para Renovação:" for="dias_renovacao" />
-                                        <select name="dias_renovacao" id="dias_renovacao" class="form-select" 
+                                        <select name="dias_renovacao" id="dias_renovacao" class="form-select"
                                         v-model="form.dias_renovacao" @change="atualizarDatasPrazos"
                                         :disabled="form.vencimento == null || form.vencimento == ''">
                                             <option :value="null"> -- SELECIONE -- </option>
@@ -195,14 +195,14 @@
                                         </select>
                                     <InputError :message="form.errors.dias_renovacao" />
                                 </div>
-        
+
                                 <!-- Prazo Final Para Requerimento: -->
                                 <div class="col-3">
                                     <InputLabel value="Prazo Final Para Requerimento:" for="requerimento"/>
                                     <input type="date" id="requerimento" name="requerimento" class="form-control" v-model="form.requerimento" disabled readonly/>
                                     <InputError :message="form.errors.requerimento" />
                                 </div>
-        
+
                                 <!-- Para Renovação: -->
                                 <div class="col-3">
                                     <InputLabel value="Para Renovação:" for="renovacao"/>
@@ -210,7 +210,7 @@
                                     <InputError :message="form.errors.renovacao" />
                                 </div>
                             </div>
-        
+
                             <!-- ROW 6 -->
                             <div class="row mb-4">
                                 <!-- Fiscal/Responsável: -->
@@ -220,7 +220,7 @@
                                     <InputError :message="form.errors.fiscal" />
                                 </div>
                             </div>
-        
+
                             <!-- ROW 7 -->
                             <div class="row mb-4">
                                 <!-- Observações: -->
@@ -230,37 +230,37 @@
                                     <InputError :message="form.errors.observacoes" />
                                 </div>
                             </div>
-        
+
                             <!-- ROW 8 -->
-                            <div class="row mb-4" v-if="form.licenca_tipo_id == 3">
+                            <div class="row mb-4" v-if="form.tipo_id == 3">
                                 <!-- Área em APP(ha): -->
                                 <div class="col-2">
                                     <InputLabel value="Área em APP(ha):" for="in_app" />
                                     <input type="text" id="in_app" name="in_app" class="form-control" v-model="form.in_app" />
                                     <InputError :message="form.errors.in_app" />
                                 </div>
-        
+
                                 <!-- Área fora APP(ha): -->
                                 <div class="col-2">
                                     <InputLabel value="Área fora APP(ha):" for="out_app" />
                                     <input type="text" id="out_app" name="out_app" class="form-control" v-model="form.out_app" />
                                     <InputError :message="form.errors.out_app" />
                                 </div>
-        
+
                                 <!-- Área Total (ha): -->
                                 <div class="col-2">
                                     <InputLabel value="Área Total(ha):" for="total_app" />
                                     <input type="text" id="total_app" name="total_app" class="form-control" v-model="form.total_app" />
                                     <InputError :message="form.errors.total_app" />
                                 </div>
-        
+
                                 <!-- Volume(m³): -->
                                 <div class="col-2">
                                     <InputLabel value="Volume(m³):" for="volume" />
                                     <input type="text" id="volume" name="volume" class="form-control" v-model="form.volume" />
                                     <InputError :message="form.errors.volume" />
                                 </div>
-             
+
                                 <!-- Sinaflor: -->
                                 <div class="col-4">
                                     <InputLabel value="Sinaflor:" for="sinaflor" />
@@ -268,7 +268,7 @@
                                     <InputError :message="form.errors.sinaflor" />
                                 </div>
                             </div>
-        
+
                             <!-- ROW # -->
                             <div class="row mb-4">
                                 <!-- Data da Publicação: -->
@@ -357,7 +357,7 @@
                                                     data-bs-toggle="modal" data-bs-target="#adicionarSegmento">
                                                         Editar
                                                     </a>
-                                                    <a class="dropdown-item" href="javascript:void(0)"  
+                                                    <a class="dropdown-item" href="javascript:void(0)"
                                                         data-bs-toggle="modal" data-bs-target="#confirmacaoExclusaoSegmento"
                                                         @click="dataSegmentoExcluir = item">
                                                         Excluir
@@ -376,14 +376,14 @@
 
 
                             <!-- MODAL -->
-                            <div class="modal fade" id="adicionarSegmento" data-bs-backdrop="static" data-bs-keyboard="false" 
+                            <div class="modal fade" id="adicionarSegmento" data-bs-backdrop="static" data-bs-keyboard="false"
                                 tabindex="-1" aria-labelledby="adicionarSegmentoLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-xl">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h1 class="modal-title" id="adicionarSegmentoLabel">
-                                                {{ 
-                                                    editarLicencaSegmento ? 'Editar Licença' : 'Adicionar Licença'    
+                                                {{
+                                                    editarLicencaSegmento ? 'Editar Licença' : 'Adicionar Licença'
                                                 }}
                                             </h1>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -461,20 +461,20 @@
                                             <a class="btn btn-secondary" href="javascript:void(0);" data-bs-dismiss="modal">
                                                 <IconX class="me-2"/> Close
                                             </a>
-                                            <a 
+                                            <a
                                                 v-if="!editarLicencaSegmento"
-                                                class="btn btn-primary" 
-                                                @click="salvarLicencaSegmento()" 
-                                                href="javascript:void(0);" 
+                                                class="btn btn-primary"
+                                                @click="salvarLicencaSegmento()"
+                                                href="javascript:void(0);"
                                                 data-bs-dismiss="modal"
                                                 >
                                                 <IconDeviceFloppy class="me-2"/> Salvar
                                             </a>
-                                            <a 
-                                                v-else    
-                                                class="btn btn-primary" 
-                                                @click="salvarLicencaSegmento()" 
-                                                href="javascript:void(0);" 
+                                            <a
+                                                v-else
+                                                class="btn btn-primary"
+                                                @click="salvarLicencaSegmento()"
+                                                href="javascript:void(0);"
                                                 data-bs-dismiss="modal"
                                                 >
                                                 <IconDeviceFloppy class="me-2"/> Editar
@@ -499,7 +499,7 @@
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                 Cancelar
                                             </button>
-                                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal" 
+                                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
                                                 @click="excluirSegmento()">
                                                 Excluir
                                             </button>
@@ -525,7 +525,7 @@
     import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
     import { Head, useForm } from "@inertiajs/vue3";
     import { IconDeviceFloppy, IconArrowLeft, IconDots, IconSearch, IconPlus, IconX } from "@tabler/icons-vue";
-    
+
     import InputLabel   from "@/Components/InputLabel.vue";
     import InputError   from "@/Components/InputError.vue";
     import Breadcrumb   from "@/Components/Breadcrumb.vue";
@@ -564,7 +564,7 @@
 
     // FORM
     const form = useForm({
-        licenca_tipo_id: null,
+        tipo_id: null,
         status: null,
         modal: null,
         numero_licenca: null,
@@ -593,7 +593,7 @@
 
         ...props.licenca,
     });
-    
+
     const formSegmento = useForm({
         id: null,
         licenca_id: form.id,
@@ -604,7 +604,7 @@
         km_final: null,
         extensao: null,
     });
-    
+
     // FUNCTIONS
     const voltarPagina = () => {
         window.history.back();
@@ -664,7 +664,6 @@
             formSegmento.patch(route('licenca_segmento.update', formSegmento));
             return
         }
-        console.log(formSegmento)
         formSegmento.post(route('licenca_segmento.store'));
     }
 
@@ -673,7 +672,7 @@
         const dias = parseInt(form.dias_renovacao);
         const dataRequerimento = dias && dataVencimento ? calcularDataPrazos(dataVencimento, dias) : '';
         const dataRenovacao = dias && dataVencimento ? calcularDataPrazos(dataRequerimento, 60) : '';
-        
+
         form.requerimento = dataRequerimento
         form.renovacao = dataRenovacao
     }
@@ -687,11 +686,18 @@
     }
 
     const calcularExtensao = () => {
-        const kmInicial = parseInt(formSegmento.km_inicial);
+        const kmInicial = parseInt(formSegmento.km_inicial) || null;
         const kmFinal = parseInt(formSegmento.km_final);
 
+        if (!kmFinal) {
+            return; 
+        }
+        if (!kmInicial && kmFinal) {
+            alert("Insira o valor de KM Inicial antes de inserir KM Final.");
+            return;
+        }
         if (kmFinal < kmInicial) {
-            alert("O valor de Km Final não pode ser menor que Km Inicial. Por favor, corrija.");
+            alert("O valor de Km Final não pode ser menor que KM Inicial. Por favor, corrija.");
         } else {
             formSegmento.extensao = kmFinal - kmInicial;
         }
