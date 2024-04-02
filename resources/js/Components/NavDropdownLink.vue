@@ -6,7 +6,7 @@ const props = defineProps({
     routeName: { type: String },
     title: { type: String },
     activeOnRoutePrefix: { type: String },
-    routeParam: { type: String, default: null },
+    routeParam: { default: null },
     paramName: { type: String, default: null },
 })
 
@@ -24,7 +24,8 @@ const isActive = computed(() => {
 </script>
 
 <template>
-    <Link class="dropdown-item" v-if="can(routeName)" :class="{ active: isActive }" :href="route(routeName, routeParam)">
+    <Link class="dropdown-item" v-if="can(routeName)" :class="{ active: isActive }"
+        :href="route(routeName, routeParam)">
     {{ title }}
     </Link>
 </template>

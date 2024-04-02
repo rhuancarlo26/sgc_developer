@@ -72,7 +72,7 @@ Route::get('/', function () {
     }
 
     return to_route('dashboard');
-});
+})->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -190,6 +190,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.contratada.update_empreendimento_trecho');
                 Route::delete('/destroy_empreendimento_trecho/{trecho}', [App\Domain\Contrato\Contratada\Empreendimento\Controller\DestroyContratadaEmpreendimentoTrechoController::class, 'index'])
                     ->name('contratos.contratada.destroy_empreendimento_trecho');
+
+                Route::get('{contrato}/recurso/equipamento', [App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\ListagemEquipamentoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.equipamento.index');
+                Route::get('{contrato}/recurso/equipamento/create/{equipamento?}', [App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\CreateEquipamentoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.equipamento.create');
+                Route::post('recurso/equipamento/store', [App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\StoreEquipamentoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.equipamento.store');
+                Route::post('recurso/equipamento/store_documento', [App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\StoreDocumentoEquipamentoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.equipamento.store_documento');
+                Route::get('recurso/equipamento/visualizar/{documento}', [App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\VisualizarDocumentoEquipamentoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.equipamento.visualizar');
+                Route::delete('{contrato}/recurso/equipamento/destroy/{documento}', [App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\DestroyDocumentoEquipamentoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.equipamento.destroy');
+                Route::delete('recurso/equipamento/destroy_equipamento/{equipamento}', [App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\DestroyEquipamentoRecursoController::class, 'index'])
+                    ->name('contratos.contratada.recurso.equipamento.destroy_equipamento');
             });
         }); // FIM CONTRATOS
 
