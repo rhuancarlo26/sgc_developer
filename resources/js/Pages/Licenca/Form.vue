@@ -236,28 +236,29 @@
                                 <!-- Área em APP(ha): -->
                                 <div class="col-2">
                                     <InputLabel value="Área em APP(ha):" for="in_app" />
-                                    <input type="text" id="in_app" name="in_app" class="form-control" v-model="form.in_app" />
+                                    <input type="number" id="in_app" name="in_app" class="form-control" v-model="form.in_app" />
                                     <InputError :message="form.errors.in_app" />
                                 </div>
 
                                 <!-- Área fora APP(ha): -->
                                 <div class="col-2">
                                     <InputLabel value="Área fora APP(ha):" for="out_app" />
-                                    <input type="text" id="out_app" name="out_app" class="form-control" v-model="form.out_app" />
+                                    <input type="number" id="out_app" name="out_app" class="form-control" v-model="form.out_app"
+                                    @change="calcularArea" />
                                     <InputError :message="form.errors.out_app" />
                                 </div>
 
                                 <!-- Área Total (ha): -->
                                 <div class="col-2">
                                     <InputLabel value="Área Total(ha):" for="total_app" />
-                                    <input type="text" id="total_app" name="total_app" class="form-control" v-model="form.total_app" />
+                                    <input type="number" id="total_app" name="total_app" class="form-control" v-model="form.total_app" disabled readonly/>
                                     <InputError :message="form.errors.total_app" />
                                 </div>
 
                                 <!-- Volume(m³): -->
                                 <div class="col-2">
                                     <InputLabel value="Volume(m³):" for="volume" />
-                                    <input type="text" id="volume" name="volume" class="form-control" v-model="form.volume" />
+                                    <input type="number" id="volume" name="volume" class="form-control" v-model="form.volume" />
                                     <InputError :message="form.errors.volume" />
                                 </div>
 
@@ -684,6 +685,14 @@
         const formatoData = newDate.toISOString().split('T')[0];
 
         return formatoData;
+    }
+
+    const calcularArea = () => {
+        const inApp = parseInt(form.in_app);
+        const outApp = parseInt(form.out_app);
+        
+        form.total_app = inApp + outApp;
+        
     }
 
     const calcularExtensao = () => {
