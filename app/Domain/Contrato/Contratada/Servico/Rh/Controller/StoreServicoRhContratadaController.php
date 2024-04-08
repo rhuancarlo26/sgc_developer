@@ -2,7 +2,6 @@
 
 namespace App\Domain\Contrato\Contratada\Servico\Rh\Controller;
 
-use App\Domain\Contrato\Contratada\Servico\app\Services\ServicoService;
 use App\Domain\Contrato\Contratada\Servico\Rh\Services\ServicoRhService;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;

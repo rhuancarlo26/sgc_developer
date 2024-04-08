@@ -1,12 +1,17 @@
 <?php
 
 use App\Domain\Contrato\Contratada\Servico\app\Controller\CreateServicosContratadaController;
+use App\Domain\Contrato\Contratada\Servico\app\Controller\DeleteServicoContratadaController;
 use App\Domain\Contrato\Contratada\Servico\app\Controller\IndexServicosContratadaController;
 use App\Domain\Contrato\Contratada\Servico\app\Controller\StoreServicosContratadaController;
 use App\Domain\Contrato\Contratada\Servico\app\Controller\UpdateServicosContratadaController;
+use App\Domain\Contrato\Contratada\Servico\Condicionante\Controller\DeleteLicencaCondicionanteServicoController;
 use App\Domain\Contrato\Contratada\Servico\Condicionante\Controller\StoreLicencaCondicionanteServicoController;
+use App\Domain\Contrato\Contratada\Servico\Equipamento\Controller\DeleteServicoEquipamentoContratadaController;
 use App\Domain\Contrato\Contratada\Servico\Equipamento\Controller\StoreServicoEquipamentoContratadaController;
+use App\Domain\Contrato\Contratada\Servico\Rh\Controller\DeleteServicoRhContratadaController;
 use App\Domain\Contrato\Contratada\Servico\Rh\Controller\StoreServicoRhContratadaController;
+use App\Domain\Contrato\Contratada\Servico\Veiculo\Controller\DeleteServicoVeiculoContratadaController;
 use App\Domain\Contrato\Contratada\Servico\Veiculo\Controller\StoreServicoVeiculoContratadaController;
 use App\Domain\Licenca\app\Controller\CreateLicencaController;
 use App\Domain\Licenca\app\Controller\GerenciarLicencaController;
@@ -249,16 +254,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     Route::get('{contrato}/servicos/create/{servico?}', [CreateServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.create');
                     Route::post('servicos/store',                       [StoreServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.store');
                     Route::patch('servicos/update',                     [UpdateServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.update');
-                    Route::post('servicos/store_licenca_condicionante', [StoreLicencaCondicionanteServicoController::class, 'index'])->name('contratos.contratada.servicos.store_licenca_condicionante');
+                    Route::delete('servicos/delete/{servico}',          [DeleteServicoContratadaController::class, 'index'])->name('contratos.contratada.servicos.delete');
 
-                    Route::prefix('/rh')->group(function () {
-                        Route::post('servicos/rh/store',                [StoreServicoRhContratadaController::class, 'index'])->name('contratos.contratada.servicos.rh.store');
+                    Route::prefix('servico/rh')->group(function () {
+                        Route::post('store',                            [StoreServicoRhContratadaController::class, 'index'])->name('contratos.contratada.servicos.rh.store');
+                        Route::post('delete/{rh}',                      [DeleteServicoRhContratadaController::class, 'index'])->name('contratos.contratada.servicos.rh.delete');
                     });
-                    Route::prefix('/veiculo')->group(function () {
-                        Route::post('servicos/veiculo/store',           [StoreServicoVeiculoContratadaController::class, 'index'])->name('contratos.contratada.servicos.veiculo.store');
+                    Route::prefix('servico/veiculo')->group(function () {
+                        Route::post('store',                            [StoreServicoVeiculoContratadaController::class, 'index'])->name('contratos.contratada.servicos.veiculo.store');
+                        Route::post('delete/{veiculo}',                 [DeleteServicoVeiculoContratadaController::class, 'index'])->name('contratos.contratada.servicos.veiculo.delete');
                     });
-                    Route::prefix('/equipamento')->group(function () {
-                        Route::post('servicos/equipamento/store',       [StoreServicoEquipamentoContratadaController::class, 'index'])->name('contratos.contratada.servicos.equipamento.store');
+                    Route::prefix('servico/equipamento')->group(function () {
+                        Route::post('store',                            [StoreServicoEquipamentoContratadaController::class, 'index'])->name('contratos.contratada.servicos.equipamento.store');
+                        Route::post('delete/{equipamento}',             [DeleteServicoEquipamentoContratadaController::class, 'index'])->name('contratos.contratada.servicos.equipamento.delete');
+                    });
+                    Route::prefix('servico/condicionante')->group(function () {
+                        Route::post('store',                            [StoreLicencaCondicionanteServicoController::class, 'index'])->name('contratos.contratada.servicos.condicionante.store');
+                        Route::post('delete',                           [DeleteLicencaCondicionanteServicoController::class, 'index'])->name('contratos.contratada.servicos.condicionante.delete');
                     });
                 });
             });

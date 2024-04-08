@@ -3,7 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Table from "@/Components/Table.vue";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import Navbar from "../Navbar.vue";
 import { IconDots } from "@tabler/icons-vue";
 import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
@@ -24,6 +24,10 @@ const abrirModalLicenca = (servico) => {
 
 const abrirModalServico = (servico) => {
     modalVisualizarServico.value.abrirModal(servico);
+}
+
+const deleteServico = (servico_id) => {
+    router.delete(route('contratos.contratada.servicos.delete', servico_id));
 }
 
 </script>
@@ -65,7 +69,7 @@ const abrirModalServico = (servico) => {
                             <td>{{ item.tipo?.nome }}</td>
                             <td>{{ item.especificacao }}</td>
                             <td>
-                                <span @click="abrirModalLicenca(item)" class="btn btn-default">
+                                <span @click="abrirModalLicenca(item)" v-if="item.condicionantes.length">
                                     {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''} -
                                     ${item.condicionantes[0]?.descricao ?? ''}` }}
                                 </span>
@@ -96,6 +100,9 @@ const abrirModalServico = (servico) => {
                                     <a class="dropdown-item"
                                         :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
                                         Editar
+                                    </a>
+                                    <a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)">
+                                        Excluir
                                     </a>
                                 </div>
                             </td>

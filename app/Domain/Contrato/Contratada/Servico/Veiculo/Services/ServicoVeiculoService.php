@@ -21,4 +21,25 @@ class ServicoVeiculoService extends BaseModelService
       'request' => $response['request']
     ];
   }
+
+  public function deleteVeiculo($veiculo, $request)
+  {
+    try {
+      $this->modelClass::Where('recurso_veiculo_id', $veiculo->id)->where('servico_id', $request['servico_id'])->firstOrFail()->delete();
+
+      $response = [
+        'type' => 'success',
+        'content' => 'Recurso deletado com sucesso!'
+      ];
+    } catch (\Exception $e) {
+      $response = [
+        'type' => 'error',
+        'content' => $e->getMessage()
+      ];
+    }
+
+    return [
+      'request' => $response
+    ];
+  }
 }
