@@ -36,10 +36,10 @@ const visualizarMapa = () => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
-    { route: '#', label: contrato.contratada }
-  ]
-    " />
+          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+          { route: '#', label: contrato.contratada }
+        ]
+          " />
       </div>
     </template>
 
@@ -53,7 +53,7 @@ const visualizarMapa = () => {
               <span>
                 Dados contratuais
               </span>
-              <IconCircleCheck />
+              <IconCircleCheck class="text-success" />
             </a>
           </li>
           <li class="nav-item" role="presentation">
@@ -62,8 +62,8 @@ const visualizarMapa = () => {
               <span>
                 Introdução
               </span>
-              <IconCircleCheck v-if="contrato.introducao" />
-              <IconCircleX v-else />
+              <IconCircleCheck class="text-success" v-if="contrato.introducao" />
+              <IconCircleX class="text-danger" v-else />
             </a>
           </li>
           <li class="nav-item" role="presentation">
@@ -72,8 +72,8 @@ const visualizarMapa = () => {
               <span>
                 Empreendimento
               </span>
-              <IconCircleCheck v-if="contrato.empreendimento_trechos.length" />
-              <IconCircleX v-else />
+              <IconCircleCheck class="text-success" v-if="contrato.empreendimento_trechos.length" />
+              <IconCircleX class="text-danger" v-else />
             </a>
           </li>
           <li class="nav-item" role="presentation">
@@ -82,8 +82,8 @@ const visualizarMapa = () => {
               <span>
                 Licenciamento
               </span>
-              <IconCircleCheck v-if="contrato.licenciamentos.length" />
-              <IconCircleX v-else />
+              <IconCircleCheck class="text-success" v-if="contrato.licenciamentos.length" />
+              <IconCircleX class="text-danger" v-else />
             </a>
           </li>
           <li class="nav-item" role="presentation">
@@ -92,8 +92,8 @@ const visualizarMapa = () => {
               <span>
                 Histórico
               </span>
-              <IconCircleCheck v-if="contrato.historico.length" />
-              <IconCircleX v-else />
+              <IconCircleCheck class="text-success" v-if="contrato.historico.length" />
+              <IconCircleX class="text-danger" v-else />
             </a>
           </li>
           <li class="nav-item" role="presentation">
@@ -102,8 +102,8 @@ const visualizarMapa = () => {
               <span>
                 Anexos
               </span>
-              <IconCircleCheck v-if="contrato.anexos.length" />
-              <IconCircleX v-else />
+              <IconCircleCheck class="text-success" v-if="contrato.anexos.length" />
+              <IconCircleX class="text-danger" v-else />
             </a>
           </li>
         </ul>
