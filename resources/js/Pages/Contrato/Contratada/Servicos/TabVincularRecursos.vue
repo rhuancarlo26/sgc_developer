@@ -1,6 +1,6 @@
 <script setup>
 import InputLabel from '@/Components/InputLabel.vue';
-import { useForm } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import { IconDots } from '@tabler/icons-vue';
 
 const props = defineProps({
@@ -21,11 +21,34 @@ const form = useForm({
 const salvarRh = () => {
   form.post(route('contratos.contratada.servicos.rh.store'));
 }
+
+const excluirRh = (rh_id) => {
+  router.post(route('contratos.contratada.servicos.rh.delete', rh_id), {
+    contrato_id: props.servico.contrato_id,
+    servico_id: props.servico.id
+  })
+}
+
 const salvarVeiculo = () => {
   form.post(route('contratos.contratada.servicos.veiculo.store'));
 }
+
+const excluirVeiculo = (veiculo_id) => {
+  router.post(route('contratos.contratada.servicos.veiculo.delete', veiculo_id), {
+    contrato_id: props.servico.contrato_id,
+    servico_id: props.servico.id
+  })
+}
+
 const salvarEquipamento = () => {
   form.post(route('contratos.contratada.servicos.equipamento.store'));
+}
+
+const excluirEquipamento = (equipamento_id) => {
+  router.post(route('contratos.contratada.servicos.equipamento.delete', equipamento_id), {
+    contrato_id: props.servico.contrato_id,
+    servico_id: props.servico.id
+  })
 }
 
 </script>
@@ -37,7 +60,7 @@ const salvarEquipamento = () => {
         <div class="row g-2">
           <div class="col">
             <v-select :options="rhs" label="nome" v-model="form.rh">
-              <template #no-options="{ }">
+              <template #no-options="{}">
                 Nenhum registro encontrado.
               </template>
             </v-select>
@@ -68,7 +91,9 @@ const salvarEquipamento = () => {
                 <IconDots />
               </button>
               <div class="dropdown-menu dropdown-menu-end">
-
+                <a @click="excluirRh(rh.id)" class="dropdown-item" href="javascript:void(0)">
+                  Excluir
+                </a>
               </div>
             </td>
           </tr>
@@ -85,7 +110,7 @@ const salvarEquipamento = () => {
           <div class="col">
             <v-select :options="[...veiculos.map(c => { return { ...c, label: `${c.codigo.codigo}` } })]"
               v-model="form.veiculo">
-              <template #no-options="{ }">
+              <template #no-options="{}">
                 Nenhum registro encontrado.
               </template>
             </v-select>
@@ -114,7 +139,9 @@ const salvarEquipamento = () => {
                 <IconDots />
               </button>
               <div class="dropdown-menu dropdown-menu-end">
-
+                <a @click="excluirVeiculo(veiculo.id)" class="dropdown-item" href="javascript:void(0)">
+                  Excluir
+                </a>
               </div>
             </td>
           </tr>
@@ -130,7 +157,7 @@ const salvarEquipamento = () => {
         <div class="row g-2">
           <div class="col">
             <v-select :options="equipamentos" label="nome" v-model="form.equipamento">
-              <template #no-options="{ }">
+              <template #no-options="{}">
                 Nenhum registro encontrado.
               </template>
             </v-select>
@@ -159,7 +186,9 @@ const salvarEquipamento = () => {
                 <IconDots />
               </button>
               <div class="dropdown-menu dropdown-menu-end">
-
+                <a @click="excluirEquipamento(equipamento.id)" class="dropdown-item" href="javascript:void(0)">
+                  Excluir
+                </a>
               </div>
             </td>
           </tr>

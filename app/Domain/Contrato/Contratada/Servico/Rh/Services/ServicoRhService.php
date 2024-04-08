@@ -2,13 +2,7 @@
 
 namespace App\Domain\Contrato\Contratada\Servico\Rh\Services;
 
-use App\Models\RecursoEquipamento;
-use App\Models\RecursoRh;
-use App\Models\RecursoVeiculo;
 use App\Models\ServicoRh;
-use App\Models\Servicos;
-use App\Models\ServicoTema;
-use App\Models\ServicoTipo;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -25,6 +19,27 @@ class ServicoRhService extends BaseModelService
 
     return [
       'request' => $response['request']
+    ];
+  }
+
+  public function deleteRh($rh, $request)
+  {
+    try {
+      $this->modelClass::Where('recurso_rh_id', $rh->id)->where('servico_id', $request['servico_id'])->firstOrFail()->delete();
+
+      $response = [
+        'type' => 'success',
+        'content' => 'Recurso deletado com sucesso!'
+      ];
+    } catch (\Exception $e) {
+      $response = [
+        'type' => 'error',
+        'content' => $e->getMessage()
+      ];
+    }
+
+    return [
+      'request' => $response
     ];
   }
 }
