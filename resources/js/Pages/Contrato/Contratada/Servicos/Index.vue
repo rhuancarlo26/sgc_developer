@@ -7,6 +7,7 @@ import { Head, Link } from "@inertiajs/vue3";
 import Navbar from "../Navbar.vue";
 import { IconDots } from "@tabler/icons-vue";
 import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
+import ModalVisualizarServico from "./ModalVisualizarServico.vue";
 import { ref } from "vue";
 
 defineProps({
@@ -15,9 +16,14 @@ defineProps({
 });
 
 const modalVisualizarLicenca = ref();
+const modalVisualizarServico = ref();
 
 const abrirModalLicenca = (servico) => {
     modalVisualizarLicenca.value.abrirModal(servico);
+}
+
+const abrirModalServico = (servico) => {
+    modalVisualizarServico.value.abrirModal(servico);
 }
 
 </script>
@@ -31,10 +37,10 @@ const abrirModalLicenca = (servico) => {
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-        { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
-        { route: '#', label: contrato.contratada }
-    ]
-        " />
+                    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+                    { route: '#', label: contrato.contratada }
+                ]
+                    " />
                 <div class="container-buttons">
                     <Link class="btn btn-info me-2" :href="route('contratos.contratada.servicos.create', contrato.id)">
                     Cadastrar serviço
@@ -59,9 +65,10 @@ const abrirModalLicenca = (servico) => {
                             <td>{{ item.tipo?.nome }}</td>
                             <td>{{ item.especificacao }}</td>
                             <td>
-                                <a @click="abrirModalLicenca(item)" href="javascript:void(0)">
-                                    TESTE
-                                </a>
+                                <span @click="abrirModalLicenca(item)" class="btn btn-default">
+                                    {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''} -
+                                    ${item.condicionantes[0]?.descricao ?? ''}` }}
+                                </span>
                             </td>
                             <td>
                                 <span v-if="item.servico_status_id === 1" class="btn btn-info">
@@ -83,7 +90,13 @@ const abrirModalLicenca = (servico) => {
                                     <IconDots />
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
-
+                                    <a @click="abrirModalServico(item)" class="dropdown-item" href="javascript:void(0)">
+                                        Visualizar
+                                    </a>
+                                    <a class="dropdown-item"
+                                        :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
+                                        Editar
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -93,6 +106,7 @@ const abrirModalLicenca = (servico) => {
         </Navbar>
 
         <ModalVisualizarLicenca ref="modalVisualizarLicenca" />
+        <ModalVisualizarServico ref="modalVisualizarServico" />
 
     </AuthenticatedLayout>
 </template>

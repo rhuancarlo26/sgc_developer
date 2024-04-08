@@ -10,12 +10,17 @@ import { IconDeviceFloppy } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 import TabDadosGerais from "./TabDadosGerais.vue";
 import TabVincularRecursos from "./TabVincularRecursos.vue";
+import TabVincularCondicionantes from "./TabVincularCondicionantes.vue";
 
 const props = defineProps({
   contrato: Object,
   servico: Object,
   tipos: Array,
-  temas: Array
+  temas: Array,
+  licencasLi: Array,
+  rhs: Array,
+  veiculos: Array,
+  equipamentos: Array
 })
 
 </script>
@@ -29,10 +34,10 @@ const props = defineProps({
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
-    { route: '#', label: contrato.contratada }
-  ]
-    " />
+          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+          { route: '#', label: contrato.contratada }
+        ]
+          " />
         <div class="container-buttons">
           <Link class="btn btn-info me-2" :href="route('contratos.contratada.servicos.index', contrato.id)">
           <IconDoorExit class="me-2" />
@@ -70,10 +75,10 @@ const props = defineProps({
             </div>
 
             <div class="tab-pane" id="vincularRecursos" role="tabpanel">
-              <TabVincularRecursos />
+              <TabVincularRecursos :servico="servico" :rhs="rhs" :veiculos="veiculos" :equipamentos="equipamentos" />
             </div>
             <div class="tab-pane" id="vincularCondicionantes" role="tabpanel">
-
+              <TabVincularCondicionantes :servico="servico" :licencasLi="licencasLi" />
             </div>
           </div>
         </div>
