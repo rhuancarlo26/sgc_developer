@@ -18,7 +18,7 @@ class CreateServicosContratadaController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico): Response
   {
-    $response = $this->servicoService->createServicos($servico);
+    $response = $this->servicoService->createServicos($contrato, $servico);
 
     return Inertia::render('Contrato/Contratada/Servicos/Form', [
       'contrato' => $contrato,

@@ -2,12 +2,17 @@
 
 namespace App\Domain\Contrato\Contratada\Servico\app\Services;
 
+use App\Models\Licenca;
+use App\Models\RecursoEquipamento;
+use App\Models\RecursoRh;
+use App\Models\RecursoVeiculo;
 use App\Models\Servicos;
 use App\Models\ServicoTema;
 use App\Models\ServicoTipo;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class ServicoService extends BaseModelService
 {
@@ -19,28 +24,57 @@ class ServicoService extends BaseModelService
   {
     return [
       'servicos' => $this->search(...$searchParams)
-        ->with(['tipo', 'tema', 'status'])
+        ->with([
+          'tipo',
+          'tema',
+          'status',
+          'rhs',
+          'veiculos',
+          'veiculos.codigo',
+          'equipamentos',
+          'condicionantes',
+          'condicionantes.licenca'
+        ])
         ->where('contrato_id', $contrato->id)
         ->paginate()
         ->appends($searchParams)
     ];
   }
 
-  public function createServicos($servico)
+  public function createServicos($contrato, $servico)
   {
     $tipos = ServicoTipo::all();
     $temas = ServicoTema::all();
+    $rhs = RecursoRh::where('contrato_id', $contrato->id)->get();
+    $veiculos = RecursoVeiculo::with(['codigo'])->where('contrato_id', $contrato->id)->get();
+    $equipamentos = RecursoEquipamento::where('contrato_id', $contrato->id)->get();
+    $licencasLi = Licenca::select(['id', 'numero_licenca'])
+      ->with([
+        'condicionantes'
+      ])
+      ->where('tipo_id', 6)
+      ->get();
 
     if ($servico) {
       $servico->load([
         'tipo',
-        'tema'
+        'tema',
+        'rhs',
+        'veiculos',
+        'veiculos.codigo',
+        'equipamentos',
+        'condicionantes',
+        'condicionantes.licenca'
       ]);
     }
 
     return [
       'tipos' => $tipos,
       'temas' => $temas,
+      'licencasLi' => $licencasLi,
+      'rhs' => $rhs,
+      'veiculos' => $veiculos,
+      'equipamentos' => $equipamentos,
       'servico' => $servico
     ];
   }
