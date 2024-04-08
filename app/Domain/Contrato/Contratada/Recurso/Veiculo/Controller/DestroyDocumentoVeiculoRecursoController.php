@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller;
+
+use App\Domain\Contrato\Contratada\Recurso\Veiculo\Services\VeiculoRecursoService;
+use App\Models\Contrato;
+use App\Models\RecursoVeiculoDocumento;
+use App\Shared\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
+
+class DestroyDocumentoVeiculoRecursoController extends Controller
+{
+  public function __construct(private readonly VeiculoRecursoService $veiculoRecursoService)
+  {
+  }
+
+  public function index(Contrato $contrato, RecursoVeiculoDocumento $documento)
+  {
+    try {
+      Storage::delete($documento['caminho']);
+
+      $this->veiculoRecursoService->delete($documento);
+
+      return to_route('contratos.contratada.recurso.veiculo.create', ['contrato' => $contrato->id, 'veiculo' => $documento->recurso_veiculo_id])->with('message', ['type' => 'success', 'content' => 'Documento excluido com sucesso!']);
+    } catch (\Exception $e) {
+      return to_route('contratos.contratada.recurso.veiculo.create', ['contrato' => $contrato->id, 'veiculo' => $documento->recurso_veiculo_id])->with('message', ['type' => 'error', 'content' => $e->getMessage()]);
+    }
+  }
+}
