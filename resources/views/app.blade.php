@@ -19,11 +19,3 @@
         @inertia
     </body>
 </html>
-
-<style>
-    body {
-        background-image: url('img/background/bg_login.jpg');
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
-</style>
