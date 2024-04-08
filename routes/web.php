@@ -1,5 +1,13 @@
 <?php
 
+use App\Domain\Contrato\Contratada\Servico\app\Controller\CreateServicosContratadaController;
+use App\Domain\Contrato\Contratada\Servico\app\Controller\IndexServicosContratadaController;
+use App\Domain\Contrato\Contratada\Servico\app\Controller\StoreServicosContratadaController;
+use App\Domain\Contrato\Contratada\Servico\app\Controller\UpdateServicosContratadaController;
+use App\Domain\Contrato\Contratada\Servico\Condicionante\Controller\StoreLicencaCondicionanteServicoController;
+use App\Domain\Contrato\Contratada\Servico\Equipamento\Controller\StoreServicoEquipamentoContratadaController;
+use App\Domain\Contrato\Contratada\Servico\Rh\Controller\StoreServicoRhContratadaController;
+use App\Domain\Contrato\Contratada\Servico\Veiculo\Controller\StoreServicoVeiculoContratadaController;
 use App\Domain\Licenca\app\Controller\CreateLicencaController;
 use App\Domain\Licenca\app\Controller\GerenciarLicencaController;
 use App\Domain\Licenca\app\Controller\GetLicencaController;
@@ -154,8 +162,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.contratada.index');
                 Route::get('{contrato}/dados_gerais', [\App\Domain\Contrato\Contratada\app\Controller\DadosGeraisContratadaController::class, 'index'])
                     ->name('contratos.contratada.dados_gerais.index');
-                Route::get('{contrato}/servicos', [App\Domain\Contrato\Contratada\app\Controller\ServicosContratadaController::class, 'index'])
-                    ->name('contratos.contratada.servicos.index');
                 Route::post('/store_introducao', [App\Domain\Contrato\Contratada\Introducao\Controller\StoreIntroducaoContratadaController::class, 'index'])
                     ->name('contratos.contratada.store_introducao.index');
                 Route::patch('/update_introducao/{introducao}', [App\Domain\Contrato\Contratada\Introducao\Controller\UpdateIntroducaoContratadaController::class, 'index'])
@@ -237,6 +243,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->name('contratos.contratada.recurso.rh.destroy');
                 Route::delete('recurso/rh/destroy_rh/{rh}', [App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyRhRecursoController::class, 'index'])
                     ->name('contratos.contratada.recurso.rh.destroy_rh');
+
+                Route::prefix('/')->group(function () {
+                    Route::get('{contrato}/servicos',                   [IndexServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.index');
+                    Route::get('{contrato}/servicos/create/{servico?}', [CreateServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.create');
+                    Route::post('servicos/store',                       [StoreServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.store');
+                    Route::patch('servicos/update',                     [UpdateServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.update');
+                    Route::post('servicos/store_licenca_condicionante', [StoreLicencaCondicionanteServicoController::class, 'index'])->name('contratos.contratada.servicos.store_licenca_condicionante');
+
+                    Route::prefix('/rh')->group(function () {
+                        Route::post('servicos/rh/store',                [StoreServicoRhContratadaController::class, 'index'])->name('contratos.contratada.servicos.rh.store');
+                    });
+                    Route::prefix('/veiculo')->group(function () {
+                        Route::post('servicos/veiculo/store',           [StoreServicoVeiculoContratadaController::class, 'index'])->name('contratos.contratada.servicos.veiculo.store');
+                    });
+                    Route::prefix('/equipamento')->group(function () {
+                        Route::post('servicos/equipamento/store',       [StoreServicoEquipamentoContratadaController::class, 'index'])->name('contratos.contratada.servicos.equipamento.store');
+                    });
+                });
             });
         }); // FIM CONTRATOS
 
