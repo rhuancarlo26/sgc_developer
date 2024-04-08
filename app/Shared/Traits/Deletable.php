@@ -27,5 +27,4 @@ trait Deletable
     {
         return $model->forceDelete();
     }
-
 }
