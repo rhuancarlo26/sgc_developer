@@ -22,4 +22,25 @@ class ServicoEquipamentoService extends BaseModelService
       'request' => $response['request']
     ];
   }
+
+  public function deleteEquipamento($equipamento, $request)
+  {
+    try {
+      $this->modelClass::Where('recurso_equipamento_id', $equipamento->id)->where('servico_id', $request['servico_id'])->firstOrFail()->delete();
+
+      $response = [
+        'type' => 'success',
+        'content' => 'Recurso deletado com sucesso!'
+      ];
+    } catch (\Exception $e) {
+      $response = [
+        'type' => 'error',
+        'content' => $e->getMessage()
+      ];
+    }
+
+    return [
+      'request' => $response
+    ];
+  }
 }
