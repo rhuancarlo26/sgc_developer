@@ -11,5 +11,5 @@ class LicencaDocumento extends Model
 
     protected $table = 'licenca_documento';
 
-    protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $guarded = ['id', 'created_at'];
 }
