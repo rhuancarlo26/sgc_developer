@@ -26,6 +26,8 @@ use App\Domain\Licenca\Condicionante\Controller\ListagemCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\StoreCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\StoreImportacaoCondicionanteController;
 use App\Domain\Licenca\Condicionante\Controller\UpdateCondicionanteController;
+use App\Domain\Licenca\Documento\Controller\DeleteLicencaDocumentoController;
+use App\Domain\Licenca\Documento\Controller\StoreLicencaDocumentoController;
 use App\Domain\Licenca\Documento\Controller\VisualizarDocumentoController;
 use App\Domain\Licenca\LicencaSegmento\Controller\DeleteLicencaSegmentoController;
 use App\Domain\Licenca\LicencaSegmento\Controller\GetUFLicencaSegmentoController;
@@ -308,7 +310,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             });
             // Documento
             Route::prefix('documento')->group(function () {
-                Route::get('/visualizar/{documento}', [VisualizarDocumentoController::class, 'index'])->name('licenca.documento.visualizar');
+                Route::post('store',                    [StoreLicencaDocumentoController::class, 'index'])->name('licenca.documento.store');
+                Route::delete('delete/{documento}',     [DeleteLicencaDocumentoController::class, 'index'])->name('licenca.documento.delete');
+                Route::get('/visualizar/{documento}',   [VisualizarDocumentoController::class, 'index'])->name('licenca.documento.visualizar');
             });
             // Requerimento
             Route::prefix('requerimento')->group(function () {
