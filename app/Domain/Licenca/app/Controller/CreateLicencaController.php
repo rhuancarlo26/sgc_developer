@@ -14,8 +14,7 @@ class CreateLicencaController extends Controller
     public function __construct(
         private readonly LicencaTipoService $licencaTipoService,
         private readonly LicencaBRService   $licencaBRService
-    )
-    {
+    ) {
     }
 
     public function index(Licenca|null $licenca): \Inertia\Response
@@ -23,6 +22,12 @@ class CreateLicencaController extends Controller
         $tipos = $this->licencaTipoService->getLicencaTipo();
         $brs   = $this->licencaBRService->getLicencaBR();
         $licencaSegmento = LicencaSegmento::where('licenca_id', $licenca->id)->get();
+
+        if ($licenca) {
+            $licenca->load([
+                'documento'
+            ]);
+        }
 
         return Inertia::render(component: 'Licenca/Form', props: [
             'tipos'           => $tipos,
