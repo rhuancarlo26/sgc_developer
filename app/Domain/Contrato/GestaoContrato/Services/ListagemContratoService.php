@@ -20,7 +20,7 @@ class ListagemContratoService extends BaseModelService
     public function ListagemContratos($tipo, $searchParams)
     {
         return [
-            'contratos' => $this->search(...$searchParams)
+            'contratos' => $this->searchAllColumns(...$searchParams)
                 ->where('tipo_id', $tipo->id)
                 ->paginate()
                 ->appends($searchParams)
