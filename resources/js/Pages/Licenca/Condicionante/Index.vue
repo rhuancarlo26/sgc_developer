@@ -41,10 +41,10 @@ const editarCondicionante = (item) => {
         <Breadcrumb class="align-self-center"
           :links="[{ route: route('licenca.index'), label: 'Licenças' }, { route: '#', label: 'Condicionante' }]" />
         <div class="container-buttons">
-          <button @click="abrirModal()" type="button" class="btn btn-success me-2">
+          <button @click="abrirModal()" type="button" class="btn btn-info me-2">
             Cadastrar condicionante
           </button>
-          <button @click="abrirModalImport()" type="button" class="btn btn-success me-2">
+          <button @click="abrirModalImport()" type="button" class="btn btn-info me-2">
             Importar condicionante
           </button>
           <a class="btn btn-dark" :href="route('licenca.index')">
@@ -81,7 +81,7 @@ const editarCondicionante = (item) => {
                     Editar
                   </a>
                   <a class="dropdown-item" :href="route('licenca.condicionante.destroy', item.id)">
-                    Deletar
+                    Excluir
                   </a>
                 </div>
               </span>

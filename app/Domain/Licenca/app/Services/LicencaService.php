@@ -23,6 +23,10 @@ class LicencaService extends BaseModelService
                 ->appends($searchParams);
     }
 
+    public function getLicenca(int $id_licenca)
+    {
+        return Licenca::where('id', $id_licenca)->first();
+    }
     public function create(array $post): array
     {
         $licencaTipoService = new LicencaTipoService();

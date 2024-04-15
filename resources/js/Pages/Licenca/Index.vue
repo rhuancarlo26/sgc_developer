@@ -121,7 +121,7 @@
                                     </a>
                                     <a v-if="!item.arquivado" @click="gerenciarArquivo(item, index, true)"
                                        class="dropdown-item" href="javascript:void(0)">
-                                        Arquivar licenca
+                                        Arquivar licença
                                     </a>
                                     <a v-else @click="gerenciarArquivo(item, index, false)" class="dropdown-item"
                                        href="javascript:void(0)">

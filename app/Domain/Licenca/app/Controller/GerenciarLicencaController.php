@@ -9,15 +9,15 @@ use Illuminate\Http\Request;
 
 class GerenciarLicencaController extends Controller
 {
-  public function __construct(private readonly LicencaService $listagemLicenca)
-  {
-  }
+    public function __construct(private readonly LicencaService $listagemLicenca)
+    {
+    }
 
-  public function index(Request $request): RedirectResponse
-  {
-    $parameters = $this->listagemLicenca->update(post: $request->all());
+    public function index(Request $request): RedirectResponse
+    {
+        $parameters = $this->listagemLicenca->update(post: $request->all());
 
-    return to_route(route: 'licenca.index', parameters: $parameters['licenca'])
-      ->with('message', $parameters['request']);
-  }
+        return to_route(route: 'licenca.index', parameters: $parameters['licenca'])
+            ->with('message', $parameters['request']);
+    }
 }
