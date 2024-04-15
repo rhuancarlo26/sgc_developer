@@ -9,7 +9,8 @@ use App\Shared\Http\Controllers\Controller;
 class GetUFLicencaSegmentoController extends Controller
 {
     public function __construct(private readonly LicencaSegmentoService $listagemUFS)
-    { }
+    {
+    }
 
     public function index(StoreLicencaSegmentoRequest $request): \Illuminate\Http\RedirectResponse
     {
@@ -17,9 +18,7 @@ class GetUFLicencaSegmentoController extends Controller
 
         return to_route(
             route: 'licenca.create',
-            parameters: [
-                'ufs' => $ufs
-            ]
+            parameters: ['ufs' => $ufs]
         );
     }
 }

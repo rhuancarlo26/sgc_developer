@@ -56,10 +56,10 @@ class DataManagement
     }
 
 
-    public function delete($entity, $infos): array
+    public function delete($entity, $id): array
     {
         try {
-            $entity->where($infos)->delete();
+            $entity::find($id)->delete();
             $type       = 'success';
             $content    = 'Registro excluido!';
         } catch (\Exception) {

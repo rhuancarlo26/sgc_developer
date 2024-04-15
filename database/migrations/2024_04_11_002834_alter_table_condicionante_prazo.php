@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('licenca_segmento', function (Blueprint $table) {
-            $table->json('coordenada');
+        Schema::table('licenca_condicionantes', function (Blueprint $table) {
+            $table->string('prazo')->nullable()->change();
+            $table->float('numero_condicionante')->change();
         });
     }
 

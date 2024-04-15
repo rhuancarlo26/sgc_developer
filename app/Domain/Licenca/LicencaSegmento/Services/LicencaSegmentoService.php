@@ -3,8 +3,6 @@
 namespace App\Domain\Licenca\LicencaSegmento\Services;
 
 use App\Domain\Licenca\app\Services\LicencaBRService;
-use App\Domain\Licenca\app\Services\LicencaTipoService;
-use App\Models\Licenca;
 use App\Models\LicencaSegmento;
 use App\Models\Rodovia;
 use App\Models\SvnSegGeoV2;
@@ -19,9 +17,17 @@ class LicencaSegmentoService extends BaseModelService
 
     protected string $modelClass = LicencaSegmento::class;
 
+    public function get(int $id_licenca, array $searchParams)
+    {
+        return $this->search(...$searchParams)
+            ->where('licenca_id', $id_licenca)
+            ->paginate(10)
+            ->appends($searchParams);
+    }
+
     public function create(array $post): array
     {
-        $uf = Uf::where('estado', $post['uf_inicial'])->first();
+        $uf      = Uf::where('estado', $post['uf_inicial'])->first();
         $rodovia = Rodovia::where('rodovia', $post['rodovia'])->where('uf_id', $uf->id)->first();
 
         $coordenada = SvnSegGeoV2::getGeoJson(
@@ -37,19 +43,9 @@ class LicencaSegmentoService extends BaseModelService
             ...$post
         ]);
 
-        $licenca = Licenca::where('id', $post['licenca_id'])->first();
-        $licencaTipoService = new LicencaTipoService();
-        $licencaBRService = new LicencaBRService();
-        $brs = $licencaBRService->getLicencaBR();
-
         return [
-            'licenca' => [
-                'tipos'             => $licencaTipoService->getLicencaTipo(),
-                'licenca'           => $licenca,
-                'licencaSegmento'   => $licencaSegmento['model'],
-                'brs'               => $brs
-            ],
-            'request' => $licenca['request']
+            'licencaSegmento' => $licencaSegmento['model'],
+            'request' => $licencaSegmento['request']
         ];
     }
 
@@ -57,48 +53,22 @@ class LicencaSegmentoService extends BaseModelService
     {
         $licencaSegmento = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
 
-        $licenca = Licenca::where('id', $post['licenca_id'])->first();
-        $licencaTipoService = new LicencaTipoService();
-        $licencaBRService = new LicencaBRService();
-        $brs = $licencaBRService->getLicencaBR();
-
         return [
-            'licenca' => [
-                'tipos' => $licencaTipoService->getLicencaTipo(),
-                'licenca' => $licenca,
-                'licencaSegmento' => $licencaSegmento['model'],
-                'brs' => $brs
-            ],
-            'request' => $licenca['request']
+            'licencaSegmento' => $licencaSegmento['model'],
+            'request'         => $licencaSegmento['request']
         ];
     }
 
     public function delete(array $post): array
     {
-        $licencaSegmento = $this->dataManagement->delete(entity: $this->modelClass, infos: $post);
-
-        $licenca = Licenca::where('id', $post['licenca_id'])->first();
-        $licencaTipoService = new LicencaTipoService();
-        $licencaBRService = new LicencaBRService();
-        $brs = $licencaBRService->getLicencaBR();
-
-        return [
-            'licenca' => [
-                'tipos' => $licencaTipoService->getLicencaTipo(),
-                'licenca' => $licenca,
-                'licencaSegmento' => $licencaSegmento['model'],
-                'brs' => $brs
-            ],
-            'request' => $licenca['request']
-        ];
+        return $this->dataManagement->delete(entity: $this->modelClass, id: $post['id']);
     }
 
     public function getUF(string $rodovia): array
     {
         $licencaBRService = new LicencaBRService();
 
-        return [
-            'ufs' => $licencaBRService->getLicencaUF($rodovia)
-        ];
+        return ['ufs' => $licencaBRService->getLicencaUF($rodovia)];
     }
+
 }
