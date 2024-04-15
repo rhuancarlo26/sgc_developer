@@ -3,7 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import Table from '@/Components/Table.vue';
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
+import ModelSearchForm from "@/Components/ModelSearchFormAllColumns.vue";
 import { ref } from "vue";
 import { IconSettings } from "@tabler/icons-vue";
 import { IconDots } from "@tabler/icons-vue";
@@ -41,8 +41,8 @@ const formatarCnpj = (cnpj) => {
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-        { route: '#', label: `Gestão de Contratos - ${tipo.nome}` }
-    ]" />
+                    { route: '#', label: `Gestão de Contratos - ${tipo.nome}` }
+                ]" />
                 <div>
                     <Link class="btn btn-info me-2" :href="route('contratos.gestao.create', tipo.id)">
                     Importar contrato
@@ -68,15 +68,15 @@ const formatarCnpj = (cnpj) => {
         <div class="card card-body space-y-3">
 
             <!-- Pesquisa-->
-            <ModelSearchForm :search-columns="{
-        'numero_contrato': 'N° do Contrato',
-        'cnpj': 'CNPJ',
-        'contratada': 'Contratada',
-        'processo_sei': 'Processo SEI',
-        'situacao': 'Situação',
-        'trechos.uf.uf': 'UF',
-        'trechos.rodovia.rodovia': 'Rodovia'
-    }" />
+            <ModelSearchForm :columns="[
+                'numero_contrato',
+                'cnpj',
+                'contratada',
+                'processo_sei',
+                'situacao',
+                'trechos.uf.uf',
+                'trechos.rodovia.rodovia'
+            ]" />
 
             <!-- Listagem-->
             <Table :columns="['UF', 'BR', 'N° do Contrato', 'CNPJ', 'Contratada', 'Processo SEI', 'Situação', 'Ação']"
@@ -87,16 +87,16 @@ const formatarCnpj = (cnpj) => {
                             <p v-if="item.ufs">
                                 <span v-for="uf in item.ufs.split(',')" :key="uf"
                                     class="badge bg-warning text-white m-1">{{
-        uf
-    }}</span>
+                                        uf
+                                    }}</span>
                             </p>
                         </td>
                         <td class="w-8">
                             <p v-if="item.brs">
                                 <span v-for="br in item.brs.split(',')" :key="br"
                                     class="badge bg-warning text-white m-1">{{
-        br
-    }}</span>
+                                        br
+                                    }}</span>
                             </p>
                         </td>
                         <td>{{ item.numero_contrato }}</td>

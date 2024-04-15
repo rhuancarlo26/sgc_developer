@@ -26,14 +26,43 @@ trait Searchable
 
             return $this->model->query()->whereHas(
                 $relation,
-                fn($query) => $query->where($column, 'like', "%$searchValue%")
+                fn ($query) => $query->where($column, 'like', "%$searchValue%")
             );
         }
 
         return $this->model::query()->when(
             $searchColumn,
-            fn($query, $column) => $query->where($column, 'like', "%$searchValue%")
+            fn ($query, $column) => $query->where($column, 'like', "%$searchValue%")
         );
+    }
+
+    public function searchAllColumns(?string $columns, ?string $value): Builder
+    {
+        $queryModel = $this->model->query();
+
+        if ($value) {
+            foreach (explode(",", $columns) as $column) {
+                if ($column && str_contains($column, '.')) {
+
+                    $explodedColumn = explode('.', $column);
+
+                    $column = last($explodedColumn);
+                    $relation = implode('.', array_slice($explodedColumn, 0, -1));
+
+                    $queryModel->orWhereHas(
+                        $relation,
+                        fn ($query) => $query->Where($column, 'like', "%$value%")
+                    );
+                } else {
+                    $queryModel->when(
+                        $column,
+                        fn ($query, $column) => $query->orWhere($column, 'like', "%$value%")
+                    );
+                }
+            }
+        }
+
+        return $queryModel;
     }
 
     /**
