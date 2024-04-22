@@ -68,10 +68,10 @@ const destroyDocumentoRh = (documento_id) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-    { route: route('contratos.contratada.recurso.rh.index', contrato.id), label: `Rh` },
-    { route: '#', label: contrato.contratada }
-  ]
-    " />
+          { route: route('contratos.contratada.recurso.rh.index', contrato.id), label: `Rh` },
+          { route: '#', label: contrato.contratada }
+        ]
+          " />
         <Link class="btn btn-info" :href="route('contratos.contratada.recurso.rh.index', contrato.id)">
         <IconDoorExit class="me-2" />
         Voltar
@@ -91,14 +91,16 @@ const destroyDocumentoRh = (documento_id) => {
             </div>
             <div class="col form-group">
               <InputLabel value="Telefone" for="telefone" />
-              <input type="text" name="telefone" id="telefone" class="form-control" v-model="form.telefone">
+              <input type="text" name="telefone" id="telefone" v-maska data-maska="(##) # ####-####"
+                class="form-control" v-model="form.telefone">
               <InputError :message="form.errors.telefone" />
             </div>
           </div>
           <div class="row mb-4">
             <div class="col form-group">
               <InputLabel value="CPF" for="cpf" />
-              <input type="text" name="cpf" id="cpf" class="form-control" v-model="form.cpf">
+              <input type="text" name="cpf" id="cpf" v-maska data-maska="###.###.###-##" class="form-control"
+                v-model="form.cpf">
               <InputError :message="form.errors.cpf" />
             </div>
             <div class="col form-group">
@@ -188,7 +190,7 @@ const destroyDocumentoRh = (documento_id) => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="documento in  rh.documentos " :key="documento.id">
+                <tr v-for="documento in rh.documentos " :key="documento.id">
                   <td>{{ documento.nome }}</td>
                   <td>
                     <span class="dropdown">
