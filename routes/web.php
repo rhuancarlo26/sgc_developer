@@ -82,6 +82,7 @@ use App\Domain\Licenca\Documento\Controller\DeleteLicencaDocumentoController;
 use App\Domain\Licenca\Documento\Controller\StoreLicencaDocumentoController;
 use App\Domain\Licenca\Documento\Controller\VisualizarDocumentoController;
 use App\Domain\Licenca\LicencaSegmento\Controller\DeleteLicencaSegmentoController;
+use App\Domain\Licenca\LicencaSegmento\Controller\GetLicencaSegmentoController;
 use App\Domain\Licenca\LicencaSegmento\Controller\GetUFLicencaSegmentoController;
 use App\Domain\Licenca\LicencaSegmento\Controller\StoreLicencaSegmentoController;
 use App\Domain\Licenca\LicencaSegmento\Controller\UpdateLicencaSegmentoController;
@@ -290,6 +291,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::patch('/gerenciar-licenca/{licenca}', [GerenciarLicencaController::class, 'index'])->name('licenca.gerenciar-licenca');
 
             // Licença Segmento
+            Route::get('/get/{licenca}',                 [GetLicencaSegmentoController::class,  'index'])->name('licenca_segmento.get');
             Route::post('/store_segmento',               [StoreLicencaSegmentoController::class,  'index'])->name('licenca_segmento.store');
             Route::patch('/update_segmento/{segmento}',  [UpdateLicencaSegmentoController::class, 'index'])->name('licenca_segmento.update');
             Route::delete('/delete_segmento/{segmento}', [DeleteLicencaSegmentoController::class, 'index'])->name('licenca_segmento.delete');

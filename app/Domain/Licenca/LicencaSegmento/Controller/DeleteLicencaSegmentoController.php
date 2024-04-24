@@ -17,23 +17,13 @@ class DeleteLicencaSegmentoController extends Controller
         private readonly LicencaBRService       $licencaBRService,
         private readonly LicencaTipoService     $licencaTipoService,
         private readonly LicencaService         $licencaService,
-    )
-    { }
+    ) {
+    }
 
     public function index(LicencaSegmento $segmento): RedirectResponse
     {
-        $post = $segmento->getAttributes();
-        $parameters = $this->listagemLicencaSegmento->delete(post: $post);
+        $response = $this->listagemLicencaSegmento->delete(post: $segmento);
 
-        return to_route(
-            route: 'licenca.create',
-            parameters: [
-                'tipos'           => $this->licencaTipoService->getLicencaTipo(),
-                'licenca'         => $this->licencaService->getLicenca($post['licenca_id']),
-                'licencaSegmento' => $this->listagemLicencaSegmento->get($post['licenca_id']),
-                'brs'             => $this->licencaBRService->getLicencaBR(),
-            ])
-            ->with('message', $parameters['request']);
+        return to_route(route: 'licenca.create', parameters: ['licenca' => $segmento->licenca_id])->with('message', $response['request']);
     }
-
 }

@@ -4,6 +4,7 @@ namespace App\Domain\Licenca\app\Controller;
 
 use App\Domain\Licenca\app\Requests\UpdateLicencaRequest;
 use App\Domain\Licenca\app\Services\LicencaService;
+use App\Models\Licenca;
 use App\Shared\Http\Controllers\Controller;
 
 class UpdateLicencaController extends Controller
@@ -12,10 +13,16 @@ class UpdateLicencaController extends Controller
     {
     }
 
-    public function index(UpdateLicencaRequest $request): \Illuminate\Http\RedirectResponse
+    public function index(Licenca $licenca, UpdateLicencaRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $parameters = $this->listagemLicenca->update(post: $request->all());
-        return to_route(route: 'licenca.create', parameters: $parameters['licenca'])
-            ->with('message', $parameters['request']);
+        $post = [
+            'tipo_id' => $request->tipo['id'],
+            ...$request->all()
+        ];
+
+        $response = $this->listagemLicenca->update(request: $post);
+
+        return to_route(route: 'licenca.create', parameters: ['licenca' => $licenca->id])
+            ->with('message', $response['request']);
     }
 }
