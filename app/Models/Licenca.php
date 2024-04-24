@@ -18,12 +18,17 @@ class Licenca extends Model
 
     public function tipo(): BelongsTo
     {
-        return $this->belongsTo(LicencaTipo::class, 'tipo_id', 'id');
+        return $this->belongsTo(LicencaTipo::class, 'tipo_id');
     }
 
     public function condicionantes(): HasMany
     {
         return $this->hasMany(LicencaCondicionante::class, 'licenca_id');
+    }
+
+    public function segmentos(): HasMany
+    {
+        return $this->hasMany(LicencaSegmento::class, 'licenca_id');
     }
 
     public function documento(): HasOne

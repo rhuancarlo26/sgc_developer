@@ -17,21 +17,23 @@ class LicencaSegmentoService extends BaseModelService
 
     protected string $modelClass = LicencaSegmento::class;
 
-    public function get(int $id_licenca, array $searchParams)
+    public function get(object $licenca)
     {
-        return $this->search(...$searchParams)
-            ->where('licenca_id', $id_licenca)
-            ->paginate(10)
-            ->appends($searchParams);
+        return $this->modelClass::with([
+            'uf_inicial',
+            'uf_final',
+            'rodovia'
+        ])
+            ->where('licenca_id', $licenca->id)
+            ->paginate(10);
     }
 
     public function create(array $post): array
     {
-        $uf      = Uf::where('estado', $post['uf_inicial'])->first();
-        $rodovia = Rodovia::where('rodovia', $post['rodovia'])->where('uf_id', $uf->id)->first();
+        $rodovia = Rodovia::where('rodovia', '020')->where('uf_id', $post['uf_inicial_id'])->first();
 
         $coordenada = SvnSegGeoV2::getGeoJson(
-            $uf->uf,
+            $post['uf_inicial']['estado'],
             $rodovia->rodovia,
             $post['km_inicial'],
             $post['km_final'],
@@ -44,7 +46,6 @@ class LicencaSegmentoService extends BaseModelService
         ]);
 
         return [
-            'licencaSegmento' => $licencaSegmento['model'],
             'request' => $licencaSegmento['request']
         ];
     }
@@ -59,7 +60,7 @@ class LicencaSegmentoService extends BaseModelService
         ];
     }
 
-    public function delete(array $post): array
+    public function delete(object $post): array
     {
         return $this->dataManagement->delete(entity: $this->modelClass, id: $post['id']);
     }
@@ -70,5 +71,4 @@ class LicencaSegmentoService extends BaseModelService
 
         return ['ufs' => $licencaBRService->getLicencaUF($rodovia)];
     }
-
 }
