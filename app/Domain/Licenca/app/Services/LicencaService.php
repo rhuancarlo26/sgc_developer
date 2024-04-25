@@ -37,7 +37,7 @@ class LicencaService extends BaseModelService
         return [
             'tipos' => Cache::rememberForever('licenca_tipos', fn () => LicencaTipo::all()),
             'ufs' => Cache::rememberForever('ufs', fn () => Uf::all()),
-            'rodovias' => Rodovia::groupBy('rodovia')->get()
+            'rodovias' => Cache::rememberForever('rodovias', fn () => Rodovia::all()),
         ];
     }
 

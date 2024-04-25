@@ -51,6 +51,20 @@ const salvarLicencaSegmento = () => {
   emit('atualizarsegmento');
 }
 
+const rodoviasUnicas = computed(() => {
+  return Array.from(new Set(props.rodovias.map(r => r.rodovia)));
+});
+
+const ufsDaRodovia = computed(() => {
+  if (form.rodovia) {
+    const ufIdsDaRodoviaSelecionada = props.rodovias.filter(br => br.rodovia === form.rodovia).map(br => br.uf_id);
+
+    return props.ufs.filter(uf => ufIdsDaRodoviaSelecionada.includes(uf.id));
+  } else {
+    return [];
+  }
+});
+
 defineExpose({ abrirModal });
 </script>
 <template>
@@ -59,7 +73,7 @@ defineExpose({ abrirModal });
       <div class="row mb-4">
         <div class="col">
           <InputLabel value="BR:" for="rodovia_id" />
-          <v-select :options="rodovias" label="rodovia" v-model="form.rodovia">
+          <v-select :options="rodoviasUnicas" v-model="form.rodovia">
             <template #no-options="{}">
               Nenhum registro encontrado.
             </template>
@@ -69,7 +83,7 @@ defineExpose({ abrirModal });
 
         <div class="col">
           <InputLabel value="UF Inicial:" for="uf_inicial" />
-          <v-select :options="ufs" label="uf" v-model="form.uf_inicial">
+          <v-select :options="ufsDaRodovia" label="uf" v-model="form.uf_inicial">
             <template #no-options="{}">
               Nenhum registro encontrado.
             </template>
@@ -79,7 +93,7 @@ defineExpose({ abrirModal });
 
         <div class="col">
           <InputLabel value="UF Final:" for="uf_final" />
-          <v-select :options="ufs" label="uf" v-model="form.uf_final">
+          <v-select :options="ufsDaRodovia" label="uf" v-model="form.uf_final">
             <template #no-options="{}">
               Nenhum registro encontrado.
             </template>

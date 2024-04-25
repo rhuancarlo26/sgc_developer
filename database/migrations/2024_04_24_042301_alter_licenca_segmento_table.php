@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('licenca_id')->constrained('licenca', 'id')->cascadeOnDelete();
             $table->foreignId('uf_inicial_id')->constrained('ufs', 'id')->cascadeOnDelete();
             $table->foreignId('uf_final_id')->constrained('ufs', 'id')->cascadeOnDelete();
-            $table->foreignId('rodovia_id')->constrained('rodovias', 'id')->cascadeOnDelete();
+            $table->string('rodovia');
             $table->float('km_inicial');
             $table->float('km_final');
             $table->float('extensao');
