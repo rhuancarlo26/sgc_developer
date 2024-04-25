@@ -2,41 +2,31 @@
 
 namespace App\Domain\Licenca\app\Controller;
 
-use App\Domain\Licenca\app\Services\LicencaBRService;
-use App\Domain\Licenca\app\Services\LicencaTipoService;
-use App\Domain\Licenca\LicencaSegmento\Services\LicencaSegmentoService;
-use App\Models\LicencaSegmento;
+use App\Domain\Licenca\app\Services\LicencaService;
 use App\Shared\Http\Controllers\Controller;
 use App\Models\Licenca;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class CreateLicencaController extends Controller
 {
-    public function __construct(
-        private readonly LicencaTipoService     $licencaTipoService,
-        private readonly LicencaBRService       $licencaBRService,
-        private readonly LicencaSegmentoService $licencaSegmentoService,
-    )
+    public function __construct(private readonly LicencaService $licencaService)
     {
     }
 
-    public function index(Licenca|null $licenca, Request $request): \Inertia\Response
+    public function index(Licenca|null $licenca): Response
     {
-        $searchParams = $request->all('searchColumn', 'searchValue');
-
-        $tipos           = $this->licencaTipoService->getLicencaTipo();
-        $brs             = $this->licencaBRService->getLicencaBR();
-        $licencaSegmento = $this->licencaSegmentoService->get($licenca->id, $searchParams);
         $licenca?->load([
-            'documento'
+            'tipo',
+            'documento',
+            'segmentos'
         ]);
 
+        $response = $this->licencaService->create();
+
         return Inertia::render(component: 'Licenca/Form', props: [
-            'tipos'           => $tipos,
             'licenca'         => $licenca,
-            'licencaSegmento' => $licencaSegmento,
-            'brs'             => $brs,
+            ...$response
         ]);
     }
 }
