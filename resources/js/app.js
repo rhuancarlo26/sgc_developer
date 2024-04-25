@@ -25,7 +25,7 @@ import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 
 createInertiaApp({
-    title: (title) => `${appName}: ${title}`,
+    title: (title) => `${title}`,
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.vue`,
