@@ -28,7 +28,7 @@ const form = useForm({
   requerimento: null,
   renovacao: null,
   fiscal: null,
-  observacoes: null,
+  observacao: null,
   data_publicacao: null,
   in_app: null,
   out_app: null,
@@ -86,7 +86,7 @@ const calcularArea = () => {
 </script>
 <template>
   <div class="row mb-4">
-    <div class="col-4">
+    <div class="col">
       <InputLabel value="Tipo de Contrato:" for="tipo_id" />
       <v-select :options="tipos" label="nome" v-model="form.tipo">
         <template #no-options="{}">
@@ -96,7 +96,7 @@ const calcularArea = () => {
       <InputError :message="form.errors.tipo" />
     </div>
 
-    <div class="col-4">
+    <div class="col">
       <InputLabel value="Renovação/Retificação:" for="status" />
       <select name="status" id="status" class="form-select" v-model="form.status">
         <option :value="null"> Nova Licença</option>
@@ -110,7 +110,7 @@ const calcularArea = () => {
       <InputError :message="form.errors.status" />
     </div>
 
-    <div class="col-4" v-if="form.status">
+    <div class="col" v-if="form.status">
       <InputLabel value="Busca Licença:" for="numero_licenca" />
       <div class="d-flex">
         <input type="text" id="numero_licenca" name="numero_licenca" class="form-control me-2"
@@ -123,7 +123,7 @@ const calcularArea = () => {
   </div>
 
   <div class="row mb-4">
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="Modal:" for="modal" />
       <select name="modal" id="modal" class="form-select" v-model="form.modal">
         <option :value="null"> -- SELECIONE --</option>
@@ -134,19 +134,19 @@ const calcularArea = () => {
       <InputError :message="form.errors.modal" />
     </div>
 
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="N° Licença:" for="numero_licenca" />
       <input type="text" id="numero_licenca" name="numero_licenca" class="form-control" v-model="form.numero_licenca" />
       <InputError :message="form.errors.numero_licenca" />
     </div>
 
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="N° SEI:" for="numero_sei" />
       <input type="text" id="numero_sei" name="numero_sei" class="form-control" v-model="form.numero_sei" />
       <InputError :message="form.errors.numero_sei" />
     </div>
 
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="Processo DNIT:" for="processo_dnit" />
       <input type="text" id="processo_dnit" name="processo_dnit" class="form-control" v-model="form.processo_dnit" />
       <InputError :message="form.errors.processo_dnit" />
@@ -154,26 +154,26 @@ const calcularArea = () => {
   </div>
 
   <div class="row mb-4">
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="Data da Emissão:" for="data_emissao" />
       <input type="date" id="data_emissao" name="data_emissao" class="form-control" v-model="form.data_emissao" />
       <InputError :message="form.errors.data_emissao" />
     </div>
 
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="Vencimento:" for="vencimento" />
       <input type="date" id="vencimento" name="vencimento" class="form-control" v-model="form.vencimento"
         @change="atualizarDatasPrazos" />
       <InputError :message="form.errors.vencimento" />
     </div>
 
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="Emissor:" for="emissor" />
       <input type="text" id="emissor" name="emissor" class="form-control" v-model="form.emissor" />
       <InputError :message="form.errors.emissor" />
     </div>
 
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="Empreendimento:" for="empreendimento" />
       <input type="text" id="empreendimento" name="empreendimento" class="form-control" v-model="form.empreendimento" />
       <InputError :message="form.errors.empreendimento" />
@@ -181,14 +181,14 @@ const calcularArea = () => {
   </div>
 
   <div class="row mb-4">
-    <div class="col-6">
+    <div class="col">
       <InputLabel value="Início do Sub-Trecho (PNV):" for="inicio_subtrecho" />
       <input type="text" id="inicio_subtrecho" name="inicio_subtrecho" class="form-control"
         v-model="form.inicio_subtrecho" />
       <InputError :message="form.errors.inicio_subtrecho" />
     </div>
 
-    <div class="col-6">
+    <div class="col">
       <InputLabel value="Fim do Sub-Trecho (PNV):" for="fim_subtrecho" />
       <input type="text" id="fim_subtrecho" name="fim_subtrecho" class="form-control" v-model="form.fim_subtrecho" />
       <InputError :message="form.errors.fim_subtrecho" />
@@ -196,14 +196,14 @@ const calcularArea = () => {
   </div>
 
   <div class="row mb-4">
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="Extensão:" for="extensao" />
       <input type="text" id="soma_extensao" name="soma_extensao" class="form-control" v-model="somaExtensao" disabled
         readonly />
       <InputError :message="form.errors.soma_extensao" />
     </div>
 
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="Dias para Renovação:" for="dias_renovacao" />
       <select name="dias_renovacao" id="dias_renovacao" class="form-select" v-model="form.dias_renovacao"
         @change="atualizarDatasPrazos" :disabled="form.vencimento == null || form.vencimento == ''">
@@ -216,14 +216,14 @@ const calcularArea = () => {
       <InputError :message="form.errors.dias_renovacao" />
     </div>
 
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="Prazo Final Para Requerimento:" for="requerimento" />
       <input type="date" id="requerimento" name="requerimento" class="form-control" v-model="form.requerimento" disabled
         readonly />
       <InputError :message="form.errors.requerimento" />
     </div>
 
-    <div class="col-3">
+    <div class="col">
       <InputLabel value="Para Renovação:" for="renovacao" />
       <input type="date" id="renovacao" name="renovacao" class="form-control" v-model="form.renovacao" disabled
         readonly />
@@ -232,7 +232,7 @@ const calcularArea = () => {
   </div>
 
   <div class="row mb-4">
-    <div class="col-12">
+    <div class="col">
       <InputLabel value="Fiscal/Responsável:" for="fiscal" />
       <input type="text" id="fiscal" name="fiscal" class="form-control" v-model="form.fiscal" />
       <InputError :message="form.errors.fiscal" />
@@ -240,41 +240,41 @@ const calcularArea = () => {
   </div>
 
   <div class="row mb-4">
-    <div class="col-12">
-      <InputLabel value="Observações:" for="observacoes" />
-      <textarea name="observacoes" id="observacoes" class="form-control" rows="5" v-model="form.observacoes"></textarea>
-      <InputError :message="form.errors.observacoes" />
+    <div class="col">
+      <InputLabel value="Observação:" for="observacao" />
+      <textarea name="observacao" id="observacao" class="form-control" rows="5" v-model="form.observacao"></textarea>
+      <InputError :message="form.errors.observacao" />
     </div>
   </div>
 
   <div class="row mb-4" v-if="form.tipo?.id == 3">
-    <div class="col-2">
+    <div class="col">
       <InputLabel value="Área em APP(ha):" for="in_app" />
       <input type="number" id="in_app" name="in_app" class="form-control" v-model="form.in_app" />
       <InputError :message="form.errors.in_app" />
     </div>
 
-    <div class="col-2">
+    <div class="col">
       <InputLabel value="Área fora APP(ha):" for="out_app" />
       <input type="number" id="out_app" name="out_app" class="form-control" v-model="form.out_app"
         @change="calcularArea" />
       <InputError :message="form.errors.out_app" />
     </div>
 
-    <div class="col-2">
+    <div class="col">
       <InputLabel value="Área Total(ha):" for="total_app" />
       <input type="number" id="total_app" name="total_app" class="form-control" v-model="form.total_app" disabled
         readonly />
       <InputError :message="form.errors.total_app" />
     </div>
 
-    <div class="col-2">
+    <div class="col">
       <InputLabel value="Volume(m³):" for="volume" />
       <input type="number" id="volume" name="volume" class="form-control" v-model="form.volume" />
       <InputError :message="form.errors.volume" />
     </div>
 
-    <div class="col-4">
+    <div class="col-3">
       <InputLabel value="Sinaflor:" for="sinaflor" />
       <input type="text" id="sinaflor" name="sinaflor" class="form-control" v-model="form.sinaflor" />
       <InputError :message="form.errors.sinaflor" />

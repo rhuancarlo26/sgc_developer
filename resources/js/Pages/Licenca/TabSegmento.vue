@@ -63,7 +63,7 @@ const excluirSegmento = (segmento_id) => {
     <template #body="{ item }">
       <tr>
         <td class="text-center">
-          {{ item.rodovia?.rodovia }}
+          {{ item.rodovia }}
         </td>
         <td class="text-center">
           {{ item.uf_inicial?.uf }}

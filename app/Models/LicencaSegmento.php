@@ -22,9 +22,4 @@ class LicencaSegmento extends Model
   {
     return $this->belongsTo(Uf::class, 'uf_final_id');
   }
-
-  public function rodovia(): BelongsTo
-  {
-    return $this->belongsTo(Rodovia::class, 'rodovia_id');
-  }
 }

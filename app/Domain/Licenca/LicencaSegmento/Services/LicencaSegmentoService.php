@@ -21,8 +21,7 @@ class LicencaSegmentoService extends BaseModelService
     {
         return $this->modelClass::with([
             'uf_inicial',
-            'uf_final',
-            'rodovia'
+            'uf_final'
         ])
             ->where('licenca_id', $licenca->id)
             ->paginate(10);
@@ -30,15 +29,7 @@ class LicencaSegmentoService extends BaseModelService
 
     public function create(array $post): array
     {
-        $rodovia = Rodovia::where('rodovia', '020')->where('uf_id', $post['uf_inicial_id'])->first();
-
-        $coordenada = SvnSegGeoV2::getGeoJson(
-            $post['uf_inicial']['estado'],
-            $rodovia->rodovia,
-            $post['km_inicial'],
-            $post['km_final'],
-            'B'
-        );
+        $coordenada = $this->getCoordenada(post: $post);
 
         $licencaSegmento = $this->dataManagement->create(entity: $this->modelClass, infos: [
             'coordenada' => $coordenada,
@@ -52,6 +43,8 @@ class LicencaSegmentoService extends BaseModelService
 
     public function update(array $post): array
     {
+        $post['coordenada'] = $this->getCoordenada(post: $post);
+
         $licencaSegmento = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
 
         return [
@@ -60,15 +53,20 @@ class LicencaSegmentoService extends BaseModelService
         ];
     }
 
+    public function getCoordenada(array $post): string
+    {
+        return SvnSegGeoV2::getGeoJson(
+            UF_inicial: $post['uf_inicial']['uf'],
+            UF_final: $post['uf_final']['uf'],
+            rodovia: $post['rodovia'],
+            km_inicial: $post['km_inicial'],
+            km_final: $post['km_final'],
+            tipo_trecho: 'B'
+        );
+    }
+
     public function delete(object $post): array
     {
         return $this->dataManagement->delete(entity: $this->modelClass, id: $post['id']);
-    }
-
-    public function getUF(string $rodovia): array
-    {
-        $licencaBRService = new LicencaBRService();
-
-        return ['ufs' => $licencaBRService->getLicencaUF($rodovia)];
     }
 }

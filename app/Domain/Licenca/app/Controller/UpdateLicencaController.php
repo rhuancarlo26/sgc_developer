@@ -16,9 +16,22 @@ class UpdateLicencaController extends Controller
     public function index(Licenca $licenca, UpdateLicencaRequest $request): \Illuminate\Http\RedirectResponse
     {
         $post = [
-            'tipo_id' => $request->tipo['id'],
-            ...$request->all()
+            ...$request->all(),
+            'tipo_id' => $request->tipo['id']
         ];
+
+        if (!isset($post['status'])) {
+            $post['numero_licenca'] = null;
+        }
+
+        if ($post['tipo_id'] !== 3) {
+            $post['numero_licenca'] = null;
+            $post['in_app'] = null;
+            $post['out_app'] = null;
+            $post['total_app'] = null;
+            $post['volume'] = null;
+            $post['sinaflor'] = null;
+        }
 
         $response = $this->listagemLicenca->update(request: $post);
 
