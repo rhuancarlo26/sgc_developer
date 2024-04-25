@@ -97,7 +97,7 @@
                         <td>
                             {{ item.processo_dnit }}
                         </td>
-                        <td @click.stop>
+                        <td>
                             <span class="dropdown">
                                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
                                     data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
@@ -118,7 +118,7 @@
                                     <a class="dropdown-item" :href="route('licenca.condicionante.index', item.id)">
                                         Condicionante
                                     </a>
-                                    <a @click="abrirModalRequerimento(item)" class="dropdown-item"
+                                    <a @click="abrirModalRequerimento(licenca)" class="dropdown-item"
                                         href="javascript:void(0)">
                                         Adicionar requerimento
                                     </a>
