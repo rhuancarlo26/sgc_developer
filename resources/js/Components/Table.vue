@@ -32,7 +32,7 @@ function updateRecordsState(records) {
                     </tr>
                 </thead>
                 <tbody>
-                    <slot v-if="records.data.length" v-for="(record, i) in records.data" name="body" :key="i"
+                    <slot v-if="records?.data?.length" v-for="(record, i) in records.data" name="body" :key="i"
                         :item="record" />
 
                     <tr v-else>
@@ -43,7 +43,7 @@ function updateRecordsState(records) {
                 </tbody>
             </table>
         </div>
-        <div class="card-footer" v-if="records.data.length">
+        <div class="card-footer" v-if="records?.data?.length">
             <Pagination :records="records" @pageChange="updateRecordsState" :inertiaPagination="inertiaPagination"
                 :axiosPagination="axiosPagination" :only="only" :excelRoute="excelRoute" />
 
