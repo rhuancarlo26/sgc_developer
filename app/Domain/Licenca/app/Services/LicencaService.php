@@ -46,8 +46,8 @@ class LicencaService extends BaseModelService
         return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
     }
 
-    public function update(array $request): array
+    public function update(array $post): array
     {
-        return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+        return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
     }
 }

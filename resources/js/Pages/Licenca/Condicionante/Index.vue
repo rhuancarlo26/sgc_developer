@@ -7,8 +7,11 @@ import Table from "@/Components/Table.vue";
 import ModalNovaCondicionante from "./ModalNovaCondicionante.vue";
 import ModalImportarCondicionante from "./ModalImportarCondicionante.vue";
 import { ref } from "vue";
-import { IconDots, IconTrash } from "@tabler/icons-vue";
+import {IconArrowLeft, IconDots, IconEdit, IconTrash} from "@tabler/icons-vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import NavLinkVoid from "@/Components/NavLinkVoid.vue";
+import NavButton from "@/Components/NavButton.vue";
+import NavLink from "@/Components/NavLink.vue";
 
 const refNovaCondicionante = ref();
 const refImportarCondicionante = ref();
@@ -41,14 +44,12 @@ const editarCondicionante = (item) => {
         <Breadcrumb class="align-self-center"
           :links="[{ route: route('licenca.index'), label: 'Licenças' }, { route: '#', label: 'Condicionante' }]" />
         <div class="container-buttons">
-          <button @click="abrirModal()" type="button" class="btn btn-info me-2">
-            Cadastrar condicionante
-          </button>
-          <button @click="abrirModalImport()" type="button" class="btn btn-info me-2">
-            Importar condicionante
-          </button>
-          <a class="btn btn-dark" :href="route('licenca.index')">
-            Voltar
+          <NavButton route-name="licenca.condicionante.store" title="Cadastrar condicionante" type-button="info"
+                     @click="abrirModal()"/>
+          <NavButton route-name="licenca.condicionante.store_importacao" title="Importar condicionante" type-button="info"
+                       @click="abrirModalImport()"/>
+          <a class="btn btn-secondary" :href="route('licenca.index')">
+              <IconArrowLeft class="me-2"/> Voltar
           </a>
         </div>
       </div>
@@ -63,28 +64,21 @@ const editarCondicionante = (item) => {
       }" />
 
       <!-- Listagem-->
-      <Table :columns="['#', 'Número', 'Descrição', 'Prazo', 'Ação']" :records="condicionantes" table-class="table-hover">
+      <Table :columns="['Número', 'Descrição', 'Prazo', 'Ação']" :records="condicionantes" table-class="table-hover">
         <template #body="{ item }">
           <tr class="cursor-pointer">
-            <td>{{ item.id }}</td>
             <td>{{ item.numero_condicionante }}</td>
             <td>{{ item.descricao }}</td>
-            <td>{{ item.prazo }}</td>
             <td>
-              <span class="dropdown">
-                <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <IconDots />
-                </button>
-                <div class="dropdown-menu dropdown-menu-end" style="">
-                  <a @click="editarCondicionante(item)" class="dropdown-item" href="javascript:void(0)">
-                    Editar
-                  </a>
-                  <a class="dropdown-item" :href="route('licenca.condicionante.destroy', item.id)">
-                    Excluir
-                  </a>
-                </div>
+              <span class="badge bg-warning text-white m-1" v-if="item.prazo">
+                {{ item.prazo }}
               </span>
+            </td>
+            <td class="col-1">
+              <NavButton route-name="licenca.condicionante.update" title="" type-button="info"
+                         @click="editarCondicionante(item)" :icon="IconEdit" class="btn btn-lg"/>
+              <NavLink route-name="licenca.condicionante.destroy" title="" :param="item.id"
+                         @click="editarCondicionante(item)" :icon="IconTrash" class="btn btn-lg btn-danger"/>
             </td>
           </tr>
         </template>

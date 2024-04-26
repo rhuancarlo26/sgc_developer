@@ -11,7 +11,6 @@
                 <div>
                     <NavLink route-name="contratos.gestao.create" :param="tipo.id" title="Importar contrato"
                              class="btn btn-info me-2"/>
-                    <!-- Contratos -->
                     <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
                             data-bs-toggle="dropdown" aria-expanded="false">
                         <IconSettings/>
@@ -20,8 +19,9 @@
                         <a @click="abrirVisualizarTrecho()" class="dropdown-item" href="javascript:void(0)">
                             Mapa dos contratos
                         </a>
-                        <NavLink route-name="contratos.gestao.excel_export" title="Exportar excel"
-                                 class="dropdown-item"/>
+                        <a class="dropdown-item" :href="route('contratos.gestao.excel_export')">
+                            Exportar excel
+                        </a>
                     </div>
                 </div>
             </div>
@@ -103,6 +103,7 @@ import {ref} from "vue";
 import {IconSettings} from "@tabler/icons-vue";
 import {IconDots} from "@tabler/icons-vue";
 import ModalVisualizarContrato from "./ModalVisualizarContrato.vue";
+import ModalVisualizarTrecho from "./ModalVisualizarTrecho.vue";
 import NavLink from "@/Components/NavLink.vue";
 
 const props = defineProps({

@@ -2,7 +2,7 @@
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { useForm } from '@inertiajs/vue3';
-import { IconDots } from '@tabler/icons-vue';
+import {IconDots, IconTrash} from '@tabler/icons-vue';
 
 const props = defineProps({
   licenca: { type: Object }
@@ -52,15 +52,10 @@ const deleteDocumento = () => {
             <tr>
               <td>{{ licenca.documento?.nome }}</td>
               <td>
-                <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
-                  data-bs-toggle="dropdown" aria-expanded="false">
-                  <IconDots />
-                </button>
-                <div class="dropdown-menu dropdown-menu-end">
-                  <a @click="deleteDocumento()" class="dropdown-item" href="javascript:void(0)">
-                    Excluir
+                  <a @click="deleteDocumento()" class="btn align-text-top btn-danger m-1" title="Excluir"
+                     href="javascript:void(0)">
+                      <IconTrash />
                   </a>
-                </div>
               </td>
             </tr>
           </tbody>
