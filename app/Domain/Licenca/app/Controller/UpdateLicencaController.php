@@ -33,7 +33,7 @@ class UpdateLicencaController extends Controller
             $post['sinaflor'] = null;
         }
 
-        $response = $this->listagemLicenca->update(request: $post);
+        $response = $this->listagemLicenca->update(post: $post);
 
         return to_route(route: 'licenca.create', parameters: ['licenca' => $licenca->id])
             ->with('message', $response['request']);

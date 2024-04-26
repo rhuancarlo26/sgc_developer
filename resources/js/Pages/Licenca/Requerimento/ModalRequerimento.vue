@@ -1,9 +1,10 @@
 <script setup>
-import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
-import { router, useForm } from "@inertiajs/vue3";
-import { IconDots } from "@tabler/icons-vue";
+import { router } from "@inertiajs/vue3";
+import {IconEdit, IconEye, IconTrash} from "@tabler/icons-vue";
 import { ref } from "vue";
+import NavButton from "@/Components/NavButton.vue";
+import NavLink from "@/Components/NavLink.vue";
 
 let licenca = ref({});
 let arquivos = ref({});
@@ -65,22 +66,14 @@ defineExpose({ abrirModal });
             <tr v-for="requerimento, index in licenca.requerimentos" :key="requerimento.id">
               <td>{{ requerimento.nome }}</td>
               <td>
-                <span class="dropdown">
-                  <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    <IconDots />
-                  </button>
-                  <div class="dropdown-menu dropdown-menu-end" style="">
-                    <a class="dropdown-item" target="_blank"
-                      :href="route('licenca.requerimento.visualizar', requerimento.id)">
-                      Visualizar
-                    </a>
-                    <a @click="excluirRequerimento(requerimento.id, index)" class="dropdown-item"
-                      href="javascript:void(0)">
-                      Excluir
-                    </a>
-                  </div>
-                </span>
+                <a class="btn btn-lg btn-info m-1" title="Visualizar" target="_blank"
+                   :href="route('licenca.requerimento.visualizar', requerimento.id)">
+                  <IconEye />
+                </a>
+                <a @click="excluirRequerimento(requerimento.id, index)" class="btn btn-lg btn-danger"
+                   title="Excluir" href="javascript:void(0)">
+                  <IconTrash />
+                </a>
               </td>
             </tr>
           </tbody>

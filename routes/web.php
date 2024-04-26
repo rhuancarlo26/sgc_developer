@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         require __DIR__ . '/../app/Domain/Contrato/Routes/ContratosRoutes.php';
 
         // Licenças
-        require __DIR__ . '/Licencas/Licencas.php';
+        require __DIR__ . '/../app/Domain/Licenca/app/Router/LicencasRouter.php';
 
         // Dashboard (Home page)
         Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');

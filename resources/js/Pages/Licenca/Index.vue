@@ -1,27 +1,23 @@
 <template>
 
-    <Head title="Gestão de Licenças" />
+    <Head title="Gestão de Licenças"/>
 
     <AuthenticatedLayout>
 
         <template #header>
             <div class="w-100 d-flex justify-content-between">
-                <Breadcrumb class="align-self-center" :links="[{ route: '#', label: 'Gestão de Licenças' }]" />
+                <Breadcrumb class="align-self-center" :links="[{ route: '#', label: 'Gestão de Licenças' }]"/>
                 <div class="container-buttons">
-                    <Link class="btn btn-info me-2" :href="route('licenca.create')">
-                    Cadastrar Licenças
-                    </Link>
+                    <NavLink route-name="licenca.create" title="Cadastrar licenças" class="btn btn-info me-2"/>
                     <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <IconSettings />
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <IconSettings/>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" :href="route('licenca.arquivo', 1)">
-                            Licenças arquivadas
-                        </a>
-                        <a class="dropdown-item" :href="route('licenca.index')">
-                            Licenças
-                        </a>
+                        <NavLink route-name="licenca.arquivo" :param="1" title="Licenças arquivadas"
+                                 class="dropdown-item"/>
+                        <NavLink route-name="licenca.index" title="Licenças ativas"
+                                 class="dropdown-item"/>
                         <a class="dropdown-item" @click="abrirMapaGeral()">
                             Mapa das licenças
                         </a>
@@ -41,7 +37,7 @@
                 'situacao': 'Situação',
                 'trechos.uf.uf': 'UF',
                 'trechos.rodovia.rodovia': 'Rodovia'
-            }" />
+            }"/>
 
             <!-- Listagem-->
             <Table
@@ -50,9 +46,9 @@
                 <template #body="{ item }">
                     <tr>
                         <td class="w-8">
-                            <IconCar v-if="item.modal == 1" />
-                            <IconShip v-if="item.modal == 2" />
-                            <IconTrain v-if="item.modal == 3" />
+                            <IconCar v-if="item.modal == 1"/>
+                            <IconShip v-if="item.modal == 2"/>
+                            <IconTrain v-if="item.modal == 3"/>
                         </td>
                         <td>
                             {{ item.tipo?.sigla }} - {{ item.tipo?.nome }}
@@ -78,7 +74,7 @@
                                     Vencida
                                 </span>
                                 <span v-else-if="item.vencimento !== '' && item.vencimento !== null"
-                                    class="badge text-bg-success">
+                                      class="badge text-bg-success">
                                     Vigente
                                 </span>
                             </a>
@@ -89,7 +85,7 @@
                                     {{ dateTimeFormat(item.vencimento) }}
                                 </span>
                                 <span v-else-if="item.vencimento !== '' && item.vencimento !== null"
-                                    class="badge text-bg-success">
+                                      class="badge text-bg-success">
                                     {{ dateTimeFormat(item.vencimento) }}
                                 </span>
                             </a>
@@ -100,36 +96,19 @@
                         <td>
                             <span class="dropdown">
                                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
-                                    data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <IconDots />
+                                        data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <IconDots/>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end" style="">
-                                    <a class="dropdown-item" :href="route('licenca.create', item.id)">
-                                        Editar
-                                    </a>
-                                    <a @click="abrirModalVisualizar(item)" class="dropdown-item"
-                                        href="javascript:void(0)">
-                                        Visualizar
-                                    </a>
-                                    <a v-if="item.documento?.id" class="dropdown-item" target="_blank"
-                                        :href="route('licenca.documento.visualizar', item.documento.id)">
+                                    <NavLink route-name="licenca.create" :param="item.id" title="Editar" class="dropdown-item"/>
+                                    <NavLinkVoid title="Visualizar" @click="abrirModalVisualizar(item)"/>
+                                    <a v-if="item.documento?.id" class="dropdown-item" target="_blank" :href="route('licenca.documento.visualizar', item.documento.id)">
                                         Visualizar PDF
                                     </a>
-                                    <a class="dropdown-item" :href="route('licenca.condicionante.index', item.id)">
-                                        Condicionante
-                                    </a>
-                                    <a @click="abrirModalRequerimento(licenca)" class="dropdown-item"
-                                        href="javascript:void(0)">
-                                        Adicionar requerimento
-                                    </a>
-                                    <a v-if="!item.arquivado" @click="gerenciarArquivo(item, index, true)"
-                                        class="dropdown-item" href="javascript:void(0)">
-                                        Arquivar licença
-                                    </a>
-                                    <a v-else @click="gerenciarArquivo(item, index, false)" class="dropdown-item"
-                                        href="javascript:void(0)">
-                                        Desarquivar
-                                    </a>
+                                    <NavLink route-name="licenca.condicionante.index" :param="item.id" title="Condicionante" class="dropdown-item"/>
+                                    <NavLinkVoid route-name="licenca.requerimento.index" title="Requerimento" @click="abrirModalRequerimento(item)"/>
+                                    <NavLinkVoid v-if="!item.arquivado" title="Arquivar licença" @click="gerenciarArquivo(item, index, true)"/>
+                                    <NavLinkVoid v-else title="Desarquivar" @click="gerenciarArquivo(item, index, false)" class="dropdown-item"/>
                                 </div>
                             </span>
                         </td>
@@ -138,24 +117,26 @@
             </Table>
         </div>
 
-        <ModalMapaGeral ref="refModalMapaGeral" />
-        <ModalVisualizar ref="refModalVisualizar" />
-        <ModalRequerimento ref="refModalRequerimento" />
+        <ModalMapaGeral ref="refModalMapaGeral"/>
+        <ModalVisualizar ref="refModalVisualizar"/>
+        <ModalRequerimento ref="refModalRequerimento"/>
     </AuthenticatedLayout>
 </template>
 
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
+import {Head, router} from "@inertiajs/vue3";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Table from "@/Components/Table.vue";
-import { ref } from "vue";
-import { IconCar, IconDots, IconSettings, IconShip, IconTrain } from "@tabler/icons-vue";
-import { dateTimeFormat } from "@/Utils/DateTimeUtils.js";
+import {ref} from "vue";
+import {IconCar, IconDots, IconSettings, IconShip, IconTrain} from "@tabler/icons-vue";
+import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
 import ModalMapaGeral from "@/Pages/Licenca/ModalMapaGeral.vue";
 import ModalVisualizar from "@/Pages/Licenca/ModalVisualizar.vue";
 import ModalRequerimento from "./Requerimento/ModalRequerimento.vue";
+import NavLink from "@/Components/NavLink.vue";
+import NavLinkVoid from "@/Components/NavLinkVoid.vue";
 
 const props = defineProps({
     licencas: Object
@@ -190,7 +171,7 @@ const abrirModalRequerimento = (item) => {
 }
 
 const gerenciarArquivo = (licenca, index, status) => {
-    router.patch(route('licenca.gerenciar-licenca', licenca), { id: licenca.id, arquivado: status }, {
+    router.patch(route('licenca.gerenciar-licenca', licenca), {id: licenca.id, arquivado: status}, {
         preserveScroll: true,
         onSuccess: () => {
             licencas.value.data.splice(index, 1)
