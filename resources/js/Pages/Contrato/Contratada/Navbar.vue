@@ -1,0 +1,52 @@
+<script setup>
+import NavDropdown from '@/Components/NavDropdown.vue';
+import NavDropdownLink from '@/Components/NavDropdownLink.vue';
+import NavLink from '@/Components/NavLink.vue';
+import {
+  IconLayoutDashboard
+} from "@tabler/icons-vue";
+
+const props = defineProps({
+  contrato: Object
+})
+</script>
+
+<template>
+  <div class="card card-body space-y-3">
+    <div class="d-flex">
+      <div class="col">
+        <ul class="navbar-nav">
+          <!-- Dashboard -->
+          <navLink route-name="contratos.contratada.dados_gerais.index" :param="contrato.id" title="Dados Gerais"
+            :icon="IconLayoutDashboard" />
+
+          <!-- Contratos -->
+          <NavDropdown prefix="contratos.*" title="Recuros" :icon="IconLayoutDashboard">
+            <!-- Gestão Ambiental -->
+            <NavDropdownLink route-name="contratos.contratada.recurso.rh.index" param-name="contrato"
+              active-on-route-prefix="contratos.contratada.recurso.rh.*" :route-param="contrato.id" title="RH" />
+
+            <!-- Equipamentos -->
+            <NavDropdownLink route-name="contratos.contratada.recurso.equipamento.index" param-name="contrato"
+              active-on-route-prefix="contratos.contratada.recurso.equipamento.*" :route-param="contrato.id"
+              title="Equipamentos" />
+
+            <!-- Veiculos -->
+            <NavDropdownLink route-name="contratos.contratada.recurso.veiculo.index" param-name="contrato"
+              active-on-route-prefix="contratos.contratada.recurso.veiculo.*" :route-param="contrato.id"
+              title="Veículos" />
+          </NavDropdown>
+
+          <navLink route-name="contratos.contratada.servicos.index" :param="contrato.id" title="Serviços"
+            :icon="IconLayoutDashboard" />
+
+          <navLink route-name="contratos.contratada.dados_gerais.index" :param="contrato.id" title="Cronograma"
+            :icon="IconLayoutDashboard" />
+        </ul>
+      </div>
+      <div class="col-11">
+        <slot name="body" />
+      </div>
+    </div>
+  </div>
+</template>
