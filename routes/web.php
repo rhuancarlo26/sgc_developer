@@ -37,6 +37,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Ambiente Geo
         Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))->name('ambienteGeo');
 
+        // SGC
+        require __DIR__ . '/../app/Domain/Sgc/Routes/SgcRoutes.php';
+
         Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index'])->name('logs');
     });
 });
