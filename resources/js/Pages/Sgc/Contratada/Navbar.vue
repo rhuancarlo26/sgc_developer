@@ -19,9 +19,9 @@ const props = defineProps({
           <!-- Dashboard -->
           <navLink route-name="sgc.contratada.dados_gerais.index" :param="contrato.id" title="Dados Gerais"
             :icon="IconLayoutDashboard" />
-            
+
           <!-- TESTE -->
-          <navLink route-name="sgc.contratada.dados_gerais.index" :param="contrato.id" title="Relatório"
+          <navLink route-name="sgc.contratada.recurso.index" :param="contrato.id" title="Relatório"
             :icon="IconLayoutDashboard" />
 
           <navLink route-name="sgc.contratada.dados_gerais.index" :param="contrato.id" title="Cronograma Físico"
