@@ -1,0 +1,119 @@
+<script setup>
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Breadcrumb from "@/Components/Breadcrumb.vue";
+import Table from "@/Components/Table.vue";
+import ModelSearchForm from "@/Components/ModelSearchForm.vue";
+import { Head, Link, router } from "@inertiajs/vue3";
+import Navbar from "../Navbar.vue";
+import { IconDots } from "@tabler/icons-vue";
+import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
+import ModalVisualizarServico from "./ModalVisualizarServico.vue";
+import { ref } from "vue";
+
+defineProps({
+    contrato: Object,
+    servicos: Object
+});
+
+const modalVisualizarLicenca = ref();
+const modalVisualizarServico = ref();
+
+const abrirModalLicenca = (servico) => {
+    modalVisualizarLicenca.value.abrirModal(servico);
+}
+
+const abrirModalServico = (servico) => {
+    modalVisualizarServico.value.abrirModal(servico);
+}
+
+const deleteServico = (servico_id) => {
+    router.delete(route('contratos.contratada.servicos.delete', servico_id));
+}
+
+</script>
+
+<template>
+
+    <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
+
+    <AuthenticatedLayout>
+
+        <template #header>
+            <div class="w-100 d-flex justify-content-between">
+                <Breadcrumb class="align-self-center" :links="[
+                    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+                    { route: '#', label: contrato.contratada }
+                ]
+                    " />
+                <div class="container-buttons">
+                    <Link class="btn btn-info me-2" :href="route('contratos.contratada.servicos.create', contrato.id)">
+                    Cadastrar serviço
+                    </Link>
+                </div>
+            </div>
+        </template>
+
+        <Navbar :contrato="contrato">
+            <template #body>
+
+
+                <!-- Pesquisa-->
+                <ModelSearchForm :search-columns="{}" />
+
+                <!-- Listagem-->
+                <Table :columns="['Tema', 'Serviço', 'Especificação', 'Licença', 'Status', 'Ação']" :records="servicos"
+                    table-class="table-hover">
+                    <template #body="{ item }">
+                        <tr>
+                            <td>{{ item.tema?.nome }}</td>
+                            <td>{{ item.tipo?.nome }}</td>
+                            <td>{{ item.especificacao }}</td>
+                            <td>
+                                <span @click="abrirModalLicenca(item)" v-if="item.condicionantes.length">
+                                    {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''} -
+                                    ${item.condicionantes[0]?.descricao ?? ''}` }}
+                                </span>
+                            </td>
+                            <td>
+                                <span v-if="item.servico_status_id === 1" class="btn btn-info">
+                                    {{ item.status?.nome }}
+                                </span>
+                                <span v-else-if="item.servico_status_id === 2" class="btn btn-warning">
+                                    {{ item.status?.nome }}
+                                </span>
+                                <span v-else-if="item.servico_status_id === 3" class="btn btn-primary">
+                                    {{ item.status?.nome }}
+                                </span>
+                                <span v-else class="btn btn-danger">
+                                    {{ item.status?.nome }}
+                                </span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
+                                    data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <IconDots />
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a @click="abrirModalServico(item)" class="dropdown-item" href="javascript:void(0)">
+                                        Visualizar
+                                    </a>
+                                    <a class="dropdown-item"
+                                        :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
+                                        Editar
+                                    </a>
+                                    <a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)">
+                                        Excluir
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </Table>
+            </template>
+        </Navbar>
+
+        <ModalVisualizarLicenca ref="modalVisualizarLicenca" />
+        <ModalVisualizarServico ref="modalVisualizarServico" />
+
+    </AuthenticatedLayout>
+</template>
