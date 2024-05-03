@@ -42,7 +42,7 @@ onMounted(async () => {
 
   <style>
   .docx-wrapper {
-    background-color: rgb(55, 3, 243) !important;
+    background-color: rgb(255, 255, 255) !important;
     
   }
 
