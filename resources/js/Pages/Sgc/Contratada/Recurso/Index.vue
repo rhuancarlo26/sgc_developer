@@ -14,7 +14,6 @@ const wordDocument = ref(null);
 const teste = ref(null)
 
 
-
 onMounted(async () => {
   try {
     const filePath = new URL('./teste.docx', import.meta.url);
@@ -30,9 +29,10 @@ onMounted(async () => {
 
     if (teste.value) {
 
-    } else {
-      console.error('Elemento #wordViewer não encontrado.');
-    }
+  } else {
+    console.error('Elemento #wordViewer não encontrado.');
+  }
+
   } catch (error) {
     console.error('Erro ao carregar o documento do Word:', error);
     // Lidar com o erro, se necessário
@@ -40,7 +40,21 @@ onMounted(async () => {
 });
 </script>
 
+  <style>
+  .docx-wrapper {
+    background-color: rgb(55, 3, 243) !important;
+    
+  }
+
+  .docx-wrapper .docx-preview { 
+    position: relative;
+    z-index: 1; /* Garantindo que o conteúdo esteja na frente do background */
+  }
+
+  </style>
+
 <template>
+ 
   <div>
     <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
     <AuthenticatedLayout>

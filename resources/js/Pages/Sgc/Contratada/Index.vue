@@ -46,7 +46,7 @@ const props = defineProps({
           <div class="d-flex">
             <div class="col">
 
-
+              TESTE
               
             </div>
           </div>
@@ -54,6 +54,7 @@ const props = defineProps({
 
 
       </template>
+
     </Navbar>
 
   </AuthenticatedLayout>
