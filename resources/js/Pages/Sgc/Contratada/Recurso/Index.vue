@@ -5,15 +5,21 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../Navbar.vue";
 import { renderAsync } from 'docx-preview';
+import DocxModal from "./DocxModal.vue";
 
 defineProps({
   contrato: Object,
 });
 
-const wordDocument = ref(null);
-const teste = ref(null)
+const docxModal = ref();
 
+const abrirDoc = () => {
+    docxModal.value.abrirModal();
+}
+// const wordDocument = ref(null);
+// const teste = ref(null)
 
+<<<<<<< HEAD
 onMounted(async () => {
   try {
     const filePath = new URL('./teste.docx', import.meta.url);
@@ -22,13 +28,31 @@ onMounted(async () => {
       throw new Error('Erro ao carregar o documento do Word');
     }
     const wordBlob = await response.blob({ type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+=======
+// const styleContainer = document.createElement('style');
+// styleContainer.innerHTML = `
+//     .docx-wrapper {
+//         background-color: red;
+//     }
+// `;
 
-    wordDocument.value = wordBlob;
+// console.log(styleContainer)
+>>>>>>> origin/ls_sgc
 
-    renderAsync(wordDocument.value, teste.value)
+// onMounted(async () => {
+//   try {
+//     const filePath = new URL('./teste.docx', import.meta.url);
+//     const response = await fetch(filePath);
+//     if (!response.ok) {
+//       throw new Error('Erro ao carregar o documento do Word');
+//     }
+//     const wordBlob = await response.blob({ type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
 
-    if (teste.value) {
+//     wordDocument.value = wordBlob;
 
+//     renderAsync(wordDocument.value, teste.value)
+
+<<<<<<< HEAD
   } else {
     console.error('Elemento #wordViewer não encontrado.');
   }
@@ -38,6 +62,18 @@ onMounted(async () => {
     // Lidar com o erro, se necessário
   }
 });
+=======
+//     if (teste.value) {
+
+//     } else {
+//       console.error('Elemento #wordViewer não encontrado.');
+//     }
+//   } catch (error) {
+//     console.error('Erro ao carregar o documento do Word:', error);
+//     // Lidar com o erro, se necessário
+//   }
+// });
+>>>>>>> origin/ls_sgc
 </script>
 
   <style>
@@ -70,12 +106,15 @@ onMounted(async () => {
 
     <Navbar :contrato="contrato">
         <template #body>
-            <div ref="teste">
-                teste
+            <div>
+                <button @click="abrirDoc()">teste</button>
             </div>
+            <!-- <div ref="teste">
+                teste
+            </div> -->
         </template>
     </Navbar>
-
+    <DocxModal ref="docxModal" href="javascript:void(0)"/>
     </AuthenticatedLayout>
   </div>
 </template>
