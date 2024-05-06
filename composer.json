@@ -1,5 +1,5 @@
 {
-    "name": "Ecossitema",
+    "name": "eco/ecossistema",
     "type": "project",
     "description": "Segunda versão do sistema Ecossistema para o DNIT.",
     "keywords": ["laravel", "framework"],
