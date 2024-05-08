@@ -18,7 +18,7 @@ const form = useForm({
 
 const salvarAnexo = () => {
   if (form.id) {
-    form.post(route('contratos.contratada.update_anexo'), {
+    form.post(route('sgc.contratada.store_anexo'), {
       onSuccess: () => {
         form.reset();
         document.getElementById('inputfile').value = null;

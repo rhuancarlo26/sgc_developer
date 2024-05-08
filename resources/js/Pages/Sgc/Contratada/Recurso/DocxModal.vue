@@ -46,7 +46,7 @@ defineExpose({ abrirModal });
         <template #body>
             <div class="card">
                 <div class="card-header">
-                    <h3 class="my-0">Doc</h3>
+                    <h3 class="my-0">RELATÓRIO DE COORDENAÇÃO</h3>
                 </div>
                 <div class="card-body" ref="teste" />
             </div>
