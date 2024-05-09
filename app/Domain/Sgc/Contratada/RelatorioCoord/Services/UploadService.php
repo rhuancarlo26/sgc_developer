@@ -21,21 +21,23 @@ class UploadService extends BaseModelService
   }
   
   public function salvarAnexo($request)
-  {
+{
     $arquivo = $this->storageAnexo($request['arquivo']);
 
     $form = [
-      ...$arquivo,
-      'contrato_id' => $request['contrato_id'],
-      'descricao' => $request['descricao']
+        ...$arquivo,
+        'contrato_id' => $request['contrato_id'],
+        'descricao' => $request['descricao'],
+        'item_id' => $request['item_id'] 
     ];
 
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $form);
 
     return [
-      'request' => $response['request']
+        'request' => $response['request']
     ];
-  }
+}
+
 
   public function storageAnexo($arquivo)
   {

@@ -21,23 +21,38 @@ const form = useForm({
   caminho: null,
   arquivo: null,
   versao: null,
+  item_id: null, 
   descricao: null
 })
 
 const itens = ref([]);
 
-// Função para obter os itens do modelo SgcRelatorioCoordenacao
 const obterItens = async () => {
   try {
     const response = await fetch(route('sgc.relatorio_coordenacao.index'));
     const data = await response.json();
-    console.log('Itens obtidos:', data); // Imprimir os dados obtidos da API
+    console.log('Itens obtidos:', data); 
+    
+    let item = null;
+
+    if (data.length > 0) {
+      
+      item = data[7];
+
+      form.item_id = item.id_item;
+    }
+
     itens.value = data;
   } catch (error) {
     console.error('Erro ao obter os itens:', error);
   }
 }
 obterItens();
+
+const selecionarItem = (idItem) => {  
+  form.item_id = idItem;
+}
+
 
 const salvarAnexo = () => {
   if (form.id) {
@@ -100,47 +115,24 @@ const abrirDoc = () => {
             " />
         </div>
       </template>
-      <div class="row mb-4">
-        <div class="col">
-          <label class="form-label">Anexo:</label>
-          <input @input="form.arquivo = $event.target.files[0]" id="inputfile" type="file" class="form-control">
-        </div>
-        <div class="col">
-          <label class="form-label">Nome</label>
-          <div class="row g-2">
-            <div class="col">
-              <input v-model="form.descricao" type="text" class="form-control">
-              <InputError :message="form.errors.descricao" />
-            </div>
-            <div class="col-auto">
-              <a @click="salvarAnexo()" href="javascript:void(0)" class="btn btn-success" aria-label="Button">
-                Salvar
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
 
     <Navbar :contrato="contrato">
         <template #body>
             <div class="lista-itens">
               <div v-for="item in itens" :key="item.id" class="item">
-                  {{ item.id_item }} - {{ item.descricao }}
-                  <button class="button" @click="abrirDoc(index)">Abrir</button>
-                
-                  <input @input="form.arquivo = $event.target.files[0]" id="inputfile" type="file" class="form-control">
-                  <div class="row g-2">
-                    <div class="col">
-                      <input v-model="form.descricao" type="text" class="form-control">
-                      <InputError :message="form.errors.descricao" />
-                    </div>
-                    <div class="col-auto">
-                      <a @click="salvarAnexo()" href="javascript:void(0)" class="btn btn-success" aria-label="Button">
-                        Salvar
-                      </a>
-                    </div>
+                {{ item.id_item }} - {{ item.descricao }}
+                <button class="button" @click="abrirDoc(index)">Abrir</button>
+
+                <input @input="form.arquivo = $event.target.files[0]" id="inputfile" type="file" class="form-control">
+                <div class="row g-2">
+                  <div class="col">
+                    <input v-model="form.descricao" type="text" class="form-control">
+                    <InputError :message="form.errors.descricao" />
                   </div>
-                                
+                  <div class="col-auto">
+                    <button class="button" @click="selecionarItem(item.id_item); salvarAnexo()">Salvar</button>
+                  </div>
+                </div>
               </div>
             </div>
             
