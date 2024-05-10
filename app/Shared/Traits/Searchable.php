@@ -51,7 +51,7 @@ trait Searchable
 
                     $queryModel->orWhereHas(
                         $relation,
-                        fn ($query) => $query->Where($column, 'like', "%$value%")
+                        fn ($query) => $query->where($column, 'like', "%$value%")
                     );
                 } else {
                     $queryModel->when(
