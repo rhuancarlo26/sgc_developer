@@ -29,15 +29,15 @@
         <div class="card card-body space-y-3">
 
             <!-- Pesquisa-->
-            <ModelSearchForm :search-columns="{
-                'numero_contrato': 'N° do Contrato',
-                'cnpj': 'CNPJ',
-                'contratada': 'Contratada',
-                'processo_sei': 'Processo SEI',
-                'situacao': 'Situação',
-                'trechos.uf.uf': 'UF',
-                'trechos.rodovia.rodovia': 'Rodovia'
-            }"/>
+            <ModelSearchForm :columns="[
+                'tipo.nome',
+                'numero_licenca',
+                'empreendimento',
+                'data_emissao',
+                'status',
+                'vencimento',
+                'processo_dnit'
+            ]"/>
 
             <!-- Listagem-->
             <Table
@@ -73,7 +73,7 @@
                                 <span v-else-if="dtAlerta(item.vencimento) <= 0" class="badge text-bg-danger">
                                     Vencida
                                 </span>
-                                <span v-else-if="item.vencimento !== '' && item.vencimento !== null"
+                                <span v-else-if="!item.vencimento !== '' && item.vencimento !== null"
                                       class="badge text-bg-success">
                                     Vigente
                                 </span>
@@ -131,7 +131,7 @@ import Table from "@/Components/Table.vue";
 import {ref} from "vue";
 import {IconCar, IconDots, IconSettings, IconShip, IconTrain} from "@tabler/icons-vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
+import ModelSearchForm from "@/Components/ModelSearchFormAllColumns.vue";
 import ModalMapaGeral from "@/Pages/Licenca/ModalMapaGeral.vue";
 import ModalVisualizar from "@/Pages/Licenca/ModalVisualizar.vue";
 import ModalRequerimento from "./Requerimento/ModalRequerimento.vue";
