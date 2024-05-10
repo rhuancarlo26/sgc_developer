@@ -18,9 +18,9 @@ class LicencaService extends BaseModelService
 
     protected string $modelClass = Licenca::class;
 
-    public function get(array $searchParams, bool $arquivado = false): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function get(array $searchParams, bool $arquivado = false)
     {
-        return $this->search(...$searchParams)
+        return $this->searchAllColumns(...$searchParams)
             ->with(relations: ['tipo', 'requerimentos', 'documento'])
             ->where('arquivado', $arquivado)
             ->paginate(10)
