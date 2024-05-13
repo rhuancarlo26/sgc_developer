@@ -4,19 +4,44 @@ import { renderAsync } from 'docx-preview';
 import { onMounted, ref } from "vue";
 
 const modalDetalhes = ref(null);
-
-const abrirModal= () => {
-    modalDetalhes.value.getBsModal().show();
-    console.log('modal aberto')
-}
-
 const wordDocument = ref(null);
 const teste = ref(null)
 
+const props = defineProps({
+  caminho: Object
+})
+
+let caminho = null;
+let filePath = null;
+
+const abrirModal = async (idItem) => {
+    modalDetalhes.value.getBsModal().show();
+    caminho = await fetchDocumentos(idItem)
+    filePath = new URL(caminho, import.meta.url);
+    console.log(filePath)
+}
+
+const fetchDocumentos = async (itemId) => {
+  try {
+    const response = await fetch(route('sgc.contratada.visualizar_doc')); // Substitua pela sua rota Laravel
+    const data = await response.json()
+    console.log(itemId)
+
+    if (itemId == data[0].item_id) {
+        return data[0].caminho
+        
+    } else {
+        console.log('não localizado.')
+    }
+  } catch (error) {
+    console.error('Erro ao buscar documentos:', error);
+  }
+};
+
+
 onMounted(async () => {
   try {
-    const filePath = new URL('./teste.docx', import.meta.url);
-    const response = await fetch(filePath);
+    const response = await fetch('http://127.0.0.1:5173/resources/js/Pages/Sgc/Contratada/Recurso/664257d510021_example.docx');
     if (!response.ok) {
       throw new Error('Erro ao carregar o documento do Word');
     }
@@ -33,7 +58,6 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Erro ao carregar o documento do Word:', error);
-    // Lidar com o erro, se necessário
   }
 });
 

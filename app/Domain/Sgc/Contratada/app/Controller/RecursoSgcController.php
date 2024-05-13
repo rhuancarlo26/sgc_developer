@@ -20,4 +20,6 @@ class RecursoSgcController extends Controller
 
     return Inertia::render('Sgc/Contratada/Recurso/Index', $response);
   }
+
+ 
 }

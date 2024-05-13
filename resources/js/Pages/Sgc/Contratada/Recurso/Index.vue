@@ -74,8 +74,8 @@ const salvarAnexo = () => {
 
 const docxModal = ref();
 
-const abrirDoc = () => {
-    docxModal.value.abrirModal();
+const abrirDoc = (idItem) => {
+    docxModal.value.abrirModal(idItem);
 }
 
 </script>
@@ -121,7 +121,7 @@ const abrirDoc = () => {
             <div class="lista-itens">
               <div v-for="item in itens" :key="item.id" class="item">
                 {{ item.id_item }} - {{ item.descricao }}
-                <button class="button" @click="abrirDoc(index)">Abrir</button>
+                <button class="button" @click="abrirDoc(item.id_item)">Abrir</button>
 
                 <input @input="form.arquivo = $event.target.files[0]" id="inputfile" type="file" class="form-control">
                 <div class="row g-2">

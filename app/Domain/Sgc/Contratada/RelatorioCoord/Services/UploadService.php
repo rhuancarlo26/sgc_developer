@@ -38,12 +38,13 @@ class UploadService extends BaseModelService
     ];
 }
 
-
   public function storageAnexo($arquivo)
   {
     $nome = $arquivo->getClientOriginalName();
     $tipo = $arquivo->extension();
-    $caminho = $arquivo->storeAs('Relatorio' . DIRECTORY_SEPARATOR . 'Sgc' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+    // $caminho = $arquivo->storeAs('Relatorio' . DIRECTORY_SEPARATOR . 'Sgc' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+
+    $caminho = $arquivo->storeAs('Storage' . DIRECTORY_SEPARATOR . 'App' . DIRECTORY_SEPARATOR .'Relatorio' . DIRECTORY_SEPARATOR .'Sgc'. DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
 
     return [
       'nome' => $nome,

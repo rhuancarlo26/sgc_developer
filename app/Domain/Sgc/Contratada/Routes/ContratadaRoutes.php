@@ -6,7 +6,7 @@ use App\Domain\Sgc\Contratada\app\Controller\ContratoSgcController;
 use App\Domain\Sgc\Contratada\app\Controller\DadosGeraisSgcController;
 use App\Domain\Sgc\Contratada\app\Controller\RecursoSgcController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StoreUploadRelatorioController;
-use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\UpdateUploadRelatorioController;
+use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\VisualizarDocxController;;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\DestroyUploadRelatorioController;
 use App\Domain\Contrato\Contratada\DadosGerais\Introducao\Controller\StoreIntroducaoContratadaController;
 
@@ -22,4 +22,8 @@ Route::prefix('/contratada')->group(function () {
         $itens = App\Models\SgcRelatorioCoordenacao::all();
         return response()->json($itens);
     })->name('sgc.relatorio_coordenacao.index');
+
+
+    Route::get('/sgc/visualizar',                                  [VisualizarDocxController::class,                         'index'])->name('sgc.contratada.visualizar_doc');
+
 });
