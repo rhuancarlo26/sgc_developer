@@ -50,9 +50,9 @@ defineExpose({ visualizarTrecho });
 </script>
 
 <template>
-  <h4>Dados Básicos do contrato</h4>
+  <!-- <h4>Dados Básicos do contrato</h4> -->
 
-  <div>
+  <div class="mt-4">
     <div class="card-header">
       <h3 class="my-0">Dados Básicos do Contrato</h3>
     </div>
@@ -76,11 +76,11 @@ defineExpose({ visualizarTrecho });
           })
         }}</span>
         <span class="col"><strong>Término da Vigência: </strong>{{
-            dateTimeFormat(contrato.data_termino_vigencia ?? null, {
-              dateStyle: 'short',
-              timeStyle: 'short'
-            })
-          }}</span>
+          dateTimeFormat(contrato.data_termino_vigencia ?? null, {
+            dateStyle: 'short',
+            timeStyle: 'short'
+          })
+        }}</span>
         <span class="col"><strong>Situação: </strong>{{ contrato.situacao }}</span>
       </div>
     </div>

@@ -84,7 +84,10 @@ const dtAlerta = (data) => {
 </script>
 
 <template>
-  <h4>Licenciamento</h4>
+  <div class="card-header mb-4 mt-4">
+    <h3 class="my-0">Licenciamento</h3>
+  </div>
+  <!-- <h4>Licenciamento</h4> -->
   <div class="mb-4">
     <div class="row g-2">
       <div class="col">
