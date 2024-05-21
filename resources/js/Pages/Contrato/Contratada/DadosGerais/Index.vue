@@ -11,6 +11,7 @@ import TabHistorico from "./Historico/TabHistorico.vue";
 import TabAnexo from "./Anexo/TabAnexo.vue";
 import TabEmpreendimento from "./Empreendimento/TabEmpreendimento.vue";
 import { IconCircleCheck, IconCircleX } from "@tabler/icons-vue";
+import NavLinkVoid from "@/Components/NavLinkVoid.vue";
 
 const mapaTabDadosContratuais = ref();
 
@@ -23,6 +24,12 @@ defineProps({
 
 const visualizarMapa = () => {
   mapaTabDadosContratuais.value.visualizarTrecho();
+}
+
+const activeTab = ref('dadosContratuais');
+
+let switchTab = (tabName) => {
+  activeTab.value = tabName;
 }
 
 </script>
@@ -44,91 +51,63 @@ const visualizarMapa = () => {
     </template>
 
     <Navbar :contrato="contrato">
-
       <template #body>
         <ul class="nav nav-tabs card-header-tabs nav-fill" data-bs-toggle="tabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <a @click="visualizarMapa()" href="#dadosContratuais" class="nav-link active d-flex justify-content-between"
-              data-bs-toggle="tab" aria-selected="true" role="tab">
-              <span>
-                Dados contratuais
-              </span>
-              <IconCircleCheck class="text-success" />
-            </a>
+          <li class="nav-item" role="presentation" @click="visualizarMapa">
+            <NavLinkVoid title="Dados contratuais" :icon="IconCircleCheck" tabName="dadosContratuais"
+              :iconClass="'text-success'" @switch-tab="switchTab"
+              class="nav-link active d-flex justify-content-between" data-bs-toggle="tab" aria-selected="true"
+              role="tab" />
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#introducao" class="nav-link d-flex justify-content-between" data-bs-toggle="tab"
-              aria-selected="false" role="tab" tabindex="-1">
-              <span>
-                Introdução
-              </span>
-              <IconCircleCheck class="text-success" v-if="contrato.introducao" />
-              <IconCircleX class="text-danger" v-else />
-            </a>
+            <NavLinkVoid title="Introdução" :icon="contrato.introducao ? IconCircleCheck : IconCircleX"
+              :iconClass="contrato.introducao ? 'text-success' : 'text-danger'" tabName="introducao"
+              @switch-tab="switchTab" class="nav-link active d-flex justify-content-between" data-bs-toggle="tab"
+              aria-selected="true" role="tab" />
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#empreendimento" class="nav-link d-flex justify-content-between" data-bs-toggle="tab"
-              aria-selected="false" tabindex="-1" role="tab">
-              <span>
-                Empreendimento
-              </span>
-              <IconCircleCheck class="text-success" v-if="contrato.empreendimento_trechos.length" />
-              <IconCircleX class="text-danger" v-else />
-            </a>
+            <NavLinkVoid title="Empreendimento"
+              :icon="contrato.empreendimento_trechos.length ? IconCircleCheck : IconCircleX" tabName="empreendimento"
+              :iconClass="contrato.empreendimento_trechos.length ? 'text-success' : 'text-danger'" @switch-tab="switchTab"
+              class="nav-link active d-flex justify-content-between" data-bs-toggle="tab" aria-selected="true"
+              role="tab" />
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#licenciamento" class="nav-link d-flex justify-content-between" data-bs-toggle="tab"
-              aria-selected="false" tabindex="-1" role="tab">
-              <span>
-                Licenciamento
-              </span>
-              <IconCircleCheck class="text-success" v-if="contrato.licenciamentos.length" />
-              <IconCircleX class="text-danger" v-else />
-            </a>
+            <NavLinkVoid title="Licenciamento" :icon="contrato.licenciamentos.length ? IconCircleCheck : IconCircleX"
+              :iconClass="contrato.licenciamentos.length ? 'text-success' : 'text-danger'" tabName="licenciamento"
+              @switch-tab="switchTab" class="nav-link active d-flex justify-content-between" data-bs-toggle="tab"
+              aria-selected="true" role="tab" />
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#historico" class="nav-link d-flex justify-content-between" data-bs-toggle="tab"
-              aria-selected="false" tabindex="-1" role="tab">
-              <span>
-                Histórico
-              </span>
-              <IconCircleCheck class="text-success" v-if="contrato.historico.length" />
-              <IconCircleX class="text-danger" v-else />
-            </a>
+            <NavLinkVoid title="Histórico" :icon="contrato.historico.length ? IconCircleCheck : IconCircleX"
+              :iconClass="contrato.historico.length ? 'text-success' : 'text-danger'" tabName="historico"
+              @switch-tab="switchTab" class="nav-link active d-flex justify-content-between" data-bs-toggle="tab"
+              aria-selected="true" role="tab" />
           </li>
           <li class="nav-item" role="presentation">
-            <a href="#anexo" class="nav-link d-flex justify-content-between" data-bs-toggle="tab" aria-selected="false"
-              tabindex="-1" role="tab">
-              <span>
-                Anexos
-              </span>
-              <IconCircleCheck class="text-success" v-if="contrato.anexos.length" />
-              <IconCircleX class="text-danger" v-else />
-            </a>
+            <NavLinkVoid title="Anexos" :icon="contrato.anexos.length ? IconCircleCheck : IconCircleX"
+              :iconClass="contrato.anexos.length ? 'text-success' : 'text-danger'" tabName="anexo"
+              @switch-tab="switchTab" class="nav-link active d-flex justify-content-between" data-bs-toggle="tab"
+              aria-selected="true" role="tab" />
           </li>
         </ul>
-
-        <div class="card-body" style="margin-top: 15px;">
-          <div class="tab-content">
-            <div class="tab-pane active show" id="dadosContratuais" role="tabpanel">
-              <TabDadosContratuais :contrato="contrato" ref="mapaTabDadosContratuais" />
-            </div>
-            <div class="tab-pane" id="introducao" role="tabpanel">
-              <TabIntroducao :contrato="contrato" />
-            </div>
-            <div class="tab-pane" id="empreendimento" role="tabpanel">
-              <TabEmpreendimento :contrato="contrato" :ufs="ufs" :rodovias="rodovias" />
-            </div>
-            <div class="tab-pane" id="licenciamento" role="tabpanel">
-              <TabLicenciamento :contrato="contrato" :numero_licencas="numero_licencas" />
-            </div>
-            <div class="tab-pane" id="historico" role="tabpanel">
-              <TabHistorico :contrato="contrato" />
-            </div>
-            <div class="tab-pane" id="anexo" role="tabpanel">
-              <TabAnexo :contrato="contrato" />
-            </div>
-          </div>
+        <div v-show="activeTab === 'dadosContratuais'">
+          <TabDadosContratuais :contrato="contrato" ref="mapaTabDadosContratuais" />
+        </div>
+        <div v-show="activeTab === 'introducao'">
+          <TabIntroducao :contrato="contrato" />
+        </div>
+        <div v-show="activeTab === 'empreendimento'">
+          <TabEmpreendimento :contrato="contrato" :ufs="ufs" :rodovias="rodovias" />
+        </div>
+        <div v-show="activeTab === 'licenciamento'">
+          <TabLicenciamento :contrato="contrato" :numero_licencas="numero_licencas" />
+        </div>
+        <div v-show="activeTab === 'historico'">
+          <TabHistorico :contrato="contrato" />
+        </div>
+        <div v-show="activeTab === 'anexo'">
+          <TabAnexo :contrato="contrato" />
         </div>
       </template>
     </Navbar>

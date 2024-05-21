@@ -41,6 +41,9 @@ const excluirAnexo = (anexo_id) => {
 </script>
 <template>
   <div class="row mb-4">
+    <div class="card-header mb-4 mt-4">
+      <h3 class="my-0">Anexos</h3>
+    </div>
     <div class="col">
       <label class="form-label">Anexo:</label>
       <input @input="form.arquivo = $event.target.files[0]" id="inputfile" type="file" class="form-control">
