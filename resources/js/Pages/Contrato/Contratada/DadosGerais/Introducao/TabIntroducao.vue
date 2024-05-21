@@ -28,8 +28,11 @@ const enviarIntroducao = () => {
 </script>
 
 <template>
-  <h4>Introdução</h4>
-  <div class="form-group mb-4">
+  <!-- <h4>Introdução</h4> -->
+  <div class="form-group mt-4">
+    <div class="card-header">
+      <h3 class="my-0">Introdução</h3>
+    </div>
     <textarea v-model="form.nome" class="form-control" rows="5"></textarea>
     <InputError :message="form.errors.nome" />
   </div>
