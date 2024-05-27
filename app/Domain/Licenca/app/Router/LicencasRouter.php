@@ -33,6 +33,9 @@ Route::prefix('licenca')->group(function () {
     // Documento
     require __DIR__ . '/../../Documento/Router/DocumentosRouter.php';
 
+    // Documento
+    require __DIR__ . '/../../Shapefile/Router/ShapefileRouter.php';
+
     // Requerimento
     require __DIR__ . '/../../Requerimento/Router/RequerimentoRouter.php';
 });
