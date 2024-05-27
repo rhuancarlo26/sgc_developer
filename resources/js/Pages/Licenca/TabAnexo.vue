@@ -35,7 +35,7 @@ const deleteShapefile = () => {
   <div class="row">
     <div class="col">
       <div v-if="!licenca.documento?.id" class="mb-4">
-        <InputLabel value="Arquivo" for="documento" />
+        <InputLabel value="Termo de referência" for="documento" />
         <div class="row g-2">
           <div class="col">
             <input @input="form.documento = $event.target.files[0]" type="file" class="form-control">
