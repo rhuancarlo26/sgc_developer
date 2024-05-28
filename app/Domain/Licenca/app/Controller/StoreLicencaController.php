@@ -14,7 +14,7 @@ class StoreLicencaController extends Controller
     {
     }
 
-    public function index(Request $request): RedirectResponse
+    public function index(StoreLicencaRequest $request): RedirectResponse
     {
         $post = [
             ...$request->all(),
