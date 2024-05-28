@@ -67,7 +67,8 @@ defineExpose({ abrirModal });
       </div>
       <div class="row mb-4">
         <div class="col">
-          <span><strong>Conselho de classe: </strong>{{ rh.conselho_classe ? 'Sim' : 'Não' }}</span>
+          <!-- Opções ainda serão passadas -->
+          <!-- <span><strong>Conselho de classe: </strong>{{ rh.conselho_classe ? 'Sim' : 'Não' }}</span> -->
         </div>
         <div class="col">
           <span><strong>Número de registro: </strong>{{ rh.numero_registro }}</span>
