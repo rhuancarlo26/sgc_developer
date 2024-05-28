@@ -36,6 +36,11 @@ class Licenca extends Model
         return $this->hasOne(LicencaDocumento::class, 'licenca_id');
     }
 
+    public function shapefile(): HasOne
+    {
+        return $this->hasOne(LicencaShapefile::class, 'licenca_id');
+    }
+
     public function requerimentos(): HasMany
     {
         return $this->hasMany(LicencaRequerimento::class, 'licenca_id');
