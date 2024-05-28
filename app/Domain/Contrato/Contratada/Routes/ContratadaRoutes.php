@@ -21,10 +21,10 @@ use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Controller\StoreLic
 use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Observacao\Controller\DeleteLicenciamentoObservacaoController;
 use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Observacao\Controller\StoreLicenciamentoObservacaoController;
 use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Observacao\Controller\UpdateLicenciamentoObservacaoController;
-use app\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\CreateEquipamentoRecursoController;
+use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\CreateEquipamentoRecursoController;
 use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\DestroyDocumentoEquipamentoRecursoController;
 use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\DestroyEquipamentoRecursoController;
-use app\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\ListagemEquipamentoRecursoController;
+use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\ListagemEquipamentoRecursoController;
 use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\StoreDocumentoEquipamentoRecursoController;
 use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\StoreEquipamentoRecursoController;
 use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\VisualizarDocumentoEquipamentoRecursoController;
