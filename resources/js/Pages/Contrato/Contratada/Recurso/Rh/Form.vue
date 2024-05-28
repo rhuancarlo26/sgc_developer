@@ -97,12 +97,12 @@ const destroyDocumentoRh = (documento_id) => {
             </div>
           </div>
           <div class="row mb-4">
-            <div class="col form-group">
+            <!-- <div class="col form-group">
               <InputLabel value="CPF" for="cpf" />
               <input type="text" name="cpf" id="cpf" v-maska data-maska="###.###.###-##" class="form-control"
                 v-model="form.cpf">
               <InputError :message="form.errors.cpf" />
-            </div>
+            </div> -->
             <div class="col form-group">
               <InputLabel value="E-mail" for="email" />
               <input type="email" name="email" id="email" class="form-control" v-model="form.email">
