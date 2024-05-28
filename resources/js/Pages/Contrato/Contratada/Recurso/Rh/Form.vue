@@ -132,7 +132,7 @@ const destroyDocumentoRh = (documento_id) => {
               <input type="date" name="ctf_validade" id="ctf_validade" class="form-control" v-model="form.ctf_validade">
               <InputError :message="form.errors.ctf_validade" />
             </div>
-            <div class="col form-group">
+            <!-- <div class="col form-group">
               <InputLabel value="Conselho de classe" for="conselho_classe" />
               <select name="conselho_classe" id="conselho_classe" class="form-control form-select"
                 v-model="form.conselho_classe">
@@ -140,7 +140,7 @@ const destroyDocumentoRh = (documento_id) => {
                 <option value="0">Não</option>
               </select>
               <InputError :message="form.errors.conselho_classe" />
-            </div>
+            </div> -->
             <div v-if="form.conselho_classe" class="col form-group">
               <InputLabel value="Número de registro" for="numero_registro" />
               <input type="text" name="numero_registro" id="numero_registro" class="form-control"
