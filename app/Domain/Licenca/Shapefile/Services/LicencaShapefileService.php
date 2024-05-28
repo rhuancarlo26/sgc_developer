@@ -6,6 +6,7 @@ use App\Models\LicencaShapefile;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Shapefile\ShapefileException;
 use Shapefile\ShapefileReader;
@@ -80,8 +81,10 @@ class LicencaShapefileService extends BaseModelService
             'features' => $features
           ];
 
-          if (Storage::exists(storage_path('app' . DIRECTORY_SEPARATOR . 'shapefile'))) {
-            Storage::deleteDirectory(storage_path('app' . DIRECTORY_SEPARATOR . 'shapefile'));
+          $folderPath = storage_path('app' . DIRECTORY_SEPARATOR . 'shapefile'); // Caminho da pasta
+
+          if (File::exists($folderPath)) {
+            File::deleteDirectory($folderPath);
           }
 
           return json_encode($featureCollection);
