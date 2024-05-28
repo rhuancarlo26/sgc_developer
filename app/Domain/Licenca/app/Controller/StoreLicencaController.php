@@ -21,10 +21,6 @@ class StoreLicencaController extends Controller
             'tipo_id' => $request->tipo['id']
         ];
 
-        if (!isset($post['status'])) {
-            $post['numero_licenca'] = null;
-        }
-
         if ($post['tipo_id'] !== 3) {
             $post['in_app'] = null;
             $post['out_app'] = null;
