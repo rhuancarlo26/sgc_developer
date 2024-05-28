@@ -127,11 +127,11 @@ const destroyDocumentoRh = (documento_id) => {
             </div>
           </div>
           <div class="row mb-4">
-            <div class="col form-group">
+            <!-- <div class="col form-group">
               <InputLabel value="Validade" for="ctf_validade" />
               <input type="date" name="ctf_validade" id="ctf_validade" class="form-control" v-model="form.ctf_validade">
               <InputError :message="form.errors.ctf_validade" />
-            </div>
+            </div> -->
             <div class="col form-group">
               <InputLabel value="Conselho de classe" for="conselho_classe" />
               <select name="conselho_classe" id="conselho_classe" class="form-control form-select"
