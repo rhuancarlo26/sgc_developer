@@ -2,11 +2,9 @@
 
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
 import Table from '@/Components/Table.vue';
 import Navbar from "../../Navbar.vue";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
-import { ref } from "vue";
 import { IconDeviceFloppy, IconDoorExit, IconDots } from "@tabler/icons-vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
@@ -19,6 +17,9 @@ const props = defineProps({
 const form = useForm({
   id: null,
   contrato_id: props.contrato.id,
+  alugado: null,
+  numero_serie: null,
+  ultima_calibracao: null,
   nome: null,
   descricao: null,
   atividade: null,
@@ -34,7 +35,7 @@ const form_documento = useForm({
 
 const salvarEquipamento = () => {
   if (form.id) {
-
+    form.patch(route('contratos.contratada.recurso.equipamento.update'))
   } else {
     form.post(route('contratos.contratada.recurso.equipamento.store'))
   }
@@ -61,10 +62,10 @@ const destroyDocumentoEquipamento = (documento_id) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-    { route: route('contratos.contratada.recurso.equipamento.index', contrato.id), label: `Equipamentos` },
-    { route: '#', label: contrato.contratada }
-  ]
-    " />
+          { route: route('contratos.contratada.recurso.equipamento.index', contrato.id), label: `Equipamentos` },
+          { route: '#', label: contrato.contratada }
+        ]
+          " />
         <Link class="btn btn-info" :href="route('contratos.contratada.recurso.equipamento.index', contrato.id)">
         <IconDoorExit class="me-2" />
         Voltar
@@ -77,6 +78,15 @@ const destroyDocumentoEquipamento = (documento_id) => {
       <template #body>
         <form @submit.prevent="salvarEquipamento()">
           <div class="row mb-4">
+            <div class="d-flex col">
+              <div class="d-flex align-items-center">
+                <label class="form-check">
+                  <input type="checkbox" class="form-check-input" v-model="form.alugado">
+                  <span class="form-check-label">Alugado</span>
+                </label>
+              </div>
+              <InputError :message="form.errors.alugado" />
+            </div>
             <div class="col">
               <InputLabel value="Nome" for="nome" />
               <input id="nome" name="nome" v-model="form.nome" class="form-control" />
@@ -86,6 +96,20 @@ const destroyDocumentoEquipamento = (documento_id) => {
               <InputLabel value="Descrição" for="descricao" />
               <input id="descricao" name="descricao" v-model="form.descricao" class="form-control" />
               <InputError :message="form.errors.descricao" />
+            </div>
+          </div>
+          <div class="row mb-4">
+            <div class="col">
+              <InputLabel value="Número de série" for="numero_serie" />
+              <input type="text" id="numero_serie" name="numero_serie" v-model="form.numero_serie"
+                class="form-control" />
+              <InputError :message="form.errors.numero_serie" />
+            </div>
+            <div class="col">
+              <InputLabel value="Data da última calibração" for="ultima_calibracao" />
+              <input type="date" id="ultima_calibracao" name="ultima_calibracao" v-model="form.ultima_calibracao"
+                class="form-control" />
+              <InputError :message="form.errors.ultima_calibracao" />
             </div>
           </div>
           <div class="row mb-4">
@@ -105,7 +129,7 @@ const destroyDocumentoEquipamento = (documento_id) => {
           <div class="mb-4 d-flex justify-content-end">
             <button type="submit" class="btn btn-success" :disabled="form.processing">
               <IconDeviceFloppy class="me-2" />
-              Salvar
+              {{ form.id ? 'Editar' : 'Salvar' }}
             </button>
           </div>
         </form>
@@ -137,7 +161,7 @@ const destroyDocumentoEquipamento = (documento_id) => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="documento in  equipamento.documentos " :key="documento.id">
+                <tr v-for="documento in equipamento.documentos " :key="documento.id">
                   <td>{{ documento.nome }}</td>
                   <td>
                     <span class="dropdown">

@@ -38,6 +38,15 @@ class EquipamentoRecursoService extends BaseModelService
     ];
   }
 
+  public function updateEquipamento(array $request)
+  {
+    $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+
+    return [
+      'request' => $response['request']
+    ];
+  }
+
   public function salvarDocumentoEquipamento($request)
   {
     try {
