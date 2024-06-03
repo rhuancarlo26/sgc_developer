@@ -35,12 +35,21 @@ class VeiculoRecursoService extends BaseModelService
     ];
   }
 
-  public function salvarVeiculo($request)
+  public function salvarVeiculo(array $request): array
   {
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
     return [
       'veiculo' => $response['model'],
+      'request' => $response['request']
+    ];
+  }
+
+  public function updateVeiculo(array $request): array
+  {
+    $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+
+    return [
       'request' => $response['request']
     ];
   }

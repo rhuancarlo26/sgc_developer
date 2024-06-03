@@ -14,6 +14,10 @@ class RecursoVeiculo extends Model
     protected $table = 'recurso_veiculos';
     protected $guarded = ['id', 'created_at'];
 
+    protected $casts = [
+        'alugado' => 'bool'
+    ];
+
     public function codigo(): BelongsTo
     {
         return $this->belongsTo(RecursoVeiculoCodigo::class, 'veiculo_codigo_id');
