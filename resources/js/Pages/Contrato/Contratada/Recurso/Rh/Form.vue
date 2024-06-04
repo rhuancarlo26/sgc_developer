@@ -29,6 +29,7 @@ const form = useForm({
   ctf_validade: null,
   conselho_classe: null,
   numero_registro: null,
+  status: null,
   observacao: null,
   ...props.rh
 });
@@ -177,6 +178,15 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                   <input type="text" name="numero_registro" id="numero_registro" class="form-control"
                     v-model="form.numero_registro">
                   <InputError :message="form.errors.numero_registro" />
+                </div>
+                <div class="col form-group">
+                  <InputLabel value="Status" for="status" />
+                  <select name="status" id="status" class="form-control form-select"
+                    v-model="form.status">
+                    <option value="1">Ativo</option>
+                    <option value="0">Inativo</option>
+                  </select>
+                  <InputError :message="form.errors.status" />
                 </div>
               </div>
               <div class="row mb-4">
