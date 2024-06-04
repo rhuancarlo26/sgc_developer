@@ -41,14 +41,20 @@ const calcExtensao = () => {
 
 const salvarLicencaSegmento = () => {
   if (form.id) {
-    form.patch(route('licenca_segmento.update', form.id));
+    form.patch(route('licenca_segmento.update', form.id), {
+      onSuccess: () => {
+        modalLicencaSegmento.value.getBsModal().hide();
+        emit('atualizarsegmento');
+      }
+    });
   } else {
-    form.post(route('licenca_segmento.store'));
+    form.post(route('licenca_segmento.store'), {
+      onSuccess: () => {
+        modalLicencaSegmento.value.getBsModal().hide();
+        emit('atualizarsegmento');
+      }
+    });
   }
-
-  modalLicencaSegmento.value.getBsModal().hide()
-
-  emit('atualizarsegmento');
 }
 
 const rodoviasUnicas = computed(() => {
@@ -78,7 +84,7 @@ defineExpose({ abrirModal });
               Nenhum registro encontrado.
             </template>
           </v-select>
-          <InputError :message="form.errors.tipo" />
+          <InputError :message="form.errors.rodovia" />
         </div>
 
         <div class="col">
@@ -98,7 +104,7 @@ defineExpose({ abrirModal });
               Nenhum registro encontrado.
             </template>
           </v-select>
-          <InputError :message="form.errors.uf_final_id" />
+          <InputError :message="form.errors.uf_final" />
         </div>
       </div>
       <div class="row mb-4">

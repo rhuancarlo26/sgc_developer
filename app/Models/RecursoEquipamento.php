@@ -12,6 +12,10 @@ class RecursoEquipamento extends Model
     protected $table = 'recurso_equipamentos';
     protected $guarded = ['id', 'created_at'];
 
+    protected $casts = [
+        'alugado' => 'bool'
+    ];
+
     public function documentos()
     {
         return $this->hasMany(RecursoEquipamentoDocumento::class, 'equipamento_id');

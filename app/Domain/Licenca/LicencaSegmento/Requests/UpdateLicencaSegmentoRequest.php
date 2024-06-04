@@ -4,7 +4,7 @@ namespace App\Domain\Licenca\LicencaSegmento\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreLicencaSegmentoRequest extends FormRequest
+class UpdateLicencaSegmentoRequest extends FormRequest
 {
   public function rules(): array
   {

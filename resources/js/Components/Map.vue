@@ -64,10 +64,8 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
 
             L.popup()
               .setLatLng(e.latlng)
-              .setContent(e.layer.feature.geometry.properties.popup)
+              .setContent(e.layer?.feature?.geometry?.properties?.popup)
               .openOn(map);
-
-            // self.$emit('trechoClicado', e.layer.feature.geometry.properties);
           }
         });
       }
@@ -86,7 +84,7 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
               color: '#0000CD',
               weight: 5,
               opacity: 1,
-              fillColor: 'white',
+              fillColor: '#9999eb',
               lineJoin: 'round'
             };
 
