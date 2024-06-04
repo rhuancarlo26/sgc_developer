@@ -78,15 +78,6 @@ const destroyDocumentoEquipamento = (documento_id) => {
       <template #body>
         <form @submit.prevent="salvarEquipamento()">
           <div class="row mb-4">
-            <div class="d-flex col">
-              <div class="d-flex align-items-center">
-                <label class="form-check">
-                  <input type="checkbox" class="form-check-input" v-model="form.alugado">
-                  <span class="form-check-label">Alugado</span>
-                </label>
-              </div>
-              <InputError :message="form.errors.alugado" />
-            </div>
             <div class="col">
               <InputLabel value="Nome" for="nome" />
               <input id="nome" name="nome" v-model="form.nome" class="form-control" />
@@ -99,18 +90,25 @@ const destroyDocumentoEquipamento = (documento_id) => {
             </div>
           </div>
           <div class="row mb-4">
-            <div class="col">
+            <div class="col-6">
               <InputLabel value="Número de série" for="numero_serie" />
               <input type="text" id="numero_serie" name="numero_serie" v-model="form.numero_serie"
                 class="form-control" />
               <InputError :message="form.errors.numero_serie" />
             </div>
-            <div class="col">
+            <div class="col-2">
               <InputLabel value="Data da última calibração" for="ultima_calibracao" />
               <input type="date" id="ultima_calibracao" name="ultima_calibracao" v-model="form.ultima_calibracao"
                 class="form-control" />
               <InputError :message="form.errors.ultima_calibracao" />
             </div>
+              <div class="col">
+                <InputLabel value="Alugado"/>
+                  <div class="d-flex align-items-center">
+                    <input type="checkbox" class="form-check-input" v-model="form.alugado">
+                  </div>
+                <InputError :message="form.errors.alugado" />
+              </div>
           </div>
           <div class="row mb-4">
             <div class="col">

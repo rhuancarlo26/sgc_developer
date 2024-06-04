@@ -7,8 +7,11 @@ import Table from '@/Components/Table.vue';
 import Navbar from "../../Navbar.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import { ref } from "vue";
-import { IconDots } from "@tabler/icons-vue";
+import {IconDots, IconEdit, IconEye, IconTrash} from "@tabler/icons-vue";
 import ModalDetalheEquipamento from "./ModalDetalheEquipamento.vue";
+import NavButton from "@/Components/NavButton.vue";
+import NavLink from "@/Components/NavLink.vue";
+import NavLinkVoid from "@/Components/NavLinkVoid.vue";
 
 defineProps({
   contrato: Object,
@@ -63,22 +66,14 @@ const abrirModal = (equipamento) => {
               <td>{{ item.nome }}</td>
               <td>{{ item.descricao }}</td>
               <td>
-                <button type="button" class="btn btn-icon dropdown-toggle p-2" data-bs-boundary="viewport"
-                  data-bs-toggle="dropdown" aria-expanded="false">
-                  <IconDots />
-                </button>
-                <div class="dropdown-menu dropdown-menu-end">
-                  <a @click="abrirModal(item)" class="dropdown-item" href="javascript:void(0)">
-                    Visualizar
-                  </a>
-                  <a class="dropdown-item"
-                    :href="route('contratos.contratada.recurso.equipamento.create', { contrato: contrato.id, equipamento: item.id })">
-                    Editar
-                  </a>
-                  <a @click="excluirEquipamento(item.id)" class="dropdown-item" href="javascript:void(0)">
-                    Excluir
-                  </a>
-                </div>
+                <a class="btn btn-lg btn-info" title="Visualizar" @click="abrirModal(item)" href="javascript:void(0)">
+                  <IconEye />
+                </a>
+                <NavLink route-name="contratos.contratada.recurso.equipamento.create" title="" :icon="IconEdit"
+                         :param="{ contrato: contrato.id, equipamento: item.id }" class="btn btn-lg btn-info m-1"/>
+                <a @click="excluirEquipamento(item.id)" class="btn btn-lg btn-danger" title="Excluir" href="javascript:void(0)">
+                  <IconTrash />
+                </a>
               </td>
             </tr>
           </template>
