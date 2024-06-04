@@ -14,16 +14,12 @@ class StoreLicencaController extends Controller
     {
     }
 
-    public function index(Request $request): RedirectResponse
+    public function index(StoreLicencaRequest $request): RedirectResponse
     {
         $post = [
             ...$request->all(),
             'tipo_id' => $request->tipo['id']
         ];
-
-        if (!isset($post['status'])) {
-            $post['numero_licenca'] = null;
-        }
 
         if ($post['tipo_id'] !== 3) {
             $post['in_app'] = null;
