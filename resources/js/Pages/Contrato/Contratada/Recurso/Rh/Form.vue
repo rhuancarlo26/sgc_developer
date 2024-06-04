@@ -307,6 +307,9 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                 </table>
               </div>
             </div>
+            <div class="d-flex justify-content-center" v-else>
+              <span class="h4 mt-4">É necessário que o formulário seja salvo antes de anexar documentos.</span>
+            </div>
           </div>
         </div>
       </template>
