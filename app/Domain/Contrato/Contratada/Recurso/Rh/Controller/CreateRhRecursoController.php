@@ -20,7 +20,7 @@ class CreateRhRecursoController extends Controller
   {
     return Inertia::render('Contrato/Contratada/Recurso/Rh/Form', [
       'contrato' => $contrato,
-      'rh' => $rh->load(['documentos']),
+      'rh' => $rh->load(['documentos', 'documentosBaixa']),
     ]);
   }
 }

@@ -16,4 +16,9 @@ class RecursoRh extends Model
     {
         return $this->hasMany(RecursoRhDocumento::class, 'recurso_rh_id');
     }
+    
+    public function documentosBaixa()
+    {
+        return $this->hasMany(RecursoRhDocumentoBaixa::class, 'recurso_rh_id');
+    }
 }
