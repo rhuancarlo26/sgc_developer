@@ -66,18 +66,22 @@ defineExpose({ abrirModal });
             </div>
           </div>
         </div>
-      </div>
-      <div class="row">
-        <strong class="px-3">Foto(s) do Equipamento</strong>
-        <div class="d-flex flex-wrap">
-          <div v-for="documento in equipamento.documentos" :key="documento.id" class="col-xl-6 py-2">
-            <img :src="route('home') + documento.caminho" :title="documento.nome" :alt="documento.nome" class="w-100" />
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="heading-3">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#fotos_equipamento" aria-expanded="false">
+                Foto(s) do Equipamento
+            </button>
+          </h2>
+          <div id="fotos_equipamento" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
+            <div class="accordion-body pt-0">
+                <div v-for="documento in equipamento.documentos" :key="documento.id" class="col-xl-6 py-2">
+                    <img :src="route('home') + documento.caminho" :title="documento.nome" :alt="documento.nome" class="w-100" />
+                </div>
+            </div>
           </div>
         </div>
       </div>
-    </template>
-    <template #footer>
-
     </template>
   </Modal>
 </template>

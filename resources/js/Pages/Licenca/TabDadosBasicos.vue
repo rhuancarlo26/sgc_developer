@@ -168,19 +168,25 @@ const calcularArea = () => {
     </div>
 
     <div class="col">
-      <InputLabel value="Emissor:" for="emissor" />
+      <InputLabel value="Emissor/UF:" for="emissor" />
       <input type="text" id="emissor" name="emissor" class="form-control" v-model="form.emissor" />
       <InputError :message="form.errors.emissor" />
     </div>
 
     <div class="col">
-      <InputLabel value="Empreendimento:" for="empreendimento" />
-      <input type="text" id="empreendimento" name="empreendimento" class="form-control" v-model="form.empreendimento" />
-      <InputError :message="form.errors.empreendimento" />
+      <InputLabel value="Processo OEMA/IBAMA:" for="processo_oema_ibama" />
+      <input type="text" id="processo_oema_ibama" name="processo_oema_ibama" class="form-control"
+        v-model="form.processo_oema_ibama" />
+      <InputError :message="form.errors.processo_oema_ibama" />
     </div>
   </div>
 
   <div class="row mb-4">
+    <div class="col">
+      <InputLabel value="Empreendimento:" for="empreendimento" />
+      <input type="text" id="empreendimento" name="empreendimento" class="form-control" v-model="form.empreendimento" />
+      <InputError :message="form.errors.empreendimento" />
+    </div>
     <div class="col">
       <InputLabel value="Início do Sub-Trecho (PNV):" for="inicio_subtrecho" />
       <input type="text" id="inicio_subtrecho" name="inicio_subtrecho" class="form-control"
