@@ -9,14 +9,15 @@ class UpdateVeiculoRecursoRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'id' => 'required',
-      'contrato_id' => 'required',
+      'id'                => 'required',
+      'contrato_id'       => 'required',
       'veiculo_codigo_id' => 'required',
-      'descricao' => 'required',
-      'observacao' => 'required',
-      'alugado' => 'required',
-      'placa_veiculo' => 'required',
-      'ultima_revisao' => 'required'
+      'descricao'         => 'required',
+      'observacao'        => 'required',
+      'alugado'           => 'required',
+      'placa_veiculo'     => 'required',
+      'ultima_revisao'    => 'required',
+      'km_inicial'        => 'required'
     ];
   }
 

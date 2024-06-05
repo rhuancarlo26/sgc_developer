@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('recurso_veiculos', function (Blueprint $table) {
             $table->boolean('alugado');
+            $table->double('km_inicial');
             $table->string('placa_veiculo');
             $table->date('ultima_revisao');
         });
