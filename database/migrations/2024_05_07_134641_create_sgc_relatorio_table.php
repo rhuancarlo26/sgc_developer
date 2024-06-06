@@ -11,7 +11,7 @@ class CreateSgcRelatorioTable extends Migration
     Schema::create('sgc_relatorio_coordenacao', function (Blueprint $table) {
         $table->id();
         $table->integer('relatorio_num');
-        $table->unsignedBigInteger('id_item');
+        $table->integer('id_item')->unique();
         $table->string('nome_topico');
         $table->integer('status');
         $table->integer('aprovado');
@@ -22,7 +22,6 @@ class CreateSgcRelatorioTable extends Migration
         $table->string('data_atualizacao', 45);
     });
 
-    DB::statement('ALTER TABLE sgc_relatorio_coordenacao ADD CONSTRAINT sgc_relatorio_coordenacao_id_item_foreign FOREIGN KEY (id_item) REFERENCES relatorio_upload(id_item)');
 }
 
 
@@ -30,6 +29,6 @@ class CreateSgcRelatorioTable extends Migration
     {
         Schema::dropIfExists('sgc_relatorio_coordenacao');
     }
-    
+
 }
 

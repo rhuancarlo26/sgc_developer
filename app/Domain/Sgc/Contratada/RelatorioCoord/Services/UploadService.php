@@ -19,7 +19,7 @@ class UploadService extends BaseModelService
   {
       return SgcRelatorioCoordenacao::all();
   }
-  
+
   public function salvarAnexo($request)
 {
     $arquivo = $this->storageAnexo($request['arquivo']);
@@ -27,8 +27,8 @@ class UploadService extends BaseModelService
     $form = [
         ...$arquivo,
         'contrato_id' => $request['contrato_id'],
-        'descricao' => $request['descricao'],
-        'item_id' => $request['item_id'] 
+        // 'descricao' => $request['descricao'],
+        'item_id' => $request['item_id']
     ];
 
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $form);
@@ -42,9 +42,9 @@ class UploadService extends BaseModelService
   {
     $nome = $arquivo->getClientOriginalName();
     $tipo = $arquivo->extension();
-    // $caminho = $arquivo->storeAs('Relatorio' . DIRECTORY_SEPARATOR . 'Sgc' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+    $caminho = $arquivo->storeAs('Relatorio' . DIRECTORY_SEPARATOR . 'Sgc' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
 
-    $caminho = $arquivo->storeAs('Storage' . DIRECTORY_SEPARATOR . 'App' . DIRECTORY_SEPARATOR .'Relatorio' . DIRECTORY_SEPARATOR .'Sgc'. DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+    // $caminho = $arquivo->storeAs('Storage' . DIRECTORY_SEPARATOR . 'App' . DIRECTORY_SEPARATOR .'Relatorio' . DIRECTORY_SEPARATOR .'Sgc'. DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
 
     return [
       'nome' => $nome,
@@ -52,5 +52,5 @@ class UploadService extends BaseModelService
       'caminho' => $caminho
     ];
   }
-  
+
 }

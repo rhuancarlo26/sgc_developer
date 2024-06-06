@@ -7,9 +7,8 @@ use App\Domain\Sgc\Contratada\app\Controller\DadosGeraisSgcController;
 use App\Domain\Sgc\Contratada\app\Controller\RecursoSgcController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StoreUploadRelatorioController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\VisualizarDocxController;;
-use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\DestroyUploadRelatorioController;
 use App\Domain\Contrato\Contratada\DadosGerais\Introducao\Controller\StoreIntroducaoContratadaController;
-
+use App\Domain\Sgc\Contratada\Comentario\Controller\StoreSgcComentarioController;
 
 Route::prefix('/contratada')->group(function () {
     Route::get('{contrato}/',                                      [ContratoSgcController::class,                           'index'])->name('sgc.contratada.index');
@@ -24,6 +23,6 @@ Route::prefix('/contratada')->group(function () {
     })->name('sgc.relatorio_coordenacao.index');
 
 
-    Route::get('/sgc/visualizar',                                  [VisualizarDocxController::class,                         'index'])->name('sgc.contratada.visualizar_doc');
-
+    Route::get('/sgc/visualizar',                                  [VisualizarDocxController::class,                        'index'])->name('sgc.contratada.visualizar_doc');
+    Route::post('/sgc/store_comentario',                           [StoreSgcComentarioController::class,                     'index'])->name('sgc.contratada.store_comentario');
 });

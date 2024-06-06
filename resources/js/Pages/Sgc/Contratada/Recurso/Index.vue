@@ -1,44 +1,41 @@
 <script setup>
 import { Head } from "@inertiajs/vue3";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../Navbar.vue";
 import DocxModal from "./DocxModal.vue";
-
-import InputError from '@/Components/InputError.vue';
-import { router, useForm } from '@inertiajs/vue3';
-import { IconDots } from '@tabler/icons-vue';
+import { useForm } from '@inertiajs/vue3';
 
 
 const props = defineProps({
-  contrato: Object
+    contrato: Object,
+    routeName: { type: String },
 })
 
 const form = useForm({
-  id: null,
-  contrato_id: props.contrato.id,
-  caminho: null,
-  arquivo: null,
-  versao: null,
-  item_id: null, 
-  descricao: null
+    id: null,
+    contrato_id: props.contrato.id,
+    caminho: null,
+    arquivo: null,
+    versao: null,
+    item_id: null,
+    descricao: null
 })
 
 const itens = ref([]);
+const docxModal = ref();
+const selectedItemId = ref(null);
 
 const obterItens = async () => {
   try {
     const response = await fetch(route('sgc.relatorio_coordenacao.index'));
     const data = await response.json();
-    console.log('Itens obtidos:', data); 
-    
     let item = null;
 
     if (data.length > 0) {
-      
-      item = data[7];
 
+      item = data[7];
       form.item_id = item.id_item;
     }
 
@@ -49,8 +46,8 @@ const obterItens = async () => {
 }
 obterItens();
 
-const selecionarItem = (idItem) => {  
-  form.item_id = idItem;
+const selecionarItem = (idItem) => {
+    form.item_id = idItem;
 }
 
 
@@ -72,36 +69,14 @@ const salvarAnexo = () => {
   }
 }
 
-const docxModal = ref();
 
 const abrirDoc = (idItem) => {
+    selectedItemId.value = idItem;
     docxModal.value.abrirModal(idItem);
 }
 
 </script>
-<style>
-.lista-itens {
-  display: flex;
-  flex-direction: column;
-  gap: 10px; 
-}
 
-.item {
-  border: 1px solid #a09e9e; 
-  padding: 10px; 
-  border-radius: 5px; 
-}
-
-.button{
-  border: 1px solid #2f2a3f;
-  position: absolute; 
-  z-index: 1;
-  border-radius: 5px;  
-  right: 03%;
-}
-
-
-</style>
 <template>
   <div>
     <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
@@ -116,30 +91,42 @@ const abrirDoc = (idItem) => {
         </div>
       </template>
 
-    <Navbar :contrato="contrato">
+      <Navbar :contrato="contrato">
         <template #body>
-            <div class="lista-itens">
-              <div v-for="item in itens" :key="item.id" class="item">
-                {{ item.id_item }} - {{ item.descricao }}
-                <button class="button" @click="abrirDoc(item.id_item)">Abrir</button>
+          <div class="d-flex flex-column gap-3">
+            <div v-for="item in itens" :key="item.id" class="border p-3 rounded">
+              <div>{{ item.nome_topico }}</div>
 
-                <input @input="form.arquivo = $event.target.files[0]" id="inputfile" type="file" class="form-control">
-                <div class="row g-2">
-                  <div class="col">
-                    <input v-model="form.descricao" type="text" class="form-control">
-                    <InputError :message="form.errors.descricao" />
+              <div class="container overflow-hidden">
+                <div class="row gx-5">
+                  <div class="col-sm-9">
+                    <div class="input-group">
+                        <input @input="form.arquivo = $event.target.files[0]"
+                            type="file" class="form-control" id="inputGroupFile04"
+                            aria-describedby="inputGroupFileAddon04"
+                            aria-label="Upload">
+                        <button @click="selecionarItem(item.id_item);
+                            salvarAnexo()" class="btn btn-success"
+                            type="button"
+                            id="inputGroupFileAddon04">Salvar
+                        </button>
+                    </div>
                   </div>
-                  <div class="col-auto">
-                    <button class="button" @click="selecionarItem(item.id_item); salvarAnexo()">Salvar</button>
+                  <div class="col d-flex flex-column gap-2">
+                    <button class="btn btn-primary" @click="abrirDoc(item.id_item)">Abrir</button>
                   </div>
                 </div>
               </div>
             </div>
-            
+          </div>
         </template>
-    </Navbar>
-    <DocxModal ref="docxModal" href="javascript:void(0)"/>
+      </Navbar>
+      <DocxModal ref="docxModal" href="javascript:void(0)" :itemId="selectedItemId"/>
     </AuthenticatedLayout>
   </div>
-  
 </template>
+
+<style>
+
+</style>
+

@@ -10,9 +10,9 @@ class CreateRelatorioUploadTable extends Migration
     {
         Schema::create('relatorio_upload', function (Blueprint $table) {
             $table->id();
-            $table->integer('contract_id');
+            $table->foreignId('contrato_id')->constrained('contratos')->cascadeOnDelete();
             $table->string('nome');
-            $table->unsignedBigInteger('item_id');
+            $table->integer('item_id')->unique();
             $table->string('caminho');
             $table->string('tipo');
             $table->string('descricao');
