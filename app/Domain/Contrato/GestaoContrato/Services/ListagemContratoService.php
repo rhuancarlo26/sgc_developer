@@ -36,6 +36,7 @@ class ListagemContratoService extends BaseModelService
         if ($contrato) {
             $contrato->load([
                 'tipo',
+                'aditivos',
                 'trechos',
                 'trechos.uf',
                 'trechos.rodovia'

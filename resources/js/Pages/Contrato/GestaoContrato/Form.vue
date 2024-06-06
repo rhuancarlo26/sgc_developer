@@ -7,27 +7,15 @@ import { IconDoorExit } from "@tabler/icons-vue";
 import { nextTick } from "vue";
 import TabDadosGerais from "./TabDadosGerais.vue";
 import TabTrechos from "./TabTrechos.vue";
+import TabAditivos from "./TabAditivos.vue";
 
 const props = defineProps({
-    ufs: {
-        type: Array
-    },
-    rodovias: {
-        type: Array
-    },
-    tipos: {
-        type: Array
-    },
-    tipo: {
-        type: Object
-    },
-    situacoes: {
-        type: Array
-    },
-    contrato: {
-        type: Object,
-        default: null
-    }
+    ufs: { type: Array },
+    rodovias: { type: Array },
+    tipos: { type: Array },
+    tipo: { type: Object },
+    situacoes: { type: Array },
+    contrato: { type: Object }
 });
 
 const mapContainer = ref();
@@ -64,16 +52,26 @@ const abaTrecho = () => {
                                 role="tab">Dados
                                 Básicos</a>
                         </li>
-                        <li v-if="contrato.id" class="nav-item" role="presentation">
-                            <a @click="abaTrecho()" href="#tabs-profile-1" class="nav-link" data-bs-toggle="tab"
-                                aria-selected="false" role="tab" tabindex="-1">Trechos</a>
-                        </li>
+                        <template v-if="contrato.id">
+                            <li class="nav-item" role="presentation">
+                                <a href="#tabs-aditivo" class="nav-link" data-bs-toggle="tab" aria-selected="false"
+                                    role="tab" tabindex="-1">Aditivos</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a @click="abaTrecho()" href="#tabs-profile-1" class="nav-link" data-bs-toggle="tab"
+                                    aria-selected="false" role="tab" tabindex="-1">Trechos</a>
+                            </li>
+                        </template>
                     </ul>
                 </div>
                 <div class="card-body">
                     <div class="tab-content">
                         <div class="tab-pane active show" id="tabs-home-1" role="tabpanel">
                             <TabDadosGerais :contrato="contrato" :tipo="tipo" />
+                        </div>
+
+                        <div class="tab-pane" id="tabs-aditivo" role="tabpanel">
+                            <TabAditivos :tipo="tipo" :contrato="contrato" />
                         </div>
 
                         <div class="tab-pane" id="tabs-profile-1" role="tabpanel">
