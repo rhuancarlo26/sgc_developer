@@ -51,13 +51,6 @@ watch(
   }
 );
 
-watch(
-  () => props.contrato.trechos,
-  () => {
-    renderTrecho();
-  }
-);
-
 const abaTrecho = () => {
   nextTick(() => {
     mapContainer.value.renderMapa();
