@@ -70,17 +70,17 @@ defineExpose({ abrirModal });
             <span class="col"><strong>Número do Processo (DNIT): </strong>{{ contrato.processo_sei
               }}</span>
             <span class="col"><strong>Início da Vigência: </strong>{{
-    dateTimeFormat(contrato.data_inicio_vigencia ?? null, {
-      dateStyle: 'short',
-      timeStyle: 'short'
-    })
-  }}</span>
+              dateTimeFormat(contrato.data_inicio_vigencia ?? null, {
+                dateStyle: 'short',
+                timeStyle: 'short'
+              })
+            }}</span>
             <span class="col"><strong>Término da Vigência: </strong>{{
-      dateTimeFormat(contrato.data_termino_vigencia ?? null, {
-        dateStyle: 'short',
-        timeStyle: 'short'
-      })
-    }}</span>
+              dateTimeFormat(contrato.data_termino_vigencia ?? null, {
+                dateStyle: 'short',
+                timeStyle: 'short'
+              })
+            }}</span>
             <span class="col"><strong>Situação: </strong>{{ contrato.situacao }}</span>
           </div>
         </div>
@@ -118,6 +118,34 @@ defineExpose({ abrirModal });
             <span class="col"><strong>Preço Aditivos: </strong>{{ contrato.total_aditivo }}</span>
             <span class="col"><strong>Preço Reajuste: </strong>{{ contrato.total_reajuste }}</span>
             <span class="col"><strong>Total: </strong>{{ contrato.total }}</span>
+          </div>
+        </div>
+
+        <div class="card-header">
+          <h3 class="my-0">Aditivos do contrato</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive mb-4">
+            <table class="table card-table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>Aditivo</th>
+                  <th>Valor</th>
+                  <th>Publicação</th>
+                  <th>Inicio da vigencia</th>
+                  <th>Numero SEI</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="aditivo in contrato.aditivos" :key="aditivo.id" class="cursor-pointer">
+                  <td>{{ aditivo.aditivo }}</td>
+                  <td>{{ aditivo.valor }}</td>
+                  <td>{{ aditivo.publicacao }}</td>
+                  <td>{{ dateTimeFormat(aditivo.data_inicio_vigencia) }}</td>
+                  <td>{{ aditivo.numero_sei }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
