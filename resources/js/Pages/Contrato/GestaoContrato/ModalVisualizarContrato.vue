@@ -52,136 +52,178 @@ defineExpose({ abrirModal });
 <template>
   <Modal ref="modalDetalhes" :title="'N° do Contrato: ' + contrato.numero_contrato" modal-dialog-class="modal-xl">
     <template #body>
-      <div class="card">
-        <div class="card-header">
-          <h3 class="my-0">Dados Básicos do Contrato</h3>
-        </div>
-        <div class="card-body">
-          <div class="row mb-4">
-            <span class="col"><strong>Empresa: </strong>{{ contrato.contratada }}</span>
-            <span class="col"><strong>CNPJ: </strong>{{ contrato.cnpj }}</span>
-            <span class="col"><strong>Número do Contrato: </strong>{{ contrato.numero_contrato
-              }}</span>
-          </div>
-          <div class="row mb-4">
-            <span class="col"><strong>Objeto do Contrato: </strong>{{ contrato.objeto }}</span>
-          </div>
-          <div class="row mb-4">
-            <span class="col"><strong>Número do Processo (DNIT): </strong>{{ contrato.processo_sei
-              }}</span>
-            <span class="col"><strong>Início da Vigência: </strong>{{
-              dateTimeFormat(contrato.data_inicio_vigencia ?? null, {
-                dateStyle: 'short',
-                timeStyle: 'short'
-              })
-            }}</span>
-            <span class="col"><strong>Término da Vigência: </strong>{{
-              dateTimeFormat(contrato.data_termino_vigencia ?? null, {
-                dateStyle: 'short',
-                timeStyle: 'short'
-              })
-            }}</span>
-            <span class="col"><strong>Situação: </strong>{{ contrato.situacao }}</span>
-          </div>
-        </div>
 
-        <div class="card-header">
-          <h3 class="my-0">Licitação</h3>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <span class="col"><strong>Edital: </strong>{{ contrato.edital }}</span>
-            <span class="col"><strong>Tipo de Licitação: </strong>{{ contrato.tipo_licitacao
-              }}</span>
-            <span class="col"><strong>Modalidade: </strong>{{ contrato.modalidade }}</span>
+      <div class="accordion" id="accordion-example">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="heading-1">
+            <button class="accordion-button " type="button" data-bs-toggle="collapse"
+              data-bs-target="#collapseDadosGerais" aria-expanded="false">
+              Dados básicos do contrato
+            </button>
+          </h2>
+          <div id="collapseDadosGerais" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
+            <div class="accordion-body pt-0">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row mb-4">
+                    <span class="col"><strong>Empresa: </strong>{{ contrato.contratada }}</span>
+                    <span class="col"><strong>CNPJ: </strong>{{ contrato.cnpj }}</span>
+                    <span class="col"><strong>Número do Contrato: </strong>{{ contrato.numero_contrato
+                      }}</span>
+                  </div>
+                  <div class="row mb-4">
+                    <span class="col"><strong>Objeto do Contrato: </strong>{{ contrato.objeto }}</span>
+                  </div>
+                  <div class="row mb-4">
+                    <span class="col"><strong>Número do Processo (DNIT): </strong>{{ contrato.processo_sei
+                      }}</span>
+                    <span class="col"><strong>Início da Vigência: </strong>{{
+                      dateTimeFormat(contrato.data_inicio_vigencia ?? null, {
+                        dateStyle: 'short',
+                        timeStyle: 'short'
+                      })
+                    }}</span>
+                    <span class="col"><strong>Término da Vigência: </strong>{{
+                      dateTimeFormat(contrato.data_termino_vigencia ?? null, {
+                        dateStyle: 'short',
+                        timeStyle: 'short'
+                      })
+                    }}</span>
+                    <span class="col"><strong>Situação: </strong>{{ contrato.situacao }}</span>
+                  </div>
+                </div>
+
+                <div class="card-header">
+                  <h3 class="my-0">Licitação</h3>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <span class="col"><strong>Edital: </strong>{{ contrato.edital }}</span>
+                    <span class="col"><strong>Tipo de Licitação: </strong>{{ contrato.tipo_licitacao
+                      }}</span>
+                    <span class="col"><strong>Modalidade: </strong>{{ contrato.modalidade }}</span>
+                  </div>
+                </div>
+
+                <div class="card-header">
+                  <h3 class="my-0">Fiscalização</h3>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <span class="col"><strong>Unidade Gestora: </strong>{{ contrato.unidade_gestora }}</span>
+                    <span class="col"><strong>Fiscal do Contrato: </strong>{{ contrato.fiscal_contrato
+                      }}</span>
+                  </div>
+                </div>
+
+                <div class="card-header">
+                  <h3 class="my-0">Valores</h3>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <span class="col"><strong>SNV: </strong>{{ contrato.snv }}</span>
+                    <span class="col"><strong>Preço Inicial: </strong>{{ contrato.preco_inicial }}</span>
+                    <span class="col"><strong>Preço Aditivos: </strong>{{ contrato.total_aditivo }}</span>
+                    <span class="col"><strong>Preço Reajuste: </strong>{{ contrato.total_reajuste }}</span>
+                    <span class="col"><strong>Total: </strong>{{ contrato.total }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="card-header">
-          <h3 class="my-0">Fiscalização</h3>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <span class="col"><strong>Unidade Gestora: </strong>{{ contrato.unidade_gestora }}</span>
-            <span class="col"><strong>Fiscal do Contrato: </strong>{{ contrato.fiscal_contrato
-              }}</span>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="heading-2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              data-bs-target="#collapseAditivos" aria-expanded="false">
+              Aditivos do contrato
+            </button>
+          </h2>
+          <div id="collapseAditivos" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
+            <div class="accordion-body pt-0">
+              <div class="card">
+                <div class="card-body">
+                  <div class="table-responsive mb-4">
+                    <table class="table card-table table-bordered table-hover">
+                      <thead>
+                        <tr>
+                          <th>Aditivo</th>
+                          <th>Valor</th>
+                          <th>Publicação</th>
+                          <th>Inicio da vigencia</th>
+                          <th>Numero SEI</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="aditivo in contrato.aditivos" :key="aditivo.id" class="cursor-pointer">
+                          <td>{{ aditivo.aditivo }}</td>
+                          <td>{{ aditivo.valor }}</td>
+                          <td>{{ aditivo.publicacao }}</td>
+                          <td>{{ dateTimeFormat(aditivo.data_inicio_vigencia) }}</td>
+                          <td>{{ aditivo.numero_sei }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="card-header">
-          <h3 class="my-0">Valores</h3>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <span class="col"><strong>SNV: </strong>{{ contrato.snv }}</span>
-            <span class="col"><strong>Preço Inicial: </strong>{{ contrato.preco_inicial }}</span>
-            <span class="col"><strong>Preço Aditivos: </strong>{{ contrato.total_aditivo }}</span>
-            <span class="col"><strong>Preço Reajuste: </strong>{{ contrato.total_reajuste }}</span>
-            <span class="col"><strong>Total: </strong>{{ contrato.total }}</span>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="heading-2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              data-bs-target="#collapseTrechos" aria-expanded="false">
+              Trechos do contrato
+            </button>
+          </h2>
+          <div id="collapseTrechos" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
+            <div class="accordion-body pt-0">
+              <div class="card">
+                <div class="card-body">
+                  <div class="table-responsive mb-4">
+                    <table class="table card-table table-bordered table-hover">
+                      <thead>
+                        <tr>
+                          <th>UF</th>
+                          <th>BR</th>
+                          <th>Km Inicial</th>
+                          <th>Km Final</th>
+                          <th>Tipo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="trecho in contrato.trechos" :key="trecho.id" class="cursor-pointer">
+                          <td>{{ trecho.uf?.uf }}</td>
+                          <td>{{ trecho.rodovia?.rodovia }}</td>
+                          <td>{{ trecho.km_inicial }}</td>
+                          <td>{{ trecho.km_final }}</td>
+                          <td>{{ trecho.trecho_tipo }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="card-header">
-          <h3 class="my-0">Aditivos do contrato</h3>
-        </div>
-        <div class="card-body">
-          <div class="table-responsive mb-4">
-            <table class="table card-table table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th>Aditivo</th>
-                  <th>Valor</th>
-                  <th>Publicação</th>
-                  <th>Inicio da vigencia</th>
-                  <th>Numero SEI</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="aditivo in contrato.aditivos" :key="aditivo.id" class="cursor-pointer">
-                  <td>{{ aditivo.aditivo }}</td>
-                  <td>{{ aditivo.valor }}</td>
-                  <td>{{ aditivo.publicacao }}</td>
-                  <td>{{ dateTimeFormat(aditivo.data_inicio_vigencia) }}</td>
-                  <td>{{ aditivo.numero_sei }}</td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="heading-2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              data-bs-target="#collapseMapa" aria-expanded="true">
+              Mapa do contrato
+            </button>
+          </h2>
+          <div id="collapseMapa" class="accordion-collapse collapse show" data-bs-parent="#accordion-example">
+            <div class="accordion-body pt-0">
+              <div class="card">
+                <div class="card-body">
+                  <Map ref="mapaVisualizarTrecho" height="300px" :manual-render="true" />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div class="card-header">
-          <h3 class="my-0">Trechos do Contrato</h3>
-        </div>
-        <div class="card-body">
-          <div class="table-responsive mb-4">
-            <table class="table card-table table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th>UF</th>
-                  <th>BR</th>
-                  <th>Km Inicial</th>
-                  <th>Km Final</th>
-                  <th>Tipo</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="trecho in contrato.trechos" :key="trecho.id" class="cursor-pointer">
-                  <td>{{ trecho.uf?.uf }}</td>
-                  <td>{{ trecho.rodovia?.rodovia }}</td>
-                  <td>{{ trecho.km_inicial }}</td>
-                  <td>{{ trecho.km_final }}</td>
-                  <td>{{ trecho.trecho_tipo }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card-header">
-          <h3 class="my-0">Mapa</h3>
-        </div>
-        <div class="card-body">
-          <Map ref="mapaVisualizarTrecho" height="300px" :manual-render="true" />
         </div>
       </div>
     </template>
