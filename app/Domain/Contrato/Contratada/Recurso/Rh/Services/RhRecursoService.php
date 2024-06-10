@@ -4,6 +4,7 @@ namespace App\Domain\Contrato\Contratada\Recurso\Rh\Services;
 
 use App\Models\RecursoRh;
 use App\Models\RecursoRhDocumento;
+use App\Models\RecursoRhDocumentoBaixa;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -15,6 +16,7 @@ class RhRecursoService extends BaseModelService
 
   protected string $modelClass = RecursoRh::class;
   protected string $modelClassDocumento = RecursoRhDocumento::class;
+  protected string $modelClassDocumentoBaixa = RecursoRhDocumentoBaixa::class;
 
   public function listagemRh($contrato, $searchParams)
   {
@@ -79,6 +81,30 @@ class RhRecursoService extends BaseModelService
         Storage::delete($value->caminho);
       }
       return ['type' => 'success', 'content' => 'Documentos excluídos com sucesso!'];
+    } catch (\Exception $th) {
+      return ['type' => 'error', 'content' => $th->getMessage()];
+    }
+  }
+
+  public function salvarDocumentoBaixaRh($request)
+  {
+    try {
+      foreach ($request['documentos_baixa'] as $key => $value) {
+        if ($value->isvalid()) {
+          $nome = $value->getClientOriginalName();
+          $tipo = $value->extension();
+          $caminho = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $nome);
+
+          $this->modelClassDocumentoBaixa::create([
+            'recurso_rh_id' => $request['recurso_rh_id'],
+            'nome' => $nome,
+            'tipo' => $tipo,
+            'caminho' => $caminho
+          ]);
+        }
+      }
+
+      return ['type' => 'success', 'content' => 'Documentos baixa cadastrados com sucesso!'];
     } catch (\Exception $th) {
       return ['type' => 'error', 'content' => $th->getMessage()];
     }
