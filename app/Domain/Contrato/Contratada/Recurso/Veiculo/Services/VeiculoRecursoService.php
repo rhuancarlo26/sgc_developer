@@ -5,6 +5,7 @@ namespace App\Domain\Contrato\Contratada\Recurso\Veiculo\Services;
 use App\Models\RecursoVeiculo;
 use App\Models\RecursoVeiculoCodigo;
 use App\Models\RecursoVeiculoDocumento;
+use App\Models\RecursoVeiculoQuilometragem;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -16,6 +17,7 @@ class VeiculoRecursoService extends BaseModelService
 
   protected string $modelClass = RecursoVeiculo::class;
   protected string $modelClassDocumento = RecursoVeiculoDocumento::class;
+  protected string $modelClassQuilometragem = RecursoVeiculoQuilometragem::class;
 
   public function listagemVeiculos($contrato, $searchParams)
   {
@@ -35,12 +37,30 @@ class VeiculoRecursoService extends BaseModelService
     ];
   }
 
-  public function salvarVeiculo($request)
+  public function salvarVeiculo(array $request): array
   {
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
     return [
       'veiculo' => $response['model'],
+      'request' => $response['request']
+    ];
+  }
+
+  public function updateVeiculo(array $request): array
+  {
+    $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+
+    return [
+      'request' => $response['request']
+    ];
+  }
+
+  public function updateQuilometragemVeiculo(array $request): array
+  {
+    $response = $this->dataManagement->update(entity: $this->modelClassQuilometragem, infos: $request, id: $request['id']);
+
+    return [
       'request' => $response['request']
     ];
   }
@@ -67,6 +87,15 @@ class VeiculoRecursoService extends BaseModelService
     } catch (\Exception $th) {
       return ['type' => 'error', 'content' => $th->getMessage()];
     }
+  }
+
+  public function salvarQuilometragemVeiculo($request)
+  {
+    $response = $this->dataManagement->create(entity: $this->modelClassQuilometragem, infos: $request);
+
+    return [
+      'request' => $response['request']
+    ];
   }
 
   public function destroyVeiculo($veiculo)
