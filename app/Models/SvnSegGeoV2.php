@@ -26,7 +26,6 @@ class SvnSegGeoV2 extends Model
      */
     public static function getGeoJson(
         string $UF_inicial,
-        string $UF_final = null,
         int    $rodovia,
         float  $km_inicial,
         float  $km_final,
@@ -42,9 +41,6 @@ class SvnSegGeoV2 extends Model
                 ['KmInicial', '>=', $km_inicial],
                 ['KmFinal', '<=', $km_final],
             ])
-            // ->when($UF_final, function ($q) use ($UF_final) {
-            //     $q->orWhere('UF', '=', strtoupper($UF_final));
-            // })
             ->orderBy('KmInicial')->cursor();
 
         $polyline = new Polyline();
