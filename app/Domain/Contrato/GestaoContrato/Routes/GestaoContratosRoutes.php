@@ -1,4 +1,8 @@
 <?php
+
+use App\Domain\Contrato\GestaoContrato\Aditivo\Controller\DestroyAditivoController;
+use App\Domain\Contrato\GestaoContrato\Aditivo\Controller\StoreAditivoController;
+use App\Domain\Contrato\GestaoContrato\Aditivo\Controller\UpdateAditivoController;
 use Illuminate\Support\Facades\Route;
 
 use App\Domain\Contrato\GestaoContrato\Controller\CreateContratoController;
@@ -25,4 +29,10 @@ Route::prefix('gestao')->group(function () {
     Route::post('/store_trecho',                    [StoreContratoTrechoController::class,   'storeTrecho'])->name('contratos.gestao.store_trecho');
     Route::patch('/atualizar_trecho/{trecho}',      [UpdateContratoTrechoController::class,  'updateTrecho'])->name('contratos.gestao.update_trecho');
     Route::delete('/delete_trecho/{tipo}/{trecho}', [DestroyContratoTrechoController::class, 'destroyTrecho'])->name('contratos.gestao.delete_trecho');
+
+    Route::prefix('aditivo')->group(function () {
+        Route::post('/store',                           [StoreAditivoController::class,         'index'])->name('contratos.gestao.aditivo.store');
+        Route::patch('/update',                         [UpdateAditivoController::class,        'index'])->name('contratos.gestao.aditivo.update');
+        Route::delete('/destroy/{tipo}/{aditivo}',      [DestroyAditivoController::class,       'index'])->name('contratos.gestao.aditivo.destroy');
+    });
 });
