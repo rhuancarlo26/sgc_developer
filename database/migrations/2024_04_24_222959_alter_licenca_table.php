@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('licenca', function (Blueprint $table) {
             $table->text('observacao')->nullable();
-            $table->dropColumn('obs_renovacao');
             $table->dropColumn('arquivo_licenca');
             $table->dropColumn('file_shape');
             $table->dropColumn('nome_file_shape');
@@ -29,7 +28,6 @@ return new class extends Migration
     {
         Schema::table('licenca', function (Blueprint $table) {
             $table->dropColumn('observacao');
-            $table->text('obs_renovacao');
             $table->string('arquivo_licenca');
             $table->string('file_shape');
             $table->string('nome_file_shape');
