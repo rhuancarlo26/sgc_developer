@@ -48,27 +48,23 @@ class RhRecursoService extends BaseModelService
     ];
   }
 
-  public function salvarDocumentoRh($request)
+  public function salvarDocumentoRh($request): array
   {
-    try {
-      foreach ($request['documentos'] as $key => $value) {
-        if ($value->isvalid()) {
-          $nome = $value->getClientOriginalName();
-          $tipo = $value->extension();
-          $caminho = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $nome);
+    foreach ($request['documentos'] as $key => $value) {
+      if ($value->isvalid()) {
+        $request['nome'] = $value->getClientOriginalName();
+        $request['tipo'] = $value->extension();
+        $request['caminho'] = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $request['nome']);
 
-          $this->modelClassDocumento::create([
-            'recurso_rh_id' => $request['recurso_rh_id'],
-            'nome' => $nome,
-            'tipo' => $tipo,
-            'caminho' => $caminho
-          ]);
-        }
+        unset($request['documentos_baixa']);
+
+        $response = $this->dataManagement->create(entity: $this->modelClassDocumento, infos: $request);
+
+        return [
+          'rh' => $response['model']['id'],
+          'request' => $response['request']
+        ];
       }
-
-      return ['type' => 'success', 'content' => 'Documentos cadastrados com sucesso!'];
-    } catch (\Exception $th) {
-      return ['type' => 'error', 'content' => $th->getMessage()];
     }
   }
 
@@ -86,27 +82,23 @@ class RhRecursoService extends BaseModelService
     }
   }
 
-  public function salvarDocumentoBaixaRh($request)
+  public function salvarDocumentoBaixaRh($request): array
   {
-    try {
-      foreach ($request['documentos_baixa'] as $key => $value) {
-        if ($value->isvalid()) {
-          $nome = $value->getClientOriginalName();
-          $tipo = $value->extension();
-          $caminho = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $nome);
+    foreach ($request['documentos_baixa'] as $key => $value) {
+      if ($value->isvalid()) {
+        $request['nome'] = $value->getClientOriginalName();
+        $request['tipo'] = $value->extension();
+        $request['caminho'] = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $request['nome']);
 
-          $this->modelClassDocumentoBaixa::create([
-            'recurso_rh_id' => $request['recurso_rh_id'],
-            'nome' => $nome,
-            'tipo' => $tipo,
-            'caminho' => $caminho
-          ]);
-        }
+        unset($request['documentos']);
+
+        $response = $this->dataManagement->create(entity: $this->modelClassDocumentoBaixa, infos: $request);
+
+        return [
+          'rh' => $response['model']['id'],
+          'request' => $response['request']
+        ];
       }
-
-      return ['type' => 'success', 'content' => 'Documentos baixa cadastrados com sucesso!'];
-    } catch (\Exception $th) {
-      return ['type' => 'error', 'content' => $th->getMessage()];
     }
   }
 }
