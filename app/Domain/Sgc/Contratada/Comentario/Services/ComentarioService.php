@@ -30,4 +30,15 @@ class ComentarioService extends BaseModelService
       'request' => $introducao['request']
     ];
   }
+
+  public function buscarTodos($filters)
+  {
+      $query = $this->modelClass::query();
+
+      if (!empty($filters)) {
+          // Exemplo: $query->where('campo', $filters['campo']);
+      }
+
+      return $query->get();
+  }
 }

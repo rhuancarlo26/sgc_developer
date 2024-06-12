@@ -8,6 +8,7 @@ use App\Domain\Sgc\Contratada\app\Controller\RecursoSgcController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StoreUploadRelatorioController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\VisualizarDocxController;;
 use App\Domain\Contrato\Contratada\DadosGerais\Introducao\Controller\StoreIntroducaoContratadaController;
+use App\Domain\Sgc\Contratada\Comentario\Controller\ListarComentario;
 use App\Domain\Sgc\Contratada\Comentario\Controller\StoreSgcComentarioController;
 
 Route::prefix('/contratada')->group(function () {

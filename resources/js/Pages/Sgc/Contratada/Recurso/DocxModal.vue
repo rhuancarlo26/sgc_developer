@@ -1,13 +1,14 @@
 <script setup>
+import { onMounted, ref } from "vue";
 import Modal from '@/Components/Modal.vue';
 import Comment from '@/Components/Comment.vue';
 import { IconMessageDots } from "@tabler/icons-vue";
 import { renderAsync } from 'docx-preview';
-import { ref } from "vue";
 
 const props = defineProps({
-    itemId: Number
-})
+    itemId: Number,
+    comentarios: Array
+});
 
 const modalDetalhes = ref(null);
 const wordDocument = ref(null);
@@ -25,6 +26,7 @@ const abrirModal = async (idItem) => {
 
     modalDetalhes.value.getBsModal().show();
     filePath = await fetchDocumentos(idItem);
+    loadComments(idItem)
 
     if (!filePath) {
         console.log('Documento não encontrado.');
@@ -45,7 +47,7 @@ const abrirModal = async (idItem) => {
     } catch (error) {
         console.error('Erro ao carregar o documento do Word:', error);
     }
-}
+};
 
 const fetchDocumentos = async (itemId) => {
     try {
@@ -73,31 +75,50 @@ const enableCounter = (event) => {
 };
 
 const increment = () => {
-
     if (!isCounting.value) return;
 
     counter.value += 1;
 
     if (counter.value > 1) {
         counter.value = 0;
-        isAddNote.value = true
+        isAddNote.value = true;
         isCounting.value = false;
     }
-}
+};
 
 const addNote = (event) => {
-
     if (isAddNote.value) {
         const rect = docModal.value.getBoundingClientRect();
         const newNote = {
-          title: 'Nova nota',
-          x: event.clientX - rect.left + docModal.value.scrollLeft,
-          y: event.clientY - rect.top + docModal.value.scrollTop
+            title: 'Nova nota',
+            comentario: '',
+            x: event.clientX - rect.left + docModal.value.scrollLeft,
+            y: event.clientY - rect.top + docModal.value.scrollTop,
+            isMinimized: false
         };
         notes.value.push(newNote);
         isAddNote.value = false;
     }
-}
+};
+
+const loadComments = (itemId) => {
+    notes.value = [];
+    props.comentarios.forEach((comentario) => {
+        if (comentario.item_id === itemId) {
+            const note = {
+                title: 'Comentário',
+                x: comentario.posicao_x,
+                y: comentario.posicao_y,
+                comentario: comentario.comentario,
+                comentario_id: comentario.comentario_id,
+                id: comentario.id,
+                itemId: comentario.item_id,
+                isMinimized: true
+            };
+            notes.value.push(note);
+        }
+    });
+};
 
 defineExpose({ abrirModal });
 
@@ -111,21 +132,22 @@ defineExpose({ abrirModal });
                     <div class="container mt-5">
                         <div class="d-flex justify-content-between">
                             <h3 class="my-0">RELATÓRIO DE COORDENAÇÃO</h3>
-                            <div >
+                            <div>
                                 <IconMessageDots
                                     class="position-fixed z-3"
                                     @click="enableCounter"
-                                    style="cursor: pointer;"/>
+                                    style="cursor: pointer;" />
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-body" ref="docModal" :key="modalKey"  @mousemove="addNote"/>
+                <div class="card-body" ref="docModal" :key="modalKey" @mousemove="addNote" />
                 <Comment v-for="(note, index) in notes"
-                    :key="index"
                     :note="note"
-                    :index = "index"
-                    :item-id="props.itemId"/>
+                    :index="index"
+                    :item-id="props.itemId"
+                    :comentarios="props.comentarios"
+                    />
             </div>
         </template>
     </Modal>

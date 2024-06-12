@@ -6,7 +6,8 @@ import { useForm } from '@inertiajs/vue3';
 const props = defineProps({
     note: Object,
     index: Number,
-    itemId: Number
+    itemId: Number,
+    comentarios: Object
 });
 
 
@@ -21,19 +22,18 @@ const form = useForm({
   perfil_id: 1,
   item_id: props.itemId,
   relatorio_num: 1,
+  posicao_x: props.note.x,
+  posicao_y: props.note.y
 });
 
 const enviarComentario = () => {
-    console.log(form)
-    form.post(route('sgc.contratada.store_comentario'), {
-      onSuccess: () => form.reset()
-    });
+    form.post(route('sgc.contratada.store_comentario'));
 }
-
 
 const toggleMinimize = () => {
     isMinimized.value = !isMinimized.value;
 };
+
 </script>
 
 <template>
@@ -48,8 +48,9 @@ const toggleMinimize = () => {
                 </div>
             </div>
             <div class="card-body">
-                <textarea v-model="form.comentario" class="form-control"></textarea>
-                <a href="#" class="btn btn-success mt-3" @click="enviarComentario">Salvar</a>
+                <textarea v-if="note.comentario" class="form-control" readonly>{{ note.comentario }}</textarea>
+                <textarea v-else v-model="form.comentario" class="form-control"></textarea>
+                <a v-if="note.title === 'Nova nota'" href="#" class="btn btn-success mt-3" @click="enviarComentario">Salvar</a>
             </div>
         </div>
         <div v-else @click="toggleMinimize" class="minimized-note btn btn-sm btn-warning">

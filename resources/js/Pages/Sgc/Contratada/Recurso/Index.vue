@@ -1,6 +1,6 @@
 <script setup>
 import { Head } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, defineProps } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../Navbar.vue";
@@ -10,7 +10,7 @@ import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
     contrato: Object,
-    routeName: { type: String },
+    comentarios: Object
 })
 
 const form = useForm({
@@ -121,7 +121,7 @@ const abrirDoc = (idItem) => {
           </div>
         </template>
       </Navbar>
-      <DocxModal ref="docxModal" href="javascript:void(0)" :itemId="selectedItemId"/>
+      <DocxModal ref="docxModal" href="javascript:void(0)" :itemId="selectedItemId" :comentarios="props.comentarios"/>
     </AuthenticatedLayout>
   </div>
 </template>

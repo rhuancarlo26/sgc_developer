@@ -8,17 +8,15 @@ use Illuminate\Http\Request;
 
 class StoreSgcComentarioController extends Controller
 {
-  public function __construct(private readonly ComentarioService $comentarioService)
-  {
-  }
+    public function __construct(private readonly ComentarioService $comentarioService)
+    {
+    }
 
-  public function index(Request $request)
-  {
-      $response = $this->comentarioService->salvarComentario($request->all());
+    public function index(Request $request)
+    {
+        $response = $this->comentarioService->salvarComentario($request->all());
 
-      return response()->json([
-          'message' => $response['request'],
-          'data' => $response
-      ]);
-  }
+        return redirect()->back()->with('success', $response);
+    }
 }
+

@@ -28,7 +28,6 @@ const enviarObservacao = () => {
 const excluirObservacao = (observacao_id) => {
   router.delete(route('contratos.contratada.destroy_historico', observacao_id));
 }
-
 </script>
 
 <template>

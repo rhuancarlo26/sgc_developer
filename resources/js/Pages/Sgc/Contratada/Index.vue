@@ -1,23 +1,12 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
-import Table from '@/Components/Table.vue';
+import { Head } from "@inertiajs/vue3";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import Modal from "@/Components/Modal.vue";
-import { ref } from "vue";
-import Map from "@/Components/Map.vue";
-import { onMounted } from "vue";
-import axios from "axios";
-import { computed } from "vue";
-import { dateTimeFormat } from "@/Utils/DateTimeUtils";
-import { IconSettings } from "@tabler/icons-vue";
-import { IconDots } from "@tabler/icons-vue";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import Navbar from "./Navbar.vue";
 
 const props = defineProps({
-  contrato: Object
+  contrato: Object,
+  comentarios: Object
 })
 
 </script>
@@ -41,13 +30,13 @@ const props = defineProps({
     <Navbar :contrato="contrato">
 
       <template #body>
-        
+
         <div class="card card-body space-y-3" style="width: 600px; height: 400px" >
           <div class="d-flex">
             <div class="col">
 
               TESTE
-              
+
             </div>
           </div>
         </div>
