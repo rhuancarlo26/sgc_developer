@@ -14,14 +14,9 @@ class DestroyRhRecursoController extends Controller
 
   public function index(RecursoRh $rh)
   {
-    try {
-      $response = $this->rhRecursoService->destroyRh($rh);
+    $response = $this->rhRecursoService->destroyRh($rh);
 
-      $this->rhRecursoService->delete($rh);
+    return back()->with('message', $response);
 
-      return to_route('contratos.contratada.recurso.rh.index', ['contrato' => $rh->contrato_id])->with('message', $response);
-    } catch (\Exception $e) {
-      return to_route('contratos.contratada.recurso.rh.index', ['contrato' => $rh->contrato_id])->with('message', $response);
-    }
   }
 }
