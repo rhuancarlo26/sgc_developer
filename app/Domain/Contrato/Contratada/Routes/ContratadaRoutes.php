@@ -142,5 +142,9 @@ Route::prefix('/contratada')->group(function () {
             Route::post('store',                            [StoreLicencaCondicionanteServicoController::class, 'index'])->name('contratos.contratada.servicos.condicionante.store');
             Route::post('delete',                           [DeleteLicencaCondicionanteServicoController::class, 'index'])->name('contratos.contratada.servicos.condicionante.delete');
         });
+
+        Route::prefix('servico')->group(function () {
+            require __DIR__ . '/../../../Servico/PMQA/app/Routes/PMQARoutes.php';
+        });
     });
 });
