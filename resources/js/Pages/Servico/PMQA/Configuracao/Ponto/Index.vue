@@ -57,7 +57,10 @@ const abrirModalVisualizar = (item) => {
           <template #action>
             <a class="btn btn-info me-1" target="_blank"
               :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.download_modelo')">Modelo</a>
-            <NavButton @click="abrirModalImportar()" type-button="success" title="Importar" />
+            <NavButton @click="abrirModalImportar()"
+              route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.importar"
+              :param="{ contrato: props.contrato.id, servico: props.servico.id }" type-button="success"
+              title="Importar" />
           </template>
         </ModelSearchFormAllColumns>
 
