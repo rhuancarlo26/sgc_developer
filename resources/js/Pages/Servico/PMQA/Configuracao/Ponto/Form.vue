@@ -126,7 +126,10 @@ const alterarPonto = () => {
               <NavLink class="btn btn-secondary me-1" title="Voltar" :icon="IconDoorExit"
                 route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.index"
                 :param="{ contrato: contrato.id, servico: servico.id }" />
-              <NavButton @click="alterarPonto()" type-button="success" :icon="IconDeviceFloppy" title="Alterar" />
+              <NavButton @click="alterarPonto()"
+                route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.update"
+                :param="{ contrato: props.contrato.id, servico: props.servico.id }" type-button="success"
+                :icon="IconDeviceFloppy" title="Alterar" />
             </div>
           </div>
         </form>
