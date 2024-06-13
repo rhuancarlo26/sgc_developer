@@ -1,10 +1,14 @@
 <template>
-    <form @submit.prevent="search()" class="d-flex justify-content-start">
+    <form @submit.prevent="search()" class="row justify-content-between align-items-center">
         <div class="col-lg-4 input-icon mb-4">
-            <input ref="inputSearch" v-model="q.value" @input="delayedSearch" placeholder="..." type="text" class="form-control" :disabled="q.processing">
+            <input ref="inputSearch" v-model="q.value" @input="delayedSearch" placeholder="..." type="text"
+                class="form-control" :disabled="q.processing">
             <span class="input-icon-addon">
                 <IconSearch class="me-4" />
             </span>
+        </div>
+        <div class="col-lg-4 mb-2 text-end">
+            <slot name="action" />
         </div>
     </form>
 </template>
@@ -16,7 +20,7 @@ import { useForm } from "@inertiajs/vue3";
 import { onMounted, ref, onUpdated } from "vue";
 
 const props = defineProps({
-    columns: []
+    columns: { type: Array }
 });
 
 let q = useForm({ columns: '', value: null });
