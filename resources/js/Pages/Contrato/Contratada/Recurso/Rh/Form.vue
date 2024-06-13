@@ -60,7 +60,7 @@ const salvarDocumentoRh = () => {
 }
 
 const destroyDocumentoRh = (documento_id) => {
-  router.delete(route('contratos.contratada.recurso.rh.destroy', { contrato: props.contrato.id, documento: documento_id }))
+  router.delete(route('contratos.contratada.recurso.rh.destroy', { contrato: props.contrato.id, model_documento: documento_id }))
 }
 
 const salvarDocumentoBaixa = () => {
@@ -76,7 +76,7 @@ const salvarDocumentoBaixa = () => {
 const destroyDocumentoBaixaRh = (documento_baixa_id) => {
   router.delete(route('contratos.contratada.recurso.rh.destroy_documento_baixa', {
     contrato: props.contrato.id,
-    documento_baixa: documento_baixa_id
+    model_documento: documento_baixa_id
   }))
 }
 
