@@ -2,14 +2,14 @@
 
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import Table from '@/Components/Table.vue';
 import Navbar from "../../Navbar.vue";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
-import { ref } from "vue";
 import { IconDeviceFloppy, IconDoorExit, IconDots } from "@tabler/icons-vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
 
 const props = defineProps({
   contrato: Object,
@@ -52,6 +52,10 @@ const salvarRh = () => {
 const salvarDocumentoRh = () => {
   form_documento.recurso_rh_id = props.rh.id;
 
+  if (!form_documento.documentos) {
+    return toast.info('Selecione um arquivo para enviar');
+  }
+
   form_documento.post(route('contratos.contratada.recurso.rh.store_documento'))
 }
 
@@ -61,6 +65,10 @@ const destroyDocumentoRh = (documento_id) => {
 
 const salvarDocumentoBaixa = () => {
   form_documento.recurso_rh_id = props.rh.id;
+
+  if (!form_documento.documentos_baixa) {
+    return toast.info('Selecione um arquivo para enviar');
+  }
 
   form_documento.post(route('contratos.contratada.recurso.rh.store_documento_baixa'))
 }
@@ -181,8 +189,7 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                 </div>
                 <div class="col form-group">
                   <InputLabel value="Status" for="status" />
-                  <select name="status" id="status" class="form-control form-select"
-                    v-model="form.status">
+                  <select name="status" id="status" class="form-control form-select" v-model="form.status">
                     <option value="1">Ativo</option>
                     <option value="0">Inativo</option>
                   </select>
