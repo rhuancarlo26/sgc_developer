@@ -21,36 +21,6 @@ use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Controller\StoreLic
 use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Observacao\Controller\DeleteLicenciamentoObservacaoController;
 use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Observacao\Controller\StoreLicenciamentoObservacaoController;
 use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Observacao\Controller\UpdateLicenciamentoObservacaoController;
-use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\CreateEquipamentoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\DestroyDocumentoEquipamentoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\DestroyEquipamentoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\ListagemEquipamentoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\StoreDocumentoEquipamentoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\StoreEquipamentoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\UpdateEquipamentoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller\VisualizarDocumentoEquipamentoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\CreateRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyDocumentoBaixaRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyDocumentoRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\ListagemRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\StoreDocumentoBaixaRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\StoreDocumentoRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\StoreRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\UpdateRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\VisualizarDocumentoBaixaRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\VisualizarDocumentoRhRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\CreateVeiculoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\DestroyDocumentoVeiculoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\DestroyQuilometragemVeiculoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\DestroyVeiculoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\ListagemVeiculoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\StoreDocumentoVeiculoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\StoreQuilometragemVeiculoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\StoreVeiculoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\UpdateQuilometragemVeiculoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\UpdateVeiculoRecursoController;
-use App\Domain\Contrato\Contratada\Recurso\Veiculo\Controller\VisualizarDocumentoVeiculoRecursoController;
 use App\Domain\Servico\app\Controller\CreateServicosContratadaController;
 use App\Domain\Servico\app\Controller\DeleteServicoContratadaController;
 use App\Domain\Servico\app\Controller\IndexServicosContratadaController;
@@ -86,38 +56,15 @@ Route::prefix('/contratada')->group(function () {
     Route::patch('/update_empreendimento_trecho',                  [UpdateContratadaEmpreendimentoTrechoController::class,  'index'])->name('contratos.contratada.update_empreendimento_trecho');
     Route::delete('/destroy_empreendimento_trecho/{trecho}',       [DestroyContratadaEmpreendimentoTrechoController::class, 'index'])->name('contratos.contratada.destroy_empreendimento_trecho');
 
-    Route::get('{contrato}/recurso/equipamento',                           [ListagemEquipamentoRecursoController::class,            'index'])->name('contratos.contratada.recurso.equipamento.index');
-    Route::get('{contrato}/recurso/equipamento/create/{equipamento?}',     [CreateEquipamentoRecursoController::class,              'index'])->name('contratos.contratada.recurso.equipamento.create');
-    Route::post('recurso/equipamento/store',                               [StoreEquipamentoRecursoController::class,               'index'])->name('contratos.contratada.recurso.equipamento.store');
-    Route::patch('recurso/equipamento/update',                             [UpdateEquipamentoRecursoController::class,               'index'])->name('contratos.contratada.recurso.equipamento.update');
-    Route::post('recurso/equipamento/store_documento',                     [StoreDocumentoEquipamentoRecursoController::class,      'index'])->name('contratos.contratada.recurso.equipamento.store_documento');
-    Route::get('recurso/equipamento/visualizar/{documento}',               [VisualizarDocumentoEquipamentoRecursoController::class, 'index'])->name('contratos.contratada.recurso.equipamento.visualizar');
-    Route::delete('{contrato}/recurso/equipamento/destroy/{documento}',    [DestroyDocumentoEquipamentoRecursoController::class,    'index'])->name('contratos.contratada.recurso.equipamento.destroy');
-    Route::delete('recurso/equipamento/destroy_equipamento/{equipamento}', [DestroyEquipamentoRecursoController::class,             'index'])->name('contratos.contratada.recurso.equipamento.destroy_equipamento');
+    
+    //Equipamento
+    require __DIR__ . '/../Recurso/Equipamento/Router/EquipamentoRouter.php';
 
-    Route::get('{contrato}/recurso/veiculo',                                [ListagemVeiculoRecursoController::class,               'index'])->name('contratos.contratada.recurso.veiculo.index');
-    Route::get('{contrato}/recurso/veiculo/create/{veiculo?}',              [CreateVeiculoRecursoController::class,                 'index'])->name('contratos.contratada.recurso.veiculo.create');
-    Route::post('recurso/veiculo/store',                                    [StoreVeiculoRecursoController::class,                  'index'])->name('contratos.contratada.recurso.veiculo.store');
-    Route::patch('recurso/veiculo/update',                                  [UpdateVeiculoRecursoController::class,                 'index'])->name('contratos.contratada.recurso.veiculo.update');
-    Route::post('recurso/veiculo/store_documento',                          [StoreDocumentoVeiculoRecursoController::class,         'index'])->name('contratos.contratada.recurso.veiculo.store_documento');
-    Route::post('recurso/veiculo/store_quilometragem',                      [StoreQuilometragemVeiculoRecursoController::class,     'index'])->name('contratos.contratada.recurso.veiculo.store_quilometragem');
-    Route::patch('recurso/veiculo/update_quilometragem',                    [UpdateQuilometragemVeiculoRecursoController::class,    'index'])->name('contratos.contratada.recurso.veiculo.update_quilometragem');
-    Route::get('recurso/veiculo/visualizar/{documento}',                    [VisualizarDocumentoVeiculoRecursoController::class,    'index'])->name('contratos.contratada.recurso.veiculo.visualizar');
-    Route::delete('{contrato}/recurso/veiculo/destroy/{documento}',         [DestroyDocumentoVeiculoRecursoController::class,       'index'])->name('contratos.contratada.recurso.veiculo.destroy');
-    Route::delete('recurso/veiculo/destroy_veiculo/{veiculo}',              [DestroyVeiculoRecursoController::class,                'index'])->name('contratos.contratada.recurso.veiculo.destroy_veiculo');
-    Route::delete('recurso/veiculo/destroy_quilometragem/{quilometragem}',  [DestroyQuilometragemVeiculoRecursoController::class,   'index'])->name('contratos.contratada.recurso.veiculo.destroy_quilometragem');
+    //Veiculo
+    require __DIR__ . '/../Recurso/Veiculo/Router/VeiculoRouter.php';
 
-    Route::get('{contrato}/recurso/rh',                                              [ListagemRhRecursoController::class,                 'index'])->name('contratos.contratada.recurso.rh.index');
-    Route::get('{contrato}/recurso/rh/create/{rh?}',                                 [CreateRhRecursoController::class,                   'index'])->name('contratos.contratada.recurso.rh.create');
-    Route::post('recurso/rh/store',                                                  [StoreRhRecursoController::class,                    'index'])->name('contratos.contratada.recurso.rh.store');
-    Route::patch('recurso/rh/update/{rh}',                                           [UpdateRhRecursoController::class,                   'index'])->name('contratos.contratada.recurso.rh.update');
-    Route::post('recurso/rh/store_documento',                                        [StoreDocumentoRhRecursoController::class,           'index'])->name('contratos.contratada.recurso.rh.store_documento');
-    Route::post('recurso/rh/store_documento_baixa',                                  [StoreDocumentoBaixaRhRecursoController::class,      'index'])->name('contratos.contratada.recurso.rh.store_documento_baixa');
-    Route::get('recurso/rh/visualizar/{documento}',                                  [VisualizarDocumentoRhRecursoController::class,      'index'])->name('contratos.contratada.recurso.rh.visualizar');
-    Route::get('recurso/rh/visualizar_documento_baixa/{documento_baixa}',            [VisualizarDocumentoBaixaRhRecursoController::class, 'index'])->name('contratos.contratada.recurso.rh.visualizar_documento_baixa');
-    Route::delete('{contrato}/recurso/rh/destroy/{model_documento}',                 [DestroyDocumentoRhRecursoController::class,         'index'])->name('contratos.contratada.recurso.rh.destroy');
-    Route::delete('{contrato}/recurso/rh/destroy_documento_baixa/{model_documento}', [DestroyDocumentoBaixaRhRecursoController::class,    'index'])->name('contratos.contratada.recurso.rh.destroy_documento_baixa');
-    Route::delete('recurso/rh/destroy_rh/{rh}',                                      [DestroyRhRecursoController::class,                  'index'])->name('contratos.contratada.recurso.rh.destroy_rh');
+    //RH
+    require __DIR__ . '/../Recurso/Rh/Router/RhRouter.php';
 
     Route::prefix('/')->group(function () {
         Route::get('{contrato}/servicos',                   [IndexServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.index');
