@@ -42,7 +42,8 @@ const props = defineProps({
                       title="Veículos" />
                   </NavDropdown>
 
-                  <NavLink route-name="contratos.contratada.servicos.index" :param="contrato.id" title="Serviços"
+                  <NavLink route-name="contratos.contratada.servicos.index" :param="contrato.id"
+                    active-on-route-prefix="contratos.contratada.servicos*" title="Serviços"
                     :icon="IconLayoutDashboard" />
 
                   <NavLink route-name="contratos.contratada.dados_gerais.index" :param="contrato.id" title="Cronograma"
