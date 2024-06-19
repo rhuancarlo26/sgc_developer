@@ -115,8 +115,8 @@ Route::prefix('/contratada')->group(function () {
     Route::post('recurso/rh/store_documento_baixa',                                  [StoreDocumentoBaixaRhRecursoController::class,      'index'])->name('contratos.contratada.recurso.rh.store_documento_baixa');
     Route::get('recurso/rh/visualizar/{documento}',                                  [VisualizarDocumentoRhRecursoController::class,      'index'])->name('contratos.contratada.recurso.rh.visualizar');
     Route::get('recurso/rh/visualizar_documento_baixa/{documento_baixa}',            [VisualizarDocumentoBaixaRhRecursoController::class, 'index'])->name('contratos.contratada.recurso.rh.visualizar_documento_baixa');
-    Route::delete('{contrato}/recurso/rh/destroy/{documento}',                       [DestroyDocumentoRhRecursoController::class,         'index'])->name('contratos.contratada.recurso.rh.destroy');
-    Route::delete('{contrato}/recurso/rh/destroy_documento_baixa/{documento_baixa}', [DestroyDocumentoBaixaRhRecursoController::class,    'index'])->name('contratos.contratada.recurso.rh.destroy_documento_baixa');
+    Route::delete('{contrato}/recurso/rh/destroy/{model_documento}',                 [DestroyDocumentoRhRecursoController::class,         'index'])->name('contratos.contratada.recurso.rh.destroy');
+    Route::delete('{contrato}/recurso/rh/destroy_documento_baixa/{model_documento}', [DestroyDocumentoBaixaRhRecursoController::class,    'index'])->name('contratos.contratada.recurso.rh.destroy_documento_baixa');
     Route::delete('recurso/rh/destroy_rh/{rh}',                                      [DestroyRhRecursoController::class,                  'index'])->name('contratos.contratada.recurso.rh.destroy_rh');
 
     Route::prefix('/')->group(function () {

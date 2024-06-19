@@ -6,7 +6,6 @@ use App\Domain\Contrato\Contratada\Recurso\Rh\Services\RhRecursoService;
 use App\Models\Contrato;
 use App\Models\RecursoRhDocumentoBaixa;
 use App\Shared\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
 
 class DestroyDocumentoBaixaRhRecursoController extends Controller
 {
@@ -14,16 +13,13 @@ class DestroyDocumentoBaixaRhRecursoController extends Controller
   {
   }
 
-  public function index(Contrato $contrato, RecursoRhDocumentoBaixa $documento_baixa)
+  public function index(Contrato $contrato, RecursoRhDocumentoBaixa $model_documento)
   {
-    try {
-      Storage::delete($documento_baixa['caminho']);
+    $response = $this->rhRecursoService->destroyDocumento($model_documento);
 
-      $this->rhRecursoService->delete($documento_baixa);
-
-      return to_route('contratos.contratada.recurso.rh.create', ['contrato' => $contrato->id, 'rh' => $documento_baixa->recurso_rh_id])->with('message', ['type' => 'success', 'content' => 'Documento baixa excluido com sucesso!']);
-    } catch (\Exception $e) {
-      return to_route('contratos.contratada.recurso.rh.create', ['contrato' => $contrato->id, 'rh' => $documento_baixa->recurso_rh_id])->with('message', ['type' => 'error', 'content' => $e->getMessage()]);
-    }
+    return back()->withInput([
+      'contrato' => $contrato->id,
+      'rh' => $model_documento->recurso_rh_id
+    ])->with('message', $response);
   }
 }
