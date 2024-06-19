@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('nome');
             $table->string('caminho');
             $table->string('tipo');
+            $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnDelete();
             $table->timestamps();
         });
     }

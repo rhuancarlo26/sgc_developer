@@ -3,7 +3,7 @@ import { Link } from "@inertiajs/vue3";
 
 defineProps({
     routeName: { type: String },
-    param: { type: Number },
+    param: { type: [Number, Object] },
     title: { type: String },
     icon: { type: Function },
     activeOnRoutePrefix: { type: String }
@@ -13,9 +13,7 @@ defineProps({
 <template>
     <li class="nav-item" :class="{ active: route().current(activeOnRoutePrefix ?? routeName) }" v-if="can(routeName)">
         <Link class="nav-link" :href="route(routeName, param)">
-        <span class="nav-link-icon d-md-none d-lg-inline-block">
-            <component :is="icon" />
-        </span>
+        <component v-if="icon" :is="icon" class="me-1" />
         <span class="nav-link-title">{{ title }}</span>
         </Link>
     </li>

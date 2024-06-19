@@ -1,13 +1,11 @@
 <?php
 
-namespace app\Domain\Contrato\Contratada\Recurso\Equipamento\Controller;
+namespace App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller;
 
-use App\Domain\Contrato\Contratada\Introducao\Services\IntroducaoService;
 use App\Domain\Contrato\Contratada\Recurso\Equipamento\Services\EquipamentoRecursoService;
 use App\Models\Contrato;
 use App\Models\RecursoEquipamento;
 use App\Shared\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CreateEquipamentoRecursoController extends Controller

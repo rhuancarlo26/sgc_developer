@@ -28,11 +28,11 @@ function updateRecordsState(records) {
             <table class="table card-table table-bordered" :class="tableClass">
                 <thead>
                     <tr>
-                        <th v-for="column in columns" :key="column">{{ column }}</th>
+                        <th v-for="column in columns" :key="column" class="text-center">{{ column }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <slot v-if="records.data.length" v-for="(record, i) in records.data" name="body" :key="i"
+                    <slot v-if="records?.data?.length" v-for="(record, i) in records.data" name="body" :key="i"
                         :item="record" />
 
                     <tr v-else>
@@ -43,7 +43,7 @@ function updateRecordsState(records) {
                 </tbody>
             </table>
         </div>
-        <div class="card-footer" v-if="records.data.length">
+        <div class="card-footer" v-if="records?.data?.length">
             <Pagination :records="records" @pageChange="updateRecordsState" :inertiaPagination="inertiaPagination"
                 :axiosPagination="axiosPagination" :only="only" :excelRoute="excelRoute" />
 

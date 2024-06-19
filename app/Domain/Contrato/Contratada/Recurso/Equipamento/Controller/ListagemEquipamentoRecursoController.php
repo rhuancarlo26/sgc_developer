@@ -1,8 +1,7 @@
 <?php
 
-namespace app\Domain\Contrato\Contratada\Recurso\Equipamento\Controller;
+namespace App\Domain\Contrato\Contratada\Recurso\Equipamento\Controller;
 
-use App\Domain\Contrato\Contratada\Introducao\Services\IntroducaoService;
 use App\Domain\Contrato\Contratada\Recurso\Equipamento\Services\EquipamentoRecursoService;
 use App\Models\Contrato;
 use App\Shared\Http\Controllers\Controller;

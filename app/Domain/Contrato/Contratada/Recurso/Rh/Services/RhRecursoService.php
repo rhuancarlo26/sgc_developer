@@ -4,6 +4,7 @@ namespace App\Domain\Contrato\Contratada\Recurso\Rh\Services;
 
 use App\Models\RecursoRh;
 use App\Models\RecursoRhDocumento;
+use App\Models\RecursoRhDocumentoBaixa;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -15,6 +16,7 @@ class RhRecursoService extends BaseModelService
 
   protected string $modelClass = RecursoRh::class;
   protected string $modelClassDocumento = RecursoRhDocumento::class;
+  protected string $modelClassDocumentoBaixa = RecursoRhDocumentoBaixa::class;
 
   public function listagemRh($contrato, $searchParams)
   {
@@ -27,7 +29,7 @@ class RhRecursoService extends BaseModelService
     ];
   }
 
-  public function salvarRh($request)
+  public function salvarRh($request): array
   {
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
@@ -37,7 +39,7 @@ class RhRecursoService extends BaseModelService
     ];
   }
 
-  public function updateRh($request)
+  public function updateRh($request): array
   {
     $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
 
@@ -46,31 +48,27 @@ class RhRecursoService extends BaseModelService
     ];
   }
 
-  public function salvarDocumentoRh($request)
+  public function salvarDocumentoRh($request): array
   {
-    try {
-      foreach ($request['documentos'] as $key => $value) {
-        if ($value->isvalid()) {
-          $nome = $value->getClientOriginalName();
-          $tipo = $value->extension();
-          $caminho = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $nome);
+    foreach ($request['documentos'] as $key => $value) {
+      if ($value->isvalid()) {
+        $request['nome'] = $value->getClientOriginalName();
+        $request['tipo'] = $value->extension();
+        $request['caminho'] = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $request['nome']);
 
-          $this->modelClassDocumento::create([
-            'recurso_rh_id' => $request['recurso_rh_id'],
-            'nome' => $nome,
-            'tipo' => $tipo,
-            'caminho' => $caminho
-          ]);
-        }
+        unset($request['documentos_baixa']);
+
+        $response = $this->dataManagement->create(entity: $this->modelClassDocumento, infos: $request);
+
+        return [
+          'rh' => $response['model']['id'],
+          'request' => $response['request']
+        ];
       }
-
-      return ['type' => 'success', 'content' => 'Documentos cadastrados com sucesso!'];
-    } catch (\Exception $th) {
-      return ['type' => 'error', 'content' => $th->getMessage()];
     }
   }
 
-  public function destroyRh($rh)
+  public function destroyRh($rh): array
   {
     try {
       $documentos = $this->modelClassDocumento::Where('recurso_rh_id', $rh->id)->get();
@@ -78,7 +76,49 @@ class RhRecursoService extends BaseModelService
       foreach ($documentos as $value) {
         Storage::delete($value->caminho);
       }
-      return ['type' => 'success', 'content' => 'Documentos excluídos com sucesso!'];
+
+      $this->delete($rh);
+
+      return [
+        'type' => 'success',
+        'content' => "{$rh->nome} excluído com sucesso!",
+      ];
+    } catch (\Exception $th) {
+      return ['type' => 'error', 'content' => $th->getMessage()];
+    }
+  }
+
+  public function salvarDocumentoBaixaRh($request): array
+  {
+    foreach ($request['documentos_baixa'] as $key => $value) {
+      if ($value->isvalid()) {
+        $request['nome'] = $value->getClientOriginalName();
+        $request['tipo'] = $value->extension();
+        $request['caminho'] = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $request['nome']);
+
+        unset($request['documentos']);
+
+        $response = $this->dataManagement->create(entity: $this->modelClassDocumentoBaixa, infos: $request);
+
+        return [
+          'rh' => $response['model']['id'],
+          'request' => $response['request']
+        ];
+      }
+    }
+  }
+
+  public function destroyDocumento($model_documento): array
+  {
+    try {
+      Storage::delete($model_documento->caminho);
+
+      $this->delete($model_documento);
+
+      return [
+        'type' => 'success',
+        'content' => "{$model_documento->nome} excluído com sucesso!",
+      ];
     } catch (\Exception $th) {
       return ['type' => 'error', 'content' => $th->getMessage()];
     }

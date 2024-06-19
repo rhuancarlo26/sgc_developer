@@ -18,7 +18,7 @@ class Licenca extends Model
 
     public function tipo(): BelongsTo
     {
-        return $this->belongsTo(LicencaTipo::class, 'tipo_id', 'id');
+        return $this->belongsTo(LicencaTipo::class, 'tipo_id');
     }
 
     public function condicionantes(): HasMany
@@ -26,9 +26,19 @@ class Licenca extends Model
         return $this->hasMany(LicencaCondicionante::class, 'licenca_id');
     }
 
+    public function segmentos(): HasMany
+    {
+        return $this->hasMany(LicencaSegmento::class, 'licenca_id');
+    }
+
     public function documento(): HasOne
     {
         return $this->hasOne(LicencaDocumento::class, 'licenca_id');
+    }
+
+    public function shapefile(): HasOne
+    {
+        return $this->hasOne(LicencaShapefile::class, 'licenca_id');
     }
 
     public function requerimentos(): HasMany

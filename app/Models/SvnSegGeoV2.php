@@ -25,21 +25,23 @@ class SvnSegGeoV2 extends Model
      * @return string String geoJSON
      */
     public static function getGeoJson(
-        string $UF,
+        string $UF_inicial,
         int    $rodovia,
         float  $km_inicial,
         float  $km_final,
         string $tipo_trecho = 'B',
-        bool   $simplificar = true
+        bool   $simplificar = true,
     ): string {
 
-        $segmentos = self::select(['Lat', 'Lng'])->where([
-            ['UF', '=', strtoupper($UF)],
-            ['BR', '=', $rodovia],
-            ['TipoTrecho', strtoupper($tipo_trecho)],
-            ['KmInicial', '>=', $km_inicial],
-            ['KmFinal', '<=', $km_final],
-        ])->orderBy('KmInicial')->cursor();
+        $segmentos = self::select(['Lat', 'Lng'])
+            ->where([
+                ['UF', '=', strtoupper($UF_inicial)],
+                ['BR', '=', $rodovia],
+                ['TipoTrecho', strtoupper($tipo_trecho)],
+                ['KmInicial', '>=', $km_inicial],
+                ['KmFinal', '<=', $km_final],
+            ])
+            ->orderBy('KmInicial')->cursor();
 
         $polyline = new Polyline();
 

@@ -9,13 +9,15 @@ class StoreLicencaSegmentoRequest extends FormRequest
   public function rules(): array
   {
     return [
-      // 'licenca_id'   => 'required',
-      // 'rodovia_id'   => 'required',
-      // 'uf_incial_id' => 'required',
-      // 'uf_final_id'  => 'required',
-      // 'km_inicial'   => 'required',
-      // 'km_final'     => 'required',
-      // 'extensao'     => 'required',
+      'licenca_id'  => 'required',
+      'rodovia'     => 'required',
+      'uf_inicial'  => 'required',
+      'uf_final'    => 'required',
+      'km_inicial'  => 'required',
+      'km_final'    => 'required',
+      'extensao'    => 'required',
+      'trecho_tipo' => 'nullable',
+      'coordenada'  => 'nullable',
     ];
   }
 

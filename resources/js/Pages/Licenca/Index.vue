@@ -1,4 +1,5 @@
 <template>
+
     <Head title="Gestão de Licenças"/>
 
     <AuthenticatedLayout>
@@ -7,20 +8,16 @@
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[{ route: '#', label: 'Gestão de Licenças' }]"/>
                 <div class="container-buttons">
-                    <Link class="btn btn-info me-2" :href="route('licenca.create')">
-                        Cadastrar Licenças
-                    </Link>
+                    <NavLink route-name="licenca.create" title="Cadastrar licenças" class="btn btn-info me-2"/>
                     <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
                             data-bs-toggle="dropdown" aria-expanded="false">
                         <IconSettings/>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" :href="route('licenca.arquivo', 1)">
-                            Licenças arquivadas
-                        </a>
-                        <a class="dropdown-item" :href="route('licenca.index')">
-                            Licenças
-                        </a>
+                        <NavLink route-name="licenca.arquivo" :param="1" title="Licenças arquivadas"
+                                 class="dropdown-item"/>
+                        <NavLink route-name="licenca.index" title="Licenças ativas"
+                                 class="dropdown-item"/>
                         <a class="dropdown-item" @click="abrirMapaGeral()">
                             Mapa das licenças
                         </a>
@@ -32,15 +29,15 @@
         <div class="card card-body space-y-3">
 
             <!-- Pesquisa-->
-            <ModelSearchForm :search-columns="{
-                'numero_contrato': 'N° do Contrato',
-                'cnpj': 'CNPJ',
-                'contratada': 'Contratada',
-                'processo_sei': 'Processo SEI',
-                'situacao': 'Situação',
-                'trechos.uf.uf': 'UF',
-                'trechos.rodovia.rodovia': 'Rodovia'
-            }"/>
+            <ModelSearchForm :columns="[
+                'tipo.nome',
+                'numero_licenca',
+                'empreendimento',
+                'data_emissao',
+                'status',
+                'vencimento',
+                'processo_dnit'
+            ]"/>
 
             <!-- Listagem-->
             <Table
@@ -48,13 +45,13 @@
                 :records="licencas" table-class="table-hover">
                 <template #body="{ item }">
                     <tr>
-                        <td class="w-8">
+                        <td class="w-8 text-center" >
                             <IconCar v-if="item.modal == 1"/>
                             <IconShip v-if="item.modal == 2"/>
                             <IconTrain v-if="item.modal == 3"/>
                         </td>
                         <td>
-                            {{ item.tipo.sigla }} - {{ item.tipo.nome }}
+                            {{ item.tipo?.sigla }} - {{ item.tipo?.nome }}
                         </td>
                         <td>
                             {{ item.numero_licenca }}
@@ -65,28 +62,30 @@
                         <td>
                             {{ item.emissor }}
                         </td>
-                        <td>
+                        <td class="text-center">
                             {{ dateTimeFormat(item.data_emissao) }}
                         </td>
-                        <td>
+                        <td class="text-center">
                             <a href="javascript:void(0)">
-                                <span v-if="item.requerimentos.length" class="badge text-bg-primary">
+                                <span v-if="item.requerimentos.length" class="badge bg-primary-lt">
                                     Em Análise
                                 </span>
-                                <span v-else-if="dtAlerta(item.vencimento) <= 0" class="badge text-bg-danger">
+                                <span v-else-if="dtAlerta(item.vencimento) <= 0" class="badge bg-danger-lt">
                                     Vencida
                                 </span>
-                                <span v-else-if="item.vencimento !== '' && item.vencimento !== null" class="badge text-bg-success">
+                                <span v-else-if="!item.vencimento !== '' && item.vencimento !== null"
+                                      class="badge bg-green-lt">
                                     Vigente
                                 </span>
                             </a>
                         </td>
-                        <td>
+                        <td class="text-center">
                             <a href="javascript:void(0)">
-                                <span v-if="dtAlerta(item.vencimento) <= 0" class="badge text-bg-danger">
+                                <span v-if="dtAlerta(item.vencimento) <= 0" class="badge bg-danger-lt">
                                     {{ dateTimeFormat(item.vencimento) }}
                                 </span>
-                                <span v-else-if="item.vencimento !== '' && item.vencimento !== null" class="badge text-bg-success">
+                                <span v-else-if="item.vencimento !== '' && item.vencimento !== null"
+                                      class="badge bg-green-lt">
                                     {{ dateTimeFormat(item.vencimento) }}
                                 </span>
                             </a>
@@ -94,39 +93,22 @@
                         <td>
                             {{ item.processo_dnit }}
                         </td>
-                        <td @click.stop>
+                        <td class="text-center">
                             <span class="dropdown">
                                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
                                         data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
                                     <IconDots/>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end" style="">
-                                    <a class="dropdown-item" :href="route('licenca.create', item.id)">
-                                        Editar
-                                    </a>
-                                    <a @click="abrirModalVisualizar(item)" class="dropdown-item"
-                                       href="javascript:void(0)">
-                                        Visualizar
-                                    </a>
-                                    <a v-if="item.documento?.id" class="dropdown-item" target="_blank"
-                                       :href="route('licenca.documento.visualizar', item.documento.id)">
+                                    <NavLink route-name="licenca.create" :param="item.id" title="Editar" class="dropdown-item"/>
+                                    <NavLinkVoid title="Visualizar" @click="abrirModalVisualizar(item)"/>
+                                    <a v-if="item.documento?.id" class="dropdown-item" target="_blank" :href="route('licenca.documento.visualizar', item.documento.id)">
                                         Visualizar PDF
                                     </a>
-                                    <a class="dropdown-item" :href="route('licenca.condicionante.index', item.id)">
-                                        Condicionante
-                                    </a>
-                                    <a @click="abrirModalRequerimento(licenca)" class="dropdown-item"
-                                       href="javascript:void(0)">
-                                        Adicionar requerimento
-                                    </a>
-                                    <a v-if="!item.arquivado" @click="gerenciarArquivo(item, index, true)"
-                                       class="dropdown-item" href="javascript:void(0)">
-                                        Arquivar licenca
-                                    </a>
-                                    <a v-else @click="gerenciarArquivo(item, index, false)" class="dropdown-item"
-                                       href="javascript:void(0)">
-                                        Desarquivar
-                                    </a>
+                                    <NavLink route-name="licenca.condicionante.index" :param="item.id" title="Condicionante" class="dropdown-item"/>
+                                    <NavLinkVoid route-name="licenca.requerimento.index" title="Requerimento" @click="abrirModalRequerimento(item)"/>
+                                    <NavLinkVoid v-if="!item.arquivado" title="Arquivar licença" @click="gerenciarArquivo(item, index, true)"/>
+                                    <NavLinkVoid v-else title="Desarquivar" @click="gerenciarArquivo(item, index, false)" class="dropdown-item"/>
                                 </div>
                             </span>
                         </td>
@@ -143,16 +125,18 @@
 
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import {Head, Link, router} from "@inertiajs/vue3";
+import {Head, router} from "@inertiajs/vue3";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Table from "@/Components/Table.vue";
 import {ref} from "vue";
 import {IconCar, IconDots, IconSettings, IconShip, IconTrain} from "@tabler/icons-vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
+import ModelSearchForm from "@/Components/ModelSearchFormAllColumns.vue";
 import ModalMapaGeral from "@/Pages/Licenca/ModalMapaGeral.vue";
 import ModalVisualizar from "@/Pages/Licenca/ModalVisualizar.vue";
 import ModalRequerimento from "./Requerimento/ModalRequerimento.vue";
+import NavLink from "@/Components/NavLink.vue";
+import NavLinkVoid from "@/Components/NavLinkVoid.vue";
 
 const props = defineProps({
     licencas: Object

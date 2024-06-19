@@ -11,7 +11,6 @@ class StoreCondicionanteRequest extends FormRequest
     return [
       'licenca_id' => 'required',
       'numero_condicionante' => 'required',
-      'prazo' => 'required',
       'descricao' => 'required'
     ];
   }
