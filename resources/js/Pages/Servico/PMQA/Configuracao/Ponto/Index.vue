@@ -70,19 +70,19 @@ const abrirModalVisualizar = (item) => {
           :records="pontos" table-class="table-hover">
           <template #body="{ item }">
             <tr>
-              <td>{{ item.id }}</td>
+              <td class="text-center">{{ item.id }}</td>
               <td>{{ item.nomepontocoleta }}</td>
-              <td>{{ item.lat_x }}</td>
-              <td>{{ item.long_y }}</td>
+              <td class="text-center">{{ item.lat_x }}</td>
+              <td class="text-center">{{ item.long_y }}</td>
               <td>{{ item.classificacao }}</td>
-              <td>{{ item.classe }}</td>
+              <td class="text-center">{{ item.classe }}</td>
               <td>{{ item.tipoambiente }}</td>
-              <td>{{ item.uf }}</td>
+              <td class="text-center">{{ item.uf }}</td>
               <td>{{ item.municipio }}</td>
               <td>{{ item.baciahidrografica }}</td>
-              <td>{{ item.km_rodovia }}</td>
-              <td>{{ item.estaca }}</td>
-              <td>
+              <td class="text-center">{{ item.km_rodovia }}</td>
+              <td class="text-center">{{ item.estaca }}</td>
+              <td class="text-center">
                 <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon" :icon="IconEye" />
                 <NavLink class="btn btn-icon btn-primary me-1"
                   route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.create"
