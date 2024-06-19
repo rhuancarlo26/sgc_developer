@@ -67,9 +67,9 @@ const editarCondicionante = (item) => {
       <Table :columns="['Número', 'Descrição', 'Prazo', 'Ação']" :records="condicionantes" table-class="table-hover">
         <template #body="{ item }">
           <tr class="cursor-pointer">
-            <td>{{ item.numero_condicionante }}</td>
+            <td class="text-center">{{ item.numero_condicionante }}</td>
             <td>{{ item.descricao }}</td>
-            <td>
+            <td class="text-center">
               <span class="badge bg-warning text-white m-1" v-if="item.prazo">
                 {{ item.prazo }}
               </span>

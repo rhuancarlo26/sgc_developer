@@ -74,21 +74,18 @@ const deleteServico = (servico_id) => {
                                     ${item.condicionantes[0]?.descricao ?? ''}` }}
                                 </span>
                             </td>
-                            <td>
-                                <span v-if="item.servico_status_id === 1" class="btn btn-info">
+                            <td class="text-center">
+                                <span v-if="item.servico_status_id === 1" class="badge bg-azure-lt">
                                     {{ item.status?.nome }}
                                 </span>
-                                <span v-else-if="item.servico_status_id === 2" class="btn btn-warning">
+                                <span v-else-if="item.servico_status_id === 2" class="badge bg-red-lt">
                                     {{ item.status?.nome }}
                                 </span>
-                                <span v-else-if="item.servico_status_id === 3" class="btn btn-primary">
-                                    {{ item.status?.nome }}
-                                </span>
-                                <span v-else class="btn btn-danger">
+                                <span v-else-if="item.servico_status_id === 3" class="badge bg-blue-lt">
                                     {{ item.status?.nome }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="text-center">
                                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
                                     data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
                                     <IconDots />

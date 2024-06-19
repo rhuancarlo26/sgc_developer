@@ -45,7 +45,7 @@
                 :records="licencas" table-class="table-hover">
                 <template #body="{ item }">
                     <tr>
-                        <td class="w-8">
+                        <td class="w-8 text-center" >
                             <IconCar v-if="item.modal == 1"/>
                             <IconShip v-if="item.modal == 2"/>
                             <IconTrain v-if="item.modal == 3"/>
@@ -62,30 +62,30 @@
                         <td>
                             {{ item.emissor }}
                         </td>
-                        <td>
+                        <td class="text-center">
                             {{ dateTimeFormat(item.data_emissao) }}
                         </td>
-                        <td>
+                        <td class="text-center">
                             <a href="javascript:void(0)">
-                                <span v-if="item.requerimentos.length" class="badge text-bg-primary">
+                                <span v-if="item.requerimentos.length" class="badge bg-primary-lt">
                                     Em Análise
                                 </span>
-                                <span v-else-if="dtAlerta(item.vencimento) <= 0" class="badge text-bg-danger">
+                                <span v-else-if="dtAlerta(item.vencimento) <= 0" class="badge bg-danger-lt">
                                     Vencida
                                 </span>
                                 <span v-else-if="!item.vencimento !== '' && item.vencimento !== null"
-                                      class="badge text-bg-success">
+                                      class="badge bg-green-lt">
                                     Vigente
                                 </span>
                             </a>
                         </td>
-                        <td>
+                        <td class="text-center">
                             <a href="javascript:void(0)">
-                                <span v-if="dtAlerta(item.vencimento) <= 0" class="badge text-bg-danger">
+                                <span v-if="dtAlerta(item.vencimento) <= 0" class="badge bg-danger-lt">
                                     {{ dateTimeFormat(item.vencimento) }}
                                 </span>
                                 <span v-else-if="item.vencimento !== '' && item.vencimento !== null"
-                                      class="badge text-bg-success">
+                                      class="badge bg-green-lt">
                                     {{ dateTimeFormat(item.vencimento) }}
                                 </span>
                             </a>
@@ -93,7 +93,7 @@
                         <td>
                             {{ item.processo_dnit }}
                         </td>
-                        <td>
+                        <td class="text-center">
                             <span class="dropdown">
                                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
                                         data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
