@@ -66,13 +66,13 @@ const excluirRh = (rh_id) => {
               <td>{{ item.email }}</td>
               <td>{{ item.funcao }}</td>
               <td>{{ item.formacao }}</td>
-              <td>
+              <td class="text-center">
                 <span :class="item.status == 0 ? 'badge bg-red-lt' : 'badge bg-green-lt'"
                 :title="item.status == 0 ? 'Item inativo' : 'Item ativo'">
-                  {{ item.status == 0 ? 'Inativo' : 'Ativo'}} 
+                  {{ item.status == 0 ? 'Inativo' : 'Ativo'}}
                 </span>
               </td>
-              <td>
+              <td class="text-center">
                 <button type="button" class="btn btn-icon dropdown-toggle p-2" data-bs-boundary="viewport"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   <IconDots />
