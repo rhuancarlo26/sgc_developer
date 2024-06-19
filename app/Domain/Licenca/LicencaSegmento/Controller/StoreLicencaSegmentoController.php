@@ -5,24 +5,25 @@ namespace App\Domain\Licenca\LicencaSegmento\Controller;
 use App\Domain\Licenca\LicencaSegmento\Requests\StoreLicencaSegmentoRequest;
 use App\Domain\Licenca\LicencaSegmento\Services\LicencaSegmentoService;
 use App\Shared\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 
 class StoreLicencaSegmentoController extends Controller
 {
-    public function __construct(private readonly LicencaSegmentoService $listagemLicencaSegmento)
-    { }
+    public function __construct(
+        private readonly LicencaSegmentoService $listagemLicencaSegmento
+    ) {
+    }
 
-    public function index(StoreLicencaSegmentoRequest $request): \Illuminate\Http\RedirectResponse
+    public function index(StoreLicencaSegmentoRequest $request): RedirectResponse
     {
-        $parameters = $this->listagemLicencaSegmento->create(post: $request->all());
+        $post = [
+            ...$request->all(),
+            'uf_inicial_id' => $request->uf_inicial['id'],
+            'uf_final_id' => $request->uf_final['id'],
+        ];
 
-        return to_route(
-                route: 'licenca.create',
-                parameters: [
-                    'tipos'             => $parameters['licenca']['tipos'],
-                    'licenca'           => $parameters['licenca']['licenca'],
-                    'licencaSegmento'   => $parameters['licenca']['licencaSegmento'],
-                    'brs'               => $parameters['licenca']['brs'],
-                ])
-            ->with('message', $parameters['request']);
+        $parameters = $this->listagemLicencaSegmento->create(post: $post);
+
+        return to_route(route: 'licenca.create', parameters: ['licenca' => $request->licenca_id])->with('message', $parameters['request']);
     }
 }

@@ -1,7 +1,7 @@
 <script setup>
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
-import { useForm } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import { IconDots, IconDeviceFloppy } from '@tabler/icons-vue';
 
 const props = defineProps({
@@ -17,7 +17,16 @@ const form = useForm({
 });
 
 const salvarLicencaCondicionante = () => {
-  form.post(route('contratos.contratada.servicos.store_licenca_condicionante'));
+  form.post(route('contratos.contratada.servicos.condicionante.store'));
+}
+
+const excluirLicencaCondicionante = (condicionante_id, licenca_id) => {
+  router.post(route('contratos.contratada.servicos.condicionante.delete'), {
+    contrato_id: props.servico.contrato_id,
+    servico_id: props.servico.id,
+    licenca_id: licenca_id,
+    condicionante_id: condicionante_id
+  })
 }
 
 </script>
@@ -77,7 +86,10 @@ const salvarLicencaCondicionante = () => {
                   <IconDots />
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
-
+                  <a @click="excluirLicencaCondicionante(condicionante.id, condicionante.licenca?.id)"
+                    class="dropdown-item" href="javascript:void(0)">
+                    Excluir
+                  </a>
                 </div>
               </td>
             </tr>

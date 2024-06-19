@@ -2,11 +2,15 @@
     "name": "Ecossitema",
     "type": "project",
     "description": "Segunda versão do sistema Ecossistema para o DNIT.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.3.0",
     "require": {
         "php": "^8.1",
+        "gasparesganga/php-shapefile": "^3.4",
         "guzzlehttp/guzzle": "^7.2",
         "inertiajs/inertia-laravel": "^0.6.8",
         "laravel/framework": "^10.10",

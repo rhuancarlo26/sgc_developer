@@ -56,11 +56,14 @@ const excluirTrecho = (trecho) => {
 </script>
 
 <template>
-  <div class="row mb-4">
+  <div class="row mb-4 mt-4">
+    <div class="card-header mb-4">
+      <h3 class="my-0">Empreendimento</h3>
+    </div>
     <div class="col">
       <InputLabel value="UF" for="uf" />
       <v-select :options="ufs" label="uf" v-model="form_trecho.uf">
-        <template #no-options="{ }">
+        <template #no-options="{}">
           Nenhum registro encontrado.
         </template>
       </v-select>
@@ -69,7 +72,7 @@ const excluirTrecho = (trecho) => {
     <div class="col">
       <InputLabel value="Rodovia" for="rodovia" />
       <v-select :options="uf_rodovias" label="rodovia" v-model="form_trecho.rodovia">
-        <template #no-options="{ }">
+        <template #no-options="{}">
           Nenhum registro encontrado.
         </template>
       </v-select>

@@ -4,9 +4,13 @@ namespace App\Domain\Licenca\app\Services;
 
 use App\Models\Licenca;
 use App\Models\LicencaSegmento;
+use App\Models\LicencaTipo;
+use App\Models\Rodovia;
+use App\Models\Uf;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Support\Facades\Cache;
 
 class LicencaService extends BaseModelService
 {
@@ -14,43 +18,36 @@ class LicencaService extends BaseModelService
 
     protected string $modelClass = Licenca::class;
 
-    public function get(array $searchParams, bool $arquivado = false): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function get(array $searchParams, bool $arquivado = false)
     {
-        return $this->search(...$searchParams)
-                ->with(relations: ['tipo', 'requerimentos', 'documento'])
-                ->where('arquivado', $arquivado)
-                ->paginate(10)
-                ->appends($searchParams);
+        return $this->searchAllColumns(...$searchParams)
+            ->with(relations: ['tipo', 'requerimentos', 'documento'])
+            ->where('arquivado', $arquivado)
+            ->paginate(10)
+            ->appends($searchParams);
     }
 
-    public function create(array $post): array
+    public function getLicenca(int $id_licenca)
     {
-        $licencaTipoService = new LicencaTipoService();
+        return Licenca::where('id', $id_licenca)->first();
+    }
 
-        $licenca = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
-
+    public function create(): array
+    {
         return [
-            'licenca' => [
-                'tipos'   => $licencaTipoService->getLicencaTipo(),
-                'licenca' => $licenca['model']
-            ],
-            'request' => $licenca['request']
+            'tipos' => Cache::rememberForever('licenca_tipos', fn () => LicencaTipo::all()),
+            'ufs' => Cache::rememberForever('ufs', fn () => Uf::all()),
+            'rodovias' => Cache::rememberForever('rodovias', fn () => Rodovia::all()),
         ];
+    }
+
+    public function store(array $request): array
+    {
+        return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
     }
 
     public function update(array $post): array
     {
-        $licencaTipoService = new LicencaTipoService();
-
-        $licenca = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
-
-        return [
-            'licenca' => [
-                'tipos'   => $licencaTipoService->getLicencaTipo(),
-                'licenca' => $licenca['model']
-            ],
-            'request' => $licenca['request']
-        ];
+        return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
     }
-
 }

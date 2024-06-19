@@ -17,7 +17,7 @@ class ListagemContratoController extends Controller
 
     public function index(ContratoTipo $tipo, Request $request): Response
     {
-        $searchParams = $request->all('searchColumn', 'searchValue');
+        $searchParams = $request->all('columns', 'value');
 
         $contratos = $this->listagemContrato->ListagemContratos($tipo, $searchParams);
 

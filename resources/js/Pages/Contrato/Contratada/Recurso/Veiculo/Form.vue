@@ -10,49 +10,15 @@ import { ref } from "vue";
 import { IconDeviceFloppy, IconDoorExit, IconDots } from "@tabler/icons-vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
+import TabDadosGerais from "./TabDadosGerais.vue";
+import TabDocumentos from "./TabDocumentos.vue";
+import TabQuilometragem from "./TabQuilometragem.vue";
 
 const props = defineProps({
   contrato: Object,
   veiculo: Object,
   codigos: Array
-})
-
-const form = useForm({
-  id: null,
-  contrato_id: props.contrato.id,
-  veiculo_codigo_id: null,
-  codigo: null,
-  descricao: null,
-  observacao: null,
-  ...props.veiculo
 });
-
-const form_documento = useForm({
-  recurso_veiculo_id: props.veiculo.id,
-  contrato_id: props.contrato.id,
-  documentos: null
-})
-
-const salvarVaiculo = () => {
-  form.veiculo_codigo_id = form.codigo?.id;
-  form.descricao = form.codigo?.descricao;
-
-  if (form.id) {
-
-  } else {
-    form.post(route('contratos.contratada.recurso.veiculo.store'));
-  }
-}
-
-const salvarDocumentoVeiculo = () => {
-  form_documento.recurso_veiculo_id = props.veiculo.id;
-
-  form_documento.post(route('contratos.contratada.recurso.veiculo.store_documento'))
-}
-
-const destroyDocumentoVeiculo = (documento_id) => {
-  router.delete(route('contratos.contratada.recurso.veiculo.destroy', { contrato: props.contrato.id, documento: documento_id }))
-}
 
 </script>
 
@@ -65,10 +31,10 @@ const destroyDocumentoVeiculo = (documento_id) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-    { route: route('contratos.contratada.recurso.veiculo.index', contrato.id), label: `Veiculos` },
-    { route: '#', label: contrato.contratada }
-  ]
-    " />
+          { route: route('contratos.contratada.recurso.veiculo.index', contrato.id), label: `Veiculos` },
+          { route: '#', label: contrato.contratada }
+        ]
+          " />
         <Link class="btn btn-info" :href="route('contratos.contratada.recurso.veiculo.index', contrato.id)">
         <IconDoorExit class="me-2" />
         Voltar
@@ -79,88 +45,36 @@ const destroyDocumentoVeiculo = (documento_id) => {
     <Navbar :contrato="contrato">
 
       <template #body>
-        <form @submit.prevent="salvarVaiculo()">
-          <div class="row mb-4">
-            <div class="col">
-              <InputLabel value="Código" for="codigo" />
-              <v-select :options="codigos" id="codigo" name="codigo" label="codigo" v-model="form.codigo">
-                <template #no-options="{ }">
-                  Nenhum registro encontrado.
-                </template>
-              </v-select>
-              <InputError :message="form.errors.codigo" />
-            </div>
-            <div class="col">
-              <InputLabel value="Descrição" for="descricao" />
-              <p id="descricao" name="descricao">{{ form.codigo?.descricao }}</p>
-            </div>
-          </div>
-          <div class="row mb-4">
-            <div class="col">
-              <InputLabel value="Observação" for="observacao" />
-              <textarea id="observacao" name="observacao" v-model="form.observacao" class="form-control"
-                rows="5"></textarea>
-              <InputError :message="form.errors.observacao" />
-            </div>
-          </div>
-          <div class="mb-4 d-flex justify-content-end">
-            <button type="submit" class="btn btn-success" :disabled="form.processing">
-              <IconDeviceFloppy class="me-2" />
-              Salvar
-            </button>
-          </div>
-        </form>
-        <div v-if="veiculo.id">
-          <div class="row mb-4">
-            <div class="col">
-              <InputLabel value="Fotos do Veiculo" for="anexo" />
-              <div class="row g-2">
-                <div class="col">
-                  <input @input="form_documento.documentos = $event.target.files" type="file" id="anexo" name="anexo"
-                    class="form-control" multiple>
-                </div>
-                <div class="col-auto">
-                  <a @click="salvarDocumentoVeiculo()" href="javascript:void(0)" class="btn btn-success"
-                    aria-label="Button">
-                    Salvar
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="table-responsive">
-            <table class="table table-hover non-hover">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>Açao</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="documento in  veiculo.documentos " :key="documento.id">
-                  <td>{{ documento.nome }}</td>
-                  <td>
-                    <span class="dropdown">
-                      <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <IconDots />
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" target="_blank"
-                          :href="route('contratos.contratada.recurso.veiculo.visualizar', documento.id)">
-                          Visualizar
-                        </a>
-                        <a @click="destroyDocumentoVeiculo(documento.id)" class="dropdown-item"
-                          href="javascript:void(0)">
-                          Excluir
-                        </a>
-                      </div>
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a href="#dadosGerais" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab">Dados
+                gerais</a>
+            </li>
+            <template v-if="veiculo.id">
+              <li class="nav-item" role="presentation">
+                <a href="#quilometragem" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+                  tabindex="-1">Quilometragem</a>
+              </li>
+              <li class="nav-item" role="presentation">
+                <a href="#fotosVeiculo" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+                  tabindex="-1">Fotos do veiculo</a>
+              </li>
+            </template>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="tab-content">
+            <div class="tab-pane active show" id="dadosGerais" role="tabpanel">
+              <TabDadosGerais :contrato="contrato" :codigos="codigos" :veiculo="veiculo" />
+            </div>
+            <div class="tab-pane" id="quilometragem" role="tabpanel">
+              <TabQuilometragem :contrato="contrato" :codigos="codigos" :veiculo="veiculo" />
+            </div>
+            <div class="tab-pane" id="fotosVeiculo" role="tabpanel">
+              <TabDocumentos :contrato="contrato" :codigos="codigos" :veiculo="veiculo" />
+            </div>
           </div>
         </div>
       </template>

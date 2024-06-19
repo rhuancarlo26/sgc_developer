@@ -33,7 +33,10 @@ const excluirObservacao = (observacao_id) => {
 
 <template>
   <div class="mb-4">
-    <h4>Histórico</h4>
+    <!-- <h4>Histórico</h4> -->
+    <div class="card-header mb-4 mt-4">
+      <h3 class="my-0">Histórico</h3>
+    </div>
     <div class="form-group mb-4">
       <textarea v-model="form.observacao" class="form-control" rows="5"></textarea>
       <InputError :message="form.errors.observacao" />

@@ -20,7 +20,8 @@ class ListagemContratoService extends BaseModelService
     public function ListagemContratos($tipo, $searchParams)
     {
         return [
-            'contratos' => $this->search(...$searchParams)
+            'contratos' => $this->searchAllColumns(...$searchParams)
+                ->with(['aditivos'])
                 ->where('tipo_id', $tipo->id)
                 ->paginate()
                 ->appends($searchParams)
@@ -36,6 +37,7 @@ class ListagemContratoService extends BaseModelService
         if ($contrato) {
             $contrato->load([
                 'tipo',
+                'aditivos',
                 'trechos',
                 'trechos.uf',
                 'trechos.rodovia'

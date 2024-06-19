@@ -1,18 +1,12 @@
 <script setup>
-import InputLabel from "@/Components/InputLabel.vue";
 import ModalVisualizar from "@/Pages/Licenca/ModalVisualizar.vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { router, useForm } from "@inertiajs/vue3";
 import InputError from "@/Components/InputError.vue";
-import { IconCar, IconDots, IconShip, IconTrain } from "@tabler/icons-vue";
-import axios from "axios";
+import { IconCar, IconDots, IconPencil, IconShip, IconTrain, IconTrash } from "@tabler/icons-vue";
 import { ref } from "vue";
-import { onMounted } from "vue";
-import { useToast } from "vue-toastification";
 
 const refModalVisualizar = ref(null);
-
-const toast = useToast();
 
 const props = defineProps({
   contrato: Object,
@@ -31,7 +25,11 @@ const form_observacao = useForm({
 });
 
 const salvarLicenca = () => {
-  form.post(route('contratos.contratada.store_licenciamento'));
+  form.post(route('contratos.contratada.store_licenciamento'), {
+    onSuccess: () => {
+      form.reset();
+    }
+  });
 }
 
 const excluirLicenciamento = (licenca_id) => {
@@ -40,10 +38,18 @@ const excluirLicenciamento = (licenca_id) => {
 
 const salvarObservacao = () => {
   if (form_observacao.id) {
-    form_observacao.patch(route('contratos.contratada.update_licenciamento_observacao', form_observacao.id));
+    form_observacao.patch(route('contratos.contratada.update_licenciamento_observacao', form_observacao.id), {
+      onSuccess: () => {
+        limparObservacao();
+      }
+    });
 
   } else {
-    form_observacao.post(route('contratos.contratada.store_licenciamento_observacao'));
+    form_observacao.post(route('contratos.contratada.store_licenciamento_observacao'), {
+      onSuccess: () => {
+        limparObservacao();
+      }
+    });
   }
 }
 
@@ -78,12 +84,15 @@ const dtAlerta = (data) => {
 </script>
 
 <template>
-  <h4>Licenciamento</h4>
+  <div class="card-header mb-4 mt-4">
+    <h3 class="my-0">Licenciamento</h3>
+  </div>
+  <!-- <h4>Licenciamento</h4> -->
   <div class="mb-4">
     <div class="row g-2">
       <div class="col">
         <v-select :options="numero_licencas" label="numero_licenca" v-model="form.licenca">
-          <template #no-options="{ }">
+          <template #no-options="{}">
             Nenhum registro encontrado.
           </template>
         </v-select>
@@ -113,7 +122,7 @@ const dtAlerta = (data) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="licenca in  contrato.licenciamentos " :key="licenca.id">
+        <tr v-for="licenca in contrato.licenciamentos " :key="licenca.id">
           <td>
             <IconCar v-if="licenca.modal == 1" />
             <IconShip v-if="licenca.modal == 2" />
@@ -185,7 +194,7 @@ const dtAlerta = (data) => {
     </table>
   </div>
   <div class="mb-4">
-    <h4>Histórico</h4>
+    <h4>Observação</h4>
     <div class="form-group mb-4">
       <textarea v-model="form_observacao.observacao" class="form-control" rows="5"></textarea>
       <InputError :message="form_observacao.errors.observacao" />
@@ -207,21 +216,13 @@ const dtAlerta = (data) => {
       <tbody>
         <tr v-for="observacao in contrato.licenciamento_observacoes" :key="observacao.id">
           <td>{{ observacao.observacao }}</td>
-          <td @click.stop>
-            <span class="dropdown">
-              <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                <IconDots />
-              </button>
-              <div class="dropdown-menu dropdown-menu-end" style="">
-                <a @click="editarObservacao(observacao)" class="dropdown-item" href="javascript:void(0)">
-                  Editar
-                </a>
-                <a @click="excluirObservacao(observacao.id)" class="dropdown-item" href="javascript:void(0)">
-                  Excluir
-                </a>
-              </div>
-            </span>
+          <td>
+            <button @click="excluirObservacao(observacao.id)" type="button" class="btn btn-danger me-2">
+              <IconTrash />
+            </button>
+            <button @click="editarObservacao(observacao)" type="button" class="btn btn-primary">
+              <IconPencil />
+            </button>
           </td>
         </tr>
       </tbody>

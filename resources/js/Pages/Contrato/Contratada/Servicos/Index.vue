@@ -3,7 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Table from "@/Components/Table.vue";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import Navbar from "../Navbar.vue";
 import { IconDots } from "@tabler/icons-vue";
 import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
@@ -24,6 +24,10 @@ const abrirModalLicenca = (servico) => {
 
 const abrirModalServico = (servico) => {
     modalVisualizarServico.value.abrirModal(servico);
+}
+
+const deleteServico = (servico_id) => {
+    router.delete(route('contratos.contratada.servicos.delete', servico_id));
 }
 
 </script>
@@ -65,26 +69,23 @@ const abrirModalServico = (servico) => {
                             <td>{{ item.tipo?.nome }}</td>
                             <td>{{ item.especificacao }}</td>
                             <td>
-                                <span @click="abrirModalLicenca(item)" class="btn btn-default">
+                                <span @click="abrirModalLicenca(item)" v-if="item.condicionantes.length">
                                     {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''} -
                                     ${item.condicionantes[0]?.descricao ?? ''}` }}
                                 </span>
                             </td>
-                            <td>
-                                <span v-if="item.servico_status_id === 1" class="btn btn-info">
+                            <td class="text-center">
+                                <span v-if="item.servico_status_id === 1" class="badge bg-azure-lt">
                                     {{ item.status?.nome }}
                                 </span>
-                                <span v-else-if="item.servico_status_id === 2" class="btn btn-warning">
+                                <span v-else-if="item.servico_status_id === 2" class="badge bg-red-lt">
                                     {{ item.status?.nome }}
                                 </span>
-                                <span v-else-if="item.servico_status_id === 3" class="btn btn-primary">
-                                    {{ item.status?.nome }}
-                                </span>
-                                <span v-else class="btn btn-danger">
+                                <span v-else-if="item.servico_status_id === 3" class="badge bg-blue-lt">
                                     {{ item.status?.nome }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="text-center">
                                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
                                     data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
                                     <IconDots />
@@ -93,9 +94,16 @@ const abrirModalServico = (servico) => {
                                     <a @click="abrirModalServico(item)" class="dropdown-item" href="javascript:void(0)">
                                         Visualizar
                                     </a>
+                                    <a v-if="item.servico_tipo_id === 1" class="dropdown-item"
+                                        :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
+                                        Gerenciar
+                                    </a>
                                     <a class="dropdown-item"
                                         :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
                                         Editar
+                                    </a>
+                                    <a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)">
+                                        Excluir
                                     </a>
                                 </div>
                             </td>
