@@ -28,7 +28,7 @@ function updateRecordsState(records) {
             <table class="table card-table table-bordered" :class="tableClass">
                 <thead>
                     <tr>
-                        <th v-for="column in columns" :key="column">{{ column }}</th>
+                        <th v-for="column in columns" :key="column" class="text-center">{{ column }}</th>
                     </tr>
                 </thead>
                 <tbody>
