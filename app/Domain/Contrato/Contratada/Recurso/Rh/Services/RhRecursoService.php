@@ -29,7 +29,7 @@ class RhRecursoService extends BaseModelService
     ];
   }
 
-  public function salvarRh($request)
+  public function salvarRh($request): array
   {
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
@@ -39,7 +39,7 @@ class RhRecursoService extends BaseModelService
     ];
   }
 
-  public function updateRh($request)
+  public function updateRh($request): array
   {
     $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
 
@@ -68,7 +68,7 @@ class RhRecursoService extends BaseModelService
     }
   }
 
-  public function destroyRh($rh)
+  public function destroyRh($rh): array
   {
     try {
       $documentos = $this->modelClassDocumento::Where('recurso_rh_id', $rh->id)->get();
@@ -76,7 +76,13 @@ class RhRecursoService extends BaseModelService
       foreach ($documentos as $value) {
         Storage::delete($value->caminho);
       }
-      return ['type' => 'success', 'content' => 'Documentos excluídos com sucesso!'];
+
+      $this->delete($rh);
+
+      return [
+        'type' => 'success',
+        'content' => "{$rh->nome} excluído com sucesso!",
+      ];
     } catch (\Exception $th) {
       return ['type' => 'error', 'content' => $th->getMessage()];
     }
@@ -99,6 +105,22 @@ class RhRecursoService extends BaseModelService
           'request' => $response['request']
         ];
       }
+    }
+  }
+
+  public function destroyDocumento($model_documento): array
+  {
+    try {
+      Storage::delete($model_documento->caminho);
+
+      $this->delete($model_documento);
+
+      return [
+        'type' => 'success',
+        'content' => "{$model_documento->nome} excluído com sucesso!",
+      ];
+    } catch (\Exception $th) {
+      return ['type' => 'error', 'content' => $th->getMessage()];
     }
   }
 }

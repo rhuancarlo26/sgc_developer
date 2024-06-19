@@ -6,7 +6,6 @@ use App\Domain\Contrato\Contratada\Recurso\Rh\Services\RhRecursoService;
 use App\Models\Contrato;
 use App\Models\RecursoRhDocumento;
 use App\Shared\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
 
 class DestroyDocumentoRhRecursoController extends Controller
 {
@@ -14,16 +13,13 @@ class DestroyDocumentoRhRecursoController extends Controller
   {
   }
 
-  public function index(Contrato $contrato, RecursoRhDocumento $documento)
+  public function index(Contrato $contrato, RecursoRhDocumento $model_documento)
   {
-    try {
-      Storage::delete($documento['caminho']);
+    $response = $this->rhRecursoService->destroyDocumento($model_documento);
 
-      $this->rhRecursoService->delete($documento);
-
-      return to_route('contratos.contratada.recurso.rh.create', ['contrato' => $contrato->id, 'rh' => $documento->recurso_rh_id])->with('message', ['type' => 'success', 'content' => 'Documento excluido com sucesso!']);
-    } catch (\Exception $e) {
-      return to_route('contratos.contratada.recurso.rh.create', ['contrato' => $contrato->id, 'rh' => $documento->recurso_rh_id])->with('message', ['type' => 'error', 'content' => $e->getMessage()]);
-    }
+    return back()->withInput([
+      'contrato' => $contrato->id,
+      'rh' => $model_documento->recurso_rh_id
+    ])->with('message', $response);
   }
 }
