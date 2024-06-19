@@ -20,11 +20,16 @@ const modalParametros = ref({});
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
-  parametros: { type: Array }
+  parametros: { type: Array },
+  listas: { type: Object }
 });
 
 const abrirModalParametros = () => {
   modalParametros.value.abrirModal();
+}
+
+const editarLista = (item) => {
+  modalParametros.value.abrirModal(item);
 }
 
 </script>
@@ -54,12 +59,30 @@ const abrirModalParametros = () => {
         </ModelSearchFormAllColumns>
 
         <!-- Listagem-->
-        <Table :columns="['Nome', 'Parâmetros', 'Ação']" :records="[]" table-class="table-hover">
+        <Table :columns="['Nome', 'Parâmetros', 'Ação']" :records="listas" table-class="table-hover">
           <template #body="{ item }">
             <tr>
               <td>{{ item.nome }}</td>
-              <td>{{ item.parametros }}</td>
-              <td></td>
+              <td>
+                <p v-if="item.lista_parametros">
+                  <span v-for="parametro in item.lista_parametros.split(',')" :key="parametro"
+                    class="badge bg-warning text-white m-1">
+                    {{ parametro }}
+                  </span>
+                </p>
+              </td>
+              <td>
+                <div class="d-flex">
+                  <NavButton :icon="IconPencil" type-button="primary" @click="editarLista(item)" />
+                  <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção de um ponto será permanente.' }">
+                    <Link :onBefore="confirmation.show"
+                      :href="route('contratos.contratada.servicos.pmqa.configuracao.parametro.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"
+                      as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                    <IconTrash />
+                    </Link>
+                  </LinkConfirmation>
+                </div>
+              </td>
             </tr>
           </template>
         </Table>
