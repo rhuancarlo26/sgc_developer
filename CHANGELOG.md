@@ -1,4 +1,7 @@
 # CHANGELOG
+### v1.3.0
+- Serviços de RH, equipamentos e veiculos
+- Inicio do PMQA
 
 ### v1.2.0
 - Licenças
