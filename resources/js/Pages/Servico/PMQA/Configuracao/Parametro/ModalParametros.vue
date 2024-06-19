@@ -21,7 +21,6 @@ const modalParametros = ref();
 
 const form = useForm({
   id: null,
-  contrato_id: props.contrato.id,
   servico_id: props.servico.id,
   nome: null,
   medir_iqa: false,
@@ -58,14 +57,30 @@ const isChecked = (parametro_id) => {
   }
 }
 
-const abrirModal = () => {
+const abrirModal = (item) => {
+  form.reset();
+
+  if (item) {
+    Object.assign(form, item)
+
+    if (item.parametros.length) {
+      form.parametros = item.parametros.map(a => a.id) ?? []
+    }
+  }
+
   modalParametros.value.getBsModal().show();
 }
 
 const saveParametros = () => {
-  form.post(route('contratos.contratada.servicos.pmqa.configuracao.parametro.store', { contrato: props.contrato.id, servico: props.servico.id }), {
-    onSuccess: () => modalParametros.value.getBsModal.hide()
-  })
+  if (form.id) {
+    form.patch(route('contratos.contratada.servicos.pmqa.configuracao.parametro.update', { contrato: props.contrato.id, servico: props.servico.id }), {
+      onSuccess: () => modalParametros.value.getBsModal().hide()
+    });
+  } else {
+    form.post(route('contratos.contratada.servicos.pmqa.configuracao.parametro.store', { contrato: props.contrato.id, servico: props.servico.id }), {
+      onSuccess: () => modalParametros.value.getBsModal().hide()
+    });
+  }
 }
 
 defineExpose({ abrirModal });
@@ -80,7 +95,7 @@ defineExpose({ abrirModal });
           <input type="text" class="form-control" v-model="form.nome">
           <InputError :message="form.errors.nome" />
         </div>
-        <div class="accordion" id="accordion-example">
+        <div class="accordion mb-4" id="accordion-example">
           <div class="accordion-item">
             <h2 class="accordion-header" id="heading-4">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -133,6 +148,10 @@ defineExpose({ abrirModal });
               </div>
             </div>
           </div>
+        </div>
+        <div class="col">
+          <span>Os parâmetros analisados foram considerados de acordo com a RESOLUÇÃO CONAMA N° 357, DE 17 DE MARÇO DE
+            2005. Já o Índice de Qualidade das Águas – IQA de acordo com a CETESB.</span>
         </div>
       </div>
     </template>
