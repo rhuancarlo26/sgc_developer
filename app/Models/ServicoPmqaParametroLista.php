@@ -22,6 +22,11 @@ class ServicoPmqaParametroLista extends Model
         return $this->belongsToMany(ServicoPmqaParametro::class, 'servico_pmqa_lista_parametros', 'lista_parametro_id', 'parametro_id');
     }
 
+    public function pontos()
+    {
+        return $this->belongsToMany(ServicoPmqaPonto::class, 'servico_pmqa_lista_pontos', 'lista_parametro_id', 'ponto_id');
+    }
+
     public function listaParametros(): Attribute
     {
         return Attribute::make(
