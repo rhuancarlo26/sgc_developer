@@ -6,14 +6,25 @@ import { Head, Link } from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
+import ModalCampanha from "./ModalCampanha.vue";
+import { ref } from "vue";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import { IconTrash } from "@tabler/icons-vue";
+import { IconPencil } from "@tabler/icons-vue";
+import { IconSettings } from "@tabler/icons-vue";
+
+const modalCampanha = ref({});
 
 const props = defineProps({
   contrato: { type: Object },
-  servico: { type: Object }
+  servico: { type: Object },
+  campanhas: { type: Object },
+  pontos: { type: Array }
 });
 
-const abrirModalCampanha = () => {
-
+const abrirModalCampanha = (item) => {
+  modalCampanha.value.abrirModal(item);
 }
 
 </script>
@@ -43,16 +54,33 @@ const abrirModalCampanha = () => {
         </ModelSearchFormAllColumns>
 
         <!-- Listagem-->
-        <Table :columns="['Nome da campanha', 'Data de início', 'Data de término', 'Pontos', 'Ação']" :records="[]"
-          table-class="table-hover">
-          <template #body="{}">
+        <Table :columns="['Nome da campanha', 'Data de início', 'Data de término', 'Pontos', 'Ação']"
+          :records="campanhas" table-class="table-hover">
+          <template #body="{ item }">
             <tr>
-
+              <td>{{ item.nome }}</td>
+              <td>{{ dateTimeFormat(item.data_inicio) }}</td>
+              <td>{{ dateTimeFormat(item.data_termino) }}</td>
+              <td>{{ item.pontos.length }}</td>
+              <td>
+                <NavButton :icon="IconSettings" class="btn-icon" type-button="info" />
+                <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
+                  @click="abrirModalCampanha(item)" />
+                <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção da campanha será permanente.' }">
+                  <Link :onBefore="confirmation.show"
+                    :href="route('contratos.contratada.servicos.pmqa.execucao.destroy', { contrato: contrato.id, servico: servico.id, campanha: item.id })"
+                    as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                  <IconTrash />
+                  </Link>
+                </LinkConfirmation>
+              </td>
             </tr>
           </template>
         </Table>
       </template>
     </Navbar>
+
+    <ModalCampanha :contrato="contrato" :servico="servico" :pontos="pontos" ref="modalCampanha" />
 
   </AuthenticatedLayout>
 </template>
