@@ -26,13 +26,17 @@ const form = useForm({
 })
 
 const abrirModal = (item) => {
-  form.id = item.id;
-  form.nome = item.nome;
-  form.data_inicio = item.data_inicio;
-  form.data_termino = item.data_termino;
+  form.reset();
 
-  if (item.pontos.length) {
-    form.pontos = item.pontos.map(a => a.id) ?? []
+  if (item) {
+    form.id = item.id;
+    form.nome = item.nome;
+    form.data_inicio = item.data_inicio;
+    form.data_termino = item.data_termino;
+
+    if (item.pontos.length) {
+      form.pontos = item.pontos.map(a => a.id) ?? []
+    }
   }
 
   modalCampanha.value.getBsModal().show();
