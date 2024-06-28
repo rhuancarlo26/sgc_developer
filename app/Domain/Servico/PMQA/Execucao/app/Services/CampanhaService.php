@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Servico\PMQA\Execucao\Services;
+namespace App\Domain\Servico\PMQA\Execucao\app\Services;
 
 use App\Models\ServicoPmqaCampanha;
 use App\Models\ServicoPmqaParametroLista;
