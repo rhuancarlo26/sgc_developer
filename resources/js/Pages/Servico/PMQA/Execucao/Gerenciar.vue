@@ -11,8 +11,11 @@ import { IconRulerMeasure } from "@tabler/icons-vue";
 import { IconChartHistogram } from "@tabler/icons-vue";
 import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
 import { ref } from "vue";
+import ModalFormColeta from "./ModalFormColeta.vue";
+import { IconSquareCheck } from "@tabler/icons-vue";
 
 const modalVisualizarPonto = ref({});
+const modalFormColeta = ref({});
 
 const props = defineProps({
   contrato: { type: Object },
@@ -23,6 +26,10 @@ const props = defineProps({
 
 const abrirModalVisualizarPonto = (item) => {
   modalVisualizarPonto.value.abrirModal(item);
+}
+
+const abrirModalFormColeta = (item) => {
+  modalFormColeta.value.abrirModal(item);
 }
 
 </script>
@@ -52,17 +59,23 @@ const abrirModalVisualizarPonto = (item) => {
           :records="pontos" :axios-pagination="true" table-class="table-hover">
           <template #body="{ item }">
             <tr>
-              <td>{{ item.nomepontocoleta }}</td>
-              <td>{{ item.classe }}</td>
-              <td>{{ item.tipoambiente }}</td>
-              <td>{{ item.uf }}</td>
-              <td>{{ item.municipio }}</td>
-              <td></td>
+              <td>{{ item.ponto?.nomepontocoleta }}</td>
+              <td>{{ item.ponto?.classe }}</td>
+              <td>{{ item.ponto?.tipoambiente }}</td>
+              <td>{{ item.ponto?.uf }}</td>
+              <td>{{ item.ponto?.municipio }}</td>
+              <td>
+                <div class="d-flex align-item-center justify-content-center text-success">
+                  <NavButton v-if="item.coleta" :icon="IconSquareCheck" class="btn-icon text-success"
+                    type-button="default" />
+                </div>
+              </td>
               <td></td>
               <td>
                 <NavButton @click="abrirModalVisualizarPonto(item)" :icon="IconEye" class="btn-icon"
                   type-button="info" />
-                <NavButton :icon="IconRulerMeasure" class="btn-icon" type-button="primary" />
+                <NavButton @click="abrirModalFormColeta(item)" :icon="IconRulerMeasure" class="btn-icon"
+                  type-button="primary" />
                 <NavButton :icon="IconChartHistogram" class="btn-icon" type-button="primary" />
               </td>
             </tr>
@@ -72,6 +85,7 @@ const abrirModalVisualizarPonto = (item) => {
     </Navbar>
 
     <ModalVisualizarPonto :campanha="campanha" :contrato="contrato" :servico="servico" ref="modalVisualizarPonto" />
+    <ModalFormColeta :campanha="campanha" :contrato="contrato" :servico="servico" ref="modalFormColeta" />
 
   </AuthenticatedLayout>
 </template>
