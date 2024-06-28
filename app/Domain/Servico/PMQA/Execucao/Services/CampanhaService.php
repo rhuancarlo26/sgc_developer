@@ -32,13 +32,6 @@ class CampanhaService extends BaseModelService
     ];
   }
 
-  public function getPontosCampanha(ServicoPmqaCampanha $campanha)
-  {
-    return ServicoPmqaPonto::whereHas('campanhas', function (Builder $query) use ($campanha) {
-      $query->where('campanha_id', $campanha->id);
-    })->paginate();
-  }
-
   public function store(array $request): array
   {
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
