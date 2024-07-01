@@ -3,9 +3,15 @@ import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import Modal from "@/Components/Modal.vue";
 import NavButton from "@/Components/NavButton.vue";
-import { useForm } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
+import { IconTrash } from "@tabler/icons-vue";
+import { IconEye } from "@tabler/icons-vue";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
+import axios from "axios";
 import { ref } from "vue";
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
 
 const props = defineProps({
   contrato: { type: Object },
@@ -15,7 +21,6 @@ const props = defineProps({
 
 const ponto = ref({});
 const modal = ref({});
-
 const form = useForm({
   id: null,
   campanha_ponto_id: null,
@@ -25,7 +30,8 @@ const form = useForm({
   preservacao_amostra: null,
   acondicionamento_amostra: null,
   transporte_amostra: null,
-  justificativa: null
+  justificativa: null,
+  arquivo: null
 });
 
 const abrirModal = (item) => {
@@ -55,10 +61,24 @@ const saveColetaPonto = () => {
       onSuccess: () => modal.value.getBsModal().hide()
     })
   } else {
-    form.post(route('contratos.contratada.servicos.pmqa.execucao.coleta.store', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id }), {
-      onSuccess: () => modal.value.getBsModal().hide()
+    axios.post(route('contratos.contratada.servicos.pmqa.execucao.coleta.store', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id }), form).then((response) => {
+      if (response.data.message.type === 'success') {
+        toast.success(response.data.message.content);
+      } else {
+        toast.error(response.data.message.content);
+      }
+
+      if (response.data.model?.id) {
+        form.id = response.data.model.id
+      }
+
+      router.reload({ only: ['pontos'] });
     })
   }
+}
+
+const saveArquivo = () => {
+  form.post(route('contratos.contratada.servicos.pmqa.execucao.coleta.store_arquivo', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id }))
 }
 
 defineExpose({ abrirModal });
@@ -98,7 +118,7 @@ defineExpose({ abrirModal });
               <InputError :message="form.errors.preservacao_amostra" />
             </div>
           </div>
-          <div class="row">
+          <div class="row mb-4">
             <div class="col form-group">
               <InputLabel value="Acondicionamento da amostra" for="acondicionamento_amostra" />
               <input type="text" class="form-control" name="acondicionamento_amostra" id="acondicionamento_amostra"
@@ -110,6 +130,51 @@ defineExpose({ abrirModal });
               <input type="text" class="form-control" name="transporte_amostra" id="transporte_amostra"
                 v-model="form.transporte_amostra">
               <InputError :message="form.errors.transporte_amostra" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="d-flex justify-content-end">
+              <NavButton @click="saveColetaPonto()" type-button="success" :icon="IconDeviceFloppy"
+                :title="form.id ? 'Alterar' : 'Salvar'" />
+            </div>
+          </div>
+          <div v-if="form.id" class="row mt-4">
+            <div class="col">
+              <div>
+                <InputLabel value="Arquivos" for="arquivo" />
+                <div class="row g-2">
+                  <div class="col">
+                    <input @input="form.arquivo = $event.target.files[0]" type="file" class="form-control"
+                      name="arquivo" id="arquivo">
+                  </div>
+                  <div class="col-auto">
+                    <NavButton @click="saveArquivo()" type-button="success" title="Salvar" />
+                  </div>
+                </div>
+                <InputError :message="form.errors.arquivo" />
+              </div>
+              <div v-if="ponto.coleta?.arquivos?.length" class="table-responsive mt-4">
+                <table class="table table-hover non-hover">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Açao</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="arquivo in ponto.coleta.arquivos" :key="arquivo.id">
+                      <td>{{ arquivo.nome }}</td>
+                      <td>
+                        <a class="btn btn-icon btn-primary me-1" target="_blank"
+                          :href="route('contratos.contratada.servicos.pmqa.execucao.coleta.show_arquivo', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id, arquivo: arquivo.id })">
+                          <IconEye />
+                        </a>
+                        <NavButton :icon="IconTrash" class="btn-icon" type-button="danger" />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -126,8 +191,6 @@ defineExpose({ abrirModal });
       </div>
     </template>
     <template #footer>
-      <NavButton @click="saveColetaPonto()" type-button="success" :icon="IconDeviceFloppy"
-        :title="form.id ? 'Alterar' : 'Salvar'" />
     </template>
   </Modal>
 </template>

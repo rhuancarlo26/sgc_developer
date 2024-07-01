@@ -17,7 +17,10 @@ class CampanhaPontoService extends BaseModelService
   public function index(ServicoPmqaCampanha $campanha, $searchParams): array
   {
     $pontos = $this->searchAllColumns(...$searchParams)
-      ->with(['ponto', 'coleta'])
+      ->with([
+        'ponto',
+        'coleta.arquivos'
+      ])
       ->where('campanha_id', $campanha->id)
       ->paginate()
       ->appends($searchParams);
