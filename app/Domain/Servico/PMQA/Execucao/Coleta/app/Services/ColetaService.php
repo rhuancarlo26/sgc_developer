@@ -7,6 +7,7 @@ use App\Models\ServicoPmqaCampanhaPontoColetaArquivo;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Support\Facades\Storage;
 
 class ColetaService extends BaseModelService
 {
@@ -23,7 +24,7 @@ class ColetaService extends BaseModelService
   {
     return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
   }
-  public function storeArquivo(array $request)
+  public function storeArquivo(array $request): array
   {
     if ($request['arquivo']->isvalid()) {
       $nome = $request['arquivo']->getClientOriginalName();
@@ -37,5 +38,11 @@ class ColetaService extends BaseModelService
         'caminho' => $caminho
       ]);
     }
+  }
+  public function deleteArquivo(ServicoPmqaCampanhaPontoColetaArquivo $arquivo): array
+  {
+    Storage::delete($arquivo->caminho);
+
+    return $this->dataManagement->delete(entity: $this->modelClassArquivo, id: $arquivo->id);
   }
 }

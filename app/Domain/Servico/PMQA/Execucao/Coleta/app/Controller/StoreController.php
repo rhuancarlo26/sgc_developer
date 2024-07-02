@@ -9,6 +9,7 @@ use App\Models\ServicoPmqaCampanha;
 use App\Models\Servicos;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class StoreController extends Controller
 {
@@ -16,7 +17,7 @@ class StoreController extends Controller
   {
   }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, StoreRequest $request): JsonResponse
+  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, StoreRequest $request): RedirectResponse
   {
     $post = [];
 
@@ -40,6 +41,6 @@ class StoreController extends Controller
 
     $response = $this->coletaService->store($post);
 
-    return response()->json(['message' => $response['request'], 'model' => $response['model']]);
+    return to_route('contratos.contratada.servicos.pmqa.execucao.coleta.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id, 'ponto' => $request->campanha_ponto_id])->with('message', $response['request']);
   }
 }

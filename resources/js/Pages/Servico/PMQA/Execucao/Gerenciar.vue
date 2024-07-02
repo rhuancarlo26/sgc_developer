@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../Navbar.vue";
-import { Head } from "@inertiajs/vue3";
+import { Head, Link } from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
@@ -11,11 +11,9 @@ import { IconRulerMeasure } from "@tabler/icons-vue";
 import { IconChartHistogram } from "@tabler/icons-vue";
 import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
 import { ref } from "vue";
-import ModalFormColeta from "./ModalFormColeta.vue";
 import { IconSquareCheck } from "@tabler/icons-vue";
 
 const modalVisualizarPonto = ref({});
-const modalFormColeta = ref({});
 
 const props = defineProps({
   contrato: { type: Object },
@@ -26,10 +24,6 @@ const props = defineProps({
 
 const abrirModalVisualizarPonto = (item) => {
   modalVisualizarPonto.value.abrirModal(item);
-}
-
-const abrirModalFormColeta = (item) => {
-  modalFormColeta.value.abrirModal(item);
 }
 
 </script>
@@ -46,6 +40,10 @@ const abrirModalFormColeta = (item) => {
           { route: '#', label: contrato.contratada }
         ]
           " />
+        <Link class="btn btn-dark"
+          :href="route('contratos.contratada.servicos.pmqa.execucao.index', { contrato: props.contrato.id, servico: props.servico.id })">
+        Voltar
+        </Link>
       </div>
     </template>
 
@@ -74,8 +72,10 @@ const abrirModalFormColeta = (item) => {
               <td>
                 <NavButton @click="abrirModalVisualizarPonto(item)" :icon="IconEye" class="btn-icon"
                   type-button="info" />
-                <NavButton @click="abrirModalFormColeta(item)" :icon="IconRulerMeasure" class="btn-icon"
-                  type-button="primary" />
+                <Link class="btn btn-icon btn-primary me-1"
+                  :href="route('contratos.contratada.servicos.pmqa.execucao.coleta.create', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id, ponto: item.id })">
+                <IconRulerMeasure />
+                </Link>
                 <NavButton :icon="IconChartHistogram" class="btn-icon" type-button="primary" />
               </td>
             </tr>
@@ -85,7 +85,6 @@ const abrirModalFormColeta = (item) => {
     </Navbar>
 
     <ModalVisualizarPonto :campanha="campanha" :contrato="contrato" :servico="servico" ref="modalVisualizarPonto" />
-    <ModalFormColeta :campanha="campanha" :contrato="contrato" :servico="servico" ref="modalFormColeta" />
 
   </AuthenticatedLayout>
 </template>
