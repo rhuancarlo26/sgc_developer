@@ -47,6 +47,10 @@ const abrirModalVisualizarPonto = (item) => {
           { route: '#', label: contrato.contratada }
         ]
           " />
+        <Link class="btn btn-dark"
+          :href="route('contratos.contratada.servicos.index', { contrato: props.contrato.id })">
+        Voltar
+        </Link>
       </div>
     </template>
 

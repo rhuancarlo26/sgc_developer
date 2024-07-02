@@ -20,6 +20,6 @@ class StoreArquivoController extends Controller
   {
     $response = $this->coletaService->storeArquivo($request->validated());
 
-    return to_route('contratos.contratada.servicos.pmqa.execucao.gerenciar', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id])->with('message', $response['request']);
+    return to_route('contratos.contratada.servicos.pmqa.execucao.coleta.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id, 'ponto' => $request->campanha_ponto_id])->with('message', $response['request']);
   }
 }

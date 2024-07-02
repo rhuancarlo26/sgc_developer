@@ -1,29 +1,26 @@
 <script setup>
-import InputError from "@/Components/InputError.vue";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Breadcrumb from "@/Components/Breadcrumb.vue";
+import Navbar from "../../Navbar.vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
 import InputLabel from "@/Components/InputLabel.vue";
-import Modal from "@/Components/Modal.vue";
+import InputError from "@/Components/InputError.vue";
 import NavButton from "@/Components/NavButton.vue";
-import { router, useForm } from "@inertiajs/vue3";
-import { IconTrash } from "@tabler/icons-vue";
 import { IconEye } from "@tabler/icons-vue";
+import { IconTrash } from "@tabler/icons-vue";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
-import axios from "axios";
-import { ref } from "vue";
-import { useToast } from 'vue-toastification';
-
-const toast = useToast();
 
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
-  campanha: { type: Object }
+  campanha: { type: Object },
+  ponto: { type: Object }
 });
 
-const ponto = ref({});
-const modal = ref({});
 const form = useForm({
   id: null,
-  campanha_ponto_id: null,
+  campanha_ponto_id: props.ponto.id,
   data_coleta: null,
   sem_coleta: false,
   numero_amostra: null,
@@ -31,49 +28,17 @@ const form = useForm({
   acondicionamento_amostra: null,
   transporte_amostra: null,
   justificativa: null,
-  arquivo: null
+  arquivo: null,
+  ...props.ponto.coleta
 });
 
-const abrirModal = (item) => {
-  form.reset();
-  ponto.value = item;
-
-  if (item.coleta) {
-    form.id = item.coleta.id;
-    form.campanha_ponto_id = item.coleta.campanha_ponto_id;
-    form.data_coleta = item.coleta.data_coleta;
-    form.sem_coleta = item.coleta.sem_coleta;
-    form.numero_amostra = item.coleta.numero_amostra;
-    form.preservacao_amostra = item.coleta.preservacao_amostra;
-    form.acondicionamento_amostra = item.coleta.acondicionamento_amostra;
-    form.transporte_amostra = item.coleta.transporte_amostra;
-    form.justificativa = item.coleta.justificativa;
-  }
-
-  modal.value.getBsModal().show();
-}
-
 const saveColetaPonto = () => {
-  form.campanha_ponto_id = ponto.value.id;
-
   if (form.id) {
     form.patch(route('contratos.contratada.servicos.pmqa.execucao.coleta.update', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id }), {
       onSuccess: () => modal.value.getBsModal().hide()
     })
   } else {
-    axios.post(route('contratos.contratada.servicos.pmqa.execucao.coleta.store', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id }), form).then((response) => {
-      if (response.data.message.type === 'success') {
-        toast.success(response.data.message.content);
-      } else {
-        toast.error(response.data.message.content);
-      }
-
-      if (response.data.model?.id) {
-        form.id = response.data.model.id
-      }
-
-      router.reload({ only: ['pontos'] });
-    })
+    form.post(route('contratos.contratada.servicos.pmqa.execucao.coleta.store', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id }));
   }
 }
 
@@ -81,14 +46,29 @@ const saveArquivo = () => {
   form.post(route('contratos.contratada.servicos.pmqa.execucao.coleta.store_arquivo', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id }))
 }
 
-defineExpose({ abrirModal });
 </script>
-
 <template>
-  <Modal ref="modal" :title="`Visualizar ${ponto.ponto?.nomepontocoleta} - ${campanha.nome}`"
-    modal-dialog-class="modal-xl">
-    <template #body>
-      <div class="card-body">
+
+  <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
+
+  <AuthenticatedLayout>
+
+    <template #header>
+      <div class="w-100 d-flex justify-content-between">
+        <Breadcrumb class="align-self-center" :links="[
+          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+          { route: '#', label: contrato.contratada }
+        ]
+          " />
+        <Link class="btn btn-dark"
+          :href="route('contratos.contratada.servicos.pmqa.execucao.gerenciar', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id })">
+        Voltar
+        </Link>
+      </div>
+    </template>
+
+    <Navbar :contrato="contrato" :servico="servico">
+      <template #body>
         <div class="row mb-4">
           <div class="col form-group">
             <InputLabel value="Data da coleta" for="data_coleta" />
@@ -118,7 +98,7 @@ defineExpose({ abrirModal });
               <InputError :message="form.errors.preservacao_amostra" />
             </div>
           </div>
-          <div class="row mb-4">
+          <div class="row">
             <div class="col form-group">
               <InputLabel value="Acondicionamento da amostra" for="acondicionamento_amostra" />
               <input type="text" class="form-control" name="acondicionamento_amostra" id="acondicionamento_amostra"
@@ -132,7 +112,26 @@ defineExpose({ abrirModal });
               <InputError :message="form.errors.transporte_amostra" />
             </div>
           </div>
-          <div v-if="form.id" class="row mt-4">
+        </div>
+        <div v-else>
+          <div class="row">
+            <div class="col">
+              <InputLabel value="Justificativa" for="transporte_amostra" />
+              <textarea class="form-control" name="justificativa" id="justificativa" rows="5"
+                v-model="form.justificativa"></textarea>
+              <InputError :message="form.errors.justificativa" />
+            </div>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col d-flex justify-content-end">
+            <NavButton @click="saveColetaPonto()" type-button="success" :icon="IconDeviceFloppy"
+              :title="form.id ? 'Alterar' : 'Salvar'" />
+          </div>
+        </div>
+        <div v-if="form.id && !form.sem_coleta">
+          <hr>
+          <div class="row">
             <div class="col">
               <div>
                 <InputLabel value="Arquivos" for="arquivo" />
@@ -163,7 +162,14 @@ defineExpose({ abrirModal });
                           :href="route('contratos.contratada.servicos.pmqa.execucao.coleta.show_arquivo', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id, arquivo: arquivo.id })">
                           <IconEye />
                         </a>
-                        <NavButton :icon="IconTrash" class="btn-icon" type-button="danger" />
+                        <LinkConfirmation v-slot="confirmation"
+                          :options="{ text: 'A remoção da coleta será permanente.' }">
+                          <Link :onBefore="confirmation.show"
+                            :href="route('contratos.contratada.servicos.pmqa.execucao.coleta.delete_arquivo', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id, arquivo: arquivo.id })"
+                            as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                          <IconTrash />
+                          </Link>
+                        </LinkConfirmation>
                       </td>
                     </tr>
                   </tbody>
@@ -172,21 +178,7 @@ defineExpose({ abrirModal });
             </div>
           </div>
         </div>
-        <div v-else>
-          <div class="row">
-            <div class="col">
-              <InputLabel value="Justificativa" for="transporte_amostra" />
-              <textarea class="form-control" name="justificativa" id="justificativa" rows="5"
-                v-model="form.justificativa"></textarea>
-              <InputError :message="form.errors.justificativa" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </template>
-    <template #footer>
-      <NavButton @click="saveColetaPonto()" type-button="success" :icon="IconDeviceFloppy"
-        :title="form.id ? 'Alterar' : 'Salvar'" />
-    </template>
-  </Modal>
+      </template>
+    </Navbar>
+  </AuthenticatedLayout>
 </template>
