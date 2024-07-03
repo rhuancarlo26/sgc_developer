@@ -24,7 +24,7 @@ class CampanhaService extends BaseModelService
       ->where('servico_id', $servico->id)
       ->paginate()
       ->appends($searchParams);
-    $pontos = ServicoPmqaPonto::with(['vinculado'])->where('servico_id', $servico->id)->get();
+    $pontos = ServicoPmqaPonto::with(['vinculado', 'campanhas'])->where('servico_id', $servico->id)->get();
 
     return [
       'campanhas' => $campanhas,

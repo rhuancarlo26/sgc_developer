@@ -11,4 +11,9 @@ class ServicoPmqaCampanhaPontoColetaArquivo extends Model
 
     protected $table = 'servico_pmqa_campanha_ponto_coleta_arquivos';
     protected $guarded = ['id', 'created_at'];
+
+    public function coleta()
+    {
+        return $this->belongsTo(ServicoPmqaCampanhaPontoColeta::class, 'coleta_id');
+    }
 }

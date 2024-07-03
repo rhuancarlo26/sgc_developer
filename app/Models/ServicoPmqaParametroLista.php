@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ServicoPmqaParametroLista extends Model
 {
@@ -17,12 +19,17 @@ class ServicoPmqaParametroLista extends Model
         'medir_iqa' => 'bool'
     ];
 
-    public function parametros()
+    public function parametros(): BelongsToMany
     {
         return $this->belongsToMany(ServicoPmqaParametro::class, 'servico_pmqa_lista_parametros', 'lista_parametro_id', 'parametro_id');
     }
 
-    public function pontos()
+    public function parametros_vinculados(): HasMany
+    {
+        return $this->hasMany(ServicoPmqaListaParametro::class, 'lista_parametro_id');
+    }
+
+    public function pontos(): BelongsToMany
     {
         return $this->belongsToMany(ServicoPmqaPonto::class, 'servico_pmqa_lista_pontos', 'lista_parametro_id', 'ponto_id');
     }

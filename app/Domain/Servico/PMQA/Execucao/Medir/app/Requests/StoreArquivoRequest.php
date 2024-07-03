@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Servico\PMQA\Execucao\Coleta\app\Requests;
+namespace App\Domain\Servico\PMQA\Execucao\Medir\app\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
