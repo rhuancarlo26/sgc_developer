@@ -68,7 +68,12 @@ const abrirModalVisualizarPonto = (item) => {
                     type-button="default" />
                 </div>
               </td>
-              <td></td>
+              <td>
+                <div class="d-flex align-item-center justify-content-center text-success">
+                  <NavButton v-if="item.medicao" :icon="IconSquareCheck" class="btn-icon text-success"
+                    type-button="default" />
+                </div>
+              </td>
               <td>
                 <NavButton @click="abrirModalVisualizarPonto(item)" :icon="IconEye" class="btn-icon"
                   type-button="info" />
@@ -76,7 +81,10 @@ const abrirModalVisualizarPonto = (item) => {
                   :href="route('contratos.contratada.servicos.pmqa.execucao.coleta.create', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id, ponto: item.id })">
                 <IconRulerMeasure />
                 </Link>
-                <NavButton :icon="IconChartHistogram" class="btn-icon" type-button="primary" />
+                <Link v-if="item.ponto.lista" class="btn btn-icon btn-primary me-1"
+                  :href="route('contratos.contratada.servicos.pmqa.execucao.medir.create', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id, ponto: item.id })">
+                <IconChartHistogram />
+                </Link>
               </td>
             </tr>
           </template>

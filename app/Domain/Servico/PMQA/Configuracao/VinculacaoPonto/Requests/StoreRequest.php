@@ -12,9 +12,9 @@ class StoreRequest extends FormRequest
       'servico_id'          => ['required'],
       'lista'               => ['required'],
       'periodicidade'       => ['required'],
-      'relatorio_parcial'   => ['required'],
-      'relatorio_acomulado' => ['required'],
-      'pontos'              => ['required']
+      'pontos'              => ['required'],
+      'relatorio_parcial'   => ['nullable'],
+      'relatorio_acomulado' => ['nullable']
     ];
   }
 

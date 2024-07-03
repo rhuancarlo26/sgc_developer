@@ -15,4 +15,5 @@ Route::prefix('/execucao')->group(function () {
   Route::delete('{contrato}/{servico}/destroy/{campanha}',          [DestroyController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.destroy');
 
   require __DIR__ . '/../../Coleta/app/Routes/ColetaRoutes.php';
+  require __DIR__ . '/../../Medir/app/Routes/MedirRoutes.php';
 });

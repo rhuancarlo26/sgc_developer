@@ -18,8 +18,10 @@ class CampanhaPontoService extends BaseModelService
   {
     $pontos = $this->searchAllColumns(...$searchParams)
       ->with([
-        'ponto',
-        'coleta.arquivos'
+        'ponto.lista.parametros_vinculados.parametro',
+        'coleta.arquivos',
+        'medicao.parametros',
+        'medicao.arquivos',
       ])
       ->where('campanha_id', $campanha->id)
       ->paginate()

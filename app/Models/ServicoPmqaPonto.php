@@ -21,4 +21,9 @@ class ServicoPmqaPonto extends Model
     {
         return $this->belongsToMany(ServicoPmqaCampanha::class, 'servico_pmqa_campanha_pontos', 'ponto_id', 'campanha_id');
     }
+
+    public function lista()
+    {
+        return $this->hasOneThrough(ServicoPmqaParametroLista::class, ServicoPmqaListaPonto::class, 'ponto_id', 'id', 'id', 'lista_parametro_id');
+    }
 }
