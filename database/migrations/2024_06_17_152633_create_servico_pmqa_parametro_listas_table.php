@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId('servico_id')->constrained('servicos')->cascadeOnDelete();
             $table->string('nome');
             $table->boolean('medir_iqa');
+            $table->string('periodicidade')->nullable();
+            $table->integer('relatorio_parcial')->nullable();
+            $table->integer('relatorio_acomulado')->nullable();
             $table->timestamps();
         });
     }
