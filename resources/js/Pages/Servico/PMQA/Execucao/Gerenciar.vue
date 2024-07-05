@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../Navbar.vue";
-import { Head } from "@inertiajs/vue3";
+import { Head, Link } from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
@@ -11,6 +11,7 @@ import { IconRulerMeasure } from "@tabler/icons-vue";
 import { IconChartHistogram } from "@tabler/icons-vue";
 import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
 import { ref } from "vue";
+import { IconSquareCheck } from "@tabler/icons-vue";
 
 const modalVisualizarPonto = ref({});
 
@@ -39,6 +40,10 @@ const abrirModalVisualizarPonto = (item) => {
           { route: '#', label: contrato.contratada }
         ]
           " />
+        <Link class="btn btn-dark"
+          :href="route('contratos.contratada.servicos.pmqa.execucao.index', { contrato: props.contrato.id, servico: props.servico.id })">
+        Voltar
+        </Link>
       </div>
     </template>
 
@@ -52,17 +57,25 @@ const abrirModalVisualizarPonto = (item) => {
           :records="pontos" :axios-pagination="true" table-class="table-hover">
           <template #body="{ item }">
             <tr>
-              <td>{{ item.nomepontocoleta }}</td>
-              <td>{{ item.classe }}</td>
-              <td>{{ item.tipoambiente }}</td>
-              <td>{{ item.uf }}</td>
-              <td>{{ item.municipio }}</td>
-              <td></td>
+              <td>{{ item.ponto?.nomepontocoleta }}</td>
+              <td>{{ item.ponto?.classe }}</td>
+              <td>{{ item.ponto?.tipoambiente }}</td>
+              <td>{{ item.ponto?.uf }}</td>
+              <td>{{ item.ponto?.municipio }}</td>
+              <td>
+                <div class="d-flex align-item-center justify-content-center text-success">
+                  <NavButton v-if="item.coleta" :icon="IconSquareCheck" class="btn-icon text-success"
+                    type-button="default" />
+                </div>
+              </td>
               <td></td>
               <td>
                 <NavButton @click="abrirModalVisualizarPonto(item)" :icon="IconEye" class="btn-icon"
                   type-button="info" />
-                <NavButton :icon="IconRulerMeasure" class="btn-icon" type-button="primary" />
+                <Link class="btn btn-icon btn-primary me-1"
+                  :href="route('contratos.contratada.servicos.pmqa.execucao.coleta.create', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id, ponto: item.id })">
+                <IconRulerMeasure />
+                </Link>
                 <NavButton :icon="IconChartHistogram" class="btn-icon" type-button="primary" />
               </td>
             </tr>

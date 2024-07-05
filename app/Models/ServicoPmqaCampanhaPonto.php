@@ -11,4 +11,14 @@ class ServicoPmqaCampanhaPonto extends Model
 
     protected $table = 'servico_pmqa_campanha_pontos';
     protected $guarded = ['id', 'created_at'];
+
+    public function ponto()
+    {
+        return $this->belongsTo(ServicoPmqaPonto::class, 'ponto_id');
+    }
+
+    public function coleta()
+    {
+        return $this->hasOne(ServicoPmqaCampanhaPontoColeta::class, 'campanha_ponto_id');
+    }
 }

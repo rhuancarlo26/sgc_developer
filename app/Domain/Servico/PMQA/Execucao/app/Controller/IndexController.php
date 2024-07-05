@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\Servico\PMQA\Execucao\Controller;
+namespace App\Domain\Servico\PMQA\Execucao\app\Controller;
 
-use App\Domain\Servico\PMQA\Execucao\Services\CampanhaService;
+use App\Domain\Servico\PMQA\Execucao\app\Services\CampanhaService;
 use App\Models\Contrato;
 use App\Models\Servicos;
 use App\Shared\Http\Controllers\Controller;
