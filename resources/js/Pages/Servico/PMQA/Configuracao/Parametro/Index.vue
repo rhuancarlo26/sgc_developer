@@ -46,6 +46,10 @@ const editarLista = (item) => {
           { route: '#', label: contrato.contratada }
         ]
           " />
+        <Link class="btn btn-dark"
+          :href="route('contratos.contratada.servicos.index', { contrato: props.contrato.id })">
+        Voltar
+        </Link>
       </div>
     </template>
 
@@ -73,7 +77,7 @@ const editarLista = (item) => {
               </td>
               <td>
                 <div class="d-flex">
-                  <NavButton :icon="IconPencil" type-button="primary" @click="editarLista(item)" />
+                  <NavButton :icon="IconPencil" class="btn-icon" type-button="primary" @click="editarLista(item)" />
                   <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção de um ponto será permanente.' }">
                     <Link :onBefore="confirmation.show"
                       :href="route('contratos.contratada.servicos.pmqa.configuracao.parametro.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"

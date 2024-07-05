@@ -12,7 +12,7 @@ defineProps({
 
 <template>
     <button type="button" :class="`btn btn-${typeButton} me-1`" v-if="!routeName || can(routeName)">
-        <component v-if="icon" :is="icon" class="me-1" />
+        <component v-if="icon" :is="icon" />
         {{ title }}
     </button>
 </template>
