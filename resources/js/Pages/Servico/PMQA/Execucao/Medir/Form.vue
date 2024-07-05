@@ -45,7 +45,7 @@ onMounted(() => {
 })
 
 const saveMedicao = () => {
-  if (props.ponto.ponto?.lista?.medir_iqa) {
+  if (!props.ponto.ponto?.lista?.medir_iqa) {
     form.iqa = null;
   }
 
