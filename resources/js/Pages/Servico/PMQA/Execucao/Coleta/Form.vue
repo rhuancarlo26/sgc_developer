@@ -43,6 +43,8 @@ const saveColetaPonto = () => {
 }
 
 const saveArquivo = () => {
+  form.id = props.ponto.coleta.id;
+
   form.post(route('contratos.contratada.servicos.pmqa.execucao.coleta.store_arquivo', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id }))
 }
 
@@ -80,7 +82,7 @@ const saveArquivo = () => {
               <input class="form-check-input" type="checkbox" v-model="form.sem_coleta">
               <span class="form-check-label">Não foi possível realizar a coleta</span>
             </label>
-            <InputError :message="form.errors.data_coleta" />
+            <InputError :message="form.errors.sem_coleta" />
           </div>
         </div>
         <div v-if="form.sem_coleta === false">
@@ -129,7 +131,7 @@ const saveArquivo = () => {
               :title="form.id ? 'Alterar' : 'Salvar'" />
           </div>
         </div>
-        <div v-if="form.id && !form.sem_coleta">
+        <div v-if="ponto.coleta?.id && !form.sem_coleta">
           <hr>
           <div class="row">
             <div class="col">
