@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Domain\Servico\PMQA\Configuracao\Parametro\Controller;
+namespace App\Domain\Servico\PMQA\Configuracao\VinculacaoPonto\Controller;
 
 use App\Domain\Servico\PMQA\Configuracao\Parametro\Services\ParametroService;
+use App\Domain\Servico\PMQA\Configuracao\VinculacaoPonto\Services\VinculacaoPontoService;
 use App\Models\Contrato;
 use App\Models\Servicos;
 use App\Shared\Http\Controllers\Controller;
@@ -12,7 +13,7 @@ use Inertia\Response;
 
 class IndexController extends Controller
 {
-  public function __construct(private readonly ParametroService $parametroService)
+  public function __construct(private readonly VinculacaoPontoService $vinculacaoPontoService)
   {
   }
 
@@ -20,9 +21,9 @@ class IndexController extends Controller
   {
     $searchParams = $request->all('columns', 'value');
 
-    $response = $this->parametroService->index($servico, $searchParams);
+    $response = $this->vinculacaoPontoService->index($servico, $searchParams);
 
-    return Inertia::render('Servico/PMQA/Configuracao/Parametro/Index', [
+    return Inertia::render('Servico/PMQA/Configuracao/VinculacaoPonto/Index', [
       'contrato' => $contrato,
       'servico' => $servico->load(['tipo']),
       ...$response

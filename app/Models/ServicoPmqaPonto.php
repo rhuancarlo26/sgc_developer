@@ -11,4 +11,9 @@ class ServicoPmqaPonto extends Model
 
     protected $table = 'servico_pmqa_pontos';
     protected $guarded = ['id', 'created_at'];
+
+    public function vinculado()
+    {
+        return $this->hasOne(ServicoPmqaListaPonto::class, 'ponto_id');
+    }
 }
