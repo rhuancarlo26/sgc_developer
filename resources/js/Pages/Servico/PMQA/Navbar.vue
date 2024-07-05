@@ -4,6 +4,7 @@ import NavDropdown from '@/Components/NavDropdown.vue';
 import Navbar from '@/Pages/Contrato/Contratada/Navbar.vue';
 import { IconLayoutDashboard } from '@tabler/icons-vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
+import NavLink from '@/Components/NavLink.vue';
 
 const porps = defineProps({
   contrato: { type: Object },
@@ -40,6 +41,11 @@ const porps = defineProps({
                           active-on-route-prefix="contratos.contratada.servicos.pmqa.configuracao.vinculacao_ponto*"
                           :route-param="{ contrato: contrato.id, servico: servico.id }" title="Vinculação de pontos" />
                       </NavDropdown>
+
+                      <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.index"
+                        active-on-route-prefix="contratos.contratada.servicos.pmqa.execucao*"
+                        :param="{ contrato: contrato.id, servico: servico.id }" title="Execução"
+                        :icon="IconLayoutDashboard" />
                     </ul>
                   </div>
                 </div>
