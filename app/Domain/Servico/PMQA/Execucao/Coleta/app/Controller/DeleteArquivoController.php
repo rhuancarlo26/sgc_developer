@@ -18,8 +18,10 @@ class DeleteArquivoController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPontoColetaArquivo $arquivo): RedirectResponse
   {
+    $arquivo->load(['coleta']);
+
     $response = $this->coletaService->deleteArquivo($arquivo);
 
-    return to_route('contratos.contratada.servicos.pmqa.execucao.coleta.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id, 'ponto' => $arquivo->id])->with('message', $response['request']);
+    return to_route('contratos.contratada.servicos.pmqa.execucao.coleta.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id, 'ponto' => $arquivo->coleta['campanha_ponto_id']])->with('message', $response['request']);
   }
 }

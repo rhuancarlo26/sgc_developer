@@ -8,7 +8,7 @@ import TabMedicao from "./TabMedicao.vue";
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
-  campanha: { type: Object },
+  campanha: { type: Object }
 });
 
 const ponto = ref({});
@@ -51,10 +51,10 @@ defineExpose({ abrirModal });
                 <TabDadosPonto :ponto="ponto" />
               </div>
               <div class="tab-pane" id="tab-dados-coleta" role="tabpanel">
-                <TabColeta :ponto="ponto" />
+                <TabColeta :contrato="contrato" :servico="servico" :campanha="campanha" :ponto="ponto" />
               </div>
               <div class="tab-pane" id="tab-dados-medicao" role="tabpanel">
-                <TabMedicao />
+                <TabMedicao :contrato="contrato" :servico="servico" :campanha="campanha" :ponto="ponto" />
               </div>
             </div>
           </div>

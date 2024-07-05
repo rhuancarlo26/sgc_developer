@@ -6,6 +6,7 @@ import NavButton from "@/Components/NavButton.vue";
 import Table from "@/Components/Table.vue";
 import { useForm } from "@inertiajs/vue3";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
+import { computed } from "vue";
 import { ref } from "vue";
 
 const props = defineProps({
@@ -23,10 +24,13 @@ const form = useForm({
   data_inicio: null,
   data_termino: null,
   pontos: []
-})
+});
+
+const arrayPontosSalvo = ref([]);
 
 const abrirModal = (item) => {
   form.reset();
+  arrayPontosSalvo.value = [];
 
   if (item) {
     form.id = item.id;
@@ -35,12 +39,19 @@ const abrirModal = (item) => {
     form.data_termino = item.data_termino;
 
     if (item.pontos.length) {
-      form.pontos = item.pontos.map(a => a.id) ?? []
+      let arr = item.pontos.map(a => a.id) ?? [];
+
+      arrayPontosSalvo.value = arr;
+      form.pontos = arr
     }
   }
 
   modalCampanha.value.getBsModal().show();
 }
+
+const pontosFiltrados = computed(() => {
+  return props.pontos.filter(ponto => !ponto.campanhas.length || arrayPontosSalvo.value.includes(ponto.id));
+});
 
 const saveCampanha = () => {
   if (form.id) {
@@ -95,7 +106,7 @@ defineExpose({ abrirModal });
               </tr>
             </thead>
             <tbody>
-              <tr v-for="ponto in pontos" :key="ponto.id">
+              <tr v-for="ponto in pontosFiltrados" :key="ponto.id">
                 <td>
                   <label class="form-check">
                     <input class="form-check-input" type="checkbox" :value="ponto.id" v-model="form.pontos">
