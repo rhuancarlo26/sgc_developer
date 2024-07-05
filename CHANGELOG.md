@@ -3,6 +3,10 @@
 - Serviços de RH, equipamentos e veiculos
 - Inicio do PMQA
 
+### v1.4.0
+- Finalização do cadastro de serviços
+- Configuração e execução do Serviço do PMQA
+
 ### v1.2.0
 - Licenças
 - Serviços
