@@ -1,28 +1,27 @@
 <?php
 
-namespace App\Domain\Servico\PMQA\Execucao\Services;
+namespace App\Domain\Servico\PMQA\Execucao\app\Services;
 
 use App\Models\ServicoPmqaCampanha;
-use App\Models\ServicoPmqaParametroLista;
-use App\Models\ServicoPmqaPonto;
-use App\Models\Servicos;
+use App\Models\ServicoPmqaCampanhaPonto;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class CampanhaPontoService extends BaseModelService
 {
   use Searchable, Deletable;
 
-  protected string $modelClass = ServicoPmqaPonto::class;
+  protected string $modelClass = ServicoPmqaCampanhaPonto::class;
 
   public function index(ServicoPmqaCampanha $campanha, $searchParams): array
   {
     $pontos = $this->searchAllColumns(...$searchParams)
-      ->whereHas('campanhas', function (Builder $query) use ($campanha) {
-        $query->where('campanha_id', $campanha->id);
-      })
+      ->with([
+        'ponto',
+        'coleta.arquivos'
+      ])
+      ->where('campanha_id', $campanha->id)
       ->paginate()
       ->appends($searchParams);
 

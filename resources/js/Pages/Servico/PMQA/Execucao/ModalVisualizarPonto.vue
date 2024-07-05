@@ -24,7 +24,8 @@ defineExpose({ abrirModal });
 </script>
 
 <template>
-  <Modal ref="modal" :title="`Visualizar ${ponto.nomepontocoleta} - ${campanha.nome}`" modal-dialog-class="modal-xl">
+  <Modal ref="modal" :title="`Visualizar ${ponto.ponto?.nomepontocoleta} - ${campanha.nome}`"
+    modal-dialog-class="modal-xl">
     <template #body>
       <div class="card-body">
         <div class="card">
@@ -50,7 +51,7 @@ defineExpose({ abrirModal });
                 <TabDadosPonto :ponto="ponto" />
               </div>
               <div class="tab-pane" id="tab-dados-coleta" role="tabpanel">
-                <TabColeta />
+                <TabColeta :ponto="ponto" />
               </div>
               <div class="tab-pane" id="tab-dados-medicao" role="tabpanel">
                 <TabMedicao />

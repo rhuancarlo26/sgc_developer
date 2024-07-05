@@ -1,10 +1,8 @@
 <?php
 
-namespace App\Domain\Servico\PMQA\Execucao\Controller;
+namespace App\Domain\Servico\PMQA\Execucao\app\Controller;
 
-use App\Domain\Servico\PMQA\Execucao\Services\CampanhaPontoService;
-use App\Domain\Servico\PMQA\Execucao\Services\CampanhaService;
-use App\Domain\Servico\PMQA\Execucao\Services\ExecucaoService;
+use App\Domain\Servico\PMQA\Execucao\app\Services\CampanhaPontoService;
 use App\Models\Contrato;
 use App\Models\ServicoPmqaCampanha;
 use App\Models\Servicos;
