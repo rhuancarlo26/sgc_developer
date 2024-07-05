@@ -6,6 +6,7 @@ import { Head, Link } from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
+import NavLink from "@/Components/NavLink.vue";
 import ModalCampanha from "./ModalCampanha.vue";
 import { ref } from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
@@ -63,9 +64,12 @@ const abrirModalCampanha = (item) => {
               <td>{{ dateTimeFormat(item.data_termino) }}</td>
               <td>{{ item.pontos.length }}</td>
               <td>
-                <NavButton :icon="IconSettings" class="btn-icon" type-button="info" />
-                <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
-                  @click="abrirModalCampanha(item)" />
+                <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.gerenciar"
+                  :param="{ contrato: contrato.id, servico: servico.id, campanha: item.id }"
+                  class="btn btn-icon btn-info me-1" :icon="IconSettings" />
+                <!-- <NavButton :icon="IconSettings" class="btn-icon" type-button="info" /> -->
+                <NavButton @click="abrirModalCampanha(item)" :icon="IconPencil" class="btn-icon"
+                  type-button="primary" />
                 <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção da campanha será permanente.' }">
                   <Link :onBefore="confirmation.show"
                     :href="route('contratos.contratada.servicos.pmqa.execucao.destroy', { contrato: contrato.id, servico: servico.id, campanha: item.id })"

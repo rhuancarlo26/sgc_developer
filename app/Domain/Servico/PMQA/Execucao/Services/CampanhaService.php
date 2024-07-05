@@ -9,8 +9,9 @@ use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
-class ExecucaoService extends BaseModelService
+class CampanhaService extends BaseModelService
 {
   use Searchable, Deletable;
 
@@ -29,6 +30,13 @@ class ExecucaoService extends BaseModelService
       'campanhas' => $campanhas,
       'pontos' => $pontos
     ];
+  }
+
+  public function getPontosCampanha(ServicoPmqaCampanha $campanha)
+  {
+    return ServicoPmqaPonto::whereHas('campanhas', function (Builder $query) use ($campanha) {
+      $query->where('campanha_id', $campanha->id);
+    })->paginate();
   }
 
   public function store(array $request): array
