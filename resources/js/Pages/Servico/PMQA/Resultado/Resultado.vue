@@ -15,7 +15,6 @@ import { IconPencil } from "@tabler/icons-vue";
 import { IconSettings } from "@tabler/icons-vue";
 import ModalResultado from "./ModalResultado.vue";
 import { computed } from "vue";
-VueApexChart
 
 const props = defineProps({
   contrato: { type: Object },
@@ -27,10 +26,23 @@ const props = defineProps({
 const filtroParametros = computed(() => {
   const parametrosIds = [...new Set(props.resultado.campanhas.map(campanha => campanha.pontos.map(ponto => ponto.lista.parametros)).flat(2).map(parametro => parametro.id))];
 
-  return props.parametros.filter(parametro => parametrosIds.includes(parametro.id)).reduce((acc, item) => {
+  let uniqueParametros = props.parametros.filter(parametro => parametrosIds.includes(parametro.id)).reduce((acc, item) => {
     acc[item.id] = item;
     return acc;
   }, {});
+
+  props.resultado.campanhas.forEach(campanha => {
+    campanha.pontos.forEach(ponto => {
+      ponto.lista.parametros_vinculados.forEach(vinculado => {
+        uniqueParametros[vinculado.parametro_id][vinculado.lista_parametro_id] = {
+          nome_lista: ponto.lista.nome,
+          medicao: vinculado.medicao.medicao
+        }
+      });
+    });
+  });
+
+  return uniqueParametros;
 });
 
 </script>
@@ -70,8 +82,7 @@ const filtroParametros = computed(() => {
             <div v-for="parametro, key, index in filtroParametros" :key="parametro.id" class="tab-pane"
               :class="index === 0 ? 'active show' : ''" :id="'tabs-parametro-' + parametro.id" role="tabpanel">
               <h4>{{ parametro.nome }}</h4>
-              <div>Fringilla egestas nunc quis tellus diam rhoncus ultricies tristique enim at
-                diam, sem nunc amet, pellentesque id egestas velit sed</div>
+              <pre>{{ parametro }}</pre>
             </div>
           </div>
         </div>
