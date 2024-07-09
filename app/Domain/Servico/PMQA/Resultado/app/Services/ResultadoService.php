@@ -3,6 +3,7 @@
 namespace App\Domain\Servico\PMQA\Resultado\app\Services;
 
 use App\Models\ServicoPmqaCampanha;
+use App\Models\ServicoPmqaParametro;
 use App\Models\ServicoPmqaResultado;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
@@ -52,5 +53,12 @@ class ResultadoService extends BaseModelService
   public function destroy(ServicoPmqaResultado $resultado): array
   {
     return $this->dataManagement->delete(entity: $this->modelClass, id: $resultado->id);
+  }
+
+  public function resultado()
+  {
+    return [
+      'parametros' => ServicoPmqaParametro::all()
+    ];
   }
 }

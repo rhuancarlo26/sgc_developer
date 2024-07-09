@@ -72,7 +72,9 @@ const abrirModalResultado = (item) => {
               </td>
               <td>{{ dateTimeFormat(item.created_at) }}</td>
               <td>
-                <NavLink route-name="dashboard" class="btn btn-icon btn-info me-1" :icon="IconSettings" />
+                <NavLink route-name="contratos.contratada.servicos.pmqa.resultado.resultado"
+                  :param="{ contrato: contrato.id, servico: servico.id, resultado: item.id }"
+                  class="btn btn-icon btn-info me-1" :icon="IconSettings" />
                 <NavButton @click="abrirModalResultado(item)" :icon="IconPencil" class="btn-icon"
                   type-button="primary" />
                 <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção da campanha será permanente.' }">
