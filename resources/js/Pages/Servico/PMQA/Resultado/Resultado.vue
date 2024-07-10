@@ -5,19 +5,13 @@ import Navbar from "../Navbar.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
-import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
-import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
-import NavLink from "@/Components/NavLink.vue";
 import { onMounted, ref } from "vue";
-import { dateTimeFormat } from "@/Utils/DateTimeUtils";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
-import { IconTrash } from "@tabler/icons-vue";
-import { IconPencil } from "@tabler/icons-vue";
-import { IconSettings } from "@tabler/icons-vue";
-import ModalResultado from "./ModalResultado.vue";
 import { computed } from "vue";
-import BarChart from "@/Components/BarChart.vue";
+import { IconEdit, IconFileTypePdf } from "@tabler/icons-vue";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import { IconX } from "@tabler/icons-vue";
+import { IconTrash } from "@tabler/icons-vue";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
 
 const props = defineProps({
@@ -29,7 +23,22 @@ const props = defineProps({
 
 const form = useForm({
   resultado_id: props.resultado.id,
-  analises: []
+  analises: [],
+});
+
+const form_iqa = useForm({
+  id: null,
+  resultado_id: props.resultado.id,
+  analise: null,
+  ...props.resultado.analise_iqa
+})
+
+let form_outra_analise = useForm({
+  id: null,
+  resultado_id: props.resultado.id,
+  nome: null,
+  arquivo: null,
+  analise: null
 });
 
 onMounted(() => {
@@ -48,14 +57,14 @@ const filtroParametros = computed(() => {
     return acc;
   }, {});
 
-  props.resultado.campanhas.forEach(campanha => {
-    campanha.pontos.forEach(ponto => {
-      ponto.lista.parametros_vinculados.forEach(vinculado => {
+  // props.resultado.campanhas.forEach(campanha => {
+  //   campanha.pontos.forEach(ponto => {
+  //     ponto.lista.parametros_vinculados.forEach(vinculado => {
 
-      });
-    });
-  });
-  console.log('parametros', uniqueParametros);
+  //     });
+  //   });
+  // });
+
   return uniqueParametros;
 });
 
@@ -65,6 +74,29 @@ const salvarAnalise = () => {
   } else {
     form.post(route('contratos.contratada.servicos.pmqa.resultado.store_analise', { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
   }
+}
+
+const salvarAnaliseIqa = () => {
+  if (form_iqa.id) {
+    form_iqa.patch(route('contratos.contratada.servicos.pmqa.resultado.update_analise_iqa', { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
+  } else {
+    form_iqa.post(route('contratos.contratada.servicos.pmqa.resultado.store_analise_iqa', { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
+  }
+}
+
+const salvarOutraAnalise = () => {
+  if (form_outra_analise.id) {
+    console.log('form', form_outra_analise);
+    form_outra_analise.post(route('contratos.contratada.servicos.pmqa.resultado.update_outra_analise', { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
+  } else {
+    form_outra_analise.post(route('contratos.contratada.servicos.pmqa.resultado.store_outra_analise', { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
+  }
+}
+
+const editarOutraAnalise = (item) => {
+  form_outra_analise.id = item.id;
+  form_outra_analise.nome = item.nome;
+  form_outra_analise.analise = item.analise;
 }
 
 </script>
@@ -112,7 +144,7 @@ const salvarAnalise = () => {
           <div class="tab-content">
             <div v-for="parametro, key, index in filtroParametros" :key="parametro.id" class="tab-pane"
               :class="index === 0 ? 'active show' : ''" :id="'tabs-parametro-' + parametro.id" role="tabpanel">
-              <BarChart :chart_data="{
+              <!-- <BarChart :chart_data="{
                 labels: ['Medição'],
                 datasets: [{
                   label: 'Data One',
@@ -123,7 +155,7 @@ const salvarAnalise = () => {
                   backgroundColor: '#f87900',
                   data: [1]
                 }]
-              }" :chart_options="{ responsive: true }"></BarChart>
+              }" :chart_options="{ responsive: true }" /> -->
               <div>
                 <div class="row mb-4">
                   <div class="col form-group">
@@ -145,19 +177,90 @@ const salvarAnalise = () => {
                 <div class="row mb-4">
                   <div class="col form-group">
                     <InputLabel value="Analise" for="analise" />
-                    <textarea name="analise-iqa" id="analise-iqa" class="form-control" rows="6"></textarea>
+                    <textarea name="analise-iqa" id="analise-iqa" class="form-control" rows="6"
+                      v-model="form_iqa.analise"></textarea>
                     <InputError :message="form.errors.analise" />
                   </div>
                 </div>
                 <div class="row">
                   <div class="col form-group d-flex justify-content-end">
-                    <NavButton @click="salvarAnalise()" type-button="success" :icon="IconDeviceFloppy" title="Salvar" />
+                    <NavButton @click="salvarAnaliseIqa()" type-button="success" :icon="IconDeviceFloppy"
+                      title="Salvar" />
                   </div>
                 </div>
               </div>
             </div>
             <div class="tab-pane" id="tabs-parametro-outra-analise" role="tabpanel">
-              Outra analise
+              <div>
+                <div class="row mb-4">
+                  <div class="col form-group">
+                    <InputLabel value="Nome da analise" for="nome" />
+                    <input type="text" name="nome" id="nome" class="form-control" v-model="form_outra_analise.nome">
+                    <InputError :message="form.errors.analise" />
+                  </div>
+                </div>
+                <div class="row mb-4">
+                  <div class="col form-group">
+                    <InputLabel value="Buscar arquivo" for="arquivo" />
+                    <input @input="form_outra_analise.arquivo = $event.target.files[0]" type="file" name="arquivo"
+                      id="arquivo" class="form-control">
+                    <InputError :message="form_outra_analise.errors.arquivo" />
+                  </div>
+                </div>
+                <div class="row mb-4">
+                  <div class="col form-group">
+                    <InputLabel value="Analise dos resultados" for="analise" />
+                    <textarea name="analise" id="analise" rows="6" class="form-control"
+                      v-model="form_outra_analise.analise"></textarea>
+                    <InputError :message="form_outra_analise.errors.analise" />
+                  </div>
+                </div>
+                <div class="row mb-4">
+                  <div class="col form-group d-flex justify-content-end">
+                    <NavButton v-if="form_outra_analise.id" @click="form_outra_analise.reset()" type-button="danger"
+                      :icon="IconX" />
+                    <NavButton @click="salvarOutraAnalise()" type-button="success" :icon="IconDeviceFloppy"
+                      :title="form_outra_analise ? 'Editar' : 'Salvar'" />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <div class="table-responsive">
+                      <table class="table table-hover non-hover">
+                        <thead>
+                          <tr>
+                            <th>Nome</th>
+                            <th>Análise dos resultados</th>
+                            <th>Ação</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="outraAnalise in resultado.outras_analises" :key="outraAnalise.id">
+                            <td>{{ outraAnalise.nome }}</td>
+                            <td>{{ outraAnalise.analise }}</td>
+                            <td>
+                              <a v-if="outraAnalise.caminho" class="btn btn-icon btn-primary me-1" target="_blank"
+                                :href="route('contratos.contratada.servicos.pmqa.resultado.visualizar_outra_analise', { contrato: contrato.id, servico: servico.id, resultado: resultado.id, outra_analise: outraAnalise.id })">
+                                <IconFileTypePdf />
+                              </a>
+                              <NavButton @click="editarOutraAnalise(outraAnalise)" route-name="#" type-button="info"
+                                :icon="IconEdit" class="btn btn-icon" />
+                              <LinkConfirmation v-slot="confirmation"
+                                :options="{ text: 'A remoção da campanha será permanente.' }">
+                                <Link :onBefore="confirmation.show"
+                                  :href="route('contratos.contratada.servicos.pmqa.resultado.delete_outra_analise', { contrato: contrato.id, servico: servico.id, resultado: resultado.id, outra_analise: outraAnalise.id })"
+                                  as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                                <IconTrash />
+                                </Link>
+                              </LinkConfirmation>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
