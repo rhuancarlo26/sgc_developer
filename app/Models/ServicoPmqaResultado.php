@@ -16,4 +16,9 @@ class ServicoPmqaResultado extends Model
     {
         return $this->belongsToMany(ServicoPmqaCampanha::class, 'servico_pmqa_resultado_campanhas', 'resultado_id', 'campanha_id');
     }
+
+    public function analises()
+    {
+        return $this->hasMany(ServicoPmqaResultadoAnaliseParametro::class, 'resultado_id');
+    }
 }
