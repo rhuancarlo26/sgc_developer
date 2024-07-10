@@ -26,6 +26,8 @@ class ResultadoController extends Controller
       'servico' => $servico->load(['tipo']),
       'resultado' => $resultado->load([
         'analises',
+        'analise_iqa',
+        'outras_analises',
         'campanhas.pontos.lista.parametros_vinculados.medicao'
       ]),
       ...$response

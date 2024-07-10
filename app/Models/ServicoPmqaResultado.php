@@ -21,4 +21,14 @@ class ServicoPmqaResultado extends Model
     {
         return $this->hasMany(ServicoPmqaResultadoAnaliseParametro::class, 'resultado_id');
     }
+
+    public function analise_iqa()
+    {
+        return $this->hasOne(ServicoPmqaResultadoAnaliseIqa::class, 'resultado_id');
+    }
+
+    public function outras_analises()
+    {
+        return $this->hasMany(ServicoPmqaResultadoOutraAnalise::class, 'resultado_id');
+    }
 }
