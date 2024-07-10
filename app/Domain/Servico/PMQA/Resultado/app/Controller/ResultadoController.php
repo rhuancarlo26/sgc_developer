@@ -25,6 +25,7 @@ class ResultadoController extends Controller
       'contrato' => $contrato,
       'servico' => $servico->load(['tipo']),
       'resultado' => $resultado->load([
+        'analises',
         'campanhas.pontos.lista.parametros_vinculados.medicao'
       ]),
       ...$response
