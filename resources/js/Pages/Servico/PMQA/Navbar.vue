@@ -51,6 +51,11 @@ const porps = defineProps({
                         active-on-route-prefix="contratos.contratada.servicos.pmqa.resultado*"
                         :param="{ contrato: contrato.id, servico: servico.id }" title="Resultado"
                         :icon="IconLayoutDashboard" />
+
+                      <NavLink route-name="contratos.contratada.servicos.pmqa.relatorio.index"
+                        active-on-route-prefix="contratos.contratada.servicos.pmqa.relatorio*"
+                        :param="{ contrato: contrato.id, servico: servico.id }" title="Relatório"
+                        :icon="IconLayoutDashboard" />
                     </ul>
                   </div>
                 </div>
