@@ -22,7 +22,8 @@ const props = defineProps({
   servico: { type: Object },
   resultado: { type: Object },
   parametros: { type: Array },
-  uniqueParametros: { type: Array }
+  uniqueParametros: { type: Array },
+  chartDataIqa: { type: Array },
 });
 
 const form = useForm({
@@ -109,10 +110,9 @@ const editarOutraAnalise = (item) => {
       <template #body>
         <div class="card-header">
           <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
-            <li v-for="parametro, key, index in uniqueParametros" :key="parametro.id" class="nav-item"
-              role="presentation">
-              <a :href="'#tabs-parametro-' + parametro.id" class="nav-link" :class="index === 0 ? 'active' : ''"
-                data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">{{ `${parametro.nome}
+            <li v-for="parametro in uniqueParametros" :key="parametro.id" class="nav-item" role="presentation">
+              <a :href="'#tabs-parametro-' + parametro.id" class="nav-link" data-bs-toggle="tab" aria-selected="false"
+                tabindex="-1" role="tab">{{ `${parametro.nome}
                 ${parametro.unidade ? ` - ${parametro.unidade}` : ''}` }}</a>
             </li>
             <li class="nav-item" role="presentation">
@@ -127,9 +127,10 @@ const editarOutraAnalise = (item) => {
         </div>
         <div class="card-body">
           <div class="tab-content">
-            <div v-for="parametro, key, index in uniqueParametros" :key="parametro.id" class="tab-pane"
-              :class="index === 0 ? 'active show' : ''" :id="'tabs-parametro-' + parametro.id" role="tabpanel">
-              <BarChart :chart_data="parametro.datasets" :chart_options="{ responsive: true }" />
+            <div v-for="parametro in uniqueParametros" :key="parametro.id" class="tab-pane"
+              :id="'tabs-parametro-' + parametro.id" role="tabpanel">
+              <BarChart :style="{ height: '70px', position: 'relative' }" :chart_data="parametro.datasets"
+                :chart_options="{ responsive: true }" />
 
               <div class="card mb-4">
                 <DivTabelaParametro :parametro="parametro" />
@@ -152,7 +153,12 @@ const editarOutraAnalise = (item) => {
               </div>
             </div>
             <div class="tab-pane" id="tabs-parametro-iqa" role="tabpanel">
-              <div class="card  mb-4">
+              <BarChart :style="{
+                height: '70px',
+                position: 'relative'
+              }" :chart_data="chartDataIqa" :chart_options="{ responsive: true }" />
+
+              <div class="card mb-4">
                 <DivTabelaMedirIqaVue />
               </div>
               <div>

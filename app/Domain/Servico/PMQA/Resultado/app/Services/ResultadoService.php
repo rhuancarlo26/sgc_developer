@@ -172,15 +172,38 @@ class ResultadoService extends BaseModelService
       'analises',
       'analise_iqa',
       'outras_analises',
-      'campanhas.medicoes.lista_parametro',
+      'campanhas.medicoes.ponto_medicao',
+      'campanhas.medicoes.lista_parametro.parametro_lista',
       'campanhas.pontos.lista.parametros_vinculados.medicao'
     ]);
 
-    // $iqas = collect($resultado->campanhas)->flatMap(function ($campanha) {
-    //   return collect($campanha->pontos)->flatMap(function ($ponto) {
-    //     return collect($ponto->lista)->pluck('medirIqa');
-    //   });
-    // })->toArray();
+    $chartDataIqa = [
+      'labels' => [],
+      'datasets' => []
+    ];
+
+    foreach ($resultado->campanhas as $campanha) {
+      $chartDataIqa['labels'][] = $campanha->nome;
+
+      $iqas = [];
+
+      foreach ($campanha->medicoes as $medicao) {
+        $id = $medicao->ponto_medicao->id;
+        $iqa = $medicao->ponto_medicao->iqa;
+
+        if (!isset($iqas[$id])) {
+          if ($iqa) {
+            $iqas[$id] = $iqa;
+          }
+        }
+      }
+
+      $chartDataIqa['datasets'][] = [
+        'label' => $campanha->nome,
+        'backgroundColor' => $this->getRandomColor(),
+        'data' => array_values($iqas)
+      ];
+    }
 
     $parametrosIds = collect($resultado->campanhas)->flatMap(function ($campanha) {
       return collect($campanha->pontos)->flatMap(function ($ponto) {
@@ -216,11 +239,11 @@ class ResultadoService extends BaseModelService
           }
         }
 
-        // Adicionando a estrutura datasets ao parâmetro
         $parametro->datasets = [
-          'labels' => range(1, $maxSize),  // Este campo pode ser removido se não for necessário
+          'labels' => range(1, $maxSize),
           'datasets' => $datasets
         ];
+
         return true;
       }
       return false;
@@ -229,7 +252,8 @@ class ResultadoService extends BaseModelService
     return [
       'parametros' => $parametros,
       'resultado' => $resultado,
-      'uniqueParametros' => $uniqueParametros
+      'uniqueParametros' => $uniqueParametros,
+      'chartDataIqa' => $chartDataIqa
     ];
   }
 }
