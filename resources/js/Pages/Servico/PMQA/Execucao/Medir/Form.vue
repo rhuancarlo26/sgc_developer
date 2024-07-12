@@ -21,6 +21,7 @@ const props = defineProps({
 
 const form = useForm({
   id: null,
+  campanha_id: props.campanha.id,
   campanha_ponto_id: props.ponto.id,
   sem_coleta: false,
   justificativa: null,
