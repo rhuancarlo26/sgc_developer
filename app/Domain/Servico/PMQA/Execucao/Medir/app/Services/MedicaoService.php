@@ -22,7 +22,7 @@ class MedicaoService extends BaseModelService
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
     if ($request['parametros']) {
-      $this->syncParametros($response['model'], $request['parametros']);
+      $this->syncParametros($response['model'], $request['parametros'], $request['campanha_id']);
     }
 
     return $response;
@@ -33,18 +33,19 @@ class MedicaoService extends BaseModelService
     $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
 
     if ($request['parametros']) {
-      $this->syncParametros(ServicoPmqaCampanhaPontoMedicao::find($request['id']), $request['parametros']);
+      $this->syncParametros(ServicoPmqaCampanhaPontoMedicao::find($request['id']), $request['parametros'], $request['campanha_id']);
     }
 
     return $response;
   }
 
-  public function syncParametros(ServicoPmqaCampanhaPontoMedicao $medicao, array $parametros): void
+  public function syncParametros(ServicoPmqaCampanhaPontoMedicao $medicao, array $parametros, int $campanha_id): void
   {
     ServicoPmqaCampanhaPontoMedicaoParametro::where('ponto_medicao_id', $medicao->id)->delete();
-    foreach ($parametros as $key => $value) {
 
+    foreach ($parametros as $key => $value) {
       ServicoPmqaCampanhaPontoMedicaoParametro::create([
+        'campanha_id' => $campanha_id,
         'ponto_medicao_id' => $medicao->id,
         'lista_parametro_id' => $key,
         'medicao' => $value

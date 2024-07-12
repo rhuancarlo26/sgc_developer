@@ -11,4 +11,9 @@ class ServicoPmqaCampanhaPontoMedicaoParametro extends Model
 
     protected $table = 'servico_pmqa_camp_p_med_parametros';
     protected $guarded = ['id', 'created_at'];
+
+    public function lista_parametro()
+    {
+        return $this->belongsTo(ServicoPmqaListaParametro::class, 'lista_parametro_id');
+    }
 }

@@ -155,10 +155,75 @@ class ResultadoService extends BaseModelService
     return $this->dataManagement->delete(entity: $this->modelClassOutraAnalise, id: $outra_analise->id);
   }
 
-  public function resultado()
+  public function getRandomColor()
   {
+    $letters = '0123456789ABCDEF';
+    $color = '#';
+    for ($i = 0; $i < 6; $i++) {
+      $color .= $letters[rand(0, 15)];
+    }
+    return $color;
+  }
+
+  public function resultado($resultado)
+  {
+    $parametros = ServicoPmqaParametro::all();
+    $resultado->load([
+      'analises',
+      'analise_iqa',
+      'outras_analises',
+      'campanhas.medicoes.lista_parametro',
+      'campanhas.pontos.lista.parametros_vinculados.medicao'
+    ]);
+
+    $parametrosIds = collect($resultado->campanhas)->flatMap(function ($campanha) {
+      return collect($campanha->pontos)->flatMap(function ($ponto) {
+        return collect($ponto->lista->parametros)->pluck('id');
+      });
+    })->unique()->toArray();
+
+    $uniqueParametros = collect($parametros)->filter(function ($parametro) use ($parametrosIds, $resultado) {
+      if (in_array($parametro->id, $parametrosIds)) {
+        $datasets = collect($resultado->campanhas)
+          ->map(function ($campanha) use ($parametro) {
+            $medicoes = collect($campanha->medicoes)
+              ->filter(function ($medicao) use ($parametro) {
+                return $medicao->lista_parametro->parametro_id == $parametro->id;
+              })
+              ->pluck('medicao')
+              ->toArray();
+
+            return [
+              'label' => $campanha->nome,
+              'backgroundColor' => $this->getRandomColor(),
+              'data' => $medicoes
+            ];
+          })
+          ->toArray();
+
+        $maxSize = 0;
+
+        foreach ($datasets as $dataset) {
+          $currentSize = count($dataset['data']);
+          if ($currentSize > $maxSize) {
+            $maxSize = $currentSize;
+          }
+        }
+
+        // Adicionando a estrutura datasets ao parâmetro
+        $parametro->datasets = [
+          'labels' => range(1, $maxSize),  // Este campo pode ser removido se não for necessário
+          'datasets' => $datasets
+        ];
+        return true;
+      }
+      return false;
+    })->keyBy('id')->toArray();
+
     return [
-      'parametros' => ServicoPmqaParametro::all()
+      'parametros' => $parametros,
+      'resultado' => $resultado,
+      'uniqueParametros' => $uniqueParametros
     ];
   }
 }

@@ -13,12 +13,14 @@ import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import { IconX } from "@tabler/icons-vue";
 import { IconTrash } from "@tabler/icons-vue";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
+import BarChart from "@/Components/BarChart.vue";
 
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
   resultado: { type: Object },
-  parametros: { type: Array }
+  parametros: { type: Array },
+  uniqueParametros: { type: Array }
 });
 
 const form = useForm({
@@ -47,25 +49,6 @@ onMounted(() => {
       form.analises[analise.parametro_id] = analise.analise;
     });
   }
-});
-
-const filtroParametros = computed(() => {
-  const parametrosIds = [...new Set(props.resultado.campanhas.map(campanha => campanha.pontos.map(ponto => ponto.lista.parametros)).flat(2).map(parametro => parametro.id))];
-
-  let uniqueParametros = props.parametros.filter(parametro => parametrosIds.includes(parametro.id)).reduce((acc, item) => {
-    acc[item.id] = item;
-    return acc;
-  }, {});
-
-  // props.resultado.campanhas.forEach(campanha => {
-  //   campanha.pontos.forEach(ponto => {
-  //     ponto.lista.parametros_vinculados.forEach(vinculado => {
-
-  //     });
-  //   });
-  // });
-
-  return uniqueParametros;
 });
 
 const salvarAnalise = () => {
@@ -124,7 +107,7 @@ const editarOutraAnalise = (item) => {
       <template #body>
         <div class="card-header">
           <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
-            <li v-for="parametro, key, index in filtroParametros" :key="parametro.id" class="nav-item"
+            <li v-for="parametro, key, index in uniqueParametros" :key="parametro.id" class="nav-item"
               role="presentation">
               <a :href="'#tabs-parametro-' + parametro.id" class="nav-link" :class="index === 0 ? 'active' : ''"
                 data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">{{ `${parametro.nome}
@@ -142,20 +125,9 @@ const editarOutraAnalise = (item) => {
         </div>
         <div class="card-body">
           <div class="tab-content">
-            <div v-for="parametro, key, index in filtroParametros" :key="parametro.id" class="tab-pane"
+            <div v-for="parametro, key, index in uniqueParametros" :key="parametro.id" class="tab-pane"
               :class="index === 0 ? 'active show' : ''" :id="'tabs-parametro-' + parametro.id" role="tabpanel">
-              <!-- <BarChart :chart_data="{
-                labels: ['Medição'],
-                datasets: [{
-                  label: 'Data One',
-                  backgroundColor: '#f87979',
-                  data: [2]
-                }, {
-                  label: 'Data One',
-                  backgroundColor: '#f87900',
-                  data: [1]
-                }]
-              }" :chart_options="{ responsive: true }" /> -->
+              <BarChart :chart_data="parametro.datasets" :chart_options="{ responsive: true }" />
               <div>
                 <div class="row mb-4">
                   <div class="col form-group">
