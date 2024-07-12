@@ -14,6 +14,8 @@ import { IconX } from "@tabler/icons-vue";
 import { IconTrash } from "@tabler/icons-vue";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
 import BarChart from "@/Components/BarChart.vue";
+import DivTabelaParametro from "../Configuracao/Parametro/DivTabelaParametro.vue";
+import DivTabelaMedirIqaVue from "../Configuracao/Parametro/DivTabelaMedirIqa.vue";
 
 const props = defineProps({
   contrato: { type: Object },
@@ -128,6 +130,11 @@ const editarOutraAnalise = (item) => {
             <div v-for="parametro, key, index in uniqueParametros" :key="parametro.id" class="tab-pane"
               :class="index === 0 ? 'active show' : ''" :id="'tabs-parametro-' + parametro.id" role="tabpanel">
               <BarChart :chart_data="parametro.datasets" :chart_options="{ responsive: true }" />
+
+              <div class="card mb-4">
+                <DivTabelaParametro :parametro="parametro" />
+              </div>
+
               <div>
                 <div class="row mb-4">
                   <div class="col form-group">
@@ -145,6 +152,9 @@ const editarOutraAnalise = (item) => {
               </div>
             </div>
             <div class="tab-pane" id="tabs-parametro-iqa" role="tabpanel">
+              <div class="card  mb-4">
+                <DivTabelaMedirIqaVue />
+              </div>
               <div>
                 <div class="row mb-4">
                   <div class="col form-group">
