@@ -176,6 +176,12 @@ class ResultadoService extends BaseModelService
       'campanhas.pontos.lista.parametros_vinculados.medicao'
     ]);
 
+    // $iqas = collect($resultado->campanhas)->flatMap(function ($campanha) {
+    //   return collect($campanha->pontos)->flatMap(function ($ponto) {
+    //     return collect($ponto->lista)->pluck('medirIqa');
+    //   });
+    // })->toArray();
+
     $parametrosIds = collect($resultado->campanhas)->flatMap(function ($campanha) {
       return collect($campanha->pontos)->flatMap(function ($ponto) {
         return collect($ponto->lista->parametros)->pluck('id');
