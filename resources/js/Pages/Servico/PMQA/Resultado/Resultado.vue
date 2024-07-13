@@ -7,8 +7,8 @@ import InputError from "@/Components/InputError.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import NavButton from "@/Components/NavButton.vue";
 import { onMounted, ref } from "vue";
-import { computed } from "vue";
-import { IconEdit, IconFileTypePdf } from "@tabler/icons-vue";
+import { IconEdit } from "@tabler/icons-vue";
+import { IconFileTypePdf } from "@tabler/icons-vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import { IconX } from "@tabler/icons-vue";
 import { IconTrash } from "@tabler/icons-vue";
@@ -22,8 +22,8 @@ const props = defineProps({
   servico: { type: Object },
   resultado: { type: Object },
   parametros: { type: Array },
-  uniqueParametros: { type: Array },
-  chartDataIqa: { type: Array },
+  uniqueParametros: { type: Object },
+  chartDataIqa: { type: Object },
 });
 
 const form = useForm({
@@ -79,11 +79,74 @@ const salvarOutraAnalise = () => {
   }
 }
 
-const editarOutraAnalise = (item) => {
-  form_outra_analise.id = item.id;
-  form_outra_analise.nome = item.nome;
-  form_outra_analise.analise = item.analise;
-}
+const horizontalLine = ref({
+  plugins: {
+    annotation: {
+      annotations: {
+        line1: {
+          type: 'line',
+          yMin: 20,
+          yMax: 20,
+          borderColor: '#667382',
+          borderWidth: 2,
+          label: {
+            content: 'Péssimo',
+            enabled: true,
+            position: 'start'
+          }
+        },
+        line2: {
+          type: 'line',
+          yMin: 36,
+          yMax: 36,
+          borderColor: '#d63939',
+          borderWidth: 2,
+          label: {
+            content: 'Threshold',
+            enabled: true,
+            position: 'start'
+          }
+        },
+        line3: {
+          type: 'line',
+          yMin: 51,
+          yMax: 51,
+          borderColor: '#f76707',
+          borderWidth: 2,
+          label: {
+            content: 'Threshold',
+            enabled: true,
+            position: 'start'
+          }
+        },
+        line4: {
+          type: 'line',
+          yMin: 79,
+          yMax: 79,
+          borderColor: '#2fb344',
+          borderWidth: 2,
+          label: {
+            content: 'Threshold',
+            enabled: true,
+            position: 'start'
+          }
+        },
+        line5: {
+          type: 'line',
+          yMin: 100,
+          yMax: 100,
+          borderColor: '#0054a6',
+          borderWidth: 2,
+          label: {
+            content: 'Threshold',
+            enabled: true,
+            position: 'start'
+          }
+        },
+      }
+    }
+  }
+})
 
 </script>
 <template>
@@ -156,7 +219,7 @@ const editarOutraAnalise = (item) => {
               <BarChart :style="{
                 height: '70px',
                 position: 'relative'
-              }" :chart_data="chartDataIqa" :chart_options="{ responsive: true }" />
+              }" :chart_data="chartDataIqa" :options="horizontalLine" :chart_options="{ responsive: true }" />
 
               <div class="card mb-4">
                 <DivTabelaMedirIqaVue />
@@ -231,8 +294,8 @@ const editarOutraAnalise = (item) => {
                                 :href="route('contratos.contratada.servicos.pmqa.resultado.visualizar_outra_analise', { contrato: contrato.id, servico: servico.id, resultado: resultado.id, outra_analise: outraAnalise.id })">
                                 <IconFileTypePdf />
                               </a>
-                              <NavButton @click="editarOutraAnalise(outraAnalise)" route-name="#" type-button="info"
-                                :icon="IconEdit" class="btn btn-icon" />
+                              <NavButton @click="Object.assing(form_outra_analise, outraAnalise)" route-name="#"
+                                type-button="info" :icon="IconEdit" class="btn btn-icon" />
                               <LinkConfirmation v-slot="confirmation"
                                 :options="{ text: 'A remoção da campanha será permanente.' }">
                                 <Link :onBefore="confirmation.show"
