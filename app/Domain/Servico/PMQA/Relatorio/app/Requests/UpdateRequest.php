@@ -4,11 +4,12 @@ namespace App\Domain\Servico\PMQA\Relatorio\app\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
   public function rules(): array
   {
     return [
+      'id'           => ['required'],
       'servico_id'   => ['required'],
       'nome'         => ['required'],
       'resultado_id' => ['required'],

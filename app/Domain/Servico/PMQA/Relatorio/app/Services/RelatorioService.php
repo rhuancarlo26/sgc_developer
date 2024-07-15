@@ -19,19 +19,34 @@ class RelatorioService extends BaseModelService
 
   protected string $modelClass = ServicoPmqaRelatorio::class;
 
-  public function index(Servicos $servico): array
+  public function index(Servicos $servico, array $searchParams): array
   {
+    $relatorios = $this->searchAllColumns(...$searchParams)
+      ->with(['status'])
+      ->where('servico_id', $servico->id)
+      ->paginate()
+      ->appends($searchParams);
+
     $resultados = ServicoPmqaResultado::with(['campanhas'])->where('servico_id', $servico->id)->get();
 
     return [
+      'relatorios' => $relatorios,
       'resultados' => $resultados
     ];
   }
 
   public function store(array $request): array
   {
-    $relatorioModel = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+    return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+  }
 
-    return $relatorioModel;
+  public function update(array $request): array
+  {
+    return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+  }
+
+  public function destroy(ServicoPmqaRelatorio $relatorio): array
+  {
+    return $this->dataManagement->delete(entity: $this->modelClass, id: $relatorio->id);
   }
 }
