@@ -17,6 +17,9 @@ const form = useForm({
 });
 
 const salvarLicencaCondicionante = () => {
+  form.contrato_id = props.servico?.contrato_id;
+  form.servico_id = props.servico?.id;
+
   form.post(route('contratos.contratada.servicos.condicionante.store'));
 }
 

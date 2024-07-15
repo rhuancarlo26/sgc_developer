@@ -11,14 +11,17 @@ const props = defineProps({
 });
 
 const form = useForm({
-  contrato_id: props.servico.contrato_id,
-  servico_id: props.servico.id,
+  contrato_id: props.servico?.contrato_id,
+  servico_id: props.servico?.id,
   rh: null,
   veiculo: null,
   equipamento: null
 });
 
 const salvarRh = () => {
+  form.contrato_id = props.servico?.contrato_id;
+  form.servico_id = props.servico?.id;
+
   form.post(route('contratos.contratada.servicos.rh.store'));
 }
 
@@ -30,6 +33,9 @@ const excluirRh = (rh_id) => {
 }
 
 const salvarVeiculo = () => {
+  form.contrato_id = props.servico?.contrato_id;
+  form.servico_id = props.servico?.id;
+
   form.post(route('contratos.contratada.servicos.veiculo.store'));
 }
 
@@ -41,6 +47,9 @@ const excluirVeiculo = (veiculo_id) => {
 }
 
 const salvarEquipamento = () => {
+  form.contrato_id = props.servico?.contrato_id;
+  form.servico_id = props.servico?.id;
+
   form.post(route('contratos.contratada.servicos.equipamento.store'));
 }
 

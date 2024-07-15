@@ -19,17 +19,11 @@ class ResultadoController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado): Response
   {
-    $response = $this->resultadoService->resultado();
+    $response = $this->resultadoService->resultado($resultado);
 
     return Inertia::render('Servico/PMQA/Resultado/Resultado', [
       'contrato' => $contrato,
       'servico' => $servico->load(['tipo']),
-      'resultado' => $resultado->load([
-        'analises',
-        'analise_iqa',
-        'outras_analises',
-        'campanhas.pontos.lista.parametros_vinculados.medicao'
-      ]),
       ...$response
     ]);
   }
