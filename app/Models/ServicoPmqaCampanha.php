@@ -16,4 +16,9 @@ class ServicoPmqaCampanha extends Model
     {
         return $this->belongsToMany(ServicoPmqaPonto::class, 'servico_pmqa_campanha_pontos', 'campanha_id', 'ponto_id');
     }
+
+    public function medicoes()
+    {
+        return $this->hasMany(ServicoPmqaCampanhaPontoMedicaoParametro::class, 'campanha_id');
+    }
 }

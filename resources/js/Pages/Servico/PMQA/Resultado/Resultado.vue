@@ -7,18 +7,23 @@ import InputError from "@/Components/InputError.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import NavButton from "@/Components/NavButton.vue";
 import { onMounted, ref } from "vue";
-import { computed } from "vue";
-import { IconEdit, IconFileTypePdf } from "@tabler/icons-vue";
+import { IconEdit } from "@tabler/icons-vue";
+import { IconFileTypePdf } from "@tabler/icons-vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import { IconX } from "@tabler/icons-vue";
 import { IconTrash } from "@tabler/icons-vue";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
+import BarChart from "@/Components/BarChart.vue";
+import DivTabelaParametro from "../Configuracao/Parametro/DivTabelaParametro.vue";
+import DivTabelaMedirIqaVue from "../Configuracao/Parametro/DivTabelaMedirIqa.vue";
 
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
   resultado: { type: Object },
-  parametros: { type: Array }
+  parametros: { type: Array },
+  uniqueParametros: { type: Object },
+  chartDataIqa: { type: Object },
 });
 
 const form = useForm({
@@ -49,25 +54,6 @@ onMounted(() => {
   }
 });
 
-const filtroParametros = computed(() => {
-  const parametrosIds = [...new Set(props.resultado.campanhas.map(campanha => campanha.pontos.map(ponto => ponto.lista.parametros)).flat(2).map(parametro => parametro.id))];
-
-  let uniqueParametros = props.parametros.filter(parametro => parametrosIds.includes(parametro.id)).reduce((acc, item) => {
-    acc[item.id] = item;
-    return acc;
-  }, {});
-
-  // props.resultado.campanhas.forEach(campanha => {
-  //   campanha.pontos.forEach(ponto => {
-  //     ponto.lista.parametros_vinculados.forEach(vinculado => {
-
-  //     });
-  //   });
-  // });
-
-  return uniqueParametros;
-});
-
 const salvarAnalise = () => {
   if (props.resultado.analises.length) {
     form.patch(route('contratos.contratada.servicos.pmqa.resultado.update_analise', { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
@@ -93,11 +79,74 @@ const salvarOutraAnalise = () => {
   }
 }
 
-const editarOutraAnalise = (item) => {
-  form_outra_analise.id = item.id;
-  form_outra_analise.nome = item.nome;
-  form_outra_analise.analise = item.analise;
-}
+const horizontalLine = ref({
+  plugins: {
+    annotation: {
+      annotations: {
+        line1: {
+          type: 'line',
+          yMin: 20,
+          yMax: 20,
+          borderColor: '#667382',
+          borderWidth: 2,
+          label: {
+            content: 'Péssimo',
+            enabled: true,
+            position: 'start'
+          }
+        },
+        line2: {
+          type: 'line',
+          yMin: 36,
+          yMax: 36,
+          borderColor: '#d63939',
+          borderWidth: 2,
+          label: {
+            content: 'Threshold',
+            enabled: true,
+            position: 'start'
+          }
+        },
+        line3: {
+          type: 'line',
+          yMin: 51,
+          yMax: 51,
+          borderColor: '#f76707',
+          borderWidth: 2,
+          label: {
+            content: 'Threshold',
+            enabled: true,
+            position: 'start'
+          }
+        },
+        line4: {
+          type: 'line',
+          yMin: 79,
+          yMax: 79,
+          borderColor: '#2fb344',
+          borderWidth: 2,
+          label: {
+            content: 'Threshold',
+            enabled: true,
+            position: 'start'
+          }
+        },
+        line5: {
+          type: 'line',
+          yMin: 100,
+          yMax: 100,
+          borderColor: '#0054a6',
+          borderWidth: 2,
+          label: {
+            content: 'Threshold',
+            enabled: true,
+            position: 'start'
+          }
+        },
+      }
+    }
+  }
+})
 
 </script>
 <template>
@@ -124,10 +173,9 @@ const editarOutraAnalise = (item) => {
       <template #body>
         <div class="card-header">
           <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
-            <li v-for="parametro, key, index in filtroParametros" :key="parametro.id" class="nav-item"
-              role="presentation">
-              <a :href="'#tabs-parametro-' + parametro.id" class="nav-link" :class="index === 0 ? 'active' : ''"
-                data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">{{ `${parametro.nome}
+            <li v-for="parametro in uniqueParametros" :key="parametro.id" class="nav-item" role="presentation">
+              <a :href="'#tabs-parametro-' + parametro.id" class="nav-link" data-bs-toggle="tab" aria-selected="false"
+                tabindex="-1" role="tab">{{ `${parametro.nome}
                 ${parametro.unidade ? ` - ${parametro.unidade}` : ''}` }}</a>
             </li>
             <li class="nav-item" role="presentation">
@@ -142,20 +190,15 @@ const editarOutraAnalise = (item) => {
         </div>
         <div class="card-body">
           <div class="tab-content">
-            <div v-for="parametro, key, index in filtroParametros" :key="parametro.id" class="tab-pane"
-              :class="index === 0 ? 'active show' : ''" :id="'tabs-parametro-' + parametro.id" role="tabpanel">
-              <!-- <BarChart :chart_data="{
-                labels: ['Medição'],
-                datasets: [{
-                  label: 'Data One',
-                  backgroundColor: '#f87979',
-                  data: [2]
-                }, {
-                  label: 'Data One',
-                  backgroundColor: '#f87900',
-                  data: [1]
-                }]
-              }" :chart_options="{ responsive: true }" /> -->
+            <div v-for="parametro in uniqueParametros" :key="parametro.id" class="tab-pane"
+              :id="'tabs-parametro-' + parametro.id" role="tabpanel">
+              <BarChart :style="{ height: '70px', position: 'relative' }" :chart_data="parametro.datasets"
+                :chart_options="{ responsive: true }" />
+
+              <div class="card mb-4">
+                <DivTabelaParametro :parametro="parametro" />
+              </div>
+
               <div>
                 <div class="row mb-4">
                   <div class="col form-group">
@@ -173,6 +216,14 @@ const editarOutraAnalise = (item) => {
               </div>
             </div>
             <div class="tab-pane" id="tabs-parametro-iqa" role="tabpanel">
+              <BarChart :style="{
+                height: '70px',
+                position: 'relative'
+              }" :chart_data="chartDataIqa" :options="horizontalLine" :chart_options="{ responsive: true }" />
+
+              <div class="card mb-4">
+                <DivTabelaMedirIqaVue />
+              </div>
               <div>
                 <div class="row mb-4">
                   <div class="col form-group">
@@ -243,8 +294,8 @@ const editarOutraAnalise = (item) => {
                                 :href="route('contratos.contratada.servicos.pmqa.resultado.visualizar_outra_analise', { contrato: contrato.id, servico: servico.id, resultado: resultado.id, outra_analise: outraAnalise.id })">
                                 <IconFileTypePdf />
                               </a>
-                              <NavButton @click="editarOutraAnalise(outraAnalise)" route-name="#" type-button="info"
-                                :icon="IconEdit" class="btn btn-icon" />
+                              <NavButton @click="Object.assing(form_outra_analise, outraAnalise)" route-name="#"
+                                type-button="info" :icon="IconEdit" class="btn btn-icon" />
                               <LinkConfirmation v-slot="confirmation"
                                 :options="{ text: 'A remoção da campanha será permanente.' }">
                                 <Link :onBefore="confirmation.show"
