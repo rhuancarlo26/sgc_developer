@@ -11,4 +11,9 @@ class ServicoPmqaRelatorio extends Model
 
     protected $table = 'servico_pmqa_relatorios';
     protected $guarded = ['id', 'created_at'];
+
+    public function status()
+    {
+        return $this->belongsTo(ServicoStatus::class, 'status_id');
+    }
 }

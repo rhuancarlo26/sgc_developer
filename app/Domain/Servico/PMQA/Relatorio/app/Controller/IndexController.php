@@ -19,7 +19,9 @@ class IndexController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, Request $request): Response
   {
-    $response = $this->relatorioService->index(servico: $servico);
+    $searchParams = $request->all('columns', 'value');
+
+    $response = $this->relatorioService->index(servico: $servico, searchParams: $searchParams);
 
     return Inertia::render('Servico/PMQA/Relatorio/Index', [
       'contrato' => $contrato,

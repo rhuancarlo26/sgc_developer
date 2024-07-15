@@ -22,19 +22,25 @@ const form = useForm({
   id: null,
   servico_id: props.servico.id,
   nome: null,
-  resultado: [],
+  resultado_id: null,
   observacao: null
 });
 
 const salvarRelatorio = () => {
-  if (form.id) {
+  const url = form.id ? 'update' : 'store';
 
-  } else {
-    form.post(route('contratos.contratada.servicos.pmqa.relatorio.store', { contrato: props.contrato.id, servico: props.servico.id }))
-  }
+  form.post(route('contratos.contratada.servicos.pmqa.relatorio.' + url, { contrato: props.contrato.id, servico: props.servico.id }), {
+    onSuccess: () => modalCampanha.value.getBsModal().hide()
+  })
 }
 
-const abrirModal = () => {
+const abrirModal = (item) => {
+  form.reset();
+
+  if (item) {
+    Object.assign(form, item);
+  }
+
   modalCampanha.value.getBsModal().show();
 }
 
@@ -69,7 +75,8 @@ defineExpose({ abrirModal });
                   <tr v-for="resultado in resultados" :key="resultado.id">
                     <td>
                       <label class="form-check">
-                        <input class="form-check-input" type="checkbox" :value="resultado" v-model="form.resultado[0]">
+                        <input class="form-check-input" type="radio" :name="'resultado-' + resultado.id"
+                          :id="'resultado-' + resultado.id" :value="resultado.id" v-model="form.resultado_id">
                         <span class="form-check-label">{{ resultado.nome }}</span>
                       </label>
                     </td>

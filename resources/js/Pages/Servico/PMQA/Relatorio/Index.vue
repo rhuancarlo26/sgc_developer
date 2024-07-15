@@ -6,13 +6,9 @@ import { Head, Link } from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
-import NavLink from "@/Components/NavLink.vue";
 import { ref } from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
-import { IconTrash } from "@tabler/icons-vue";
-import { IconPencil } from "@tabler/icons-vue";
-import { IconSettings } from "@tabler/icons-vue";
+import { IconDots } from "@tabler/icons-vue";
 import ModalFormRelatorio from "./ModalFormRelatorio.vue";
 
 const modalFormRelatorio = ref({});
@@ -20,11 +16,12 @@ const modalFormRelatorio = ref({});
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
+  relatorios: { type: Object },
   resultados: { type: Array }
 });
 
-const abrirModalFormRelatorio = () => {
-  modalFormRelatorio.value.abrirModal();
+const abrirModalFormRelatorio = (item) => {
+  modalFormRelatorio.value.abrirModal(item);
 }
 
 </script>
@@ -58,13 +55,53 @@ const abrirModalFormRelatorio = () => {
         </ModelSearchFormAllColumns>
 
         <!-- Listagem-->
-        <Table :columns="['Nome do relatório', 'Data', 'Status', 'Ação']" :records="[]" table-class="table-hover">
-          <template #body="{}">
+        <Table :columns="['Nome do relatório', 'Data', 'Status', 'Ação']" :records="relatorios"
+          table-class="table-hover">
+          <template #body="{ item }">
             <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
+              <td>{{ item.nome }}</td>
+              <td>{{ dateTimeFormat(item.created_at) }}</td>
+              <td class="text-center">
+                <span v-if="item.status_id === 1" class="badge bg-azure-lt">
+                  {{ item.status?.nome }}
+                </span>
+                <span v-else-if="item.status_id === 2" class="badge bg-red-lt">
+                  {{ item.status?.nome }}
+                </span>
+                <span v-else-if="item.status_id === 3" class="badge bg-blue-lt">
+                  {{ item.status?.nome }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="dropdown">
+                  <button class="btn btn-info dropdown-toggle align-text-top" data-bs-boundary="viewport"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <IconDots />
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end" style="">
+                    <a class="dropdown-item" href="javascript:void(0)">
+                      Conclusão
+                    </a>
+                    <a class="dropdown-item" href="javascript:void(0)">
+                      Visualizar relátorio
+                    </a>
+                    <a @click="abrirModalFormRelatorio(item)" class="dropdown-item" href="javascript:void(0)">
+                      Editar
+                    </a>
+                    <Link
+                      :href="route('contratos.contratada.servicos.pmqa.relatorio.delete', { contrato: contrato.id, servico: servico.id, relatorio: item.id })"
+                      method="DELETE" class="dropdown-item">
+                    Excluir
+                    </Link>
+                    <a class="dropdown-item" href="javascript:void(0)">
+                      Enviar para o fiscal
+                    </a>
+                    <a class="dropdown-item" href="javascript:void(0)">
+                      Exportar relatório
+                    </a>
+                  </div>
+                </span>
+              </td>
             </tr>
           </template>
         </Table>
