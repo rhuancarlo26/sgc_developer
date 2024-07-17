@@ -8,7 +8,7 @@
 <style scoped>
 #a4 {
   width: 210mm;
-  height: 297mm;
+  min-height: 297mm;
   border: 1px solid #000;
   margin: auto;
   box-shadow: 0 0 5mm rgba(0, 0, 0, 0.5);

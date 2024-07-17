@@ -61,7 +61,7 @@ const props = defineProps({
             <tbody>
               <tr v-for="equipamento in servico.equipamentos" :key="equipamento.id">
                 <td class="text-center">{{ equipamento.nome }}</td>
-                <td class="text-center">{{ equipamento.numero_serie }}</td>
+                <td class="text-center">{{ equipamento.descricao }}</td>
               </tr>
             </tbody>
           </table>

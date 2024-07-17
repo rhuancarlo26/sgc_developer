@@ -24,6 +24,7 @@ class RelatorioService extends BaseModelService
     $relatorios = $this->searchAllColumns(...$searchParams)
       ->with([
         'status',
+        'resultado.analises',
         'resultado.campanhas.pontos.lista.parametros'
       ])
       ->where('servico_id', $servico->id)

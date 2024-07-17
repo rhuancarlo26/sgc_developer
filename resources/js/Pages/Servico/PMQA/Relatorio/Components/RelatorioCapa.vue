@@ -8,7 +8,7 @@ const props = defineProps({
 </script>
 <template>
   <div class="d-flex flex-column justify-content-between min-vh-100">
-    <div>
+    <div class="text-center">
       <span><strong>{{ contrato.contratada }}</strong></span>
     </div>
     <div class="d-flex justify-content-center">
@@ -28,7 +28,7 @@ const props = defineProps({
         </p>
       </div>
     </div>
-    <div>
+    <div class="text-center">
       <span><strong>{{ dateTimeFormat(relatorio.created_at) }}</strong></span>
     </div>
   </div>
