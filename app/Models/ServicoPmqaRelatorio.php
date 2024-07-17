@@ -16,4 +16,9 @@ class ServicoPmqaRelatorio extends Model
     {
         return $this->belongsTo(ServicoStatus::class, 'status_id');
     }
+
+    public function resultado()
+    {
+        return $this->belongsTo(ServicoPmqaResultado::class, 'resultado_id');
+    }
 }

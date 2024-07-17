@@ -22,7 +22,10 @@ class RelatorioService extends BaseModelService
   public function index(Servicos $servico, array $searchParams): array
   {
     $relatorios = $this->searchAllColumns(...$searchParams)
-      ->with(['status'])
+      ->with([
+        'status',
+        'resultado.campanhas.pontos.lista.parametros'
+      ])
       ->where('servico_id', $servico->id)
       ->paginate()
       ->appends($searchParams);

@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../Navbar.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
@@ -10,8 +10,10 @@ import { ref } from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconDots } from "@tabler/icons-vue";
 import ModalFormRelatorio from "./ModalFormRelatorio.vue";
+import ModalVisualizarRelatorio from "./ModalVisualizarRelatorio.vue";
 
 const modalFormRelatorio = ref({});
+const modalVisualizarRelatorio = ref({});
 
 const props = defineProps({
   contrato: { type: Object },
@@ -22,6 +24,14 @@ const props = defineProps({
 
 const abrirModalFormRelatorio = (item) => {
   modalFormRelatorio.value.abrirModal(item);
+}
+
+const abrirVisualizarRelatorio = (item) => {
+  modalVisualizarRelatorio.value.abrirModal(item);
+}
+
+const excluirRelatorio = (item) => {
+  router.delete(route('contratos.contratada.servicos.pmqa.relatorio.delete', { contrato: props.contrato.id, servico: props.servico.id, relatorio: item.id }));
 }
 
 </script>
@@ -82,17 +92,15 @@ const abrirModalFormRelatorio = (item) => {
                     <a class="dropdown-item" href="javascript:void(0)">
                       Conclusão
                     </a>
-                    <a class="dropdown-item" href="javascript:void(0)">
+                    <a @click="abrirVisualizarRelatorio(item)" class="dropdown-item" href="javascript:void(0)">
                       Visualizar relátorio
                     </a>
                     <a @click="abrirModalFormRelatorio(item)" class="dropdown-item" href="javascript:void(0)">
                       Editar
                     </a>
-                    <Link
-                      :href="route('contratos.contratada.servicos.pmqa.relatorio.delete', { contrato: contrato.id, servico: servico.id, relatorio: item.id })"
-                      method="DELETE" class="dropdown-item">
-                    Excluir
-                    </Link>
+                    <a @click="excluirRelatorio(item)" class="dropdown-item" href="javascript:void(0)">
+                      Excluir
+                    </a>
                     <a class="dropdown-item" href="javascript:void(0)">
                       Enviar para o fiscal
                     </a>
@@ -109,6 +117,7 @@ const abrirModalFormRelatorio = (item) => {
     </Navbar>
 
     <ModalFormRelatorio :contrato="contrato" :servico="servico" :resultados="resultados" ref="modalFormRelatorio" />
+    <ModalVisualizarRelatorio :contrato="contrato" :servico="servico" ref="modalVisualizarRelatorio" />
 
   </AuthenticatedLayout>
 </template>
