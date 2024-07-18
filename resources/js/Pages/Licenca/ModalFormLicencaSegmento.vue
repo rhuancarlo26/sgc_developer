@@ -18,9 +18,9 @@ const emit = defineEmits(['atualizarsegmento']);
 
 const modalLicencaSegmento = ref();
 
-let form = useForm({
+const form = useForm({
   id: null,
-  licenca_id: props.licenca.id,
+  licenca_id: props.licenca?.id,
   rodovia: null,
   uf_inicial: null,
   uf_final: null,
@@ -40,6 +40,8 @@ const calcExtensao = () => {
 }
 
 const salvarLicencaSegmento = () => {
+  form.licenca_id = props.licenca?.id;
+
   if (form.id) {
     form.patch(route('licenca_segmento.update', form.id), {
       onSuccess: () => {

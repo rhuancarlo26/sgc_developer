@@ -15,6 +15,8 @@ const form = useForm({
 })
 
 const salvarDocumento = () => {
+  form.licenca_id = props.licenca.id;
+
   form.post(route('licenca.documento.store'));
 }
 
@@ -23,6 +25,8 @@ const deleteDocumento = () => {
 }
 
 const salvarShapefile = () => {
+  form.licenca_id = props.licenca.id;
+
   form.post(route('licenca.shapefile.store'));
 }
 

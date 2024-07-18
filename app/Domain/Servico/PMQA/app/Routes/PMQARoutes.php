@@ -7,6 +7,9 @@ Route::prefix('/pmqa')->group(function () {
     require __DIR__ . '/../../Configuracao/Ponto/Routes/PontoRoutes.php';
     require __DIR__ . '/../../Configuracao/Parametro/Routes/ParametroRoutes.php';
     require __DIR__ . '/../../Configuracao/VinculacaoPonto/Routes/VinculacaoPontoRoutes.php';
-    require __DIR__ . '/../../Execucao/app/Routes/ExecucaoRoutes.php';
   });
+
+  require __DIR__ . '/../../Execucao/app/Routes/ExecucaoRoutes.php';
+
+  require __DIR__ . '/../../Resultado/app/Routes/ResultadoRoutes.php';
 });

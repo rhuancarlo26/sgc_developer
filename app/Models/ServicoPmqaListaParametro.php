@@ -19,6 +19,11 @@ class ServicoPmqaListaParametro extends Model
         return $this->belongsTo(ServicoPmqaParametro::class, 'parametro_id');
     }
 
+    public function parametro_lista()
+    {
+        return $this->belongsTo(ServicoPmqaParametroLista::class, 'lista_parametro_id');
+    }
+
     public function medicao(): HasOne
     {
         return $this->hasOne(ServicoPmqaCampanhaPontoMedicaoParametro::class, 'lista_parametro_id');
