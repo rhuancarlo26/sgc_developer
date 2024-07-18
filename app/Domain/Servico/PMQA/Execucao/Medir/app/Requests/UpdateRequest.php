@@ -10,6 +10,7 @@ class UpdateRequest extends FormRequest
   {
     return [
       'id'                => ['required'],
+      'campanha_id'       => ['required'],
       'campanha_ponto_id' => ['required'],
       'sem_coleta'        => ['nullable'],
       'iqa'               => ['nullable'],

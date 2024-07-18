@@ -57,7 +57,7 @@ class LicencaSegmentoService extends BaseModelService
     {
         return SvnSegGeoV2::getGeoJson(
             UF_inicial: $post['uf_inicial']['uf'],
-            UF_final: $post['uf_final']['uf'],
+            // UF_final: $post['uf_final']['uf'],
             rodovia: $post['rodovia'],
             km_inicial: $post['km_inicial'],
             km_final: $post['km_final'],
