@@ -19,24 +19,29 @@ class ServicoService extends BaseModelService
 
   protected string $modelClass = Servicos::class;
 
-  public function listarServicos($contrato, $searchParams)
+  public function listarServicos($contrato, $searchParams, $statusIds = null)
   {
+    $query = $this->search(...$searchParams)
+      ->with([
+        'tipo',
+        'tema',
+        'status',
+        'rhs',
+        'veiculos',
+        'veiculos.codigo',
+        'equipamentos',
+        'condicionantes',
+        'condicionantes.licenca'
+      ])
+      ->where('contrato_id', $contrato->id);
+
+    // Verifica se $statusIds foi fornecido e não está vazio
+    if (!is_null($statusIds) && !empty($statusIds)) {
+      $query->whereIn('servico_status_id', $statusIds);
+    }
+
     return [
-      'servicos' => $this->search(...$searchParams)
-        ->with([
-          'tipo',
-          'tema',
-          'status',
-          'rhs',
-          'veiculos',
-          'veiculos.codigo',
-          'equipamentos',
-          'condicionantes',
-          'condicionantes.licenca'
-        ])
-        ->where('contrato_id', $contrato->id)
-        ->paginate()
-        ->appends($searchParams)
+      'servicos' => $query->paginate()->appends($searchParams)
     ];
   }
 
