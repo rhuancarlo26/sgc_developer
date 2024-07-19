@@ -11,6 +11,7 @@ class StoreAnaliseIqaRequest extends FormRequest
     return [
       'resultado_id' => ['required'],
       'analise'      => ['required'],
+      'imagem'       => ['required'],
     ];
   }
 

@@ -16,6 +16,7 @@ import { IconDeviceFloppy } from "@tabler/icons-vue";
 import BarChart from "@/Components/BarChart.vue";
 import DivTabelaParametro from "../Configuracao/Parametro/DivTabelaParametro.vue";
 import DivTabelaMedirIqaVue from "../Configuracao/Parametro/DivTabelaMedirIqa.vue";
+import html2canvas from "html2canvas";
 
 const props = defineProps({
   contrato: { type: Object },
@@ -28,14 +29,17 @@ const props = defineProps({
 
 const form = useForm({
   resultado_id: props.resultado.id,
+  parametro_id: null,
   analises: [],
+  imagem: null
 });
 
 const form_iqa = useForm({
   id: null,
   resultado_id: props.resultado.id,
   analise: null,
-  ...props.resultado.analise_iqa
+  ...props.resultado.analise_iqa,
+  imagem: null,
 })
 
 let form_outra_analise = useForm({
@@ -54,20 +58,45 @@ onMounted(() => {
   }
 });
 
-const salvarAnalise = () => {
-  if (props.resultado.analises.length) {
-    form.patch(route('contratos.contratada.servicos.pmqa.resultado.update_analise', { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
+const captureChart = (opcao, parametro_id = null) => {
+  let chart = null;
+
+  if (opcao === 1) {
+    form.parametro_id = parametro_id;
+
+    chart = document.getElementById('divs-parametro-' + parametro_id);
   } else {
-    form.post(route('contratos.contratada.servicos.pmqa.resultado.store_analise', { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
+    chart = document.getElementById('div-parametro-iqa')
   }
+
+  html2canvas(chart, {
+    useCORS: true,
+    allowTaint: true
+  }).then(canvas => {
+    if (opcao === 1) {
+      form.imagem = canvas.toDataURL('image/png');
+
+      salvarAnalise();
+    } else {
+      form_iqa.imagem = canvas.toDataURL('image/png');
+
+      salvarAnaliseIqa();
+    }
+  });
+}
+
+const salvarAnalise = () => {
+  const url = props.resultado.analises.filter(analise => analise.parametro_id === form.parametro_id).length ? 'update_analise' : 'store_analise';
+
+  form.post(route('contratos.contratada.servicos.pmqa.resultado.' + url, { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
+
 }
 
 const salvarAnaliseIqa = () => {
-  if (form_iqa.id) {
-    form_iqa.patch(route('contratos.contratada.servicos.pmqa.resultado.update_analise_iqa', { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
-  } else {
-    form_iqa.post(route('contratos.contratada.servicos.pmqa.resultado.store_analise_iqa', { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
-  }
+  const url = form_iqa.id ? 'update_analise_iqa' : 'store_analise_iqa'
+
+  form_iqa.post(route('contratos.contratada.servicos.pmqa.resultado.' + url, { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
+
 }
 
 const salvarOutraAnalise = () => {
@@ -190,10 +219,17 @@ const horizontalLine = ref({
         </div>
         <div class="card-body">
           <div class="tab-content">
-            <div v-for="parametro in uniqueParametros" :key="parametro.id" class="tab-pane"
-              :id="'tabs-parametro-' + parametro.id" role="tabpanel">
-              <BarChart :style="{ height: '70px', position: 'relative' }" :chart_data="parametro.datasets"
-                :chart_options="{ responsive: true }" />
+            <div v-for="parametro in uniqueParametros" :key="parametro.id" :id="'tabs-parametro-' + parametro.id"
+              :name="'tabs-parametro-' + parametro.id" class="tab-pane" role="tabpanel">
+              <BarChart :style="{ height: '70px', position: 'relative' }" :id="'divs-parametro-' + parametro.id"
+                :name="'divs-parametro-' + parametro.id" :chart_data="parametro.datasets" :chart_options="{
+                  responsive: true, plugins: {
+                    title: {
+                      display: true,
+                      text: `Gráfico de ${parametro.nome}`
+                    }
+                  }
+                }" />
 
               <div class="card mb-4">
                 <DivTabelaParametro :parametro="parametro" />
@@ -210,13 +246,14 @@ const horizontalLine = ref({
                 </div>
                 <div class="row">
                   <div class="col form-group d-flex justify-content-end">
-                    <NavButton @click="salvarAnalise()" type-button="success" :icon="IconDeviceFloppy" title="Salvar" />
+                    <NavButton @click="captureChart(1, parametro.id)" type-button="success" :icon="IconDeviceFloppy"
+                      title="Salvar" />
                   </div>
                 </div>
               </div>
             </div>
             <div class="tab-pane" id="tabs-parametro-iqa" role="tabpanel">
-              <BarChart :style="{
+              <BarChart id="div-parametro-iqa" :style="{
                 height: '70px',
                 position: 'relative'
               }" :chart_data="chartDataIqa" :options="horizontalLine" :chart_options="{ responsive: true }" />
@@ -235,8 +272,7 @@ const horizontalLine = ref({
                 </div>
                 <div class="row">
                   <div class="col form-group d-flex justify-content-end">
-                    <NavButton @click="salvarAnaliseIqa()" type-button="success" :icon="IconDeviceFloppy"
-                      title="Salvar" />
+                    <NavButton @click="captureChart(2)" type-button="success" :icon="IconDeviceFloppy" title="Salvar" />
                   </div>
                 </div>
               </div>
@@ -294,7 +330,7 @@ const horizontalLine = ref({
                                 :href="route('contratos.contratada.servicos.pmqa.resultado.visualizar_outra_analise', { contrato: contrato.id, servico: servico.id, resultado: resultado.id, outra_analise: outraAnalise.id })">
                                 <IconFileTypePdf />
                               </a>
-                              <NavButton @click="Object.assing(form_outra_analise, outraAnalise)" route-name="#"
+                              <NavButton @click="Object.assign(form_outra_analise, outraAnalise)" route-name="#"
                                 type-button="info" :icon="IconEdit" class="btn btn-icon" />
                               <LinkConfirmation v-slot="confirmation"
                                 :options="{ text: 'A remoção da campanha será permanente.' }">

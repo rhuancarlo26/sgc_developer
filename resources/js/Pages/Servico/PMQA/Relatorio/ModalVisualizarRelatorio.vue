@@ -9,6 +9,7 @@ import RelatorioPontos from "./Components/RelatorioPontos.vue";
 import RelatorioVeiculos from "./Components/RelatorioVeiculos.vue";
 import RelatorioCampanhas from "./Components/RelatorioCampanhas.vue";
 import RelatorioResultados from "./Components/RelatorioResultados.vue";
+import RelatorioOutraAnalise from "./Components/RelatorioOutraAnalise.vue";
 
 const props = defineProps({
   contrato: { type: Object },
@@ -58,7 +59,7 @@ defineExpose({ abrirModal });
           <RelatorioResultados :relatorio="relatorio" />
         </div>
         <div v-show="pagina === 8">
-          Teste 8
+          <RelatorioOutraAnalise :relatorio="relatorio" />
         </div>
         <div v-show="pagina === 9">
           Teste 9
