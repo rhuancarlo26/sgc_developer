@@ -52,6 +52,21 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                 <!-- Ambiente Geo -->
                                 <NavLink route-name="ambienteGeo" title="Ambiente Geo" :icon="IconWorld" />
 
+                                <!-- Fiscal -->
+                                <NavDropdown prefix="fiscal.*" title="Fiscal" :icon="IconFileCertificate">
+                                    <!-- Tipo 1 -->
+                                    <NavDropdownLink route-name="fiscal.index" param-name="tipo" route-param="1"
+                                        active-on-route-prefix="fiscal.*" title="Gestão Ambiental" />
+
+                                    <!-- Tipo 2 -->
+                                    <NavDropdownLink route-name="fiscal.index" param-name="tipo" route-param="2"
+                                        active-on-route-prefix="fiscal.*" title="Estudo Ambiental" />
+
+                                    <!-- Tipo 3 -->
+                                    <NavDropdownLink route-name="fiscal.index" param-name="tipo" route-param="3"
+                                        active-on-route-prefix="fiscal.*" title="Regularização Ambiental" />
+                                </NavDropdown>
+
                                 <!-- Cadastros -->
                                 <NavDropdown prefix="cadastros.*" title="Cadastros" :icon="IconClipboardList">
 

@@ -12,7 +12,7 @@ defineProps({
         <ol class="breadcrumb breadcrumb-arrows">
             <li v-for="(link, i) in links" class="breadcrumb-item"
                 :class="{'active':  i === links.length - 1}">
-                <Link :href="link.route ?? '#'" :class="{disabled: link.route ?? '#' === '#'}">
+                <Link :href="link.route ?? '#'" :class="{disabled: link.route ?? '#' === '#'}" :title="link.title">
                     {{ link.label }}
                 </Link>
             </li>
