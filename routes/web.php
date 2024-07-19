@@ -31,6 +31,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Licenças
         require __DIR__ . '/../app/Domain/Licenca/app/Router/LicencasRouter.php';
 
+        // Fiscal
+        require __DIR__ . '/../app/Domain/Fiscal/app/Routes/FiscalRouter.php';
+
         // Dashboard (Home page)
         Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
 
