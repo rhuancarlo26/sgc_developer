@@ -2,7 +2,7 @@
 import Modal from "@/Components/Modal.vue";
 import { ref } from "vue";
 import FolhaA4 from "./Components/FolhaA4.vue";
-import RelatorioCapa from "./Components/relatorioCapa.vue";
+import RelatorioCapa from "./Components/RelatorioCapa.vue";
 import RelatorioDadosBasicos from "./Components/RelatorioDadosBasicos.vue";
 import RelatorioParametros from "./Components/RelatorioParametros.vue";
 import RelatorioPontos from "./Components/RelatorioPontos.vue";
@@ -10,6 +10,8 @@ import RelatorioVeiculos from "./Components/RelatorioVeiculos.vue";
 import RelatorioCampanhas from "./Components/RelatorioCampanhas.vue";
 import RelatorioResultados from "./Components/RelatorioResultados.vue";
 import RelatorioOutraAnalise from "./Components/RelatorioOutraAnalise.vue";
+import RelatorioConclusao from "./Components/RelatorioConclusao.vue";
+import RelatorioAnexos from "./Components/RelatorioAnexos.vue";
 
 const props = defineProps({
   contrato: { type: Object },
@@ -62,7 +64,10 @@ defineExpose({ abrirModal });
           <RelatorioOutraAnalise :relatorio="relatorio" />
         </div>
         <div v-show="pagina === 9">
-          Teste 9
+          <RelatorioConclusao :relatorio="relatorio" />
+        </div>
+        <div v-show="pagina === 10">
+          <RelatorioAnexos :relatorio="relatorio" />
         </div>
       </FolhaA4>
     </template>
