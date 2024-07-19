@@ -25,6 +25,8 @@ class RelatorioService extends BaseModelService
       ->with([
         'status',
         'resultado.analises',
+        'resultado.analise_iqa',
+        'resultado.outras_analises',
         'resultado.campanhas.pontos.lista.parametros'
       ])
       ->where('servico_id', $servico->id)

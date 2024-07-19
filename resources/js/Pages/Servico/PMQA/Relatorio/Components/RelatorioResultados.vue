@@ -1,4 +1,6 @@
 <script setup>
+import { usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -37,9 +39,21 @@ const parametrosVinculados = computed(() => {
 <template>
   <div>
     <h4>Resultados</h4>
+    <hr>
+    <div class="mb-4" v-if="relatorio.resultado?.analise_iqa">
+      <h4>IQA</h4>
+      <img class="mb-2" :src="usePage().props.app_url + '/storage/' + relatorio.resultado?.analise_iqa?.caminho"
+        alt="Gráfico">
+
+      <div>
+        <span><strong>Análise: </strong>{{ relatorio.resultado?.analise_iqa?.analise }}</span>
+      </div>
+    </div>
+
     <div class="mb-4" v-for="parametro in parametrosVinculados" :key="parametro.id">
       <hr>
       <h4>{{ parametro.nome }}</h4>
+      <img class="mb-2" :src="usePage().props.app_url + '/storage/' + parametro.analise?.caminho" alt="Gráfico">
 
       <div>
         <span><strong>Análise: </strong>{{ parametro.analise?.analise }}</span>

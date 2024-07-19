@@ -4,15 +4,15 @@ namespace App\Domain\Servico\PMQA\Resultado\app\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateAnaliseIqaRequest extends FormRequest
+class UpdateAnaliseRequest extends FormRequest
 {
   public function rules(): array
   {
     return [
-      'id'           => ['required'],
       'resultado_id' => ['required'],
-      'analise'      => ['required'],
-      'imagem'       => ['required']
+      'parametro_id' => ['required'],
+      'analises'     => ['required'],
+      'imagem'       => ['required'],
     ];
   }
 
