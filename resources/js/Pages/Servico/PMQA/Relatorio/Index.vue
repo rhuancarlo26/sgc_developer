@@ -104,7 +104,8 @@ const excluirRelatorio = (item) => {
                     <a class="dropdown-item" href="javascript:void(0)">
                       Enviar para o fiscal
                     </a>
-                    <a class="dropdown-item" href="javascript:void(0)">
+                    <a class="dropdown-item" target="_blank"
+                      :href="route('contratos.contratada.servicos.pmqa.relatorio.gerar_pdf', { contrato: contrato.id, servico: servico.id, relatorio: item.id })">
                       Exportar relatório
                     </a>
                   </div>
