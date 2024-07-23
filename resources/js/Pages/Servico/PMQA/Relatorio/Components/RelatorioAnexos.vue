@@ -1,6 +1,8 @@
 <script setup>
 </script>
 <template>
-  <h4>Anexos</h4>
-  Anexos
+  <div>
+    <h4>Anexos</h4>
+    Anexos
+  </div>
 </template>
