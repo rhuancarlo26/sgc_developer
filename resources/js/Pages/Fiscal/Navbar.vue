@@ -15,7 +15,7 @@ const props = defineProps({
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-          { route: route('fiscal.index', { tipo: contrato.tipo_id }), label: '🡰 Fiscal', title: 'voltar'  },
+          { route: route('fiscal.index', { tipo: contrato.tipo_id }), label: '🡰 Fiscal', title: 'voltar' },
           { route: '#', label: contrato.contratada }
         ]" />
       </div>
@@ -33,10 +33,10 @@ const props = defineProps({
                     <NavLink route-name="fiscal.dados.servicos.index" :param="contrato.id" title="Serviços"
                       :icon="IconLayoutDashboard" />
 
-                    <NavLink route-name="fiscal.dados.configuracoes.index" :param="contrato.id"
-                      title="Configurações" :icon="IconLayoutDashboard" />
+                    <NavLink route-name="fiscal.dados.configuracoes.index" :param="contrato.id" title="Configurações"
+                      :icon="IconLayoutDashboard" />
 
-                    <NavLink route-name="contratos.contratada.dados_gerais.index" :param="contrato.id" title="RNC"
+                    <NavLink route-name="fiscal.dados.rnc.index" :param="contrato.id" title="RNC"
                       :icon="IconLayoutDashboard" />
 
                     <NavLink route-name="contratos.contratada.dados_gerais.index" :param="contrato.id"
