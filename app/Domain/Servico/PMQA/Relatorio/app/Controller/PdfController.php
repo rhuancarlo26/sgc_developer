@@ -22,6 +22,9 @@ class PdfController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, ServicoPmqaRelatorio $relatorio, Request $request)
   {
+    $analiseIqa = (object) array();
+    $analises = [];
+
     $relatorio->load(
       'status',
       'resultado.analises',
@@ -32,7 +35,9 @@ class PdfController extends Controller
 
     $pontosVinculados = collect($relatorio->resultado->campanhas)->pluck('pontos')->flatten()->unique('id')->values();
     $parametrosVinculados = collect($relatorio->resultado->campanhas)->pluck('pontos')->flatten()->pluck('lista.parametros')->flatten()->unique('id')->values();
-    $analiseIqa = $this->showImageAsBase64($relatorio->resultado->analise_iqa->caminho);
+    if ($relatorio->resultado->analise_iqa) {
+      $analiseIqa = $this->showImageAsBase64($relatorio->resultado->analise_iqa->caminho);
+    }
     $analises = $relatorio->resultado->analises->mapWithKeys(function ($item) {
       $item['imagem'] = $this->showImageAsBase64($item->caminho);
 

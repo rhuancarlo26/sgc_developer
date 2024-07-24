@@ -14,7 +14,7 @@
 
     .full-page-div {
         width: 19cm;
-        min-height: 29.7cm;
+        min-height: 27cm;
         box-sizing: border-box;
         padding: 1cm;
     }
@@ -403,7 +403,9 @@
                     <td class="text-center">{{ date('d-m-Y', strtotime($item->data_termino)) }}</td>
                     <td>
                         @foreach ($item->pontos as $key => $ponto)
-                            {{ $ponto->nomepontocoleta }}
+                            <span class="badge bg-warning text-white">
+                                {{ $ponto->nomepontocoleta }}
+                            </span>
                         @endforeach
                     </td>
                 </tr>
@@ -426,15 +428,17 @@
         </div>
     @endif
 
-    @foreach ($parametrosVinculados as $key => $item)
-        <div class="mb-4">
-            <h3>10.{{ $key + 2 }}. {{ $item->nome }}</h3>
-            <img class="full-page-image" src="{{ $analises[$item->id]->imagem }}" alt="Gráfico">
-            <div>
-                <span><strong>Análise: </strong>{{ $analises[$item->id]->analise }}</span>
+    @if (count($analises))
+        @foreach ($parametrosVinculados as $key => $item)
+            <div class="mb-4">
+                <h3>10.{{ $key + 2 }}. {{ $item->nome }}</h3>
+                <img class="full-page-image" src="{{ $analises[$item->id]->imagem }}" alt="Gráfico">
+                <div>
+                    <span><strong>Análise: </strong>{{ $analises[$item->id]->analise }}</span>
+                </div>
             </div>
-        </div>
-    @endforeach
+        @endforeach
+    @endif
 </div>
 
 <div class="full-page-div">
