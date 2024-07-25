@@ -59,4 +59,9 @@ class Servicos extends Model
     {
         return $this->hasMany(ServicoPmqaPonto::class, 'servico_id');
     }
+
+    public function pmqa_config_lista_parecer()
+    {
+        return $this->hasOne(ServicoPmqaConfiguracaoParecer::class, 'servico_id');
+    }
 }

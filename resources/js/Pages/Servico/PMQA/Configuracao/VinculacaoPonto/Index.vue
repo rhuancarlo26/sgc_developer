@@ -5,7 +5,7 @@ import Navbar from "../../Navbar.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import ModalVincularPonto from "./ModalVincularPonto.vue";
 import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
 import { ref } from "vue";
@@ -33,6 +33,10 @@ const abrirModalVisualizarPonto = (item) => {
   modalVisualizarPonto.value.abrirModal(item);
 }
 
+const enviarListaFiscal = () => {
+  router.post(route('contratos.contratada.servicos.pmqa.configuracao.vinculacao_ponto.enviar_lista_fiscal', { contrato: props.contrato.id, servico: props.servico.id }));
+}
+
 </script>
 <template>
 
@@ -56,15 +60,12 @@ const abrirModalVisualizarPonto = (item) => {
 
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
-        <!-- Pesquisa-->
         <ModelSearchFormAllColumns :columns="['nome']">
-          <template #action>
-            <NavButton type-button="primary" title="Enviar ao fiscal" />
+          <template #action v-if="!servico.pmqa_config_lista_parecer?.status_id === 2">
+            <NavButton @click="enviarListaFiscal()" type-button="primary" title="Enviar ao fiscal" />
             <NavButton @click="abrirModalVincularPonto()" type-button="success" title="Vincular" />
           </template>
         </ModelSearchFormAllColumns>
-
-        <!-- Listagem-->
         <Table :columns="['Nome da lista', 'Qtd. pontos', 'Ação']" :records="vinculacoes" table-class="table-hover">
           <template #body="{ item }">
             <tr>
@@ -73,15 +74,18 @@ const abrirModalVisualizarPonto = (item) => {
               <td>
                 <NavButton :icon="IconEye" class="btn-icon" type-button="info"
                   @click="abrirModalVisualizarPonto(item)" />
-                <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
-                  @click="abrirModalVincularPonto(item)" />
-                <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção de um ponto será permanente.' }">
-                  <Link :onBefore="confirmation.show"
-                    :href="route('contratos.contratada.servicos.pmqa.configuracao.vinculacao_ponto.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"
-                    as="button" method="delete" type="button" class="btn btn-icon btn-danger">
-                  <IconTrash />
-                  </Link>
-                </LinkConfirmation>
+
+                <template v-if="!servico.pmqa_config_lista_parecer?.status_id === 2">
+                  <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
+                    @click="abrirModalVincularPonto(item)" />
+                  <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção de um ponto será permanente.' }">
+                    <Link :onBefore="confirmation.show"
+                      :href="route('contratos.contratada.servicos.pmqa.configuracao.vinculacao_ponto.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"
+                      as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                    <IconTrash />
+                    </Link>
+                  </LinkConfirmation>
+                </template>
               </td>
             </tr>
           </template>
