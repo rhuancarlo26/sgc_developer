@@ -25,7 +25,7 @@ class IndexController extends Controller
 
     return Inertia::render('Servico/PMQA/Configuracao/VinculacaoPonto/Index', [
       'contrato' => $contrato,
-      'servico' => $servico->load(['tipo']),
+      'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
       ...$response
     ]);
   }
