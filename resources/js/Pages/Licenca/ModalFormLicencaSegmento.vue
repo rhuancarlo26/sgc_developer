@@ -24,9 +24,9 @@ const form = useForm({
   rodovia: null,
   uf_inicial: null,
   uf_final: null,
-  km_inicial: null,
-  km_final: null,
-  extensao: null,
+  km_inicio: null,
+  km_fim: null,
+  extensao_br: null,
 });
 
 const abrirModal = (item) => {
@@ -36,7 +36,7 @@ const abrirModal = (item) => {
 }
 
 const calcExtensao = () => {
-  form.extensao = parseFloat(form.km_final) - parseFloat(form.km_inicial);
+  form.extensao_br = parseFloat(form.km_fim) - parseFloat(form.km_inicio);
 }
 
 const salvarLicencaSegmento = () => {
@@ -111,24 +111,24 @@ defineExpose({ abrirModal });
       </div>
       <div class="row mb-4">
         <div class="col">
-          <InputLabel value="KM Inicial:" for="km_inicial" />
-          <input @input="calcExtensao()" type="number" step="any" id="km_inicial" name="km_inicial" class="form-control"
-            v-model="form.km_inicial" />
-          <InputError :message="form.errors.km_inicial" />
+          <InputLabel value="KM Inicial:" for="km_inicio" />
+          <input @input="calcExtensao()" type="number" step="any" id="km_inicio" name="km_inicio" class="form-control"
+            v-model="form.km_inicio" />
+          <InputError :message="form.errors.km_inicio" />
         </div>
 
         <div class="col">
-          <InputLabel value="KM Final:" for="km_final" />
-          <input @input="calcExtensao()" type="number" step="any" id="km_final" name="km_final" class="form-control"
-            v-model="form.km_final" />
-          <InputError :message="form.errors.km_final" />
+          <InputLabel value="KM Final:" for="km_fim" />
+          <input @input="calcExtensao()" type="number" step="any" id="km_fim" name="km_fim" class="form-control"
+            v-model="form.km_fim" />
+          <InputError :message="form.errors.km_fim" />
         </div>
 
         <div class="col">
-          <InputLabel value="Extensão:" for="extensao" />
-          <input type="text" id="extensao" name="extensao" class="form-control" :value="form.extensao" disabled
+          <InputLabel value="Extensão:" for="extensao_br" />
+          <input type="text" id="extensao_br" name="extensao_br" class="form-control" :value="form.extensao_br" disabled
             readonly />
-          <InputError :message="form.errors.extensao" />
+          <InputError :message="form.errors.extensao_br" />
         </div>
       </div>
     </template>

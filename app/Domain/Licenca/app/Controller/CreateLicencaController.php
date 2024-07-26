@@ -18,8 +18,6 @@ class CreateLicencaController extends Controller
     {
         $licenca?->load([
             'tipo',
-            'documento',
-            'shapefile',
             'segmentos'
         ]);
 

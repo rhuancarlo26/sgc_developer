@@ -50,8 +50,8 @@
                             <IconShip v-if="item.modal == 2"/>
                             <IconTrain v-if="item.modal == 3"/>
                         </td>
-                        <td>
-                            {{ item.tipo?.sigla }} - {{ item.tipo?.nome }}
+                        <td class="text-center">
+                            {{ item.tipo?.sigla }}
                         </td>
                         <td>
                             {{ item.numero_licenca }}

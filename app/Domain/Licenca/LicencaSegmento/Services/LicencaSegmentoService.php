@@ -59,8 +59,8 @@ class LicencaSegmentoService extends BaseModelService
             UF_inicial: $post['uf_inicial']['uf'],
             // UF_final: $post['uf_final']['uf'],
             rodovia: $post['rodovia'],
-            km_inicial: $post['km_inicial'],
-            km_final: $post['km_final'],
+            km_inicial: $post['km_inicio'],
+            km_final: $post['km_fim'],
             tipo_trecho: 'B'
         );
     }
