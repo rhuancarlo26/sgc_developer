@@ -12,13 +12,13 @@ class Licenca extends Model
 {
     use HasFactory;
 
-    protected $table = 'licenca';
+    protected $table = 'licencas';
 
     protected $guarded = ['id', 'created_at'];
 
     public function tipo(): BelongsTo
     {
-        return $this->belongsTo(LicencaTipo::class, 'tipo_id');
+        return $this->belongsTo(LicencaTipo::class, 'id');
     }
 
     public function condicionantes(): HasMany
@@ -31,10 +31,10 @@ class Licenca extends Model
         return $this->hasMany(LicencaSegmento::class, 'licenca_id');
     }
 
-    public function documento(): HasOne
-    {
-        return $this->hasOne(LicencaDocumento::class, 'licenca_id');
-    }
+//    public function documento(): HasOne
+//    {
+//        return $this->hasOne(LicencaDocumento::class, 'licenca_id');
+//    }
 
     public function shapefile(): HasOne
     {
@@ -43,6 +43,6 @@ class Licenca extends Model
 
     public function requerimentos(): HasMany
     {
-        return $this->hasMany(LicencaRequerimento::class, 'licenca_id');
+        return $this->hasMany(LicencaRequerimento::class, 'id_licenca');
     }
 }

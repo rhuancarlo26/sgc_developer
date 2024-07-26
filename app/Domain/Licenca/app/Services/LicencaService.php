@@ -21,7 +21,7 @@ class LicencaService extends BaseModelService
     public function get(array $searchParams, bool $arquivado = false)
     {
         return $this->searchAllColumns(...$searchParams)
-            ->with(relations: ['tipo', 'requerimentos', 'documento'])
+            ->with(relations: ['tipo', 'requerimentos'])
             ->where('arquivado', $arquivado)
             ->paginate(10)
             ->appends($searchParams);

@@ -76,7 +76,7 @@
                                    href="javascript:void(0)">
                                     Visualizar
                                 </a>
-                                <NavLink route-name="contratos.gestao.create" :param="[item.tipo_id, item.id]"
+                                <NavLink route-name="contratos.gestao.create" :param="[item.tipo_contrato, item.id]"
                                          title="Editar" class="dropdown-item"/>
                                 <NavLink route-name="contratos.gestao.delete" :param="item.id" title="Excluir"
                                          class="dropdown-item"/>

@@ -22,7 +22,7 @@ class ListagemContratoService extends BaseModelService
         return [
             'contratos' => $this->searchAllColumns(...$searchParams)
                 ->with(['aditivos'])
-                ->where('tipo_id', $tipo->id)
+                ->where('tipo_contrato', $tipo->id)
                 ->paginate()
                 ->appends($searchParams)
         ];

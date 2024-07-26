@@ -21,7 +21,7 @@ class Contrato extends Model
 
     public function tipo(): BelongsTo
     {
-        return $this->belongsTo(ContratoTipo::class, 'tipo_id');
+        return $this->belongsTo(ContratoTipo::class, 'tipo_contrato');
     }
 
     public function aditivos(): HasMany

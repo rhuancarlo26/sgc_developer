@@ -9,19 +9,22 @@ use Illuminate\Support\Facades\Auth;
 
 class StoreContratoController extends Controller
 {
-  public function __construct(private readonly ListagemContratoService $listagemContrato)
-  {
-  }
+    public function __construct(private readonly ListagemContratoService $listagemContrato)
+    {
+    }
 
-  public function store(StoreContratoRequest $request)
-  {
-    $post = [
-      ...$request->all(),
-      'user_id' => Auth::user()->id
-    ];
+    public function store(StoreContratoRequest $request)
+    {
+        $post = [
+            ...$request->all(),
+            'usuarios_id' => Auth::user()->id
+        ];
 
-    $response = $this->listagemContrato->store($post);
+        $response = $this->listagemContrato->store($post);
 
-    return to_route('contratos.gestao.create', ['tipo' => $response['model']->tipo_id, 'contrato' => $response['model']->id])->with('message', $response['request']);
-  }
+        return to_route('contratos.gestao.create', [
+            'tipo'     => $response['model']->tipo_contrato,
+            'contrato' => $response['model']->id
+        ])->with('message', $response['request']);
+    }
 }
