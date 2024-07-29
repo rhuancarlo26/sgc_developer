@@ -61,7 +61,8 @@ const enviarListaFiscal = () => {
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
         <ModelSearchFormAllColumns :columns="['nome']">
-          <template #action v-if="!servico.pmqa_config_lista_parecer?.status_id === 2">
+          <template #action
+            v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
             <NavButton @click="enviarListaFiscal()" type-button="primary" title="Enviar ao fiscal" />
             <NavButton @click="abrirModalVincularPonto()" type-button="success" title="Vincular" />
           </template>
@@ -75,7 +76,8 @@ const enviarListaFiscal = () => {
                 <NavButton :icon="IconEye" class="btn-icon" type-button="info"
                   @click="abrirModalVisualizarPonto(item)" />
 
-                <template v-if="!servico.pmqa_config_lista_parecer?.status_id === 2">
+                <template
+                  v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
                   <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
                     @click="abrirModalVincularPonto(item)" />
                   <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção de um ponto será permanente.' }">

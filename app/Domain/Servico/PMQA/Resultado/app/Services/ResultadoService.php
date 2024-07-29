@@ -64,12 +64,10 @@ class ResultadoService extends BaseModelService
     $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['resultado_id'] . '.png';
     Storage::disk()->put($path, $request['imagem']);
 
-    return $this->dataManagement->update(entity: $this->modelClassAnaliseIqa, infos: [
+    return $this->dataManagement->create(entity: $this->modelClassAnaliseIqa, infos: [
       ...$request,
       'caminho' => str_replace("public\\", "", $path)
-    ], id: $request['id']);
-
-    return $this->dataManagement->create(entity: $this->modelClassAnaliseIqa, infos: $request);
+    ]);
   }
 
   public function storeOutraAnalise(array $request): array

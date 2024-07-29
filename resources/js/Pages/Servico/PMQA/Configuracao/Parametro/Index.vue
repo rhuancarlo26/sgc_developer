@@ -55,8 +55,9 @@ const editarLista = (item) => {
 
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
-        <ModelSearchFormAllColumns :columns="['nome', 'parametro.nome']">
-          <template #action v-if="!servico.pmqa_config_lista_parecer?.status_id === 2">
+        <ModelSearchFormAllColumns :columns="['nome', 'parametros.nome']">
+          <template #action
+            v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
             <NavButton @click="abrirModalParametros()" type-button="success" title="Novo parâmetro" />
           </template>
         </ModelSearchFormAllColumns>
@@ -75,7 +76,8 @@ const editarLista = (item) => {
               </td>
               <td>
                 <div class="d-flex">
-                  <template v-if="!servico.pmqa_config_lista_parecer?.status_id === 2">
+                  <template
+                    v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
                     <NavButton :icon="IconPencil" class="btn-icon" type-button="primary" @click="editarLista(item)" />
                     <LinkConfirmation v-slot="confirmation"
                       :options="{ text: 'A remoção de um ponto será permanente.' }">

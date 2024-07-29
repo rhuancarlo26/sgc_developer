@@ -26,6 +26,14 @@ const form = useForm({
   observacao: null
 });
 
+const reset = () => {
+  form.id = null;
+  form.servico_id = props.servico.id;
+  form.nome = null;
+  form.resultado_id = null;
+  form.observacao = null;
+}
+
 const salvarRelatorio = () => {
   const url = form.id ? 'update' : 'store';
 

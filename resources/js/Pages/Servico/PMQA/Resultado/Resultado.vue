@@ -50,6 +50,14 @@ let form_outra_analise = useForm({
   analise: null
 });
 
+const reset_form_outra_analise = () => {
+  form_outra_analise.id = null,
+    form_outra_analise.resultado_id = props.resultado.id,
+    form_outra_analise.nome = null,
+    form_outra_analise.arquivo = null,
+    form_outra_analise.analise = null
+}
+
 onMounted(() => {
   if (props.resultado.analises.length) {
     props.resultado.analises.forEach(analise => {
@@ -96,7 +104,6 @@ const salvarAnaliseIqa = () => {
   const url = form_iqa.id ? 'update_analise_iqa' : 'store_analise_iqa'
 
   form_iqa.post(route('contratos.contratada.servicos.pmqa.resultado.' + url, { contrato: props.contrato.id, servico: props.servico.id, resultado: props.resultado.id }))
-
 }
 
 const salvarOutraAnalise = () => {
@@ -304,7 +311,7 @@ const horizontalLine = ref({
                 </div>
                 <div class="row mb-4">
                   <div class="col form-group d-flex justify-content-end">
-                    <NavButton v-if="form_outra_analise.id" @click="form_outra_analise.reset()" type-button="danger"
+                    <NavButton v-if="form_outra_analise.id" @click="reset_form_outra_analise()" type-button="danger"
                       :icon="IconX" />
                     <NavButton @click="salvarOutraAnalise()" type-button="success" :icon="IconDeviceFloppy"
                       :title="form_outra_analise ? 'Editar' : 'Salvar'" />

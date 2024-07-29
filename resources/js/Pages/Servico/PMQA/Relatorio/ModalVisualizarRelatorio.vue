@@ -35,8 +35,11 @@ defineExpose({ abrirModal });
   <Modal ref="modalRelatorio" title="Visualizar relatório" modal-dialog-class="modal-xl">
     <template #body>
       <div class="d-flex justify-content-center mb-4">
-        <button @click="pagina -= 1" class="btn btn-primary me-4">Anterior</button>
-        <button @click="pagina += 1" class="btn btn-primary">Próximo</button>
+        <button @click="pagina -= 1" :disabled="pagina === 1" class="btn btn-primary me-1">Anterior</button>
+        <span v-for="num in 10" :key="num">
+          <button @click="pagina = num" :disabled="num === pagina" class="btn btn-primary me-1">{{ num }}</button>
+        </span>
+        <button @click="pagina += 1" :disabled="pagina === 10" class="btn btn-primary">Próximo</button>
       </div>
       <FolhaA4>
         <div v-show="pagina === 1">

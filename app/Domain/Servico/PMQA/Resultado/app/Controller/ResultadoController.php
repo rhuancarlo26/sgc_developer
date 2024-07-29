@@ -23,7 +23,7 @@ class ResultadoController extends Controller
 
     return Inertia::render('Servico/PMQA/Resultado/Resultado', [
       'contrato' => $contrato,
-      'servico' => $servico->load(['tipo']),
+      'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
       ...$response
     ]);
   }
