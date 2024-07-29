@@ -9,7 +9,7 @@ class ArquivoUtils
     public function visualizar($caminho): \Illuminate\Http\Response
     {
         return Response::make(
-            content: file_get_contents(storage_path('app') . DIRECTORY_SEPARATOR . $caminho),
+            content: file_get_contents(storage_path('app/public') . DIRECTORY_SEPARATOR . $caminho),
             headers: ["Content-type" => "application/pdf"]
         );
     }

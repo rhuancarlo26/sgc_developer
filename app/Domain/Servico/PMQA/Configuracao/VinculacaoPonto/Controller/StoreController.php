@@ -7,6 +7,7 @@ use App\Domain\Servico\PMQA\Configuracao\VinculacaoPonto\Services\VinculacaoPont
 use App\Models\Contrato;
 use App\Models\Servicos;
 use App\Shared\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 
 class StoreController extends Controller
 {
@@ -14,7 +15,7 @@ class StoreController extends Controller
   {
   }
 
-  public function index(Contrato $contrato, Servicos $servico, StoreRequest $request)
+  public function index(Contrato $contrato, Servicos $servico, StoreRequest $request): RedirectResponse
   {
     $response = $this->vinculacaoPontoService->store($servico, $request->validated());
 
