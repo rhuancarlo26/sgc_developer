@@ -55,14 +55,13 @@ const editarLista = (item) => {
 
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
-        <!-- Pesquisa-->
-        <ModelSearchFormAllColumns :columns="['nome', 'parametro.nome']">
-          <template #action>
+        <ModelSearchFormAllColumns :columns="['nome', 'parametros.nome']">
+          <template #action
+            v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
             <NavButton @click="abrirModalParametros()" type-button="success" title="Novo parâmetro" />
           </template>
         </ModelSearchFormAllColumns>
 
-        <!-- Listagem-->
         <Table :columns="['Nome', 'Parâmetros', 'Ação']" :records="listas" table-class="table-hover">
           <template #body="{ item }">
             <tr>
@@ -77,14 +76,18 @@ const editarLista = (item) => {
               </td>
               <td>
                 <div class="d-flex">
-                  <NavButton :icon="IconPencil" class="btn-icon" type-button="primary" @click="editarLista(item)" />
-                  <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção de um ponto será permanente.' }">
-                    <Link :onBefore="confirmation.show"
-                      :href="route('contratos.contratada.servicos.pmqa.configuracao.parametro.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"
-                      as="button" method="delete" type="button" class="btn btn-icon btn-danger">
-                    <IconTrash />
-                    </Link>
-                  </LinkConfirmation>
+                  <template
+                    v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
+                    <NavButton :icon="IconPencil" class="btn-icon" type-button="primary" @click="editarLista(item)" />
+                    <LinkConfirmation v-slot="confirmation"
+                      :options="{ text: 'A remoção de um ponto será permanente.' }">
+                      <Link :onBefore="confirmation.show"
+                        :href="route('contratos.contratada.servicos.pmqa.configuracao.parametro.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"
+                        as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                      <IconTrash />
+                      </Link>
+                    </LinkConfirmation>
+                  </template>
                 </div>
               </td>
             </tr>

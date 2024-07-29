@@ -55,10 +55,10 @@ const abrirModalVisualizar = (item) => {
 
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
-        <!-- Pesquisa-->
         <ModelSearchFormAllColumns
           :columns="['id', 'nomepontocoleta', 'lat_x', 'long_y', 'classificacao', 'classe', 'tipoambiente', 'uf', 'municipio', 'baciahidrografica', 'km_rodovia', 'estaca']">
-          <template #action>
+          <template #action
+            v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
             <a class="btn btn-info me-1" target="_blank"
               :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.download_modelo')">Modelo</a>
             <NavButton @click="abrirModalImportar()"
@@ -88,16 +88,20 @@ const abrirModalVisualizar = (item) => {
               <td class="text-center">{{ item.estaca }}</td>
               <td class="text-center">
                 <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon" :icon="IconEye" />
-                <NavLink class="btn btn-icon btn-primary me-1"
-                  route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.create"
-                  :param="{ contrato: contrato.id, servico: servico.id, ponto: item.id }" :icon="IconPencil" />
-                <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção de um ponto será permanente.' }">
-                  <Link :onBefore="confirmation.show"
-                    :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.delete', { contrato: contrato.id, servico: servico.id, ponto: item.id })"
-                    as="button" method="delete" type="button" class="btn btn-icon btn-danger">
-                  <IconTrash />
-                  </Link>
-                </LinkConfirmation>
+
+                <template
+                  v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
+                  <NavLink class="btn btn-icon btn-primary me-1"
+                    route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.create"
+                    :param="{ contrato: contrato.id, servico: servico.id, ponto: item.id }" :icon="IconPencil" />
+                  <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção de um ponto será permanente.' }">
+                    <Link :onBefore="confirmation.show"
+                      :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.delete', { contrato: contrato.id, servico: servico.id, ponto: item.id })"
+                      as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                    <IconTrash />
+                    </Link>
+                  </LinkConfirmation>
+                </template>
               </td>
             </tr>
           </template>

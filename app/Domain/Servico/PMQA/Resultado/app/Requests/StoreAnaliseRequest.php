@@ -10,7 +10,9 @@ class StoreAnaliseRequest extends FormRequest
   {
     return [
       'resultado_id' => ['required'],
-      'analises'      => ['required'],
+      'parametro_id' => ['required'],
+      'analises'     => ['required'],
+      'imagem'       => ['required'],
     ];
   }
 

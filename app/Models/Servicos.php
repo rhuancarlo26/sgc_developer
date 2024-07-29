@@ -49,4 +49,19 @@ class Servicos extends Model
     {
         return $this->hasManyThrough(LicencaCondicionante::class, ServicoLicencaCondicionante::class, 'servico_id', 'id', 'id', 'condicionante_id');
     }
+
+    public function licencas_condicionantes()
+    {
+        return $this->hasMany(ServicoLicencaCondicionante::class, 'servico_id');
+    }
+
+    public function pontos()
+    {
+        return $this->hasMany(ServicoPmqaPonto::class, 'servico_id');
+    }
+
+    public function pmqa_config_lista_parecer()
+    {
+        return $this->hasOne(ServicoPmqaConfiguracaoParecer::class, 'servico_id');
+    }
 }

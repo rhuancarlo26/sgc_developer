@@ -50,20 +50,24 @@ class ResultadoService extends BaseModelService
 
   public function storeAnalises(array $request): array
   {
-    foreach ($request['analises'] as $key => $value) {
-      $response = $this->dataManagement->create(entity: $this->modelClassAnalise, infos: [
-        'resultado_id' => $request['resultado_id'],
-        'parametro_id' => $key,
-        'analise' => $value
-      ]);
-    }
+    $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $request['resultado_id'] . '_' . $request['parametro_id'] . '.png';
+    Storage::disk()->put($path, $request['imagem']);
 
-    return $response;
+    return $this->dataManagement->create(entity: $this->modelClassAnalise, infos: [
+      ...$request,
+      'caminho' => str_replace("public\\", "", $path)
+    ]);
   }
 
   public function storeAnaliseIqa(array $request): array
   {
-    return $this->dataManagement->create(entity: $this->modelClassAnaliseIqa, infos: $request);
+    $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['resultado_id'] . '.png';
+    Storage::disk()->put($path, $request['imagem']);
+
+    return $this->dataManagement->create(entity: $this->modelClassAnaliseIqa, infos: [
+      ...$request,
+      'caminho' => str_replace("public\\", "", $path)
+    ]);
   }
 
   public function storeOutraAnalise(array $request): array
@@ -71,14 +75,14 @@ class ResultadoService extends BaseModelService
     if ($request['arquivo']->isvalid()) {
       $nome = $request['arquivo']->getClientOriginalName();
       $tipo = $request['arquivo']->extension();
-      $caminho = $request['arquivo']->storeAs('Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'OutraAnalise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+      $caminho = $request['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'OutraAnalise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
     }
 
     return $this->dataManagement->create(entity: $this->modelClassOutraAnalise, infos: [
       'resultado_id' => $request['resultado_id'],
       'nome_arquivo' => $nome,
       'tipo' => $tipo,
-      'caminho' => $caminho,
+      'caminho' => str_replace("public\\", "", $caminho),
       'nome' => $request['nome'],
       'analise' => $request['analise']
     ]);
@@ -88,21 +92,21 @@ class ResultadoService extends BaseModelService
   {
     if ($outraAnalise = ServicoPmqaResultadoOutraAnalise::find($request['id'])) {
       if ($outraAnalise->caminho) {
-        Storage::delete($outraAnalise->caminho);
+        Storage::delete('public' . DIRECTORY_SEPARATOR . $outraAnalise->caminho);
       }
     }
 
     if ($request['arquivo']->isvalid()) {
       $nome = $request['arquivo']->getClientOriginalName();
       $tipo = $request['arquivo']->extension();
-      $caminho = $request['arquivo']->storeAs('Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'OutraAnalise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+      $caminho = $request['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'OutraAnalise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
     }
 
     return $this->dataManagement->update(entity: $this->modelClassOutraAnalise, infos: [
       'resultado_id' => $request['resultado_id'],
       'nome_arquivo' => $nome,
       'tipo' => $tipo,
-      'caminho' => $caminho,
+      'caminho' => str_replace("public\\", "", $caminho),
       'nome' => $request['nome'],
       'analise' => $request['analise']
     ], id: $request['id']);
@@ -110,20 +114,25 @@ class ResultadoService extends BaseModelService
 
   public function updateAnalises(array $request): array
   {
-    foreach ($request['analises'] as $key => $value) {
-      if (gettype($value) == 'string') {
-        $response = $this->dataManagement->create(entity: $this->modelClassAnalise, infos: [
-          'resultado_id' => $request['resultado_id'],
-          'parametro_id' => $key,
-          'analise' => $value
-        ]);
-      } else {
-        $response = $this->dataManagement->update(entity: $this->modelClassAnalise, infos: [
-          'resultado_id' => $request['resultado_id'],
-          'parametro_id' => $key,
-          'analise' => $value['analise']
-        ], id: $value['id']);
-      }
+    $analise = $this->modelClassAnalise::where('resultado_id', $request['resultado_id'])->where('parametro_id', $request['parametro_id'])->first();
+
+    if ($analise->caminho) {
+      Storage::delete('public' . DIRECTORY_SEPARATOR . $analise->caminho);
+    }
+
+    $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $request['resultado_id'] . '_' . $request['parametro_id'] . '.png';
+    Storage::disk()->put($path, $request['imagem']);
+
+    if ($analise) {
+      $response = $this->dataManagement->update(entity: $this->modelClassAnalise, infos: [
+        ...$request,
+        'caminho' => str_replace("public\\", "", $path)
+      ], id: $analise->id);
+    } else {
+      $response = $this->dataManagement->create(entity: $this->modelClassAnalise, infos: [
+        ...$request,
+        'caminho' => str_replace("public\\", "", $path)
+      ]);
     }
 
     return $response;
@@ -131,7 +140,19 @@ class ResultadoService extends BaseModelService
 
   public function updateAnaliseIqa(array $request): array
   {
-    return $this->dataManagement->update(entity: $this->modelClassAnaliseIqa, infos: $request, id: $request['id']);
+    $analiseIqa = ServicoPmqaResultadoAnaliseIqa::where('resultado_id', $request['resultado_id'])->first();
+
+    if ($analiseIqa->caminho) {
+      Storage::delete('public' . DIRECTORY_SEPARATOR . $analiseIqa->caminho);
+    }
+
+    $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['resultado_id'] . '.png';
+    Storage::disk()->put($path, $request['imagem']);
+
+    return $this->dataManagement->update(entity: $this->modelClassAnaliseIqa, infos: [
+      ...$request,
+      'caminho' => str_replace("public\\", "", $path)
+    ], id: $request['id']);
   }
 
   public function update(array $request): array
@@ -150,7 +171,7 @@ class ResultadoService extends BaseModelService
 
   public function destroyOutraAnalise(ServicoPmqaResultadoOutraAnalise $outra_analise): array
   {
-    Storage::delete($outra_analise->caminho);
+    Storage::delete('public' . DIRECTORY_SEPARATOR . $outra_analise->caminho);
 
     return $this->dataManagement->delete(entity: $this->modelClassOutraAnalise, id: $outra_analise->id);
   }

@@ -27,6 +27,14 @@ const form = useForm({
   parametros: []
 });
 
+const reset = () => {
+  form.id = null;
+  form.servico_id = props.servico.id;
+  form.nome = null;
+  form.medir_iqa = false;
+  form.parametros = [];
+}
+
 watch(
   () => form.medir_iqa,
   (medir) => {
@@ -58,7 +66,7 @@ const isChecked = (parametro_id) => {
 }
 
 const abrirModal = (item) => {
-  form.reset();
+  reset();
 
   if (item) {
     Object.assign(form, item)
