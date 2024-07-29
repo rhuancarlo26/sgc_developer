@@ -43,7 +43,7 @@ let switchTab = (tabName) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+          { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
           { route: '#', label: contrato.contratada }
         ]
           " />
@@ -65,13 +65,13 @@ let switchTab = (tabName) => {
               @switch-tab="switchTab" class="nav-link active d-flex justify-content-between" data-bs-toggle="tab"
               aria-selected="true" role="tab" />
           </li>
-          <li class="nav-item" role="presentation">
-            <NavLinkVoid title="Empreendimento"
-              :icon="contrato.empreendimento_trechos.length ? IconCircleCheck : IconCircleX" tabName="empreendimento"
-              :iconClass="contrato.empreendimento_trechos.length ? 'text-success' : 'text-danger'" @switch-tab="switchTab"
-              class="nav-link active d-flex justify-content-between" data-bs-toggle="tab" aria-selected="true"
-              role="tab" />
-          </li>
+<!--          <li class="nav-item" role="presentation">-->
+<!--            <NavLinkVoid title="Empreendimento"-->
+<!--              :icon="contrato.empreendimento_trechos.length ? IconCircleCheck : IconCircleX" tabName="empreendimento"-->
+<!--              :iconClass="contrato.empreendimento_trechos.length ? 'text-success' : 'text-danger'" @switch-tab="switchTab"-->
+<!--              class="nav-link active d-flex justify-content-between" data-bs-toggle="tab" aria-selected="true"-->
+<!--              role="tab" />-->
+<!--          </li>-->
           <li class="nav-item" role="presentation">
             <NavLinkVoid title="Licenciamento" :icon="contrato.licenciamentos.length ? IconCircleCheck : IconCircleX"
               :iconClass="contrato.licenciamentos.length ? 'text-success' : 'text-danger'" tabName="licenciamento"
@@ -97,9 +97,9 @@ let switchTab = (tabName) => {
         <div v-show="activeTab === 'introducao'">
           <TabIntroducao :contrato="contrato" />
         </div>
-        <div v-show="activeTab === 'empreendimento'">
-          <TabEmpreendimento :contrato="contrato" :ufs="ufs" :rodovias="rodovias" />
-        </div>
+<!--        <div v-show="activeTab === 'empreendimento'">-->
+<!--          <TabEmpreendimento :contrato="contrato" :ufs="ufs" :rodovias="rodovias" />-->
+<!--        </div>-->
         <div v-show="activeTab === 'licenciamento'">
           <TabLicenciamento :contrato="contrato" :numero_licencas="numero_licencas" />
         </div>

@@ -15,7 +15,7 @@ class Licenca extends Model
     protected $table = 'licencas';
     protected $guarded = ['id', 'created_at'];
 
-    public function tipo_licenca(): BelongsTo
+    public function tipo(): BelongsTo
     {
         return $this->belongsTo(LicencaTipo::class, 'tipo');
     }
