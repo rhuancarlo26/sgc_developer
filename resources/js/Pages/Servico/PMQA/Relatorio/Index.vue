@@ -82,34 +82,32 @@ const excluirRelatorio = (item) => {
                   {{ item.status?.nome }}
                 </span>
               </td>
-              <td class="text-center">
-                <span class="dropdown">
-                  <button class="btn btn-info dropdown-toggle align-text-top" data-bs-boundary="viewport"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    <IconDots />
-                  </button>
-                  <div class="dropdown-menu dropdown-menu-end" style="">
-                    <a class="dropdown-item" href="javascript:void(0)">
-                      Conclusão
-                    </a>
-                    <a @click="abrirVisualizarRelatorio(item)" class="dropdown-item" href="javascript:void(0)">
-                      Visualizar relátorio
-                    </a>
-                    <a @click="abrirModalFormRelatorio(item)" class="dropdown-item" href="javascript:void(0)">
-                      Editar
-                    </a>
-                    <a @click="excluirRelatorio(item)" class="dropdown-item" href="javascript:void(0)">
-                      Excluir
-                    </a>
-                    <a class="dropdown-item" href="javascript:void(0)">
-                      Enviar para o fiscal
-                    </a>
-                    <a class="dropdown-item" target="_blank"
-                      :href="route('contratos.contratada.servicos.pmqa.relatorio.gerar_pdf', { contrato: contrato.id, servico: servico.id, relatorio: item.id })">
-                      Exportar relatório
-                    </a>
-                  </div>
-                </span>
+              <td>
+                <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
+                  data-bs-toggle="dropdown" aria-expanded="false">
+                  <IconDots />
+                </button>
+                <div class="dropdown-menu dropdown-menu-end" style="">
+                  <a class="dropdown-item" href="javascript:void(0)">
+                    Conclusão
+                  </a>
+                  <a @click="abrirVisualizarRelatorio(item)" class="dropdown-item" href="javascript:void(0)">
+                    Visualizar relátorio
+                  </a>
+                  <a @click="abrirModalFormRelatorio(item)" class="dropdown-item" href="javascript:void(0)">
+                    Editar
+                  </a>
+                  <a @click="excluirRelatorio(item)" class="dropdown-item" href="javascript:void(0)">
+                    Excluir
+                  </a>
+                  <a class="dropdown-item" href="javascript:void(0)">
+                    Enviar para o fiscal
+                  </a>
+                  <a class="dropdown-item" target="_blank"
+                    :href="route('contratos.contratada.servicos.pmqa.relatorio.gerar_pdf', { contrato: contrato.id, servico: servico.id, relatorio: item.id })">
+                    Exportar relatório
+                  </a>
+                </div>
               </td>
             </tr>
           </template>

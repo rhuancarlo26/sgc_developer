@@ -27,6 +27,7 @@ class IndexController extends Controller
       'contrato' => $contrato,
       'servico' => $servico->load([
         'tipo',
+        'pmqa_config_lista_parecer',
         'rhs',
         'equipamentos',
         'veiculos.codigo',

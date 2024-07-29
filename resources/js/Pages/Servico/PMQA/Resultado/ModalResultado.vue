@@ -27,6 +27,14 @@ const form = useForm({
   campanhas_selecionadas: []
 });
 
+const reset = () => {
+  form.id = null;
+  form.servico_id = props.servico.id;
+  form.nome = null;
+  form.campanha = null;
+  form.campanhas_selecionadas = [];
+}
+
 watch(() => form.campanha,
   (item) => {
     let resposta = null;
@@ -41,7 +49,7 @@ watch(() => form.campanha,
   });
 
 const abrirModal = (item) => {
-  form.reset();
+  reset();
 
   if (item) {
     form.id = item.id;

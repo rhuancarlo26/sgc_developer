@@ -57,7 +57,8 @@ const abrirModalVisualizar = (item) => {
       <template #body>
         <ModelSearchFormAllColumns
           :columns="['id', 'nomepontocoleta', 'lat_x', 'long_y', 'classificacao', 'classe', 'tipoambiente', 'uf', 'municipio', 'baciahidrografica', 'km_rodovia', 'estaca']">
-          <template #action v-if="!servico.pmqa_config_lista_parecer?.status_id === 2">
+          <template #action
+            v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
             <a class="btn btn-info me-1" target="_blank"
               :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.download_modelo')">Modelo</a>
             <NavButton @click="abrirModalImportar()"
@@ -88,7 +89,8 @@ const abrirModalVisualizar = (item) => {
               <td class="text-center">
                 <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon" :icon="IconEye" />
 
-                <template v-if="!servico.pmqa_config_lista_parecer?.status_id === 2">
+                <template
+                  v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
                   <NavLink class="btn btn-icon btn-primary me-1"
                     route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.create"
                     :param="{ contrato: contrato.id, servico: servico.id, ponto: item.id }" :icon="IconPencil" />

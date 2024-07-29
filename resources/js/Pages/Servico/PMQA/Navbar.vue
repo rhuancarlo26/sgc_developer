@@ -42,7 +42,7 @@ const porps = defineProps({
                           :route-param="{ contrato: contrato.id, servico: servico.id }" title="Vinculação de pontos" />
                       </NavDropdown>
 
-                      <template v-if="!servico.pmqa_config_lista_parecer?.status_id === 2">
+                      <template v-if="servico.pmqa_config_lista_parecer?.status_id >= 2">
                         <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.index"
                           active-on-route-prefix="contratos.contratada.servicos.pmqa.execucao*"
                           :param="{ contrato: contrato.id, servico: servico.id }" title="Execução"
