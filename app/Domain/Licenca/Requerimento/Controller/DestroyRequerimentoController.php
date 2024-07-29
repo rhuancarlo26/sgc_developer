@@ -17,7 +17,7 @@ class DestroyRequerimentoController extends Controller
   public function index(LicencaRequerimento $requerimento): RedirectResponse
   {
     try {
-      Storage::delete($requerimento->caminho);
+      Storage::delete($requerimento->arquivo);
 
       $requerimento->delete();
 

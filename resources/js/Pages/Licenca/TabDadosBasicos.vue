@@ -11,7 +11,7 @@ const props = defineProps({
 
 const form = useForm({
   licenca_id: props.licenca.id,
-  tipo: null,
+  tipo_licenca: null,
   status: null,
   modal: null,
   numero_licenca: null,
@@ -88,7 +88,7 @@ const calcularArea = () => {
   <div class="row mb-4">
     <div class="col">
       <InputLabel value="Tipo de Contrato:" for="tipo_id" />
-      <v-select :options="tipos" label="nome" v-model="form.tipo">
+      <v-select :options="tipos" label="nome" v-model="form.tipo_licenca">
         <template #no-options="{}">
           Nenhum registro encontrado.
         </template>
@@ -248,7 +248,7 @@ const calcularArea = () => {
   <div class="row mb-4">
     <div class="col">
       <InputLabel value="Observação:" for="observacao" />
-      <textarea name="observacao" id="observacao" class="form-control" rows="5" v-model="form.observacao"></textarea>
+      <textarea name="observacao" id="observacao" class="form-control" rows="5" v-model="form.obs_renovacao"></textarea>
       <InputError :message="form.errors.observacao" />
     </div>
   </div>

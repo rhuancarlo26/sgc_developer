@@ -22,8 +22,8 @@ const editarCondicionante = (item) => {
 
 const form = useForm({
   id: null,
-  licenca_id: props.licenca.id,
-  numero_condicionante: null,
+  licencas_id: props.licenca.id,
+  numero: null,
   prazo: null,
   descricao: null
 });
@@ -61,8 +61,8 @@ defineExpose({ abrirModal, editarCondicionante });
       <div class="row mb-4">
         <div class="col">
           <label class="form-label">N° da condicionante</label>
-          <input type="text" class="form-control" name="numero_condicionante" v-model="form.numero_condicionante">
-          <InputError :message="form.errors.numero_condicionante" />
+          <input type="text" class="form-control" name="numero" v-model="form.numero">
+          <InputError :message="form.errors.numero" />
         </div>
         <div class="col">
           <label class="form-label">Prazo</label>

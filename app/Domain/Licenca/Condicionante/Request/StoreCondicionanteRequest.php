@@ -9,8 +9,8 @@ class StoreCondicionanteRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'licenca_id' => 'required',
-      'numero_condicionante' => 'required',
+      'licencas_id' => 'required',
+      'numero' => 'required',
       'descricao' => 'required'
     ];
   }

@@ -18,10 +18,10 @@ class StoreLicencaController extends Controller
     {
         $post = [
             ...$request->all(),
-            'tipo_id' => $request->tipo['id']
+            'tipo' => $request->tipo_licenca['id']
         ];
 
-        if ($post['tipo_id'] !== 3) {
+        if ($post['tipo'] !== 3) {
             $post['in_app'] = null;
             $post['out_app'] = null;
             $post['total_app'] = null;

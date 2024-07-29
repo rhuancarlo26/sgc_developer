@@ -11,6 +11,6 @@ class VisualizarRequerimentoController extends Controller
     public function index(LicencaRequerimento $requerimento): \Illuminate\Http\Response
     {
         $arquivo = new ArquivoUtils();
-        return $arquivo->visualizar($requerimento->caminho);
+        return $arquivo->visualizar($requerimento->arquivo);
     }
 }

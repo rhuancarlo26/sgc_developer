@@ -1,23 +1,22 @@
 <template>
 
-    <Head title="Gestão de Licenças"/>
+    <Head title="Gestão de Licenças" />
 
     <AuthenticatedLayout>
 
         <template #header>
             <div class="w-100 d-flex justify-content-between">
-                <Breadcrumb class="align-self-center" :links="[{ route: '#', label: 'Gestão de Licenças' }]"/>
+                <Breadcrumb class="align-self-center" :links="[{ route: '#', label: 'Gestão de Licenças' }]" />
                 <div class="container-buttons">
-                    <NavLink route-name="licenca.create" title="Cadastrar licenças" class="btn btn-info me-2"/>
+                    <NavLink route-name="licenca.create" title="Cadastrar licenças" class="btn btn-info me-2" />
                     <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                        <IconSettings/>
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <IconSettings />
                     </button>
                     <div class="dropdown-menu dropdown-menu-end">
                         <NavLink route-name="licenca.arquivo" :param="1" title="Licenças arquivadas"
-                                 class="dropdown-item"/>
-                        <NavLink route-name="licenca.index" title="Licenças ativas"
-                                 class="dropdown-item"/>
+                            class="dropdown-item" />
+                        <NavLink route-name="licenca.index" title="Licenças ativas" class="dropdown-item" />
                         <a class="dropdown-item" @click="abrirMapaGeral()">
                             Mapa das licenças
                         </a>
@@ -37,7 +36,7 @@
                 'status',
                 'vencimento',
                 'processo_dnit'
-            ]"/>
+            ]" />
 
             <!-- Listagem-->
             <Table
@@ -45,13 +44,13 @@
                 :records="licencas" table-class="table-hover">
                 <template #body="{ item }">
                     <tr>
-                        <td class="w-8 text-center" >
-                            <IconCar v-if="item.modal == 1"/>
-                            <IconShip v-if="item.modal == 2"/>
-                            <IconTrain v-if="item.modal == 3"/>
+                        <td class="w-8 text-center">
+                            <IconCar v-if="item.modal == 1" />
+                            <IconShip v-if="item.modal == 2" />
+                            <IconTrain v-if="item.modal == 3" />
                         </td>
                         <td class="text-center">
-                            {{ item.tipo?.sigla }}
+                            {{ item.tipo_licenca?.sigla }}
                         </td>
                         <td>
                             {{ item.numero_licenca }}
@@ -74,7 +73,7 @@
                                     Vencida
                                 </span>
                                 <span v-else-if="!item.vencimento !== '' && item.vencimento !== null"
-                                      class="badge bg-green-lt">
+                                    class="badge bg-green-lt">
                                     Vigente
                                 </span>
                             </a>
@@ -85,7 +84,7 @@
                                     {{ dateTimeFormat(item.vencimento) }}
                                 </span>
                                 <span v-else-if="item.vencimento !== '' && item.vencimento !== null"
-                                      class="badge bg-green-lt">
+                                    class="badge bg-green-lt">
                                     {{ dateTimeFormat(item.vencimento) }}
                                 </span>
                             </a>
@@ -96,19 +95,25 @@
                         <td class="text-center">
                             <span class="dropdown">
                                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
-                                        data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <IconDots/>
+                                    data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <IconDots />
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end" style="">
-                                    <NavLink route-name="licenca.create" :param="item.id" title="Editar" class="dropdown-item"/>
-                                    <NavLinkVoid title="Visualizar" @click="abrirModalVisualizar(item)"/>
-                                    <a v-if="item.documento?.id" class="dropdown-item" target="_blank" :href="route('licenca.documento.visualizar', item.documento.id)">
+                                    <NavLink route-name="licenca.create" :param="item.id" title="Editar"
+                                        class="dropdown-item" />
+                                    <NavLinkVoid title="Visualizar" @click="abrirModalVisualizar(item)" />
+                                    <a v-if="item.documento?.id" class="dropdown-item" target="_blank"
+                                        :href="route('licenca.documento.visualizar', item.documento.id)">
                                         Visualizar PDF
                                     </a>
-                                    <NavLink route-name="licenca.condicionante.index" :param="item.id" title="Condicionante" class="dropdown-item"/>
-                                    <NavLinkVoid route-name="licenca.requerimento.index" title="Requerimento" @click="abrirModalRequerimento(item)"/>
-                                    <NavLinkVoid v-if="!item.arquivado" title="Arquivar licença" @click="gerenciarArquivo(item, index, true)"/>
-                                    <NavLinkVoid v-else title="Desarquivar" @click="gerenciarArquivo(item, index, false)" class="dropdown-item"/>
+                                    <NavLink route-name="licenca.condicionante.index" :param="item.id"
+                                        title="Condicionante" class="dropdown-item" />
+                                    <NavLinkVoid route-name="licenca.requerimento.index" title="Requerimento"
+                                        @click="abrirModalRequerimento(item)" />
+                                    <NavLinkVoid v-if="!item.arquivado" title="Arquivar licença"
+                                        @click="gerenciarArquivo(item, index, true)" />
+                                    <NavLinkVoid v-else title="Desarquivar"
+                                        @click="gerenciarArquivo(item, index, false)" class="dropdown-item" />
                                 </div>
                             </span>
                         </td>
@@ -117,20 +122,20 @@
             </Table>
         </div>
 
-        <ModalMapaGeral ref="refModalMapaGeral"/>
-        <ModalVisualizar ref="refModalVisualizar"/>
-        <ModalRequerimento ref="refModalRequerimento"/>
+        <ModalMapaGeral ref="refModalMapaGeral" />
+        <ModalVisualizar ref="refModalVisualizar" />
+        <ModalRequerimento ref="refModalRequerimento" />
     </AuthenticatedLayout>
 </template>
 
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import {Head, router} from "@inertiajs/vue3";
+import { Head, router } from "@inertiajs/vue3";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Table from "@/Components/Table.vue";
-import {ref} from "vue";
-import {IconCar, IconDots, IconSettings, IconShip, IconTrain} from "@tabler/icons-vue";
-import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
+import { ref } from "vue";
+import { IconCar, IconDots, IconSettings, IconShip, IconTrain } from "@tabler/icons-vue";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils.js";
 import ModelSearchForm from "@/Components/ModelSearchFormAllColumns.vue";
 import ModalMapaGeral from "@/Pages/Licenca/ModalMapaGeral.vue";
 import ModalVisualizar from "@/Pages/Licenca/ModalVisualizar.vue";
@@ -171,7 +176,7 @@ const abrirModalRequerimento = (item) => {
 }
 
 const gerenciarArquivo = (licenca, index, status) => {
-    router.patch(route('licenca.gerenciar-licenca', licenca), {id: licenca.id, arquivado: status}, {
+    router.patch(route('licenca.gerenciar-licenca', licenca), { id: licenca.id, arquivado: status }, {
         preserveScroll: true,
         onSuccess: () => {
             licencas.value.data.splice(index, 1)
