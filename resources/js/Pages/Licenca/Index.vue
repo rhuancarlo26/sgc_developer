@@ -29,7 +29,7 @@
 
             <!-- Pesquisa-->
             <ModelSearchForm :columns="[
-                'tipo.nome',
+                'tipo_licenca.sigla',
                 'numero_licenca',
                 'empreendimento',
                 'data_emissao',
@@ -93,29 +93,27 @@
                             {{ item.processo_dnit }}
                         </td>
                         <td class="text-center">
-                            <span class="dropdown">
-                                <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
+                            <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
                                     data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <IconDots />
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-end" style="">
-                                    <NavLink route-name="licenca.create" :param="item.id" title="Editar"
-                                        class="dropdown-item" />
-                                    <NavLinkVoid title="Visualizar" @click="abrirModalVisualizar(item)" />
-                                    <a v-if="item.documento?.id" class="dropdown-item" target="_blank"
-                                        :href="route('licenca.documento.visualizar', item.documento.id)">
-                                        Visualizar PDF
-                                    </a>
-                                    <NavLink route-name="licenca.condicionante.index" :param="item.id"
-                                        title="Condicionante" class="dropdown-item" />
-                                    <NavLinkVoid route-name="licenca.requerimento.index" title="Requerimento"
-                                        @click="abrirModalRequerimento(item)" />
-                                    <NavLinkVoid v-if="!item.arquivado" title="Arquivar licença"
-                                        @click="gerenciarArquivo(item, index, true)" />
-                                    <NavLinkVoid v-else title="Desarquivar"
-                                        @click="gerenciarArquivo(item, index, false)" class="dropdown-item" />
-                                </div>
-                            </span>
+                                <IconDots/>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" style="">
+                                <NavLink route-name="licenca.create" :param="item.id" title="Editar"
+                                         class="dropdown-item"/>
+                                <NavLinkVoid title="Visualizar" @click="abrirModalVisualizar(item)"/>
+                                <a v-if="item.documento?.id" class="dropdown-item" target="_blank"
+                                   :href="route('licenca.documento.visualizar', item.documento.id)">
+                                    Visualizar PDF
+                                </a>
+                                <NavLink route-name="licenca.condicionante.index" :param="item.id"
+                                         title="Condicionante" class="dropdown-item"/>
+                                <NavLinkVoid route-name="licenca.requerimento.index" title="Requerimento"
+                                             @click="abrirModalRequerimento(item)"/>
+                                <NavLinkVoid v-if="!item.arquivado" title="Arquivar licença"
+                                             @click="gerenciarArquivo(item, index, true)"/>
+                                <NavLinkVoid v-else title="Desarquivar"
+                                             @click="gerenciarArquivo(item, index, false)" class="dropdown-item"/>
+                            </div>
                         </td>
                     </tr>
                 </template>

@@ -34,10 +34,10 @@ class Contrato extends Model
         return $this->hasMany(contratoTrecho::class, 'contrato_id');
     }
 
-    public function empreendimento_trechos(): HasMany
-    {
-        return $this->hasMany(ContratoEmpreendimentoTrecho::class, 'contrato_id');
-    }
+//    public function empreendimento_trechos(): HasMany
+//    {
+//        return $this->hasMany(ContratoEmpreendimentoTrecho::class, 'contrato_id');
+//    }
 
     public function introducao(): HasOne
     {

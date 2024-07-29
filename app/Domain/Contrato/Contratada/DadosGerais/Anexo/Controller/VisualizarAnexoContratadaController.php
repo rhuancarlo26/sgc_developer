@@ -9,6 +9,6 @@ class VisualizarAnexoContratadaController extends Controller
 {
   public function index(ContratoAnexo $anexo)
   {
-    return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . $anexo->caminho);
+    return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . $anexo->caminho_arquivo);
   }
 }

@@ -14,83 +14,84 @@ use ZipArchive;
 
 class LicencaShapefileService extends BaseModelService
 {
-  use Searchable, Deletable;
+    use Searchable, Deletable;
 
-  protected string $modelClass = LicencaShapefile::class;
+    protected string $modelClass = LicencaShapefile::class;
 
-  public function store($request)
-  {
-    $post = [
-      'licenca_id' => $request['licenca_id'],
-      'nome_arquivo' => $request['shapefile']->getClientOriginalName(),
-      'coordenada' => $this->getFeatureCollection($request['shapefile'])
-    ];
+    public function store($request)
+    {
+        dd($post);
+        $post = [
+            'licenca_id' => $request['licenca_id'],
+            'nome_arquivo' => $request['shapefile']->getClientOriginalName(),
+            'coordenada' => $this->getFeatureCollection($request['shapefile'])
+        ];
 
-    $shapefile = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
+        $shapefile = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
 
-    return [
-      'request' => $shapefile['request']
-    ];
-  }
+        return [
+            'request' => $shapefile['request']
+        ];
+    }
 
-  public function getFeatureCollection($file)
-  {
-    $zip = new ZipArchive;
+    public function getFeatureCollection($file)
+    {
+        $zip = new ZipArchive;
 
-    $tempPath = $file->storeAs('shapefile', $file->getClientOriginalName());
-    $extractPath = storage_path('app' . DIRECTORY_SEPARATOR . 'shapefile' . DIRECTORY_SEPARATOR . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+        $tempPath = $file->storeAs('shapefile', $file->getClientOriginalName());
+        $extractPath = storage_path('app' . DIRECTORY_SEPARATOR . 'shapefile' . DIRECTORY_SEPARATOR . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
 
-    if ($zip->open(storage_path('app' . DIRECTORY_SEPARATOR . $tempPath)) === TRUE) {
-      $zip->extractTo($extractPath);
-      $zip->close();
+        if ($zip->open(storage_path('app' . DIRECTORY_SEPARATOR . $tempPath)) === TRUE) {
+            $zip->extractTo($extractPath);
+            $zip->close();
 
-      $shapefilePath = null;
+            $shapefilePath = null;
 
-      $files = scandir($extractPath);
+            $files = scandir($extractPath);
 
-      foreach ($files as $file) {
-        if (pathinfo($file, PATHINFO_EXTENSION) == 'shp') {
-          $shapefilePath = $extractPath . '/' . $file;
-          break;
-        }
-      }
-
-      if ($shapefilePath) {
-        try {
-          $Shapefile = new ShapefileReader($shapefilePath);
-
-          $features = [];
-
-          while ($record = $Shapefile->fetchRecord()) {
-            if ($record->isDeleted()) {
-              continue;
+            foreach ($files as $file) {
+                if (pathinfo($file, PATHINFO_EXTENSION) == 'shp') {
+                    $shapefilePath = $extractPath . '/' . $file;
+                    break;
+                }
             }
 
-            $geometry = $record->getGeoJSON();
-            $attributes = (object) $record->getDataArray();
+            if ($shapefilePath) {
+                try {
+                    $Shapefile = new ShapefileReader($shapefilePath);
 
-            $features[] = [
-              'type' => 'Feature',
-              'geometry' => json_decode($geometry, true),
-              'properties' => $attributes
-            ];
-          }
+                    $features = [];
 
-          $featureCollection = [
-            'type' => 'FeatureCollection',
-            'features' => $features
-          ];
+                    while ($record = $Shapefile->fetchRecord()) {
+                        if ($record->isDeleted()) {
+                            continue;
+                        }
 
-          $folderPath = storage_path('app' . DIRECTORY_SEPARATOR . 'shapefile'); // Caminho da pasta
+                        $geometry = $record->getGeoJSON();
+                        $attributes = (object)$record->getDataArray();
 
-          if (File::exists($folderPath)) {
-            File::deleteDirectory($folderPath);
-          }
+                        $features[] = [
+                            'type' => 'Feature',
+                            'geometry' => json_decode($geometry, true),
+                            'properties' => $attributes
+                        ];
+                    }
 
-          return json_encode($featureCollection);
-        } catch (ShapefileException $e) {
+                    $featureCollection = [
+                        'type' => 'FeatureCollection',
+                        'features' => $features
+                    ];
+
+                    $folderPath = storage_path('app' . DIRECTORY_SEPARATOR . 'shapefile'); // Caminho da pasta
+
+                    if (File::exists($folderPath)) {
+                        File::deleteDirectory($folderPath);
+                    }
+
+                    return json_encode($featureCollection);
+                } catch (ShapefileException $e) {
+                }
+            }
         }
-      }
     }
-  }
 }

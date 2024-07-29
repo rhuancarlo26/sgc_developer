@@ -14,7 +14,6 @@ use App\Domain\Contrato\Contratada\DadosGerais\Empreendimento\Controller\UpdateC
 use App\Domain\Contrato\Contratada\DadosGerais\Historico\Controller\DestroyHistoricoContratadaController;
 use App\Domain\Contrato\Contratada\DadosGerais\Historico\Controller\StoreHistoricoContratadaController;
 use App\Domain\Contrato\Contratada\DadosGerais\Historico\Controller\UpdateHistoricoContratadaController;
-use App\Domain\Contrato\Contratada\DadosGerais\Introducao\Controller\StoreIntroducaoContratadaController;
 use App\Domain\Contrato\Contratada\DadosGerais\Introducao\Controller\UpdateIntroducaoContratadaController;
 use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Controller\DeleteLicenciamentoContratadaController;
 use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Controller\StoreLicenciamentoContratadaController;
@@ -38,8 +37,7 @@ use App\Domain\Servico\Veiculo\Controller\StoreServicoVeiculoContratadaControlle
 Route::prefix('/contratada')->group(function () {
     Route::get('{contrato}/',                                      [ContratoContratadaController::class,                    'index'])->name('contratos.contratada.index');
     Route::get('{contrato}/dados_gerais',                          [DadosGeraisContratadaController::class,                 'index'])->name('contratos.contratada.dados_gerais.index');
-    Route::post('/store_introducao',                               [StoreIntroducaoContratadaController::class,             'index'])->name('contratos.contratada.store_introducao.index');
-    Route::patch('/update_introducao/{introducao}',                [UpdateIntroducaoContratadaController::class,            'index'])->name('contratos.contratada.update_introducao.index');
+    Route::patch('/update_introducao/{contrato}',                  [UpdateIntroducaoContratadaController::class,            'index'])->name('contratos.contratada.update_introducao.index');
     Route::post('/store_licenciamento',                            [StoreLicenciamentoContratadaController::class,          'index'])->name('contratos.contratada.store_licenciamento');
     Route::post('/delete_licenciamento/{licenca}',                 [DeleteLicenciamentoContratadaController::class,         'index'])->name('contratos.contratada.delete_licenciamento');
     Route::post('/store_licenciamento_observacao',                 [StoreLicenciamentoObservacaoController::class,          'index'])->name('contratos.contratada.store_licenciamento_observacao');
@@ -56,7 +54,7 @@ Route::prefix('/contratada')->group(function () {
     Route::patch('/update_empreendimento_trecho',                  [UpdateContratadaEmpreendimentoTrechoController::class,  'index'])->name('contratos.contratada.update_empreendimento_trecho');
     Route::delete('/destroy_empreendimento_trecho/{trecho}',       [DestroyContratadaEmpreendimentoTrechoController::class, 'index'])->name('contratos.contratada.destroy_empreendimento_trecho');
 
-    
+
     //Equipamento
     require __DIR__ . '/../Recurso/Equipamento/Router/EquipamentoRouter.php';
 
