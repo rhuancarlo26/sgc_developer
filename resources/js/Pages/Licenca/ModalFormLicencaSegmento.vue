@@ -19,7 +19,7 @@ const emit = defineEmits(['atualizarsegmento']);
 const modalLicencaSegmento = ref();
 
 const form = useForm({
-  id: null,
+  idlicenca_br: null,
   licenca_id: props.licenca?.id,
   rodovia: null,
   uf_inicial: null,
@@ -29,8 +29,19 @@ const form = useForm({
   extensao_br: null,
 });
 
+const reset = () => {
+  form.idlicenca_br = null;
+  form.licenca_id = props.licenca?.id;
+  form.rodovia = null;
+  form.uf_inicial = null;
+  form.uf_final = null;
+  form.km_inicio = null;
+  form.km_fim = null;
+  form.extensao_br = null;
+}
+
 const abrirModal = (item) => {
-  item ? Object.assign(form, item) : form.reset();
+  item ? Object.assign(form, item) : reset();
 
   modalLicencaSegmento.value.getBsModal().show();
 }
@@ -42,8 +53,8 @@ const calcExtensao = () => {
 const salvarLicencaSegmento = () => {
   form.licenca_id = props.licenca?.id;
 
-  if (form.id) {
-    form.patch(route('licenca_segmento.update', form.id), {
+  if (form.idlicenca_br) {
+    form.patch(route('licenca_segmento.update', form.idlicenca_br), {
       onSuccess: () => {
         modalLicencaSegmento.value.getBsModal().hide();
         emit('atualizarsegmento');
@@ -65,7 +76,7 @@ const rodoviasUnicas = computed(() => {
 
 const ufsDaRodovia = computed(() => {
   if (form.rodovia) {
-    const ufIdsDaRodoviaSelecionada = props.rodovias.filter(br => br.rodovia === form.rodovia).map(br => br.uf_id);
+    const ufIdsDaRodoviaSelecionada = props.rodovias.filter(br => br.rodovia === form.rodovia).map(br => br.estados_id);
 
     return props.ufs.filter(uf => ufIdsDaRodoviaSelecionada.includes(uf.id));
   } else {

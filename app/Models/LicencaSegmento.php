@@ -11,7 +11,8 @@ class LicencaSegmento extends Model
   use HasFactory;
 
   protected $table = 'licencas_br';
-  protected $guarded = ['id', 'created_at'];
+  protected $primaryKey = 'idlicenca_br';
+  protected $guarded = ['idlicenca_br', 'created_at'];
 
   public function uf_inicial(): BelongsTo
   {

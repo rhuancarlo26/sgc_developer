@@ -32,6 +32,7 @@ const buscarLicenca = () => {
       toast.error('Nenhuma condicionante encontrada!');
       return
     }
+    toast.success('Condicionante encontrada!');
 
     condicionantes.value = r.data.condicionantes;
   });
@@ -75,7 +76,7 @@ defineExpose({ abrirModal });
           </thead>
           <tbody>
             <tr v-for="condicionante in condicionantes" :key="condicionante.id">
-              <td class="text-center">{{ condicionante.numero_condicionante }}</td>
+              <td class="text-center">{{ condicionante.numero }}</td>
               <td class="text-left">{{ condicionante.descricao }}</td>
             </tr>
           </tbody>

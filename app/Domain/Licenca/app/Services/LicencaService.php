@@ -21,7 +21,7 @@ class LicencaService extends BaseModelService
     public function get(array $searchParams, bool $arquivado = false)
     {
         return $this->searchAllColumns(...$searchParams)
-            ->with(relations: ['tipo', 'requerimentos'])
+            ->with(relations: ['tipo_licenca', 'requerimentos'])
             ->where('arquivado', $arquivado)
             ->paginate(10)
             ->appends($searchParams);
@@ -49,5 +49,31 @@ class LicencaService extends BaseModelService
     public function update(array $post): array
     {
         return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
+    }
+
+    public function storeDocumento($documento, $licenca_id)
+    {
+        try {
+            if ($documento->isvalid()) {
+                $nome = $documento->getClientOriginalName();
+                // $tipo = $documento->extension();
+                $caminho = $documento->storeAs('Licenca' . DIRECTORY_SEPARATOR . 'Documento' . DIRECTORY_SEPARATOR . uniqid() . '__' . $nome);
+
+                $this->dataManagement->update(entity: $this->modelClass, infos: [
+                    'arquivo_licenca' => $caminho
+                ], id: $licenca_id);
+
+                // $this->modelClass::create([
+                //   'licenca_id' => $licenca_id,
+                //   'nome' => $nome,
+                //   'tipo' => $tipo,
+                //   'caminho' => $caminho
+                // ]);
+            }
+
+            return ['type' => 'success', 'content' => 'Documento cadastrados com sucesso!'];
+        } catch (\Exception $th) {
+            return ['type' => 'error', 'content' => $th->getMessage()];
+        }
     }
 }

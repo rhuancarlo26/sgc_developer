@@ -29,6 +29,6 @@ class DestroyCondicionanteController extends Controller
       ];
     }
 
-    return to_route('licenca.condicionante.index', ['licenca' => $condicionante->licenca_id])->with('message', $response);
+    return to_route('licenca.condicionante.index', ['licenca' => $condicionante->licencas_id])->with('message', $response);
   }
 }
