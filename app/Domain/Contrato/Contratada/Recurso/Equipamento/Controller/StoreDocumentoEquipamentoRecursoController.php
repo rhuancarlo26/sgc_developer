@@ -8,14 +8,17 @@ use Illuminate\Http\Request;
 
 class StoreDocumentoEquipamentoRecursoController extends Controller
 {
-  public function __construct(private readonly EquipamentoRecursoService $equimentoRecursoService)
-  {
-  }
+    public function __construct(private readonly EquipamentoRecursoService $equimentoRecursoService)
+    {
+    }
 
-  public function index(Request $request)
-  {
-    $response = $this->equimentoRecursoService->salvarDocumentoEquipamento($request->all());
+    public function index(Request $request)
+    {
+        $response = $this->equimentoRecursoService->salvarDocumentoEquipamento($request->all());
 
-    return to_route('contratos.contratada.recurso.equipamento.create', ['contrato' => $request->contrato_id, 'equipamento' => $request->equipamento_id])->with('message', $response);
-  }
+        return to_route('contratos.contratada.recurso.equipamento.create', [
+            'contrato' => $request->id_contrato,
+            'equipamento' => $request->id
+        ])->with('message', $response);
+    }
 }
