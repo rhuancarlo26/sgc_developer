@@ -9,6 +9,6 @@ class RecursoVeiculoDocumento extends Model
 {
     use HasFactory;
 
-    protected $table = 'recurso_veiculo_documentos';
+    protected $table = 'veiculo_arquivo';
     protected $guarded = ['id', 'created_at'];
 }

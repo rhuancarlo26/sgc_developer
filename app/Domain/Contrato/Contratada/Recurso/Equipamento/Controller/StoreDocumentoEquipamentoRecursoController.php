@@ -18,7 +18,7 @@ class StoreDocumentoEquipamentoRecursoController extends Controller
 
         return to_route('contratos.contratada.recurso.equipamento.create', [
             'contrato' => $request->id_contrato,
-            'equipamento' => $request->id
+            'equipamento' => $request->cod_equipamento
         ])->with('message', $response);
     }
 }
