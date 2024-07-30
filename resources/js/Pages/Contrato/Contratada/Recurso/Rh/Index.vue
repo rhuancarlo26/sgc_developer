@@ -36,7 +36,7 @@ const excluirRh = (rh_id) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
     { route: '#', label: contrato.contratada }
   ]
     " />
@@ -65,7 +65,7 @@ const excluirRh = (rh_id) => {
               <td>{{ item.cpf }}</td>
               <td>{{ item.email }}</td>
               <td>{{ item.funcao }}</td>
-              <td>{{ item.formacao }}</td>
+              <td>{{ item.profissao }}</td>
               <td class="text-center">
                 <span :class="item.status == 0 ? 'badge bg-red-lt' : 'badge bg-green-lt'"
                 :title="item.status == 0 ? 'Item inativo' : 'Item ativo'">
