@@ -8,17 +8,17 @@ use Illuminate\Http\Request;
 
 class UpdateRhRecursoController extends Controller
 {
-  public function __construct(private readonly RhRecursoService $rhRecursoService)
-  {
-  }
+    public function __construct(private readonly RhRecursoService $rhRecursoService)
+    {
+    }
 
-  public function index(Request $request)
-  {
-    $response = $this->rhRecursoService->updateRh($request->all());
+    public function index(Request $request)
+    {
+        $response = $this->rhRecursoService->updateRh($request->all());
 
-    return back()->withInput([
-      'contrato' => $request->contrato_id,
-      'rh' => $request->id
-    ])->with('message', $response['request']);
-  }
+        return back()->withInput([
+            'contrato' => $request->contrato_id,
+            'rh' => $request->id
+        ])->with('message', $response['request']);
+    }
 }
