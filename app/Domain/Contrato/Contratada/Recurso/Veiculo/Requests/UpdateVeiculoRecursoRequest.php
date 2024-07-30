@@ -11,11 +11,9 @@ class UpdateVeiculoRecursoRequest extends FormRequest
     return [
       'id'                => 'required',
       'contrato_id'       => 'required',
-      'veiculo_codigo_id' => 'required',
+      'cod_veiculos'      => 'required',
       'descricao'         => 'required',
-      'observacao'        => 'required',
-      'alugado'           => 'required',
-      'placa_veiculo'     => 'required',
+      'placa'             => 'required',
       'ultima_revisao'    => 'required',
       'km_inicial'        => 'required'
     ];
