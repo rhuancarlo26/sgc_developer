@@ -6,5 +6,6 @@ Route::prefix('/supressao-vegetacao')->group(function () {
   Route::prefix('/configuracao')->group(function () {
       require __DIR__ . '/../../Configuracao/VincularASV/Routes/VincularASVRoutes.php';
       require __DIR__ . '/../../Configuracao/PlanoSupressao/Routes/PlanoSupressaoRoutes.php';
+      require __DIR__ . '/../../Configuracao/PatioEstocagem/Routes/PatioEstocagemRoutes.php';
   });
 });

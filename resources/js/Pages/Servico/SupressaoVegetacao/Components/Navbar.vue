@@ -37,8 +37,8 @@ defineProps({
                           active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.configuracao.plano-supressao*"
                           :route-param="{ contrato: contrato.id, servico: servico.id }" title="Plano de Supressão" />
                         <NavDropdownLink
-                          route-name="contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index"
-                          active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv*"
+                          route-name="contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.index"
+                          active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem*"
                           :route-param="{ contrato: contrato.id, servico: servico.id }" title="Patio estocagem" />
                       </NavDropdown>
 
