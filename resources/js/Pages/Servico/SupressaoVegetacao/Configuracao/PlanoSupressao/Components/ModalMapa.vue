@@ -8,7 +8,6 @@ const modalVisualizar = ref();
 const mapaVisualizar = ref();
 
 const abrirModal = (geoJson) => {
-    console.log(JSON.parse(geoJson))
     modalVisualizar.value.getBsModal().show();
 
     modalVisualizar.value

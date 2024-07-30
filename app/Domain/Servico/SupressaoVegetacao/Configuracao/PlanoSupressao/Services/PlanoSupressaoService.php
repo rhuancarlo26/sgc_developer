@@ -49,8 +49,9 @@ class PlanoSupressaoService extends BaseModelService
 
         $doc = $request['doc'];
         if ($doc) {
-            $arquivo = $this->arquivoUtils->salvar(arquivo: $doc, diretorio: 'uploads/supressao/plano', prefixo: 'PS');
+            $arquivo = $this->arquivoUtils->salvar(arquivo: $doc, diretorio: 'public/uploads/supressao/plano/', prefixo: 'PS');
             $request['arquivo_id'] = $arquivo?->id;
+            unset($request['doc']);
         }
 
         return $this->dataManagement->create(entity: $this->modelClass, infos: [

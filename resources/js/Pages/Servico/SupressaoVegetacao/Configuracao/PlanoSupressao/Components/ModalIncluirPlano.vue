@@ -32,9 +32,10 @@ const save = () => {
             servico_id: props.servico.id,
         }))
         .post(route('contratos.contratada.servicos.supressao-vegetacao.configuracao.plano-supressao.store'), {
-            preserveState: false,
+            preserveState: true,
             onSuccess: () => {
                 modalRef.value.getBsModal().hide();
+                form.reset();
             }
         })
 }
