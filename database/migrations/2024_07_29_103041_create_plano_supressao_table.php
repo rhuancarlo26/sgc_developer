@@ -18,10 +18,10 @@ return new class extends Migration
             $table->string('chave');
             $table->decimal('area_em_app');
             $table->decimal('area_fora_app');
-            $table->date('dt_final');
-            $table->date('dt_inicial');
-            $table->text('local_shape_em_app');
-            $table->text('local_shape_fora_app');
+            $table->date('dt_final')->nullable();
+            $table->date('dt_inicial')->nullable();
+            $table->text('local_shape_em_app')->nullable();
+            $table->text('local_shape_fora_app')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
