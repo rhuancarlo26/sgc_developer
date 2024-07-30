@@ -56,7 +56,7 @@ Route::prefix('/contratada')->group(function () {
     Route::patch('/update_empreendimento_trecho',                  [UpdateContratadaEmpreendimentoTrechoController::class,  'index'])->name('contratos.contratada.update_empreendimento_trecho');
     Route::delete('/destroy_empreendimento_trecho/{trecho}',       [DestroyContratadaEmpreendimentoTrechoController::class, 'index'])->name('contratos.contratada.destroy_empreendimento_trecho');
 
-    
+
     //Equipamento
     require __DIR__ . '/../Recurso/Equipamento/Router/EquipamentoRouter.php';
 
@@ -92,6 +92,7 @@ Route::prefix('/contratada')->group(function () {
 
         Route::prefix('servico')->group(function () {
             require __DIR__ . '/../../../Servico/PMQA/app/Routes/PMQARoutes.php';
+            require __DIR__ . '/../../../Servico/MonAtpFauna/app/Routes/MonAtpFaunaRoutes.php';
         });
     });
 });
