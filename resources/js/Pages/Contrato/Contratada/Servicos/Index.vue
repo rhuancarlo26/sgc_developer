@@ -94,8 +94,14 @@ const deleteServico = (servico_id) => {
                                     <a @click="abrirModalServico(item)" class="dropdown-item" href="javascript:void(0)">
                                         Visualizar
                                     </a>
+                                    <!-- PMQA - id: 1 -->
                                     <a v-if="item.servico_tipo_id === 1" class="dropdown-item"
                                         :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
+                                        Gerenciar
+                                    </a>
+                                    <!-- Controle de Ocorrencias - id: 7 -->
+                                    <a v-else-if="item.servico_tipo_id === 7" class="dropdown-item"
+                                        :href="route('contratos.contratada.servicos.controledeocorrencias.configuracoes.empreendimento.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
                                     <a class="dropdown-item"
