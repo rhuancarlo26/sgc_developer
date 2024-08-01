@@ -11,17 +11,17 @@ use Inertia\Response;
 
 class CreateServicosContratadaController extends Controller
 {
-  public function __construct(private readonly ServicoService $servicoService)
-  {
-  }
+    public function __construct(private readonly ServicoService $servicoService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico): Response
-  {
-    $response = $this->servicoService->createServicos($contrato, $servico);
+    public function index(Contrato $contrato, Servicos $servico): Response
+    {
+        $response = $this->servicoService->createServicos($contrato, $servico);
 
-    return Inertia::render('Contrato/Contratada/Servicos/Form', [
-      'contrato' => $contrato,
-      ...$response
-    ]);
-  }
+        return Inertia::render('Contrato/Contratada/Servicos/Form', [
+            'contrato' => $contrato,
+            ...$response
+        ]);
+    }
 }

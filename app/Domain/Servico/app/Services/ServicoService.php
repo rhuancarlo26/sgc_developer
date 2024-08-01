@@ -15,90 +15,90 @@ use App\Shared\Traits\Searchable;
 
 class ServicoService extends BaseModelService
 {
-  use Searchable, Deletable;
+    use Searchable, Deletable;
 
-  protected string $modelClass = Servicos::class;
+    protected string $modelClass = Servicos::class;
 
-  public function listarServicos($contrato, $searchParams, $statusIds = null)
-  {
-    $query = $this->search(...$searchParams)
-      ->with([
-        'tipo',
-        'tema',
-        'status',
-        'rhs',
-        'veiculos',
-        'veiculos.codigo',
-        'equipamentos',
-        'condicionantes',
-        'condicionantes.licenca'
-      ])
-      ->where('contrato_id', $contrato->id);
+    public function listarServicos($contrato, $searchParams, $statusIds = null): array
+    {
+        $query = $this->search(...$searchParams)
+            ->with([
+                'tipo',
+                'tema',
+//                'status',
+                'rhs',
+                'veiculos',
+                'veiculos.codigo',
+                'equipamentos',
+                'condicionantes',
+                'condicionantes.licenca'
+            ])
+            ->where('id_contrato', $contrato->id)
+            ->where('deleted_at', null);
 
-    // Verifica se $statusIds foi fornecido e não está vazio
-    if (!is_null($statusIds) && !empty($statusIds)) {
-      $query->whereIn('servico_status_id', $statusIds);
+//        // Verifica se $statusIds foi fornecido e não está vazio
+//        if (!is_null($statusIds) && !empty($statusIds)) {
+//            $query->whereIn('servico_status_id', $statusIds);
+//        }
+
+        return [
+            'servicos' => $query->paginate()->appends($searchParams)
+        ];
     }
 
-    return [
-      'servicos' => $query->paginate()->appends($searchParams)
-    ];
-  }
+    public function createServicos($contrato, $servico): array
+    {
+        $tipos = ServicoTipo::all();
+        $temas = ServicoTema::all();
+        $rhs = RecursoRh::where('id_contrato', $contrato->id)->get();
+        $veiculos = RecursoVeiculo::with(['codigo'])->where('id_contrato', $contrato->id)->get();
+        $equipamentos = RecursoEquipamento::where('id_contrato', $contrato->id)->get();
+        $licencasLi = Licenca::select(['id', 'numero_licenca'])
+            ->with(['condicionantes'])
+            ->where('tipo', 6)
+            ->get();
 
-  public function createServicos($contrato, $servico)
-  {
-    $tipos = ServicoTipo::all();
-    $temas = ServicoTema::all();
-    $rhs = RecursoRh::where('contrato_id', $contrato->id)->get();
-    $veiculos = RecursoVeiculo::with(['codigo'])->where('contrato_id', $contrato->id)->get();
-    $equipamentos = RecursoEquipamento::where('contrato_id', $contrato->id)->get();
-    $licencasLi = Licenca::select(['id', 'numero_licenca'])
-      ->with([
-        'condicionantes'
-      ])
-      ->where('tipo_id', 6)
-      ->get();
+        if ($servico) {
+            $servico->load([
+                'tipo',
+                'tema',
+                'rhs',
+                'veiculos',
+                'veiculos.codigo',
+                'equipamentos',
+                'condicionantes',
+                'condicionantes.licenca'
+            ]);
+        }
 
-    if ($servico) {
-      $servico->load([
-        'tipo',
-        'tema',
-        'rhs',
-        'veiculos',
-        'veiculos.codigo',
-        'equipamentos',
-        'condicionantes',
-        'condicionantes.licenca'
-      ]);
+        return [
+            'tipos' => $tipos,
+            'temas' => $temas,
+            'licencasLi' => $licencasLi,
+            'rhs' => $rhs,
+            'veiculos' => $veiculos,
+            'equipamentos' => $equipamentos,
+            'servico' => $servico
+        ];
     }
 
-    return [
-      'tipos' => $tipos,
-      'temas' => $temas,
-      'licencasLi' => $licencasLi,
-      'rhs' => $rhs,
-      'veiculos' => $veiculos,
-      'equipamentos' => $equipamentos,
-      'servico' => $servico
-    ];
-  }
+    public function storeServico($request): array
+    {
+        $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
-  public function storeServico($request)
-  {
-    $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+        return [
+            'servico' => $response['model']['id'],
+            'request' => $response['request']
+        ];
+    }
 
-    return [
-      'servico' => $response['model']['id'],
-      'request' => $response['request']
-    ];
-  }
+    public function updateServico($request): array
+    {
+        $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
 
-  public function updateServico($request)
-  {
-    $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+        return [
+            'request' => $response['request']
+        ];
+    }
 
-    return [
-      'request' => $response['request']
-    ];
-  }
 }

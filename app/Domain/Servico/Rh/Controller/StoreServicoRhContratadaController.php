@@ -8,19 +8,22 @@ use Illuminate\Http\Request;
 
 class StoreServicoRhContratadaController extends Controller
 {
-  public function __construct(private readonly ServicoRhService $servicoRhService)
-  {
-  }
+    public function __construct(private readonly ServicoRhService $servicoRhService)
+    {
+    }
 
-  public function index(Request $request)
-  {
-    $post = [
-      'servico_id' => $request->servico_id,
-      'recurso_rh_id' => $request->rh['id']
-    ];
+    public function index(Request $request)
+    {
+        $post = [
+            'id_servico' => $request->servico_id,
+            'id_rh'      => $request->rh['id']
+        ];
 
-    $response = $this->servicoRhService->storeServicoRh($post);
+        $response = $this->servicoRhService->storeServicoRh($post);
 
-    return to_route('contratos.contratada.servicos.create', ['contrato' => $request->contrato_id, 'servico' => $request->servico_id])->with('message', $response['request']);
-  }
+        return to_route('contratos.contratada.servicos.create', [
+            'contrato' => $request->id_contrato,
+            'servico'  => $request->servico_id
+        ])->with('message', $response['request']);
+    }
 }

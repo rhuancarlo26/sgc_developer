@@ -9,6 +9,6 @@ class ServicoLicencaCondicionante extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_licenca_condicionantes';
+    protected $table = 'servico_licenca_condicionante';
     protected $guarded = ['id', 'created_at'];
 }
