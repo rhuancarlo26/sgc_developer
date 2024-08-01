@@ -29,8 +29,12 @@ const porps = defineProps({
                       <NavDropdown prefix="contratos.contratada.servicos.pmqa.configuracao*" title="Configurações"
                         :icon="IconLayoutDashboard">
 
-                        <NavDropdownLink route-name="home" :route-param="{ contrato: contrato.id, servico: servico.id }"
-                          title="Empreendimento" />
+                        <NavDropdownLink
+                          route-name="contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index"
+                          :route-param="{ contrato: contrato.id, servico: servico.id }" title="Empreendimento" />
+                        <NavDropdownLink
+                          route-name="contratos.contratada.servicos.cont_ocorrencia.configuracao.lote_obra.index"
+                          :route-param="{ contrato: contrato.id, servico: servico.id }" title="Lote de obra" />
                       </NavDropdown>
                     </ul>
                   </div>
