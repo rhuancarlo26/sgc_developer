@@ -9,37 +9,32 @@ use App\Shared\Traits\Searchable;
 
 class ServicoRhService extends BaseModelService
 {
-  use Searchable, Deletable;
+    use Searchable, Deletable;
 
-  protected string $modelClass = ServicoRh::class;
+    protected string $modelClass = ServicoRh::class;
 
-  public function storeServicoRh($request)
-  {
-    $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
-
-    return [
-      'request' => $response['request']
-    ];
-  }
-
-  public function deleteRh($rh, $request)
-  {
-    try {
-      $this->modelClass::Where('recurso_rh_id', $rh->id)->where('servico_id', $request['servico_id'])->firstOrFail()->delete();
-
-      $response = [
-        'type' => 'success',
-        'content' => 'Recurso deletado com sucesso!'
-      ];
-    } catch (\Exception $e) {
-      $response = [
-        'type' => 'error',
-        'content' => $e->getMessage()
-      ];
+    public function storeServicoRh($request): array
+    {
+        $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+        return ['request' => $response['request']];
     }
 
-    return [
-      'request' => $response
-    ];
-  }
+    public function deleteRh($rh, $request): array
+    {
+        try {
+            $this->modelClass::Where('id_rh', $rh->id)->where('id_servico', $request['servico_id'])->firstOrFail()->delete();
+
+            $response = [
+                'type' => 'success',
+                'content' => 'Recurso deletado com sucesso!'
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'type' => 'error',
+                'content' => $e->getMessage()
+            ];
+        }
+
+        return ['request' => $response];
+    }
 }

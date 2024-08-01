@@ -58,7 +58,7 @@ defineExpose({ abrirModal });
               </h2>
               <div id="objetivo" class="accordion-collapse collapse" data-bs-parent="#servico">
                 <div class="accordion-body pt-0">
-                  <p>{{ detalhe.objetivo }}</p>
+                  <p>{{ detalhe.objetivos }}</p>
                 </div>
               </div>
             </div>
@@ -154,7 +154,7 @@ defineExpose({ abrirModal });
               <tbody>
                 <tr v-for="equipamento in detalhe.equipamentos" :key="equipamento.id">
                   <td>{{ equipamento.nome }}</td>
-                  <td>{{ equipamento.descricao }}</td>
+                  <td>{{ equipamento.espec_tecnica }}</td>
                 </tr>
               </tbody>
             </table>

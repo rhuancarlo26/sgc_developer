@@ -41,7 +41,7 @@ const deleteServico = (servico_id) => {
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-                    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+                    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
                     { route: '#', label: contrato.contratada }
                 ]
                     " />
@@ -61,28 +61,31 @@ const deleteServico = (servico_id) => {
                 <ModelSearchForm :search-columns="{}" />
 
                 <!-- Listagem-->
-                <Table :columns="['Tema', 'Serviço', 'Especificação', 'Licença', 'Status', 'Ação']" :records="servicos"
+                <Table :columns="['', 'Tema', 'Serviço', 'Especificação', 'Licença', 'Status', 'Ação']" :records="servicos"
                     table-class="table-hover">
                     <template #body="{ item }">
                         <tr>
-                            <td>{{ item.tema?.nome }}</td>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item.tema?.nome_tema }}</td>
                             <td>{{ item.tipo?.nome }}</td>
                             <td>{{ item.especificacao }}</td>
                             <td>
                                 <span @click="abrirModalLicenca(item)" v-if="item.condicionantes.length">
-                                    {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''} -
-                                    ${item.condicionantes[0]?.descricao ?? ''}` }}
+                                    {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''}` }}
                                 </span>
                             </td>
                             <td class="text-center">
-                                <span v-if="item.servico_status_id === 1" class="badge bg-azure-lt">
-                                    {{ item.status?.nome }}
+                                <span v-if="item.status_aprovacao === 1" class="badge bg-azure-lt">
+                                    Em confecção
                                 </span>
-                                <span v-else-if="item.servico_status_id === 2" class="badge bg-red-lt">
-                                    {{ item.status?.nome }}
+                                <span v-else-if="item.status_aprovacao === 2" class="badge bg-red-lt">
+                                   Em análise
                                 </span>
-                                <span v-else-if="item.servico_status_id === 3" class="badge bg-blue-lt">
-                                    {{ item.status?.nome }}
+                                <span v-else-if="item.status_aprovacao === 3" class="badge bg-blue-lt">
+                                   Aprovado
+                                </span>
+                                <span v-else-if="item.status_aprovacao === 4" class="badge bg-blue-lt">
+                                   Pendente
                                 </span>
                             </td>
                             <td class="text-center">

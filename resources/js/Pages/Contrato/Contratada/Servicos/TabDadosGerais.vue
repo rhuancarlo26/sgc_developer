@@ -22,7 +22,7 @@ const form = useForm({
   especificacao: null,
   introducao: null,
   justificativa: null,
-  objetivo: null,
+  objetivos: null,
   metodologia: null,
   publico_alvo: null,
   ...props.servico
@@ -98,8 +98,8 @@ const salvarServico = () => {
     <div class="row mb-4">
       <div class="col form-group">
         <InputLabel value="Objetivos" for="objetivo" />
-        <textarea name="objetivo" id="objetivo" class="form-control" v-model="form.objetivo" rows="5"></textarea>
-        <InputError :message="form.errors.objetivo" />
+        <textarea name="objetivo" id="objetivo" class="form-control" v-model="form.objetivos" rows="5"></textarea>
+        <InputError :message="form.errors.objetivos" />
       </div>
     </div>
     <div class="row mb-4">
