@@ -9,7 +9,7 @@ class ServicoPmqaPonto extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_pontos';
+    protected $table = 'config_pontos';
     protected $guarded = ['id', 'created_at'];
 
     public function vinculado()
