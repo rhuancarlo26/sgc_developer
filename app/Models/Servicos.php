@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ class Servicos extends Model
 
     protected $table = 'servicos';
     protected $guarded = ['id', 'created_at'];
+    protected $appends = ['licenca_ufs', 'licenca_brs'];
 
     public function status(): BelongsTo
     {
@@ -55,6 +57,46 @@ class Servicos extends Model
         return $this->hasMany(ServicoLicencaCondicionante::class, 'servico_id');
     }
 
+    public function licencaUfs(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $ufInicial = collect($this->licencas_condicionantes)
+                    ->pluck('licenca.segmentos')
+                    ->flatten(1)
+                    ->pluck('uf_inicial')
+                    ->all();
+
+                $ufFinal = collect($this->licencas_condicionantes)
+                    ->pluck('licenca.segmentos')
+                    ->flatten(1)
+                    ->pluck('uf_final')
+                    ->all();
+
+                return collect($ufInicial)
+                    ->merge($ufFinal)
+                    ->unique('id')
+                    ->values()
+                    ->all();
+            }
+        );
+    }
+
+    public function licencaBrs(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                return collect($this->licencas_condicionantes)
+                    ->pluck('licenca.segmentos')
+                    ->flatten(1)
+                    ->pluck('rodovia')
+                    ->unique()
+                    ->values()
+                    ->toArray();
+            }
+        );
+    }
+
     public function pontos()
     {
         return $this->hasMany(ServicoPmqaPonto::class, 'servico_id');
@@ -63,5 +105,10 @@ class Servicos extends Model
     public function pmqa_config_lista_parecer()
     {
         return $this->hasOne(ServicoPmqaConfiguracaoParecer::class, 'servico_id');
+    }
+
+    public function cont_ocorr_parecer_configuracao()
+    {
+        return $this->hasOne(ServicoContOcorrSupervisaoParecerConfiguracao::class, 'fk_servico');
     }
 }
