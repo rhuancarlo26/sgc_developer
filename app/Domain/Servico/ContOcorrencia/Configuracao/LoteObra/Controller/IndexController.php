@@ -19,14 +19,14 @@ class IndexController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, Request $request): Response
   {
-    // $searchParams = $request->all('columns', 'value');
+    $searchParams = $request->all('columns', 'value');
 
-    // $response = $this->empreendimentoService->index($servico, $searchParams);
+    $response = $this->loteObraService->index($servico, $searchParams);
 
     return Inertia::render('Servico/ContOcorr/Configuracao/LoteObra/Index', [
       'contrato' => $contrato,
-      'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
-      // ...$response
+      'servico' => $servico->load(['tipo', 'cont_ocorr_parecer_configuracao'])->append(['licenca_ufs']),
+      ...$response
     ]);
   }
 }
