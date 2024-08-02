@@ -5,6 +5,7 @@ namespace App\Shared\Utils;
 use App\Models\Arquivo;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 
 class ArquivoUtils
 {
@@ -33,5 +34,13 @@ class ArquivoUtils
             'diretorio'    => $diretorio,
             'nome_arquivo' => $arquivo->getClientOriginalName(),
         ]);
+    }
+
+    public function delete(Arquivo $arquivo): bool
+    {
+        if(Storage::delete(storage_path($arquivo->diretorio . $arquivo->arquivo))) {
+            return $arquivo->delete();
+        }
+        return false;
     }
 }

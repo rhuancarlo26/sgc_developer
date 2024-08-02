@@ -66,7 +66,7 @@ const abrirModalVisualizar = (item) => {
             <template #body>
 
                 <div class="ms-auto mb-4">
-                    <NavButton @click="abrirModalCadastro"
+                    <NavButton @click="abrirModalCadastro(null)"
                        route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.importar"
                        :param="{ contrato: props.contrato.id, servico: props.servico.id }" type-button="success"
                        title="Cadastrar pátio de estocagem" />
@@ -98,7 +98,7 @@ const abrirModalVisualizar = (item) => {
                                     <NavButton @click="abrirModalCadastro(item)" type-button="warning" class="btn-icon" :icon="IconPencil" />
                                     <LinkConfirmation v-slot="confirmation" :options="{ text: 'Você deseja remover o plano de supressão?' }">
                                         <Link :onBefore="confirmation.show"
-                                              :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.plano-supressao.destroy', { plano: item.id })"
+                                              :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.delete', item.id)"
                                               as="button" method="delete" type="button" class="btn btn-icon btn-danger">
                                             <IconTrash/>
                                         </Link>

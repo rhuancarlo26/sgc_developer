@@ -1,7 +1,7 @@
 <script setup>
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import Modal from "@/Components/Modal.vue";
-import {useForm} from "@inertiajs/vue3";
+import {router, useForm} from "@inertiajs/vue3";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 
@@ -42,8 +42,11 @@ const save = () => {
     }
 
     if(form.id !== null) {
-        // A FAZER
-        form.patch(route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.update', form.id), {
+        router.post(route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.update', form.id), {
+            _method: 'patch',
+            ...form.data(),
+            fotos: form.fotos.filter(foto => foto instanceof File),
+        }, {
             preserveState: true,
             onSuccess
         })
@@ -54,6 +57,34 @@ const save = () => {
         preserveState: true,
         onSuccess
     })
+}
+
+const images = computed(() => {
+    return (form.fotos).map((foto, index) =>  ({
+        id: foto?.id ?? null,
+        index,
+        path: foto?.caminho ?? URL.createObjectURL(foto)
+    }));
+})
+
+const fileRef = ref()
+const onChangeFotos = (event) => {
+    form.fotos.push(...Array.from(event.target.files));
+    fileRef.value.value = '';
+}
+
+const destroyPhoto = (photoId, index) => {
+    if (photoId !== null) {
+        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.fotos.delete', {arquivo: photoId, patio: form.id}), {
+            preserveState: true,
+            onSuccess() {
+                modalRef.value.getBsModal().hide();
+                form.reset();
+            }
+        })
+        return;
+    }
+    form.fotos.splice(index, 1)
 }
 
 defineExpose({abrirModal});
@@ -103,9 +134,16 @@ defineExpose({abrirModal});
                     </div>
                     <div class="col-12">
                         <InputLabel value="Anexar fotos" for="local_shape_fora_app"/>
-                        <input @input="form.fotos = $event.target.files" id="fotos"
-                               type="file" class="form-control" accept=".jpg, .jpeg, .png" multiple>
+                        <input ref="fileRef" @input="onChangeFotos" id="fotos" type="file" class="form-control" accept=".jpg, .jpeg, .png" multiple>
                         <InputError :message="form.errors.fotos"/>
+                        <ul class="list-unstyled d-flex gap-2 flex-wrap mt-3">
+                            <li v-for="img in images" class="d-flex flex-column">
+                                <span class="avatar avatar-xl">
+                                    <img :src="img.path" alt />
+                                </span>
+                                <button @click="destroyPhoto(img.id, img.index)" type="button" class="btn btn-sm btn-danger">Remover</button>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </template>
