@@ -8,6 +8,7 @@ use App\Models\PatioEstocagem;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
+use App\Shared\Traits\GenerateCode;
 use App\Shared\Traits\Searchable;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
@@ -16,7 +17,7 @@ use Illuminate\Http\UploadedFile;
 
 class PatioEstocagemService extends BaseModelService
 {
-    use Searchable, Deletable;
+    use Searchable, Deletable, GenerateCode;
 
     protected string $modelClass = PatioEstocagem::class;
 
@@ -42,9 +43,14 @@ class PatioEstocagemService extends BaseModelService
         $this->handleShapefile(request: $request);
         $response = $this->dataManagement->create(entity: $this->modelClass, infos: [
             ...$request,
-            'chave' => $this->getCodigo(),
+            'chave' => $this->getCodigo(prefix: 'PE'),
         ]);
-        $this->handleFotos(request: $request, afterSave: fn(array $fotosId) => $response['model']?->fotos()->sync($fotosId));
+        $this->arquivoUtils->handleFotos(
+            fotos: $request['fotos'],
+            diretorio: 'public/uploads/supressao/patio/',
+            prefixo: 'PT',
+            afterSave: fn(array $fotosId) => $response['model']?->fotos()->sync($fotosId)
+        );
         return $response;
     }
 
@@ -52,7 +58,12 @@ class PatioEstocagemService extends BaseModelService
     {
         $this->handleShapefile(request: $request);
         $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
-        $this->handleFotos(request: $request, afterSave: fn(array $fotosId) => $this->model->find($request['id'])?->fotos()->attach($fotosId));
+        $this->arquivoUtils->handleFotos(
+            fotos: $request['fotos'],
+            diretorio: 'public/uploads/supressao/patio/',
+            prefixo: 'PT',
+            afterSave: fn(array $fotosId) => $this->model->find($request['id'])?->fotos()->attach($fotosId)
+        );
         return $response;
     }
 
@@ -65,20 +76,6 @@ class PatioEstocagemService extends BaseModelService
         return false;
     }
 
-    private function handleFotos(array &$request, callable $afterSave): void
-    {
-        if (!isset($request['fotos']) || !count($request['fotos'])) {
-            return;
-        }
-        /** @var UploadedFile[] $fotos */
-        $fotos = $request['fotos'];
-        $fotosId = array_map(function($foto) {
-            $arquivo = $this->arquivoUtils->salvar(arquivo: $foto, diretorio: 'public/uploads/supressao/patio/', prefixo: 'PT');
-            return $arquivo?->id;
-        }, $fotos);
-        $afterSave($fotosId);
-    }
-
     private function handleShapefile(array &$request): void
     {
         $shapefile = $request['shapefile'];
@@ -88,12 +85,5 @@ class PatioEstocagemService extends BaseModelService
         $path = storage_path('app' . DIRECTORY_SEPARATOR . 'file_shape' . DIRECTORY_SEPARATOR . uniqid() . '.json');
         file_put_contents($path, $shape);
         $request['local_shape'] = $path;
-    }
-
-    private function getCodigo(): string
-    {
-        $last = PatioEstocagem::query()->latest('id')->first()?->id;
-        $key  = sprintf('%02d', $last + 1);
-        return 'PE-' . $key . '/' . date('Y');
     }
 }
