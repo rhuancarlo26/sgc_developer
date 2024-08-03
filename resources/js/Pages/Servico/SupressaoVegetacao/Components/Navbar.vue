@@ -42,6 +42,23 @@ defineProps({
                           :route-param="{ contrato: contrato.id, servico: servico.id }" title="Patio estocagem" />
                       </NavDropdown>
 
+                        <NavDropdown prefix="contratos.contratada.servicos.supressao-vegetacao.execucao*" title="Execução"
+                                     :icon="IconLayoutDashboard">
+
+                            <NavDropdownLink route-name="contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.index"
+                              active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.execucao.supressao*"
+                              :route-param="{ contrato: contrato.id, servico: servico.id }" title="Supressão" />
+
+                            <NavDropdownLink route-name="contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index"
+                              active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv*"
+                              :route-param="{ contrato: contrato.id, servico: servico.id }" title="Pilhas" />
+
+                            <NavDropdownLink route-name="contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index"
+                              active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv*"
+                              :route-param="{ contrato: contrato.id, servico: servico.id }" title="Destinação" />
+
+                        </NavDropdown>
+
                       <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.index"
                         active-on-route-prefix="contratos.contratada.servicos.pmqa.execucao*"
                         :param="{ contrato: contrato.id, servico: servico.id }" title="Execução"
