@@ -38,9 +38,25 @@ class ArquivoUtils
 
     public function delete(Arquivo $arquivo): bool
     {
-        if(Storage::delete(storage_path($arquivo->diretorio . $arquivo->arquivo))) {
+        if (Storage::delete(storage_path($arquivo->diretorio . $arquivo->arquivo))) {
             return $arquivo->delete();
         }
         return false;
+    }
+
+    /**
+     * @param UploadedFile[] $fotos
+     * @param string $diretorio
+     * @param string $prefixo
+     * @param ?callable $afterSave
+     */
+    public function handleFotos(array $fotos, string $diretorio, string $prefixo, ?callable $afterSave = null): void
+    {
+        if (!count($fotos)) return;
+        $fotosId = array_map(function ($foto) use ($diretorio, $prefixo) {
+            $arquivo = $this->salvar(arquivo: $foto, diretorio: $diretorio, prefixo: $prefixo);
+            return $arquivo?->id;
+        }, $fotos);
+        if ($afterSave !== null) $afterSave($fotosId);
     }
 }

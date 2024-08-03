@@ -7,6 +7,7 @@ use App\Models\PlanoSupressao;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
+use App\Shared\Traits\GenerateCode;
 use App\Shared\Traits\Searchable;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
@@ -14,7 +15,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class PlanoSupressaoService extends BaseModelService
 {
-    use Searchable, Deletable;
+    use Searchable, Deletable, GenerateCode;
 
     protected string $modelClass = PlanoSupressao::class;
 
@@ -56,14 +57,7 @@ class PlanoSupressaoService extends BaseModelService
 
         return $this->dataManagement->create(entity: $this->modelClass, infos: [
             ...$request,
-            'chave' => $this->getCodigo(),
+            'chave' => $this->getCodigo(prefix: 'PS'),
         ]);
-    }
-
-    private function getCodigo(): string
-    {
-        $last = PlanoSupressao::query()->latest('id')->first()?->id;
-        $key  = sprintf('%02d', $last + 1);
-        return 'PS-' . $key . '/' . date('Y');
     }
 }
