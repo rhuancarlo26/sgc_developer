@@ -11,6 +11,7 @@ use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\GenerateCode;
 use App\Shared\Traits\Searchable;
+use App\Shared\Traits\ShapefileHandler;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -18,7 +19,7 @@ use Illuminate\Http\UploadedFile;
 
 class SupressaoService extends BaseModelService
 {
-    use Searchable, Deletable, GenerateCode;
+    use Searchable, Deletable, GenerateCode, ShapefileHandler;
 
     protected string $modelClass = AreaSupressao::class;
 
@@ -71,23 +72,4 @@ class SupressaoService extends BaseModelService
         return $response;
     }
 
-    public function deleteFoto(Arquivo $arquivo, PatioEstocagem $patio): bool
-    {
-        if ($this->arquivoUtils->delete(arquivo: $arquivo)) {
-            $patio->fotos()->detach($arquivo->id);
-            return true;
-        }
-        return false;
-    }
-
-    private function handleShapefile(array &$request): void
-    {
-        $shapefile = $request['shapefile'];
-        if (!($shapefile instanceof UploadedFile)) return;
-        $shape = $this->licencaShapefileService->getFeatureCollection(file: $shapefile);
-        $request['shapefile'] = $shape;
-        $path = storage_path('app' . DIRECTORY_SEPARATOR . 'file_shape' . DIRECTORY_SEPARATOR . uniqid() . '.json');
-        file_put_contents($path, $shape);
-        $request['local_shape'] = $path;
-    }
 }
