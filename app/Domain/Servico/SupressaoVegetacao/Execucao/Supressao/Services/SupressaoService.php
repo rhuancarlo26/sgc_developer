@@ -35,7 +35,7 @@ class SupressaoService extends BaseModelService
     public function index(Servicos $servico): LengthAwarePaginator
     {
         return $this->model->query()
-            ->with(['fotos', 'tipo', 'licenca'])
+            ->with(['bioma', 'estagioSucessional', 'fotos', 'corteEspecies', 'licenca'])
             ->where('servico_id', $servico->id)
             ->paginate();
     }
@@ -48,7 +48,7 @@ class SupressaoService extends BaseModelService
             'chave' => $this->getCodigo(prefix: 'AS'),
         ]);
         if ($request['corte_especie']) {
-            $response['model']?->corteEspecies()->createMany($request['cortes']);
+            $response['model']?->corteEspecies()->createMany($request['corte_especies']);
         }
         $this->arquivoUtils->handleFotos(
             fotos: $request['fotos'] ?? [],
@@ -63,11 +63,21 @@ class SupressaoService extends BaseModelService
     {
         $this->handleShapefile(request: $request);
         $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+        /** @var AreaSupressao $supressao */
+        $supressao = $this->model->find($request['id']);
+        if ($request['corte_especie']) {
+            foreach($request['corte_especies'] as $corteEspecie) {
+                $supressao?->corteEspecies()->updateOrCreate(
+                    ['id' => $corteEspecie['id'] ?? null],
+                    $corteEspecie
+                );
+            }
+        }
         $this->arquivoUtils->handleFotos(
             fotos: $request['fotos'] ?? [],
             diretorio: 'public/uploads/supressao/area_suprida/',
             prefixo: 'AS',
-            afterSave: fn(array $fotosId) => $this->model->find($request['id'])?->fotos()->attach($fotosId)
+            afterSave: fn(array $fotosId) => $supressao?->fotos()->attach($fotosId)
         );
         return $response;
     }

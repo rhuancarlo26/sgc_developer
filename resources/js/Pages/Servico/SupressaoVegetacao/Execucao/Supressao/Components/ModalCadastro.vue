@@ -19,6 +19,7 @@ const props = defineProps({
 })
 
 const form = useForm({
+    id: null,
     chave: null,
     dt_inicial: null,
     dt_final: null,
@@ -33,7 +34,7 @@ const form = useForm({
     observacao: null,
 
     corte_especie: false,
-    cortes: [],
+    corte_especies: [],
 
     fotos: [],
 })
@@ -42,7 +43,10 @@ const modalRef = ref();
 const abrirModal = (item) => {
     form.reset()
     if (item != null) {
-        Object.assign(form, item);
+        Object.assign(form, {
+            ...item,
+            corte_especie: item.corte_especies.length > 0,
+        });
     }
     modalRef.value.getBsModal().show();
 }
@@ -58,17 +62,17 @@ const save = () => {
         form.reset();
     }
 
-    // if (form.id !== null) {
-    //     router.post(route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.update', form.id), {
-    //         _method: 'patch',
-    //         ...form.data(),
-    //         fotos: form.fotos.filter(foto => foto instanceof File),
-    //     }, {
-    //         preserveState: true,
-    //         onSuccess
-    //     })
-    //     return
-    // }
+    if (form.id !== null) {
+        router.post(route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.update'), {
+            _method: 'patch',
+            ...form.data(),
+            fotos: form.fotos.filter(foto => foto instanceof File),
+        }, {
+            preserveState: true,
+            onSuccess
+        })
+        return
+    }
 
     form.post(route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.store'), {
         preserveState: true,
@@ -94,16 +98,17 @@ const salvarEspecie = () => {
         return;
     }
     const value = {...formCientifica.value};
-    editFormCientifica.value !== null ? form.cortes[editFormCientifica.value] = value : form.cortes.push(value);
+    editFormCientifica.value !== null ? form.corte_especies[editFormCientifica.value] = value : form.corte_especies.push(value);
     Object.keys(formCientifica.value).forEach((i) => formCientifica.value[i] = null);
+    editFormCientifica.value = null
 }
 
 const removerEspecie = (index) => {
-    form.cortes.splice(index, 1)
+    form.corte_especies.splice(index, 1)
 }
 
 const editarEspecie = (item, index) => {
-    formCientifica.value = {...form.cortes[index]};
+    formCientifica.value = {...form.corte_especies[index]};
     editFormCientifica.value = index;
 }
 
@@ -141,7 +146,7 @@ defineExpose({abrirModal});
 
 <template>
     <form @submit.prevent="save">
-        <Modal ref="modalRef" title="Cadastro pátio de estocagem" modal-dialog-class="modal-xl">
+        <Modal ref="modalRef" title="Cadastro Área de Supressão" modal-dialog-class="modal-xl">
             <template #body>
                 <div class="card">
                     <div class="card-header">
@@ -291,7 +296,7 @@ defineExpose({abrirModal});
                                         </div>
                                         <Table
                                             :columns="['Nome científica', 'Nome popular', 'N° de Indivíduos', 'Compensação', 'Legislação', 'Ações']"
-                                            :records="{ data: form.cortes, links: [] }"
+                                            :records="{ data: form.corte_especies, links: [] }"
                                             table-class="table-hover">
                                             <template #body="{ item, key }">
                                                 <tr>
