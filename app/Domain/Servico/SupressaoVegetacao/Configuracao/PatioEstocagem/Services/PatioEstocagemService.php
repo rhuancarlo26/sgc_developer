@@ -47,7 +47,7 @@ class PatioEstocagemService extends BaseModelService
             'chave' => $this->getCodigo(prefix: 'PE'),
         ]);
         $this->arquivoUtils->handleFotos(
-            fotos: $request['fotos'],
+            fotos: $request['fotos'] ?? [],
             diretorio: 'public/uploads/supressao/patio/',
             prefixo: 'PT',
             afterSave: fn(array $fotosId) => $response['model']?->fotos()->sync($fotosId)
@@ -60,7 +60,7 @@ class PatioEstocagemService extends BaseModelService
         $this->handleShapefile(request: $request);
         $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
         $this->arquivoUtils->handleFotos(
-            fotos: $request['fotos'],
+            fotos: $request['fotos'] ?? [],
             diretorio: 'public/uploads/supressao/patio/',
             prefixo: 'PT',
             afterSave: fn(array $fotosId) => $this->model->find($request['id'])?->fotos()->attach($fotosId)

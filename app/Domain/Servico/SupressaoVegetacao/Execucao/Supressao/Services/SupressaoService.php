@@ -51,7 +51,7 @@ class SupressaoService extends BaseModelService
             $response['model']?->corteEspecies()->createMany($request['cortes']);
         }
         $this->arquivoUtils->handleFotos(
-            fotos: $request['fotos'],
+            fotos: $request['fotos'] ?? [],
             diretorio: 'public/uploads/supressao/area_suprida/',
             prefixo: 'AS',
             afterSave: fn(array $fotosId) => $response['model']?->fotos()->sync($fotosId)
@@ -64,7 +64,7 @@ class SupressaoService extends BaseModelService
         $this->handleShapefile(request: $request);
         $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
         $this->arquivoUtils->handleFotos(
-            fotos: $request['fotos'],
+            fotos: $request['fotos'] ?? [],
             diretorio: 'public/uploads/supressao/area_suprida/',
             prefixo: 'AS',
             afterSave: fn(array $fotosId) => $this->model->find($request['id'])?->fotos()->attach($fotosId)
