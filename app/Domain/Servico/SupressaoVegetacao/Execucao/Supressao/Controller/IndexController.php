@@ -5,6 +5,7 @@ namespace App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Controller;
 
 use App\Domain\Servico\SupressaoVegetacao\Configuracao\VincularASV\Services\VincularASVService;
 use App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Services\EstagioSucessionalService;
+use App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Services\SupressaoService;
 use App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Services\TipoBiomaService;
 use App\Models\Contrato;
 use App\Models\Servicos;
@@ -17,9 +18,10 @@ class IndexController extends Controller
 {
 
     public function __construct(
+        private readonly TipoBiomaService          $tipoBiomaService,
+        private readonly VincularASVService        $vincularASVService,
+        private readonly SupressaoService          $supressaoService,
         private readonly EstagioSucessionalService $estagioSucessionalService,
-        private readonly TipoBiomaService $tipoBiomaService,
-        private readonly VincularASVService $vincularASVService,
     )
     {
     }
@@ -29,6 +31,7 @@ class IndexController extends Controller
         return Inertia::render(component: 'Servico/SupressaoVegetacao/Execucao/Supressao/Index', props: [
             'contrato' => $contrato,
             'servico' => $servico->load(['tipo']),
+            'data' => $this->supressaoService->index(servico: $servico),
             'estagios' => $this->estagioSucessionalService->all(columns: ['id', 'nome']),
             'biomas' => $this->tipoBiomaService->all(columns: ['id', 'nome']),
             'licencas' => $this->vincularASVService->search('servico_id', $servico->id)
