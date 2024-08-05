@@ -14,32 +14,32 @@ class TipoBiomaSeeder extends Seeder
     {
         TipoBioma::query()->insert([
             [
-                'chave' => 'd49f44e8a05c831d02b9a6ee3bb94ae9',
+                'chave' => 'bc4801e49a89d60e33a6cfe74c2ff01e',
                 'nome' => 'Amazônia',
                 'created_at' => '2023-02-10 14:09:00'
             ],
             [
-                'chave' => 'd0ce8d9c0917fd344226736f320a8c5e',
+                'chave' => '553f55540a1e4d55827c97894fdb1df4',
                 'nome' => 'Cerrado',
                 'created_at' => '2023-02-10 14:09:00'
             ],
             [
-                'chave' => 'ccb9003609ddd80fb17bc67c8f6d5a54',
+                'chave' => '24411de03b918e3a290ef5b329f09bc5',
                 'nome' => 'Mata Atlântica',
                 'created_at' => '2023-02-10 14:09:00'
             ],
             [
-                'chave' => 'ccb9003609ddd80fb17bc67c8f6d5a55',
+                'chave' => '6a344f81a1cedf5e5f8939f257101107',
                 'nome' => 'Caatinga',
                 'created_at' => '2023-02-10 14:09:00'
             ],
             [
-                'chave' => 'ccb9003609ddd80fb17bc67c8f6d5a56',
+                'chave' => '2667996a5c2528e4e23961fcb2962f3e',
                 'nome' => 'Pampa',
                 'created_at' => '2023-02-10 14:09:00'
             ],
             [
-                'chave' => 'ccb9003609ddd80fb17bc67c8f6d5a57',
+                'chave' => 'ebb2b0444d8fe26a361bd4bbdebe5723',
                 'nome' => 'Pantanal',
                 'created_at' => '2023-02-10 14:09:00'
             ],
