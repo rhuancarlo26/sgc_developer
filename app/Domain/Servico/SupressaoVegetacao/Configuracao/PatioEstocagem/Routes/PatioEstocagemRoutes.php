@@ -12,6 +12,6 @@ Route::prefix('/patio-estocagem')->group(function () {
     Route::get('/{contrato}/{servico}',              IndexController::class)->name('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.index');
     Route::post('/store',                            StoreController::class)->name('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.store');
     Route::patch('{patio}/update',                   UpdateController::class)->name('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.update');
-    Route::delete('fotos/{patio}/deletar',           DeleteController::class)->name('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.delete');
+    Route::delete('{patio}/deletar',                 DeleteController::class)->name('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.delete');
     Route::delete('fotos/{arquivo}/{patio}/deletar', DeleteFotoController::class)->name('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.fotos.delete');
 });

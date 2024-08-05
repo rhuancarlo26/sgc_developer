@@ -95,7 +95,7 @@ const abrirModalVisualizar = (item) => {
                                     <NavButton @click="abrirModalCadastro(item)" type-button="warning" class="btn-icon" :icon="IconPencil" />
                                     <LinkConfirmation v-slot="confirmation" :options="{ text: 'Você deseja remover o plano de supressão?' }">
                                         <Link :onBefore="confirmation.show"
-                                              :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.delete', item.id)"
+                                              :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.delete', item.id)"
                                               as="button" method="delete" type="button" class="btn btn-icon btn-danger">
                                             <IconTrash/>
                                         </Link>

@@ -82,4 +82,13 @@ class SupressaoService extends BaseModelService
         return $response;
     }
 
+    public function deleteFoto(Arquivo $arquivo, AreaSupressao $area): bool
+    {
+        if($this->arquivoUtils->delete(arquivo: $arquivo)) {
+            $area->fotos()->detach($arquivo->id);
+            return true;
+        }
+        return false;
+    }
+
 }
