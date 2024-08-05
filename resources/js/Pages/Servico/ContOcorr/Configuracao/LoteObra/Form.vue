@@ -20,7 +20,8 @@ import TabObservacao from "./TabObservacao.vue";
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
-  lote: { type: Object }
+  lote: { type: Object },
+  rodovias: { type: Array }
 });
 
 </script>
@@ -65,7 +66,7 @@ const props = defineProps({
         <div class="card-body">
           <div class="tab-content">
             <div class="tab-pane active show" id="dados_lote" role="tabpanel">
-              <TabDadosLote :contrato="contrato" :servico="servico" :lote="lote" />
+              <TabDadosLote :contrato="contrato" :servico="servico" :lote="lote" :rodovias="rodovias" />
             </div>
             <div v-show="lote.id" class="tab-pane" id="dados_obra" role="tabpanel">
               <TabDadosObra :contrato="contrato" :servico="servico" :lote="lote" />

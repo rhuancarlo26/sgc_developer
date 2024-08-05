@@ -12,8 +12,10 @@ const toast = useToast();
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
-  lote: { type: Object }
+  lote: { type: Object },
+  rodovias: { type: Array }
 });
+
 const form = useForm({
   id: null,
   temContrato: props.lote?.num_contrato ? true : false,
@@ -72,6 +74,34 @@ const salvarLote = () => {
   form.post(route('contratos.contratada.servicos.cont_ocorrencia.configuracao.lote_obra.' + url, { contrato: props.contrato.id, servico: props.servico.id }))
 }
 
+const brs = computed(() => {
+  const ufsSet = new Set();
+  let ufs = [];
+  let rodovias = [];
+
+  props.servico.licencas_condicionantes.map(lc => {
+    lc.licenca.segmentos.map(segmento => {
+      rodovias.push(segmento.rodovia)
+      ufs.push(segmento.uf_inicial, segmento.uf_final)
+    })
+  })
+
+  ufs.forEach(uf => {
+    const ufString = JSON.stringify(uf);
+    ufsSet.add(ufString);
+  })
+
+  const ufsFiltered = Array.from(ufsSet).map(ufString => JSON.parse(ufString));
+
+  const rodoviasFiltered = props.rodovias.filter(br => rodovias.includes(br.rodovia) && ufsFiltered.map(uf => uf.id).includes(br.uf_id));
+
+  return Array.from(new Set(rodoviasFiltered.map(item => item.id)))
+    .map(id => {
+      return rodoviasFiltered.find(item => item.id === id);
+    });
+})
+
+
 </script>
 <template>
   <div class="row mb-4">
@@ -116,21 +146,11 @@ const salvarLote = () => {
       <InputError :message="form.errors.nome" />
     </div>
     <div class="col">
-      <InputLabel value="UF" for="uf" />
-      <v-select :options="servico.licenca_ufs" label="uf" v-model="form.uf">
-        <template #no-options="{}">
-          Nenhum registro encontrado.
-        </template>
-      </v-select>
-      <InputError :message="form.errors.uf" />
-    </div>
-    <div class="col">
-      <InputLabel value="BR" for="rodovia" />
-      <v-select :options="servico.licenca_brs" v-model="form.rodovia">
-        <template #no-options="{}">
-          Nenhum registro encontrado.
-        </template>
-      </v-select>
+      <InputLabel value="Trecho" for="rodovia" />
+      <select class="form-control form-select" v-model="form.rodovia">
+        <option v-for="rodovia in brs" :key="rodovia" :value="rodovia">{{ `${rodovia.rodovia} - (${rodovia.uf.estado})`
+          }}</option>
+      </select>
       <InputError :message="form.errors.rodovia" />
     </div>
   </div>

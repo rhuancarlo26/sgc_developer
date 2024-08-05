@@ -25,7 +25,7 @@ class IndexController extends Controller
 
     return Inertia::render('Servico/ContOcorr/Configuracao/LoteObra/Index', [
       'contrato' => $contrato,
-      'servico' => $servico->load(['tipo', 'cont_ocorr_parecer_configuracao'])->append(['licenca_ufs']),
+      'servico' => $servico->load(['tipo', 'cont_ocorr_parecer_configuracao']),
       ...$response
     ]);
   }

@@ -4,6 +4,7 @@ import InputError from "@/Components/InputError.vue";
 import NavButton from "@/Components/NavButton.vue";
 import { useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
+import { IconDeviceFloppy } from "@tabler/icons-vue";
 
 const toast = useToast();
 const props = defineProps({

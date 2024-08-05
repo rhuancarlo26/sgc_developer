@@ -19,7 +19,12 @@ class UpdateController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, Request $request): RedirectResponse
   {
-    $response = $this->loteObraService->update($request->all());
+    $post = [
+      ...$request->all(),
+      'id_rodovia' => $request->rodovia['id'],
+      'id_uf' => $request->rodovia['uf']['id']
+    ];
+    $response = $this->loteObraService->update(post: $post);
 
     return to_route('contratos.contratada.servicos.cont_ocorrencia.configuracao.lote_obra.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'lote' => $request->id])->with('message', $response['request']);
   }
