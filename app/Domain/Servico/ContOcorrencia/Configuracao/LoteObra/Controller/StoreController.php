@@ -22,20 +22,12 @@ class StoreController extends Controller
     $lote = ServicoContOcorrSupervisaoConfigLote::where('id_servico', $servico->id)->latest('id')->first();
     $numPorServico = $lote ? $lote->num_por_servico + 1 : 1;
 
-    $rodovia = Rodovia::where('rodovia', $request->rodovia)
-      ->where('uf_id', $request->uf['id'])
-      ->first();
-
-    if (!$rodovia) {
-      $rodovia = Rodovia::where('rodovia', $request->rodovia)->first();
-    }
-
     $post = [
       ...$request->all(),
       'num_por_servico' => $numPorServico,
       'nome_id' => 'L.0' . $numPorServico,
-      'id_rodovia' => $rodovia->id,
-      'id_uf' => $request->uf['id']
+      'id_rodovia' => $request->rodovia['id'],
+      'id_uf' => $request->rodovia['uf']['id']
     ];
 
     $response = $this->loteObraService->store($post);

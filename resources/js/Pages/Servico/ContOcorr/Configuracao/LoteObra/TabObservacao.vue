@@ -3,6 +3,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import NavButton from "@/Components/NavButton.vue";
 import { useForm } from "@inertiajs/vue3";
+import { IconDeviceFloppy } from "@tabler/icons-vue";
 
 const props = defineProps({
   contrato: { type: Object },

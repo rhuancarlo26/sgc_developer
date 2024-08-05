@@ -13,7 +13,6 @@ class StoreRequest extends FormRequest
       'num_contrato'                  => ['nullable'],
       'nome'                          => ['nullable'],
       'rodovia'                       => ['nullable'],
-      'uf'                            => ['nullable'],
       'empresa'                       => ['nullable'],
       'situacao_contrato'             => ['nullable'],
       'obj_contrato'                  => ['nullable'],

@@ -3,6 +3,7 @@
 namespace App\Domain\Servico\ContOcorrencia\Configuracao\LoteObra\Services;
 
 use App\Models\Licenca;
+use App\Models\Rodovia;
 use App\Models\ServicoContOcorrSupervisaoConfigLote;
 use App\Models\ServicoContOcorrSupervisaoParecerConfiguracao;
 use App\Models\ServicoLicencaCondicionante;
@@ -31,7 +32,7 @@ class LoteObraService extends BaseModelService
 
   public function create(): array
   {
-    return [];
+    return ['rodovias' => Rodovia::with(['uf'])->get()];
   }
 
   public function store(array $post): array
