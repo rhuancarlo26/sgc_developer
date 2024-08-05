@@ -63,8 +63,11 @@ const abrirModalVisualizar = (item) => {
                 <ModelSearchFormAllColumns
                     :columns="['id', 'nomepontocoleta', 'lat_x', 'long_y', 'classificacao', 'classe', 'tipoambiente', 'uf', 'municipio', 'baciahidrografica', 'km_rodovia', 'estaca']">
                     <template #action>
+                        <a class="btn btn-success me-1" :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.export', { servico: servico.id })">
+                            Exportar Excel
+                        </a>
                         <NavButton @click="abrirModalCadastro"
-                           route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.importar"
+                           route-name="contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.store"
                            :param="{ contrato: props.contrato.id, servico: props.servico.id }" type-button="success"
                            title="Cadastrar Área de Supressão" />
                     </template>
