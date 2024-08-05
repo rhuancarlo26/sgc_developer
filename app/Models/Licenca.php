@@ -45,4 +45,9 @@ class Licenca extends Model
     {
         return $this->hasMany(LicencaRequerimento::class, 'licenca_id');
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
