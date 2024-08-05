@@ -131,14 +131,14 @@ defineExpose({ abrirModal });
           <table class="table card-table table-bordered">
             <thead>
               <tr>
-                <th>Ponto</th>
-                <th>Classe</th>
-                <th>Tipo de ambiente</th>
-                <th>UF</th>
-                <th>Município</th>
-                <th>Bacia hifrográfica</th>
-                <th>Km rodovia</th>
-                <th>Estaca</th>
+                <th class="text-center">Ponto</th>
+                <th class="text-center">Classe</th>
+                <th class="text-center">Tipo de ambiente</th>
+                <th class="text-center">UF</th>
+                <th class="text-center">Município</th>
+                <th class="text-center">Bacia hifrográfica</th>
+                <th class="text-center">Km rodovia</th>
+                <th class="text-center">Estaca</th>
               </tr>
             </thead>
             <tbody>
@@ -149,13 +149,13 @@ defineExpose({ abrirModal });
                     <span class="form-check-label">{{ ponto.id }}</span>
                   </label>
                 </td>
-                <td>{{ ponto.classe }}</td>
-                <td>{{ ponto.tipoambiente }}</td>
-                <td>{{ ponto.uf }}</td>
-                <td>{{ ponto.municipio }}</td>
-                <td>{{ ponto.baciahidrografica }}</td>
-                <td>{{ ponto.km_rodovia }}</td>
-                <td>{{ ponto.estaca }}</td>
+                <td class="text-center">{{ ponto.classe }}</td>
+                <td class="text-center">{{ ponto.tipo_ambiente }}</td>
+                <td class="text-center">{{ ponto.UF }}</td>
+                <td class="text-center">{{ ponto.municipio }}</td>
+                <td class="text-center">{{ ponto.bacia_hidrografica }}</td>
+                <td class="text-center">{{ ponto.km_rodovia }}</td>
+                <td class="text-center">{{ ponto.estaca }}</td>
               </tr>
             </tbody>
           </table>

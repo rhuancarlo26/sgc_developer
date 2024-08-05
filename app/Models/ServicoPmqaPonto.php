@@ -14,7 +14,7 @@ class ServicoPmqaPonto extends Model
 
     public function vinculado()
     {
-        return $this->hasOne(ServicoPmqaListaPonto::class, 'ponto_id');
+        return $this->hasOne(ServicoPmqaListaPonto::class, 'fk_ponto');
     }
 
     public function campanhas()
@@ -24,6 +24,6 @@ class ServicoPmqaPonto extends Model
 
     public function lista()
     {
-        return $this->hasOneThrough(ServicoPmqaParametroLista::class, ServicoPmqaListaPonto::class, 'ponto_id', 'id', 'id', 'lista_parametro_id');
+        return $this->hasOneThrough(ServicoPmqaParametroLista::class, ServicoPmqaListaPonto::class, 'fk_ponto', 'id', 'id', 'lista_parametro_id');
     }
 }

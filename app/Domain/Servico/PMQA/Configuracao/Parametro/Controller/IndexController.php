@@ -12,20 +12,20 @@ use Inertia\Response;
 
 class IndexController extends Controller
 {
-  public function __construct(private readonly ParametroService $parametroService)
-  {
-  }
+    public function __construct(private readonly ParametroService $parametroService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, Request $request): Response
-  {
-    $searchParams = $request->all('columns', 'value');
+    public function index(Contrato $contrato, Servicos $servico, Request $request): Response
+    {
+        $searchParams = $request->all('columns', 'value');
 
-    $response = $this->parametroService->index($servico, $searchParams);
+        $response = $this->parametroService->index($servico, $searchParams);
 
-    return Inertia::render('Servico/PMQA/Configuracao/Parametro/Index', [
-      'contrato' => $contrato,
-      'servico' => $servico->load(['tipo']),
-      ...$response
-    ]);
-  }
+        return Inertia::render('Servico/PMQA/Configuracao/Parametro/Index', [
+            'contrato' => $contrato,
+            'servico'  => $servico->load(['tipo']),
+            ...$response
+        ]);
+    }
 }

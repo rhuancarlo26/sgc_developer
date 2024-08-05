@@ -68,10 +68,10 @@ const editarLista = (item) => {
             <tr>
               <td>{{ item.nome }}</td>
               <td>
-                <p v-if="item.lista_parametros">
-                  <span v-for="parametro in item.lista_parametros.split(',')" :key="parametro"
+                <p v-if="item.parametros" >
+                  <span v-for="(record, i) in item.parametros" :key="parametro"
                     class="badge bg-warning text-white m-1">
-                    {{ parametro }}
+                    {{record.parametro}}
                   </span>
                 </p>
               </td>
