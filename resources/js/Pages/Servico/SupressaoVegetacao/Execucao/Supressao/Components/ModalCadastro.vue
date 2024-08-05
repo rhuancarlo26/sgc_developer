@@ -103,8 +103,13 @@ const salvarEspecie = () => {
     editFormCientifica.value = null
 }
 
-const removerEspecie = (index) => {
-    form.corte_especies.splice(index, 1)
+const removerEspecie = (item, index) => {
+    if(item?.id !== null) {
+        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.corete-especies.delete', item.id), {
+            preserveState: true,
+        });
+    }
+    form.corte_especies.splice(index, 1);
 }
 
 const editarEspecie = (item, index) => {
@@ -129,14 +134,9 @@ const onChangeFotos = (event) => {
 
 const destroyPhoto = (photoId, index) => {
     if (photoId !== null) {
-        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.fotos.delete', {arquivo: photoId, patio: form.id}), {
+        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.fotos.delete', {arquivo: photoId, area: form.id}), {
             preserveState: true,
-            onSuccess() {
-                modalRef.value.getBsModal().hide();
-                form.reset();
-            }
         })
-        return;
     }
     form.fotos.splice(index, 1)
 }
@@ -308,7 +308,7 @@ defineExpose({abrirModal});
                                                     <td>
                                                         <div class="d-flex justify-content-center">
                                                             <NavButton @click="editarEspecie(item, key)" type-button="warning" class="btn-icon btn-sm" :icon="IconPencil" />
-                                                            <NavButton @click="removerEspecie(key)" type-button="danger" class="btn-icon btn-sm" :icon="IconTrash" />
+                                                            <NavButton @click="removerEspecie(item, key)" type-button="danger" class="btn-icon btn-sm" :icon="IconTrash" />
                                                         </div>
                                                     </td>
                                                 </tr>
