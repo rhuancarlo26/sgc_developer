@@ -28,10 +28,12 @@ class IndexController extends Controller
 
     public function __invoke(Contrato $contrato, Servicos $servico, Request $request): Response
     {
+        $searchParams = $request->all('columns', 'value');
+
         return Inertia::render(component: 'Servico/SupressaoVegetacao/Execucao/Supressao/Index', props: [
             'contrato' => $contrato,
             'servico' => $servico->load(['tipo']),
-            'data' => $this->supressaoService->index(servico: $servico),
+            'data' => $this->supressaoService->index(servico: $servico, searchParams: $searchParams),
             'estagios' => $this->estagioSucessionalService->all(columns: ['id', 'nome']),
             'biomas' => $this->tipoBiomaService->all(columns: ['id', 'nome']),
             'licencas' => $this->vincularASVService->search('servico_id', $servico->id)

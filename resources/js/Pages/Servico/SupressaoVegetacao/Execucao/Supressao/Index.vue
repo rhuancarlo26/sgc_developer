@@ -1,5 +1,5 @@
 <script setup>
-import {Head, Link} from "@inertiajs/vue3";
+import {Head, Link, router} from "@inertiajs/vue3";
 import {IconMap, IconLineDashed, IconTrash, IconEye, IconPencil} from "@tabler/icons-vue";
 import Table from "@/Components/Table.vue";
 import Navbar from "../../Components/Navbar.vue";
@@ -7,7 +7,7 @@ import NavButton from "@/Components/NavButton.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import ModalCadastro from "./Components/ModalCadastro.vue";
@@ -37,6 +37,16 @@ const modalVisualizarRef = ref();
 const abrirModalVisualizar = (item) => {
     modalVisualizarRef.value.abrirModal(item);
 }
+
+const urlQueryParams = computed(() => {
+    const params = new URLSearchParams(window.location.search);
+    const result = {};
+    for (const [key, value] of params.entries()) {
+        result[key] = value;
+    }
+    return result;
+})
+
 </script>
 
 <template>
@@ -61,9 +71,9 @@ const abrirModalVisualizar = (item) => {
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
                 <ModelSearchFormAllColumns
-                    :columns="['id', 'nomepontocoleta', 'lat_x', 'long_y', 'classificacao', 'classe', 'tipoambiente', 'uf', 'municipio', 'baciahidrografica', 'km_rodovia', 'estaca']">
+                    :columns="['chave', 'dt_inicial', 'dt_final', 'area_em_app', 'area_fora_app', 'area_total', 'bioma.nome', 'estagioSucessional.nome', 'licenca.numero_licenca']">
                     <template #action>
-                        <a class="btn btn-success me-1" :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.export', { servico: servico.id })">
+                        <a class="btn btn-success me-1" :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.export', { servico: servico.id, _query: urlQueryParams })">
                             Exportar Excel
                         </a>
                         <NavButton @click="abrirModalCadastro"

@@ -2,18 +2,29 @@
 
 namespace App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Exports;
 
-use App\Models\AreaSupressao;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Services\SupressaoService;
+use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class SupressaoExport implements FromCollection, WithMapping, WithHeadings, WithTitle
+class SupressaoExport implements FromQuery, WithMapping, WithHeadings, WithTitle
 {
 
-    public function collection(): \Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
+    public function __construct(
+        private readonly SupressaoService $supressaoService,
+        private readonly array $searchParams,
+        private readonly int $servicoId,
+    )
     {
-        return AreaSupressao::all();
+    }
+
+    public function query(): Builder
+    {
+        return $this->supressaoService
+            ->searchAllColumns(...$this->searchParams)
+            ->where('servico_id', $this->servicoId);
     }
 
     public function map($row): array

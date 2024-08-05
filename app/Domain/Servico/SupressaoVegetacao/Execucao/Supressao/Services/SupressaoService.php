@@ -5,7 +5,6 @@ namespace App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Services;
 use App\Domain\Licenca\Shapefile\Services\LicencaShapefileService;
 use App\Models\AreaSupressao;
 use App\Models\Arquivo;
-use App\Models\PatioEstocagem;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
@@ -15,7 +14,6 @@ use App\Shared\Traits\ShapefileHandler;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Http\UploadedFile;
 
 class SupressaoService extends BaseModelService
 {
@@ -32,12 +30,13 @@ class SupressaoService extends BaseModelService
         parent::__construct($dataManagement);
     }
 
-    public function index(Servicos $servico): LengthAwarePaginator
+    public function index(Servicos $servico, array $searchParams): LengthAwarePaginator
     {
-        return $this->model->query()
+        return $this->searchAllColumns(...$searchParams)
             ->with(['bioma', 'estagioSucessional', 'fotos', 'corteEspecies', 'licenca'])
             ->where('servico_id', $servico->id)
-            ->paginate();
+            ->paginate()
+            ->appends($searchParams);
     }
 
     public function store(array $request): array
