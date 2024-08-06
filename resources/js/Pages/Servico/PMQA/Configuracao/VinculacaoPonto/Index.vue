@@ -69,8 +69,8 @@ const abrirModalVisualizarPonto = (item) => {
           <template #body="{ item }">
             <tr>
               <td>{{ item.nome }}</td>
-              <td>{{ item.pontos.length }}</td>
-              <td>
+              <td class="text-center">{{ item.pontos.length }}</td>
+              <td class="text-center">
                 <NavButton :icon="IconEye" class="btn-icon" type-button="info"
                   @click="abrirModalVisualizarPonto(item)" />
                 <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"

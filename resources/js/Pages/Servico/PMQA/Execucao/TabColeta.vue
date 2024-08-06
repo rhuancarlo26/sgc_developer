@@ -13,7 +13,7 @@ const props = defineProps({
   <div v-if="ponto.coleta">
     <div class="row mb-4">
       <div class="col">
-        <span><strong>Data da coleta: </strong>{{ dateTimeFormat(ponto.coleta?.data_coleta) }}</span>
+        <span><strong>Data da coleta: </strong>{{ dateTimeFormat(ponto.coleta?.dt_coleta) }}</span>
       </div>
       <div class="col">
         <span><strong>Realizado a coleta?: </strong>{{ ponto.coleta?.sem_coleta ? 'Não' : 'Sim' }}</span>

@@ -14,16 +14,28 @@ class ServicoPmqaPonto extends Model
 
     public function vinculado()
     {
-        return $this->hasOne(ServicoPmqaListaPonto::class, 'fk_ponto');
+        return $this->hasOne(related: ServicoPmqaListaPonto::class, foreignKey: 'fk_ponto');
     }
 
     public function campanhas()
     {
-        return $this->belongsToMany(ServicoPmqaCampanha::class, 'servico_pmqa_campanha_pontos', 'ponto_id', 'campanha_id');
+        return $this->belongsToMany(
+            related: ServicoPmqaPonto::class,
+            table: 'exec_campanha_ponto',
+            foreignPivotKey: 'fk_ponto',
+            relatedPivotKey: 'fk_exec_campanha'
+        );
     }
 
     public function lista()
     {
-        return $this->hasOneThrough(ServicoPmqaParametroLista::class, ServicoPmqaListaPonto::class, 'fk_ponto', 'id', 'id', 'lista_parametro_id');
+        return $this->hasOneThrough(
+            related: ServicoPmqaParametroLista::class,
+            through: ServicoPmqaListaPonto::class,
+            firstKey: 'fk_ponto',
+            secondKey: 'id',
+            localKey: 'id',
+            secondLocalKey: 'fk_lista'
+        );
     }
 }
