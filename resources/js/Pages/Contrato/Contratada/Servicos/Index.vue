@@ -99,7 +99,7 @@ const deleteServico = (servico_id) => {
                                         Gerenciar
                                     </a>
                                     <a v-else-if="item.servico_tipo_id === 3" class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.mon_atp_fauna.configuracao.vincular_abio.index', { contrato: contrato.id, servico: item.id })">
+                                        :href="route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
                                     <a class="dropdown-item"
