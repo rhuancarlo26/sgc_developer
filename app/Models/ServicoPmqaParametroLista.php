@@ -15,18 +15,21 @@ class ServicoPmqaParametroLista extends Model
     protected $table = 'config_parametros_lista';
     protected $guarded = ['id', 'created_at'];
     protected $appends = ['lista_parametros'];
-    protected $casts = [
-        'medir_iqa' => 'bool'
-    ];
+    protected $casts = ['medir_iqa' => 'bool'];
 
     public function parametros(): BelongsToMany
     {
-        return $this->belongsToMany(ServicoPmqaParametro::class, 'config_parametros', 'fk_parametro_lista', 'fk_parametro');
+        return $this->belongsToMany(
+            related: ServicoPmqaParametro::class,
+            table: 'config_parametros',
+            foreignPivotKey: 'fk_parametro_lista',
+            relatedPivotKey: 'fk_parametro'
+        );
     }
 
     public function parametros_vinculados(): HasMany
     {
-        return $this->hasMany(ServicoPmqaListaParametro::class, 'lista_parametro_id');
+        return $this->hasMany(related: ServicoPmqaListaParametro::class, foreignKey: 'fk_parametro_lista');
     }
 
     public function pontos(): BelongsToMany
