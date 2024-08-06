@@ -11,4 +11,9 @@ Route::prefix('/cont_ocorrencia')->group(function () {
       require __DIR__ . '/../../Configuracao/LoteObra/Routes/LoteObraRoutes.php';
     });
   });
+  Route::prefix('/execucao')->group(function () {
+    Route::prefix('/ocorrencia')->group(function () {
+      require __DIR__ . '/../../Execucao/Ocorrencia/Routes/OcorrenciaRoutes.php';
+    });
+  });
 });
