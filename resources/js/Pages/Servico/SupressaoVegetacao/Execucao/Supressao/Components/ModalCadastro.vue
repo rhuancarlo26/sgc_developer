@@ -45,7 +45,7 @@ const abrirModal = (item) => {
     if (item != null) {
         Object.assign(form, {
             ...item,
-            corte_especie: item.corte_especies.length > 0,
+            corte_especie: item.corte_especies?.length > 0,
         });
     }
     modalRef.value.getBsModal().show();
