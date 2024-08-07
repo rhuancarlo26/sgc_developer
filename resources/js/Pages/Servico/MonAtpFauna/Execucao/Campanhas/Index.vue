@@ -1,3 +1,4 @@
+<!-- resources\js\Pages\Servico\MonAtpFauna\Execucao\Campanhas\Index.vue -->
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
