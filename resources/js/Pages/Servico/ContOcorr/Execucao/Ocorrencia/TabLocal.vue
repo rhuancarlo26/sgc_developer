@@ -16,7 +16,9 @@ const props = defineProps({
 });
 
 const form = useForm({
+  id: null,
   id_ocorrencia: null,
+  num_por_servico: null,
   rodovia: null,
   data_ocorrencia: null,
   km: null,
@@ -25,9 +27,6 @@ const form = useForm({
   latitude: null,
   longitude: null,
   lote: null,
-  nome_lote: null,
-  empresa: null,
-  num_contrato: null,
   indicio_responsabilidade: null,
   possivel_causa: null,
   descricao_causa: null,
@@ -41,21 +40,6 @@ watch(
   () => form.rnc_direto,
   (value) => {
     form.tipo = value ? 'RNC' : 'ROA';
-  }
-);
-
-watch(
-  () => form.lote,
-  (value) => {
-    if (value.id) {
-      form.nome_lote = value.nome;
-      form.empresa = value.empresa;
-      form.num_contrato = value.num_contrato;
-    } else {
-      form.nome_lote = null;
-      form.empresa = null;
-      form.num_contrato = null;
-    }
   }
 );
 
@@ -83,21 +67,24 @@ const brs = computed(() => {
 });
 
 const salvarLocal = () => {
-  form.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.store', { contrato: props.contrato.id, servico: props.servico.id }));
+  const url = form.id ? 'update' : 'store';
+  form.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.' + url, { contrato: props.contrato.id, servico: props.servico.id }));
 }
 </script>
 <template>
   <div class="row mb-4">
     <div class="col">
       <InputLabel value="ID Ocorrência" for="nome_id" />
-      <input type="text" class="form-control" v-model="form.nome_id" disabled>
+      <input type="text" class="form-control"
+        :value="`${form.tipo ?? '###'}.${ocorrencia.num_por_servico ?? '##'}.${form.rodovia?.uf?.uf ?? '##'}-${form.rodovia?.rodovia ?? '##'}`"
+        disabled>
       <InputError :message="form.errors.nome_id" />
     </div>
     <div class="col">
       <InputLabel value="Segmento" for="rodovia" />
       <select class="form-control form-select" v-model="form.rodovia">
         <option v-for="rodovia in brs" :key="rodovia.id" :value="rodovia">{{ `${rodovia.rodovia} -
-          ${rodovia.uf.estado}` }}</option>
+          ${rodovia.uf?.estado}` }}</option>
       </select>
       <InputError :message="form.errors.rodovia" />
     </div>

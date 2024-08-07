@@ -31,7 +31,7 @@ class CreateController extends Controller
         'licencas_condicionantes.licenca.segmentos.uf_inicial',
         'licencas_condicionantes.licenca.segmentos.uf_final'
       ]),
-      'ocorrencia' => $ocorrencia->load(['lote', 'rodovia.uf']),
+      'ocorrencia' => $ocorrencia->load(['lote', 'rodovia.uf', 'registros']),
       ...$response
     ]);
   }
