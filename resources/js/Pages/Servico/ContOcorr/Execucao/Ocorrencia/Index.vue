@@ -14,11 +14,20 @@ import { IconPencil } from "@tabler/icons-vue";
 import { IconTrash } from "@tabler/icons-vue";
 import NavLink from "@/Components/NavLink.vue";
 import { IconMap } from "@tabler/icons-vue";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+import ModalVisualizarOcorrencia from "./ModalVisualizarOcorrencia.vue";
+
+const modalVisualizarOcorrencia = ref({});
 
 const props = defineProps({
   contrato: { type: Object },
-  servico: { type: Object }
+  servico: { type: Object },
+  ocorrencias: { type: Object }
 });
+
+const abrirModal = (item) => {
+  modalVisualizarOcorrencia.value.abrirModal(item)
+}
 
 </script>
 <template>
@@ -43,7 +52,7 @@ const props = defineProps({
 
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
-        <ModelSearchFormAllColumns :columns="[]">
+        <ModelSearchFormAllColumns :columns="['nome_id', 'intensidade', 'lote.nome_id', 'lote.empresa']">
           <template #action>
             <NavLink route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.create"
               :param="{ contrato: props.contrato.id, servico: props.servico.id }" class="btn btn-success"
@@ -52,14 +61,38 @@ const props = defineProps({
         </ModelSearchFormAllColumns>
         <Table
           :columns="['ID Ocorrência', 'Intensidade Ocorrência', 'Data da Ocorrência', 'Ocorrênia anterior', 'Prazo Ocorrência', 'Lote', 'Construtora', 'Status Aprovação', 'Envio', 'Ação']"
-          :records="[]" table-class="table-hover">
-          <template #body="{}">
+          :records="ocorrencias" table-class="table-hover">
+          <template #body="{ item }">
             <tr>
+              <td>{{ item.nome_id }}</td>
+              <td>{{ item.intensidade }}</td>
+              <td>{{ dateTimeFormat(item.data_ocorrencia) }}</td>
+              <td>-</td>
+              <td>-</td>
+              <td>{{ item.lote?.nome_id }}</td>
+              <td>{{ item.lote?.empresa }}</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="d-inline-flex">
+                <NavButton @click="abrirModal(item)" type-button="info" class="btn-icon" :icon="IconEye" />
+                <NavLink class="btn btn-icon btn-primary me-1"
+                  route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.create"
+                  :param="{ contrato: contrato.id, servico: servico.id, ocorrencia: item.id }" :icon="IconPencil" />
+                <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção do lote será permanente.' }">
+                  <Link :onBefore="confirmation.show"
+                    :href="route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.delete', { contrato: contrato.id, servico: servico.id, ocorrencia: item.id })"
+                    as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                  <IconTrash />
+                  </Link>
+                </LinkConfirmation>
+              </td>
             </tr>
           </template>
         </Table>
       </template>
     </Navbar>
+
+    <ModalVisualizarOcorrencia ref="modalVisualizarOcorrencia" />
 
   </AuthenticatedLayout>
 </template>

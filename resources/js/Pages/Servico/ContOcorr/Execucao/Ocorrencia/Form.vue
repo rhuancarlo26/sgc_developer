@@ -14,6 +14,11 @@ import { IconDeviceFloppy } from "@tabler/icons-vue";
 import NavLink from "@/Components/NavLink.vue";
 import { IconMap } from "@tabler/icons-vue";
 import TabLocal from "./TabLocal.vue";
+import TabDescricao from "./TabDescricao.vue";
+import TabAcao from "./TabAcao.vue";
+import TabNorma from "./TabNorma.vue";
+import TabRegistro from "./TabRegistro.vue";
+import TabObservacao from "./TabObservacao.vue";
 
 const props = defineProps({
   contrato: { type: Object },
@@ -38,7 +43,7 @@ const props = defineProps({
         ]
           " />
         <Link class="btn btn-dark"
-          :href="route('contratos.contratada.servicos.cont_ocorrencia.configuracao.lote_obra.index', { contrato: contrato.id, servico: servico.id })">
+          :href="route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index', { contrato: contrato.id, servico: servico.id })">
         Voltar
         </Link>
       </div>
@@ -56,6 +61,22 @@ const props = defineProps({
               <a href="#descricao" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
                 tabindex="-1">Descrição</a>
             </li>
+            <li class="nav-item" role="presentation">
+              <a href="#acao" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+                tabindex="-1">Ações</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a href="#norma" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+                tabindex="-1">Norma / Fundamento legal</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a href="#registro" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+                tabindex="-1">Registro fotográfico</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a href="#observacao" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+                tabindex="-1">Observações</a>
+            </li>
           </ul>
         </div>
         <div class="card-body">
@@ -65,6 +86,19 @@ const props = defineProps({
                 :rodovias="rodovias" />
             </div>
             <div class="tab-pane" id="descricao" role="tabpanel">
+              <TabDescricao :contrato="contrato" :servico="servico" :ocorrencia="ocorrencia" />
+            </div>
+            <div class="tab-pane" id="acao" role="tabpanel">
+              <TabAcao :contrato="contrato" :servico="servico" :ocorrencia="ocorrencia" />
+            </div>
+            <div class="tab-pane" id="norma" role="tabpanel">
+              <TabNorma :contrato="contrato" :servico="servico" :ocorrencia="ocorrencia" />
+            </div>
+            <div class="tab-pane" id="registro" role="tabpanel">
+              <TabRegistro :contrato="contrato" :servico="servico" :ocorrencia="ocorrencia" />
+            </div>
+            <div class="tab-pane" id="observacao" role="tabpanel">
+              <TabObservacao :contrato="contrato" :servico="servico" :ocorrencia="ocorrencia" />
             </div>
           </div>
         </div>
