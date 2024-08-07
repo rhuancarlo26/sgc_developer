@@ -1,3 +1,4 @@
+<!-- resources\js\Pages\Servico\MonAtpFauna\Resultado\Index.vue -->
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
@@ -6,7 +7,7 @@ import NavButton from "@/Components/NavButton.vue";
 import NavLink from "@/Components/NavLink.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
-import ModalVincularABIO from "./ModalVincularABIO.vue";
+import ModalNovoResultado from "./ModalNovoResultado.vue";
 import { ref } from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconDots } from "@tabler/icons-vue";
@@ -18,10 +19,10 @@ const props = defineProps({
   licencas: { type: Array }
 });
 
-const modalVincularABIO = ref({});
+const modalNovoResultado = ref({});
 
-const abrirModalVincularABIO = () => {
-  modalVincularABIO.value.abrirModal();
+const abrirModalNovoResultado = () => {
+  modalNovoResultado.value.abrirModal();
 }
 
 </script>
@@ -49,7 +50,7 @@ const abrirModalVincularABIO = () => {
       <template #body>
         <ModelSearchFormAllColumns :columns="[]">
           <template #action>
-            <NavButton @click="abrirModalVincularABIO()" type-button="info" title="Vincular ABIO" />
+            <NavButton @click="abrirModalNovoResultado()" type-button="info" title="Novo Resultado" />
           </template>
         </ModelSearchFormAllColumns>
 
@@ -85,7 +86,7 @@ const abrirModalVincularABIO = () => {
       </template>
     </Navbar>
 
-    <ModalVincularABIO :contrato="contrato" :servico="servico" :licencas="licencas" ref="modalVincularABIO" />
+    <ModalNovoResultado ref="modalNovoResultado" />
 
   </AuthenticatedLayout>
 </template>

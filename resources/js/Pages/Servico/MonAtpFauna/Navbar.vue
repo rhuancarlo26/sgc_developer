@@ -66,7 +66,7 @@ const porps = defineProps({
                                                 route-name="contratos.contratada.servicos.mon_atp_fauna.resultado.index"
                                                 active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.resultado*"
                                                 :param="{ contrato: contrato.id, servico: servico.id }"
-                                                title="Execução" :icon="IconLayoutDashboard" />
+                                                title="Resultado" :icon="IconLayoutDashboard" />
 
                                             <!-- Relatorios -->
                                             <NavLink
