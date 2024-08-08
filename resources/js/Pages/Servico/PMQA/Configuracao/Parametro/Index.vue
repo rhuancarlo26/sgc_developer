@@ -21,7 +21,8 @@ const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
   parametros: { type: Array },
-  listas: { type: Object }
+  listas: { type: Object },
+  aprovacao: {type: Object}
 });
 
 const abrirModalParametros = () => {
@@ -30,6 +31,13 @@ const abrirModalParametros = () => {
 
 const editarLista = (item) => {
   modalParametros.value.abrirModal(item);
+}
+
+const ap = (ap) => {
+    if (!ap?.fk_status) {
+        return true;
+    }
+    return ap?.fk_status === 2;
 }
 
 </script>
@@ -56,7 +64,7 @@ const editarLista = (item) => {
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
         <!-- Pesquisa-->
-        <ModelSearchFormAllColumns :columns="['nome', 'parametro.nome']">
+        <ModelSearchFormAllColumns :columns="['nome', 'parametro.nome']" v-if="ap(aprovacao)">
           <template #action>
             <NavButton @click="abrirModalParametros()" type-button="success" title="Novo parâmetro" />
           </template>
@@ -77,8 +85,8 @@ const editarLista = (item) => {
               </td>
               <td>
                 <div class="d-flex">
-                  <NavButton :icon="IconPencil" class="btn-icon" type-button="primary" @click="editarLista(item)" />
-                  <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção de um ponto será permanente.' }">
+                  <NavButton :icon="IconPencil" class="btn-icon" type-button="primary" @click="editarLista(item)" v-if="ap(aprovacao)" />
+                  <LinkConfirmation v-slot="confirmation" :options="{ text: 'A remoção de um ponto será permanente.' }" v-if="ap(aprovacao)">
                     <Link :onBefore="confirmation.show"
                       :href="route('contratos.contratada.servicos.pmqa.configuracao.parametro.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"
                       as="button" method="delete" type="button" class="btn btn-icon btn-danger">

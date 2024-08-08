@@ -2,16 +2,16 @@
 
 namespace App\Domain\Fiscal\app\Controllers;
 
-use App\Domain\Servico\app\Services\ServicoService;
+use App\Domain\Fiscal\app\services\FiscalService;
 use App\Models\Contrato;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class TabServicosController extends Controller
+class ListagemServicosController extends Controller
 {
-    public function __construct(private readonly ServicoService $servicoService)
+    public function __construct(private readonly FiscalService $fiscalService)
     {
     }
 
@@ -19,9 +19,9 @@ class TabServicosController extends Controller
     {
         $searchParams = $request->all('searchColumn', 'searchValue');
 
-        $response = $this->servicoService->listarServicos($contrato, $searchParams, $statusIds = [2, 3, 4]);
+        $response = $this->fiscalService->listagemServicos($contrato, $searchParams, );
 
-        return Inertia::render('Fiscal/Tab/TabServicos', [
+        return Inertia::render('Fiscal/Servico/TabServicos', [
             'contrato' => $contrato,
             ...$response
         ]);

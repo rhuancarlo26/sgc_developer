@@ -9,10 +9,14 @@ use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Domain\Servico\PMQA\app\Utils\ConfigucacaoParecer;
 
 class IndexController extends Controller
 {
-    public function __construct(private readonly PontoService $pontoService)
+    public function __construct(
+        private readonly PontoService $pontoService,
+        private readonly ConfigucacaoParecer $configucacaoParecer
+    )
     {
     }
 
@@ -25,7 +29,8 @@ class IndexController extends Controller
         return Inertia::render('Servico/PMQA/Configuracao/Ponto/Index', [
             'contrato' => $contrato,
             'servico' => $servico->load(['tipo']),
-            ...$response
+            ...$response,
+            ...$this->configucacaoParecer->get($servico->id)
         ]);
     }
 }
