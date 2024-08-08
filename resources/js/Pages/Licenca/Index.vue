@@ -50,7 +50,7 @@
                             <IconTrain v-if="item.modal == 3" />
                         </td>
                         <td class="text-center">
-                            {{ item.tipo_licenca?.sigla }}
+                            {{ item.tipo?.sigla }}
                         </td>
                         <td>
                             {{ item.numero_licenca }}
