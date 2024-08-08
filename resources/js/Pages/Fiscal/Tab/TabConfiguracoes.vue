@@ -4,8 +4,8 @@ import ModelSearchForm from "@/Components/ModelSearchForm.vue";
 import { Head } from "@inertiajs/vue3";
 import Navbar from "../Navbar.vue";
 import { IconDots } from "@tabler/icons-vue";
-import ModalVisualizarParecerFiscal from "../ModalVisualizarParecerFiscal.vue";
-import ModalVisualizarServicoFiscal from "../ModalVisualizarServicoFiscal.vue";
+// import ModalVisualizarParecerFiscal from "../ModalVisualizarParecerFiscal.vue";
+// import ModalVisualizarServicoFiscal from "../ModalVisualizarServicoFiscal.vue";
 import { ref } from "vue";
 
 defineProps({
@@ -80,7 +80,7 @@ const abrirModalServicoFiscal = (item) => {
         </template>
     </Navbar>
 
-    <ModalVisualizarParecerFiscal ref="modalVisualizarParecerFiscal" />
-    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />
+<!--    <ModalVisualizarParecerFiscal ref="modalVisualizarParecerFiscal" />-->
+<!--    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />-->
 
 </template>
