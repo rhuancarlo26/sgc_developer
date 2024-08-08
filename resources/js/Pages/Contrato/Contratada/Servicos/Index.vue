@@ -1,6 +1,6 @@
 <template>
 
-    <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
+    <Head :title="`${contrato.contratada.slice(0, 10)}...`"/>
 
     <AuthenticatedLayout>
 
@@ -10,10 +10,10 @@
                     { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
                     { route: '#', label: contrato.contratada }
                 ]
-                    " />
+                    "/>
                 <div class="container-buttons">
                     <Link class="btn btn-info me-2" :href="route('contratos.contratada.servicos.create', contrato.id)">
-                    Cadastrar serviço
+                        Cadastrar serviço
                     </Link>
                 </div>
             </div>
@@ -24,11 +24,12 @@
 
 
                 <!-- Pesquisa-->
-                <ModelSearchForm :search-columns="{}" />
+                <ModelSearchForm :search-columns="{}"/>
 
                 <!-- Listagem-->
-                <Table :columns="['', 'Tema', 'Serviço', 'Especificação', 'Licença', 'Status', 'Ação']" :records="servicos"
-                    table-class="table-hover">
+                <Table :columns="['', 'Tema', 'Serviço', 'Especificação', 'Licença', 'Status', 'Ação']"
+                       :records="servicos"
+                       table-class="table-hover">
                     <template #body="{ item }">
                         <tr>
                             <td>{{ item.id }}</td>
@@ -56,19 +57,23 @@
                             </td>
                             <td class="text-center">
                                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
-                                    data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <IconDots />
+                                        data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <IconDots/>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <a @click="abrirModalServico(item)" class="dropdown-item" href="javascript:void(0)">
                                         Visualizar
                                     </a>
                                     <a v-if="item.servico === 1 && item.status_aprovacao === 3" class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
+                                       :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
-                                    <a class="dropdown-item" v-if="item.status_aprovacao === 1"
-                                        :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
+                                    <a v-if="item.servico === 6  && item.status_aprovacao === 3" class="dropdown-item"
+                                       :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index', { contrato: contrato.id, servico: item.id })">
+                                        Gerenciar
+                                    </a>
+                                    <a class="dropdown-item"
+                                       :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
                                         Editar
                                     </a>
                                     <a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)"
@@ -91,8 +96,8 @@
             </template>
         </Navbar>
 
-        <ModalVisualizarLicenca ref="modalVisualizarLicenca" />
-        <ModalVisualizarServico ref="modalVisualizarServico" />
+        <ModalVisualizarLicenca ref="modalVisualizarLicenca"/>
+        <ModalVisualizarServico ref="modalVisualizarServico"/>
 
     </AuthenticatedLayout>
 </template>
@@ -102,12 +107,12 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Table from "@/Components/Table.vue";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
+import {Head, Link, router} from "@inertiajs/vue3";
 import Navbar from "../Navbar.vue";
-import { IconDots } from "@tabler/icons-vue";
+import {IconDots} from "@tabler/icons-vue";
 import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
 import ModalVisualizarServico from "./ModalVisualizarServico.vue";
-import { ref } from "vue";
+import {ref} from "vue";
 
 defineProps({
     contrato: Object,
