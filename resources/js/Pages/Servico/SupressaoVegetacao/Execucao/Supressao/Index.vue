@@ -73,7 +73,7 @@ const urlQueryParams = computed(() => {
                 <ModelSearchFormAllColumns
                     :columns="['chave', 'dt_inicial', 'dt_final', 'area_em_app', 'area_fora_app', 'area_total', 'bioma.nome', 'estagioSucessional.nome', 'licenca.numero_licenca']">
                     <template #action>
-                        <a class="btn btn-success me-1" :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.export', { servico: servico.id, _query: urlQueryParams })">
+                        <a v-if="data.data?.length" class="btn btn-success me-1" :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.export', { servico: servico.id, _query: urlQueryParams })">
                             Exportar Excel
                         </a>
                         <NavButton @click="abrirModalCadastro"

@@ -69,7 +69,7 @@ const urlQueryParams = computed(() => {
                 <ModelSearchFormAllColumns
                     :columns="['chave', 'created_at', 'volume', 'licenca.numero_licenca', 'produto.nome', 'corteEspecie.nome', 'corteEspecie.qtd_corte', 'areaSupressao.chave']">
                     <template #action>
-                        <a class="btn btn-success me-1" :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.export', { servico: servico.id, _query: urlQueryParams })">
+                        <a v-if="data.data?.length" class="btn btn-success me-1" :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.pilhas.export', { servico: servico.id, _query: urlQueryParams })">
                             Exportar Excel
                         </a>
                         <NavButton @click="abrirModalCadastro()"
@@ -98,7 +98,7 @@ const urlQueryParams = computed(() => {
                                     <NavButton @click="abrirModalCadastro(item)" type-button="warning" class="btn-icon" :icon="IconPencil" />
                                     <LinkConfirmation v-slot="confirmation" :options="{ text: 'Você deseja remover o plano de supressão?' }">
                                         <Link :onBefore="confirmation.show"
-                                              :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.delete', item.id)"
+                                              :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.pilhas.delete', item.id)"
                                               as="button" method="delete" type="button" class="btn btn-icon btn-danger">
                                             <IconTrash/>
                                         </Link>

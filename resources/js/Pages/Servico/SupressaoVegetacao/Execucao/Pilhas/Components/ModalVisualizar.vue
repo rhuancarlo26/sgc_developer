@@ -5,9 +5,9 @@ import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
 import Table from "@/Components/Table.vue";
 
 const modalRef = ref();
-const supressao = ref(null);
+const pilha = ref(null);
 const abrirModal = (item) => {
-    supressao.value = item;
+    pilha.value = item;
     modalRef.value.getBsModal().show();
 }
 
@@ -15,40 +15,36 @@ defineExpose({abrirModal});
 </script>
 
 <template>
-    <Modal ref="modalRef" title="Visualizar Área de Supressão" modal-dialog-class="modal-xl">
+    <Modal ref="modalRef" title="Visualizar Controle de Pilha" modal-dialog-class="modal-xl">
         <template #body>
-            <div v-if="supressao">
-                <p>ID Código: <span class="fw-bold">{{ supressao.chave }}</span></p>
-                <div class="d-flex gap-4">
-                    <p>Data Inicial: <span class="fw-bold">{{ dateTimeFormat(supressao.dt_inicial) }}</span></p>
-                    <p>Data Final: <span class="fw-bold">{{ dateTimeFormat(supressao.dt_final) }}</span></p>
-                </div>
-                <p>Bioma: <span class="fw-bold">{{ supressao.bioma?.nome }}</span></p>
-                <p>Fitofisionomia: <span class="fw-bold">{{ supressao.fitofisionomia }}</span></p>
-                <p>Estágio Sucessional: <span class="fw-bold">{{ supressao.estagio_sucessional?.nome }}</span></p>
-                <div class="d-flex gap-4">
-                    <p>Area em APP: <span class="fw-bold">{{ supressao.area_em_app }}</span></p>
-                    <p>Área fora APP: <span class="fw-bold">{{ supressao.area_fora_app }}</span></p>
-                    <p>Área Total: <span class="fw-bold">{{ supressao.area_total }}</span></p>
-                </div>
-                <p>Nº ASV: <span class="fw-bold">{{ supressao.licenca.numero_licenca }}</span></p>
-                <p>Observação: <span class="fw-bold">{{ supressao.observacao }}</span></p>
-
-                <Table
-                    :columns="['Nome científica', 'Nome popular', 'N° de Indivíduos', 'Compensação', 'Legislação']"
-                    :records="{ data: supressao.corte_especies, links: [] }"
-                    table-class="table-hover">
-                    <template #body="{ item, key }">
-                        <tr>
-                            <td>{{ item.nome }}</td>
-                            <td>{{ item.nome_popular }}</td>
-                            <td>{{ item.qtd_corte }}</td>
-                            <td>{{ item.compensacao }}</td>
-                            <td>{{ item.legislacao }}</td>
-                        </tr>
-                    </template>
-                </Table>
-
+            <div v-if="pilha">
+                <p class="row">
+                    <span class="col-6">ID Codigo: <b>{{ pilha.chave }}</b></span>
+                    <span class="col-6">Data de Cadastro: <b>{{ dateTimeFormat(pilha.created_at) }}</b></span>
+                </p>
+                <p class="row">
+                    <span class="col-6">Área Supressão: <b>{{ pilha.area_supressao.chave }}</b></span>
+                    <span class="col-6">Numero da ASV: <b>{{ pilha.licenca.numero_licenca }}</b></span>
+                </p>
+                <p class="row">
+                    <span class="col-6">Pátio de Estocagem: <b>{{ pilha.patio.chave }}</b></span>
+                    <span class="col-6">Tipo de Produto: <b>{{ pilha.produto.nome }}</b></span>
+                </p>
+                <p class="row">
+                    <span class="col-6">Tipo de Pilha: <b>{{ pilha.tipo_pilha_label }}</b></span>
+                    <span class="col-6">Volume (m³): <b>{{ pilha.volume }}</b></span>
+                </p>
+                <p class="row">
+                    <span class="col-6">Espécies Ameaçadas/protegidas: <b>{{ pilha.corte_especie?.nome }}</b></span>
+                    <span class="col-6">Quantidade de Indivíduos: <b>{{ pilha.nu_individuo }}</b></span>
+                </p>
+                <p class="row">
+                    <span class="col-3">Latitude: <b>{{ pilha.latitude }}</b></span>
+                    <span class="col-3">Longitude: <b>{{ pilha.longitude }}</b></span>
+                </p>
+                <p class="row">
+                    <span class="col-12">Observação: <b>{{ pilha.observacao }}</b></span>
+                </p>
             </div>
         </template>
         <template #footer>
