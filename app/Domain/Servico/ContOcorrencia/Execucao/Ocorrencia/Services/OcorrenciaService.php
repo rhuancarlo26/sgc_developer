@@ -5,6 +5,7 @@ namespace App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Services;
 use App\Models\Rodovia;
 use App\Models\ServicoConOcorrOcorrenciSupervisaoExecOcorrencia;
 use App\Models\ServicoConOcorrSupervicaoExecOcorrenciaRegistro;
+use App\Models\ServicoConOcorrSupervisaoExecOcorrenciaHistorico;
 use App\Models\ServicoContOcorrSupervisaoConfigLote;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
@@ -18,15 +19,18 @@ class OcorrenciaService extends BaseModelService
 
   protected string $modelClass = ServicoConOcorrOcorrenciSupervisaoExecOcorrencia::class;
   protected string $modelClassRegistro = ServicoConOcorrSupervicaoExecOcorrenciaRegistro::class;
+  protected string $modelClassHistorico = ServicoConOcorrSupervisaoExecOcorrenciaHistorico::class;
 
   public function index(Servicos $servico, array $searchParams): array
   {
     return [
       'ocorrencias' => $this->searchAllColumns(...$searchParams)
-        ->with(['lote'])
+        ->with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
         ->where('id_servico', $servico->id)
         ->paginate()
-        ->appends($searchParams)
+        ->appends($searchParams),
+      'ocorrencias_em_aberto' => $this->modelClass::with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
+        ->where('id_servico', $servico->id)->where('envio_empresa', 'Não')->get()
     ];
   }
 
@@ -40,7 +44,14 @@ class OcorrenciaService extends BaseModelService
 
   public function store(array $post): array
   {
-    return $this->dataManagement->create(entity: $this->modelClass, infos: $post);
+    $response = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
+
+    $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
+      'id_ocorrencia' => $response['model']['id'],
+      'id_ocorrencia_levantamento' => 1
+    ]);
+
+    return $response;
   }
 
   public function storeRegistro(array $post): array
@@ -51,13 +62,44 @@ class OcorrenciaService extends BaseModelService
     return $this->dataManagement->create(entity: $this->modelClassRegistro, infos: [
       'id_ocorrencia' => $post['id_ocorrencia'],
       'nome' => $nome,
-      'caminho_arquivo' => $caminho
+      'caminho_arquivo' => str_replace("public\\", "", $caminho)
     ]);
+  }
+
+  public function enviarOcorrencia(array $post)
+  {
+    foreach ($post['ocorrencias'] as $item) {
+      if ($item['tipo'] == 'RNC') {
+        $data['aprovado_rnc'] = 'Em análise';
+        $data['envio_empresa'] = 'Não';
+        $data['envio_fiscal'] = 'Sim';
+        $tipo = 5;
+      } else {
+        $data['envio_empresa'] = 'Sim';
+        $tipo = 4;
+      }
+
+      $response = $this->dataManagement->update(entity: $this->modelClass, infos: $data, id: $item['id']);
+
+      $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
+        'id_ocorrencia' => $item['id'],
+        'id_ocorrencia_levantamento' => $tipo
+      ]);
+    }
+
+    return $response;
   }
 
   public function update(array $post): array
   {
-    return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
+    $response = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
+
+    $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
+      'id_ocorrencia' => $post['id'],
+      'id_ocorrencia_levantamento' => 2
+    ]);
+
+    return $response;
   }
 
   public function destroy(array $post): array

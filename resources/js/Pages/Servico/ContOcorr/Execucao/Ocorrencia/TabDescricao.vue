@@ -14,6 +14,7 @@ const props = defineProps({
 });
 
 const form = useForm({
+  form: 2,
   id: null,
   local: null,
   classificacao: null,
@@ -77,7 +78,7 @@ const salvarDescricao = () => {
     </div>
     <div class="col">
       <InputLabel value="Prazo para Correção (dias)" for="prazo" />
-      <input type="text" class="form-control" v-model="form.prazo" disabled>
+      <input type="text" class="form-control" :value="ocorrencia.prazo" disabled>
       <InputError :message="form.errors.prazo" />
     </div>
   </div>

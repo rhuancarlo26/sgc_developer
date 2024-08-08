@@ -34,7 +34,9 @@ class StoreController extends Controller
       'id_servico' => $servico->id,
       'id_rodovia' => $request->rodovia['id'],
       'id_uf' => $request->rodovia['uf_id'],
-      'id_lote' => $request->lote['id']
+      'id_lote' => $request->lote['id'],
+      'status' => 'Em aberto',
+      'envio_empresa' => 'Não'
     ];
 
     $response = $this->ocorrenciaService->store($post);
