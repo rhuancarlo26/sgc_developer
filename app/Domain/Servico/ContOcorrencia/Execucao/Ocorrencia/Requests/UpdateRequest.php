@@ -8,42 +8,59 @@ class UpdateRequest extends FormRequest
 {
   public function rules(): array
   {
-    return [
-      'id'                        => ['nullable'],
-      'id_servico'                => ['nullable'],
-      'num_por_servico'           => ['nullable'],
-      'nome_id'                   => ['nullable'],
-      'id_rodovia'                => ['nullable'],
-      'id_uf'                     => ['nullable'],
-      'data_ocorrencia'           => ['nullable'],
-      'km'                        => ['nullable'],
-      'estaca'                    => ['nullable'],
-      'lado'                      => ['nullable'],
-      'latitude'                  => ['nullable'],
-      'longitude'                 => ['nullable'],
-      'zona'                      => ['nullable'],
-      'id_lote'                   => ['nullable'],
-      'indicio_responsabilidade'  => ['nullable'],
-      'possivel_causa'            => ['nullable'],
-      'descricao_causa'           => ['nullable'],
-      'intensidade'               => ['nullable'],
-      'tipo'                      => ['nullable'],
-      'rnc_direto'                => ['nullable'],
-      'local'                     => ['nullable'],
-      'classificacao'             => ['nullable'],
-      'descricao'                 => ['nullable'],
-      'area_total'                => ['nullable'],
-      'prazo'                     => ['nullable'],
-      'dias_restantes'            => ['nullable'],
-      'acoes'                     => ['nullable'],
-      'norma'                     => ['nullable'],
-      'obs'                       => ['nullable'],
-      'status'                    => ['nullable'],
-      'aprovado_rnc'              => ['nullable'],
-      'parecer_fiscal'            => ['nullable'],
-      'envio_empresa'             => ['nullable'],
-      'envio_fiscal'              => ['nullable'],
-    ];
+    $request = request()->all();
+    $rules = [];
+
+    if ($request['form'] === 1) {
+      $rules = [
+        ...$rules,
+        'id'                        => ['nullable'],
+        'rodovia'                   => ['required'],
+        'data_ocorrencia'           => ['required'],
+        'km'                        => ['required'],
+        'estaca'                    => ['required'],
+        'lado'                      => ['required'],
+        'latitude'                  => ['required'],
+        'longitude'                 => ['required'],
+        'lote'                      => ['required'],
+        'indicio_responsabilidade'  => ['required'],
+        'possivel_causa'            => ['required'],
+        'descricao_causa'           => ['required'],
+        'intensidade'               => ['required'],
+        'tipo'                      => ['required'],
+        'prazo'                     => ['required'],
+        'rnc_direto'                => ['required'],
+      ];
+    } elseif ($request['form'] === 2) {
+      $rules = [
+        ...$rules,
+        'id'            => ['required'],
+        'local'         => ['required'],
+        'classificacao' => ['required'],
+        'descricao'     => ['required'],
+        'area_total'    => ['required'],
+      ];
+    } elseif ($request['form'] === 3) {
+      $rules = [
+        ...$rules,
+        'id'    => ['required'],
+        'acoes' => ['required'],
+      ];
+    } elseif ($request['form'] === 4) {
+      $rules = [
+        ...$rules,
+        'id'    => ['required'],
+        'norma' => ['required'],
+      ];
+    } elseif ($request['form'] === 6) {
+      $rules = [
+        ...$rules,
+        'id'  => ['required'],
+        'obs' => ['required'],
+      ];
+    }
+
+    return $rules;
   }
 
   public function messages(): array

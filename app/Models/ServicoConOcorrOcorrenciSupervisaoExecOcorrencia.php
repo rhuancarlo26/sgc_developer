@@ -32,4 +32,9 @@ class ServicoConOcorrOcorrenciSupervisaoExecOcorrencia extends Model
     {
         return $this->hasMany(ServicoConOcorrSupervicaoExecOcorrenciaRegistro::class, 'id_ocorrencia');
     }
+
+    public function historico(): HasMany
+    {
+        return $this->hasMany(ServicoConOcorrSupervisaoExecOcorrenciaHistorico::class, 'id_ocorrencia');
+    }
 }

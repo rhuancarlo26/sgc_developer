@@ -1,5 +1,7 @@
 <script setup>
 import Modal from "@/Components/Modal.vue";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+import { usePage } from "@inertiajs/vue3";
 import { ref } from "vue";
 
 const modalVisualizarOcorrencia = ref();
@@ -32,35 +34,43 @@ defineExpose({ abrirModal });
                   <tbody>
                     <tr>
                       <th>BR</th>
-                      <td></td>
+                      <td>{{ ocorrencia.rodovia?.rodovia }}</td>
                     </tr>
                     <tr>
                       <th>UF</th>
-                      <td></td>
+                      <td>{{ ocorrencia.rodovia?.uf?.uf }}</td>
                     </tr>
                     <tr>
                       <th>Data da Ocorrência</th>
-                      <td></td>
+                      <td>{{ dateTimeFormat(ocorrencia.data_ocorrencia) }}</td>
                     </tr>
                     <tr>
                       <th>KM</th>
-                      <td></td>
+                      <td>{{ ocorrencia.km }}</td>
                     </tr>
                     <tr>
                       <th>Estaca</th>
-                      <td></td>
+                      <td>{{ ocorrencia.estaca }}</td>
                     </tr>
                     <tr>
                       <th>Lado</th>
-                      <td></td>
+                      <td>{{ ocorrencia.lado }}</td>
                     </tr>
                     <tr>
                       <th>Latitude</th>
-                      <td></td>
+                      <td>{{ ocorrencia.latitude }}</td>
                     </tr>
                     <tr>
                       <th>Longitude</th>
-                      <td></td>
+                      <td>{{ ocorrencia.longitude }}</td>
+                    </tr>
+                    <tr>
+                      <th>Lote</th>
+                      <td>{{ ocorrencia.lote?.nome_id }}</td>
+                    </tr>
+                    <tr>
+                      <th>Empresa / Consórico</th>
+                      <td>{{ ocorrencia.lote?.empresa }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -73,35 +83,39 @@ defineExpose({ abrirModal });
                 <table class="table card-table table-bordered table-hover">
                   <tbody>
                     <tr>
-                      <th>Lote</th>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <th>Empresa / Consórico</th>
-                      <td></td>
-                    </tr>
-                    <tr>
                       <th>Contrato de obra</th>
-                      <td></td>
+                      <td>{{ ocorrencia.lote?.num_contrato }}</td>
                     </tr>
                     <tr>
                       <th>Indícios de responsabilidade da construtora</th>
-                      <td></td>
+                      <td>{{ ocorrencia.indicio_responsabilidade ? 'Sim' : 'Não' }}</td>
+                    </tr>
+                    <tr>
+                      <th>Possível causa</th>
+                      <td>{{ ocorrencia.possivel_causa }}</td>
+                    </tr>
+                    <tr>
+                      <th>Descrição da causa</th>
+                      <td>{{ ocorrencia.descricao_causa }}</td>
                     </tr>
                     <tr>
                       <th>RNC direto</th>
-                      <td></td>
+                      <td>{{ ocorrencia.rnc_direto ? 'Sim' : 'Não' }}</td>
                     </tr>
                     <tr>
                       <th>Intensidade de ocorrência</th>
-                      <td></td>
+                      <td>{{ ocorrencia.intensidade }}</td>
                     </tr>
                     <tr>
                       <th>Tipo de ocorrência</th>
-                      <td></td>
+                      <td>{{ ocorrencia.tipo }}</td>
                     </tr>
                     <tr>
                       <th>Status da ocorrência</th>
+                      <td>{{ ocorrencia.status }}</td>
+                    </tr>
+                    <tr>
+                      <th>Ocorrências anteriores</th>
                       <td></td>
                     </tr>
                   </tbody>
@@ -121,15 +135,15 @@ defineExpose({ abrirModal });
                   <tbody>
                     <tr>
                       <th>Local da ocorrência</th>
-                      <td></td>
+                      <td>{{ ocorrencia.local }}</td>
                     </tr>
                     <tr>
                       <th>Classificação da ocorrência</th>
-                      <td></td>
+                      <td>{{ ocorrencia.classificacao }}</td>
                     </tr>
                     <tr>
                       <th>Descrição da ocorrência</th>
-                      <td></td>
+                      <td>{{ ocorrencia.descricao }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -143,11 +157,11 @@ defineExpose({ abrirModal });
                   <tbody>
                     <tr>
                       <th>Área total da ocorrência (m²)</th>
-                      <td></td>
+                      <td>{{ ocorrencia.area_total }}</td>
                     </tr>
                     <tr>
                       <th>Prazo para correção (dias)</th>
-                      <td></td>
+                      <td>{{ ocorrencia.prazo }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -160,7 +174,7 @@ defineExpose({ abrirModal });
         <div class="row">
           <h3>Sugestões de ações corretivas</h3>
           <div class="col">
-            <span><strong>Ações: </strong></span>
+            <span><strong>Ações: </strong>{{ ocorrencia.acoes }}</span>
           </div>
         </div>
       </div>
@@ -168,15 +182,17 @@ defineExpose({ abrirModal });
         <div class="row">
           <h3>Norma / fundamento legal</h3>
           <div class="col">
-            <span><strong>Norma: </strong></span>
+            <span><strong>Norma: </strong>{{ ocorrencia.norma }}</span>
           </div>
         </div>
       </div>
       <div class="mb-4">
         <div class="row">
           <h3>Registro fotográfico</h3>
-          <div class="col">
-            <span><strong>Norma: </strong></span>
+          <div class="row">
+            <div v-for="registro in ocorrencia.registros" :key="registro.id" class="col-2">
+              <img :src="usePage().props.app_url + '/storage/' + registro.caminho_arquivo" alt="registro fotográfico">
+            </div>
           </div>
         </div>
       </div>
@@ -184,156 +200,10 @@ defineExpose({ abrirModal });
         <div class="row">
           <h3>Observações</h3>
           <div class="col">
-            <span><strong>Observação: </strong></span>
+            <span><strong>Observação: </strong>{{ ocorrencia.obs }}</span>
           </div>
         </div>
       </div>
-      <!-- <div class=" mb-4">
-        <h3>Dados lote</h3>
-        <div class="row">
-          <div class="col">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table card-table table-bordered table-hover">
-                  <tbody>
-                    <tr class="cursor-pointer">
-                      <th>ID lote:</th>
-                      <td>{{ lote.nome_id }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>Nome lote:</th>
-                      <td>{{ lote.nome }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>BR:</th>
-                      <td>{{ lote.rodovia?.rodovia }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>UF:</th>
-                      <td>{{ lote.uf?.uf }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>km inicial:</th>
-                      <td>{{ lote.km_inicial }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>Fiscal contrato:</th>
-                      <td>{{ lote.fiscal_contrato }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table card-table table-bordered table-hover">
-                  <tbody>
-                    <tr class="cursor-pointer">
-                      <th>Km final:</th>
-                      <td>{{ lote.km_final }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>Estaca inicial:</th>
-                      <td>{{ lote.estaca_inicial }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>Estaca final:</th>
-                      <td>{{ lote.estaca_final }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>Empresa/Consórcio:</th>
-                      <td>{{ lote.empresa }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>N° do contrato:</th>
-                      <td>{{ lote.num_contrato }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>Situação do contrato:</th>
-                      <td>{{ lote.situacao_contrato }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table card-table table-bordered table-hover">
-                  <tbody>
-                    <tr class="cursor-pointer">
-                      <th>Objeto do contrato:</th>
-                      <td>{{ lote.obj_contrato }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="mb-4">
-        <h3>Dados supervisora da obra</h3>
-        <div class="row">
-          <div class="col">
-            <div class="card-body">
-              <div class="table-responsive mb-4">
-                <table class="table card-table table-bordered table-hover">
-                  <tbody>
-                    <tr class="cursor-pointer">
-                      <th>Supervisora de obras:</th>
-                      <td>{{ lote.fiscal_contrato_supervisora }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>N° do contrato:</th>
-                      <td>{{ lote.num_contrato_supervisora }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card-body">
-              <div class="table-responsive mb-4">
-                <table class="table card-table table-bordered table-hover">
-                  <tbody>
-                    <tr class="cursor-pointer">
-                      <th>Fiscal contrato:</th>
-                      <td>{{ lote.fiscal_contrato }}</td>
-                    </tr>
-                    <tr class="cursor-pointer">
-                      <th>Situação do contrato:</th>
-                      <td>{{ lote.situacao_contrato_supervisora }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table card-table table-bordered table-hover">
-                  <tbody>
-                    <tr class="cursor-pointer">
-                      <th>Observações:</th>
-                      <td>{{ lote.obs }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> -->
     </template>
     <template #footer>
     </template>

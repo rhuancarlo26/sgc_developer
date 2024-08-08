@@ -14,6 +14,7 @@ const props = defineProps({
 });
 
 const form = useForm({
+  form: 4,
   id: null,
   norma: null,
   ...props.ocorrencia

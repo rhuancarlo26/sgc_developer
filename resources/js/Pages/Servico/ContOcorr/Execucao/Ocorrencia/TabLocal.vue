@@ -16,6 +16,7 @@ const props = defineProps({
 });
 
 const form = useForm({
+  form: 1,
   id: null,
   id_ocorrencia: null,
   num_por_servico: null,
@@ -32,6 +33,7 @@ const form = useForm({
   descricao_causa: null,
   rnc_direto: null,
   intensidade: null,
+  prazo: null,
   tipo: null,
   ...props.ocorrencia
 });
@@ -39,7 +41,23 @@ const form = useForm({
 watch(
   () => form.rnc_direto,
   (value) => {
-    form.tipo = value ? 'RNC' : 'ROA';
+    if (value) {
+      form.tipo = 'RNC';
+      form.prazo = 15;
+    } else {
+      form.tipo = 'ROA';
+    }
+  }
+);
+
+watch(
+  () => form.intensidade,
+  (value) => {
+    if (value === 'Leve' || value === 'Moderada') {
+      form.prazo = 30;
+    } else if (value === 'Grave') {
+      form.prazo = 15;
+    }
   }
 );
 
