@@ -87,8 +87,12 @@ const onChangeFotos = (event) => {
 
 const destroyPhoto = (photoId, index) => {
     if (photoId !== null) {
-        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.fotos.delete', {arquivo: photoId, area: form.id}), {
+        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.execucao.pilhas.fotos.delete', {arquivo: photoId, pilha: form.id}), {
             preserveState: true,
+            onSuccess() {
+                modalRef.value.getBsModal().hide();
+                form.reset();
+            }
         })
     }
     form.fotos.splice(index, 1)

@@ -34,7 +34,7 @@ class PilhasService extends BaseModelService
     public function index(Servicos $servico, array $searchParams): LengthAwarePaginator
     {
         return $this->searchAllColumns(...$searchParams)
-            ->with(['areaSupressao', 'fotos', 'licenca', 'produto', 'corteEspecie'])
+            ->with(['areaSupressao', 'fotos', 'licenca', 'patio', 'produto', 'corteEspecie'])
             ->where('servico_id', $servico->id)
             ->paginate()
             ->appends($searchParams);
@@ -67,10 +67,10 @@ class PilhasService extends BaseModelService
         return $response;
     }
 
-    public function deleteFoto(Arquivo $arquivo, AreaSupressao $area): bool
+    public function deleteFoto(Arquivo $arquivo, ControlePilha $pilha): bool
     {
         if($this->arquivoUtils->delete(arquivo: $arquivo)) {
-            $area->fotos()->detach($arquivo->id);
+            $pilha->fotos()->detach($arquivo->id);
             return true;
         }
         return false;

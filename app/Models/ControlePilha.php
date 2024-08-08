@@ -49,4 +49,9 @@ class ControlePilha extends Model
         return $this->belongsTo(CorteEspecie::class, 'corte_especie_id');
     }
 
+    public function patio(): BelongsTo
+    {
+        return $this->belongsTo(PatioEstocagem::class, 'patio_estocagem_id');
+    }
+
 }
