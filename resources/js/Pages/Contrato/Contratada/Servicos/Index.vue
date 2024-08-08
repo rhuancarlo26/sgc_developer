@@ -1,37 +1,3 @@
-<script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import Breadcrumb from "@/Components/Breadcrumb.vue";
-import Table from "@/Components/Table.vue";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
-import Navbar from "../Navbar.vue";
-import { IconDots } from "@tabler/icons-vue";
-import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
-import ModalVisualizarServico from "./ModalVisualizarServico.vue";
-import { ref } from "vue";
-
-defineProps({
-    contrato: Object,
-    servicos: Object
-});
-
-const modalVisualizarLicenca = ref();
-const modalVisualizarServico = ref();
-
-const abrirModalLicenca = (servico) => {
-    modalVisualizarLicenca.value.abrirModal(servico);
-}
-
-const abrirModalServico = (servico) => {
-    modalVisualizarServico.value.abrirModal(servico);
-}
-
-const deleteServico = (servico_id) => {
-    router.delete(route('contratos.contratada.servicos.delete', servico_id));
-}
-
-</script>
-
 <template>
 
     <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
@@ -78,13 +44,13 @@ const deleteServico = (servico_id) => {
                                 <span v-if="item.status_aprovacao === 1" class="badge bg-azure-lt">
                                     Em confecção
                                 </span>
-                                <span v-else-if="item.status_aprovacao === 2" class="badge bg-red-lt">
+                                <span v-else-if="item.status_aprovacao === 2" class="badge bg-yellow-lt">
                                    Em análise
                                 </span>
                                 <span v-else-if="item.status_aprovacao === 3" class="badge bg-blue-lt">
                                    Aprovado
                                 </span>
-                                <span v-else-if="item.status_aprovacao === 4" class="badge bg-blue-lt">
+                                <span v-else-if="item.status_aprovacao === 4" class="badge bg-red-lt">
                                    Pendente
                                 </span>
                             </td>
@@ -97,16 +63,25 @@ const deleteServico = (servico_id) => {
                                     <a @click="abrirModalServico(item)" class="dropdown-item" href="javascript:void(0)">
                                         Visualizar
                                     </a>
-                                    <a v-if="item.servico === 1" class="dropdown-item"
+                                    <a v-if="item.servico === 1 && item.status_aprovacao === 3" class="dropdown-item"
                                         :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
-                                    <a class="dropdown-item"
+                                    <a class="dropdown-item" v-if="item.status_aprovacao === 1"
                                         :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
                                         Editar
                                     </a>
-                                    <a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)">
+                                    <a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)"
+                                       v-if="item.status_aprovacao === 1">
                                         Excluir
+                                    </a>
+                                    <a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
+                                       v-if="item.status_aprovacao === 4">
+                                        Parecer
+                                    </a>
+                                    <a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
+                                       v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4">
+                                        Enviar para o fiscal
                                     </a>
                                 </div>
                             </td>
@@ -121,3 +96,41 @@ const deleteServico = (servico_id) => {
 
     </AuthenticatedLayout>
 </template>
+
+<script setup>
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Breadcrumb from "@/Components/Breadcrumb.vue";
+import Table from "@/Components/Table.vue";
+import ModelSearchForm from "@/Components/ModelSearchForm.vue";
+import { Head, Link, router } from "@inertiajs/vue3";
+import Navbar from "../Navbar.vue";
+import { IconDots } from "@tabler/icons-vue";
+import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
+import ModalVisualizarServico from "./ModalVisualizarServico.vue";
+import { ref } from "vue";
+
+defineProps({
+    contrato: Object,
+    servicos: Object
+});
+
+const modalVisualizarLicenca = ref();
+const modalVisualizarServico = ref();
+
+const abrirModalLicenca = (servico) => {
+    modalVisualizarLicenca.value.abrirModal(servico);
+}
+
+const abrirModalServico = (servico) => {
+    modalVisualizarServico.value.abrirModal(servico);
+}
+
+const deleteServico = (servico_id) => {
+    router.delete(route('contratos.contratada.servicos.delete', servico_id));
+}
+
+const enviaFiscal = (servico_id) => {
+    router.post(route('contratos.contratada.servicos.envia-fiscal', servico_id));
+}
+</script>
+

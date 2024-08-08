@@ -1,26 +1,53 @@
 <?php
 
-namespace App\Domain\Fiscal\app\Services;
+namespace App\Domain\Fiscal\app\services;
 
+use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
-use App\Models\Contrato;
 
 class FiscalService extends BaseModelService
 {
     use Searchable, Deletable;
 
-    protected string $modelClass = Contrato::class;
+    protected string $modelClass = Servicos::class;
 
-    public function ListagemContratos($tipo, $searchParams)
+    public function listagemServicos($contrato, $searchParams)
     {
-        return [
-            'contratos' => $this->searchAllColumns(...$searchParams)
-                ->with(['aditivos'])
-                ->where('tipo_id', $tipo->id)
-                ->paginate()
-                ->appends($searchParams)
-        ];
+        $query = $this->search(...$searchParams)
+            ->with([
+                'tipo',
+                'tema',
+                'rhs',
+                'veiculos',
+                'veiculos.codigo',
+                'equipamentos',
+                'condicionantes',
+                'condicionantes.licenca',
+                'parecer'
+            ])
+            ->where('id_contrato', $contrato->id)
+            ->where('deleted_at', null)
+            ->whereIn('status_aprovacao', [2, 3, 4]);
+
+        return ['servicos' => $query->paginate()->appends($searchParams)];
+    }
+
+    public function listagemConfiguracaoPMQA($contrato, $searchParams)
+    {
+        $query = $this->search(...$searchParams)
+            ->with([
+                'tema',
+                'tipo',
+                'parecerPMQA',
+                'parecer'
+            ])
+            ->where('id_contrato', $contrato->id)
+            ->where('servico', 1)
+            ->where('deleted_at', null)
+            ->whereIn('status_aprovacao', [2, 3, 4]);
+
+        return ['servicos' => $query->paginate()->appends($searchParams)];
     }
 }

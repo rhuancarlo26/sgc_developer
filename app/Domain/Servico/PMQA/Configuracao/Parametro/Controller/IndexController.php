@@ -2,6 +2,7 @@
 
 namespace App\Domain\Servico\PMQA\Configuracao\Parametro\Controller;
 
+use App\Domain\Servico\PMQA\app\Utils\ConfigucacaoParecer;
 use App\Domain\Servico\PMQA\Configuracao\Parametro\Services\ParametroService;
 use App\Models\Contrato;
 use App\Models\Servicos;
@@ -12,7 +13,10 @@ use Inertia\Response;
 
 class IndexController extends Controller
 {
-    public function __construct(private readonly ParametroService $parametroService)
+    public function __construct(
+        private readonly ParametroService $parametroService,
+        private readonly ConfigucacaoParecer $configucacaoParecer
+    )
     {
     }
 
@@ -25,7 +29,8 @@ class IndexController extends Controller
         return Inertia::render('Servico/PMQA/Configuracao/Parametro/Index', [
             'contrato' => $contrato,
             'servico'  => $servico->load(['tipo']),
-            ...$response
+            ...$response,
+            ...$this->configucacaoParecer->get($servico->id)
         ]);
     }
 }

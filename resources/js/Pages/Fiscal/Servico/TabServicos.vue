@@ -1,33 +1,3 @@
-<script setup>
-import Table from "@/Components/Table.vue";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import { Head } from "@inertiajs/vue3";
-import Navbar from "../Navbar.vue";
-import { IconDots } from "@tabler/icons-vue";
-import ModalVisualizarParecerFiscal from "../ModalVisualizarParecerFiscal.vue";
-import ModalVisualizarServicoFiscal from "../ModalVisualizarServicoFiscal.vue";
-import { ref } from "vue";
-
-defineProps({
-    contrato: Object,
-    servicos: Object
-});
-
-const modalVisualizarParecerFiscal = ref();
-const modalVisualizarServicoFiscal = ref();
-
-const abrirModalParecerFiscal = (item) => {
-    console.log(item);
-    modalVisualizarParecerFiscal.value.abrirModal(item);
-}
-
-const abrirModalServicoFiscal = (item) => {
-    console.log(item);
-    modalVisualizarServicoFiscal.value.abrirModal(item);
-}
-
-</script>
-
 <template>
 
     <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
@@ -39,28 +9,28 @@ const abrirModalServicoFiscal = (item) => {
             <ModelSearchForm :search-columns="{}" />
 
             <!-- Listagem-->
-            <Table :columns="['Tema', 'Serviço', 'Especificação', 'Licença', 'Status', 'Ação']" :records="servicos"
+            <Table :columns="['#', 'Tema', 'Serviço', 'Especificação', 'Licença', 'Status', 'Ação']" :records="servicos"
                 table-class="table-hover">
                 <template #body="{ item }">
                     <tr>
-                        <td>{{ item.tema?.nome }}</td>
+                        <td class="text-center">{{item.id}}</td>
+                        <td>{{ item.tema?.nome_tema }}</td>
                         <td>{{ item.tipo?.nome }}</td>
                         <td>{{ item.especificacao }}</td>
                         <td>
                             <span @click="abrirModalLicenca(item)" v-if="item.condicionantes.length">
-                                {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''} -
-                                ${item.condicionantes[0]?.descricao ?? ''}` }}
+                                {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''} ` }}
                             </span>
                         </td>
                         <td class="text-center">
-                            <span v-if="item.servico_status_id === 2" class="badge bg-yellow-lt">
-                                {{ item.status?.nome }}
+                            <span v-if="item.status_aprovacao === 2" class="badge bg-yellow-lt">
+                                Em análise
                             </span>
-                            <span v-else-if="item.servico_status_id === 3" class="badge bg-blue-lt">
-                                {{ item.status?.nome }}
+                            <span v-else-if="item.status_aprovacao === 3" class="badge bg-blue-lt">
+                                Aprovado
                             </span>
-                            <span v-else-if="item.servico_status_id === 4" class="badge bg-red-lt">
-                                {{ item.status?.nome }}
+                            <span v-else-if="item.status_aprovacao === 4" class="badge bg-red-lt">
+                                Pendente
                             </span>
                         </td>
                         <td class="text-center">
@@ -73,7 +43,7 @@ const abrirModalServicoFiscal = (item) => {
                                     Visualizar serviço
                                 </a>
                                 <a @click="abrirModalParecerFiscal(item)" class="dropdown-item" href="javascript:void(0)">
-                                    Visualizar parecer
+                                    Parecer
                                 </a>
                             </div>
                         </td>
@@ -87,3 +57,32 @@ const abrirModalServicoFiscal = (item) => {
     <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />
 
 </template>
+
+<script setup>
+import Table from "@/Components/Table.vue";
+import ModelSearchForm from "@/Components/ModelSearchForm.vue";
+import { Head } from "@inertiajs/vue3";
+import Navbar from "../Navbar.vue";
+import { IconDots } from "@tabler/icons-vue";
+import ModalVisualizarParecerFiscal from "./ModalVisualizarParecerFiscal.vue";
+import ModalVisualizarServicoFiscal from "./ModalVisualizarServicoFiscal.vue";
+import { ref } from "vue";
+
+defineProps({
+    contrato: Object,
+    servicos: Object
+});
+
+const modalVisualizarParecerFiscal = ref();
+const modalVisualizarServicoFiscal = ref();
+
+const abrirModalParecerFiscal = (item) => {
+    modalVisualizarParecerFiscal.value.abrirModal(item);
+}
+
+const abrirModalServicoFiscal = (item) => {
+    modalVisualizarServicoFiscal.value.abrirModal(item);
+}
+
+</script>
+

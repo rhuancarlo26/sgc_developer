@@ -33,6 +33,7 @@ use App\Domain\Servico\Rh\Controller\DeleteServicoRhContratadaController;
 use App\Domain\Servico\Rh\Controller\StoreServicoRhContratadaController;
 use App\Domain\Servico\Veiculo\Controller\DeleteServicoVeiculoContratadaController;
 use App\Domain\Servico\Veiculo\Controller\StoreServicoVeiculoContratadaController;
+use App\Domain\Servico\app\Controller\EnviaServicoFiscalController;
 
 Route::prefix('/contratada')->group(function () {
     Route::get('{contrato}/',                                      [ContratoContratadaController::class,                    'index'])->name('contratos.contratada.index');
@@ -70,6 +71,7 @@ Route::prefix('/contratada')->group(function () {
         Route::post('servicos/store',                       [StoreServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.store');
         Route::patch('servicos/update',                     [UpdateServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.update');
         Route::delete('servicos/delete/{servico}',          [DeleteServicoContratadaController::class, 'index'])->name('contratos.contratada.servicos.delete');
+        Route::post('servicos/envia-fiscal/{servico}',      [EnviaServicoFiscalController::class, 'index'])->name('contratos.contratada.servicos.envia-fiscal');
 
         Route::prefix('servico/rh')->group(function () {
             Route::post('store',                            [StoreServicoRhContratadaController::class, 'index'])->name('contratos.contratada.servicos.rh.store');

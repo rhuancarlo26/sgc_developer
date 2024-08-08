@@ -1,33 +1,3 @@
-<script setup>
-import Table from "@/Components/Table.vue";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import { Head } from "@inertiajs/vue3";
-import Navbar from "../Navbar.vue";
-import { IconDots } from "@tabler/icons-vue";
-import ModalVisualizarParecerFiscal from "../ModalVisualizarParecerFiscal.vue";
-import ModalVisualizarServicoFiscal from "../ModalVisualizarServicoFiscal.vue";
-import { ref } from "vue";
-
-defineProps({
-    contrato: Object,
-    servicos: Object
-});
-
-const modalVisualizarParecerFiscal = ref();
-const modalVisualizarServicoFiscal = ref();
-
-const abrirModalParecerFiscal = (item) => {
-    console.log(item);
-    modalVisualizarParecerFiscal.value.abrirModal(item);
-}
-
-const abrirModalServicoFiscal = (item) => {
-    console.log(item);
-    modalVisualizarServicoFiscal.value.abrirModal(item);
-}
-
-</script>
-
 <template>
 
     <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
@@ -66,9 +36,9 @@ const abrirModalServicoFiscal = (item) => {
                                 <IconDots />
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <a @click="abrirModalServicoFiscal(item)" class="dropdown-item" href="javascript:void(0)">
-                                    Visualizar
-                                </a>
+<!--                                <a @click="abrirModalServicoFiscal(item)" class="dropdown-item" href="javascript:void(0)">-->
+<!--                                    Visualizar-->
+<!--                                </a>-->
                                 <a @click="abrirModalParecerFiscal(item)" class="dropdown-item" href="javascript:void(0)">
                                     Visualizar parecer
                                 </a>
@@ -80,7 +50,32 @@ const abrirModalServicoFiscal = (item) => {
         </template>
     </Navbar>
 
-    <ModalVisualizarParecerFiscal ref="modalVisualizarParecerFiscal" />
-    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />
+    <ModalParecerPMQA ref="modalParecerPMQA" />
+<!--    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />-->
 
 </template>
+
+<script setup>
+import Table from "@/Components/Table.vue";
+import ModelSearchForm from "@/Components/ModelSearchForm.vue";
+import { Head } from "@inertiajs/vue3";
+import Navbar from "../Navbar.vue";
+import { IconDots } from "@tabler/icons-vue";
+import { ref } from "vue";
+
+import ModalParecerPMQA from "./ModalParecerPMQA.vue";
+
+
+defineProps({
+    contrato: Object,
+    servicos: Object
+});
+
+const modalParecerPMQA = ref();
+const modalVisualizarServicoFiscal = ref();
+
+const abrirModalParecerFiscal = (item) => {
+    modalParecerPMQA.value.abrirModal(item);
+}
+
+</script>

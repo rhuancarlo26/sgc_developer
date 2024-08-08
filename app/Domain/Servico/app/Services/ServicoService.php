@@ -19,7 +19,7 @@ class ServicoService extends BaseModelService
 
     protected string $modelClass = Servicos::class;
 
-    public function listarServicos($contrato, $searchParams, $statusIds = null): array
+    public function listarServicos($contrato, $searchParams): array
     {
         $query = $this->search(...$searchParams)
             ->with([
@@ -36,14 +36,7 @@ class ServicoService extends BaseModelService
             ->where('id_contrato', $contrato->id)
             ->where('deleted_at', null);
 
-//        // Verifica se $statusIds foi fornecido e não está vazio
-//        if (!is_null($statusIds) && !empty($statusIds)) {
-//            $query->whereIn('servico_status_id', $statusIds);
-//        }
-
-        return [
-            'servicos' => $query->paginate()->appends($searchParams)
-        ];
+        return ['servicos' => $query->paginate()->appends($searchParams)];
     }
 
     public function createServicos($contrato, $servico): array
@@ -72,13 +65,13 @@ class ServicoService extends BaseModelService
         }
 
         return [
-            'tipos' => $tipos,
-            'temas' => $temas,
-            'licencasLi' => $licencasLi,
-            'rhs' => $rhs,
-            'veiculos' => $veiculos,
+            'tipos'        => $tipos,
+            'temas'        => $temas,
+            'licencasLi'   => $licencasLi,
+            'rhs'          => $rhs,
+            'veiculos'     => $veiculos,
             'equipamentos' => $equipamentos,
-            'servico' => $servico
+            'servico'      => $servico
         ];
     }
 
@@ -96,9 +89,7 @@ class ServicoService extends BaseModelService
     {
         $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
 
-        return [
-            'request' => $response['request']
-        ];
+        return ['request' => $response['request']];
     }
 
 }
