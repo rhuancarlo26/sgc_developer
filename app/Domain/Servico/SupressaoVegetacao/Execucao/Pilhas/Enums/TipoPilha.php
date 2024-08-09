@@ -8,7 +8,7 @@ enum TipoPilha: int
     case ESPECIE_AMEACADA_PROTEGIDA = 1;
     case MATERIA_ORGANICA = 2;
 
-    public static function getLabel(int $value): string
+    public static function getLabel(?int $value): string
     {
         return match ($value) {
             self::ESPECIE_COMUM->value => 'Espécie Comum',
