@@ -9,5 +9,6 @@ Route::prefix('/supressao-vegetacao')->group(function () {
       require __DIR__ . '/../../Configuracao/PatioEstocagem/Routes/PatioEstocagemRoutes.php';
       require __DIR__ . '/../../Execucao/Supressao/Routes/SupressaoRoutes.php';
       require __DIR__ . '/../../Execucao/Pilhas/Routes/PilhasRoutes.php';
+      require __DIR__ . '/../../Execucao/Destinacao/Routes/DestinacaoRoutes.php';
   });
 });
