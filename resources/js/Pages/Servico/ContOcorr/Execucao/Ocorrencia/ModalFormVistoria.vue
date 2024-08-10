@@ -7,7 +7,7 @@ import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vu
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { IconEye } from "@tabler/icons-vue";
 import { IconPlus } from "@tabler/icons-vue";
 import { IconPencil } from "@tabler/icons-vue";
@@ -20,6 +20,9 @@ import { usePage } from "@inertiajs/vue3";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
 
 const modalFormVistoria = ref();
 const ocorrencia = ref({});
@@ -27,26 +30,69 @@ const ocorrencia = ref({});
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
-  ocorrencias: { type: Object }
+  ocorrencias: { type: Array }
 });
 
 const form = useForm({
-  ocorrencias: []
+  id_ocorrencia: null,
+  nome_id: null,
+  data_ocorrencia: null,
+  nome_id: null,
+  data_vistoria: null,
+  corrigido: null,
+  data_fim: null,
+  intensidade_vistoria: null,
+  tipo_vistoria: null,
+  acordo_prazo: null,
+  prazo_vistoria: null,
+  obs_vistoria: null
 });
-
 
 const abrirModal = (item) => {
   ocorrencia.value = {};
 
   if (item) {
     ocorrencia.value = item;
+
+    form.id_ocorrencia = ocorrencia.value.id
   }
   modalFormVistoria.value.getBsModal().show();
 }
 
-const enviarOcorrencias = () => {
-  form.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.enviar_ocorrencia', { contrato: props.contrato.id, servico: props.servico.id }), {
-    onSuccess: () => modalFormVistoria.value.getBsModal().hide()
+const changeFormCorrigido = () => {
+  if (ocorrencia.value.tipo === 'ROA') {
+    if (form.corrigido) {
+      form.tipo_vistoria = ocorrencia.value.tipo;
+      form.intensidade_vistoria = ocorrencia.value.intensidade;
+    } else {
+      form.intensidade_vistoria = null;
+      form.tipo_vistoria = ocorrencia.value.tipo;
+    }
+  } else {
+    if (form.corrigido) {
+      form.tipo_vistoria = ocorrencia.value.tipo;
+      form.intensidade_vistoria = ocorrencia.value.intensidade;
+    } else {
+      form.tipo_vistoria = ocorrencia.value.tipo;
+    }
+  }
+}
+
+const changeAcordoPrazo = () => {
+  if (form.acordo_prazo) {
+    form.prazo_vistoria = null;
+  } else {
+    form.prazo_vistoria = 'Indeterminado';
+  }
+}
+
+const salvarVistoria = () => {
+  router.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.store_vistoria', { contrato: props.contrato.id, servico: props.servico.id }), { ocorrencia: ocorrencia.value, vistoria: form }, {
+    onSuccess: () => {
+      form.reset();
+
+      ocorrencia.value.vistorias = props.ocorrencias.find(ocorr => ocorr.id === ocorrencia.value.id).vistorias;
+    }
   });
 }
 
@@ -71,7 +117,7 @@ defineExpose({ abrirModal });
       <div class="row mb-4">
         <div class="col">
           <InputLabel value="ID vistoria" for="nome_id" />
-          <input type="text" class="form-control" v-model="form.nome_id">
+          <input type="text" class="form-control" v-model="form.nome_id" disabled>
           <InputError :message="form.errors.nome_id" />
         </div>
         <div class="col">
@@ -85,11 +131,13 @@ defineExpose({ abrirModal });
           <InputLabel value="Ocorrência corrigida" for="corrigido" />
           <div>
             <label class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" :value="true" v-model="form.corrigido">
+              <input @change="changeFormCorrigido()" class="form-check-input" type="radio" :value="true"
+                v-model="form.corrigido">
               <span class="form-check-label">Sim</span>
             </label>
             <label class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" :value="false" v-model="form.corrigido">
+              <input @change="changeFormCorrigido()" class="form-check-input" type="radio" :value="false"
+                v-model="form.corrigido">
               <span class="form-check-label">Não</span>
             </label>
           </div>
@@ -101,41 +149,47 @@ defineExpose({ abrirModal });
           <InputError :message="form.errors.data_fim" />
         </div>
       </div>
-      <div class="row mb-4">
-        <div class="col">
-          <InputLabel value="Intensidade de Ocorrência" for="intensidade_vistoria" />
-          <select class="form-control form-select" v-model="form.intensidade_vistoria">
-            <option value="Leve">Leve</option>
-            <option value="Moderada">Moderada</option>
-            <option value="Grave">Grave</option>
-          </select>
-          <InputError :message="form.errors.intensidade_vistoria" />
-        </div>
-        <div class="col">
-          <InputLabel value="Tipo de Ocorrência" for="tipo_vistoria" />
-          <input type="text" class="form-control" v-model="form.tipo_vistoria">
-          <InputError :message="form.errors.tipo_vistoria" />
-        </div>
-      </div>
-      <div v-if="!form.corrigido" class="row mb-4">
-        <div class="col align-content-center">
-          <InputLabel value="Realizado Acordo de Prazo" for="acordo_prazo" />
-          <div>
-            <label class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" :value="true" v-model="form.acordo_prazo">
-              <span class="form-check-label">Sim</span>
-            </label>
-            <label class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" :value="false" v-model="form.acordo_prazo">
-              <span class="form-check-label">Não</span>
-            </label>
+      <div>
+        <div class="row mb-4">
+          <div class="col">
+            <InputLabel value="Intensidade de Ocorrência" for="intensidade_vistoria" />
+            <select class="form-control form-select" v-model="form.intensidade_vistoria"
+              :disabled="form.corrigido === true">
+              <option value="Leve">Leve</option>
+              <option value="Moderada">Moderada</option>
+              <option value="Grave">Grave</option>
+            </select>
+            <InputError :message="form.errors.intensidade_vistoria" />
           </div>
-          <InputError :message="form.errors.acordo_prazo" />
+          <div class="col">
+            <InputLabel value="Tipo de Ocorrência" for="tipo_vistoria" />
+            <input type="text" class="form-control" v-model="form.tipo_vistoria" disabled>
+            <InputError :message="form.errors.tipo_vistoria" />
+          </div>
         </div>
-        <div class="col">
-          <InputLabel value="Prazo para Correção (dias)" for="prazo_vistoria" />
-          <input type="text" class="form-control" v-model="form.prazo_vistoria">
-          <InputError :message="form.errors.prazo_vistoria" />
+        <div v-if="form.corrigido === false && ocorrencia.tipo === 'RNC'" class="row mb-4">
+          <div class="col align-content-center">
+            <InputLabel value="Realizado Acordo de Prazo" for="acordo_prazo" />
+            <div>
+              <label class="form-check form-check-inline">
+                <input @change="changeAcordoPrazo()" class="form-check-input" type="radio" :value="true"
+                  v-model="form.acordo_prazo">
+                <span class="form-check-label">Sim</span>
+              </label>
+              <label class="form-check form-check-inline">
+                <input @change="changeAcordoPrazo()" class="form-check-input" type="radio" :value="false"
+                  v-model="form.acordo_prazo">
+                <span class="form-check-label">Não</span>
+              </label>
+            </div>
+            <InputError :message="form.errors.acordo_prazo" />
+          </div>
+          <div v-if="form.acordo_prazo !== null" class="col">
+            <InputLabel value="Prazo para Correção (dias)" for="prazo_vistoria" />
+            <input type="text" class="form-control" v-model="form.prazo_vistoria"
+              :disabled="form.acordo_prazo === false">
+            <InputError :message="form.errors.prazo_vistoria" />
+          </div>
         </div>
       </div>
       <div class="row mb-4">
@@ -147,7 +201,8 @@ defineExpose({ abrirModal });
       </div>
       <div class="row mb-4">
         <div class="col d-flex justify-content-end">
-          <NavButton type-button="success" :icon="IconDeviceFloppy" :title="form.id ? 'Alterar' : 'Salvar'" />
+          <NavButton @click="salvarVistoria()" type-button="success" :icon="IconDeviceFloppy"
+            :title="form.id ? 'Alterar' : 'Salvar'" />
         </div>
       </div>
       <div class="row col mb-4">
@@ -163,7 +218,13 @@ defineExpose({ abrirModal });
                 </tr>
               </thead>
               <tbody>
-                <tr>
+                <tr v-for="vistoria in ocorrencia.vistorias" :key="vistoria.id">
+                  <td>{{ vistoria.nome_id }}</td>
+                  <td>{{ dateTimeFormat(vistoria.data_vistoria) }}</td>
+                  <td></td>
+                  <td>
+
+                  </td>
                 </tr>
               </tbody>
             </table>

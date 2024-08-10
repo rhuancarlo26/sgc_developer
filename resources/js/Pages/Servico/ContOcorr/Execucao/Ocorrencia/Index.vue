@@ -98,7 +98,7 @@ const abrirModalFormVistoria = (item) => {
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
                   <a @click="abrirModalOcorrenciaHistorico(item)" class="dropdown-item" href="javascript:void(0)">
-                    Histórico
+                    Log de atividades
                   </a>
                   <a @click="abrirModalOcorrencia(item)" class="dropdown-item" href="javascript:void(0)">
                     Visualizar
@@ -124,7 +124,8 @@ const abrirModalFormVistoria = (item) => {
     <ModalVisualizarOcorrenciaHistorico ref="modalVisualizarOcorrenciaHistorico" />
     <ModalEnviarOcorrencia :contrato="contrato" :servico="servico" :ocorrencias="ocorrencias_em_aberto"
       ref="modalEnviarOcorrencia" />
-    <ModalFormVistoria :contrato="contrato" :servico="servico" ref="modalFormVistoria" />
+    <ModalFormVistoria :contrato="contrato" :servico="servico" :ocorrencias="ocorrencias.data"
+      ref="modalFormVistoria" />
 
   </AuthenticatedLayout>
 </template>
