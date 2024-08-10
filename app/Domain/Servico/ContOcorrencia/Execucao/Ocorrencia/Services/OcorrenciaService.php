@@ -6,11 +6,15 @@ use App\Models\Rodovia;
 use App\Models\ServicoConOcorrOcorrenciSupervisaoExecOcorrencia;
 use App\Models\ServicoConOcorrSupervicaoExecOcorrenciaRegistro;
 use App\Models\ServicoConOcorrSupervisaoExecOcorrenciaHistorico;
+use App\Models\ServicoConOcorrSupervisaoExecOcorrenciaVistoria;
 use App\Models\ServicoContOcorrSupervisaoConfigLote;
 use App\Models\Servicos;
+use App\Models\Uf;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Carbon\Carbon;
+use FontLib\Table\Type\post;
 use Illuminate\Support\Facades\Storage;
 
 class OcorrenciaService extends BaseModelService
@@ -20,17 +24,18 @@ class OcorrenciaService extends BaseModelService
   protected string $modelClass = ServicoConOcorrOcorrenciSupervisaoExecOcorrencia::class;
   protected string $modelClassRegistro = ServicoConOcorrSupervicaoExecOcorrenciaRegistro::class;
   protected string $modelClassHistorico = ServicoConOcorrSupervisaoExecOcorrenciaHistorico::class;
+  protected string $modelClassVistoria = ServicoConOcorrSupervisaoExecOcorrenciaVistoria::class;
 
   public function index(Servicos $servico, array $searchParams): array
   {
     return [
       'ocorrencias' => $this->searchAllColumns(...$searchParams)
-        ->with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
+        ->with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento', 'vistorias'])
         ->where('id_servico', $servico->id)
         ->paginate()
         ->appends($searchParams),
       'ocorrencias_em_aberto' => $this->modelClass::with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
-        ->where('id_servico', $servico->id)->where('envio_empresa', 'Não')->get()
+        ->where('id_servico', $servico->id)->where('rnc_direto', 'RNC')->get()
     ];
   }
 
@@ -64,6 +69,11 @@ class OcorrenciaService extends BaseModelService
       'nome' => $nome,
       'caminho_arquivo' => str_replace("public\\", "", $caminho)
     ]);
+  }
+
+  public function storeVistoria(array $post)
+  {
+    return $this->dataManagement->create(entity: $this->modelClassVistoria, infos: $post['vistoria']);
   }
 
   public function enviarOcorrencia(array $post)

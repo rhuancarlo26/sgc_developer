@@ -33,7 +33,8 @@ class UpdateController extends Controller
       'id_servico' => $servico->id,
       'id_rodovia' => $request->rodovia['id'],
       'id_uf' => $request->rodovia['uf_id'],
-      'id_lote' => $request->lote['id']
+      'id_lote' => $request->lote['id'],
+      'dias_restantes' => $request->prazo
     ];
 
     $response = $this->ocorrenciaService->update($post);

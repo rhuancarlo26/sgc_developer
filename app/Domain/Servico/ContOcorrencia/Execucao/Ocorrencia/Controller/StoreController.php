@@ -18,9 +18,7 @@ use Inertia\Response;
 
 class StoreController extends Controller
 {
-  public function __construct(private readonly OcorrenciaService $ocorrenciaService)
-  {
-  }
+  public function __construct(private readonly OcorrenciaService $ocorrenciaService) {}
 
   public function index(Contrato $contrato, Servicos $servico, StoreRequest $request): RedirectResponse
   {
@@ -35,6 +33,7 @@ class StoreController extends Controller
       'id_rodovia' => $request->rodovia['id'],
       'id_uf' => $request->rodovia['uf_id'],
       'id_lote' => $request->lote['id'],
+      'dias_restantes' => $request->prazo,
       'status' => 'Em aberto',
       'envio_empresa' => 'Não'
     ];
