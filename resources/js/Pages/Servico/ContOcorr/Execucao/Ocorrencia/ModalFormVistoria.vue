@@ -2,25 +2,31 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../../Navbar.vue";
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
+import {Head, Link, router, useForm} from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
-import { ref, watch } from "vue";
-import { IconEye } from "@tabler/icons-vue";
-import { IconPlus } from "@tabler/icons-vue";
-import { IconPencil } from "@tabler/icons-vue";
-import { IconTrash } from "@tabler/icons-vue";
+import {ref, watch} from "vue";
+import {IconEye} from "@tabler/icons-vue";
+import {IconPlus} from "@tabler/icons-vue";
+import {IconPencil} from "@tabler/icons-vue";
+import {IconTrash} from "@tabler/icons-vue";
 import NavLink from "@/Components/NavLink.vue";
-import { IconMap } from "@tabler/icons-vue";
-import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+import {IconMap} from "@tabler/icons-vue";
+import {dateTimeFormat} from "@/Utils/DateTimeUtils";
 import Modal from "@/Components/Modal.vue";
-import { usePage } from "@inertiajs/vue3";
-import { IconDeviceFloppy } from "@tabler/icons-vue";
+import {usePage} from "@inertiajs/vue3";
+import {IconDeviceFloppy} from "@tabler/icons-vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
-import { useToast } from 'vue-toastification';
+import {useToast} from 'vue-toastification';
+import TabObservacao from "@/Pages/Servico/ContOcorr/Execucao/Ocorrencia/TabObservacao.vue";
+import TabLocal from "@/Pages/Servico/ContOcorr/Execucao/Ocorrencia/TabLocal.vue";
+import TabRegistro from "@/Pages/Servico/ContOcorr/Execucao/Ocorrencia/TabRegistro.vue";
+import TabDescricao from "@/Pages/Servico/ContOcorr/Execucao/Ocorrencia/TabDescricao.vue";
+import TabNorma from "@/Pages/Servico/ContOcorr/Execucao/Ocorrencia/TabNorma.vue";
+import TabAcao from "@/Pages/Servico/ContOcorr/Execucao/Ocorrencia/TabAcao.vue";
 
 const toast = useToast();
 
@@ -28,211 +34,138 @@ const modalFormVistoria = ref();
 const ocorrencia = ref({});
 
 const props = defineProps({
-  contrato: { type: Object },
-  servico: { type: Object },
-  ocorrencias: { type: Array }
+    contrato: {type: Object},
+    servico: {type: Object},
+    ocorrencias: {type: Array}
 });
 
 const form = useForm({
-  id_ocorrencia: null,
-  nome_id: null,
-  data_ocorrencia: null,
-  nome_id: null,
-  data_vistoria: null,
-  corrigido: null,
-  data_fim: null,
-  intensidade_vistoria: null,
-  tipo_vistoria: null,
-  acordo_prazo: null,
-  prazo_vistoria: null,
-  obs_vistoria: null
+    id: null,
+    id_ocorrencia: null,
+    data_ocorrencia: null,
+    nome_id: null,
+    data_vistoria: null,
+    corrigido: null,
+    data_fim: null,
+    intensidade_vistoria: null,
+    tipo_vistoria: null,
+    acordo_prazo: null,
+    prazo_vistoria: null,
+    obs_vistoria: null
 });
 
 const abrirModal = (item) => {
-  ocorrencia.value = {};
+    ocorrencia.value = {};
 
-  if (item) {
-    ocorrencia.value = item;
+    if (item) {
+        ocorrencia.value = item;
 
-    form.id_ocorrencia = ocorrencia.value.id
-  }
-  modalFormVistoria.value.getBsModal().show();
+        form.id_ocorrencia = ocorrencia.value.id
+    }
+    modalFormVistoria.value.getBsModal().show();
 }
 
 const changeFormCorrigido = () => {
-  if (ocorrencia.value.tipo === 'ROA') {
-    if (form.corrigido) {
-      form.tipo_vistoria = ocorrencia.value.tipo;
-      form.intensidade_vistoria = ocorrencia.value.intensidade;
+    if (ocorrencia.value.tipo === 'ROA') {
+        if (form.corrigido === 'Sim') {
+            form.tipo_vistoria = ocorrencia.value.tipo;
+            form.intensidade_vistoria = ocorrencia.value.intensidade;
+        } else {
+            form.intensidade_vistoria = null;
+            form.tipo_vistoria = ocorrencia.value.tipo;
+        }
     } else {
-      form.intensidade_vistoria = null;
-      form.tipo_vistoria = ocorrencia.value.tipo;
+        if (form.corrigido === 'Sim') {
+            form.tipo_vistoria = ocorrencia.value.tipo;
+            form.intensidade_vistoria = ocorrencia.value.intensidade;
+        } else {
+            form.tipo_vistoria = ocorrencia.value.tipo;
+        }
     }
-  } else {
-    if (form.corrigido) {
-      form.tipo_vistoria = ocorrencia.value.tipo;
-      form.intensidade_vistoria = ocorrencia.value.intensidade;
-    } else {
-      form.tipo_vistoria = ocorrencia.value.tipo;
-    }
-  }
 }
 
 const changeAcordoPrazo = () => {
-  if (form.acordo_prazo) {
-    form.prazo_vistoria = null;
-  } else {
-    form.prazo_vistoria = 'Indeterminado';
-  }
+    if (form.acordo_prazo === 'Sim') {
+        form.prazo_vistoria = null;
+    } else {
+        form.prazo_vistoria = 'Indeterminado';
+    }
 }
 
 const salvarVistoria = () => {
-  router.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.store_vistoria', { contrato: props.contrato.id, servico: props.servico.id }), { ocorrencia: ocorrencia.value, vistoria: form }, {
-    onSuccess: () => {
-      form.reset();
+    const url = form.id ? 'update_vistoria' : 'store_vistoria';
 
-      ocorrencia.value.vistorias = props.ocorrencias.find(ocorr => ocorr.id === ocorrencia.value.id).vistorias;
-    }
-  });
+    router.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.' + url, {
+        contrato: props.contrato.id,
+        servico: props.servico.id
+    }), {ocorrencia: ocorrencia.value, vistoria: form}, {
+        onSuccess: () => {
+            form.reset();
+
+            ocorrencia.value.vistorias = props.ocorrencias.find(ocorr => ocorr.id === ocorrencia.value.id).vistorias;
+        }
+    });
 }
 
-defineExpose({ abrirModal });
+const excluirVistoria = (vistoria_id) => {
+    router.delete(route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.delete_vistoria', {
+        contrato: props.contrato.id,
+        servico: props.servico.id,
+        vistoria: vistoria_id
+    }), {
+        onSuccess: () => {
+            ocorrencia.value.vistorias = props.ocorrencias.find(ocorr => ocorr.id === ocorrencia.value.id).vistorias;
+        }
+    });
+}
+
+defineExpose({abrirModal});
 </script>
 
 <template>
-  <Modal ref="modalFormVistoria" title="Cadastro de vistorias" modal-dialog-class="modal-xl">
-    <template #body>
-      <div class="row mb-4">
-        <div class="col">
-          <InputLabel value="ID ocorrência" for="nome_id" />
-          <input type="text" class="form-control" :value="ocorrencia.nome_id" disabled>
-          <InputError :message="form.errors.nome_id" />
-        </div>
-        <div class="col">
-          <InputLabel value="Data da ocorrência" for="data_ocorrencia" />
-          <input type="date" class="form-control" :value="ocorrencia.data_ocorrencia" disabled>
-          <InputError :message="form.errors.data_ocorrencia" />
-        </div>
-      </div>
-      <div class="row mb-4">
-        <div class="col">
-          <InputLabel value="ID vistoria" for="nome_id" />
-          <input type="text" class="form-control" v-model="form.nome_id" disabled>
-          <InputError :message="form.errors.nome_id" />
-        </div>
-        <div class="col">
-          <InputLabel value="Data da vistoria" for="data_vistoria" />
-          <input type="date" class="form-control" v-model="form.data_vistoria">
-          <InputError :message="form.errors.data_vistoria" />
-        </div>
-      </div>
-      <div class="row mb-4">
-        <div class="col align-content-center">
-          <InputLabel value="Ocorrência corrigida" for="corrigido" />
-          <div>
-            <label class="form-check form-check-inline">
-              <input @change="changeFormCorrigido()" class="form-check-input" type="radio" :value="true"
-                v-model="form.corrigido">
-              <span class="form-check-label">Sim</span>
-            </label>
-            <label class="form-check form-check-inline">
-              <input @change="changeFormCorrigido()" class="form-check-input" type="radio" :value="false"
-                v-model="form.corrigido">
-              <span class="form-check-label">Não</span>
-            </label>
-          </div>
-          <InputError :message="form.errors.corrigido" />
-        </div>
-        <div v-if="form.corrigido" class="col">
-          <InputLabel value="Data fim" for="data_fim" />
-          <input type="date" class="form-control" v-model="form.data_fim">
-          <InputError :message="form.errors.data_fim" />
-        </div>
-      </div>
-      <div>
-        <div class="row mb-4">
-          <div class="col">
-            <InputLabel value="Intensidade de Ocorrência" for="intensidade_vistoria" />
-            <select class="form-control form-select" v-model="form.intensidade_vistoria"
-              :disabled="form.corrigido === true">
-              <option value="Leve">Leve</option>
-              <option value="Moderada">Moderada</option>
-              <option value="Grave">Grave</option>
-            </select>
-            <InputError :message="form.errors.intensidade_vistoria" />
-          </div>
-          <div class="col">
-            <InputLabel value="Tipo de Ocorrência" for="tipo_vistoria" />
-            <input type="text" class="form-control" v-model="form.tipo_vistoria" disabled>
-            <InputError :message="form.errors.tipo_vistoria" />
-          </div>
-        </div>
-        <div v-if="form.corrigido === false && ocorrencia.tipo === 'RNC'" class="row mb-4">
-          <div class="col align-content-center">
-            <InputLabel value="Realizado Acordo de Prazo" for="acordo_prazo" />
-            <div>
-              <label class="form-check form-check-inline">
-                <input @change="changeAcordoPrazo()" class="form-check-input" type="radio" :value="true"
-                  v-model="form.acordo_prazo">
-                <span class="form-check-label">Sim</span>
-              </label>
-              <label class="form-check form-check-inline">
-                <input @change="changeAcordoPrazo()" class="form-check-input" type="radio" :value="false"
-                  v-model="form.acordo_prazo">
-                <span class="form-check-label">Não</span>
-              </label>
-            </div>
-            <InputError :message="form.errors.acordo_prazo" />
-          </div>
-          <div v-if="form.acordo_prazo !== null" class="col">
-            <InputLabel value="Prazo para Correção (dias)" for="prazo_vistoria" />
-            <input type="text" class="form-control" v-model="form.prazo_vistoria"
-              :disabled="form.acordo_prazo === false">
-            <InputError :message="form.errors.prazo_vistoria" />
-          </div>
-        </div>
-      </div>
-      <div class="row mb-4">
-        <div class="col">
-          <InputLabel value="Observações da Vistoria" for="obs_vistoria" />
-          <textarea rows="6" class="form-control" v-model="form.obs_vistoria"></textarea>
-          <InputError :message="form.errors.obs_vistoria" />
-        </div>
-      </div>
-      <div class="row mb-4">
-        <div class="col d-flex justify-content-end">
-          <NavButton @click="salvarVistoria()" type-button="success" :icon="IconDeviceFloppy"
-            :title="form.id ? 'Alterar' : 'Salvar'" />
-        </div>
-      </div>
-      <div class="row col mb-4">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table card-table table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th>ID vistoria</th>
-                  <th>Data da vistoria</th>
-                  <th>Adicionar arquivos</th>
-                  <th>Ação</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="vistoria in ocorrencia.vistorias" :key="vistoria.id">
-                  <td>{{ vistoria.nome_id }}</td>
-                  <td>{{ dateTimeFormat(vistoria.data_vistoria) }}</td>
-                  <td></td>
-                  <td>
+    <Modal ref="modalFormVistoria" title="Cadastro de vistorias" modal-dialog-class="modal-xl">
+        <template #body>
 
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </template>
-    <template #footer>
-    </template>
-  </Modal>
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a href="#vistoria" class="nav-link active" data-bs-toggle="tab" aria-selected="true"
+                           role="tab">Vistorias</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a href="#arquivo" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+                           tabindex="-1">Arquivos</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a href="#visualizar" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab"
+                           tabindex="-1">Visualizar</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="tab-pane active show" id="vistoria" role="tabpanel">
+
+                    </div>
+                    <div class="tab-pane" id="arquivo" role="tabpanel">
+
+                    </div>
+                    <div class="tab-pane" id="visualizar" role="tabpanel">
+
+                    </div>
+                    <div class="tab-pane" id="norma" role="tabpanel">
+
+                    </div>
+                    <div class="tab-pane" id="registro" role="tabpanel">
+
+                    </div>
+                    <div class="tab-pane" id="observacao" role="tabpanel">
+
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+        </template>
+    </Modal>
 </template>
