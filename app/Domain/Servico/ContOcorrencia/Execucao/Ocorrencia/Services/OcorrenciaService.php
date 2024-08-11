@@ -19,108 +19,123 @@ use Illuminate\Support\Facades\Storage;
 
 class OcorrenciaService extends BaseModelService
 {
-  use Searchable, Deletable;
+    use Searchable, Deletable;
 
-  protected string $modelClass = ServicoConOcorrOcorrenciSupervisaoExecOcorrencia::class;
-  protected string $modelClassRegistro = ServicoConOcorrSupervicaoExecOcorrenciaRegistro::class;
-  protected string $modelClassHistorico = ServicoConOcorrSupervisaoExecOcorrenciaHistorico::class;
-  protected string $modelClassVistoria = ServicoConOcorrSupervisaoExecOcorrenciaVistoria::class;
+    protected string $modelClass = ServicoConOcorrOcorrenciSupervisaoExecOcorrencia::class;
+    protected string $modelClassRegistro = ServicoConOcorrSupervicaoExecOcorrenciaRegistro::class;
+    protected string $modelClassHistorico = ServicoConOcorrSupervisaoExecOcorrenciaHistorico::class;
+    protected string $modelClassVistoria = ServicoConOcorrSupervisaoExecOcorrenciaVistoria::class;
 
-  public function index(Servicos $servico, array $searchParams): array
-  {
-    return [
-      'ocorrencias' => $this->searchAllColumns(...$searchParams)
-        ->with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento', 'vistorias'])
-        ->where('id_servico', $servico->id)
-        ->paginate()
-        ->appends($searchParams),
-      'ocorrencias_em_aberto' => $this->modelClass::with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
-        ->where('id_servico', $servico->id)->where('rnc_direto', 'RNC')->get()
-    ];
-  }
-
-  public function create(array $post): array
-  {
-    return [
-      'lotes' => ServicoContOcorrSupervisaoConfigLote::where('id_servico', $post['servico_id'])->get(),
-      'rodovias' => Rodovia::with(['uf'])->get()
-    ];
-  }
-
-  public function store(array $post): array
-  {
-    $response = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
-
-    $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
-      'id_ocorrencia' => $response['model']['id'],
-      'id_ocorrencia_levantamento' => 1
-    ]);
-
-    return $response;
-  }
-
-  public function storeRegistro(array $post): array
-  {
-    $nome = $post['arquivo']->getClientOriginalName();
-    $caminho = $post['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Registro' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
-
-    return $this->dataManagement->create(entity: $this->modelClassRegistro, infos: [
-      'id_ocorrencia' => $post['id_ocorrencia'],
-      'nome' => $nome,
-      'caminho_arquivo' => str_replace("public\\", "", $caminho)
-    ]);
-  }
-
-  public function storeVistoria(array $post)
-  {
-    return $this->dataManagement->create(entity: $this->modelClassVistoria, infos: $post['vistoria']);
-  }
-
-  public function enviarOcorrencia(array $post)
-  {
-    foreach ($post['ocorrencias'] as $item) {
-      if ($item['tipo'] == 'RNC') {
-        $data['aprovado_rnc'] = 'Em análise';
-        $data['envio_empresa'] = 'Não';
-        $data['envio_fiscal'] = 'Sim';
-        $tipo = 5;
-      } else {
-        $data['envio_empresa'] = 'Sim';
-        $tipo = 4;
-      }
-
-      $response = $this->dataManagement->update(entity: $this->modelClass, infos: $data, id: $item['id']);
-
-      $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
-        'id_ocorrencia' => $item['id'],
-        'id_ocorrencia_levantamento' => $tipo
-      ]);
+    public function index(Servicos $servico, array $searchParams): array
+    {
+        return [
+            'ocorrencias' => $this->searchAllColumns(...$searchParams)
+                ->with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento', 'vistorias'])
+                ->where('id_servico', $servico->id)
+                ->paginate()
+                ->appends($searchParams),
+            'ocorrencias_em_aberto' => $this->modelClass::with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
+                ->where('id_servico', $servico->id)->where('rnc_direto', 'RNC')->get()
+        ];
     }
 
-    return $response;
-  }
+    public function create(array $post): array
+    {
+        return [
+            'lotes' => ServicoContOcorrSupervisaoConfigLote::where('id_servico', $post['servico_id'])->get(),
+            'rodovias' => Rodovia::with(['uf'])->get()
+        ];
+    }
 
-  public function update(array $post): array
-  {
-    $response = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
+    public function createVistoria(array $post): array
+    {
+        return [];
+    }
 
-    $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
-      'id_ocorrencia' => $post['id'],
-      'id_ocorrencia_levantamento' => 2
-    ]);
+    public function store(array $post): array
+    {
+        $response = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
 
-    return $response;
-  }
+        $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
+            'id_ocorrencia' => $response['model']['id'],
+            'id_ocorrencia_levantamento' => 1
+        ]);
 
-  public function destroy(array $post): array
-  {
-    return $this->dataManagement->delete(entity: $this->modelClass, id: $post['id']);
-  }
+        return $response;
+    }
 
-  public function destroyRegistro($registro): array
-  {
-    Storage::delete($registro->caminho_arquivo);
+    public function storeRegistro(array $post): array
+    {
+        $nome = $post['arquivo']->getClientOriginalName();
+        $caminho = $post['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Registro' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
 
-    return $this->dataManagement->delete(entity: $this->modelClassRegistro, id: $registro->id);
-  }
+        return $this->dataManagement->create(entity: $this->modelClassRegistro, infos: [
+            'id_ocorrencia' => $post['id_ocorrencia'],
+            'nome' => $nome,
+            'caminho_arquivo' => str_replace("public\\", "", $caminho)
+        ]);
+    }
+
+    public function storeVistoria(array $post)
+    {
+        return $this->dataManagement->create(entity: $this->modelClassVistoria, infos: $post['vistoria']);
+    }
+
+    public function enviarOcorrencia(array $post)
+    {
+        foreach ($post['ocorrencias'] as $item) {
+            if ($item['tipo'] == 'RNC') {
+                $data['aprovado_rnc'] = 'Em análise';
+                $data['envio_empresa'] = 'Não';
+                $data['envio_fiscal'] = 'Sim';
+                $tipo = 5;
+            } else {
+                $data['envio_empresa'] = 'Sim';
+                $tipo = 4;
+            }
+
+            $response = $this->dataManagement->update(entity: $this->modelClass, infos: $data, id: $item['id']);
+
+            $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
+                'id_ocorrencia' => $item['id'],
+                'id_ocorrencia_levantamento' => $tipo
+            ]);
+        }
+
+        return $response;
+    }
+
+    public function update(array $post): array
+    {
+        $response = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
+
+        $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
+            'id_ocorrencia' => $post['id'],
+            'id_ocorrencia_levantamento' => 2
+        ]);
+
+        return $response;
+    }
+
+    public function updateVistoria(array $post): array
+    {
+        return $this->dataManagement->update(entity: $this->modelClassVistoria, infos: $post['vistoria'], id: $post['vistoria']['id']);
+    }
+
+    public function destroy(array $post): array
+    {
+        return $this->dataManagement->delete(entity: $this->modelClass, id: $post['id']);
+    }
+
+    public function destroyRegistro($registro): array
+    {
+        Storage::delete($registro->caminho_arquivo);
+
+        return $this->dataManagement->delete(entity: $this->modelClassRegistro, id: $registro->id);
+    }
+
+    public function destroyVistoria(array $post): array
+    {
+        return $this->dataManagement->delete(entity: $this->modelClassVistoria, id: $post['id']);
+    }
 }
