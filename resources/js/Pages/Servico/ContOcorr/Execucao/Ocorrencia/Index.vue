@@ -19,12 +19,10 @@ import {dateTimeFormat} from "@/Utils/DateTimeUtils";
 import ModalVisualizarOcorrencia from "./ModalVisualizarOcorrencia.vue";
 import ModalVisualizarOcorrenciaHistorico from "./ModalVisualizarOcorrenciaHistorico.vue";
 import ModalEnviarOcorrencia from "./ModalEnviarOcorrencia.vue";
-import ModalFormVistoria from "./ModalFormVistoria.vue";
 
 const modalVisualizarOcorrencia = ref({});
 const modalVisualizarOcorrenciaHistorico = ref({});
 const modalEnviarOcorrencia = ref({});
-const modalFormVistoria = ref({});
 
 const props = defineProps({
     contrato: {type: Object},
@@ -41,9 +39,6 @@ const abrirModalOcorrenciaHistorico = (item) => {
 }
 const abrirModalEnviarOcorrencia = () => {
     modalEnviarOcorrencia.value.abrirModal()
-}
-const abrirModalFormVistoria = (item) => {
-    modalFormVistoria.value.abrirModal(item)
 }
 
 </script>
@@ -121,10 +116,6 @@ const abrirModalFormVistoria = (item) => {
                                         :param="{ contrato: contrato.id, servico: servico.id, ocorrencia: item.id }"
                                         title="Vistoria"
                                         class="dropdown-item"/>
-                                    <a @click="abrirModalFormVistoria(item)" class="dropdown-item"
-                                       href="javascript:void(0)">
-                                        Vistoria
-                                    </a>
                                 </div>
                             </td>
                         </tr>
