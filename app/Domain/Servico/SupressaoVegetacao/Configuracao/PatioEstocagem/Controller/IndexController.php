@@ -2,6 +2,7 @@
 
 namespace App\Domain\Servico\SupressaoVegetacao\Configuracao\PatioEstocagem\Controller;
 
+use App\Domain\Servico\SupressaoVegetacao\app\Utils\ConfigucacaoParecer;
 use App\Domain\Servico\SupressaoVegetacao\Configuracao\PatioEstocagem\Services\PatioEstocagemService;
 use App\Domain\Servico\SupressaoVegetacao\Configuracao\PatioEstocagem\Services\TipoPatioService;
 use App\Domain\Servico\SupressaoVegetacao\Configuracao\VincularASV\Services\VincularASVService;
@@ -19,6 +20,7 @@ class IndexController extends Controller
         private readonly TipoPatioService $tipoPatioService,
         private readonly VincularASVService $vincularASVService,
         private readonly PatioEstocagemService $patioEstocagemService,
+        private readonly ConfigucacaoParecer $configucacaoParecer
     )
     {
     }
@@ -33,6 +35,7 @@ class IndexController extends Controller
             'licencas' => $this->vincularASVService->search('servico_id', $servico->id)
                 ->with(['licenca.tipo'])
                 ->get(),
+            ...$this->configucacaoParecer->get($servico->id)
         ]);
     }
 

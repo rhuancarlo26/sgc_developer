@@ -34,17 +34,18 @@ class FiscalService extends BaseModelService
         return ['servicos' => $query->paginate()->appends($searchParams)];
     }
 
-    public function listagemConfiguracaoPMQA($contrato, $searchParams)
+    public function listagemConfiguracao($contrato, $searchParams, $id_servico): array
     {
         $query = $this->search(...$searchParams)
             ->with([
                 'tema',
                 'tipo',
-                'parecerPMQA',
-                'parecer'
+                'parecer',
+                'parecerPmqa',
+                'parecerSupressaoVegetacao',
             ])
             ->where('id_contrato', $contrato->id)
-            ->where('servico', 1)
+            ->where('servico', $id_servico)
             ->where('deleted_at', null)
             ->whereIn('status_aprovacao', [2, 3, 4]);
 

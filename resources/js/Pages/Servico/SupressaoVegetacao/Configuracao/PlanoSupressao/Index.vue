@@ -16,6 +16,7 @@ const props = defineProps({
     data: {type: Object},
     contrato: {type: Object},
     servico: {type: Object},
+    aprovacao: {type: Object}
 });
 
 const modalIncluirPlanoRef = ref();
@@ -26,6 +27,13 @@ const abrirModalIncluirPlano = () => {
 const modalMapaRef = ref();
 const abrirModalMapa = (geojson) => {
     modalMapaRef.value.abrirModal(geojson);
+}
+
+const ap = (ap) => {
+    if (!ap?.fk_status) {
+        return true;
+    }
+    return ap?.fk_status === 2;
 }
 
 </script>
@@ -39,7 +47,7 @@ const abrirModalMapa = (geojson) => {
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-                    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+                    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
                     { route: '#', label: contrato.contratada }
                 ]"/>
                 <Link class="btn btn-dark"
@@ -53,7 +61,7 @@ const abrirModalMapa = (geojson) => {
             <template #body>
 
                 <div class="ms-auto mb-4">
-                    <NavButton @click="abrirModalIncluirPlano"
+                    <NavButton @click="abrirModalIncluirPlano" v-if="ap(aprovacao)"
                        route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.importar"
                        :param="{ contrato: props.contrato.id, servico: props.servico.id }" type-button="success"
                        title="Incluir plano" />
@@ -84,7 +92,7 @@ const abrirModalMapa = (geojson) => {
                                 <div class="d-flex justify-content-center">
                                     <NavButton v-if="item.arquivo === null" type-button="primary" class="btn-icon" :icon="IconFile" disabled />
                                     <a v-else target="_blank" class="btn btn-primary btn-icon me-1" :href="item.arquivo?.caminho"><IconFile /></a>
-                                    <LinkConfirmation v-slot="confirmation" :options="{ text: 'Você deseja remover o plano de supressão?' }">
+                                    <LinkConfirmation v-if="ap(aprovacao)" v-slot="confirmation" :options="{ text: 'Você deseja remover o plano de supressão?' }">
                                         <Link :onBefore="confirmation.show"
                                               :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.plano-supressao.destroy', { plano: item.id })"
                                               as="button" method="delete" type="button" class="btn btn-icon btn-danger">

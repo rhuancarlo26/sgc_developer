@@ -46,8 +46,8 @@ const props = defineProps({
                     active-on-route-prefix="contratos.contratada.servicos*" title="Serviços"
                     :icon="IconLayoutDashboard" />
 
-                  <NavLink route-name="contratos.contratada.dados_gerais.index" :param="contrato.id" title="Cronograma"
-                    :icon="IconLayoutDashboard" />
+<!--                  <NavLink route-name="contratos.contratada.dados_gerais.index" :param="contrato.id" title="Cronograma"-->
+<!--                    :icon="IconLayoutDashboard" />-->
                 </ul>
               </div>
             </div>

@@ -70,7 +70,7 @@
                                 <IconDots/>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <NavLink route-name="contratos.contratada.index" :param="item.id" title="Entrar"
+                                <NavLink route-name="contratos.contratada.dados_gerais.index" :param="item.id" title="Entrar"
                                          class="dropdown-item"/>
                                 <a @click="abrirVisualizarContrato(item)" class="dropdown-item"
                                    href="javascript:void(0)">

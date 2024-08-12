@@ -3,6 +3,7 @@
 use App\Domain\Fiscal\app\Controllers\IndexFiscalController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesPMQAController;
 use App\Domain\Fiscal\app\Controllers\ListagemServicosController;
+use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesSupressaoVegetacaoController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('fiscal')->group(function () {
@@ -11,6 +12,7 @@ Route::prefix('fiscal')->group(function () {
     Route::prefix('/')->group(function () {
         Route::get('{contrato}/servicos', [ListagemServicosController::class, 'index'])->name('fiscal.dados.servicos.index');
         Route::get('{contrato}/configuracoes/pqma', [ListagemConfiguracoesPMQAController::class, 'index'])->name('fiscal.configuracoes.pmqa.index');
+        Route::get('{contrato}/configuracoes/supressao', [ListagemConfiguracoesSupressaoVegetacaoController::class, 'index'])->name('fiscal.configuracoes.supressao.index');
     });
 
     require __DIR__ . '/../../Parecer/Routes/ParecerRouter.php';

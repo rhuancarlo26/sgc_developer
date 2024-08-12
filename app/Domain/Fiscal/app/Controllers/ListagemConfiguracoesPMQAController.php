@@ -19,7 +19,7 @@ class ListagemConfiguracoesPMQAController extends Controller
     {
         $searchParams = $request->all('searchColumn', 'searchValue');
 
-        $response = $this->servicoService->listagemConfiguracaoPMQA($contrato, $searchParams);
+        $response = $this->servicoService->listagemConfiguracao($contrato, $searchParams, 1);
 
         return Inertia::render('Fiscal/Configuracao/TabConfiguracoesPMQA', [
             'contrato' => $contrato,

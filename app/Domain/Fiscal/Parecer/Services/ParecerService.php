@@ -4,6 +4,7 @@ namespace App\Domain\Fiscal\Parecer\Services;
 
 use App\Models\ServicoParecer;
 use App\Models\ServicoParecerPMQAConfiguracao;
+use App\Models\ServicoParecerSupressaoConfiguracao;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
@@ -29,6 +30,15 @@ class ParecerService extends BaseModelService
     public function emiteParecerConfigPMQA($post): array
     {
         $response = $this->dataManagement->update(entity: ServicoParecerPMQAConfiguracao::class, infos: $post, id: $post['id']);
+
+        return [
+            'request' => $response['request']
+        ];
+    }
+
+    public function emiteParecerConfigSupressao($post): array
+    {
+        $response = $this->dataManagement->update(entity: ServicoParecerSupressaoConfiguracao::class, infos: $post, id: $post['id']);
 
         return [
             'request' => $response['request']

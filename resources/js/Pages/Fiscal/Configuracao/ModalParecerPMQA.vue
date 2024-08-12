@@ -77,9 +77,9 @@ const parecer_pmqa = ref(null);
 const abrirModal = (item) => {
     console.log(item)
     servico.value = item;
-    parecer_pmqa.value = item.parecer_p_m_q_a;
-    form.id = item.parecer_p_m_q_a.id
-    form.parecer = item.parecer_p_m_q_a.parecer
+    parecer_pmqa.value = item.parecer_pmqa;
+    form.id = item.parecer_pmqa.id
+    form.parecer = item.parecer_pmqa.parecer
     form.id_contrato = item.id_contrato
     modalParecer.value.getBsModal().show();
 }

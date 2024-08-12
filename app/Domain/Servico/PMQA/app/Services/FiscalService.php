@@ -3,7 +3,6 @@
 namespace App\Domain\Servico\PMQA\app\Services;
 
 use App\Models\ServicoParecerPMQAConfiguracao;
-use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -14,7 +13,7 @@ class FiscalService extends BaseModelService
 
     protected string $modelClass = ServicoParecerPMQAConfiguracao::class;
 
-    public function enviaFiscal(array $post, int $id_servico)
+    public function enviaFiscal(array $post, int $id_servico): array
     {
 
         $post['fk_servico'] = $id_servico;

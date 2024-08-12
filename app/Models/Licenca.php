@@ -30,10 +30,10 @@ class Licenca extends Model
         return $this->hasMany(LicencaSegmento::class, 'licenca_id');
     }
 
-    //    public function documento(): HasOne
-    //    {
-    //        return $this->hasOne(LicencaDocumento::class, 'licenca_id');
-    //    }
+    public function documento(): HasOne
+    {
+        return $this->hasOne(LicencaDocumento::class, 'licenca_id');
+    }
 
     public function shapefile(): HasOne
     {
