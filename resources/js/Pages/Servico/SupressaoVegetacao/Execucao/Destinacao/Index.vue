@@ -18,12 +18,6 @@ const props = defineProps({
     data: {type: Object},
     contrato: {type: Object},
     servico: {type: Object},
-
-    tipos: {type: Array},
-    patios: {type: Array},
-    produtos: {type: Array},
-    licencas: {type: Array},
-    areasSuprimidas: {type: Array},
 });
 
 const modalCadastroRef = ref();
@@ -114,15 +108,8 @@ const urlQueryParams = computed(() => {
         <ModalVisualizar ref="modalVisualizarRef" />
         <ModalCadastro
             ref="modalCadastroRef"
-
             :pilhas="pilhas"
-
-            :patios="patios"
-            :tipos="tipos"
             :servico="servico"
-            :produtos="produtos"
-            :licencas="licencas"
-            :areasSuprimidas="areasSuprimidas"
         />
     </AuthenticatedLayout>
 

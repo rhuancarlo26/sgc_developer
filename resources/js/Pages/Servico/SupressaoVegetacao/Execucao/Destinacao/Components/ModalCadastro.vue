@@ -10,13 +10,7 @@ import Table from "@/Components/Table.vue";
 
 const props = defineProps({
     pilhas: {type: Array},
-
-    patios: {type: Array},
     servico: {type: Object},
-    tipos: {type: Array},
-    licencas: {type: Array},
-    produtos: {type: Array},
-    areasSuprimidas: {type: Array},
 })
 
 const form = useForm({
@@ -77,11 +71,11 @@ const save = () => {
 }
 
 const arquivos = computed(() => {
-    return (form.arquivos).map((foto, index) =>  ({
-        id: foto?.id ?? null,
+    return (form.arquivos).map((arquivo, index) =>  ({
+        id: arquivo?.id ?? null,
         index,
-        path: foto?.caminho ?? URL.createObjectURL(foto),
-        name: foto?.nome_arquivo ?? foto.name,
+        path: arquivo?.caminho ?? URL.createObjectURL(arquivo),
+        name: arquivo?.nome_arquivo ?? foto.name,
     }));
 })
 
