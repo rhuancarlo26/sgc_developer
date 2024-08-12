@@ -6,9 +6,9 @@ use App\Domain\Servico\PMQA\app\Controller\AprovacaoConfigController;
 
 Route::prefix('/pmqa')->group(function () {
     Route::prefix('/configuracao')->group(function () {
-        Route::post('{contrato}/{servico}/envia-fiscal', [EnviaFiscalController::class, 'index'])
-            ->name('contratos.contratada.servicos.pmqa.configuracao.envia-fiscal');
-        Route::get('{servico}/aprovacao-config', [AprovacaoConfigController::class, 'index'])->name('aprovacao-config.get');
+        Route::post('{contrato}/{servico}/envia-fiscal-pmqa', [EnviaFiscalController::class, 'index'])
+            ->name('contratos.contratada.servicos.pmqa.configuracao.envia-fiscal-pmqa');
+        Route::get('{servico}/aprovacao-config-pmqa', [AprovacaoConfigController::class, 'index'])->name('aprovacao-config-pmqa.get');
         require __DIR__ . '/../../Configuracao/Ponto/Routes/PontoRoutes.php';
         require __DIR__ . '/../../Configuracao/Parametro/Routes/ParametroRoutes.php';
         require __DIR__ . '/../../Configuracao/VinculacaoPonto/Routes/VinculacaoPontoRoutes.php';

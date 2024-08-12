@@ -20,7 +20,7 @@ onMounted(() => {
 })
 
 const getAprovacao = () => {
-    axios.get(route('aprovacao-config.get', {servico: props.servico.id}))
+    axios.get(route('aprovacao-config-pmqa.get', {servico: props.servico.id}))
         .then(response => {
             aprovacao.value = response.data.aprovacao
         })

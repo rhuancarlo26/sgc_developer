@@ -82,8 +82,14 @@ class Servicos extends Model
         return $this->hasOne(related: ServicoParecer::class, foreignKey: 'fk_servico');
     }
 
-    public function parecerPMQA(): HasOne
+    public function parecerPmqa(): HasOne
     {
         return $this->hasOne(related: ServicoParecerPMQAConfiguracao::class, foreignKey: 'fk_servico');
     }
+
+    public function parecerSupressaoVegetacao(): HasOne
+    {
+        return $this->hasOne(related: ServicoParecerSupressaoConfiguracao::class, foreignKey: 'fk_servico');
+    }
+
 }

@@ -15,15 +15,15 @@
                     <tr>
                         <td class="text-center">{{item.id}}</tD>
                         <td class="text-center">{{ item.tipo?.nome }}</td>
-                        <td> {{item.parecer_pmqa?.parecer}}</td>
+                        <td> {{item.parecer_supressao_vegetacao?.parecer}}</td>
                         <td class="text-center">
-                            <span v-if="item.parecer_pmqa?.fk_status === 1" class="badge bg-yellow-lt">
+                            <span v-if="item.parecer_supressao_vegetacao?.fk_status === 1" class="badge bg-yellow-lt">
                                 Em análise
                             </span>
-                            <span v-else-if="item.parecer_pmqa?.fk_status === 3" class="badge bg-blue-lt">
+                            <span v-else-if="item.parecer_supressao_vegetacao?.fk_status === 3" class="badge bg-blue-lt">
                                 Aprovado
                             </span>
-                            <span v-else-if="item.parecer_pmqa?.fk_status === 2" class="badge bg-red-lt">
+                            <span v-else-if="item.parecer_supressao_vegetacao?.fk_status === 2" class="badge bg-red-lt">
                                 Pendente
                             </span>
                             <span v-else class="badge bg-red-lt">
@@ -50,7 +50,7 @@
         </template>
     </Navbar>
 
-    <ModalParecerPMQA ref="modalParecerPMQA" />
+    <ModalParecerSupressao ref="modalParecerSupressao" />
 <!--    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />-->
 
 </template>
@@ -63,7 +63,7 @@ import Navbar from "../Navbar.vue";
 import { IconDots } from "@tabler/icons-vue";
 import { ref } from "vue";
 
-import ModalParecerPMQA from "./ModalParecerPMQA.vue";
+import ModalParecerSupressao from "./ModalParecerSupressao.vue";
 
 
 defineProps({
@@ -71,11 +71,11 @@ defineProps({
     servicos: Object
 });
 
-const modalParecerPMQA = ref();
+const modalParecerSupressao = ref();
 const modalVisualizarServicoFiscal = ref();
 
 const abrirModalParecerFiscal = (item) => {
-    modalParecerPMQA.value.abrirModal(item);
+    modalParecerSupressao.value.abrirModal(item);
 }
 
 </script>

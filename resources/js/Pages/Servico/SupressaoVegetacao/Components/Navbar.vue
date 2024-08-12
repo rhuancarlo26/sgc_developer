@@ -5,11 +5,26 @@ import Navbar from '@/Pages/Contrato/Contratada/Navbar.vue';
 import { IconLayoutDashboard } from '@tabler/icons-vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import NavLink from '@/Components/NavLink.vue';
+import axios from "axios";
+import {onMounted, ref} from "vue";
 
-defineProps({
+const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object }
 });
+
+const aprovacao = ref({});
+
+onMounted(() => {
+    getAprovacao();
+})
+
+const getAprovacao = () => {
+    axios.get(route('aprovacao-config-supressao.get', {servico: props.servico.id}))
+        .then(response => {
+            aprovacao.value = response.data.aprovacao
+        })
+}
 </script>
 <template>
   <Navbar :contrato="contrato">
@@ -43,7 +58,7 @@ defineProps({
                       </NavDropdown>
 
                         <NavDropdown prefix="contratos.contratada.servicos.supressao-vegetacao.execucao*" title="Execução"
-                                     :icon="IconLayoutDashboard">
+                                     :icon="IconLayoutDashboard" v-if="aprovacao.fk_status === 3">
 
                             <NavDropdownLink route-name="contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.index"
                               active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.execucao.supressao*"
@@ -62,12 +77,12 @@ defineProps({
                       <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.index"
                         active-on-route-prefix="contratos.contratada.servicos.pmqa.execucao*"
                         :param="{ contrato: contrato.id, servico: servico.id }" title="Execução"
-                        :icon="IconLayoutDashboard" />
+                        :icon="IconLayoutDashboard" v-if="aprovacao.fk_status === 3"/>
 
                       <NavLink route-name="contratos.contratada.servicos.pmqa.resultado.index"
                         active-on-route-prefix="contratos.contratada.servicos.pmqa.resultado*"
                         :param="{ contrato: contrato.id, servico: servico.id }" title="Resultado"
-                        :icon="IconLayoutDashboard" />
+                        :icon="IconLayoutDashboard" v-if="aprovacao.fk_status === 3"/>
                     </ul>
                   </div>
                 </div>

@@ -3,6 +3,7 @@
 namespace App\Domain\Servico\SupressaoVegetacao\Configuracao\VincularASV\Controller;
 
 use App\Domain\Licenca\app\Services\LicencaService;
+use App\Domain\Servico\SupressaoVegetacao\app\Utils\ConfigucacaoParecer;
 use App\Domain\Servico\SupressaoVegetacao\Configuracao\VincularASV\Services\VincularASVService;
 use App\Models\Contrato;
 use App\Models\Servicos;
@@ -14,8 +15,9 @@ use Inertia\Response;
 class IndexController extends Controller
 {
     public function __construct(
-        private readonly LicencaService $licencaService,
-        private readonly VincularASVService $vincularASVService
+        private readonly LicencaService     $licencaService,
+        private readonly VincularASVService $vincularASVService,
+        private readonly ConfigucacaoParecer $configucacaoParecer
     )
     {
     }
@@ -26,8 +28,8 @@ class IndexController extends Controller
             'data' => $this->vincularASVService->index(servico: $servico),
             'contrato' => $contrato,
             'servico' => $servico->load(['tipo']),
-            'licencas' => $this->licencaService->all(searchParams:['tipo_id', '3']),
+            'licencas' => $this->licencaService->all(searchParams: ['tipo', '3']),
+            ...$this->configucacaoParecer->get($servico->id)
         ]);
     }
-
 }

@@ -15,13 +15,13 @@
                         <div class="mb-2">
                             <IconHome class="icon me-2 text-secondary"/>
                             Status: <strong>
-                                <span v-if="parecer_pmqa?.fk_status === 1" class="badge bg-yellow-lt">
+                                <span v-if="parecer_supressao_vegetacao?.fk_status === 1" class="badge bg-yellow-lt">
                                         Em análise
                                 </span>
-                                <span v-else-if="parecer_pmqa?.fk_status === 3" class="badge bg-blue-lt">
+                                <span v-else-if="parecer_supressao_vegetacao?.fk_status === 3" class="badge bg-blue-lt">
                                         Aprovado
                                     </span>
-                                <span v-else-if="parecer_pmqa?.fk_status === 2" class="badge bg-red-lt">
+                                <span v-else-if="parecer_supressao_vegetacao?.fk_status === 2" class="badge bg-red-lt">
                                         Pendente
                                 </span>
                                 <span v-else class="badge bg-red-lt">
@@ -29,27 +29,27 @@
                                 </span>
                         </strong>
                         </div>
-                        <div class="mb-2" v-if="parecer_pmqa?.fk_status === 1">
+                        <div class="mb-2" v-if="parecer_supressao_vegetacao?.fk_status === 1">
                             <textarea name="parecer" id="parecer" class="form-control" v-model="form.parecer"
                                       rows="5"></textarea>
                             <InputError :message="form.errors.parecer"/>
                         </div>
-                        <div class="mb-2" v-if="parecer_pmqa?.fk_status !== 1">
+                        <div class="mb-2" v-if="parecer_supressao_vegetacao?.fk_status !== 1">
                             <IconMessage class="icon me-2 text-secondary"/>
                             Parecer: <strong>{{ form.parecer }}</strong>
                         </div>
-                        <div class="mb-2" v-if="parecer_pmqa?.fk_status !== 1">
+                        <div class="mb-2" v-if="parecer_supressao_vegetacao?.fk_status !== 1">
                             <IconCalendar class="icon me-2 text-secondary"/>
-                            Data do parece: <strong>{{ parecer_pmqa?.parecer.updated_at }}</strong>
+                            Data do parece: <strong>{{ parecer_supressao_vegetacao?.updated_at }}</strong>
                         </div>
                     </div>
                 </div>
             </div>
         </template>
         <template #footer>
-            <NavButton @click="emiteParecer(3)" v-if="parecer_pmqa?.fk_status === 1" type-button="success"
+            <NavButton @click="emiteParecer(3)" v-if="parecer_supressao_vegetacao?.fk_status === 1" type-button="success"
                        :icon="IconCheck" title="Aprovar"/>
-            <NavButton @click="emiteParecer(2)" v-if="parecer_pmqa?.fk_status === 1" type-button="danger"
+            <NavButton @click="emiteParecer(2)" v-if="parecer_supressao_vegetacao?.fk_status === 1" type-button="danger"
                        :icon="IconCheck" title="Reprovar"/>
         </template>
     </Modal>
@@ -72,14 +72,14 @@ import NavButton from "@/Components/NavButton.vue";
 
 const servico = ref(null);
 const modalParecer = ref(null);
-const parecer_pmqa = ref(null);
+const parecer_supressao_vegetacao = ref(null);
 
 const abrirModal = (item) => {
     console.log(item)
     servico.value = item;
-    parecer_pmqa.value = item.parecer_pmqa;
-    form.id = item.parecer_pmqa.id
-    form.parecer = item.parecer_pmqa.parecer
+    parecer_supressao_vegetacao.value = item.parecer_supressao_vegetacao;
+    form.id = item.parecer_supressao_vegetacao.id
+    form.parecer = item.parecer_supressao_vegetacao.parecer
     form.id_contrato = item.id_contrato
     modalParecer.value.getBsModal().show();
 }
@@ -93,7 +93,7 @@ const form = useForm({
 
 const emiteParecer = (status) => {
     form.fk_status = status;
-    form.post(route('fiscal.emite-parecer-config-pqma'), {
+    form.post(route('fiscal.emite-parecer-config-supressao'), {
         onSuccess: () => modalParecer.value.getBsModal().hide()
     });
 }
