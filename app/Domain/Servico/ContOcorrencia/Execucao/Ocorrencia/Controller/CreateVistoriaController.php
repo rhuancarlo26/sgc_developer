@@ -32,7 +32,13 @@ class CreateVistoriaController extends Controller
                 'licencas_condicionantes.licenca.segmentos.uf_inicial',
                 'licencas_condicionantes.licenca.segmentos.uf_final'
             ]),
-            'ocorrencia' => $ocorrencia->load(['lote', 'rodovia.uf', 'registros', 'vistorias']),
+            'ocorrencia' => $ocorrencia->load([
+                'lote',
+                'rodovia.uf',
+                'registros',
+                'vistorias.imagens',
+                'vistorias.arquivos'
+            ]),
             ...$response
         ]);
     }

@@ -7,6 +7,8 @@ use App\Models\ServicoConOcorrOcorrenciSupervisaoExecOcorrencia;
 use App\Models\ServicoConOcorrSupervicaoExecOcorrenciaRegistro;
 use App\Models\ServicoConOcorrSupervisaoExecOcorrenciaHistorico;
 use App\Models\ServicoConOcorrSupervisaoExecOcorrenciaVistoria;
+use App\Models\ServicoConOcorrSupervisaoExecOcorrenciaVistoriaArquivoPrazo;
+use App\Models\ServicoConOcorrSupervisaoExecOcorrenciaVistoriaImg;
 use App\Models\ServicoContOcorrSupervisaoConfigLote;
 use App\Models\Servicos;
 use App\Models\Uf;
@@ -25,6 +27,8 @@ class OcorrenciaService extends BaseModelService
     protected string $modelClassRegistro = ServicoConOcorrSupervicaoExecOcorrenciaRegistro::class;
     protected string $modelClassHistorico = ServicoConOcorrSupervisaoExecOcorrenciaHistorico::class;
     protected string $modelClassVistoria = ServicoConOcorrSupervisaoExecOcorrenciaVistoria::class;
+    protected string $modelClassVistoriaImg = ServicoConOcorrSupervisaoExecOcorrenciaVistoriaImg::class;
+    protected string $modelClassVistoriaArquivo = ServicoConOcorrSupervisaoExecOcorrenciaVistoriaArquivoPrazo::class;
 
     public function index(Servicos $servico, array $searchParams): array
     {
@@ -79,6 +83,56 @@ class OcorrenciaService extends BaseModelService
     public function storeVistoria(array $post)
     {
         return $this->dataManagement->create(entity: $this->modelClassVistoria, infos: $post['vistoria']);
+    }
+
+    public function storeVistoriaImagem(array $post)
+    {
+        $response = [
+            'request' => [
+                'type' => 'error',
+                'content' => 'Falha ao cadastrar!'
+            ]
+        ];
+
+        foreach ($post['imagens'] as $key => $value) {
+            $infos = [];
+
+            $infos['nome'] = $value->getClientOriginalName();
+            $infos['caminho_arquivo'] = $value->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Vistoria' . DIRECTORY_SEPARATOR . 'Imagem' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $infos['nome']);
+
+            $response = $this->dataManagement->create(entity: $this->modelClassVistoriaImg, infos: [
+                'id_vistoria' => $post['id_vistoria'],
+                'nome' => $infos['nome'],
+                'caminho_arquivo' => str_replace("public\\", "", $infos['caminho_arquivo'])
+            ]);
+        }
+
+        return $response;
+    }
+
+    public function storeVistoriaArquivo(array $post)
+    {
+        $response = [
+            'request' => [
+                'type' => 'error',
+                'content' => 'Falha ao cadastrar!'
+            ]
+        ];
+
+        foreach ($post['arquivos'] as $key => $value) {
+            $infos = [];
+
+            $infos['nome'] = $value->getClientOriginalName();
+            $infos['caminho_arquivo'] = $value->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Vistoria' . DIRECTORY_SEPARATOR . 'Arquivo' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $infos['nome']);
+
+            $response = $this->dataManagement->create(entity: $this->modelClassVistoriaArquivo, infos: [
+                'id_vistoria' => $post['id_vistoria'],
+                'nome' => $infos['nome'],
+                'caminho_arquivo' => str_replace("public\\", "", $infos['caminho_arquivo'])
+            ]);
+        }
+
+        return $response;
     }
 
     public function enviarOcorrencia(array $post)
@@ -137,5 +191,19 @@ class OcorrenciaService extends BaseModelService
     public function destroyVistoria(array $post): array
     {
         return $this->dataManagement->delete(entity: $this->modelClassVistoria, id: $post['id']);
+    }
+
+    public function destroyVistoriaImagem(ServicoConOcorrSupervisaoExecOcorrenciaVistoriaImg $imagem): array
+    {
+        Storage::delete('public' . DIRECTORY_SEPARATOR . $imagem->caminho_arquivo);
+
+        return $this->dataManagement->delete(entity: $this->modelClassVistoriaImg, id: $imagem->id);
+    }
+
+    public function destroyVistoriaArquivo(ServicoConOcorrSupervisaoExecOcorrenciaVistoriaArquivoPrazo $arquivo): array
+    {
+        Storage::delete('public' . DIRECTORY_SEPARATOR . $arquivo->caminho_arquivo);
+
+        return $this->dataManagement->delete(entity: $this->modelClassVistoriaArquivo, id: $arquivo->id);
     }
 }

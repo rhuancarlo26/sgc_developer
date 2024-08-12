@@ -6,7 +6,7 @@ use App\Domain\Servico\ContOcorrencia\Configuracao\Empreendimento\Services\Empre
 use App\Domain\Servico\ContOcorrencia\Configuracao\LoteObra\Services\LoteObraService;
 use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Requests\StoreRegistroRequest;
 use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Requests\StoreRequest;
-use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Requests\StoreVistoriaRequest;
+use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Requests\StoreVistoriaArquivoRequest;
 use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Services\OcorrenciaService;
 use App\Models\Contrato;
 use App\Models\ServicoConOcorrOcorrenciSupervisaoExecOcorrencia;
@@ -25,7 +25,7 @@ class StoreVistoriaController extends Controller
     {
     }
 
-    public function index(Contrato $contrato, Servicos $servico, StoreVistoriaRequest $request): RedirectResponse
+    public function index(Contrato $contrato, Servicos $servico, StoreVistoriaArquivoRequest $request): RedirectResponse
     {
         $post = $request->validated();
 

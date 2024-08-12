@@ -7,7 +7,7 @@ import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vu
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
 import {ref} from "vue";
-import {IconEye, IconTrash} from "@tabler/icons-vue";
+import {IconEye, IconList, IconTrash} from "@tabler/icons-vue";
 import {IconPlus} from "@tabler/icons-vue";
 import {IconPencil} from "@tabler/icons-vue";
 import {IconDeviceFloppy} from "@tabler/icons-vue";
@@ -24,8 +24,10 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import ModalVisualizarVistoria from "./ModalVisualizarVistoria.vue";
+import ModalVistoriaArquivo from "./ModalVistoriaArquivo.vue";
 
 const modalVisualizarVistoria = ref({});
+const modalVistoriaArquivo = ref({});
 
 const props = defineProps({
     contrato: {type: Object},
@@ -88,8 +90,12 @@ const salvarVistoria = () => {
     });
 }
 
-const abrirModalVisualizarVistoria = (item) => {
-    modalVisualizarVistoria.value.abrirModal(item)
+const abrirModalVisualizarVistoria = (vistoria) => {
+    modalVisualizarVistoria.value.abrirModal(vistoria)
+}
+
+const abrirModalVistoriaArquivo = (vistoria) => {
+    modalVistoriaArquivo.value.abrirModal(vistoria)
 }
 
 </script>
@@ -239,11 +245,16 @@ const abrirModalVisualizarVistoria = (item) => {
                                     <td>{{ vistoria.nome_id }}</td>
                                     <td>{{ dateTimeFormat(vistoria.data_vistoria) }}</td>
                                     <td>
-                                        <NavButton @click="abrirModalVisualizarVistoria(vistoria)" :icon="IconEye"
+                                        <NavButton @click="abrirModalVistoriaArquivo(vistoria)"
+                                                   :icon="IconList"
                                                    class="btn-icon"
                                                    type-button="primary"/>
                                     </td>
                                     <td>
+                                        <NavButton @click="abrirModalVisualizarVistoria(vistoria)"
+                                                   :icon="IconEye"
+                                                   class="btn-icon"
+                                                   type-button="info"/>
                                         <NavButton @click="Object.assign(form, vistoria)" :icon="IconPencil"
                                                    class="btn-icon"
                                                    type-button="primary"/>
@@ -266,7 +277,9 @@ const abrirModalVisualizarVistoria = (item) => {
             </template>
         </Navbar>
 
-        <ModalVisualizarVistoria ref="modalVisualizarVistoria"/>
+        <ModalVisualizarVistoria :ocorrencia="ocorrencia" ref="modalVisualizarVistoria"/>
+        <ModalVistoriaArquivo :contrato="contrato" :servico="servico" :ocorrencia="ocorrencia"
+                              ref="modalVistoriaArquivo"/>
 
     </AuthenticatedLayout>
 </template>
