@@ -1,33 +1,3 @@
-<script setup>
-import Table from "@/Components/Table.vue";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import { Head } from "@inertiajs/vue3";
-import Navbar from "../Navbar.vue";
-import { IconDots } from "@tabler/icons-vue";
-// import ModalVisualizarParecerFiscal from "../ModalVisualizarParecerFiscal.vue";
-// import ModalVisualizarServicoFiscal from "../ModalVisualizarServicoFiscal.vue";
-import { ref } from "vue";
-
-defineProps({
-    contrato: Object,
-    servicos: Object
-});
-
-const modalVisualizarParecerFiscal = ref();
-const modalVisualizarServicoFiscal = ref();
-
-const abrirModalParecerFiscal = (item) => {
-    console.log(item);
-    modalVisualizarParecerFiscal.value.abrirModal(item);
-}
-
-const abrirModalServicoFiscal = (item) => {
-    console.log(item);
-    modalVisualizarServicoFiscal.value.abrirModal(item);
-}
-
-</script>
-
 <template>
 
     <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
@@ -44,16 +14,16 @@ const abrirModalServicoFiscal = (item) => {
                 <template #body="{ item }">
                     <tr>
                         <td class="text-center">{{item.id}}</tD>
-                        <td class="text-center">{{ item.tipo?.nome }}</td>
-                        <td> {{item.parecer_p_m_q_a?.parecer}}</td>
+                        <td class="text-center">{{item.tema.nome_tema}} - {{ item.tipo?.nome }}</td>
+                        <td> {{item.parecer_afugentamento?.parecer}}</td>
                         <td class="text-center">
-                            <span v-if="item.parecer_p_m_q_a?.fk_status === 1" class="badge bg-yellow-lt">
+                            <span v-if="item.parecer_afugentamento?.fk_status === 1" class="badge bg-yellow-lt">
                                 Em análise
                             </span>
-                            <span v-else-if="item.parecer_p_m_q_a?.fk_status === 3" class="badge bg-blue-lt">
+                            <span v-else-if="item.parecer_afugentamento?.fk_status === 3" class="badge bg-blue-lt">
                                 Aprovado
                             </span>
-                            <span v-else-if="item.parecer_p_m_q_a?.fk_status === 2" class="badge bg-red-lt">
+                            <span v-else-if="item.parecer_afugentamento?.fk_status === 2" class="badge bg-red-lt">
                                 Pendente
                             </span>
                             <span v-else class="badge bg-red-lt">
@@ -66,11 +36,11 @@ const abrirModalServicoFiscal = (item) => {
                                 <IconDots />
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <a @click="abrirModalServicoFiscal(item)" class="dropdown-item" href="javascript:void(0)">
-                                    Visualizar
-                                </a>
+<!--                                <a @click="abrirModalServicoFiscal(item)" class="dropdown-item" href="javascript:void(0)">-->
+<!--                                    Visualizar-->
+<!--                                </a>-->
                                 <a @click="abrirModalParecerFiscal(item)" class="dropdown-item" href="javascript:void(0)">
-                                    Visualizar parecer
+                                    Parecer
                                 </a>
                             </div>
                         </td>
@@ -80,7 +50,32 @@ const abrirModalServicoFiscal = (item) => {
         </template>
     </Navbar>
 
-<!--    <ModalVisualizarParecerFiscal ref="modalVisualizarParecerFiscal" />-->
+    <ModalParecerAfugentamento ref="modalParecerAfugentamento" />
 <!--    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />-->
 
 </template>
+
+<script setup>
+import Table from "@/Components/Table.vue";
+import ModelSearchForm from "@/Components/ModelSearchForm.vue";
+import { Head } from "@inertiajs/vue3";
+import Navbar from "../Navbar.vue";
+import { IconDots } from "@tabler/icons-vue";
+import { ref } from "vue";
+
+import ModalParecerAfugentamento from "./ModalParecerAfugentamento.vue";
+
+
+defineProps({
+    contrato: Object,
+    servicos: Object
+});
+
+const modalParecerAfugentamento = ref();
+const modalVisualizarServicoFiscal = ref();
+
+const abrirModalParecerFiscal = (item) => {
+    modalParecerAfugentamento.value.abrirModal(item);
+}
+
+</script>

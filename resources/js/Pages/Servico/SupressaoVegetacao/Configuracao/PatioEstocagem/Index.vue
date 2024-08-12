@@ -58,7 +58,7 @@ const form = useForm({
 const enviaFiscal = (aprovacao) => {
     form.fk_status = 1;
     form.id = aprovacao?.id;
-    form.post(route('contratos.contratada.servicos.pmqa.configuracao.envia-fiscal-supressao', {
+    form.post(route('contratos.contratada.servicos.supressao.configuracao.envia-fiscal', {
         contrato: props.contrato.id,
         servico: props.servico.id
     }));

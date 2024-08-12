@@ -7,7 +7,7 @@ use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 
-class EmiteParecerConfigSupressaoController extends Controller
+class EmiteParecerConfigAfugentamentoController extends Controller
 {
     public function __construct(private readonly ParecerService $parecerService)
     {
@@ -15,7 +15,7 @@ class EmiteParecerConfigSupressaoController extends Controller
 
     public function index(Request $request)
     {
-        $response = $this->parecerService->emiteParecerConfigSupressao($request->all());
+        $response = $this->parecerService->emiteParecerConfigAfugentamento($request->all());
 
         return to_route(route: 'fiscal.configuracoes.afugentamento.index', parameters: ['contrato' => $request->get('id_contrato')])
             ->with('message', $response['request']);

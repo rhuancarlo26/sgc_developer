@@ -3,6 +3,7 @@
 namespace App\Domain\Fiscal\Parecer\Services;
 
 use App\Models\ServicoParecer;
+use App\Models\ServicoParecerAfugentamentoConfiguracao;
 use App\Models\ServicoParecerPMQAConfiguracao;
 use App\Models\ServicoParecerSupressaoConfiguracao;
 use App\Models\Servicos;
@@ -39,6 +40,15 @@ class ParecerService extends BaseModelService
     public function emiteParecerConfigSupressao($post): array
     {
         $response = $this->dataManagement->update(entity: ServicoParecerSupressaoConfiguracao::class, infos: $post, id: $post['id']);
+
+        return [
+            'request' => $response['request']
+        ];
+    }
+
+    public function emiteParecerConfigAfugentamento($post): array
+    {
+        $response = $this->dataManagement->update(entity: ServicoParecerAfugentamentoConfiguracao::class, infos: $post, id: $post['id']);
 
         return [
             'request' => $response['request']

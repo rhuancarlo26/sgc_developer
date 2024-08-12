@@ -22389,3 +22389,74 @@ INSERT INTO `supressao_parecer_configuracao` (`id`, `fk_servico`, `parecer`, `fk
 (9, 252, NULL, 1, '2024-05-23 15:20:39', '2024-05-23 15:20:39', NULL),
 (10, 206, NULL, 1, '2024-06-21 15:23:13', '2024-06-21 15:23:13', NULL),
 (11, 309, 'ok', 3, '2024-07-09 16:09:07', '2024-07-09 17:27:21', NULL);
+
+CREATE TABLE `afugent_fauna_parecer_configuracao` (
+  `id` int(11) primary key auto_increment NOT NULL,
+  `fk_servico` int(11) DEFAULT NULL,
+  `parecer` text DEFAULT NULL,
+  `fk_status` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+--
+-- Dumping data for table `afugent_fauna_parecer_configuracao`
+--
+
+INSERT INTO `afugent_fauna_parecer_configuracao` (`id`, `fk_servico`, `parecer`, `fk_status`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 69, 'aprovado', 3, '2023-08-29 13:30:19', '2023-08-29 13:36:06', NULL),
+(2, 118, NULL, 1, '2024-03-06 10:16:11', '2024-03-06 10:16:11', NULL),
+(3, 131, NULL, 1, '2024-03-06 15:21:18', '2024-03-06 15:21:18', NULL),
+(4, 134, 'OK.', 3, '2024-03-20 15:52:43', '2024-03-25 10:28:40', NULL),
+(5, 204, 'teste', 3, '2024-04-04 15:58:05', '2024-04-04 16:02:47', NULL),
+(6, 210, 'Ok.', 3, '2024-05-03 09:50:16', '2024-05-03 11:09:03', NULL),
+(7, 244, 'ok', 3, '2024-05-03 10:26:21', '2024-05-03 10:28:54', NULL),
+(8, 203, NULL, 2, '2024-06-21 15:20:02', '2024-07-15 12:25:00', NULL);
+
+
+CREATE TABLE `afugent_fauna_config_asv` (
+  `id` int(11) primary key auto_increment NOT NULL,
+  `chave` varchar(255) NOT NULL,
+  `id_servico` int(11) NOT NULL,
+  `id_licenca` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+--
+-- Dumping data for table `afugent_fauna_config_asv`
+--
+
+INSERT INTO `afugent_fauna_config_asv` (`id`, `chave`, `id_servico`, `id_licenca`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(2, '2980469255162f19e1ab0d6e094a6c54', 69, 18, NULL, NULL, NULL),
+(3, '7682b5b545e61e834953b21c797181af', 134, 388, NULL, NULL, NULL),
+(4, '54dcdb7760d84c3770b9bc860edfd093', 118, 413, NULL, NULL, NULL),
+(5, 'cf86223fbc938233ebc53e37ea0573c0', 118, 417, NULL, NULL, NULL),
+(6, '59ef0ab0eb5f8a072b1a7c588c1bc4a3', 204, 246, NULL, NULL, NULL),
+(7, '027ed154f5d526b696d580e98c6a793e', 244, 31, NULL, NULL, NULL),
+(8, '663c95960d69d54906579b5861de0716', 210, 419, NULL, NULL, NULL),
+(9, '0899aa2125cc71bd05c6d8792cc6b8ef', 203, 412, NULL, NULL, NULL);
+
+CREATE TABLE `afugent_fauna_config_abio` (
+  `id` int(11) primary key auto_increment NOT NULL,
+  `chave` varchar(255) NOT NULL,
+  `id_servico` int(11) NOT NULL,
+  `id_licenca` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+--
+-- Dumping data for table `afugent_fauna_config_abio`
+--
+
+INSERT INTO `afugent_fauna_config_abio` (`id`, `chave`, `id_servico`, `id_licenca`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, '2b6bdf4d058ee0bbb6128631f01db4ec', 69, 27, NULL, NULL, NULL),
+(2, 'd5d7b4cc625c3f0e7a2a4cb4a33ef751', 134, 389, NULL, NULL, NULL),
+(3, 'e16488ef90dba1447d85e472ca3a6b72', 204, 25, NULL, NULL, NULL),
+(4, '17b736938464a03199eeb342ed23400a', 244, 20, NULL, NULL, NULL),
+(5, '547977d11761060c4c405f9797622abe', 210, 420, NULL, NULL, NULL),
+(6, 'ab5c3676f8b172c5648719233c1d1e25', 203, 411, NULL, NULL, NULL);

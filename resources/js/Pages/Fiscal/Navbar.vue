@@ -36,7 +36,10 @@ const props = defineProps({
 
                                         <NavDropdown prefix="fiscal.dados.configuracoes*"
                                                      title="Configurações" :icon="IconLayoutDashboard">
-
+                                            <NavDropdownLink route-name="fiscal.configuracoes.afugentamento.index"
+                                                             :route-param="{ contrato: contrato.id }"
+                                                             active-on-route-prefix="fiscal.configuracoes.supressao.index"
+                                                             title="Fauna - Afugentamento e resgate de fauna"/>
                                             <NavDropdownLink route-name="fiscal.configuracoes.pmqa.index"
                                                              :route-param="{ contrato: contrato.id }"
                                                              active-on-route-prefix="fiscal.configuracoes.pmqa.index"
@@ -47,7 +50,6 @@ const props = defineProps({
                                                              active-on-route-prefix="fiscal.configuracoes.supressao.index"
                                                              title="Supressão da vegetação"/>
                                         </NavDropdown>
-
 
                                         <NavLink route-name="contratos.contratada.dados_gerais.index"
                                                  :param="contrato.id" title="RNC"

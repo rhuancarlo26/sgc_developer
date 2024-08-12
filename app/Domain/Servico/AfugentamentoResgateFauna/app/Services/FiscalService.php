@@ -1,22 +1,23 @@
 <?php
 
-namespace App\Domain\Servico\PMQA\app\Services;
+namespace App\Domain\Servico\AfugentamentoResgateFauna\app\Services;
 
-use App\Domain\Servico\app\Utils\EnviaFiscalUtils;
-use App\Models\ServicoParecerPMQAConfiguracao;
+use App\Models\ServicoParecerAfugentamentoConfiguracao;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use App\Domain\Servico\app\Utils\EnviaFiscalUtils;
 
 class FiscalService extends BaseModelService
 {
     use Searchable, Deletable;
 
-    protected string $modelClass = ServicoParecerPMQAConfiguracao::class;
+    protected string $modelClass = ServicoParecerAfugentamentoConfiguracao::class;
 
     public function __construct(private readonly EnviaFiscalUtils $enviaFiscalUtils)
     {
     }
+
     public function enviaFiscal(array $post, int $id_servico): array
     {
         $post['fk_servico'] = $id_servico;

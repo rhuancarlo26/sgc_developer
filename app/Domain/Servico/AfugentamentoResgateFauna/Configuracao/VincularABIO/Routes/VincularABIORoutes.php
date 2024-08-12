@@ -6,7 +6,10 @@ use App\Domain\Servico\AfugentamentoResgateFauna\Configuracao\VincularABIO\Contr
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/vincularABIO')->group(function () {
-    Route::get('{contrato}/{servico}',           [IndexController::class,      'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.abio.index');
-    Route::post('{licenca}/{servico}',           [VincularABIOController::class,      'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.abio.create');
-    Route::delete('{licenca}',           [DestroyABIOController::class,      'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.abio.delete');
+    Route::get('{contrato}/{servico}', [IndexController::class, 'index'])
+        ->name('contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.abio.index');
+    Route::post('{licenca}/{servico}', [VincularABIOController::class, 'index'])
+        ->name('contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.abio.create');
+    Route::delete('{licenca}', [DestroyABIOController::class, 'index'])
+        ->name('contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.abio.delete');
 });
