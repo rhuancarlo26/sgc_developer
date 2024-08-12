@@ -59,9 +59,9 @@ defineProps({
 
                         </NavDropdown>
 
-                      <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.index"
-                        active-on-route-prefix="contratos.contratada.servicos.pmqa.execucao*"
-                        :param="{ contrato: contrato.id, servico: servico.id }" title="Execução"
+                      <NavLink route-name="contratos.contratada.servicos.supressao-vegetacao.resultado.index"
+                        active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.resultado*"
+                        :param="{ contrato: contrato.id, servico: servico.id }" title="Resultado"
                         :icon="IconLayoutDashboard" />
 
                       <NavLink route-name="contratos.contratada.servicos.pmqa.resultado.index"
