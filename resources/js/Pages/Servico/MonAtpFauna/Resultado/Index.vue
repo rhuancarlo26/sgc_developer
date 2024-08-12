@@ -8,6 +8,7 @@ import NavLink from "@/Components/NavLink.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import ModalNovoResultado from "./ModalNovoResultado.vue";
+import ModalAnalise from "./ModalAnalise.vue";
 import { ref } from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconDots } from "@tabler/icons-vue";
@@ -20,9 +21,14 @@ const props = defineProps({
 });
 
 const modalNovoResultado = ref({});
+const modalAnalise = ref({});
 
 const abrirModalNovoResultado = () => {
   modalNovoResultado.value.abrirModal();
+}
+
+const abrirModalAnalise = () => {
+  modalAnalise.value.abrirModal();
 }
 
 </script>
@@ -35,10 +41,10 @@ const abrirModalNovoResultado = () => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
-          { route: '#', label: contrato.contratada }
-        ]
-          " />
+    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+    { route: '#', label: contrato.contratada }
+  ]
+    " />
         <Link class="btn btn-dark"
           :href="route('contratos.contratada.servicos.index', { contrato: props.contrato.id })">
         Voltar
@@ -74,10 +80,9 @@ const abrirModalNovoResultado = () => {
                   <IconDots />
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
-                  <NavLink route-name="home" title="Visualizar AABIO" class="dropdown-item" />
-                  <NavLink route-name="home" title="Visualizar RET" class="dropdown-item" />
-                  <NavLink route-name="home" title="Adicionar RET" class="dropdown-item" />
-                  <NavLink route-name="home" title="Excluir" class="dropdown-item" />
+                  <a href="#" class="dropdown-item" @click.prevent="abrirModalAnalise">
+                    Analisar
+                  </a>
                 </div>
               </td>
             </tr>
@@ -87,6 +92,7 @@ const abrirModalNovoResultado = () => {
     </Navbar>
 
     <ModalNovoResultado ref="modalNovoResultado" />
+    <ModalAnalise ref="modalAnalise" />
 
   </AuthenticatedLayout>
 </template>
