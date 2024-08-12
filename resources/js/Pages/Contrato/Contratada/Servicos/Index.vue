@@ -72,6 +72,10 @@
                                        :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
+                                    <a v-if="item.servico_tipo_id === 2" class="dropdown-item"
+                                        :href="route('contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv.index', { contrato: contrato.id, servico: item.id })">
+                                        Gerenciar
+                                    </a>
                                     <a class="dropdown-item"
                                        :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
                                         Editar
