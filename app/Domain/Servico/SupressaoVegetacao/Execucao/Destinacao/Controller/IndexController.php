@@ -21,10 +21,6 @@ class IndexController extends Controller
 {
 
     public function __construct(
-        private readonly VincularASVService    $vincularASVService,
-        private readonly SupressaoService      $supressaoService,
-        private readonly PatioEstocagemService $patioEstocagemService,
-        private readonly TipoProdutoService    $tipoProdutoService,
         private readonly PilhasService         $pilhasService,
         private readonly DestinacaoService     $destinacaoService,
     )
@@ -39,12 +35,6 @@ class IndexController extends Controller
             'servico' => $servico->load(['tipo']),
             'data' => $this->destinacaoService->index(servico: $servico, searchParams: $searchParams),
             'pilhas' => $this->pilhasService->search('servico_id', $servico->id)->with(['corteEspecie', 'licenca'])->get(),
-
-            'tipos' => TipoPilha::toArray(),
-            'patios' => $this->patioEstocagemService->search('servico_id', $servico->id)->get(['id', 'chave']),
-            'produtos' => $this->tipoProdutoService->all(columns: ['id', 'nome']),
-            'areasSuprimidas' => $this->supressaoService->search('servico_id', $servico->id)->get(['id', 'chave']),
-            'licencas' => $this->vincularASVService->search('servico_id', $servico->id)->with('licenca')->get(),
         ]);
     }
 
