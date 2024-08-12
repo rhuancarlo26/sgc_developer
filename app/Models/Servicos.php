@@ -92,4 +92,9 @@ class Servicos extends Model
         return $this->hasOne(related: ServicoParecerSupressaoConfiguracao::class, foreignKey: 'fk_servico');
     }
 
+    public function parecerAfugentamento(): HasOne
+    {
+        return $this->hasOne(related: ServicoParecerAfugentamentoConfiguracao::class, foreignKey: 'fk_servico');
+    }
+
 }

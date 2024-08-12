@@ -17,7 +17,7 @@ class EmiteParecerConfigSupressaoController extends Controller
     {
         $response = $this->parecerService->emiteParecerConfigSupressao($request->all());
 
-        return to_route(route: 'fiscal.configuracoes.supressao.index', parameters: ['contrato' => $request->get('id_contrato')])
+        return to_route(route: 'fiscal.configuracoes.afugentamento.index', parameters: ['contrato' => $request->get('id_contrato')])
             ->with('message', $response['request']);
     }
 }

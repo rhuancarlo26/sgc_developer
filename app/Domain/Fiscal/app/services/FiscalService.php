@@ -13,7 +13,7 @@ class FiscalService extends BaseModelService
 
     protected string $modelClass = Servicos::class;
 
-    public function listagemServicos($contrato, $searchParams)
+    public function listagemServicos($contrato, $searchParams): array
     {
         $query = $this->search(...$searchParams)
             ->with([
@@ -28,6 +28,7 @@ class FiscalService extends BaseModelService
                 'parecer'
             ])
             ->where('id_contrato', $contrato->id)
+            ->where('servico', 2)
             ->where('deleted_at', null)
             ->whereIn('status_aprovacao', [2, 3, 4]);
 
@@ -43,6 +44,7 @@ class FiscalService extends BaseModelService
                 'parecer',
                 'parecerPmqa',
                 'parecerSupressaoVegetacao',
+                'parecerAfugentamento',
             ])
             ->where('id_contrato', $contrato->id)
             ->where('servico', $id_servico)

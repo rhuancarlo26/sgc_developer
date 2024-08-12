@@ -2,14 +2,29 @@
 import Navbar from '@/Pages/Contrato/Contratada/Navbar.vue';
 import NavDropdown from '@/Components/NavDropdown.vue';
 import NavDropdownLink from '@/Components/NavDropdownLink.vue';
-import { IconLayoutDashboard } from '@tabler/icons-vue';
+import {IconLayoutDashboard} from '@tabler/icons-vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import NavLink from '@/Components/NavLink.vue';
+import axios from "axios";
+import {onMounted, ref} from "vue";
 
-const porps = defineProps({
-    contrato: { type: Object },
-    servico: { type: Object }
+const props = defineProps({
+    contrato: {type: Object},
+    servico: {type: Object}
 });
+
+const aprovacao = ref({});
+
+onMounted(() => {
+    getAprovacao();
+})
+
+const getAprovacao = () => {
+    axios.get(route('aprovacao-config-afugentamento.get', {servico: props.servico.id}))
+        .then(response => {
+            aprovacao.value = response.data.aprovacao
+        })
+}
 
 </script>
 <template>
@@ -17,7 +32,7 @@ const porps = defineProps({
         <template #body>
             <div class="mb-4">
                 <Breadcrumb
-                    :links="[{ route: route('contratos.contratada.servicos.index', { contrato: contrato.id, servico: servico.id }), label: 'Serviços' }, { route: '#', label: servico?.tipo?.nome }]" />
+                    :links="[{ route: route('contratos.contratada.servicos.index', { contrato: contrato.id, servico: servico.id }), label: 'Serviços' }, { route: '#', label: servico?.tipo?.nome }]"/>
             </div>
             <div class="card card-body p-0 space-y-3">
                 <header class="navbar-expand-md">
@@ -35,17 +50,17 @@ const porps = defineProps({
                                                     route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv.index"
                                                     active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv*"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Vincular ASV" />
+                                                    title="Vincular ASV"/>
 
                                                 <NavDropdownLink
                                                     route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.abio.index"
                                                     active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.abio*"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Vincular Abio" />
+                                                    title="Vincular Abio"/>
 
                                             </NavDropdown>
 
-                                            <NavDropdown
+                                            <NavDropdown v-if="aprovacao.fk_status === 3"
                                                 prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao*"
                                                 title="Execução" :icon="IconLayoutDashboard">
 
@@ -53,13 +68,13 @@ const porps = defineProps({
                                                     route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.frente.supressao.index"
                                                     active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.frente.supressao*"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Frente de Supressão" />
+                                                    title="Frente de Supressão"/>
 
                                                 <NavDropdownLink
                                                     route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.index"
                                                     active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros*"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Registros" />
+                                                    title="Registros"/>
 
                                             </NavDropdown>
 
@@ -76,7 +91,7 @@ const porps = defineProps({
                     </div>
                 </header>
                 <div class="mt-2 card card-body">
-                    <slot name="body" />
+                    <slot name="body"/>
                 </div>
             </div>
         </template>

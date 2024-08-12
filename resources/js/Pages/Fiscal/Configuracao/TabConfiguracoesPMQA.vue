@@ -14,7 +14,7 @@
                 <template #body="{ item }">
                     <tr>
                         <td class="text-center">{{item.id}}</tD>
-                        <td class="text-center">{{ item.tipo?.nome }}</td>
+                        <td class="text-center">{{item.tema.nome_tema}} - {{ item.tipo?.nome }}</td>
                         <td> {{item.parecer_pmqa?.parecer}}</td>
                         <td class="text-center">
                             <span v-if="item.parecer_pmqa?.fk_status === 1" class="badge bg-yellow-lt">
@@ -40,7 +40,7 @@
 <!--                                    Visualizar-->
 <!--                                </a>-->
                                 <a @click="abrirModalParecerFiscal(item)" class="dropdown-item" href="javascript:void(0)">
-                                    Visualizar parecer
+                                    Parecer
                                 </a>
                             </div>
                         </td>

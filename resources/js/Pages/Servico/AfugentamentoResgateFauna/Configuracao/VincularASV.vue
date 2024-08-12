@@ -19,7 +19,8 @@ const props = defineProps({
     contrato: { type: Object },
     servico: { type: Object },
     licencaASV: { type: Array },
-    licencaVinculadas: { type: Array }
+    licencaVinculadas: { type: Array },
+    aprovacao: {type: Object}
 });
 
 const modalDetalheVincularASV = ref();
@@ -50,6 +51,12 @@ const destroy = (item) => {
     })
 }
 
+const ap = (ap) => {
+    if (!ap?.fk_status) {
+        return true;
+    }
+    return ap?.fk_status === 2;
+}
 </script>
 
 <template>
@@ -60,7 +67,7 @@ const destroy = (item) => {
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-                    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+                    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
                     { route: '#', label: contrato.contratada }
                 ]
                     " />
@@ -96,7 +103,6 @@ const destroy = (item) => {
                         <!-- <InputError :message="form_trecho.errors.asv_id" /> -->
                     </div>
                 </div>
-
                 <!-- Tabela -->
                 <table class="table table-hover">
                     <thead>
