@@ -55,7 +55,7 @@ const abrirModalVincularABIO = () => {
 
         <!-- Listagem-->
         <Table
-          :columns="['Tipo', 'N° licença', 'Empreendimento', 'Emissor', 'Data de emissão', 'Vencimento', 'Responsável', 'Processo DNIT', 'Ação']"
+          :columns="['Tipo', 'N° licença', 'Empreendimento', 'KM Inicial', 'KM Final', 'Extensão', 'Shapefile', 'Ação']"
           :records="vinculacoes" table-class="table-hover">
           <template #body="{ item }">
             <tr>
