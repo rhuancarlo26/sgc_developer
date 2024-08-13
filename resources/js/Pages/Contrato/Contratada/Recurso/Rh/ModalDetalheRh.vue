@@ -51,7 +51,7 @@ defineExpose({ abrirModal });
           <span><strong>E-mail: </strong>{{ rh.email }}</span>
         </div>
         <div class="col">
-          <span><strong>Formação: </strong>{{ rh.formacao }}</span>
+          <span><strong>Formação: </strong>{{ rh.profissao }}</span>
         </div>
       </div>
       <div class="row mb-4">
@@ -76,7 +76,7 @@ defineExpose({ abrirModal });
       </div>
       <div class="row mb-4">
         <div class="col">
-          <span><strong>Observação: </strong>{{ rh.observacao }}</span>
+          <span><strong>Observação: </strong>{{ rh.obs }}</span>
         </div>
       </div>
       <div class="row">

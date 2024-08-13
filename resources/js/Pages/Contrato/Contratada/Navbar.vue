@@ -25,7 +25,7 @@ const props = defineProps({
                     title="Dados Gerais" :icon="IconLayoutDashboard" />
 
 
-                  <NavDropdown prefix="contratos.contratada.recurso*" title="Recuros" :icon="IconLayoutDashboard">
+                  <NavDropdown prefix="contratos.contratada.recurso*" title="Recursos" :icon="IconLayoutDashboard">
 
                     <NavDropdownLink route-name="contratos.contratada.recurso.rh.index" param-name="contrato"
                       active-on-route-prefix="contratos.contratada.recurso.rh.*" :route-param="contrato.id"

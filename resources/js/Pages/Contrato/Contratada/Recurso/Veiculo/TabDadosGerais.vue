@@ -12,7 +12,7 @@ const props = defineProps({
 
 const form = useForm({
     id: null,
-    contrato_id: props.contrato.id,
+    id_contrato: props.contrato.id,
     cod_veiculos: null,
     codigo: null,
     descricao: null,
@@ -25,7 +25,7 @@ const form = useForm({
 });
 
 const salvarVaiculo = () => {
-    form.veiculo_codigo_id = form.codigo?.id;
+    form.veiculo_codigo_id = form.cod_veiculos?.id;
     form.descricao = form.codigo?.descricao;
 
     if (form.id) {
@@ -40,7 +40,7 @@ const salvarVaiculo = () => {
         <div class="row mb-4">
             <div class="col">
                 <InputLabel value="Código" for="codigo"/>
-                <v-select :options="codigos" id="codigo" name="codigo" label="codigo" v-model="form.codigo">
+                <v-select :options="codigos" id="codigo" name="codigo" label="codigo" v-model="form.cod_veiculos">
                     <template #no-options="{}">
                         Nenhum registro encontrado.
                     </template>
@@ -49,7 +49,7 @@ const salvarVaiculo = () => {
             </div>
             <div class="col">
                 <InputLabel value="Descrição" for="descricao"/>
-                <input id="descricao" name="descricao" type="text" class="form-control" :value="form.codigo?.descricao"
+                <input id="descricao" name="descricao" type="text" class="form-control" :value="form.cod_veiculos?.descricao"
                        disabled>
                 <InputError :message="form.errors.descricao"/>
             </div>

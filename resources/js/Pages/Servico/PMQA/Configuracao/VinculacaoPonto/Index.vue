@@ -76,14 +76,10 @@ const enviaFiscal = (aprovacao) => {
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
                 <ModelSearchFormAllColumns :columns="['nome']">
-                    <template #action
-                              v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
-                        <NavButton @click="enviarListaFiscal()" type-button="primary" title="Enviar ao fiscal"
-                                   v-if="ap(aprovacao)"
-                                   @click="enviaFiscal(aprovacao)"/>
-                        <NavButton @click="abrirModalVincularPonto()" type-button="success" title="Vincular"
-                                   v-if="ap(aprovacao)"/>
-                    </template>
+                    <NavButton type-button="primary" title="Enviar ao fiscal" v-if="ap(aprovacao)"
+                               @click="enviaFiscal(aprovacao)"/>
+                    <NavButton @click="abrirModalVincularPonto()" type-button="success" title="Vincular"
+                               v-if="ap(aprovacao)"/>
                 </ModelSearchFormAllColumns>
 
 

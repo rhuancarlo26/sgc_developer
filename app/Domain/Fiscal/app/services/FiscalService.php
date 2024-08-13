@@ -28,7 +28,6 @@ class FiscalService extends BaseModelService
                 'parecer'
             ])
             ->where('id_contrato', $contrato->id)
-            ->where('servico', 2)
             ->where('deleted_at', null)
             ->whereIn('status_aprovacao', [2, 3, 4]);
 
