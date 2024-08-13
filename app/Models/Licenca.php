@@ -37,10 +37,10 @@ class Licenca extends Model
         return $this->hasOne(LicencaDocumento::class, 'licenca_id');
     }
 
-    public function shapefile(): HasOne
-    {
-        return $this->hasOne(LicencaShapefile::class, 'licenca_id');
-    }
+//    public function shapefile(): HasOne
+//    {
+//        return $this->hasOne(LicencaShapefile::class, 'licenca_id');
+//    }
 
     public function requerimentos(): HasMany
     {
@@ -54,7 +54,7 @@ class Licenca extends Model
                 $ufs = [];
 
                 foreach ($this->segmentos as $value) {
-                    $uf = $value->uf_inicial->uf;
+                    $uf = $value->uf_inicial;
 
                     $uf ? array_push($ufs, trim($uf)) : '';
                 }
@@ -71,7 +71,7 @@ class Licenca extends Model
                 $ufs = [];
 
                 foreach ($this->segmentos as $value) {
-                    $uf = $value->uf_final->uf;
+                    $uf = $value->uf_final;
 
                     $uf ? array_push($ufs, trim($uf)) : '';
                 }

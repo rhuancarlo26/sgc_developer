@@ -40,15 +40,18 @@ const props = defineProps({
                                                              :route-param="{ contrato: contrato.id }"
                                                              active-on-route-prefix="fiscal.configuracoes.supressao.index"
                                                              title="Fauna - Afugentamento e resgate de fauna"/>
+                                            <NavDropdownLink route-name="fiscal.configuracoes.supressao.index"
+                                                             :route-param="{ contrato: contrato.id }"
+                                                             active-on-route-prefix="fiscal.configuracoes.supressao.index"
+                                                             title="Flora - Supressão da vegetação"/>
                                             <NavDropdownLink route-name="fiscal.configuracoes.pmqa.index"
                                                              :route-param="{ contrato: contrato.id }"
                                                              active-on-route-prefix="fiscal.configuracoes.pmqa.index"
                                                              title="Programa de Monitoramento da Qualidade da Água"/>
-
-                                            <NavDropdownLink route-name="fiscal.configuracoes.supressao.index"
+                                            <NavDropdownLink route-name="fiscal.configuracoes.ocorrencia.index"
                                                              :route-param="{ contrato: contrato.id }"
-                                                             active-on-route-prefix="fiscal.configuracoes.supressao.index"
-                                                             title="Supressão da vegetação"/>
+                                                             active-on-route-prefix="fiscal.configuracoes.ocorrencia.index"
+                                                             title="Supervisão ambiental - Controle de ocorrência"/>
                                         </NavDropdown>
 
                                         <NavLink route-name="contratos.contratada.dados_gerais.index"

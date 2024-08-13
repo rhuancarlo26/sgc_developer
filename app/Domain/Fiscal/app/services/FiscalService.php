@@ -45,6 +45,7 @@ class FiscalService extends BaseModelService
                 'parecerPmqa',
                 'parecerSupressaoVegetacao',
                 'parecerAfugentamento',
+                'parecerOcorrencia'
             ])
             ->where('id_contrato', $contrato->id)
             ->where('servico', $id_servico)

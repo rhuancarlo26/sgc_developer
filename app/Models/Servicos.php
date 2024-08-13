@@ -105,7 +105,7 @@ class Servicos extends Model
 
     public function pmqa_config_lista_parecer()
     {
-        return $this->hasOne(ServicoPmqaConfiguracaoParecer::class, 'servico_id');
+        return $this->hasOne(ServicoPmqaConfiguracaoParecer::class, 'fk_servico');
     }
 
     public function cont_ocorr_parecer_configuracao()
@@ -116,6 +116,11 @@ class Servicos extends Model
     public function parecerAfugentamento(): HasOne
     {
         return $this->hasOne(related: ServicoParecerAfugentamentoConfiguracao::class, foreignKey: 'fk_servico');
+    }
+
+    public function parecerOcorrencia(): HasOne
+    {
+        return $this->hasOne(related: ServicoContOcorrSupervisaoParecerConfiguracao::class, foreignKey: 'fk_servico');
     }
 
 }
