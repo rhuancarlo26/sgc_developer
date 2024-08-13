@@ -17,7 +17,7 @@ class CreateController extends Controller
     {
         return Inertia::render('Servico/PMQA/Execucao/Coleta/Form', [
             'contrato' => $contrato,
-            'servico'  => $servico->load(['tipo']),
+            'servico'  => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
             'campanha' => $campanha,
             'ponto'    => $ponto->load(['ponto', 'coleta.arquivos'])
         ]);

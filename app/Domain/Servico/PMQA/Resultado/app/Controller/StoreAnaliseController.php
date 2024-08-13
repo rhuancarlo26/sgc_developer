@@ -19,16 +19,21 @@ class StoreAnaliseController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado, StoreAnaliseRequest $request): RedirectResponse
   {
-    $analisesFiltradas = array_filter($request->validated('analises'), function ($value) {
-      return !is_null($value);
-    });
+    $image = $request->validated('imagem');
+
+    $image = str_replace('data:image/png;base64,', '', $image);
+    $image = str_replace(' ', '+', $image);
+
+    $imageData = base64_decode($image);
 
     $post = [
       'resultado_id' => $request->validated('resultado_id'),
-      'analises' => $analisesFiltradas
+      'parametro_id' => $request->validated('parametro_id'),
+      'analise' => $request->validated('analises')[$request->validated('parametro_id')],
+      'imagem' => $imageData
     ];
 
-    $response = $this->resultadoService->storeAnalises($request->validated());
+    $response = $this->resultadoService->storeAnalises($post);
 
     return to_route('contratos.contratada.servicos.pmqa.resultado.resultado', ['contrato' => $contrato->id, 'servico' => $servico->id, 'resultado' => $resultado->id])->with('message', $response['request']);
   }

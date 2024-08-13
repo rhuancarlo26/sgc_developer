@@ -5,7 +5,7 @@ import Navbar from "../../Navbar.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
-import {Head, Link, useForm} from "@inertiajs/vue3";
+import { Head, Link, router, useForm} from "@inertiajs/vue3";
 import ModalVincularPonto from "./ModalVincularPonto.vue";
 import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
 import {ref} from "vue";
@@ -75,17 +75,17 @@ const enviaFiscal = (aprovacao) => {
 
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
-                <!-- Pesquisa-->
                 <ModelSearchFormAllColumns :columns="['nome']">
-                    <template #action>
-                        <NavButton type-button="primary" title="Enviar ao fiscal" v-if="ap(aprovacao)"
+                    <template #action
+                        v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
+            <NavButton @click="enviarListaFiscal()" type-button="primary" title="Enviar ao fiscal" v-if="ap(aprovacao)"
                                    @click="enviaFiscal(aprovacao)"/>
                         <NavButton @click="abrirModalVincularPonto()" type-button="success" title="Vincular"
                                    v-if="ap(aprovacao)"/>
                     </template>
                 </ModelSearchFormAllColumns>
 
-                <!-- Listagem-->
+
                 <Table :columns="['Nome da lista', 'Qtd. pontos', 'Ação']" :records="vinculacoes"
                        table-class="table-hover">
                     <template #body="{ item }">
@@ -95,7 +95,8 @@ const enviaFiscal = (aprovacao) => {
                             <td class="text-center">
                                 <NavButton :icon="IconEye" class="btn-icon" type-button="info"
                                            @click="abrirModalVisualizarPonto(item)"/>
-                                <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
+                <template
+                  v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">                <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
                                            v-if="ap(aprovacao)"
                                            @click="abrirModalVincularPonto(item)"/>
                                 <LinkConfirmation v-slot="confirmation"
@@ -106,7 +107,7 @@ const enviaFiscal = (aprovacao) => {
                                           as="button" method="delete" type="button" class="btn btn-icon btn-danger">
                                         <IconTrash/>
                                     </Link>
-                                </LinkConfirmation>
+                                </LinkConfirmation></template>
                             </td>
                         </tr>
                     </template>

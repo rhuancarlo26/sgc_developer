@@ -12,6 +12,7 @@ class UpdateAnaliseIqaRequest extends FormRequest
       'id'           => ['required'],
       'resultado_id' => ['required'],
       'analise'      => ['required'],
+      'imagem'       => ['required']
     ];
   }
 
