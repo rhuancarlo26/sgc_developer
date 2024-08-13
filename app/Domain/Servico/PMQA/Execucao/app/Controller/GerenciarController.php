@@ -25,7 +25,7 @@ class GerenciarController extends Controller
 
         return Inertia::render('Servico/PMQA/Execucao/Gerenciar', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo']),
+            'servico'  => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
             'campanha' => $campanha,
             ...$response
         ]);

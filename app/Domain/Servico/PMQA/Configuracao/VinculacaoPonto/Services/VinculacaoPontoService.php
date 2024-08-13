@@ -2,6 +2,7 @@
 
 namespace App\Domain\Servico\PMQA\Configuracao\VinculacaoPonto\Services;
 
+use App\Models\ServicoPmqaConfiguracaoParecer;
 use App\Models\ServicoPmqaParametroLista;
 use App\Models\ServicoPmqaPonto;
 use App\Models\Servicos;
@@ -14,6 +15,7 @@ class VinculacaoPontoService extends BaseModelService
     use Searchable, Deletable;
 
     protected string $modelClass = ServicoPmqaParametroLista::class;
+    protected string $modelClassConfigParecer = ServicoPmqaConfiguracaoParecer::class;
 
     public function index(Servicos $servico, $searchParams): array
     {
@@ -64,5 +66,10 @@ class VinculacaoPontoService extends BaseModelService
                 'content' => 'Registro excluido!',
             ]
         ];
+    }
+
+    public function enviarListaFiscal(array $post)
+    {
+        return $this->dataManagement->create(entity: $this->modelClassConfigParecer, infos: $post);
     }
 }

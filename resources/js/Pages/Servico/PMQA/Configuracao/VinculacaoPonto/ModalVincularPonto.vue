@@ -28,8 +28,17 @@ const form = useForm({
   pontos: []
 })
 
+const reset = () => {
+  form.servico_id = props.servico.id;
+  form.lista = null;
+  form.periodicidade = null;
+  form.relatorio_parcial = null;
+  form.relatorio_acomulado = null;
+  form.pontos = [];
+}
+
 const abrirModal = (item) => {
-  form.reset();
+  reset();
   vinculacao.value = {};
 
   if (item) {

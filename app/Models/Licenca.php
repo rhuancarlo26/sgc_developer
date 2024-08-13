@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ class Licenca extends Model
 
     protected $table = 'licencas';
     protected $guarded = ['id', 'created_at'];
+    protected $appends = ['iniciais', 'finais', 'brs'];
 
     public function tipo(): BelongsTo
     {
@@ -43,6 +45,57 @@ class Licenca extends Model
     public function requerimentos(): HasMany
     {
         return $this->hasMany(LicencaRequerimento::class, 'id_licenca');
+    }
+
+    public function iniciais(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $ufs = [];
+
+                foreach ($this->segmentos as $value) {
+                    $uf = $value->uf_inicial->uf;
+
+                    $uf ? array_push($ufs, trim($uf)) : '';
+                }
+
+                return implode(",", array_unique($ufs));
+            }
+        );
+    }
+
+    public function finais(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $ufs = [];
+
+                foreach ($this->segmentos as $value) {
+                    $uf = $value->uf_final->uf;
+
+                    $uf ? array_push($ufs, trim($uf)) : '';
+                }
+
+                return implode(",", array_unique($ufs));
+            }
+        );
+    }
+
+    public function brs(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $rodovias = [];
+
+                foreach ($this->segmentos as $value) {
+                    $rodovia = $value->rodovia;
+
+                    $rodovia ? array_push($rodovias, trim($rodovia)) : '';
+                }
+
+                return implode(",", array_unique($rodovias));
+            }
+        );
     }
 
     public function licencaServicos(): HasMany

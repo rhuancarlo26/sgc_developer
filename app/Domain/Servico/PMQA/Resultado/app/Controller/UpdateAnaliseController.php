@@ -2,7 +2,7 @@
 
 namespace App\Domain\Servico\PMQA\Resultado\app\Controller;
 
-use App\Domain\Servico\PMQA\Resultado\app\Requests\StoreAnaliseRequest;
+use App\Domain\Servico\PMQA\Resultado\app\Requests\UpdateAnaliseRequest;
 use App\Domain\Servico\PMQA\Resultado\app\Services\ResultadoService;
 use App\Models\Contrato;
 use App\Models\ServicoPmqaResultado;
@@ -17,27 +17,21 @@ class UpdateAnaliseController extends Controller
   {
   }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado, StoreAnaliseRequest $request): RedirectResponse
+  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado, UpdateAnaliseRequest $request): RedirectResponse
   {
-    $analisesFiltradas = array_filter($request->validated('analises'), function ($value) {
-      return !is_null($value);
-    });
+    $image = $request->validated('imagem');
+
+    $image = str_replace('data:image/png;base64,', '', $image);
+    $image = str_replace(' ', '+', $image);
+
+    $imageData = base64_decode($image);
 
     $post = [
       'resultado_id' => $request->validated('resultado_id'),
-      'analises' => $analisesFiltradas
+      'parametro_id' => $request->validated('parametro_id'),
+      'analise' => $request->validated('analises')[$request->validated('parametro_id')],
+      'imagem' => $imageData
     ];
-
-    $resultado->load(['analises']);
-
-    if (count($resultado->analises)) {
-      foreach ($resultado->analises as $value) {
-        $post['analises'][$value->parametro_id] = [
-          'id' => $value->id,
-          'analise' => $post['analises'][$value->parametro_id]
-        ];
-      }
-    }
 
     $response = $this->resultadoService->updateAnalises($post);
 

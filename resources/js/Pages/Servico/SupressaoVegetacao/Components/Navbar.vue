@@ -68,15 +68,15 @@ const getAprovacao = () => {
                               active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.execucao.pilhas*"
                               :route-param="{ contrato: contrato.id, servico: servico.id }" title="Pilhas" />
 
-                            <NavDropdownLink route-name="contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index"
-                              active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv*"
+                            <NavDropdownLink route-name="contratos.contratada.servicos.supressao-vegetacao.execucao.destinacao.index"
+                              active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.execucao.destinacao*"
                               :route-param="{ contrato: contrato.id, servico: servico.id }" title="Destinação" />
 
                         </NavDropdown>
 
-                      <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.index"
-                        active-on-route-prefix="contratos.contratada.servicos.pmqa.execucao*"
-                        :param="{ contrato: contrato.id, servico: servico.id }" title="Execução"
+                      <NavLink route-name="contratos.contratada.servicos.supressao-vegetacao.resultado.index"
+                        active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.resultado*"
+                        :param="{ contrato: contrato.id, servico: servico.id }" title="Resultado"
                         :icon="IconLayoutDashboard" v-if="aprovacao.fk_status === 3"/>
 
                       <NavLink route-name="contratos.contratada.servicos.pmqa.resultado.index"

@@ -19,7 +19,19 @@ class StoreAnaliseIqaController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado, StoreAnaliseIqaRequest $request): RedirectResponse
   {
-    $response = $this->resultadoService->storeAnaliseIqa($request->validated());
+    $image = $request->validated('imagem');
+
+    $image = str_replace('data:image/png;base64,', '', $image);
+    $image = str_replace(' ', '+', $image);
+
+    $imageData = base64_decode($image);
+
+    $post = [
+      ...$request->validated(),
+      'imagem' => $imageData
+    ];
+
+    $response = $this->resultadoService->storeAnaliseIqa($post);
 
     return to_route('contratos.contratada.servicos.pmqa.resultado.resultado', ['contrato' => $contrato->id, 'servico' => $servico->id, 'resultado' => $resultado->id])->with('message', $response['request']);
   }

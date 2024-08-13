@@ -62,10 +62,9 @@ const ap = (ap) => {
 
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
-                <!-- Pesquisa-->
                 <ModelSearchFormAllColumns
                     :columns="['id', 'nomepontocoleta', 'lat_x', 'long_y', 'classificacao', 'classe', 'tipoambiente', 'uf', 'municipio', 'baciahidrografica', 'km_rodovia', 'estaca']">
-                    <template #action>
+                    <template #actionv-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
                         <a class="btn btn-info me-1" target="_blank"
                            v-if="ap(aprovacao)"
                            :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.download_modelo')">Modelo</a>
@@ -98,7 +97,8 @@ const ap = (ap) => {
                             <td class="text-center">
                                 <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon"
                                            :icon="IconEye"/>
-                                <NavLink class="btn btn-icon btn-primary me-1" v-if="ap(aprovacao)"
+                <template
+                  v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">                <NavLink class="btn btn-icon btn-primary me-1" v-if="ap(aprovacao)"
                                          route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.create"
                                          :param="{ contrato: contrato.id, servico: servico.id, ponto: item.id }"
                                          :icon="IconPencil"/>
@@ -109,7 +109,7 @@ const ap = (ap) => {
                                           as="button" method="delete" type="button" class="btn btn-icon btn-danger">
                                         <IconTrash/>
                                     </Link>
-                                </LinkConfirmation>
+                                </LinkConfirmation></template>
                             </td>
                         </tr>
                     </template>

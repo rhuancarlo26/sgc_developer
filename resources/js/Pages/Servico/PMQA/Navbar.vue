@@ -63,7 +63,8 @@ const getAprovacao = () => {
                                                     title="Vinculação de pontos"/>
                                             </NavDropdown>
 
-                                            <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.index"
+                                            <template v-if="servico.pmqa_config_lista_parecer?.status_id >= 2">
+                        <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.index"
                                                      active-on-route-prefix="contratos.contratada.servicos.pmqa.execucao*"
                                                      :param="{ contrato: contrato.id, servico: servico.id }"
                                                      title="Execução" v-if="aprovacao.fk_status === 3"
@@ -74,7 +75,11 @@ const getAprovacao = () => {
                                                      :param="{ contrato: contrato.id, servico: servico.id }"
                                                      title="Resultado" v-if="aprovacao.fk_status === 3"
                                                      :icon="IconLayoutDashboard"/>
-                                        </ul>
+                    <NavLink route-name="contratos.contratada.servicos.pmqa.relatorio.index"
+                          active-on-route-prefix="contratos.contratada.servicos.pmqa.relatorio*"
+                          :param="{ contrato: contrato.id, servico: servico.id }" title="Relatório"
+                          :icon="IconLayoutDashboard" />
+                      </template>                    </ul>
                                     </div>
                                 </div>
                             </div>
