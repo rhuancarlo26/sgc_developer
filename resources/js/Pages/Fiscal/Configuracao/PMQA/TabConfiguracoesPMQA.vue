@@ -36,9 +36,9 @@
                                 <IconDots />
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-<!--                                <a @click="abrirModalServicoFiscal(item)" class="dropdown-item" href="javascript:void(0)">-->
-<!--                                    Visualizar-->
-<!--                                </a>-->
+                                <a @click="abriVisualizacao(item)" class="dropdown-item" href="javascript:void(0)">
+                                    Visualizar
+                                </a>
                                 <a @click="abrirModalParecerFiscal(item)" class="dropdown-item" href="javascript:void(0)">
                                     Parecer
                                 </a>
@@ -51,7 +51,7 @@
     </Navbar>
 
     <ModalParecerPMQA ref="modalParecerPMQA" />
-<!--    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />-->
+    <ModalVisualizarPMQA ref="modalVisualizarPMQA" />
 
 </template>
 
@@ -59,11 +59,12 @@
 import Table from "@/Components/Table.vue";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
 import { Head } from "@inertiajs/vue3";
-import Navbar from "../Navbar.vue";
+import Navbar from "../../Navbar.vue";
 import { IconDots } from "@tabler/icons-vue";
 import { ref } from "vue";
 
 import ModalParecerPMQA from "./ModalParecerPMQA.vue";
+import ModalVisualizarPMQA from "./ModalVisualizarPMQA.vue";
 
 
 defineProps({
@@ -72,10 +73,14 @@ defineProps({
 });
 
 const modalParecerPMQA = ref();
-const modalVisualizarServicoFiscal = ref();
+const modalVisualizarPMQA = ref();
 
 const abrirModalParecerFiscal = (item) => {
     modalParecerPMQA.value.abrirModal(item);
+}
+
+const abriVisualizacao = (item) => {
+    modalVisualizarPMQA.value.abrirModal(item);
 }
 
 </script>
