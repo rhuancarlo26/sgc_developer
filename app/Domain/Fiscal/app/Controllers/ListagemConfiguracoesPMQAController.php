@@ -21,7 +21,7 @@ class ListagemConfiguracoesPMQAController extends Controller
 
         $response = $this->servicoService->listagemConfiguracao($contrato, $searchParams, 1);
 
-        return Inertia::render('Fiscal/Configuracao/TabConfiguracoesPMQA', [
+        return Inertia::render('Fiscal/Configuracao/PMQA/TabConfiguracoesPMQA', [
             'contrato' => $contrato,
             ...$response
         ]);
