@@ -19,26 +19,27 @@ use Inertia\Response;
 
 class UpdateController extends Controller
 {
-  public function __construct(private readonly OcorrenciaService $ocorrenciaService)
-  {
-  }
+    public function __construct(private readonly OcorrenciaService $ocorrenciaService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, UpdateRequest $request): RedirectResponse
-  {
-    $nome = $request['tipo'] . '.' . $request->num_por_servico . '.' . $request->rodovia['rodovia'] . '-' . Uf::find($request->rodovia['uf_id'])->uf;
+    public function index(Contrato $contrato, Servicos $servico, UpdateRequest $request): RedirectResponse
+    {
+        $post = [
+            ...$request->validated(),
+            'id_servico' => $servico->id,
+            'dias_restantes' => $request->prazo
+        ];
 
-    $post = [
-      ...$request->validated(),
-      'nome_id' => $nome,
-      'id_servico' => $servico->id,
-      'id_rodovia' => $request->rodovia['id'],
-      'id_uf' => $request->rodovia['uf_id'],
-      'id_lote' => $request->lote['id'],
-      'dias_restantes' => $request->prazo
-    ];
+        if ($request->form === 1) {
+            $post['nome_id'] = $request['tipo'] . '.' . $request->num_por_servico . '.' . $request->rodovia['rodovia'] . '-' . Uf::find($request->rodovia['uf_id'])->uf;
+            $post['id_rodovia'] = $request->rodovia['id'];
+            $post['id_uf'] = $request->rodovia['uf_id'];
+            $post['id_lote'] = $request->lote['id'];
+        }
 
-    $response = $this->ocorrenciaService->update($post);
+        $response = $this->ocorrenciaService->update($post);
 
-    return to_route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'ocorrencia' => $request->id])->with('message', $response['request']);
-  }
+        return to_route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'ocorrencia' => $request->id])->with('message', $response['request']);
+    }
 }
