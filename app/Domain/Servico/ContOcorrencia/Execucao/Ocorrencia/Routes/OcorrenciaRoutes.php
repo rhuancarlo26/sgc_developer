@@ -17,6 +17,8 @@ use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Controller\VisualizarI
 use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Controller\VisualizarArquivoVistoriaController;
 use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Controller\StoreVistoriaArquivoController;
 use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Controller\DeleteVistoriaArquivoController;
+use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Controller\DeleteController;
+use App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Controller\DeleteVistoriaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('{contrato}/{servico}/', [IndexController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index');
@@ -31,9 +33,9 @@ Route::get('{contrato}/{servico}/visualizar_registro/{registro}', [VisualizarReg
 Route::post('{contrato}/{servico}/update', [UpdateController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.update');
 Route::post('{contrato}/{servico}/update_vistoria', [UpdateVistoriaController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.update_vistoria');
 Route::post('{contrato}/{servico}/enviar_ocorrencia', [EnviarOcorrenciaController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.enviar_ocorrencia');
-Route::get('{contrato}/{servico}/delete/{ocorrencia}', [DeleteVistoriaImagemController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.delete');
+Route::get('{contrato}/{servico}/delete/{ocorrencia}', [DeleteController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.delete');
 Route::delete('{contrato}/{servico}/delete_registro/{registro}', [DeleteRegistroController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.delete_registro');
-Route::delete('{contrato}/{servico}/delete_vistoria/{vistoria}', [DeleteVistoriaImagemController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.delete_vistoria');
+Route::delete('{contrato}/{servico}/delete_vistoria/{vistoria}', [DeleteVistoriaController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.delete_vistoria');
 Route::delete('{contrato}/{servico}/{ocorrencia}/{vistoria}/delete_vistoria_imagem/{imagem}', [DeleteVistoriaImagemController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.delete_vistoria_imagem');
 Route::delete('{contrato}/{servico}/{ocorrencia}/{vistoria}/delete_vistoria_arquivo/{arquivo}', [DeleteVistoriaArquivoController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.delete_vistoria_arquivo');
 Route::get('{contrato}/{servico}/{ocorrencia}/{vistoria}/visualizar_vistoria_imagem/{imagem}', [VisualizarImagemVistoriaController::class, 'index'])->name('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.visualizar_vistoria_imagem');

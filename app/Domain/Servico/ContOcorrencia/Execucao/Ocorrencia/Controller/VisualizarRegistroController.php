@@ -21,8 +21,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class VisualizarRegistroController extends Controller
 {
-  public function index(Contrato $contrato, Servicos $servico, ServicoConOcorrSupervicaoExecOcorrenciaRegistro $registro): BinaryFileResponse
-  {
-    return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . $registro->caminho_arquivo);
-  }
+    public function index(Contrato $contrato, Servicos $servico, ServicoConOcorrSupervicaoExecOcorrenciaRegistro $registro): BinaryFileResponse
+    {
+        return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $registro->caminho_arquivo);
+    }
 }

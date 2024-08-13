@@ -18,14 +18,14 @@ use Inertia\Response;
 
 class DeleteController extends Controller
 {
-  public function __construct(private readonly OcorrenciaService $ocorrenciaService)
-  {
-  }
+    public function __construct(private readonly OcorrenciaService $ocorrenciaService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoConOcorrOcorrenciSupervisaoExecOcorrencia $ocorrencia): RedirectResponse
-  {
-    $response = $this->ocorrenciaService->destroy(['id' => $ocorrencia->id]);
+    public function index(Contrato $contrato, Servicos $servico, ServicoConOcorrOcorrenciSupervisaoExecOcorrencia $ocorrencia): RedirectResponse
+    {
+        $response = $this->ocorrenciaService->destroy(['id' => $ocorrencia->id]);
 
-    return to_route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index', ['contrato' => $contrato->id, 'servico' => $servico->id])->with('message', $response['request']);
-  }
+        return to_route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index', ['contrato' => $contrato->id, 'servico' => $servico->id])->with('message', $response['request']);
+    }
 }
