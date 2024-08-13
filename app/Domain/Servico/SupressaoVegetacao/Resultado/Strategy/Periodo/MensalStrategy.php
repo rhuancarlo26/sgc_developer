@@ -13,4 +13,9 @@ class MensalStrategy implements DateSettingStrategy
             'dt_final' => date("Y-m-t", strtotime($inicio)) . ' 23:59:59'
         ];
     }
+
+    public function getDate(string $dataIncio): string
+    {
+        return date("Y-m", strtotime($dataIncio));
+    }
 }
