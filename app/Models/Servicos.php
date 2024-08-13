@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -63,5 +64,10 @@ class Servicos extends Model
     public function pmqa_config_lista_parecer()
     {
         return $this->hasOne(ServicoPmqaConfiguracaoParecer::class, 'servico_id');
+    }
+
+    public function cont_ocorr_parecer_configuracao()
+    {
+        return $this->hasOne(ServicoContOcorrSupervisaoParecerConfiguracao::class, 'fk_servico');
     }
 }
