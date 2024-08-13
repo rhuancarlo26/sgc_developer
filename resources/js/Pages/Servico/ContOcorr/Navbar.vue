@@ -28,13 +28,19 @@ const porps = defineProps({
                     <ul class="navbar-nav">
                       <NavDropdown prefix="contratos.contratada.servicos.pmqa.configuracao*" title="Configurações"
                         :icon="IconLayoutDashboard">
-
                         <NavDropdownLink
                           route-name="contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index"
                           :route-param="{ contrato: contrato.id, servico: servico.id }" title="Empreendimento" />
                         <NavDropdownLink
                           route-name="contratos.contratada.servicos.cont_ocorrencia.configuracao.lote_obra.index"
                           :route-param="{ contrato: contrato.id, servico: servico.id }" title="Lote de obra" />
+                      </NavDropdown>
+
+                      <NavDropdown prefix="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia*"
+                        title="Execução" :icon="IconLayoutDashboard">
+                        <NavDropdownLink
+                          route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index"
+                          :route-param="{ contrato: contrato.id, servico: servico.id }" title="Ocorrência" />
                       </NavDropdown>
                     </ul>
                   </div>

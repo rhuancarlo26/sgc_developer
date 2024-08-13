@@ -38,7 +38,9 @@
                             <td>{{ item.especificacao }}</td>
                             <td>
                                 <span @click="abrirModalLicenca(item)" v-if="item.condicionantes.length">
-                                    {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''}` }}
+                                    {{
+                                        `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''}`
+                                    }}
                                 </span>
                             </td>
                             <td class="text-center">
@@ -68,16 +70,17 @@
                                        :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
-                                    <a v-else-if="item.servico_tipo_id === 7" class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index', { contrato: contrato.id, servico: item.id })">
-                                    </a>
                                     <a v-else-if="item.servico === 2 && item.status_aprovacao === 3" class="dropdown-item"
                                        :href="route('contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
                                     <a v-if="item.servico === 6  && item.status_aprovacao === 3" class="dropdown-item"
                                        :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index', { contrato: contrato.id, servico: item.id })">
+                                        :href="route('contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
+                                    </a>
+                                    <a v-else-if="item.servico_tipo_id === 7" class="dropdown-item"
+                                        :href="route('contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index', { contrato: contrato.id, servico: item.id })">
                                     </a>
                                     <a class="dropdown-item"
                                        :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
