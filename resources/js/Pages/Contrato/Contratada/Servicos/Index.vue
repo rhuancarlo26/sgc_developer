@@ -3,12 +3,12 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Table from "@/Components/Table.vue";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
+import {Head, Link, router} from "@inertiajs/vue3";
 import Navbar from "../Navbar.vue";
-import { IconDots } from "@tabler/icons-vue";
+import {IconDots} from "@tabler/icons-vue";
 import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
 import ModalVisualizarServico from "./ModalVisualizarServico.vue";
-import { ref } from "vue";
+import {ref} from "vue";
 
 defineProps({
     contrato: Object,
@@ -34,7 +34,7 @@ const deleteServico = (servico_id) => {
 
 <template>
 
-    <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
+    <Head :title="`${contrato.contratada.slice(0, 10)}...`"/>
 
     <AuthenticatedLayout>
 
@@ -44,10 +44,10 @@ const deleteServico = (servico_id) => {
                     { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
                     { route: '#', label: contrato.contratada }
                 ]
-                    " />
+                    "/>
                 <div class="container-buttons">
                     <Link class="btn btn-info me-2" :href="route('contratos.contratada.servicos.create', contrato.id)">
-                    Cadastrar serviço
+                        Cadastrar serviço
                     </Link>
                 </div>
             </div>
@@ -58,11 +58,11 @@ const deleteServico = (servico_id) => {
 
 
                 <!-- Pesquisa-->
-                <ModelSearchForm :search-columns="{}" />
+                <ModelSearchForm :search-columns="{}"/>
 
                 <!-- Listagem-->
                 <Table :columns="['Tema', 'Serviço', 'Especificação', 'Licença', 'Status', 'Ação']" :records="servicos"
-                    table-class="table-hover">
+                       table-class="table-hover">
                     <template #body="{ item }">
                         <tr>
                             <td>{{ item.tema?.nome }}</td>
@@ -70,8 +70,10 @@ const deleteServico = (servico_id) => {
                             <td>{{ item.especificacao }}</td>
                             <td>
                                 <span @click="abrirModalLicenca(item)" v-if="item.condicionantes.length">
-                                    {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''} -
-                                    ${item.condicionantes[0]?.descricao ?? ''}` }}
+                                    {{
+                                        `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''} -
+                                    ${item.condicionantes[0]?.descricao ?? ''}`
+                                    }}
                                 </span>
                             </td>
                             <td class="text-center">
@@ -87,26 +89,27 @@ const deleteServico = (servico_id) => {
                             </td>
                             <td class="text-center">
                                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
-                                    data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <IconDots />
+                                        data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <IconDots/>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <a @click="abrirModalServico(item)" class="dropdown-item" href="javascript:void(0)">
                                         Visualizar
                                     </a>
                                     <a v-if="item.servico_tipo_id === 1" class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
+                                       :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
                                     <a v-else-if="item.servico_tipo_id === 6" class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index', { contrato: contrato.id, servico: item.id })">
+                                       :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
                                     <a v-else-if="item.servico_tipo_id === 7" class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index', { contrato: contrato.id, servico: item.id })">
+                                       :href="route('contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index', { contrato: contrato.id, servico: item.id })">
+                                        Gerenciar
                                     </a>
                                     <a class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
+                                       :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
                                         Editar
                                     </a>
                                     <a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)">
@@ -120,8 +123,8 @@ const deleteServico = (servico_id) => {
             </template>
         </Navbar>
 
-        <ModalVisualizarLicenca ref="modalVisualizarLicenca" />
-        <ModalVisualizarServico ref="modalVisualizarServico" />
+        <ModalVisualizarLicenca ref="modalVisualizarLicenca"/>
+        <ModalVisualizarServico ref="modalVisualizarServico"/>
 
     </AuthenticatedLayout>
 </template>
