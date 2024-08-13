@@ -39,8 +39,8 @@ class VeiculoRecursoService extends BaseModelService
 
     public function salvarVeiculo(array $request): array
     {
+        $request['cod_veiculos'] = $request['cod_veiculos']['id'];
         $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
-
         return [
             'veiculo' => $response['model'],
             'request' => $response['request']
