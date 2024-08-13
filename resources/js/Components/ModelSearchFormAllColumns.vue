@@ -41,7 +41,9 @@ const delayedSearch = () => {
 
 const search = () => {
     if (!q.processing) {
-        q.get(route(route().current(), route().params));
+        q.get(route(route().current(), route().params), {
+            preserveScroll: true,
+        });
     }
 };
 
