@@ -27,6 +27,14 @@ class LicencaService extends BaseModelService
             ->appends($searchParams);
     }
 
+    public function all(array $searchParams, bool $arquivado = false)
+    {
+        return $this->searchAllColumns(...$searchParams)
+            ->with(relations: 'tipo')
+            ->where('arquivado', $arquivado)
+            ->get();
+    }
+
     public function getLicenca(int $id_licenca)
     {
         return Licenca::where('id', $id_licenca)->first();

@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Domain\Servico\SupressaoVegetacao\Configuracao\PlanoSupressao\Services;
+
+use App\Domain\Licenca\Shapefile\Services\LicencaShapefileService;
+use App\Models\PlanoSupressao;
+use App\Models\Servicos;
+use App\Shared\Abstract\BaseModelService;
+use App\Shared\Traits\Deletable;
+use App\Shared\Traits\GenerateCode;
+use App\Shared\Traits\Searchable;
+use App\Shared\Utils\ArquivoUtils;
+use App\Shared\Utils\DataManagement;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+class PlanoSupressaoService extends BaseModelService
+{
+    use Searchable, Deletable, GenerateCode;
+
+    protected string $modelClass = PlanoSupressao::class;
+
+    public function __construct(
+        DataManagement $dataManagement,
+        private readonly LicencaShapefileService $licencaShapefileService,
+        private readonly ArquivoUtils $arquivoUtils,
+    )
+    {
+        parent::__construct($dataManagement);
+    }
+
+    public function index(Servicos $servico): LengthAwarePaginator
+    {
+        return $this->model->query()
+            ->with(['arquivo'])
+            ->where('servico_id', $servico->id)
+            ->paginate();
+    }
+
+    public function store(array $request): array
+    {
+        $shapeEmApp = $request['local_shape_em_app'];
+        if ($shapeEmApp) {
+            $request['local_shape_em_app'] = $this->licencaShapefileService->getFeatureCollection(file: $shapeEmApp);
+        }
+
+        $shapeForaApp = $request['local_shape_fora_app'];
+        if ($shapeForaApp) {
+            $request['local_shape_fora_app'] = $this->licencaShapefileService->getFeatureCollection(file: $shapeForaApp);
+        }
+
+        $doc = $request['doc'];
+        if ($doc) {
+            $arquivo = $this->arquivoUtils->salvar(arquivo: $doc, diretorio: 'public/uploads/supressao/plano/', prefixo: 'PS');
+            $request['arquivo_id'] = $arquivo?->id;
+            unset($request['doc']);
+        }
+
+        return $this->dataManagement->create(entity: $this->modelClass, infos: [
+            ...$request,
+            'chave' => $this->getCodigo(prefix: 'PS'),
+        ]);
+    }
+}

@@ -98,9 +98,12 @@ const deleteServico = (servico_id) => {
                                         :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
+                                    <a v-else-if="item.servico_tipo_id === 6" class="dropdown-item"
+                                        :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index', { contrato: contrato.id, servico: item.id })">
+                                        Gerenciar
+                                    </a>
                                     <a v-else-if="item.servico_tipo_id === 7" class="dropdown-item"
                                         :href="route('contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index', { contrato: contrato.id, servico: item.id })">
-                                        Gerenciar
                                     </a>
                                     <a class="dropdown-item"
                                         :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
