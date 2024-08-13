@@ -97,4 +97,9 @@ class Licenca extends Model
             }
         );
     }
+
+    public function licencaServicos(): HasMany
+    {
+        return $this->hasMany(ServicoLicenca::class, 'licenca_id');
+    }
 }

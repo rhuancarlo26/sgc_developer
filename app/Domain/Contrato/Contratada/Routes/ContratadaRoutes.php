@@ -93,6 +93,7 @@ Route::prefix('/contratada')->group(function () {
         Route::prefix('servico')->group(function () {
             require __DIR__ . '/../../../Servico/PMQA/app/Routes/PMQARoutes.php';
             require __DIR__ . '/../../../Servico/ContOcorrencia/app/Routes/ContOcorrenciaRoutes.php';
+            require __DIR__ . '/../../../Servico/SupressaoVegetacao/app/Routes/SupressaoVegetacaoRoutes.php';
         });
     });
 });
