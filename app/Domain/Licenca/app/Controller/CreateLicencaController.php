@@ -17,7 +17,7 @@ class CreateLicencaController extends Controller
     public function index(Licenca|null $licenca): Response
     {
         $licenca?->load([
-            'tipo_licenca',
+            'tipo',
             'segmentos'
         ]);
 

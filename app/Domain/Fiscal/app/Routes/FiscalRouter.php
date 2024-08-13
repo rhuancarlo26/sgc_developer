@@ -5,6 +5,7 @@ use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesPMQAController;
 use App\Domain\Fiscal\app\Controllers\ListagemServicosController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesSupressaoVegetacaoController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesAfugentamentoController;
+use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesControleOcorrenciaController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('fiscal')->group(function () {
@@ -22,6 +23,9 @@ Route::prefix('fiscal')->group(function () {
 
         Route::get('{contrato}/configuracoes/afugentamento', [ListagemConfiguracoesAfugentamentoController::class, 'index'])
             ->name('fiscal.configuracoes.afugentamento.index');
+
+        Route::get('{contrato}/configuracoes/ocorrencia', [ListagemConfiguracoesControleOcorrenciaController::class, 'index'])
+            ->name('fiscal.configuracoes.ocorrencia.index');
     });
 
     require __DIR__ . '/../../Parecer/Routes/ParecerRouter.php';

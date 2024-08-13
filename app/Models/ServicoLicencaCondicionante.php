@@ -16,7 +16,7 @@ class ServicoLicencaCondicionante extends Model
 
     public function licenca()
     {
-        return $this->belongsTo(Licenca::class, 'licenca_id');
+        return $this->belongsTo(Licenca::class, 'id_licenca');
     }
 
     public function condicionante()
