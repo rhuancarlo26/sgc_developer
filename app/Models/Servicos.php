@@ -16,6 +16,11 @@ class Servicos extends Model
     protected $table = 'servicos';
     protected $guarded = ['id', 'created_at'];
 
+    public function contrato(): BelongsTo
+    {
+        return $this->belongsTo(Contrato::class, 'contrato_id');
+    }
+
     public function status(): BelongsTo
     {
         return $this->belongsTo(ServicoStatus::class, 'servico_status_id');

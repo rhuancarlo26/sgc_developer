@@ -105,8 +105,7 @@ defineExpose({abrirModal});
                     <InputError message=""/>
                 </div>
             </div>
-            <hr>
-            <div class="row">
+            <div class="row mb-4">
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table card-table table-bordered table-hover">
