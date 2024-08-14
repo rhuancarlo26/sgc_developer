@@ -18,7 +18,9 @@ import {IconMap} from "@tabler/icons-vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils";
 import ModalGerarACA from "./ModalGerarACA.vue";
 import ModalVisualizarACA from "./ModelVisualizarACA.vue";
+import ModalEnviarACA from "./ModalEnviarACA.vue";
 
+const modalEnviarACA = ref({});
 const modalGerarACA = ref({});
 const modalVisualizarACA = ref({});
 
@@ -26,6 +28,7 @@ const props = defineProps({
     contrato: {type: Object},
     servico: {type: Object},
     acas: {type: Object},
+    acas_nao_enviadas: {type: Array},
     lotes: {type: Array},
     ocorrencias_aprovadas: {type: Array}
 });
@@ -36,6 +39,10 @@ const abrirModalGerarACA = () => {
 
 const abrirModalVisualizarACA = (item) => {
     modalVisualizarACA.value.abrirModal(item);
+}
+
+const abrirModalEnviarACA = () => {
+    modalEnviarACA.value.abrirModal();
 }
 
 </script>
@@ -59,6 +66,8 @@ const abrirModalVisualizarACA = (item) => {
             <template #body>
                 <ModelSearchFormAllColumns :columns="['nome_id', 'intensidade', 'lote.nome_id', 'lote.empresa']">
                     <template #action>
+                        <NavButton @click="abrirModalEnviarACA()" type-button="primary"
+                                   title="Enviar ACA"/>
                         <NavButton @click="abrirModalGerarACA()" type-button="success"
                                    title="Gerar ACA"/>
                     </template>
@@ -71,7 +80,7 @@ const abrirModalVisualizarACA = (item) => {
                             <td>{{ item.nome_id }}</td>
                             <td>{{ dateTimeFormat(item.data_aca) }}</td>
                             <td>
-                                <span v-for="rnc in item.rncs" :key="rnc"
+                                <span v-for="rnc in item.rncs" :key="rnc.id"
                                       class="badge bg-warning text-white m-1">
                                     {{ rnc.nome_id }}
                                 </span>
@@ -100,6 +109,7 @@ const abrirModalVisualizarACA = (item) => {
         <ModalGerarACA :contrato="contrato" :servico="servico" :ocorrencias="ocorrencias_aprovadas" :lotes="lotes"
                        ref="modalGerarACA"/>
         <ModalVisualizarACA ref="modalVisualizarACA"/>
+        <ModalEnviarACA :contrato="contrato" :servico="servico" :acas="acas_nao_enviadas" ref="modalEnviarACA"/>
 
     </AuthenticatedLayout>
 </template>

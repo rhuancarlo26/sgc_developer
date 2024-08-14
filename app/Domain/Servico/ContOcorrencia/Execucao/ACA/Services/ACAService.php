@@ -25,6 +25,7 @@ class ACAService extends BaseModelService
                 ->where('id_servico', $servico_id)
                 ->paginate()
                 ->appends($searchParams),
+            'acas_nao_enviadas' => $this->modelClass::with(['lote', 'rncs'])->where('id_servico', $servico_id)->where('enviado', 'Não')->get(),
             'lotes' => $this->modelClassLote::where('id_servico', $servico_id)->get(),
             'ocorrencias_aprovadas' => $this->modelClassOcorrencia::with(['lote'])->where('id_servico', $servico_id)->get()
         ];
@@ -42,5 +43,27 @@ class ACAService extends BaseModelService
     public function destroy(int $aca_id): array
     {
         return $this->dataManagement->delete(entity: $this->modelClass, id: $aca_id);
+    }
+
+    public function enviarACA(array $post)
+    {
+        $response = [
+            'request' => [
+                'type' => 'error',
+                'content' => 'Falha ao cadastrar!'
+            ]
+        ];
+
+        foreach ($post['acas'] as $aca) {
+            try {
+                $response = $this->dataManagement->update(entity: $this->modelClass, infos: [
+                    'enviado' => 'Sim'
+                ], id: $aca['id']);
+            } catch (\Exception $ex) {
+
+            }
+
+            return $response;
+        }
     }
 }
