@@ -1,22 +1,21 @@
 <script setup>
 import Modal from "@/Components/Modal.vue";
-import { ref } from "vue";
-import {IconEye, IconPencil, IconTrash} from "@tabler/icons-vue";
-import NavButton from "@/Components/NavButton.vue";
+import {ref} from "vue";
 import Table from "@/Components/Table.vue";
-import NavLink from "@/Components/NavLink.vue";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
-import {Link} from "@inertiajs/vue3";
 
 const modalVisualizacao = ref(null);
 const pmqa = ref(null);
+const pontos = ref(null);
+const parametro = ref(null);
 
 const abrirModal = (item) => {
-    pmqa.value = item;
+    pontos.value = item.pontos
+    parametro.value = item.parametros
     modalVisualizacao.value.getBsModal().show();
 }
 
-defineExpose({ abrirModal });
+
+defineExpose({abrirModal});
 </script>
 
 <template>
@@ -25,81 +24,82 @@ defineExpose({ abrirModal });
             <div class="accordion" id="accordion-example">
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="heading-1">
-                        <button class="accordion-button " type="button" data-bs-toggle="collapse"
-                            data-bs-target="#introducao" aria-expanded="true">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#pontos" aria-expanded="false">
                             Pontos
                         </button>
                     </h2>
-                    <div id="introducao" class="accordion-collapse collapse show" data-bs-parent="#accordion-example">
+                    <div id="pontos" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
                         <div class="accordion-body pt-0">
-                            <pre>
-                                {{pmqa}}
-                            </pre>
-<!--                            <Table-->
-<!--                                :columns="['Cod. ponto', 'Pt. coleta', 'Latitude', 'Longitude', 'Classificação', 'Classe', 'Tipo de ambiente', 'UF', 'Municipio', 'Bacia hidrografica', 'Km rodovia', 'Estaca', 'Ação']"-->
-<!--                                :records="pontos" table-class="table-hover">-->
-<!--                                <template #body="{ item }">-->
-<!--                                    <tr>-->
-<!--                                        <td class="text-center">{{ item.id }}</td>-->
-<!--                                        <td class="text-center">{{ item.nome_ponto_coleta }}</td>-->
-<!--                                        <td class="text-center">{{ item.lat_x }}</td>-->
-<!--                                        <td class="text-center">{{ item.long_y }}</td>-->
-<!--                                        <td>{{ item.classificacao }}</td>-->
-<!--                                        <td class="text-center">{{ item.classe }}</td>-->
-<!--                                        <td class="text-center">{{ item.tipo_ambiente }}</td>-->
-<!--                                        <td class="text-center">{{ item.UF }}</td>-->
-<!--                                        <td>{{ item.municipio }}</td>-->
-<!--                                        <td>{{ item.bacia_hidrografica }}</td>-->
-<!--                                        <td class="text-center">{{ item.km_rodovia }}</td>-->
-<!--                                        <td class="text-center">{{ item.estaca }}</td>-->
-<!--                                        <td class="text-center">-->
-<!--                                            <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon"-->
-<!--                                                       :icon="IconEye"/>-->
-<!--                                            <template-->
-<!--                                                v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">-->
-<!--                                                <NavLink class="btn btn-icon btn-primary me-1" v-if="ap(aprovacao)"-->
-<!--                                                         route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.create"-->
-<!--                                                         :param="{ contrato: contrato.id, servico: servico.id, ponto: item.id }"-->
-<!--                                                         :icon="IconPencil"/>-->
-<!--                                                <LinkConfirmation v-slot="confirmation" v-if="ap(aprovacao)"-->
-<!--                                                                  :options="{ text: 'A remoção de um ponto será permanente.' }">-->
-<!--                                                    <Link :onBefore="confirmation.show"-->
-<!--                                                          :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.delete', { contrato: contrato.id, servico: servico.id, ponto: item.id })"-->
-<!--                                                          as="button" method="delete" type="button" class="btn btn-icon btn-danger">-->
-<!--                                                        <IconTrash/>-->
-<!--                                                    </Link>-->
-<!--                                                </LinkConfirmation>-->
-<!--                                            </template>-->
-<!--                                        </td>-->
-<!--                                    </tr>-->
-<!--                                </template>-->
-<!--                            </Table>-->
+                            <table class="table card-table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">Cod. ponto</th>
+                                    <th class="text-center">Pt. coleta</th>
+                                    <th class="text-center">Latitude</th>
+                                    <th class="text-center">Longitude</th>
+                                    <th>Classificação</th>
+                                    <th class="text-center">Classe</th>
+                                    <th class="text-center">Tipo de ambiente</th>
+                                    <th class="text-center">UF</th>
+                                    <th>Municipio</th>
+                                    <th>Bacia hidrografica</th>
+                                    <th class="text-center">Km rodovia</th>
+                                    <th class="text-center">Estaca</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="item in pontos">
+                                    <td class="text-center">{{ item.id }}</td>
+                                    <td class="text-center">{{ item.nome_ponto_coleta }}</td>
+                                    <td class="text-center">{{ item.lat_x }}</td>
+                                    <td class="text-center">{{ item.long_y }}</td>
+                                    <td>{{ item.classificacao }}</td>
+                                    <td class="text-center">{{ item.classe }}</td>
+                                    <td class="text-center">{{ item.tipo_ambiente }}</td>
+                                    <td class="text-center">{{ item.UF }}</td>
+                                    <td>{{ item.municipio }}</td>
+                                    <td>{{ item.bacia_hidrografica }}</td>
+                                    <td class="text-center">{{ item.km_rodovia }}</td>
+                                    <td class="text-center">{{ item.estaca }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="heading-2">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#justificativa" aria-expanded="false">
+                                data-bs-target="#parametros" aria-expanded="false">
                             Parametros
                         </button>
                     </h2>
-                    <div id="justificativa" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
+                    <div id="parametros" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
                         <div class="accordion-body pt-0">
-                            {{ item?.justificativa }}
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="heading-3">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#objetivos" aria-expanded="false">
-                            Pontos vinculados
-                        </button>
-                    </h2>
-                    <div id="objetivos" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
-                        <div class="accordion-body pt-0">
-                            {{ item?.objetivo }}
+                            <table class="table card-table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">Nome</th>
+                                    <th class="text-center">Parâmetros</th>
+                                    <th class="text-center">Pontos vinculados</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="item in parametro">
+                                    <td>{{ item.nome }}</td>
+                                    <td>
+                                        <p v-if="item.parametros">
+                                          <span v-for="(record, i) in item.parametros" :key="parametro"
+                                                class="badge bg-warning text-white m-1">
+                                            {{ record.parametro }}
+                                          </span>
+                                        </p>
+                                    </td>
+                                    <td class="text-center"> {{ item.pontos.length }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

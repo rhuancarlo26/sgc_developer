@@ -23,8 +23,7 @@ class ListagemConfiguracoesControleOcorrenciaController extends Controller
 
         return Inertia::render('Fiscal/Configuracao/TabConfiguracoesControleOcorrencia', [
             'contrato' => $contrato,
-            ...$response,
-            'pontos' => 'teste'
+            ...$response
         ]);
     }
 }
