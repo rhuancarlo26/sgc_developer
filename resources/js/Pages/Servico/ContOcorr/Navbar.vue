@@ -50,6 +50,10 @@ const porps = defineProps({
                                                     route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.controle_rnc.index"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
                                                     title="Controle RNC"/>
+                                                <NavDropdownLink
+                                                    route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.aca.index"
+                                                    :route-param="{ contrato: contrato.id, servico: servico.id }"
+                                                    title="ACA"/>
                                             </NavDropdown>
                                         </ul>
                                     </div>
