@@ -16,8 +16,8 @@ import NavLink from "@/Components/NavLink.vue";
 import NavLinkVoid from "@/Components/NavLinkVoid.vue";
 import {IconMap} from "@tabler/icons-vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils";
-import ModalVisualizarOcorrencia from "./ModalVisualizarOcorrencia.vue";
-import ModalVisualizarOcorrenciaHistorico from "./ModalVisualizarOcorrenciaHistorico.vue";
+import ModalVisualizarOcorrencia from "../ModalOcorrencia/ModalVisualizarOcorrencia.vue";
+import ModalVisualizarOcorrenciaHistorico from "../ModalOcorrencia/ModalVisualizarOcorrenciaHistorico.vue";
 import ModalEnviarOcorrencia from "./ModalEnviarOcorrencia.vue";
 
 const modalVisualizarOcorrencia = ref({});
