@@ -18,5 +18,8 @@ Route::prefix('/cont_ocorrencia')->group(function () {
         Route::prefix('/controle_rnc')->group(function () {
             require __DIR__ . '/../../Execucao/ControleRNC/Routes/ControleRNCRoutes.php';
         });
+        Route::prefix('/aca')->group(function () {
+            require __DIR__ . '/../../Execucao/ACA/Routes/ACARoutes.php';
+        });
     });
 });
