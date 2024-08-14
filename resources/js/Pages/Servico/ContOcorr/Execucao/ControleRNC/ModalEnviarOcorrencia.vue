@@ -28,8 +28,7 @@ const props = defineProps({
 });
 
 const form = useForm({
-    ocorrencias: [],
-    url: 'contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index'
+    ocorrencias: []
 });
 
 
@@ -38,7 +37,7 @@ const abrirModal = () => {
 }
 
 const enviarOcorrencias = () => {
-    form.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.enviar_ocorrencia', {
+    form.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.controle_rnc.update', {
         contrato: props.contrato.id,
         servico: props.servico.id
     }), {
@@ -52,14 +51,12 @@ defineExpose({abrirModal});
 <template>
     <Modal ref="modalEnviarOcorrencia" title="Enviar ocorrência" modal-dialog-class="modal-xl">
         <template #body>
-            <h3></h3>
             <div class="row col mb-4">
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table card-table table-bordered table-hover">
                             <thead>
                             <tr>
-                                <th></th>
                                 <th>ID ocorrência</th>
                                 <th>Intensidade ocorrência</th>
                                 <th>Tipo ocorrência</th>
@@ -74,12 +71,14 @@ defineExpose({abrirModal});
                             <tbody>
                             <tr v-for="item in ocorrencias" :key="item.id">
                                 <td>
-                                    <input class="form-check-input m-0 align-middle" type="checkbox" :value="item"
-                                           v-model="form.ocorrencias">
+                                    <label class="form-check">
+                                        <input class="form-check-input" type="checkbox" :value="item"
+                                               v-model="form.ocorrencias">
+                                        <span class="form-check-label"> {{ item.id }} </span>
+                                    </label>
                                 </td>
                                 <td>{{ item.nome_id }}</td>
                                 <td>{{ item.intensidade }}</td>
-                                <td>{{ item.tipo }}</td>
                                 <td>{{ dateTimeFormat(item.data_ocorrencia) }}</td>
                                 <td>-</td>
                                 <td>-</td>
