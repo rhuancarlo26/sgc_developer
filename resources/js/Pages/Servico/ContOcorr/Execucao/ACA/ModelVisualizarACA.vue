@@ -95,6 +95,11 @@ defineExpose({abrirModal});
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col d-flex justify-content-end">
+                    <span><strong>Data ACA: </strong>{{ dateTimeFormat(aca.data_aca) }}</span>
+                </div>
+            </div>
         </template>
         <template #footer>
         </template>
