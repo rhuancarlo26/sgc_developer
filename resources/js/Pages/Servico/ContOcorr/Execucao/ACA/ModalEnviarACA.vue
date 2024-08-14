@@ -18,31 +18,31 @@ import {dateTimeFormat} from "@/Utils/DateTimeUtils";
 import Modal from "@/Components/Modal.vue";
 import {usePage} from "@inertiajs/vue3";
 import {IconDeviceFloppy} from "@tabler/icons-vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import InputError from "@/Components/InputError.vue";
 
-const modalEnviarOcorrencia = ref();
+const modalEnviarACA = ref();
 
 const props = defineProps({
     contrato: {type: Object},
     servico: {type: Object},
-    ocorrencias: {type: Object}
+    acas: {type: Array}
 });
 
 const form = useForm({
-    ocorrencias: [],
-    url: 'contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index'
+    acas: []
 });
 
-
 const abrirModal = () => {
-    modalEnviarOcorrencia.value.getBsModal().show();
+    modalEnviarACA.value.getBsModal().show();
 }
 
-const enviarOcorrencias = () => {
-    form.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.enviar_ocorrencia', {
+const enviarACA = () => {
+    form.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.aca.enviar_aca', {
         contrato: props.contrato.id,
         servico: props.servico.id
     }), {
-        onSuccess: () => modalEnviarOcorrencia.value.getBsModal().hide()
+        onSuccess: () => modalEnviarACA.value.getBsModal().hide()
     });
 }
 
@@ -50,42 +50,41 @@ defineExpose({abrirModal});
 </script>
 
 <template>
-    <Modal ref="modalEnviarOcorrencia" title="Enviar ocorrência" modal-dialog-class="modal-xl">
+    <Modal ref="modalEnviarACA" title="Cadastro de Atestados de Conformidade Ambiental" modal-dialog-class="modal-xl">
         <template #body>
-            <h3></h3>
-            <div class="row col mb-4">
+            <div class="row mb-4">
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table card-table table-bordered table-hover">
                             <thead>
                             <tr>
                                 <th></th>
-                                <th>ID ocorrência</th>
-                                <th>Intensidade ocorrência</th>
-                                <th>Tipo ocorrência</th>
-                                <th>Data da ocorrência</th>
-                                <th>Data fim</th>
-                                <th>Ocorrência anterior</th>
-                                <th>Prazo correção</th>
+                                <th>ID ACA</th>
+                                <th>Data ACA</th>
+                                <th>Relação de RNC's</th>
                                 <th>Lote</th>
-                                <th>Contrutora</th>
+                                <th>Construtora</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="item in ocorrencias" :key="item.id">
+                            <tr v-for="aca in acas" :key="aca.id">
                                 <td>
-                                    <input class="form-check-input m-0 align-middle" type="checkbox" :value="item"
-                                           v-model="form.ocorrencias">
+                                    <label class="form-check">
+                                        <input class="form-check-input" type="checkbox" :value="aca"
+                                               v-model="form.acas">
+                                        <span class="form-check-label"> {{ aca.id }} </span>
+                                    </label>
                                 </td>
-                                <td>{{ item.nome_id }}</td>
-                                <td>{{ item.intensidade }}</td>
-                                <td>{{ item.tipo }}</td>
-                                <td>{{ dateTimeFormat(item.data_ocorrencia) }}</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>{{ item.prazo }}</td>
-                                <td>{{ item.lote?.nome_id }}</td>
-                                <td>{{ item.lote?.empresa }}</td>
+                                <td>{{ aca.nome_id }}</td>
+                                <td>{{ dateTimeFormat(aca.data_aca) }}</td>
+                                <td>
+                                    <span v-for="rnc in aca.rncs" :key="rnc.id"
+                                          class="badge bg-warning text-white m-1">
+                                    {{ rnc.nome_id }}
+                                </span>
+                                </td>
+                                <td>{{ aca.lote?.nome_id }}</td>
+                                <td>{{ aca.lote?.empresa }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -94,8 +93,8 @@ defineExpose({abrirModal});
             </div>
             <div class="row">
                 <div class="col d-flex justify-content-end">
-                    <NavButton @click="enviarOcorrencias()" type-button="success" :icon="IconDeviceFloppy"
-                               title="Enviar"/>
+                    <NavButton @click="enviarACA()" type-button="success" :icon="IconDeviceFloppy"
+                               title="Enviar ACA's"/>
                 </div>
             </div>
         </template>

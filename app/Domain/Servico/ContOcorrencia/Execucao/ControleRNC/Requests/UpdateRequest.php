@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Requests;
+namespace App\Domain\Servico\ContOcorrencia\Execucao\ControleRNC\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class EnviarOcorrenciaRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     public function rules(): array
     {
         return [
-            'ocorrencias' => ['required'],
-            'url' => ['required']
+            'ocorrencias' => ['required', 'array']
         ];
     }
 

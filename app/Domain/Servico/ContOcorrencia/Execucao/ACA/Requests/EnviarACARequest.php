@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Requests;
+namespace App\Domain\Servico\ContOcorrencia\Execucao\ACA\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class EnviarOcorrenciaRequest extends FormRequest
+class EnviarACARequest extends FormRequest
 {
     public function rules(): array
     {
         return [
-            'ocorrencias' => ['required'],
-            'url' => ['required']
+            'acas' => ['required', 'array'],
         ];
     }
 

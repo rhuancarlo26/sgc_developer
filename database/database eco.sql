@@ -250,7 +250,102 @@ INSERT INTO `users` (`id`, `chave`, `perfis_id`, `usuario_pai`, `id_contratada`,
 (235, '', 2, NULL, NULL, NULL, 'Milton Rocha Marinho', 'milton.marinho@dnit.gov.br', '', 0, NULL, '$2y$10$JksazuW6aGUjr4HfXgvZAebyf0S49ZmC35KWRbMxu296dwCCpbj0y', NULL, NULL, 364950, '20471718149', 1, 0, '2024-07-15 09:46:46', '2024-07-15 14:21:16', NULL);
 
 
-UPDATE `ecosistema`.`users` SET `email_verified_at` = '2024-07-24 12:36:13' WHERE (`id` = '1');
+UPDATE `users` SET `email_verified_at` = '2024-07-24 12:36:13' WHERE (`id` = '1');
+
+CREATE TABLE `password_reset_tokens` (
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`email`)
+);
+
+
+CREATE TABLE `failed_jobs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
+);
+
+
+CREATE TABLE `personal_access_tokens` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `tokenable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_id` bigint unsigned NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `abilities` text COLLATE utf8mb4_unicode_ci,
+  `last_used_at` timestamp NULL DEFAULT NULL,
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
+  KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
+);
+
+CREATE TABLE `permissions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permissions_name_guard_name_unique` (`name`,`guard_name`)
+);
+
+
+CREATE TABLE `roles` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_name_guard_name_unique` (`name`,`guard_name`)
+);
+
+
+INSERT INTO `roles`(`name`,`guard_name`,`created_at`,`updated_at`)VALUES('Super Admin','web','2024-07-24 12:08:35','2024-07-24 12:08:35');
+
+CREATE TABLE `model_has_permissions` (
+  `permission_id` bigint unsigned NOT NULL,
+  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`permission_id`,`model_id`,`model_type`),
+  KEY `model_has_permissions_model_id_model_type_index` (`model_id`,`model_type`),
+  CONSTRAINT `model_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE
+);
+
+
+CREATE TABLE `model_has_roles` (
+  `role_id` bigint unsigned NOT NULL,
+  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`role_id`,`model_id`,`model_type`),
+  KEY `model_has_roles_model_id_model_type_index` (`model_id`,`model_type`),
+  CONSTRAINT `model_has_roles_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+);
+
+
+INSERT INTO `model_has_roles`
+(`role_id`,`model_type`,`model_id`) VALUES
+(1, 'App\Models\User', 1);
+
+
+CREATE TABLE `role_has_permissions` (
+  `permission_id` bigint unsigned NOT NULL,
+  `role_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`permission_id`,`role_id`),
+  KEY `role_has_permissions_role_id_foreign` (`role_id`),
+  CONSTRAINT `role_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `role_has_permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+);
 
 
 CREATE TABLE `contratos` (
@@ -285,7 +380,7 @@ CREATE TABLE `contratos` (
   `tipo_contrato` int(11) DEFAULT 1,
   `introducao` text DEFAULT NULL,
   `snv` varchar(45) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+);
 
 INSERT INTO `contratos` (`id`, `chave`, `id_contratada`, `usuarios_id`, `id_rodovia`, `id_uf`, `sk_contrato`, `numero_contrato`, `cnpj`, `contratada`, `data_inicio`, `data_termino`, `processo_sei`, `trecho`, `obj_contrato`, `situacao`, `edital`, `tipo_licitacao`, `modalidade`, `unidade_gestora`, `fiscal_contrato`, `preco_inicial`, `total_aditivos`, `total_reajuste`, `total`, `created_at`, `updated_at`, `deleted_at`, `tipo_contrato`, `introducao`, `snv`) VALUES
 (1, '', 1, 2, 105, 14, 123456, '00001/2020', '12280150000185', 'Empresa Teste S/A', '2022-07-01 00:00:00', '2024-12-28 00:00:00', '654321', 'teste', 'Empresa de teste', 'ATIVO', '0000', 'TÉCNICA E PREÇO', 'Pregão Eletrônico', 'Superintendência do Dnit', 'Cleber', '0', '0', '0', '0', '2024-01-01 23:23:23', '2024-06-21 11:06:29', '2024-01-01 23:23:23', 1, 'O Departamento Nacional de Infraestrutura de Transportes (DNIT),\nresponsável pelas obras de duplicação da BR-381/MG, em seu trecho\ncompreendido entre Belo Horizonte e Governador Valadares, perfazendo 303\nkm de extensão, apresenta o Relatório de Atendimento de Condicionantes,\nque trata da situação atualizada (dezembro/2022) e documentada das\ncondicionantes da LI n. 001/2020.\nConforme determinado pelo DNIT no Ofício n. 183123/2022/SEMABCOENGE-\nMG (SEI/DNIT 12675652), o Relatório visa atender a Condicionante\n19 da Licença de Instalação n. 001/2020:\nCond. 19 - Manter arquivadas no empreendimento cópias impressas, na\níntegra, dos relatórios de cumprimento das condicionantes, acompanhadas da\nrespectiva ART, as quais deverão ficar disponíveis ao órgão ambiental durante\na vigência da licença ambiental e pelo período de 05 (cinco) anos após o\nvencimento da mesma, podendo ser solicitadas a qualquer tempo, inclusive\npelo agente de fiscalização ambiental.\nDesse modo, esse Relatório tão logo aprovado pelo SEMAB/DNIT será\ndisponibilizado à população, em via impressa e digital, nas Unidades Locais\ndo DNIT em Governador Valadares e Contagem e na Superintendência\nRegional em Belo Horizonte - MG.\nEntre os Anexos 1 ao 18 estão apresentados os documentos\ncomprobatórios do atendimento das condicionantes e no Anexo 19, as\nAnotações de Responsabilidade Técnica – ART da equipe da Gestão\nAmbiental, responsável pela elaboração do presente relatório\n\nteste 25', NULL),
@@ -348,16 +443,16 @@ INSERT INTO `contratos` (`id`, `chave`, `id_contratada`, `usuarios_id`, `id_rodo
 
 
 
-CREATE TABLE `ecosistema`.`contrato_tipos` (
+CREATE TABLE `contrato_tipos` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `nome` VARCHAR(45) NOT NULL,
   `created_at` TIMESTAMP NULL,
   `updated_at` TIMESTAMP NULL,
   PRIMARY KEY (`id`));
 
-INSERT INTO `ecosistema`.`contrato_tipos` (`nome`) VALUES ('Gestão Ambiental');
-INSERT INTO `ecosistema`.`contrato_tipos` (`nome`) VALUES ('Estudo Ambiental');
-INSERT INTO `ecosistema`.`contrato_tipos` (`nome`) VALUES ('Regularização Ambiental');
+INSERT INTO `contrato_tipos` (`nome`) VALUES ('Gestão Ambiental');
+INSERT INTO `contrato_tipos` (`nome`) VALUES ('Estudo Ambiental');
+INSERT INTO `contrato_tipos` (`nome`) VALUES ('Regularização Ambiental');
 
 
 CREATE TABLE `trecho_contrato` (
@@ -511,7 +606,7 @@ INSERT INTO `trecho_contrato` (`id`, `contrato_id`, `rodovia_id`, `uf_id`, `km_i
 
 
 
-CREATE TABLE `ecosistema`.`contrato_aditivos` (
+CREATE TABLE `contrato_aditivos` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `contrato_id` INT NOT NULL,
   `aditivo` VARCHAR(45) NULL,
@@ -525,7 +620,7 @@ CREATE TABLE `ecosistema`.`contrato_aditivos` (
   INDEX `contrato_aditivo_fk_idx` (`contrato_id` ASC) VISIBLE,
   CONSTRAINT `contrato_aditivo_fk`
     FOREIGN KEY (`contrato_id`)
-    REFERENCES `ecosistema`.`contratos` (`id`)
+    REFERENCES `contratos` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
