@@ -37,7 +37,64 @@ defineExpose({abrirModal});
     <Modal ref="modalVisualizarACA" title="Atestado de Conformidade Ambiental"
            modal-dialog-class="modal-xl">
         <template #body>
-
+            <div class="row mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table card-table table-bordered table-hover">
+                            <tbody>
+                            <tr>
+                                <th>ID ACA</th>
+                                <td>{{ aca.nome_id }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    {{
+                                        `A ${aca.servico?.contrato?.contratada}, contrato ${aca.servico?.contrato?.numero_contrato}, cujo objeto é ${aca.servico?.contrato?.objeto}
+              atesta que a empresa/consórcio ${aca.lote?.empresa}, contrato ${aca.lote?.num_contrato}, Lote
+              ${aca.lote?.nome_id}, apresentou a seguinte relação de Registros de Não Conformidades (RNC) atendidos,
+              conforme consta na tabela a seguir:`
+                                    }}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table card-table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>ID ocorrência</th>
+                                <th>Intensidade ocorrência</th>
+                                <th>Tipo ocorrência</th>
+                                <th>Data da ocorrência</th>
+                                <th>Data fim</th>
+                                <th>Ocorrência anterior</th>
+                                <th>Prazo correção</th>
+                                <th>Lote</th>
+                                <th>Empresa / Consórcio</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="rnc in aca.rncs" :key="rnc.id">
+                                <td>{{ rnc.nome_id }}</td>
+                                <td>{{ rnc.nome_id }}</td>
+                                <td>{{ rnc.intensidade }}</td>
+                                <td>{{ dateTimeFormat(rnc.data_ocorrencia) }}</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>{{ rnc.prazo }}</td>
+                                <td>{{ rnc.lote?.nome_id }}</td>
+                                <td>{{ rnc.lote?.empresa }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </template>
         <template #footer>
         </template>

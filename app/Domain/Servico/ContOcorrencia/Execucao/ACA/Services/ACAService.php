@@ -21,7 +21,7 @@ class ACAService extends BaseModelService
     {
         return [
             'acas' => $this->searchAllColumns(...$searchParams)
-                ->with(['lote', 'rncs'])
+                ->with(['servico.contrato', 'lote', 'rncs.lote'])
                 ->where('id_servico', $servico_id)
                 ->paginate()
                 ->appends($searchParams),
