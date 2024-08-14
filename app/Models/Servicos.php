@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Servicos extends Model
 {
@@ -78,16 +78,6 @@ class Servicos extends Model
         );
     }
 
-    public function parecer(): HasOne
-    {
-        return $this->hasOne(related: ServicoParecer::class, foreignKey: 'fk_servico');
-    }
-
-    public function parecerPmqa(): HasOne
-    {
-        return $this->hasOne(related: ServicoParecerPMQAConfiguracao::class, foreignKey: 'fk_servico');
-    }
-
     public function parecerSupressaoVegetacao(): HasOne
     {
         return $this->hasOne(related: ServicoParecerSupressaoConfiguracao::class, foreignKey: 'fk_servico');
@@ -98,19 +88,34 @@ class Servicos extends Model
         return $this->hasMany(ServicoLicencaCondicionante::class, 'servico_id');
     }
 
-    public function pontos()
+    public function pontos(): HasMany
     {
-        return $this->hasMany(ServicoPmqaPonto::class, 'servico_id');
+        return $this->hasMany(ServicoPmqaPonto::class, 'fk_servico');
     }
 
-    public function pmqa_config_lista_parecer()
+    public function parametros(): HasMany
+    {
+        return $this->hasMany(ServicoPmqaParametroLista::class, 'fk_servico');
+    }
+
+    public function pmqa_config_lista_parecer(): HasOne
     {
         return $this->hasOne(ServicoPmqaConfiguracaoParecer::class, 'fk_servico');
     }
 
-    public function cont_ocorr_parecer_configuracao()
+    public function cont_ocorr_parecer_configuracao(): HasOne
     {
         return $this->hasOne(ServicoContOcorrSupervisaoParecerConfiguracao::class, 'fk_servico');
+    }
+
+    public function parecer(): HasOne
+    {
+        return $this->hasOne(related: ServicoParecer::class, foreignKey: 'fk_servico');
+    }
+
+    public function parecerPmqa(): HasOne
+    {
+        return $this->hasOne(related: ServicoParecerPMQAConfiguracao::class, foreignKey: 'fk_servico');
     }
 
     public function parecerAfugentamento(): HasOne
