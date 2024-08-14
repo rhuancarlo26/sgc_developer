@@ -19,14 +19,14 @@ use Inertia\Response;
 
 class EnviarOcorrenciaController extends Controller
 {
-  public function __construct(private readonly OcorrenciaService $ocorrenciaService)
-  {
-  }
+    public function __construct(private readonly OcorrenciaService $ocorrenciaService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, EnviarOcorrenciaRequest $request): RedirectResponse
-  {
-    $response = $this->ocorrenciaService->enviarOcorrencia($request->validated());
+    public function index(Contrato $contrato, Servicos $servico, EnviarOcorrenciaRequest $request): RedirectResponse
+    {
+        $response = $this->ocorrenciaService->enviarOcorrencia($request->validated());
 
-    return to_route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index', ['contrato' => $contrato->id, 'servico' => $servico->id])->with('message', $response['request']);
-  }
+        return to_route($request->validated('url'), ['contrato' => $contrato->id, 'servico' => $servico->id])->with('message', $response['request']);
+    }
 }

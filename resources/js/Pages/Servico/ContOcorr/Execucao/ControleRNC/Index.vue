@@ -2,13 +2,13 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../../Navbar.vue";
-import {Head, Link, router} from "@inertiajs/vue3";
+import {Head, Link, router, useForm} from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import {ref} from "vue";
-import {IconDots, IconEye} from "@tabler/icons-vue";
+import {IconDeviceFloppy, IconDots, IconEye, IconSettings} from "@tabler/icons-vue";
 import {IconList} from "@tabler/icons-vue";
 import {IconPencil} from "@tabler/icons-vue";
 import {IconTrash} from "@tabler/icons-vue";
@@ -16,29 +16,57 @@ import NavLink from "@/Components/NavLink.vue";
 import NavLinkVoid from "@/Components/NavLinkVoid.vue";
 import {IconMap} from "@tabler/icons-vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils";
-import ModalVisualizarOcorrencia from "../ModalOcorrencia/ModalVisualizarOcorrencia.vue";
-import ModalVisualizarOcorrenciaHistorico from "../ModalOcorrencia/ModalVisualizarOcorrenciaHistorico.vue";
 import ModalEnviarOcorrencia from "./ModalEnviarOcorrencia.vue";
+import ModalVisualizarOcorrenciaHistorico
+    from "../ModalOcorrencia/ModalVisualizarOcorrenciaHistorico.vue";
+import ModalVisualizarOcorrencia
+    from "../ModalOcorrencia/ModalVisualizarOcorrencia.vue";
+import ModalParecerOcorrencia from "./ModalParecerOcorrencia.vue";
 
+const modalEnviarOcorrencia = ref({});
 const modalVisualizarOcorrencia = ref({});
 const modalVisualizarOcorrenciaHistorico = ref({});
-const modalEnviarOcorrencia = ref({});
+const modalParecerOcorrencia = ref({});
 
 const props = defineProps({
     contrato: {type: Object},
     servico: {type: Object},
     ocorrencias: {type: Object},
-    ocorrencias_em_aberto: {type: Array}
+    ocorrencias_fiscal: {type: Array}
 });
 
-const abrirModalOcorrencia = (item) => {
-    modalVisualizarOcorrencia.value.abrirModal(item)
-}
-const abrirModalOcorrenciaHistorico = (item) => {
-    modalVisualizarOcorrenciaHistorico.value.abrirModal(item)
-}
+const form = useForm({
+    ocorrencias: [],
+    url: 'contratos.contratada.servicos.cont_ocorrencia.execucao.controle_rnc.index'
+});
+
 const abrirModalEnviarOcorrencia = () => {
-    modalEnviarOcorrencia.value.abrirModal()
+    modalEnviarOcorrencia.value.abrirModal();
+}
+
+const abrirModalOcorrencia = (item) => {
+    modalVisualizarOcorrencia.value.abrirModal(item);
+}
+
+const abrirModalOcorrenciaHistorico = (item) => {
+    modalVisualizarOcorrenciaHistorico.value.abrirModal(item);
+}
+
+const abrirModalParecerOcorrencia = (item) => {
+    modalParecerOcorrencia.value.abrirModal(item);
+}
+
+const enviarOcorrencia = (item) => {
+    form.ocorrencias = [
+        item
+    ];
+
+    form.post(route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.enviar_ocorrencia', {
+        contrato: props.contrato.id,
+        servico: props.servico.id
+    }), {
+        onSuccess: () => form.reset()
+    });
 }
 
 </script>
@@ -68,20 +96,17 @@ const abrirModalEnviarOcorrencia = () => {
                     <template #action>
                         <NavButton @click="abrirModalEnviarOcorrencia()" type-button="primary"
                                    title="Enviar ocorrência"/>
-                        <NavLink route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.create"
-                                 :param="{ contrato: props.contrato.id, servico: props.servico.id }"
-                                 class="btn btn-success"
-                                 title="Nova ocorrência"/>
                     </template>
                 </ModelSearchFormAllColumns>
                 <Table
-                    :columns="['ID Ocorrência', 'Intensidade Ocorrência', 'Data da Ocorrência', 'Ocorrênia anterior', 'Prazo Ocorrência', 'Lote', 'Construtora', 'Status Aprovação', 'Envio', 'Ação']"
+                    :columns="['ID Ocorrência', 'Intensidade Ocorrência', 'Data da Ocorrência', 'Data fim', 'Ocorrênia anterior', 'Prazo correção', 'Lote', 'Construtora', 'Status Atendimento', 'Envio', 'Ação']"
                     :records="ocorrencias" table-class="table-hover">
                     <template #body="{ item }">
                         <tr>
                             <td>{{ item.nome_id }}</td>
                             <td>{{ item.intensidade }}</td>
                             <td>{{ dateTimeFormat(item.data_ocorrencia) }}</td>
+                            <td>-</td>
                             <td>-</td>
                             <td>-</td>
                             <td>{{ item.lote?.nome_id }}</td>
@@ -107,15 +132,18 @@ const abrirModalEnviarOcorrencia = () => {
                                              route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.create"
                                              :param="{ contrato: contrato.id, servico: servico.id, ocorrencia: item.id }"/>
                                     <NavLink
-                                        route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.delete"
-                                        :param="{ contrato: contrato.id, servico: servico.id, ocorrencia: item.id }"
-                                        title="Excluir"
-                                        class="dropdown-item"/>
-                                    <NavLink
                                         route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.create_vistoria"
                                         :param="{ contrato: contrato.id, servico: servico.id, ocorrencia: item.id }"
                                         title="Vistoria"
                                         class="dropdown-item"/>
+                                    <a @click="enviarOcorrencia(item)" class="dropdown-item"
+                                       href="javascript:void(0)">
+                                        Enviar ao fiscal
+                                    </a>
+                                    <a @click="abrirModalParecerOcorrencia(item)" class="dropdown-item"
+                                       href="javascript:void(0)">
+                                        Parecer fiscal
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -124,12 +152,11 @@ const abrirModalEnviarOcorrencia = () => {
             </template>
         </Navbar>
 
+        <ModalEnviarOcorrencia :contrato="contrato" :servico="servico" :ocorrencias="ocorrencias_fiscal"
+                               ref="modalEnviarOcorrencia"/>
         <ModalVisualizarOcorrencia ref="modalVisualizarOcorrencia"/>
         <ModalVisualizarOcorrenciaHistorico ref="modalVisualizarOcorrenciaHistorico"/>
-        <ModalEnviarOcorrencia :contrato="contrato" :servico="servico" :ocorrencias="ocorrencias_em_aberto"
-                               ref="modalEnviarOcorrencia"/>
-        <ModalFormVistoria :contrato="contrato" :servico="servico" :ocorrencias="ocorrencias.data"
-                           ref="modalFormVistoria"/>
+        <ModalParecerOcorrencia ref="modalParecerOcorrencia"/>
 
     </AuthenticatedLayout>
 </template>

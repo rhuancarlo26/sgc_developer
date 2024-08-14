@@ -98,6 +98,10 @@ const abrirModalVistoriaArquivo = (vistoria) => {
     modalVistoriaArquivo.value.abrirModal(vistoria)
 }
 
+const voltarPagina = () => {
+    window.history.back();
+}
+
 </script>
 <template>
 
@@ -112,10 +116,8 @@ const abrirModalVistoriaArquivo = (vistoria) => {
           { route: '#', label: contrato.contratada }
         ]
           "/>
-                <Link class="btn btn-dark"
-                      :href="route('contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index', { contrato: contrato.id, servico: servico.id })">
-                    Voltar
-                </Link>
+                <NavButton @click="voltarPagina()" type-button="dark"
+                           title="Voltar"/>
             </div>
         </template>
 
