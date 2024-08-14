@@ -14,6 +14,8 @@ use App\Shared\Traits\ShapefileHandler;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SupressaoService extends BaseModelService
 {
@@ -65,7 +67,7 @@ class SupressaoService extends BaseModelService
         /** @var AreaSupressao $supressao */
         $supressao = $this->model->find($request['id']);
         if ($request['corte_especie']) {
-            foreach($request['corte_especies'] as $corteEspecie) {
+            foreach ($request['corte_especies'] as $corteEspecie) {
                 $supressao?->corteEspecies()->updateOrCreate(
                     ['id' => $corteEspecie['id'] ?? null],
                     $corteEspecie
@@ -83,11 +85,73 @@ class SupressaoService extends BaseModelService
 
     public function deleteFoto(Arquivo $arquivo, AreaSupressao $area): bool
     {
-        if($this->arquivoUtils->delete(arquivo: $arquivo)) {
+        if ($this->arquivoUtils->delete(arquivo: $arquivo)) {
             $area->fotos()->detach($arquivo->id);
             return true;
         }
         return false;
+    }
+
+    public function getByPeriodo(Servicos $servico, Carbon $dtInicio, Carbon $dtFinal, array $with = [])
+    {
+        return $this->model
+            ->where('servico_id', $servico->id)
+            ->where('dt_inicial', '>=', $dtInicio->format('Y-m-d'))
+            ->where('dt_final', '<=', $dtFinal->format('Y-m-d'))
+            ->with($with)
+            ->get();
+    }
+
+    public function getSumAreaByServico(int $id)
+    {
+        return $this->model
+            ->selectRaw('SUM(area_em_app) as area_em_app, SUM(area_fora_app) as area_fora_app')
+            ->where('servico_id', $id)
+            ->first();
+    }
+
+    public function getSumAreaPerMonthByServico(Servicos $servico, Carbon $dtInicio, Carbon $dtFinal)
+    {
+        return DB::table('area_supressao')
+            ->select(DB::raw('SUM(area_supressao.area_total) as area_total'), DB::raw("
+                CASE
+                    WHEN MONTH(dt_inicial) = 1 THEN 'Janeiro'
+                    WHEN MONTH(dt_inicial) = 2 THEN 'Fevereiro'
+                    WHEN MONTH(dt_inicial) = 3 THEN 'Março'
+                    WHEN MONTH(dt_inicial) = 4 THEN 'Abril'
+                    WHEN MONTH(dt_inicial) = 5 THEN 'Maio'
+                    WHEN MONTH(dt_inicial) = 6 THEN 'Junho'
+                    WHEN MONTH(dt_inicial) = 7 THEN 'Julho'
+                    WHEN MONTH(dt_inicial) = 8 THEN 'Agosto'
+                    WHEN MONTH(dt_inicial) = 9 THEN 'Setembro'
+                    WHEN MONTH(dt_inicial) = 10 THEN 'Outubro'
+                    WHEN MONTH(dt_inicial) = 11 THEN 'Novembro'
+                    WHEN MONTH(dt_inicial) = 12 THEN 'Dezembro'
+                END AS mes
+            "))
+            ->join('tipo_biomas as b', 'area_supressao.tipo_bioma_id', '=', 'b.id')
+            ->join('estagio_sucessional as e', 'area_supressao.estagio_sucessional_id', '=', 'e.id')
+            ->join('licenca as l', 'area_supressao.licenca_id', '=', 'l.id')
+            ->where('servico_id', $servico->id)
+            ->whereDate('dt_inicial', '>=', $dtInicio)
+            ->whereDate('dt_final', '<=', $dtFinal)
+            ->groupBy(DB::raw("
+                CASE
+                    WHEN MONTH(dt_inicial) = 1 THEN 'Janeiro'
+                    WHEN MONTH(dt_inicial) = 2 THEN 'Fevereiro'
+                    WHEN MONTH(dt_inicial) = 3 THEN 'Março'
+                    WHEN MONTH(dt_inicial) = 4 THEN 'Abril'
+                    WHEN MONTH(dt_inicial) = 5 THEN 'Maio'
+                    WHEN MONTH(dt_inicial) = 6 THEN 'Junho'
+                    WHEN MONTH(dt_inicial) = 7 THEN 'Julho'
+                    WHEN MONTH(dt_inicial) = 8 THEN 'Agosto'
+                    WHEN MONTH(dt_inicial) = 9 THEN 'Setembro'
+                    WHEN MONTH(dt_inicial) = 10 THEN 'Outubro'
+                    WHEN MONTH(dt_inicial) = 11 THEN 'Novembro'
+                    WHEN MONTH(dt_inicial) = 12 THEN 'Dezembro'
+                END
+            "), DB::raw('MONTH(dt_inicial)'))
+            ->get();
     }
 
 }

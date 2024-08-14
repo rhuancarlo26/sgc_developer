@@ -58,4 +58,12 @@ class LicencaService extends BaseModelService
     {
         return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
     }
+
+    public function getSumArea(array $licencaIds)
+    {
+        return $this->model
+            ->selectRaw('SUM(in_app) as in_app, SUM(out_app) as out_app')
+            ->whereIn('id', $licencaIds)
+            ->first();
+    }
 }
