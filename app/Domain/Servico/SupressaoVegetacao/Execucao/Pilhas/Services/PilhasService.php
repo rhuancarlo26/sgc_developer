@@ -98,4 +98,12 @@ class PilhasService extends BaseModelService
             ->get();
     }
 
+    public function getTotalEstocado(Servicos $servico): Model
+    {
+        return $this->model
+            ->selectRaw('SUM(volume) as volume')
+            ->where('servico_id', $servico->id)
+            ->first();
+    }
+
 }
