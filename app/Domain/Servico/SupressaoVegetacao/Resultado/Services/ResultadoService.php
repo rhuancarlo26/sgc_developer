@@ -4,9 +4,11 @@ namespace App\Domain\Servico\SupressaoVegetacao\Resultado\Services;
 
 use App\Domain\Licenca\app\Services\LicencaService;
 use App\Domain\Servico\SupressaoVegetacao\Configuracao\PlanoSupressao\Services\PlanoSupressaoService;
+use App\Domain\Servico\SupressaoVegetacao\Execucao\Pilhas\Services\PilhasService;
 use App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Services\CorteEspecieService;
 use App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Services\SupressaoService;
 use App\Domain\Servico\SupressaoVegetacao\Resultado\Strategy\Periodo\ContextStrategy;
+use App\Models\ControlePilha;
 use App\Models\ResultadoSupressao;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
@@ -28,6 +30,7 @@ class ResultadoService extends BaseModelService
         private readonly CorteEspecieService   $corteEspecieService,
         private readonly PlanoSupressaoService $planoSupressaoService,
         private readonly LicencaService        $licencaService,
+        private readonly PilhasService         $pilhasService,
     )
     {
         parent::__construct($dataManagement);
@@ -85,6 +88,34 @@ class ResultadoService extends BaseModelService
         $areaMes = $this->supressaoService->getSumAreaPerMonthByServico($servico, $resultado->dt_inicio, $resultado->dt_final);
 
         return compact('supressao', 'cortes', 'resumo', 'percentualSuprimido', 'areaMes');
+    }
+
+    public function getResultadoAnalisePilha(Servicos $servico, ResultadoSupressao $resultado): array
+    {
+        $pilha = $this->pilhasService->getByPeriodo($servico, $resultado->dt_inicio, $resultado->dt_final);
+        $pilhaProtegida = $this->pilhasService->getPilhaProtegidaByPeriodo($servico, $resultado->dt_inicio, $resultado->dt_final);
+
+        $result = $pilha->reduce(function(array $carry, ControlePilha $pilha) {
+            if($pilha->tipo_produto_id == 1) $carry['organico'] += $pilha->volume;
+            if($pilha->tipo_produto_id == 2) $carry['lenha'] += $pilha->volume;
+            if($pilha->tipo_produto_id == 3) $carry['comercial'] += $pilha->volume;
+            return $carry;
+        }, ['organico' => 0, 'lenha' => 0, 'comercial' => 0]);
+
+        $volumeTotalASV = $this->licencaService->getSumTotalASV($pilha->pluck('licenca_id')->toArray())->volume ?? 0;
+
+        $volume = 0;
+        $volumeTotalSuprimido = $result['lenha'] + $result['comercial'];
+        if ($volumeTotalASV) {
+            $volume = number_format(($volumeTotalSuprimido / $volumeTotalASV) * 100, 2, ',', ' ');
+        }
+
+        $resumo = [
+            ['desc' => 'Pilhas', 'organico' => $result['organico'], 'lenha' => $result['lenha'], 'comercial' => $result['comercial'], 'total' => $volumeTotalSuprimido],
+            ['desc' => 'ASV', 'organico' => '-', 'lenha' => '-', 'comercial' => '-', 'total' => $volumeTotalASV]
+        ];
+
+        return compact('pilha', 'pilhaProtegida', 'resumo', 'volume');
     }
 
 }
