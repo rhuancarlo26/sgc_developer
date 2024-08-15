@@ -32,8 +32,17 @@ const analyzePilha = async (item) => {
     return data
 }
 
+const analyzeDestinacao = async (item) => {
+    const {data} = await axios.get(route('contratos.contratada.servicos.supressao-vegetacao.resultado.destinacao-analise', {
+        servico: item.servico_id,
+        resultado: item.id
+    }))
+    return data
+}
+
 const analiseSupressao = ref(null)
 const analisePilha = ref(null)
+const analiseDestinacao = ref(null)
 
 watch(tab, async (value) => {
     if (!resultado.value || !value) return;
@@ -43,6 +52,9 @@ watch(tab, async (value) => {
     if (value === 'pilhas' && !analisePilha.value) {
         analisePilha.value = await analyzePilha(resultado.value);
     }
+    if (value === 'destinacao' && !analiseDestinacao.value) {
+        analiseDestinacao.value = await analyzeDestinacao(resultado.value);
+    }
 }, {immediate: true});
 
 onMounted(() => {
@@ -51,6 +63,7 @@ onMounted(() => {
         resultado.value = null;
         analiseSupressao.value = null;
         analisePilha.value = null;
+        analiseDestinacao.value = null;
     });
 });
 
@@ -136,12 +149,12 @@ defineExpose({abrirModal});
                                 <div class="col-12">
                                     <hr class="mb-4"/>
                                 </div>
-                                <div class="col-12 mt-3">
+                                <div class="col-12">
                                     <label for="">Análise da Supressão de Vegetação:</label>
                                     <textarea v-model="resultado.analise_supressao_vegetacao" class="form-control" rows="3"></textarea>
                                 </div>
-                                <div class="col-12 mt-3">
-                                    <hr class="border-dark">
+                                <div class="col-12">
+                                    <hr class="mb-4">
                                 </div>
                                 <div class="col-12">
                                     <h4>Tabela de supressão de vegetal de espécies ameaçadas/protegidas</h4>
@@ -219,12 +232,12 @@ defineExpose({abrirModal});
                                 <div class="col-12">
                                     <hr class="mb-4"/>
                                 </div>
-                                <div class="col-12 mt-3">
+                                <div class="col-12">
                                     <label for="">Análise das pilhas cadastradas:</label>
                                     <textarea v-model="resultado.analise_pilhas_cadastradas" class="form-control" rows="3"></textarea>
                                 </div>
-                                <div class="col-12 mt-3">
-                                    <hr class="border-dark">
+                                <div class="col-12">
+                                    <hr class="mb-4">
                                 </div>
                                 <div class="col-12">
                                     <h4>Tabela com a somatória do volume das pilhas cadastradas</h4>
@@ -249,17 +262,59 @@ defineExpose({abrirModal});
                                 <div class="col-12">
                                     <hr class="mb-4"/>
                                 </div>
-                                <div class="col-12 mt-3">
+                                <div class="col-12">
                                     <label for="">Análise das pilhas de espécies protegidas/amaçadas</label>
                                     <textarea v-model="resultado.analise_pilhas_especie_protetigas" class="form-control" rows="3"></textarea>
-                                </div>
-                                <div class="col-12 mt-3">
-                                    <hr class="border-dark">
                                 </div>
                             </div>
                         </div>
                         <div class="tab-pane" id="destinacao">
-                            destinacao
+                            <div v-if="analiseDestinacao" class="row row-gap-2">
+                                <div class="col-12">
+                                    <h4>Tabela com as pilhas cadastradas</h4>
+                                    <Table
+                                        :columns="['Código', 'Data do envio', 'Pilhas', 'Destinatário', 'Uso da madeira', 'Volume (m³)', 'Observação']"
+                                        :records="{ data: analiseDestinacao.destinacao, links: [] }"
+                                        table-class="table-hover">
+                                        <template #body="{ item, key }">
+                                            <tr>
+                                                <td>{{ item.chave }}</td>
+                                                <td>{{ dateTimeFormat(item.dt_envio) }}</td>
+                                                <td>{{ item.pilhas.map((p) => p.chave).join(', ') }}</td>
+                                                <td>{{ item.destinatario }}</td>
+                                                <td>{{ item.uso_da_madeira }}</td>
+                                                <td>{{ item.pilhas_sum_volume }}</td>
+                                                <td>{{ item.observacao ?? '-' }}</td>
+                                            </tr>
+                                        </template>
+                                    </Table>
+                                </div>
+                                <div class="col-12">
+                                    <hr class="mb-4"/>
+                                </div>
+                                <div class="col-12">
+                                    <h4>
+                                        Volume total de madeira destinada: {{analiseDestinacao.volumeDestinado}}(m³)
+                                    </h4>
+                                </div>
+                                <div class="col-12">
+                                    <h4>
+                                        Volume total de madeira Estocada: {{analiseDestinacao.volumeEstocado}}(m³)
+                                    </h4>
+                                </div>
+                                <div class="col-12">
+                                    <h4>
+                                        Percentual do volume destinado: {{analiseDestinacao.percentTotalDestinado}}%
+                                    </h4>
+                                </div>
+                                <div class="col-12">
+                                    <hr class="mb-3 mt-0"/>
+                                </div>
+                                <div class="col-12">
+                                    <label for="">Análise da destinação das pilhas:</label>
+                                    <textarea v-model="resultado.analise_destinacao_pilhas" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

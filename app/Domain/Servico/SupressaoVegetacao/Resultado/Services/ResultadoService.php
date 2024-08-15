@@ -4,11 +4,13 @@ namespace App\Domain\Servico\SupressaoVegetacao\Resultado\Services;
 
 use App\Domain\Licenca\app\Services\LicencaService;
 use App\Domain\Servico\SupressaoVegetacao\Configuracao\PlanoSupressao\Services\PlanoSupressaoService;
+use App\Domain\Servico\SupressaoVegetacao\Execucao\Destinacao\Services\DestinacaoService;
 use App\Domain\Servico\SupressaoVegetacao\Execucao\Pilhas\Services\PilhasService;
 use App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Services\CorteEspecieService;
 use App\Domain\Servico\SupressaoVegetacao\Execucao\Supressao\Services\SupressaoService;
 use App\Domain\Servico\SupressaoVegetacao\Resultado\Strategy\Periodo\ContextStrategy;
 use App\Models\ControlePilha;
+use App\Models\Destinacao;
 use App\Models\ResultadoSupressao;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
@@ -31,6 +33,7 @@ class ResultadoService extends BaseModelService
         private readonly PlanoSupressaoService $planoSupressaoService,
         private readonly LicencaService        $licencaService,
         private readonly PilhasService         $pilhasService,
+        private readonly DestinacaoService     $destinacaoService,
     )
     {
         parent::__construct($dataManagement);
@@ -95,10 +98,10 @@ class ResultadoService extends BaseModelService
         $pilha = $this->pilhasService->getByPeriodo($servico, $resultado->dt_inicio, $resultado->dt_final);
         $pilhaProtegida = $this->pilhasService->getPilhaProtegidaByPeriodo($servico, $resultado->dt_inicio, $resultado->dt_final);
 
-        $result = $pilha->reduce(function(array $carry, ControlePilha $pilha) {
-            if($pilha->tipo_produto_id == 1) $carry['organico'] += $pilha->volume;
-            if($pilha->tipo_produto_id == 2) $carry['lenha'] += $pilha->volume;
-            if($pilha->tipo_produto_id == 3) $carry['comercial'] += $pilha->volume;
+        $result = $pilha->reduce(function (array $carry, ControlePilha $pilha) {
+            if ($pilha->tipo_produto_id == 1) $carry['organico'] += $pilha->volume;
+            if ($pilha->tipo_produto_id == 2) $carry['lenha'] += $pilha->volume;
+            if ($pilha->tipo_produto_id == 3) $carry['comercial'] += $pilha->volume;
             return $carry;
         }, ['organico' => 0, 'lenha' => 0, 'comercial' => 0]);
 
@@ -116,6 +119,23 @@ class ResultadoService extends BaseModelService
         ];
 
         return compact('pilha', 'pilhaProtegida', 'resumo', 'volume');
+    }
+
+    public function getResultadoAnaliseDestinacao(Servicos $servico, ResultadoSupressao $resultado): array
+    {
+        $destinacao = $this->destinacaoService->getByPeriodo($servico, $resultado->dt_inicio, $resultado->dt_final);
+
+        $volumeDestinado = $destinacao->reduce(function (int $carry, Destinacao $destinacao) {
+            return $carry + $destinacao->volume;
+        }, 0);
+
+        $volumeEstocado = $this->pilhasService->getTotalEstocado($servico)?->volume ?? 0;
+        $percentTotalDestinado = 0;
+        if ($volumeDestinado) {
+            $percentTotalDestinado = number_format(($volumeDestinado / $volumeEstocado) * 100, 2, ',', ' ');
+        }
+
+        return compact('destinacao', 'volumeDestinado', 'volumeEstocado', 'percentTotalDestinado');
     }
 
 }
