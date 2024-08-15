@@ -607,22 +607,22 @@ INSERT INTO `trecho_contrato` (`id`, `contrato_id`, `rodovia_id`, `uf_id`, `km_i
 
 
 CREATE TABLE `contrato_aditivos` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
   `contrato_id` INT NOT NULL,
   `aditivo` VARCHAR(45) NULL,
   `valor` FLOAT NULL,
   `publicacao` VARCHAR(45) NULL,
   `data_inicio_vigencia` DATE NULL,
   `numero_sei` VARCHAR(45) NULL,
-  `created_at` TIMESTAMP NULL DEFAULT,
-  `updated_at` TIMESTAMP NULL DEFAULT,
-  PRIMARY KEY (`id`),
-  INDEX `contrato_aditivo_fk_idx` (`contrato_id` ASC) VISIBLE,
-  CONSTRAINT `contrato_aditivo_fk`
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_contrato_aditivo`
     FOREIGN KEY (`contrato_id`)
     REFERENCES `contratos` (`id`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
+    ON UPDATE NO ACTION,
+  INDEX `idx_contrato_aditivo_fk` (`contrato_id` ASC)
+);
 
 CREATE TABLE `estados` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -22962,7 +22962,7 @@ CREATE TABLE `supervisao_exec_ocorrencia` (
   `nome_id` varchar(50) NOT NULL,
   `id_rodovia` int(11) DEFAULT NULL,
   `id_uf` int(11) DEFAULT NULL,
-  `data_ocorrencia` datetime DEFAULT NULL,
+  `data_ocorrencia` date DEFAULT NULL,
   `km` int(11) DEFAULT NULL,
   `estaca` varchar(100) NOT NULL,
   `lado` varchar(15) NOT NULL,
@@ -25025,23 +25025,19 @@ CREATE TABLE `supervisao_exec_ocorrencia_vistoria` (
   `id` int(11) primary key NOT NULL,
   `id_ocorrencia` int(11) DEFAULT NULL,
   `num_por_ocorrencia` int(11) DEFAULT NULL,
-  `nome_id` varchar(50) NOT NULL,
-  `data_vistoria` datetime DEFAULT NULL,
-  `corrigido` varchar(5) NOT NULL,
-  `data_fim` datetime DEFAULT NULL,
-  `intensidade_vistoria` varchar(15) NOT NULL,
-  `tipo_vistoria` varchar(5) NOT NULL,
-  `acordo_prazo` varchar(5) NOT NULL,
-  `prazo_vistoria` varchar(50) NOT NULL,
+  `nome_id` varchar(50) DEFAULT NULL,
+  `data_vistoria` date DEFAULT NULL,
+  `corrigido` varchar(5) DEFAULT NULL,
+  `data_fim` date DEFAULT NULL,
+  `intensidade_vistoria` varchar(15) DEFAULT NULL,
+  `tipo_vistoria` varchar(5) DEFAULT NULL,
+  `acordo_prazo` varchar(5) DEFAULT NULL,
+  `prazo_vistoria` varchar(50) DEFAULT NULL,
   `obs_vistoria` text DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `supervisao_exec_ocorrencia_vistoria`
---
 
 INSERT INTO `supervisao_exec_ocorrencia_vistoria` (`id`, `id_ocorrencia`, `num_por_ocorrencia`, `nome_id`, `data_vistoria`, `corrigido`, `data_fim`, `intensidade_vistoria`, `tipo_vistoria`, `acordo_prazo`, `prazo_vistoria`, `obs_vistoria`, `created_at`, `updated_at`, `deleted_at`) VALUES
 (1, 3, 1, 'ROA.02.319-AM.(Vis.1)', '2023-05-08 00:00:00', 'Não', NULL, 'Grave', 'RNC', 'Não', 'Indeterminado', 'Assoreamento aumentou.', '2023-05-09 15:21:31', '2023-05-09 15:21:31', NULL),
@@ -25215,3 +25211,192 @@ INSERT INTO `supervisao_exec_ocorrencia_vistoria` (`id`, `id_ocorrencia`, `num_p
 (183, 295, 1, 'RNC.04.230-PA.(Vis.1)', '2024-07-04 00:00:00', 'Não', NULL, 'Grave', 'RNC', 'Sim', '10', 'xxxxx', '2024-07-04 15:32:53', '2024-07-04 15:32:53', NULL),
 (184, 304, 1, 'RNC.06.230-PA.(Vis.1)', '2024-03-30 00:00:00', 'Não', NULL, 'Grave', 'RNC', 'Sim', '10', 'xxxx', '2024-07-04 15:34:24', '2024-07-04 15:34:24', NULL),
 (185, 295, 2, 'RNC.04.230-PA.(Vis.2)', '2024-07-04 00:00:00', 'Sim', '2024-07-04 00:00:00', 'Grave', 'RNC', '', '', NULL, '2024-07-04 15:45:12', '2024-07-04 15:45:12', NULL);
+
+
+CREATE TABLE `supervisao_exec_ocorrencia_vistoria_img` (
+  `id` int(11) primary key auto_increment NOT NULL,
+  `chave` varchar(255) NOT NULL,
+  `id_vistoria` int(11) DEFAULT NULL,
+  `nome` varchar(255) NOT NULL,
+  `caminho_arquivo` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+INSERT INTO `supervisao_exec_ocorrencia_vistoria_img` (`id`, `chave`, `id_vistoria`, `nome`, `caminho_arquivo`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, '8c238d7eb463caa57e681b136a8254f9', 1, 'WhatsApp Image 2023-04-17 at 09.26.22 (1).jpeg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/1_572523211.jpeg', '2023-05-09 15:21:58', '2023-05-09 15:21:58', NULL),
+(2, 'bd936078483113054961b7cd8b114ea5', 11, 'lote1 foto 9.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/11_1030657714.jpg', '2023-11-13 13:56:20', '2023-11-13 13:56:20', NULL),
+(3, '37444a684faff2f0d5e85469ab7352e3', 13, 'lote1 foto 9.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/13_2036804259.jpg', '2023-11-16 13:17:46', '2023-11-16 13:17:46', NULL),
+(4, '96df259f5bc9264c7807e2c538ad8106', 19, 'lote1 foto 13.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/19_2128941227.jpg', '2023-11-23 10:20:29', '2023-11-23 10:20:29', NULL),
+(5, '5b86fbd8e80627e930803dc4a75e5894', 22, 'lote1 foto 13.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/22_676640551.jpg', '2023-11-24 10:26:02', '2023-11-24 10:26:02', NULL),
+(9, '2e473183561ff201624a3ff66640d957', 71, 'ADV3566_2024_02_14_L05_505_NNC_km_400+200_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/71_1449808449.pdf', '2024-03-21 10:13:51', '2024-03-21 10:13:51', NULL),
+(11, '6df75d664e46e49ad4c9a9739345d0cf', 73, 'ADV3574_2024_02_29_L05_507_NNC_km_398+200_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/73_97960255.jpg', '2024-03-21 10:21:59', '2024-03-21 10:21:59', NULL),
+(12, '992893c82f0b8d20680240593e8e180d', 74, 'ADV3585_2024_01_16_L01_3571_CV_Jazida_EC25_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/74_90000727.jpg', '2024-03-21 10:34:19', '2024-03-21 10:34:19', NULL),
+(13, '2d7ad8f0293dad76b2b0c37f14c0b844', 75, 'ADV 3586_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/75_879810127.jpg', '2024-03-21 10:48:16', '2024-03-21 10:48:16', NULL),
+(14, 'ad0ec7bb6e6a9ad606d55d28ea5af61d', 76, 'ADV3587_Atendida.JPG', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/76_1039465831.JPG', '2024-03-21 10:55:17', '2024-03-21 10:55:17', NULL),
+(15, '997bb6bcb775f97bb8da20ac192f1851', 78, 'ADV3588_Atendida.JPG', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/78_1994345215.JPG', '2024-03-21 11:05:13', '2024-03-21 11:05:13', NULL),
+(16, '617da675d5c4acf98d9f4435c2e2a958', 80, 'ADV3589_Atendida.JPG', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/80_1954721659.JPG', '2024-03-21 11:19:58', '2024-03-21 11:19:58', NULL),
+(17, 'c4f62deb088d4289807d2d3d6b970827', 81, 'ADV3590_2024_02_07_L01_3576_CV_Canteiro de Obras_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/81_774838967.jpg', '2024-03-21 11:25:07', '2024-03-21 11:25:07', NULL),
+(18, '1eef9e447c9000ea532b2e3e1a270d7b', 82, 'ADV3591_2024_02_07_L01_3577_CV_Canteiro de Obras_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/82_2055873283.jpg', '2024-03-21 11:39:22', '2024-03-21 11:39:22', NULL),
+(19, '9d14fd6aabf662884c88a57e95f834c4', 84, 'ADV3593_2024_02_29_L01_3579_CV_Jazida_EC-25_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/84_101261615.jpg', '2024-03-21 15:32:30', '2024-03-21 15:32:30', NULL),
+(20, 'f68994b97ca5043f3474937c548fee3f', 87, 'ADV3596_2024_02_07_L01_3582_CV_Usina de asfalto_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/87_1617435379.jpg', '2024-03-21 15:57:29', '2024-03-21 15:57:29', NULL),
+(21, '5e2ac2e512011bd2d0ca4bf59a00e1ba', 88, 'ADV3597_2024_02_07_L01_3583_CV_Usina de asfalto_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/88_81160251.jpg', '2024-03-21 16:06:43', '2024-03-21 16:06:43', NULL),
+(22, 'cfc40bfb01397f39798a87d5327d35e0', 89, 'ADV3598_2024_02_07_L01_3584_CV_Usina de asfalto_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/89_1380848167.jpg', '2024-03-21 16:19:02', '2024-03-21 16:19:02', NULL),
+(23, '1ee06c47741c9b93ffac28914d8eff98', 91, 'ADV3599_2024_02_27_L08_1503_RA_km477+430_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/91_2131479502.jpg', '2024-03-21 16:25:45', '2024-03-21 16:25:45', NULL),
+(24, 'c5670832b26c13838bb21bff9435df63', 95, 'ADV3602_2024_02_27_L08_1504_RA_km470+120_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/95_656740674.jpg', '2024-03-22 09:08:55', '2024-03-22 09:08:55', NULL),
+(25, '53dbff2fb6228bf04642f8619e5034d5', 97, 'ADV3603_2024_02_27_L08_1505_RA_km477+940_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/97_1165465294.jpg', '2024-03-22 09:23:49', '2024-03-22 09:23:49', NULL),
+(26, '2709e74681034eab36d689c764846a37', 98, 'ADV3604_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/98_1890018519.jpg', '2024-03-22 09:29:35', '2024-03-22 09:29:35', NULL),
+(27, '355e0df4330dcbcde94c761cd6a85709', 100, 'ADV3605_2024_02_26_L10_1500_RA_km_428+400_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/100_1279936073.jpg', '2024-03-22 09:36:36', '2024-03-22 09:36:36', NULL),
+(28, '354dccc5b1b9ee34ea132627e47092b5', 101, 'ADV3606_2024_02_16_L10_3592_CV_Ponte_Rio_Camaquã_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/101_1997660701.jpg', '2024-03-22 09:44:15', '2024-03-22 09:44:15', NULL),
+(29, '02483b9614911bc83134cf3d05a8ca90', 103, 'ADV3609_Atendida.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/103_1913842372.jpg', '2024-03-22 10:04:45', '2024-03-22 10:04:45', NULL),
+(30, 'eff00c1188ce1089cdc0f464ad4fa2f3', 155, 'ff6da934-e6e7-458f-8378-cc1c7ee2dc60.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/155_1160029969.jpg', '2024-05-29 15:05:40', '2024-05-29 15:05:40', NULL),
+(31, '287a4bdb74107ec8bf09ad72dfbcf491', 155, 'd6894776-22a0-4682-93c2-900a468641dd.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/155_329200439.jpg', '2024-05-29 15:05:47', '2024-05-29 15:05:47', NULL),
+(32, 'ddccc6b0f9eb3f527b8d3ca6fd6233d8', 158, '09-02-2024 8.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/158_323664452.jpg', '2024-05-29 15:53:13', '2024-05-29 15:53:13', NULL),
+(33, '74e270a1ab633c21a2cde8a3348dd326', 158, '09-02-2024 50.jpg', 'uploads/supervisao_ambiental/ocorrencia/img_vistoria/158_1185833420.jpg', '2024-05-29 15:53:26', '2024-05-29 15:53:26', NULL);
+
+
+CREATE TABLE `supervisao_exec_ocorrencia_vistoria_arquivo_prazo` (
+  `id` int(11) primary key NOT NULL,
+  `chave` varchar(255) NOT NULL,
+  `id_vistoria` int(11) DEFAULT NULL,
+  `nome` varchar(255) NOT NULL,
+  `caminho_arquivo` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+INSERT INTO `supervisao_exec_ocorrencia_vistoria_arquivo_prazo` (`id`, `chave`, `id_vistoria`, `nome`, `caminho_arquivo`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'a0f45dc4e3518af1f6a232524ce8c0f4', 13, 'Li 01_2020.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/13_1597004033.pdf', '2023-11-16 13:17:58', '2023-11-16 13:17:58', NULL),
+(2, '4aca236fbb949d462ed2093b1b4860d1', 29, '2023_08_30_3012_Encaminha_RA_1490_L7Remanescentes_STE.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/29_361494636.pdf', '2024-02-29 17:52:40', '2024-02-29 17:52:40', NULL),
+(3, 'f6152843729e0e59c8c43513d48880e4', 31, '2023_10_05_3030_Encaminha_CNC_833_L7_STE.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/31_606010904.pdf', '2024-02-29 17:55:45', '2024-02-29 17:55:45', NULL),
+(4, 'ed8c1df3182c6864eb2891c7bd8bb5a0', 32, 'ADV3561_2023_10_16_L07_833_CNC_Canteiro_de_obras_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/32_1914959498.pdf', '2024-02-29 17:57:12', '2024-02-29 17:57:12', NULL),
+(5, 'aebad06d0999694c6efdf70651700969', 33, 'ADV3562_2023_10_09_L05_3548_CV_km_398+403_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/33_411088342.pdf', '2024-03-01 09:40:40', '2024-03-01 09:40:40', NULL),
+(6, 'bec31394b45f690425f1e7db503b26cf', 34, 'RA 1491.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/34_1647029836.pdf', '2024-03-01 09:57:09', '2024-03-01 09:57:09', NULL),
+(7, '928d0c427aea3649608e7dd58ce7d9f7', 35, 'CNC 834.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/35_86146889.pdf', '2024-03-01 09:59:17', '2024-03-01 09:59:17', NULL),
+(8, '2d4c330260a3d4ca32c70a2044861d6e', 36, 'NNC 504.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/36_1401231298.pdf', '2024-03-01 10:03:47', '2024-03-01 10:03:47', NULL),
+(9, 'aed6ea9608f3072e6ab5b29834945bcb', 37, 'ADV3564_2023_10_04_L01_3550_CV_km_311+260_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/37_397621790.pdf', '2024-03-01 11:08:52', '2024-03-01 11:08:52', NULL),
+(10, 'e15b2a7a72a768872a53297fc3e9b83a', 38, 'ADV3565_2023_10_04_L01_3551_CV_km_313+580_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/38_1270445803.pdf', '2024-03-01 11:14:41', '2024-03-01 11:14:41', NULL),
+(11, '0241f57f0af14c30d1c13826d6703e62', 39, 'RA 1493.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/39_263053344.pdf', '2024-03-01 11:31:06', '2024-03-01 11:31:06', NULL),
+(12, '9d67db0eb797a072b8ce1229c6226f5c', 40, 'CNC 836.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/40_543243534.pdf', '2024-03-01 11:32:48', '2024-03-01 11:32:48', NULL),
+(13, 'd8ca78c2ef74c0ea32f61b9b4a1329fc', 41, 'NNC 505.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/41_1027449591.pdf', '2024-03-01 11:34:22', '2024-03-01 11:34:22', NULL),
+(14, 'f7f4179066c560e32c07b3f439cc69e0', 42, 'ADV3567_2023_11_07_L01_3553_CV_Canteiro_de_obras_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/42_344641938.pdf', '2024-03-01 11:53:51', '2024-03-01 11:53:51', NULL),
+(15, 'ca8db63165a385eb33882f582a559914', 43, 'RA 1492.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/43_527959398.pdf', '2024-03-01 14:20:46', '2024-03-01 14:20:46', NULL),
+(16, 'ba6a86c0bab7c783e1b8843379f968ca', 44, 'CNC 835.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/44_2069740614.pdf', '2024-03-01 14:20:58', '2024-03-01 14:20:58', NULL),
+(17, '0afe9e602c2b506908689df630170737', 45, 'NNC 503.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/45_2128421424.pdf', '2024-03-01 14:21:08', '2024-03-01 14:21:08', NULL),
+(18, 'b906d46313b03fd4fd46f6b3540ce8ce', 46, 'RA 1496.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/46_2037121154.pdf', '2024-03-01 14:27:21', '2024-03-01 14:27:21', NULL),
+(19, '734c9cd8b3234c2d8694bcde424a2394', 47, 'ADV3569_2023_12_11_L01_1496_RA_Jazida_EC25_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/47_798073462.pdf', '2024-03-01 14:29:03', '2024-03-01 14:29:03', NULL),
+(20, '5638f6218add412f54a7e26aca322ceb', 48, 'ADV3570_2023_11_07_L01_3556_CV_Pedreira_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/48_397630448.pdf', '2024-03-01 14:36:53', '2024-03-01 14:36:53', NULL),
+(21, '53497441957125f1e0842c76362acfcd', 49, 'ADV3571_2023_11_07_L01_3557_CV_Usina_de_asfalto_I_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/49_963671293.pdf', '2024-03-01 14:46:31', '2024-03-01 14:46:31', NULL),
+(22, '4f782065a5e9dcf727e900021c9a436f', 50, 'ADV3572_2023_11_20_L05_3558_CV_km398+000_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/50_1838882466.pdf', '2024-03-01 15:54:45', '2024-03-01 15:54:45', NULL),
+(23, '3c382f7c9ae1900f4068d6b7ca547d50', 51, 'ADV3573_2023_11_21_L05_1495_RA_km_398+000_Em_andamento.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/51_1025862753.pdf', '2024-03-05 10:24:39', '2024-03-05 10:24:39', NULL),
+(24, '6b105e32bf54a3b2be00e82157b699d5', 52, 'ADV3573_2023_12_12_L05_837_CNC_km_398+000_Em_andamento.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/52_1381515080.pdf', '2024-03-05 10:24:46', '2024-03-05 10:24:46', NULL),
+(25, 'b406cf009f7a9362d9bb51c6bcef3aed', 53, 'ADV3573_2024_01_09_L05_506_NNC_km_398+000_Em_andamento.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/53_921417604.pdf', '2024-03-05 10:24:55', '2024-03-05 10:24:55', NULL),
+(26, 'a8383151d3707276e569f144e5d63101', 54, 'ADV3574_2023_11_21_L05_1494_RA_km_398+200_Em_andamento.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/54_27468919.pdf', '2024-03-05 10:37:25', '2024-03-05 10:37:25', NULL),
+(27, 'e48bec38a326afb28e08e43340708c0c', 55, 'ADV3574_2023_12_12_L05_838_CNC_km_398+200_Em_andamento.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/55_357930323.pdf', '2024-03-05 10:37:32', '2024-03-05 10:37:32', NULL),
+(28, 'e8d1da82cab5222688637358a9567980', 56, 'ADV3574_2024_01_09_L05_507_NNC_km_398+200_Em_andamento.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/56_270600094.pdf', '2024-03-05 10:37:40', '2024-03-05 10:37:40', NULL),
+(29, '8007364a4ea7231cebfedd69cf56274a', 57, '3575.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/57_1929696390.pdf', '2024-03-12 14:29:27', '2024-03-12 14:29:27', NULL),
+(30, '0f94ddb1634c3b604c5e9ba522b1bf06', 58, '3576.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/58_1094571718.pdf', '2024-03-12 14:33:40', '2024-03-12 14:33:40', NULL),
+(31, '1534a95b12a73039957f0dd035434664', 59, 'ADV3577_2023_12_01_L01_3563_CV_Jazida_EC-25_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/59_683158735.pdf', '2024-03-12 14:42:15', '2024-03-12 14:42:15', NULL),
+(32, '10272ce5ed350b07ff8668788af41cfe', 60, 'ADV3578_2024_01_16_L01_1497_RA_Jazida_EC25.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/60_804115056.pdf', '2024-03-12 14:59:25', '2024-03-12 14:59:25', NULL),
+(33, 'c4102310bc90d4cae40256e02d4526f2', 61, 'ADV3578_2024_01_16_L01_1497_RA_Jazida_EC25_Atendida OK.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/61_1559117975.pdf', '2024-03-12 15:00:12', '2024-03-12 15:00:12', NULL),
+(34, '612689629a1209b1371f3b8d05cd0449', 62, 'ADV3579_2023_12_01_L01_3565_CV_km_303+060_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/62_1088085896.pdf', '2024-03-12 15:12:05', '2024-03-12 15:12:05', NULL),
+(35, 'cc86f0954c8afa5a888fe9c96d456788', 63, 'ADV3580_2023_12_01_L01_3566_CV_km_307+350_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/63_94756196.pdf', '2024-03-12 15:16:47', '2024-03-12 15:16:47', NULL),
+(36, '63c099853fe6bfedc92660b35c93fd29', 64, 'ADV3581_2023_11_14_L10_3567_CV_Ponte_Rio_Camaquã_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/64_1007047077.pdf', '2024-03-12 15:52:45', '2024-03-12 15:52:45', NULL),
+(37, 'f9833bd4c2cb16fed715721276ea5254', 65, 'ADV3582_2023_12_19_L01_3568_CV_Canteiro_de_obras_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/65_799308642.pdf', '2024-03-12 15:59:27', '2024-03-12 15:59:27', NULL),
+(38, '4737954351feee2e990e71d71c4c04ef', 66, 'ADV3583_2023_12_19_L01_3569_CV_Canteiro_de_obras_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/66_656958591.pdf', '2024-03-12 16:16:20', '2024-03-12 16:16:20', NULL),
+(39, 'e9c2bf893b479b48b3a93cca5e2e0c3b', 67, 'ADV3584_2023_12_19_L01_3570_CV_Usina_de_Asfalto_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/67_1512726692.pdf', '2024-03-12 16:20:34', '2024-03-12 16:20:34', NULL),
+(40, 'c3e25c96be839736437a003d5ffb0354', 72, 'ADV3573_2024_02_14_L05_506_NNC_km_398+000_Atendida.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/72_612316920.pdf', '2024-03-21 10:15:03', '2024-03-21 10:15:03', NULL),
+(42, 'cb4813b3ecd373f27b16e24fd6d341c0', 70, 'NCA949_2024_03_12_L1_CNC_Sedimentacao_km_50+100_ao_50+400.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/70_314402994.pdf', '2024-03-21 10:18:35', '2024-03-21 10:18:35', NULL),
+(43, 'da9849d072afc8b12674347ce110005a', 77, 'ADV3588_2024_02_08_L10_1498_RA_Ponte_Rio_Camaquã.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/77_1304117365.pdf', '2024-03-21 11:04:36', '2024-03-21 11:04:36', NULL),
+(44, 'b68943dd60a1966faa9d7502e0c5eb5f', 79, 'ADV3589_2024_02_08_L10_1499_RA_km_428+400.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/79_1277059652.pdf', '2024-03-21 11:14:27', '2024-03-21 11:14:27', NULL),
+(45, 'ea6196e843db8af9fa5cc6196325147f', 83, 'ADV3592_RA1507.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/83_389963495.pdf', '2024-03-21 14:22:02', '2024-03-21 14:22:02', NULL),
+(46, 'e13c2cedab8b8f61d5c77e58e142bb0b', 85, 'ADV3594_RA 1508.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/85_881224513.pdf', '2024-03-21 15:40:23', '2024-03-21 15:40:23', NULL),
+(47, '92486ddb1a7e43da77d05a0a3edd94d2', 86, 'ADV3595_RA1509.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/86_120225286.pdf', '2024-03-21 15:48:47', '2024-03-21 15:48:47', NULL),
+(48, '67593b30d898f8d08dbc360f40e9a097', 90, 'ADV3599_2024_02_27_L08_1503_RA_km477+430.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/90_1402153615.pdf', '2024-03-21 16:24:46', '2024-03-21 16:24:46', NULL),
+(49, 'e2f9ecacc9db4be8a4ef890ef2e6d6df', 92, 'ADV3600_2024_02_20_L01_1501_RA_km_311+080_Em_andamento.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/92_1642368048.pdf', '2024-03-21 16:32:02', '2024-03-21 16:32:02', NULL),
+(50, '127a5bc23d8f42321486cbe7c995cf38', 93, 'ADV3601_2024_02_20_L01_1502_RA_km_311+300_Em_andamento.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/93_1917059945.pdf', '2024-03-21 16:35:13', '2024-03-21 16:35:13', NULL),
+(51, '8d47aa3f9af1651c877d29b8db9f427c', 94, 'ADV3602_2024_02_27_L08_1504_RA_km470+120.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/94_2134864488.pdf', '2024-03-22 09:05:52', '2024-03-22 09:05:52', NULL),
+(52, '531d7e619513b42bb11e7e1f607edb2f', 96, 'ADV3603_2024_02_27_L08_1505_RA_km477+940.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/96_1452490609.pdf', '2024-03-22 09:23:21', '2024-03-22 09:23:21', NULL),
+(53, '01988b9291ee41ed5914c8d39d8209d0', 99, 'ADV3605_2024_02_26_L10_1500_RA_km_428+400.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/99_1222684068.pdf', '2024-03-22 09:36:07', '2024-03-22 09:36:07', NULL),
+(54, 'efb3771509408490427147e66d5ab715', 104, 'ADV3610_RA1510.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/104_77483908.pdf', '2024-03-22 10:09:44', '2024-03-22 10:09:44', NULL),
+(56, '52dc60cc00c120451f14495301447741', 105, 'NCA952_2024_03_11_L2_RA_Processo_erosivo_drenagem_km_53+820.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/105_1393347783.pdf', '2024-03-22 14:15:56', '2024-03-22 14:15:56', NULL),
+(57, 'd19c3def73604d69845ba6a836e50ed9', 106, 'NCA952_2024_03_21_L2_CNC_Processo_erosivo_drenagem_km_53+820.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/106_241935286.pdf', '2024-03-22 14:17:45', '2024-03-22 14:17:45', NULL),
+(58, '08fb0bb66971bb00766852fba1c9f2e2', 107, 'NCA946_2024_02_19_L1_RA_Manutencao_leito_estrada.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/107_558901603.pdf', '2024-03-22 14:32:49', '2024-03-22 14:32:49', NULL),
+(59, '084eaf923a7570e867aaa85979e3a384', 110, '581_2024_03_06_L1_RA_Sedimentacao_km_48+320_ao_48+360.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/110_1046140407.pdf', '2024-03-22 14:50:13', '2024-03-22 14:50:13', NULL),
+(60, 'f1420c7595487096fa8a1dcb417aa620', 111, '393_2024_03_12_L1_CNC_Sedimentacao_km_48+320_ao_48+360.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/111_1122822028.pdf', '2024-03-22 14:51:25', '2024-03-22 14:51:25', NULL),
+(61, 'faf231565e2e3291b6da23abe46fa87a', 119, 'REGISTRO_AMBIENTAL-CO-SPCPE-ASST-20-OAC-NS Km 36.5.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/119_1467946835.pdf', '2024-03-26 13:55:28', '2024-03-26 13:55:28', NULL),
+(62, '8541e03f8dcd97673b0f16623a9de129', 120, 'REGISTRO_AMBIENTAL-CO-SPCPE-ASST-20-OAC-NS Km 36.5.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/120_2133762643.pdf', '2024-03-26 13:55:42', '2024-03-26 13:55:42', NULL),
+(63, '39e89ba73ddc50f31dec2910c5433984', 121, 'REGISTRO_AMBIENTAL-CO-SPCPE-ASST-25-OAC-NS Km 36[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/121_2092368427.pdf', '2024-03-26 13:57:31', '2024-03-26 13:57:31', NULL),
+(64, '43c1ab41abdb88e2dc260d0dec5f2cd8', 122, 'REGISTRO_AMBIENTAL-CO-SPCPE-CPE 1-7-TA-ES Km 43[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/122_368908573.pdf', '2024-03-26 14:01:34', '2024-03-26 14:01:34', NULL),
+(65, '0445744a8bdf977a788f1abe3045493d', 123, 'REGISTRO_AMBIENTAL-CO-SPCPE-CPE 1-7-TA-ES Km 43[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/123_1906044886.pdf', '2024-03-26 14:03:29', '2024-03-26 14:03:29', NULL),
+(66, '75edadb5fdb9f56ac2b640a6a0e885ac', 124, 'REGISTRO_AMBIENTAL-CO-SPCPE-CPE 1-7-TA-ES Km 43[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/124_1944680247.pdf', '2024-03-26 14:05:51', '2024-03-26 14:05:51', NULL),
+(67, '34525e76fa90339994b246d9d82033d9', 125, 'REGISTRO_AMBIENTAL-CO-SPCPE-CPE 1-7-TA-ES Km 43[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/125_152454887.pdf', '2024-03-26 14:06:54', '2024-03-26 14:06:54', NULL),
+(68, '68dd77a37984e46f9c4fdb3118ec5791', 126, 'REGISTRO_AMBIENTAL-CO-SPCPE-CPE 1-7-TA-ES Km 43[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/126_767309553.pdf', '2024-03-26 14:08:05', '2024-03-26 14:08:05', NULL),
+(69, 'aeec71bd772bf2b2ba0205a292cc948a', 127, 'OFICIO  GA 12 _2024 RESPOSTA OFICIO MPB SA 05 2024.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/127_1135019018.pdf', '2024-03-26 14:13:33', '2024-03-26 14:13:33', NULL),
+(70, '0f43cd9e082e77f917cc38c5feb2a8ca', 128, 'REGISTRO_AMBIENTAL-CO-SPCPE-ASST-11-TA-ES Km 46.3[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/128_1238178076.pdf', '2024-03-26 14:20:35', '2024-03-26 14:20:35', NULL),
+(72, 'de79403f40f12cc9ce6fe39a3f9dedf0', 130, 'REGISTRO_AMBIENTAL-CO-SPCPE-ASST-11-TA-ES Km 46.3[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/130_366343761.pdf', '2024-03-26 14:23:08', '2024-03-26 14:23:08', NULL),
+(73, 'cf928ee07f79bdc5fd6ee5fd4169284e', 131, 'REGISTRO_AMBIENTAL-CO-SPCPE-ASST-11-TA-ES Km 46.3[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/131_1502366885.pdf', '2024-03-26 14:24:21', '2024-03-26 14:24:21', NULL),
+(74, '68d8a60480e887a1ab0f26e1fdfda4f5', 132, 'NCA947_2024_03_06_L1_RA_Manutencao_bacias de siltagem_FD_Caminhos_de_servico.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/132_234276352.pdf', '2024-03-27 14:50:53', '2024-03-27 14:50:53', NULL),
+(75, 'e8647e52c01df7d4be4e8a208236c04f', 133, 'NCA947_2024_03_12_L1_CNC_Manutencao_bacias_siltagem_FD_Caminhos_de_servico.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/133_995984982.pdf', '2024-03-27 14:52:09', '2024-03-27 14:52:09', NULL),
+(76, 'eecd7593765ebd28b9ef5df5cbdf47d4', 134, 'NCA947_2024_03_19_L1_NNC_Manutencao_bacias_siltagem_FD_Caminhos_de_servico.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/134_436728690.pdf', '2024-03-27 14:53:09', '2024-03-27 14:53:09', NULL),
+(77, '57fbc7de91ca2bcb31263426db128aa5', 135, 'NCA949_2024_03_06_L1_RA_Sedimentacao_km_50+100_ao_50+400.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/135_1258835773.pdf', '2024-03-27 15:06:11', '2024-03-27 15:06:11', NULL),
+(78, 'af27c6d915bae65f413e6316ea7092f7', 136, 'NCA949_2024_03_12_L1_CNC_Sedimentacao_km_50+100_ao_50+400.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/136_825994293.pdf', '2024-03-27 15:07:12', '2024-03-27 15:07:12', NULL),
+(79, '2e42861f1d11ffcd858cf9ae4429b32e', 138, 'REGISTRO_AMBIENTAL-CO-SPCPE-CPE 16-TC-ES Km 47.90[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/138_734600980.pdf', '2024-03-27 15:08:27', '2024-03-27 15:08:27', NULL),
+(80, '3c3cbf2da8a5d03d6c7d8c267764011c', 137, 'NCA949_2024_03_25_L1_NNC_Sedimentacao_km_50+100_ao_50+400.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/137_179960959.pdf', '2024-03-27 15:08:44', '2024-03-27 15:08:44', NULL),
+(81, 'c0e07803cdd155e0aabde1267fed66e1', 140, 'REGISTRO_AMBIENTAL-CO-SPCPE-CPE 16-TC-ES Km 47.90[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/140_2043289377.pdf', '2024-03-27 15:09:18', '2024-03-27 15:09:18', NULL),
+(82, '7a68c6bc046f0835168ce15debe1ece8', 141, 'REGISTRO_AMBIENTAL-CO-SPCPE-ASST-27-COH-NS Km 56.80[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/141_1408342085.pdf', '2024-03-27 15:11:56', '2024-03-27 15:11:56', NULL),
+(83, '275c3dec951faea93427b0e73ad55980', 142, 'REGISTRO_AMBIENTAL-CO-SGRSEL-DIM-10-APP-NS Km 68[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/142_2106893188.pdf', '2024-03-27 15:17:31', '2024-03-27 15:17:31', NULL),
+(84, '8addd444be4eb752dfe174236b092e61', 143, 'REGISTRO_AMBIENTAL-CO-SGRSEL-DIM-10-APP-NS Km 68[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/143_691262417.pdf', '2024-03-27 15:18:22', '2024-03-27 15:18:22', NULL),
+(85, '7e45e428353688daf780e634da36f5ab', 144, 'REGISTRO_AMBIENTAL-CO-SGRSEL-DIM-10-APP-NS Km 68[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/144_56971702.pdf', '2024-03-27 15:19:23', '2024-03-27 15:19:23', NULL),
+(86, 'ec002bc54726e242434239ee4f50aca6', 146, 'NCA951_2024_03_06_L2_RA_Realocacao_coleta_sementes_recuperacao_ambiental.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/146_1365670762.pdf', '2024-03-27 15:21:41', '2024-03-27 15:21:41', NULL),
+(87, '6176c3961501d1e64b2e91652d965234', 145, 'REGISTRO_AMBIENTAL CO-SPCPE-ASST-23-COH-ES Km 65.1[1].pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/145_308985473.pdf', '2024-03-27 15:21:51', '2024-03-27 15:21:51', NULL),
+(88, '4069b09d644d7c8319c23d0bf32a21cf', 148, 'NCA953_2024_03_06_L2_RA_Gerenciamento_incorreto_residuos_km_53+820_ao_53+990.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/148_1949018194.pdf', '2024-03-27 15:47:34', '2024-03-27 15:47:34', NULL),
+(89, '10f44abf79c85b58bae453fdb5164743', 149, 'NCA953_2024_03_11_L2_CNC_Gerenciamento_incorreto_residuos_km_53+820_ao_53+990.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/149_45485713.pdf', '2024-03-27 15:48:37', '2024-03-27 15:48:37', NULL),
+(90, '1d0ff2d7db167aa519f05c09bda2dafa', 150, 'NCA953_2024_03_21_L2_NNC_Gerenciamento_incorreto_residuos_km_53+820_ao_53+990.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/150_783443497.pdf', '2024-03-27 15:49:44', '2024-03-27 15:49:44', NULL),
+(91, 'c9cbae50e1ec844eaa43ec61fb5ebaf4', 153, 'NCA952_2024_04_03_L2_NNC_Processo_erosivo_drenagem_km_53+820.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/153_1657108347.pdf', '2024-04-25 16:42:45', '2024-04-25 16:42:45', NULL),
+(92, 'f9c60425225429bb5ccfceee6a9b1017', 178, '587_2024_04_19_L2_RA_Gerenciamento incorreto dos residuos_km_52+100_ao_54+940.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/178_1210218913.pdf', '2024-07-03 11:08:14', '2024-07-03 11:08:14', NULL),
+(93, '52c42c34d2a813339e94b1b0c423920d', 179, '397_2024_04_25_L2_CNC_Gerenciamento incorreto dos residuos_km_52+100_ao_54+940.pdf', 'uploads/supervisao_ambiental/ocorrencia/arquivo_prazo/179_2141287970.pdf', '2024-07-03 11:12:21', '2024-07-03 11:12:21', NULL);
+
+CREATE TABLE `supervisao_exec_aca` (
+  `id` int(11) primary key auto_increment NOT NULL,
+  `id_servico` int(11) DEFAULT NULL,
+  `num_por_servico` int(11) DEFAULT NULL,
+  `nome_id` varchar(50) DEFAULT NULL,
+  `data_aca` date DEFAULT NULL,
+  `id_lote` int(11) DEFAULT NULL,
+  `enviado` varchar(5) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+
+INSERT INTO `supervisao_exec_aca` (`id`, `id_servico`, `num_por_servico`, `nome_id`, `data_aca`, `id_lote`, `enviado`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 35, 1, 'ACA.01', '2023-10-09 00:00:00', 1, 'Sim', '2023-10-09 19:40:13', '2023-11-16 13:23:26', NULL),
+(2, 35, 2, 'ACA.02', '2023-11-16 00:00:00', 1, 'Sim', '2023-11-16 13:22:44', '2023-11-16 13:23:26', NULL),
+(3, 35, 3, 'ACA.03', '2023-11-22 00:00:00', 1, 'Sim', '2023-11-22 10:46:05', '2023-11-23 10:25:03', NULL),
+(4, 35, 4, 'ACA.04', '2023-11-23 00:00:00', 1, 'Sim', '2023-11-23 10:25:48', '2023-11-24 10:29:15', NULL),
+(5, 35, 5, 'ACA.05', '2023-11-23 00:00:00', 2, 'Sim', '2023-11-23 10:25:59', '2023-11-24 10:29:15', NULL),
+(6, 35, 6, 'ACA.06', '2023-11-24 00:00:00', 1, 'Sim', '2023-11-24 10:29:44', '2023-11-24 10:30:22', NULL),
+(7, 306, 1, 'ACA.01', '2024-06-25 00:00:00', 53, 'Sim', '2024-06-25 18:01:23', '2024-06-25 18:01:34', NULL),
+(8, 306, 2, 'ACA.02', '2024-07-03 00:00:00', 53, 'Não', '2024-07-03 09:37:04', '2024-07-03 09:37:04', NULL);
+
+CREATE TABLE `supervisao_exec_aca_rnc` (
+  `id` int(11) NOT NULL,
+  `id_aca` int(11) DEFAULT NULL,
+  `id_ocorrencia` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+INSERT INTO `supervisao_exec_aca_rnc` (`id`, `id_aca`, `id_ocorrencia`) VALUES
+(1, 1, 10),
+(2, 2, 12),
+(3, 2, 19),
+(4, 3, 15),
+(5, 4, 17),
+(6, 5, 24),
+(7, 6, 6),
+(8, 6, 21),
+(9, 7, 292),
+(10, 8, 290);
