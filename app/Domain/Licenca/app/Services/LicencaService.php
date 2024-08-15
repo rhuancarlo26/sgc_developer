@@ -66,4 +66,12 @@ class LicencaService extends BaseModelService
             ->whereIn('id', $licencaIds)
             ->first();
     }
+
+    public function getSumTotalASV(array $licencaIds)
+    {
+        return $this->model
+            ->selectRaw('SUM(volume) as volume')
+            ->whereIn('id', $licencaIds)
+            ->first();
+    }
 }
