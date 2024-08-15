@@ -21,6 +21,11 @@ class Servicos extends Model
 //        return $this->belongsTo(ServicoStatus::class, 'status_aprovacao');
 //    }
 
+    public function contrato(): BelongsTo
+    {
+        return $this->belongsTo(related: Contrato::class, foreignKey: 'id_contrato');
+    }
+
     public function tema(): BelongsTo
     {
         return $this->belongsTo(related: ServicoTema::class, foreignKey: 'tema_servico');
@@ -85,7 +90,7 @@ class Servicos extends Model
 
     public function licencas_condicionantes()
     {
-        return $this->hasMany(ServicoLicencaCondicionante::class, 'servico_id');
+        return $this->hasMany(ServicoLicencaCondicionante::class, 'id_servico');
     }
 
     public function pontos(): HasMany
