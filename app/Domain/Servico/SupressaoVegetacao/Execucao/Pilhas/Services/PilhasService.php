@@ -16,6 +16,7 @@ use App\Shared\Traits\ShapefileHandler;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class PilhasService extends BaseModelService
