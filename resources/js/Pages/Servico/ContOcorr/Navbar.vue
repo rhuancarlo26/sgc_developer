@@ -55,6 +55,13 @@ const porps = defineProps({
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
                                                     title="ACA"/>
                                             </NavDropdown>
+
+                                            <NavLink
+                                                route-name="contratos.contratada.servicos.cont_ocorrencia.resultado.index"
+                                                active-on-route-prefix="contratos.contratada.servicos.cont_ocorrencia.resultado*"
+                                                :param="{ contrato: contrato.id, servico: servico.id }"
+                                                title="Resultado"
+                                                :icon="IconLayoutDashboard"/>
                                         </ul>
                                     </div>
                                 </div>

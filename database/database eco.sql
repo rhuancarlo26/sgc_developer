@@ -25400,3 +25400,48 @@ INSERT INTO `supervisao_exec_aca_rnc` (`id`, `id_aca`, `id_ocorrencia`) VALUES
 (8, 6, 21),
 (9, 7, 292),
 (10, 8, 290);
+
+CREATE TABLE `supervisao_resultado` (
+  `id` int(11) primary key auto_increment NOT NULL,
+  `id_servico` int(11) DEFAULT NULL,
+  `nome` varchar(255) DEFAULT NULL,
+  `periodo` varchar(255) DEFAULT NULL,
+  `dt_inicio` date DEFAULT NULL,
+  `dt_final` date DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+INSERT INTO `supervisao_resultado` (`id`, `id_servico`, `nome`, `periodo`, `dt_inicio`, `dt_final`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 52, 'Supervisão', 'P', '2023-01-01 00:00:00', '2023-05-22 00:00:00', '2023-05-22 14:56:03', '2023-05-22 14:56:03', NULL),
+(2, 35, 'Teste ', 'S', '2023-01-01 00:00:00', '2023-06-30 00:00:00', '2023-08-04 18:16:06', '2023-08-04 18:16:06', NULL),
+(3, 35, 'semestral', 'A', '2023-01-01 00:00:00', '2023-12-31 00:00:00', '2023-10-09 19:41:58', '2023-11-13 14:05:13', NULL),
+(5, 35, 'mensal teste', 'A', '2023-01-01 00:00:00', '2023-12-31 00:00:00', '2023-11-16 13:24:48', '2023-11-16 13:24:48', NULL),
+(6, 35, 'Teste ', 'A', '2023-01-01 00:00:00', '2023-12-31 00:00:00', '2023-11-22 10:47:24', '2023-11-22 10:47:24', NULL),
+(7, 117, 'Supervisão', 'P', '2023-08-01 00:00:00', '2024-05-30 00:00:00', '2024-05-31 09:11:31', '2024-05-31 09:11:31', NULL),
+(9, 65, 'teste', 'S', '2024-01-01 00:00:00', '2024-06-30 00:00:00', '2024-06-06 09:34:06', '2024-06-06 09:34:06', NULL),
+(14, 306, 'FINAL', 'P', '2023-01-01 00:00:00', '2024-07-03 00:00:00', '2024-07-03 15:23:06', '2024-07-03 15:23:06', NULL);
+
+CREATE TABLE `supervisao_relatorio` (
+  `id` int(11) primary key auto_increment NOT NULL,
+  `id_servico` int(11) DEFAULT NULL,
+  `id_resultado` int(11) DEFAULT NULL,
+  `nome_relatorio` varchar(255) DEFAULT NULL,
+  `sobre_relatorio` text DEFAULT NULL,
+  `conclusao` text DEFAULT NULL,
+  `fk_status` int(11) DEFAULT NULL,
+  `parecer_fiscal` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+
+INSERT INTO `supervisao_relatorio` (`id`, `id_servico`, `id_resultado`, `nome_relatorio`, `sobre_relatorio`, `conclusao`, `fk_status`, `parecer_fiscal`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 35, 2, 'Relatorio teste', 'ds', NULL, 3, 'e', '2023-08-04 18:16:16', '2023-11-23 10:58:10', NULL),
+(2, 35, 3, 'teste', 'testes', NULL, 3, 'fafsfasfasfasfafafafefe', '2023-10-09 19:46:47', '2023-11-24 11:11:26', NULL),
+(3, 117, 7, 'Supervisão Ambiental', 'Relatório com ocorrências de agosto/23 a maio/24', '', 1, NULL, '2024-05-31 09:12:53', '2024-05-31 09:14:02', NULL),
+(4, 65, 9, 'TESTE', NULL, NULL, 1, NULL, '2024-06-06 13:13:26', '2024-06-06 13:13:26', NULL),
+(5, 65, 9, 'TESTE', NULL, NULL, 1, NULL, '2024-06-06 13:13:26', '2024-06-06 13:13:26', NULL),
+(6, 306, 10, 'Teste', NULL, NULL, 4, NULL, '2024-06-27 09:51:31', '2024-07-04 15:37:19', NULL);
