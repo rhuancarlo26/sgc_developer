@@ -657,41 +657,6 @@ INSERT INTO `afugent_fauna_tipo_registro` (`id`, `id_forma_registro`, `nome`, `c
 -- Table structure for table `area_supressao`
 --
 
-CREATE TABLE `area_supressao` (
-  `id` int(11) NOT NULL,
-  `chave` varchar(255) DEFAULT NULL,
-  `dt_inicial` datetime NOT NULL,
-  `dt_final` datetime NOT NULL,
-  `fitofisionomia` text DEFAULT NULL,
-  `area_em_app` decimal(10,2) NOT NULL,
-  `area_fora_app` decimal(10,2) NOT NULL,
-  `area_total` decimal(10,2) NOT NULL,
-  `corte_especie` varchar(255) DEFAULT NULL,
-  `observacao` text DEFAULT NULL,
-  `shapefile` longtext DEFAULT NULL,
-  `servico_id` int(11) NOT NULL,
-  `licenca_id` int(11) NOT NULL,
-  `estagio_sucessional_id` int(11) NOT NULL,
-  `tipo_bioma_id` int(11) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL,
-  `local_shape` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `area_supressao`
---
-
-INSERT INTO `area_supressao` (`id`, `chave`, `dt_inicial`, `dt_final`, `fitofisionomia`, `area_em_app`, `area_fora_app`, `area_total`, `corte_especie`, `observacao`, `shapefile`, `servico_id`, `licenca_id`, `estagio_sucessional_id`, `tipo_bioma_id`, `created_at`, `updated_at`, `deleted_at`, `local_shape`) VALUES
-(1, 'AS-10/2023', '2023-10-31 00:00:00', '2023-11-01 00:00:00', '123', 123.00, 123.00, 123.00, 'N', '123', NULL, 74, 8, 1, 1, '2023-10-31 16:24:30', '2023-10-31 16:24:30', NULL, NULL),
-(2, 'AS-11/2023', '2023-11-03 00:00:00', '2023-11-04 00:00:00', '132123', 123.00, 0.00, 123.00, 'S', '123123', NULL, 74, 8, 2, 1, '2023-11-03 13:34:36', '2023-11-24 15:14:30', NULL, 'F:\\Apache24_8081\\htdocs\\DPP\\ecosistema\\writable\\file_shape\\6544f6ec32075.json'),
-(3, 'AS-12/2023', '2023-11-03 00:00:00', '2023-11-04 00:00:00', '123', 123.00, 123.00, 123.00, 'S', '123', NULL, 74, 8, 1, 1, '2023-11-03 14:15:49', '2023-11-03 14:15:49', NULL, 'F:\\Apache24_8081\\htdocs\\DPP\\ecosistema\\writable\\file_shape\\6545009567f28.json'),
-(4, 'AS-13/2023', '2023-11-06 00:00:00', '2023-11-13 00:00:00', 'teste', 10.00, 10.00, 20.00, 'S', 'teste', NULL, 74, 8, 2, 3, '2023-11-13 17:53:46', '2023-11-13 17:54:53', NULL, 'F:\\Apache24_8081\\htdocs\\DPP\\ecosistema\\writable\\file_shape\\655262ec88d84.json'),
-(5, 'AS-14/2023', '2023-11-20 00:00:00', '2023-11-24 00:00:00', 'tette', 0.00, 1.00, 1.00, 'S', 'teste', NULL, 74, 8, 3, 1, '2023-11-24 11:01:53', '2023-11-24 11:01:53', NULL, NULL),
-(18, 'AS-15/2024', '2023-03-14 00:00:00', '2023-11-28 00:00:00', 'Floresta Estacional Semidecidual', 0.09, 0.02, 0.10, 'N', 'Supressão de 0,103 ha para implantação de OAE\'s.', NULL, 127, 417, 3, 3, '2024-04-04 15:22:13', '2024-04-04 15:45:24', NULL, 'F:\\Apache24_8081\\htdocs\\DPP\\ecosistema\\writable\\file_shape\\660ef544d259c.json'),
-(19, 'AS-28/2024', '2023-11-28 00:00:00', '2023-11-28 00:00:00', 'Floresta Estacional Semidecidual', 0.00, 0.00, 0.00, 'N', 'Supressão de 03 arvores isoladas presentes na arborização urbana.', NULL, 127, 417, 4, 3, '2024-04-04 15:50:54', '2024-04-04 15:50:54', NULL, 'F:\\Apache24_8081\\htdocs\\DPP\\ecosistema\\writable\\file_shape\\660ef68ece93b.json'),
-(21, 'AS-29/2024', '2024-02-20 00:00:00', '2024-03-30 00:00:00', 'FOD', 40.00, 350.00, 390.00, 'S', NULL, NULL, 309, 8, 1, 1, '2024-07-11 15:14:43', '2024-07-11 15:14:43', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -706,29 +671,6 @@ INSERT INTO `area_supressao` (`id`, `chave`, `dt_inicial`, `dt_final`, `fitofisi
 -- Table structure for table `arquivo_area_supressao`
 --
 
-CREATE TABLE `arquivo_area_supressao` (
-  `id` int(11) NOT NULL,
-  `arquivo_id` int(11) NOT NULL,
-  `area_supressao_id` int(11) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `arquivo_controle_pilha`
---
-
-CREATE TABLE `arquivo_controle_pilha` (
-  `id` int(11) NOT NULL,
-  `arquivo_id` int(11) NOT NULL,
-  `controle_pilhas_id` int(11) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 -- --------------------------------------------------------
 
@@ -1973,29 +1915,6 @@ INSERT INTO `controle_pilhas` (`id`, `chave`, `servico_id`, `licenca_id`, `area_
 -- Table structure for table `corte_especie`
 --
 
-CREATE TABLE `corte_especie` (
-  `id` int(11) NOT NULL,
-  `nome` varchar(100) NOT NULL,
-  `nome_popular` varchar(100) NOT NULL,
-  `qtd_corte` int(11) NOT NULL,
-  `area_supressao_id` int(11) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL,
-  `compensacao` int(11) DEFAULT NULL,
-  `legislacao` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `corte_especie`
---
-
-INSERT INTO `corte_especie` (`id`, `nome`, `nome_popular`, `qtd_corte`, `area_supressao_id`, `created_at`, `updated_at`, `deleted_at`, `compensacao`, `legislacao`) VALUES
-(1, '123', '123', 123, 2, '2023-11-03 13:34:36', '2023-11-24 15:14:03', '2023-11-24 15:14:03', 1231, '123'),
-(2, '123', '123', 123, 3, '2023-11-03 14:15:49', '2023-11-03 14:15:49', NULL, 123, '123'),
-(3, 'hevea brasiliensis', 'seringueira', 10, 4, '2023-11-13 17:54:34', '2023-11-13 17:54:53', NULL, 300, 'lei'),
-(4, 'Castanheira', 'castanha', 2, 5, '2023-11-24 11:01:53', '2023-11-24 11:01:53', NULL, 50, 'lei'),
-(5, 'Swietenia macrophylla', 'Mogno', 40, 21, '2024-07-11 15:14:43', '2024-07-11 15:14:43', NULL, 1600, 'Lei 00.000');
 
 -- --------------------------------------------------------
 
@@ -2138,26 +2057,6 @@ INSERT INTO `destinacao_pilhas` (`id`, `destinacao_id`, `controle_pilha_id`, `cr
 --
 -- Table structure for table `estagio_sucessional`
 --
-
-CREATE TABLE `estagio_sucessional` (
-  `id` int(11) NOT NULL,
-  `chave` varchar(255) NOT NULL,
-  `nome` varchar(75) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `estagio_sucessional`
---
-
-INSERT INTO `estagio_sucessional` (`id`, `chave`, `nome`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, '1362565737e2fe98ec287983e32c33b5', 'Climáxica', '2023-02-10 14:09:00', NULL, NULL),
-(2, '7bdbb8c147b84749b86af29763dcc87f', 'Secundária Inicial', '2023-02-10 14:09:00', NULL, NULL),
-(3, '5340cbafd624877249997ff42bf95b0a', 'Secundária Tardia', '2023-02-10 14:09:00', NULL, NULL),
-(4, '4bf22034e62aa7a95b71d8165f00ba4e', 'Pioneira', '2023-02-10 14:09:00', NULL, NULL);
-
 
 
 
@@ -6361,27 +6260,6 @@ CREATE TABLE `supressao_relatorio_anexos` (
 --
 -- Table structure for table `tipo_biomas`
 --
-
-CREATE TABLE `tipo_biomas` (
-  `id` int(11) primary key auto_increment NOT NULL,
-  `chave` varchar(255) NOT NULL,
-  `nome` varchar(75) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `tipo_biomas`
---
-
-INSERT INTO `tipo_biomas` (`id`, `chave`, `nome`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'bc4801e49a89d60e33a6cfe74c2ff01e', 'Amazônia', '2023-02-10 14:09:00', NULL, NULL),
-(2, '553f55540a1e4d55827c97894fdb1df4', 'Cerrado', '2023-02-10 14:09:00', NULL, NULL),
-(3, '24411de03b918e3a290ef5b329f09bc5', 'Mata Atlântica', '2023-02-10 14:09:00', NULL, NULL),
-(4, '6a344f81a1cedf5e5f8939f257101107', 'Caatinga', '2023-02-10 14:09:00', NULL, NULL),
-(5, '2667996a5c2528e4e23961fcb2962f3e', 'Pampa', '2023-02-10 14:09:00', NULL, NULL),
-(6, 'ebb2b0444d8fe26a361bd4bbdebe5723', 'Pantanal', '2023-02-10 14:09:00', NULL, NULL);
 
 -- --------------------------------------------------------
 
