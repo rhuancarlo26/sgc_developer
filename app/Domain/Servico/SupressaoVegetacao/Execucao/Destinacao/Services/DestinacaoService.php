@@ -11,6 +11,7 @@ use App\Shared\Traits\Searchable;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 
 class DestinacaoService extends BaseModelService
 {
@@ -69,6 +70,18 @@ class DestinacaoService extends BaseModelService
             afterSave: fn(array $fotosId) => $destinacao?->arquivos()->attach($fotosId)
         );
         return $response;
+    }
+
+    public function getByPeriodo(Servicos $servico, Carbon $dtInicio, Carbon $dtFinal): \Illuminate\Database\Eloquent\Collection|array
+    {
+        return $this->model
+            ->where('servico_id', $servico->id)
+            ->whereBetween('dt_envio', [$dtInicio->format('Y-m-d'), $dtFinal->format('Y-m-d')])
+            ->with(['pilhas' => fn($query) => $query->groupBy('tipo_produto_id')])
+            ->withSum('pilhas', 'volume')
+            ->groupBy('id')
+            ->get();
+
     }
 
 }

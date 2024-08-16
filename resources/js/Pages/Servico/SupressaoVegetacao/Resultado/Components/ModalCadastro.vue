@@ -42,11 +42,7 @@ const save = () => {
     }
 
     if (form.id !== null) {
-        router.post(route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.update'), {
-            _method: 'patch',
-            ...form.data(),
-            fotos: form.fotos.filter(foto => foto instanceof File),
-        }, {
+        form.patch(route('contratos.contratada.servicos.supressao-vegetacao.resultado.update'), {
             preserveState: true,
             onSuccess
         })
