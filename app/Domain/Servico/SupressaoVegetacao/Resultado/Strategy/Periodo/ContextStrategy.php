@@ -19,6 +19,8 @@ class ContextStrategy
      */
     public function calculate(array $request): array
     {
+        if(!isset($request['periodo'])) return [];
+
         match ($request['periodo']) {
             Periodo::ANUAL->value => $this->setStrategy(new AnualStrategy()),
             Periodo::MENSAL->value => $this->setStrategy(new MensalStrategy()),
