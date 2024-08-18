@@ -2,6 +2,7 @@
 
 namespace App\Domain\Servico\SupressaoVegetacao\Resultado\Controller;
 
+use App\Domain\Servico\SupressaoVegetacao\Resultado\Services\AnaliseService;
 use App\Domain\Servico\SupressaoVegetacao\Resultado\Services\ResultadoService;
 use App\Models\ResultadoSupressao;
 use App\Models\Servicos;
@@ -12,7 +13,7 @@ class PilhaAnaliseController extends Controller
 {
 
     public function __construct(
-        private readonly ResultadoService $resultadoService
+        private readonly AnaliseService $analiseService
     )
     {
     }
@@ -20,7 +21,7 @@ class PilhaAnaliseController extends Controller
     public function __invoke(Servicos $servico, ResultadoSupressao $resultado): JsonResponse
     {
         return response()->json(
-            data: $this->resultadoService->getResultadoAnalisePilha($servico, $resultado)
+            data: $this->analiseService->getResultadoAnalisePilha($servico, $resultado)
         );
     }
 

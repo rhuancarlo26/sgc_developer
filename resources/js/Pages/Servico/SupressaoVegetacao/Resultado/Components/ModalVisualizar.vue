@@ -100,21 +100,21 @@ defineExpose({abrirModal});
                     <div class="card-header">
                         <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
                             <li class="nav-item">
-                                <a href="#supressao" @click="tab = 'supressao'" class="nav-link active"
+                                <a href="#supressao" @click="tab = 'supressao'" :class="{active: tab === 'supressao'}" class="nav-link"
                                    data-bs-toggle="tab">Supressão</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#pilhas" @click="tab = 'pilhas'" class="nav-link"
+                                <a href="#pilhas" @click="tab = 'pilhas'" :class="{active: tab === 'pilhas'}" class="nav-link"
                                    data-bs-toggle="tab">Pilhas</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#destinacao" @click="tab = 'destinacao'" class="nav-link" data-bs-toggle="tab">Destinação</a>
+                                <a href="#destinacao" @click="tab = 'destinacao'" :class="{active: tab === 'destinacao'}" class="nav-link" data-bs-toggle="tab">Destinação</a>
                             </li>
                         </ul>
                     </div>
                     <div class="card-body">
                         <div class="tab-content">
-                            <div class="tab-pane active show" id="supressao">
+                            <div :class="[tab === 'supressao' ? 'active show' : '']" class="tab-pane" id="supressao">
                                 <div v-if="analiseSupressao" class="row row-gap-2">
                                     <div class="col-12">
                                         <h4>Tabela com as áreas de supressão de vegetação</h4>
@@ -217,24 +217,24 @@ defineExpose({abrirModal});
                                     </div>
                                 </div>
                             </div>
-                            <div class="tab-pane" id="pilhas">
+                            <div :class="[tab === 'pilhas' ? 'active show' : '']" class="tab-pane" id="pilhas">
                                 <div v-if="analisePilha" class="row row-gap-2">
                                     <div class="col-12">
                                         <h4>Tabela com as pilhas cadastradas</h4>
                                         <Table
-                                            :columns="['Código', 'Área de supressão', 'Data cadastro', 'Nº ASV', 'Tipo de pilha', 'Tipo de produto', 'Nome científico', 'Nº indivíduos', 'Volume (m³)']"
+                                            :columns="['Código', 'Área de supressão', 'Data cadastro', 'Nº ASV', 'Tipo de pilha', 'Tipo de produto', 'Nome científico', 'Volume (m³)']"
                                             :records="{ data: analisePilha.pilha, links: [] }"
                                             table-class="table-hover">
                                             <template #body="{ item, key }">
                                                 <tr>
                                                     <td>{{ item.chave }}</td>
-                                                    <td>{{ item.area_supressao.chave }}</td>
+                                                    <td>{{ item.area_supressao }}</td>
                                                     <td>{{ dateTimeFormat(item.created_at) }}</td>
-                                                    <td>{{ item.licenca.numero_licenca }}</td>
+                                                    <td>{{ item.licenca_id }}</td>
                                                     <td>{{ item.tipo_pilha_label }}</td>
-                                                    <td>{{ item.produto.nome }}</td>
-                                                    <td>{{ item.corte_especie?.nome ?? '-' }}</td>
-                                                    <td>{{ item.corte_especie?.qtd_corte ?? '-' }}</td>
+                                                    <td>{{ item.produto }}</td>
+                                                    <td>{{ item.corte ?? '-' }}</td>
+                                                    <td>{{ item.volume ?? '-' }}</td>
                                                 </tr>
                                             </template>
                                         </Table>
@@ -287,12 +287,12 @@ defineExpose({abrirModal});
                                             <template #body="{ item, key }">
                                                 <tr>
                                                     <td>{{ item.chave }}</td>
-                                                    <td>{{ item.area_supressao.chave }}</td>
+                                                    <td>{{ item.area_supressao }}</td>
                                                     <td>{{ dateTimeFormat(item.created_at) }}</td>
-                                                    <td>{{ item.licenca.numero_licenca }}</td>
+                                                    <td>{{ item.licenca_id }}</td>
                                                     <td>{{ item.tipo_pilha_label }}</td>
-                                                    <td>{{ item.produto.nome }}</td>
-                                                    <td>{{ item.corte_especie?.nome ?? '-' }}</td>
+                                                    <td>{{ item.produto }}</td>
+                                                    <td>{{ item.corte ?? '-' }}</td>
                                                     <td>{{ item.volume ?? '-' }}</td>
                                                 </tr>
                                             </template>
@@ -308,7 +308,7 @@ defineExpose({abrirModal});
                                     </div>
                                 </div>
                             </div>
-                            <div class="tab-pane" id="destinacao">
+                            <div :class="[tab === 'destinacao' ? 'active show' : '']" class="tab-pane" id="destinacao">
                                 <div v-if="analiseDestinacao" class="row row-gap-2">
                                     <div class="col-12">
                                         <h4>Tabela com as pilhas cadastradas</h4>
@@ -320,10 +320,10 @@ defineExpose({abrirModal});
                                                 <tr>
                                                     <td>{{ item.chave }}</td>
                                                     <td>{{ dateTimeFormat(item.dt_envio) }}</td>
-                                                    <td>{{ item.pilhas.map((p) => p.chave).join(', ') }}</td>
+                                                    <td>{{ item.pilhas }}</td>
                                                     <td>{{ item.destinatario }}</td>
                                                     <td>{{ item.uso_da_madeira }}</td>
-                                                    <td>{{ item.pilhas_sum_volume }}</td>
+                                                    <td>{{ item.volume }}</td>
                                                     <td>{{ item.observacao ?? '-' }}</td>
                                                 </tr>
                                             </template>
