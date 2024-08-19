@@ -369,14 +369,7 @@ INSERT INTO `afugent_fauna_tipo_registro` (`id`, `id_forma_registro`, `nome`, `c
 -- Table structure for table `arquivo_destinacao_pilha`
 --
 
-CREATE TABLE `arquivo_destinacao_pilha` (
-  `id` int(11) NOT NULL,
-  `arquivo_id` int(11) NOT NULL,
-  `destinacaos_id` int(11) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
 
 -- --------------------------------------------------------
 
@@ -1546,48 +1539,6 @@ CREATE TABLE `contratos_usuarios` (
 -- Table structure for table `controle_pilhas`
 --
 
-CREATE TABLE `controle_pilhas` (
-  `id` int(11) NOT NULL,
-  `chave` varchar(255) NOT NULL,
-  `servico_id` int(11) NOT NULL,
-  `licenca_id` int(11) NOT NULL,
-  `area_supressao_id` int(11) NOT NULL,
-  `patio_estocagem_id` int(11) NOT NULL,
-  `corte_especie_id` int(11) DEFAULT NULL,
-  `tipo_produto_id` int(11) NOT NULL,
-  `dt_cadastro` datetime DEFAULT NULL,
-  `tipo_pilha` tinyint(1) NOT NULL DEFAULT 1,
-  `volume` decimal(10,2) NOT NULL,
-  `nu_individuo` int(11) NOT NULL,
-  `latitude` varchar(255) NOT NULL,
-  `longitude` varchar(255) NOT NULL,
-  `zona` varchar(255) NOT NULL,
-  `observacao` text DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `controle_pilhas`
---
-
-INSERT INTO `controle_pilhas` (`id`, `chave`, `servico_id`, `licenca_id`, `area_supressao_id`, `patio_estocagem_id`, `corte_especie_id`, `tipo_produto_id`, `dt_cadastro`, `tipo_pilha`, `volume`, `nu_individuo`, `latitude`, `longitude`, `zona`, `observacao`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(6, 'CP-10/2023', 74, 8, 5, 1, 4, 3, NULL, 1, 50.00, 0, 'dff', 'ff', '', 'ff', '2023-11-24 11:02:46', '2023-11-24 11:02:46', NULL),
-(11, 'CP-16/2023', 74, 8, 4, 1, 3, 2, NULL, 1, 60.00, 0, '0', '0', '', '0', '2023-11-24 15:16:14', '2023-11-24 15:16:14', NULL),
-(12, 'CP-21/2023', 74, 8, 4, 1, 3, 1, '1970-01-01 00:00:00', 2, 30.00, 0, '', '', '', '1', '2023-11-24 15:17:49', '2023-11-24 15:18:51', NULL),
-(17, 'CP-22/2024', 127, 417, 18, 3, NULL, 2, '1970-01-01 00:00:00', 0, 4.11, 0, '234019', '9350985', '', 'Bueiro da Estaca 501 LE. Coordenada em SIRGAS 2000 UTM 25S.', '2024-04-04 16:04:33', '2024-04-09 16:51:04', NULL),
-(18, 'CP-27/2024', 127, 417, 18, 3, NULL, 2, '1970-01-01 00:00:00', 0, 1.48, 0, '234336', '9350954', '', 'Bueiro da Estaca 517 LE. Coordenada em SIRGAS 2000 UTM 25S.', '2024-04-09 16:57:57', '2024-04-10 15:17:00', NULL),
-(19, 'CP-28/2024', 127, 417, 18, 3, NULL, 2, '1970-01-01 00:00:00', 0, 0.50, 0, '234787', '9350882', '', 'Bueiro da Estaca 539 LE. Coordenada em SIRGAS 2000 UTM 25S.', '2024-04-10 15:19:10', '2024-04-10 15:19:45', NULL),
-(20, 'CP-29/2024', 127, 417, 18, 3, NULL, 2, '1970-01-01 00:00:00', 0, 0.93, 0, '235091', '9350842', '', 'Bueiro da Estaca 555 LE. Coordenada em SIRGAS 2000 UTM 25S.', '2024-04-10 15:21:29', '2024-04-10 15:22:10', NULL),
-(21, 'CP-30/2024', 127, 417, 18, 3, NULL, 2, '1970-01-01 00:00:00', 0, 0.28, 0, '235368', '9350841', '', 'Bueiro da Estaca 570 LE. Coordenada em SIRGAS 2000 UTM 25S.', '2024-04-10 15:34:19', '2024-04-10 15:40:18', NULL),
-(22, 'CP-31/2024', 127, 417, 18, 3, NULL, 2, '1970-01-01 00:00:00', 0, 4.46, 0, '235694', '9350848', '', 'Bueiro da Estaca 584 LE. Coordenada em SIRGAS 2000 UTM 25S.', '2024-04-10 15:40:58', '2024-04-10 15:42:53', NULL),
-(23, 'CP-32/2024', 127, 417, 18, 3, NULL, 2, '1970-01-01 00:00:00', 0, 0.64, 0, '235983', '9350818', '', 'Bueiro da Estaca 600 LE. Coordenada em SIRGAS 2000 UTM 25S.', '2024-04-10 15:45:32', '2024-04-10 15:45:59', NULL),
-(24, 'CP-33/2024', 127, 417, 18, 3, NULL, 2, NULL, 0, 0.13, 0, '236274', '9350786', '', 'Bueiro da Estaca 614 LE. Coordenada em SIRGAS 2000 UTM 25S.', '2024-04-10 15:47:27', '2024-04-10 15:47:27', NULL),
-(25, 'CP-34/2024', 127, 417, 19, 3, NULL, 2, NULL, 0, 0.31, 0, '239496', '9351174', '', 'Arvores isoladas entre as Estacas 773 a 776 LE. Coordenada em SIRGAS 2000 UTM 25S.', '2024-04-10 15:51:30', '2024-04-10 15:51:30', NULL),
-(26, 'CP-35/2024', 127, 417, 19, 3, NULL, 2, NULL, 0, 1.32, 0, '239433', '9351107', '', 'Arvores isoladas entre as Estacas 773 a 776 LD. Coordenada em SIRGAS 2000 UTM 25S.', '2024-04-10 15:52:50', '2024-04-10 15:52:50', NULL),
-(27, 'CP-36/2024', 309, 8, 21, 21, NULL, 2, NULL, 0, 40.00, 0, '00000', '00000', '', NULL, '2024-07-11 15:49:00', '2024-07-11 15:49:00', NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -1665,30 +1616,7 @@ INSERT INTO `cronograma_evento` (`id`, `contrato_id`, `servico_id`, `periodo`, `
 -- Table structure for table `destinacaos`
 --
 
-CREATE TABLE `destinacaos` (
-  `id` int(11) NOT NULL,
-  `chave` varchar(255) NOT NULL,
-  `servico_id` int(11) NOT NULL,
-  `dt_envio` datetime DEFAULT NULL,
-  `uso_da_madeira` text DEFAULT NULL,
-  `destinatario` text DEFAULT NULL,
-  `observacao` text DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
---
--- Dumping data for table `destinacaos`
---
-
-INSERT INTO `destinacaos` (`id`, `chave`, `servico_id`, `dt_envio`, `uso_da_madeira`, `destinatario`, `observacao`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'DP-10/2023', 74, '2023-11-24 00:00:00', 'Escora no canteiro', 'obra dnit', 'ss', '2023-11-24 11:04:18', '2023-11-24 11:04:18', NULL),
-(2, 'DP-11/2024', 127, '2024-03-26 00:00:00', 'Furto de material lenhoso.', 'Terceiros não relacionados ao empreendimento.', 'Furto total das madeiras armazenadas nas estacas 501 LE, 517 LE, 600 LE, 614 LE, 776 LE e 776 LD. \r\nFurto parcial (0,32 m³) das madeiras armazenadas na estaca 539 LE.', '2024-04-11 14:49:38', '2024-04-18 02:03:30', NULL),
-(3, 'DP-12/2024', 127, NULL, 'Furto de material lenhoso.', 'Terceiros não relacionados ao empreendimento.', NULL, '2024-04-12 14:07:41', '2024-04-12 14:08:54', '2024-04-12 14:08:54'),
-(4, 'DP-12/2024', 127, '2023-09-22 00:00:00', 'Furto de material lenhoso.', 'Terceiro não relacionado ao empreendimento.', 'Furto parcial (6,56 m³) das madeiras armazenadas nas estacas 501, 517, 539, 570 e 594 LE.', '2024-04-12 14:12:45', '2024-04-12 14:25:38', NULL),
-(5, 'DP-14/2024', 309, '2024-07-15 00:00:00', '-', 'Furto', 'BO 12345/2024 registrado online', '2024-07-15 11:13:00', '2024-07-15 11:13:25', '2024-07-15 11:13:25'),
-(6, 'DP-14/2024', 309, '2024-07-15 00:00:00', 'Furto', 'Desconhecido', 'BO 12345/2024 registrado online', '2024-07-15 11:14:14', '2024-07-15 11:14:14', NULL);
 
 -- --------------------------------------------------------
 
@@ -1696,40 +1624,6 @@ INSERT INTO `destinacaos` (`id`, `chave`, `servico_id`, `dt_envio`, `uso_da_made
 -- Table structure for table `destinacao_pilhas`
 --
 
-CREATE TABLE `destinacao_pilhas` (
-  `id` int(11) NOT NULL,
-  `destinacao_id` int(11) NOT NULL,
-  `controle_pilha_id` int(11) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `destinacao_pilhas`
---
-
-INSERT INTO `destinacao_pilhas` (`id`, `destinacao_id`, `controle_pilha_id`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 1, 6, '2023-11-24 11:04:18', '2023-11-24 11:04:18', NULL),
-(2, 2, 17, '2024-04-11 14:49:38', '2024-04-11 14:49:38', NULL),
-(3, 2, 23, '2024-04-11 14:49:38', '2024-04-11 14:49:38', NULL),
-(4, 2, 24, '2024-04-11 14:49:38', '2024-04-11 14:49:38', NULL),
-(5, 2, 25, '2024-04-11 14:49:38', '2024-04-11 14:49:38', NULL),
-(6, 2, 26, '2024-04-11 14:49:38', '2024-04-11 14:49:38', NULL),
-(7, 2, 18, '2024-04-12 13:39:47', '2024-04-12 13:39:47', NULL),
-(8, 2, 19, '2024-04-12 13:55:30', '2024-04-12 13:55:30', NULL),
-(9, 3, 21, '2024-04-12 14:07:41', '2024-04-12 14:07:41', NULL),
-(10, 3, 22, '2024-04-12 14:07:41', '2024-04-12 14:07:41', NULL),
-(11, 3, 17, '2024-04-12 14:07:41', '2024-04-12 14:07:41', NULL),
-(12, 3, 18, '2024-04-12 14:07:41', '2024-04-12 14:07:41', NULL),
-(13, 3, 19, '2024-04-12 14:07:41', '2024-04-12 14:07:41', NULL),
-(14, 4, 17, '2024-04-12 14:12:45', '2024-04-12 14:12:45', NULL),
-(15, 4, 18, '2024-04-12 14:12:45', '2024-04-12 14:12:45', NULL),
-(16, 4, 19, '2024-04-12 14:12:45', '2024-04-12 14:12:45', NULL),
-(17, 4, 21, '2024-04-12 14:12:45', '2024-04-12 14:12:45', NULL),
-(18, 4, 22, '2024-04-12 14:12:45', '2024-04-12 14:12:45', NULL),
-(20, 5, 27, '2024-07-15 11:13:00', '2024-07-15 11:13:00', NULL),
-(21, 6, 27, '2024-07-15 11:14:14', '2024-07-15 11:14:14', NULL);
 
 -- --------------------------------------------------------
 
