@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Domain\Servico\ContOcorrencia\Configuracao\Empreendimento\Requests;
+namespace App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreLicencaShapefileRequest extends FormRequest
+class UpdateVistoriaRequest extends FormRequest
 {
     public function rules(): array
     {
         return [
-            'licenca_id' => 'required|exists:licencas,id',
-            'shapefile' => 'required|file|mimes:zip'
+            'ocorrencia' => ['required'],
+            'vistoria' => ['required']
         ];
     }
 
