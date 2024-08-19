@@ -6,7 +6,7 @@ import { Head, Link, router } from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import { ref } from "vue";
-import { IconDots } from "@tabler/icons-vue";
+import { IconDots, IconDownload } from "@tabler/icons-vue";
 import NovoRegistroModal from "./Modal/NovoRegistroModal.vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import Swal from 'sweetalert2';
@@ -52,6 +52,10 @@ const destroy = (registro) => {
     })
 }
 
+const download = () => {
+    router.get(route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.download', { servico: props.servico.id }));
+}
+
 </script>
 
 <template>
@@ -81,10 +85,16 @@ const destroy = (registro) => {
 
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
-                <!-- Pesquisa-->
-                <ModelSearchFormAllColumns :columns="[]">
-                </ModelSearchFormAllColumns>
+                <div class="d-flex justify-content-between">
+                    <!-- Pesquisa-->
+                    <ModelSearchFormAllColumns class="w-100" :columns="[]">
+                    </ModelSearchFormAllColumns>
 
+                    <!-- Download -->
+                    <button type="button" class="btn col h-5" @click="download()">
+                        <IconDownload />
+                    </button>
+                </div>
                 <Table :columns="['Nome do Registro', 'Nº da frente de Supressão', 'BR', 'UF', 'KM',
                     'Grupo Amostrado', 'Espécie', 'Data Registro', 'Categoria', 'Ação']" :records="registros"
                     table-class="table-hover">
@@ -106,7 +116,8 @@ const destroy = (registro) => {
                                         <IconDots />
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        <li><a class="dropdown-item" @click="abrirModalVisualizarRegistro(item)" href="javascript:void(0);">Visualizar</a></li>
+                                        <li><a class="dropdown-item" @click="abrirModalVisualizarRegistro(item)"
+                                                href="javascript:void(0);">Visualizar</a></li>
                                         <li><a class="dropdown-item" @click="abrirModalEditarRegistro(item)"
                                                 href="javascript:void(0);">Editar</a>
                                         </li>
@@ -124,6 +135,6 @@ const destroy = (registro) => {
         <NovoRegistroModal ref="novoRegistroModal" :grupoAmostrado="grupoAmostrado" :frenteSupressao="frenteSupressao"
             :formaRegistro="formaRegistro" />
 
-            <VisualizarRegistroModal ref="visualizarRegistroModal" />
+        <VisualizarRegistroModal ref="visualizarRegistroModal" />
     </AuthenticatedLayout>
 </template>
