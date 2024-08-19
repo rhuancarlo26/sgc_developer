@@ -11,42 +11,51 @@ const props = defineProps({
 });
 
 const form = useForm({
-  contrato_id: props.servico.contrato_id,
-  servico_id: props.servico.id,
+  id_contrato: props.servico?.id_contrato,
+  servico_id: props.servico?.id,
   rh: null,
   veiculo: null,
   equipamento: null
 });
 
 const salvarRh = () => {
+  form.id_contrato = props.servico?.id_contrato;
+  form.servico_id = props.servico?.id;
+
   form.post(route('contratos.contratada.servicos.rh.store'));
 }
 
 const excluirRh = (rh_id) => {
   router.post(route('contratos.contratada.servicos.rh.delete', rh_id), {
-    contrato_id: props.servico.contrato_id,
+    id_contrato: props.servico.id_contrato,
     servico_id: props.servico.id
   })
 }
 
 const salvarVeiculo = () => {
+  form.id_contrato = props.servico?.id_contrato;
+  form.servico_id = props.servico?.id;
+
   form.post(route('contratos.contratada.servicos.veiculo.store'));
 }
 
 const excluirVeiculo = (veiculo_id) => {
   router.post(route('contratos.contratada.servicos.veiculo.delete', veiculo_id), {
-    contrato_id: props.servico.contrato_id,
+    id_contrato: props.servico.id_contrato,
     servico_id: props.servico.id
   })
 }
 
 const salvarEquipamento = () => {
+  form.id_contrato = props.servico?.id_contrato;
+  form.servico_id = props.servico?.id;
+
   form.post(route('contratos.contratada.servicos.equipamento.store'));
 }
 
 const excluirEquipamento = (equipamento_id) => {
   router.post(route('contratos.contratada.servicos.equipamento.delete', equipamento_id), {
-    contrato_id: props.servico.contrato_id,
+    id_contrato: props.servico.id_contrato,
     servico_id: props.servico.id
   })
 }
@@ -84,7 +93,7 @@ const excluirEquipamento = (equipamento_id) => {
         <tbody>
           <tr v-for="rh in servico.rhs" :key="rh.id" class="cursor-pointer">
             <td>{{ rh.nome }}</td>
-            <td>{{ rh.formacao }}</td>
+            <td>{{ rh.obs }}</td>
             <td>
               <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
                 data-bs-toggle="dropdown" aria-expanded="false">

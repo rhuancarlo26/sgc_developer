@@ -9,6 +9,6 @@ class ServicoPmqaListaPonto extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_lista_pontos';
+    protected $table = 'config_vinculacao';
     protected $guarded = ['id', 'created_at'];
 }

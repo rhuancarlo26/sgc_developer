@@ -14,13 +14,13 @@ const props = defineProps({
 const toast = useToast();
 const form = useForm({
   numero_contrato: null,
-  tipo_id: null,
+  tipo_contrato: null,
   cnpj: null,
   contratada: null,
-  objeto: null,
+    obj_contrato: null,
   processo_sei: null,
-  data_inicio_vigencia: null,
-  data_termino_vigencia: null,
+  data_inicio: null,
+  data_termino: null,
   situacao: null,
   edital: null,
   tipo_licitacao: null,
@@ -75,10 +75,10 @@ const getDadosContrato = () => {
       form.cnpj = response.data.data[0].NU_CNPJ_CPF;
       form.numero_contrato = response.data.data[0].NU_CON_FORMATADO;
       form.contratada = response.data.data[0].NO_EMPRESA;
-      form.objeto = response.data.data[0].DS_OBJETO;
+      form.obj_contrato = response.data.data[0].DS_OBJETO;
       form.processo_sei = response.data.data[0].NU_PROCESSO;
-      form.data_inicio_vigencia = YYYYmmdd(response.data.data[0].DT_INICIO);
-      form.data_termino_vigencia = YYYYmmdd(response.data.data[0].DT_TERMINO_VIGENCIA);
+      form.data_inicio = YYYYmmdd(response.data.data[0].DT_INICIO);
+      form.data_termino = YYYYmmdd(response.data.data[0].DT_TERMINO_VIGENCIA);
       form.situacao = response.data.data[0].DS_FAS_CONTRATO;
       form.edital = response.data.data[0].NU_EDITAL;
       form.tipo_licitacao = response.data.data[0].TIPO_LICITACAO;
@@ -97,7 +97,7 @@ const getDadosContrato = () => {
 }
 
 const salvarContrato = () => {
-  form.tipo_id = props.tipo.id;
+  form.tipo_contrato = props.tipo.id;
 
   form.transform((data) => Object.assign({}, data))
 
@@ -152,9 +152,9 @@ const salvarContrato = () => {
       </div>
       <div class="row mb-4">
         <div class="col">
-          <InputLabel value="Objeto do Contrato" for="objeto" />
-          <textarea name="objeto" id="objeto" class="form-control" rows="5" v-model="form.objeto" disabled></textarea>
-          <InputError :message="form.errors.objeto" />
+          <InputLabel value="Objeto do Contrato" for="obj_contrato" />
+          <textarea name="objeto" id="obj_contrato" class="form-control" rows="5" v-model="form.obj_contrato" disabled></textarea>
+          <InputError :message="form.errors.obj_contrato" />
         </div>
       </div>
       <div class="row">
@@ -165,16 +165,16 @@ const salvarContrato = () => {
           <InputError :message="form.errors.processo_sei" />
         </div>
         <div class="col">
-          <InputLabel value="Início da Vigência" for="data_inicio_vigencia" />
-          <input type="date" id="data_inicio_vigencia" name="data_inicio_vigencia" class="form-control"
-            v-model="form.data_inicio_vigencia" disabled />
-          <InputError :message="form.errors.data_inicio_vigencia" />
+          <InputLabel value="Início da Vigência" for="data_inicio" />
+          <input type="date" id="data_inicio" name="data_inicio" class="form-control"
+            v-model="form.data_inicio" disabled />
+          <InputError :message="form.errors.data_inicio" />
         </div>
         <div class="col">
-          <InputLabel value="Término da Vigência" for="data_termino_vigencia" />
-          <input type="date" id="data_termino_vigencia" name="data_termino_vigencia" class="form-control"
-            v-model="form.data_termino_vigencia" disabled />
-          <InputError :message="form.errors.data_termino_vigencia" />
+          <InputLabel value="Término da Vigência" for="data_termino" />
+          <input type="date" id="data_termino" name="data_termino" class="form-control"
+            v-model="form.data_termino" disabled />
+          <InputError :message="form.errors.data_termino" />
         </div>
         <div class="col">
           <InputLabel value="Situação" for="situacao" />
@@ -221,7 +221,7 @@ const salvarContrato = () => {
         <div class="col">
           <InputLabel value="Fiscal do Contrato" for="fiscal_contrato" />
           <input type="text" id="fiscal_contrato" name="fiscal_contrato" class="form-control"
-            v-model="form.fiscal_contrato" disabled />
+            v-model="form.fiscal_contrato" />
           <InputError :message="form.errors.fiscal_contrato" />
         </div>
       </div>
@@ -244,8 +244,7 @@ const salvarContrato = () => {
         </div>
         <div class="col">
           <InputLabel value="Preço Aditivos" for="total_aditivo" />
-          <input type="text" id="total_aditivo" name="total_aditivo" class="form-control" v-model="form.total_aditivo"
-            disabled />
+          <input type="text" id="total_aditivo" name="total_aditivo" class="form-control" v-model="form.total_aditivo"/>
           <InputError :message="form.errors.total_aditivo" />
         </div>
         <div class="col">

@@ -9,6 +9,6 @@ class ContratoLicencaObservacao extends Model
 {
     use HasFactory;
 
-    protected $table = 'contrato_licenca_observacoes';
+    protected $table = 'contrato_licenca_obs';
     protected $guarded = ['id', 'created_at'];
 }

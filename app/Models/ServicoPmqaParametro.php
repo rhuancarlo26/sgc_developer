@@ -9,6 +9,6 @@ class ServicoPmqaParametro extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_parametros';
+    protected $table   = 'parametros';
     protected $guarded = ['id', 'created_at'];
 }

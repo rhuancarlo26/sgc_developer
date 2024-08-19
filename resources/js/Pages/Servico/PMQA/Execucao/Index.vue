@@ -38,7 +38,7 @@ const abrirModalCampanha = (item) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+          { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
           { route: '#', label: contrato.contratada }
         ]
           " />
@@ -56,17 +56,16 @@ const abrirModalCampanha = (item) => {
             <NavButton @click="abrirModalCampanha()" type-button="success" title="Nova campanha" />
           </template>
         </ModelSearchFormAllColumns>
-
         <!-- Listagem-->
         <Table :columns="['Nome da campanha', 'Data de início', 'Data de término', 'Pontos', 'Ação']"
           :records="campanhas" table-class="table-hover">
           <template #body="{ item }">
             <tr>
-              <td>{{ item.nome }}</td>
-              <td>{{ dateTimeFormat(item.data_inicio) }}</td>
-              <td>{{ dateTimeFormat(item.data_termino) }}</td>
-              <td>{{ item.pontos.length }}</td>
-              <td>
+              <td class="text-center">{{ item.nome_campanha }}</td>
+              <td class="text-center">{{ dateTimeFormat(item.dt_inicio) }}</td>
+              <td class="text-center">{{ dateTimeFormat(item.dt_fim) }}</td>
+              <td class="text-center">{{ item.pontos.length }}</td>
+              <td class="text-center">
                 <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.gerenciar"
                   :param="{ contrato: contrato.id, servico: servico.id, campanha: item.id }"
                   class="btn btn-icon btn-info me-1" :icon="IconSettings" />

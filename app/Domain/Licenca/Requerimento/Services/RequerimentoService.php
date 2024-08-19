@@ -19,19 +19,18 @@ class RequerimentoService extends BaseModelService
       foreach ($arquivos as $key => $value) {
         if ($value->isvalid()) {
           $nome = $value->getClientOriginalName();
-          $tipo = $value->extension();
-          $caminho = $value->storeAs('Licenca' . DIRECTORY_SEPARATOR . 'Requerimento' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $nome);
+          // $tipo = $value->extension();
+          $caminho = $value->storeAs('Licenca' . DIRECTORY_SEPARATOR . 'Requerimento' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '__' . $nome);
 
           $this->modelClass::create([
-            'licenca_id' => $licenca_id,
-            'nome' => $nome,
-            'tipo' => $tipo,
-            'caminho' => $caminho
+            'id_licenca' => $licenca_id,
+            'nome_arquivo' => $nome,
+            'arquivo' => $caminho
           ]);
         }
       }
 
-      $requerimentos = LicencaRequerimento::where('licenca_id', $licenca_id)->get();
+      $requerimentos = LicencaRequerimento::where('id_licenca', $licenca_id)->get();
 
       return ['type' => 'success', 'content' => 'Requerimentos cadastrados com sucesso!', 'requerimentos' => $requerimentos];
     } catch (\Exception $th) {

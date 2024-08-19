@@ -17,8 +17,8 @@ class IndexController extends Controller
     public function index(Request $request, $arquivo = false): Response
     {
         $searchParams = $request->all('columns', 'value');
-        
-        $licencas = $this->listagemLicenca->get(searchParams: $searchParams , arquivado: $arquivo);
+
+        $licencas = $this->listagemLicenca->get(searchParams: $searchParams, arquivado: $arquivo);
 
         return Inertia::render(component: 'Licenca/Index', props: [
             "licencas" => $licencas

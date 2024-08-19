@@ -15,14 +15,18 @@ const form = useForm({
 })
 
 const salvarDocumento = () => {
+  form.licenca_id = props.licenca.id;
+
   form.post(route('licenca.documento.store'));
 }
 
 const deleteDocumento = () => {
-  form.delete(route('licenca.documento.delete', props.licenca.documento.id));
+  form.delete(route('licenca.documento.delete', props.licenca.id));
 }
 
 const salvarShapefile = () => {
+  form.licenca_id = props.licenca.id;
+
   form.post(route('licenca.shapefile.store'));
 }
 
@@ -34,7 +38,7 @@ const deleteShapefile = () => {
 <template>
   <div class="row">
     <div class="col">
-      <div v-if="!licenca.documento?.id" class="mb-4">
+      <div v-if="!licenca.arquivo_licenca" class="mb-4">
         <InputLabel value="Termo de referência" for="documento" />
         <div class="row g-2">
           <div class="col">
@@ -53,7 +57,7 @@ const deleteShapefile = () => {
       <div v-else>
         <div class="card">
           <div class="table-responsive">
-            <table class="table card-table table-bordered" :class="tableClass">
+            <table class="table card-table table-bordered">
               <thead>
                 <tr>
                   <th>Nome</th>
@@ -62,7 +66,7 @@ const deleteShapefile = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td>{{ licenca.documento?.nome }}</td>
+                  <td>{{ licenca.arquivo_licenca.split('__')[1] }}</td>
                   <td>
                     <a @click="deleteDocumento()" class="btn align-text-top btn-danger m-1" title="Excluir"
                       href="javascript:void(0)">

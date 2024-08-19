@@ -9,14 +9,17 @@ use Illuminate\Http\Request;
 
 class StoreDocumentoVeiculoRecursoController extends Controller
 {
-  public function __construct(private readonly VeiculoRecursoService $veiculoRecursoService)
-  {
-  }
+    public function __construct(private readonly VeiculoRecursoService $veiculoRecursoService)
+    {
+    }
 
-  public function index(Request $request)
-  {
-    $response = $this->veiculoRecursoService->salvarDocumentoVeiculo($request->all());
+    public function index(Request $request)
+    {
+        $response = $this->veiculoRecursoService->salvarDocumentoVeiculo($request->all());
 
-    return to_route('contratos.contratada.recurso.veiculo.create', ['contrato' => $request->contrato_id, 'veiculo' => $request->recurso_veiculo_id])->with('message', $response);
-  }
+        return to_route('contratos.contratada.recurso.veiculo.create', [
+            'contrato' => $request->contrato_id,
+            'veiculo'  => $request->cod_veiculo]
+        )->with('message', $response);
+    }
 }

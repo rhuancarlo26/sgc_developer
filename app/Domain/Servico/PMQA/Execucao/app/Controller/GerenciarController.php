@@ -13,21 +13,21 @@ use Inertia\Response;
 
 class GerenciarController extends Controller
 {
-  public function __construct(private readonly CampanhaPontoService $campanhaPontoService)
-  {
-  }
+    public function __construct(private readonly CampanhaPontoService $campanhaPontoService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, Request $request): Response
-  {
-    $searchParams = $request->all('columns', 'value');
+    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, Request $request): Response
+    {
+        $searchParams = $request->all('columns', 'value');
 
-    $response = $this->campanhaPontoService->index($campanha, $searchParams);
+        $response = $this->campanhaPontoService->index($campanha, $searchParams);
 
-    return Inertia::render('Servico/PMQA/Execucao/Gerenciar', [
-      'contrato' => $contrato,
-      'servico' => $servico->load(['tipo']),
-      'campanha' => $campanha,
-      ...$response
-    ]);
-  }
+        return Inertia::render('Servico/PMQA/Execucao/Gerenciar', [
+            'contrato' => $contrato,
+            'servico'  => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'campanha' => $campanha,
+            ...$response
+        ]);
+    }
 }

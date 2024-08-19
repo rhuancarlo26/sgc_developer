@@ -12,80 +12,81 @@ use App\Shared\Traits\Searchable;
 
 class ParametroService extends BaseModelService
 {
-  use Searchable, Deletable;
+    use Searchable, Deletable;
 
-  protected string $modelClass = ServicoPmqaParametroLista::class;
-  protected string $modelClassListaParametro = ServicoPmqaListaParametro::class;
+    protected string $modelClass = ServicoPmqaParametroLista::class;
+    protected string $modelClassListaParametro = ServicoPmqaListaParametro::class;
 
-  public function index(Servicos $servico, array $searchParams): array
-  {
-    return [
-      'listas' => $this->searchAllColumns(...$searchParams)
-        ->with(['parametros'])
-        ->where('servico_id', '=', $servico->id)
-        ->paginate()
-        ->appends($searchParams),
-      'parametros' => ServicoPmqaParametro::orderBy('nome')->get()
-    ];
-  }
+    public function index(Servicos $servico, array $searchParams): array
+    {
+        return [
+            'listas' => $this->searchAllColumns(...$searchParams)
+                ->with(['parametros'])
+                ->where('fk_servico', '=', $servico->id)
+                ->paginate()
+                ->appends($searchParams),
+            'parametros' => ServicoPmqaParametro::orderBy('parametro')->get()
+        ];
+    }
 
-  public function store(Servicos $servico, array $request)
-  {
-    $response = $this->storeParametroLista([
-      'servico_id' => $servico->id,
-      'nome' => $request['nome'],
-      'medir_iqa' => $request['medir_iqa']
-    ]);
+    public function store(Servicos $servico, array $request)
+    {
+        $response = $this->storeParametroLista([
+            'fk_servico' => $servico->id,
+            'nome' => $request['nome'],
+            'medir_iqa' => $request['medir_iqa']
+        ]);
 
-    $this->storeListaParametros($response['model'], $request['parametros']);
+        $this->storeListaParametros($response['model'], $request['parametros']);
 
-    return $response['request'];
-  }
+        return $response['request'];
+    }
 
-  public function update(Servicos $servico, array $request)
-  {
-    $response = $this->updateParametroLista([
-      'id' => $request['id'],
-      'servico_id' => $servico->id,
-      'nome' => $request['nome'],
-      'medir_iqa' => $request['medir_iqa']
-    ]);
+    public function update(Servicos $servico, array $request)
+    {
+        $response = $this->updateParametroLista([
+            'id' => $request['id'],
+            'fk_servico' => $servico->id,
+            'nome' => $request['nome'],
+            'medir_iqa' => $request['medir_iqa']
+        ]);
 
-    $this->updateListaParametros($request, $request['parametros']);
+        $this->updateListaParametros($request, $request['parametros']);
 
-    return $response['request'];
-  }
+        return $response['request'];
+    }
 
-  private function storeParametroLista(array $request): array
-  {
-    $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+    private function storeParametroLista(array $request): array
+    {
+        $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
-    return $response;
-  }
+        return $response;
+    }
 
-  private function updateParametroLista(array $request): array
-  {
-    $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+    private function updateParametroLista(array $request): array
+    {
+        $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
 
-    return $response;
-  }
+        return $response;
+    }
 
-  private function storeListaParametros(ServicoPmqaParametroLista $parametroLista, array $request): void
-  {
-    $parametroLista->parametros()->sync(collect($request)->toArray());
-  }
+    private function storeListaParametros(ServicoPmqaParametroLista $parametroLista, array $request): void
+    {
+        $parametroLista->parametros()->sync(collect($request)->toArray());
+    }
 
-  private function updateListaParametros(array $parametroLista, array $request): void
-  {
-    $parametroLista = ServicoPmqaParametroLista::find($parametroLista['id']);
+    private function updateListaParametros(array $parametroLista, array $request): void
+    {
+        $parametroLista = ServicoPmqaParametroLista::find($parametroLista['id']);
 
-    $parametroLista->parametros()->sync(collect($request)->toArray());
-  }
+        $parametroLista->parametros()->sync(collect($request)->toArray());
+    }
 
-  public function destroy(ServicoPmqaParametroLista $parametroLista)
-  {
-    $response = $this->dataManagement->delete($this->modelClass, $parametroLista->id);
+    public function destroy(ServicoPmqaParametroLista $parametroLista)
+    {
+        $response = $this->dataManagement->delete($this->modelClass, $parametroLista->id);
 
-    return $response;
-  }
+        return $response;
+    }
+
 }
