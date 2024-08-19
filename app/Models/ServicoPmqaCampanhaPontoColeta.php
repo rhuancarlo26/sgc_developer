@@ -10,14 +10,12 @@ class ServicoPmqaCampanhaPontoColeta extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pqma_campanha_ponto_coletas';
+    protected $table   = 'exec_ponto_coleta';
     protected $guarded = ['id', 'created_at'];
-    protected $casts = [
-        'sem_coleta' => 'bool'
-    ];
+    protected $casts   = ['sem_coleta' => 'bool'];
 
     public function arquivos(): HasMany
     {
-        return $this->hasMany(ServicoPmqaCampanhaPontoColetaArquivo::class, 'coleta_id');
+        return $this->hasMany(related: ServicoPmqaCampanhaPontoColetaArquivo::class, foreignKey: 'fk_ponto_coleta');
     }
 }

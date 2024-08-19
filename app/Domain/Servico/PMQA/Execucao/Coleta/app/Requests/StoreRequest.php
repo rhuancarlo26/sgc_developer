@@ -11,12 +11,12 @@ class StoreRequest extends FormRequest
     $request = (object) request()->all();
     $regras = [];
 
-    $regras['campanha_ponto_id']          = 'required';
-    $regras['data_coleta']                = 'required';
+    $regras['fk_campanha_ponto']          = 'required';
+    $regras['dt_coleta']                  = 'required';
     $regras['sem_coleta']                 = 'required';
 
     if ($request->sem_coleta === true) {
-      $regras['justificativa']            = 'required';
+      $regras['observacao']               = 'required';
     } else {
       $regras['numero_amostra']           = 'required';
       $regras['preservacao_amostra']      = 'required';

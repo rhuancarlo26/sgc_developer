@@ -2,7 +2,7 @@
 
 namespace App\Domain\Fiscal\app\Controllers;
 
-use App\Domain\Fiscal\app\Services\FiscalService;
+use App\Domain\Contrato\GestaoContrato\Services\ListagemContratoService;
 use App\Shared\Http\Controllers\Controller;
 use App\Models\ContratoTipo;
 use Inertia\Inertia;
@@ -12,7 +12,7 @@ use Inertia\Response;
 
 class IndexFiscalController extends Controller
 {
-    public function __construct(private readonly  FiscalService $fiscalService)
+    public function __construct(private readonly ListagemContratoService $fiscalService)
     {
     }
 
@@ -24,7 +24,7 @@ class IndexFiscalController extends Controller
 
         return Inertia::render('Fiscal/Index', [
             ... $contratos,
-            'tipo' => $tipo,
+            'tipo' => $tipo
         ]);
     }
 }

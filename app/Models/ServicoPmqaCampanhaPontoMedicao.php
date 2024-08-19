@@ -10,19 +10,17 @@ class ServicoPmqaCampanhaPontoMedicao extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_campanha_ponto_medicoes';
+    protected $table   = 'exec_ponto_medicao';
     protected $guarded = ['id', 'created_at'];
-    protected $casts = [
-        'sem_coleta' => 'bool'
-    ];
+    protected $casts   = ['sem_coleta' => 'bool'];
 
     public function parametros()
     {
-        return $this->HasMany(ServicoPmqaCampanhaPontoMedicaoParametro::class, 'ponto_medicao_id');
+        return $this->HasMany(related: ServicoPmqaCampanhaPontoMedicaoParametro::class, foreignKey: 'fk_ponto_medicao');
     }
 
     public function arquivos()
     {
-        return $this->hasMany(ServicoPmqaCampanhaPontoMedicaoArquivo::class, 'medicao_id');
+        return $this->hasMany(related: ServicoPmqaCampanhaPontoMedicaoArquivo::class, foreignKey: 'fk_ponto_medicao');
     }
 }

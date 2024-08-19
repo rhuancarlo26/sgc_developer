@@ -10,7 +10,7 @@ class UpdateLicencaRequest extends FormRequest
   {
     return [
       'user_id'           => 'nullable',
-      'tipo'              => 'required',
+      'tipo_licenca'      => 'required',
       'numero_licenca'    => 'required',
       'modal'             => 'required',
       'data_emissao'      => 'required',
@@ -34,7 +34,7 @@ class UpdateLicencaRequest extends FormRequest
       'total_app'         => 'nullable',
       'geo_json'          => 'nullable',
       'arquivado'         => 'nullable',
-      'observacao'        => 'required',
+      'obs_renovacao'     => 'required',
       'status'            => 'nullable',
     ];
   }

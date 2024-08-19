@@ -29,12 +29,9 @@ class LicencaSegmentoService extends BaseModelService
 
     public function create(array $post): array
     {
-        $coordenada = $this->getCoordenada(post: $post);
+        // $post['coordenada'] = $this->getCoordenada(post: $post);
 
-        $licencaSegmento = $this->dataManagement->create(entity: $this->modelClass, infos: [
-            'coordenada' => $coordenada,
-            ...$post
-        ]);
+        $licencaSegmento = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
 
         return [
             'request' => $licencaSegmento['request']
@@ -43,9 +40,9 @@ class LicencaSegmentoService extends BaseModelService
 
     public function update(array $post): array
     {
-        $post['coordenada'] = $this->getCoordenada(post: $post);
+        // $request['coordenada'] = $this->getCoordenada(re$request: $request);
 
-        $licencaSegmento = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
+        $licencaSegmento = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['idlicenca_br']);
 
         return [
             'licencaSegmento' => $licencaSegmento['model'],
@@ -59,14 +56,14 @@ class LicencaSegmentoService extends BaseModelService
             UF_inicial: $post['uf_inicial']['uf'],
             // UF_final: $post['uf_final']['uf'],
             rodovia: $post['rodovia'],
-            km_inicial: $post['km_inicial'],
-            km_final: $post['km_final'],
+            km_inicial: $post['km_inicio'],
+            km_final: $post['km_fim'],
             tipo_trecho: 'B'
         );
     }
 
     public function delete(object $post): array
     {
-        return $this->dataManagement->delete(entity: $this->modelClass, id: $post['id']);
+        return $this->dataManagement->delete(entity: $this->modelClass, id: $post['idlicenca_br']);
     }
 }

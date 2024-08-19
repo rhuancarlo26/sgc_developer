@@ -18,7 +18,7 @@ class DestroyAnexoContratadaController extends Controller
     $contrato_id = $anexo->contrato_id;
 
     try {
-      Storage::delete($anexo['caminho']);
+      Storage::delete($anexo['caminho_arquivo']);
 
       $this->anexoService->delete($anexo);
 

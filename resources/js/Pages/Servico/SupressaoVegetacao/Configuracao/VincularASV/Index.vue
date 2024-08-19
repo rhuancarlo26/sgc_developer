@@ -16,7 +16,8 @@ const props = defineProps({
     data: {type: Object},
     contrato: {type: Object},
     servico: {type: Object},
-    licencas: {type: Object}
+    licencas: {type: Object},
+    aprovacao: {type: Object}
 });
 
 const form = useForm({
@@ -46,6 +47,13 @@ const abrirModalVisualizar = (item) => {
     modalVisualizarASVRef.value.abrirModal(item);
 }
 
+const ap = (ap) => {
+    if (!ap?.fk_status) {
+        return true;
+    }
+    return ap?.fk_status === 2;
+}
+
 </script>
 
 <template>
@@ -57,7 +65,7 @@ const abrirModalVisualizar = (item) => {
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-                    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+                    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
                     { route: '#', label: contrato.contratada }
                 ]"/>
                 <Link class="btn btn-dark"
@@ -70,7 +78,7 @@ const abrirModalVisualizar = (item) => {
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
 
-                <div class="row justify-content-between align-items-center">
+                <div class="row justify-content-between align-items-center" v-if="ap(aprovacao)">
                     <div class="col-5 mb-2">
                         <v-select :options="licencas" label="numero_licenca" v-model="form.licenca_id" :reduce="r => r.id">
                             <template v-slot:option="option">
@@ -100,7 +108,7 @@ const abrirModalVisualizar = (item) => {
                                     <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon" :icon="IconEye"/>
                                     <NavButton v-if="item.documento === null" type-button="primary" class="btn-icon" :icon="IconFile" disabled />
                                     <a v-else class="btn btn-primary btn-icon me-1" :href="item.documento.caminho"><IconFile /></a>
-                                    <LinkConfirmation v-slot="confirmation" :options="{ text: 'Você deseja remover o vínculo?' }">
+                                    <LinkConfirmation v-if="ap(aprovacao)" v-slot="confirmation" :options="{ text: 'Você deseja remover o vínculo?' }">
                                         <Link :onBefore="confirmation.show"
                                               :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.delete', { contrato: contrato.id, servico: servico.id, licenca: item.id })"
                                               as="button" method="delete" type="button" class="btn btn-icon btn-danger">

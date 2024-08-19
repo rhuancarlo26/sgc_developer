@@ -72,20 +72,20 @@ const excluirSegmento = (segmento_id) => {
           {{ item.uf_final?.uf }}
         </td>
         <td class="text-center">
-          {{ item.km_inicial }}
+          {{ item.km_inicio }}
         </td>
         <td class="text-center">
-          {{ item.km_final }}
+          {{ item.km_fim }}
         </td>
         <td class="text-center">
-          {{ item.extensao }}
+          {{ item.extensao_br }}
         </td>
         <td class="text-center">
           <a class="btn align-text-top btn-info m-1" title="Editar" @click="abrirFormSegmento(item)"
             href="javascript:void(0)">
             <IconEdit />
           </a>
-          <a @click="excluirSegmento(item.id)" class="btn align-text-top btn-danger m-1" title="Excluir"
+          <a @click="excluirSegmento(item.idlicenca_br)" class="btn align-text-top btn-danger m-1" title="Excluir"
             href="javascript:void(0)">
             <IconTrash />
           </a>

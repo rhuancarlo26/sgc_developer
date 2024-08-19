@@ -21,7 +21,7 @@ class Contrato extends Model
 
     public function tipo(): BelongsTo
     {
-        return $this->belongsTo(ContratoTipo::class, 'tipo_id');
+        return $this->belongsTo(ContratoTipo::class, 'tipo_contrato');
     }
 
     public function aditivos(): HasMany
@@ -34,10 +34,10 @@ class Contrato extends Model
         return $this->hasMany(contratoTrecho::class, 'contrato_id');
     }
 
-    public function empreendimento_trechos(): HasMany
-    {
-        return $this->hasMany(ContratoEmpreendimentoTrecho::class, 'contrato_id');
-    }
+//    public function empreendimento_trechos(): HasMany
+//    {
+//        return $this->hasMany(ContratoEmpreendimentoTrecho::class, 'contrato_id');
+//    }
 
     public function introducao(): HasOne
     {

@@ -10,7 +10,7 @@ class contratoTrecho extends Model
 {
     use HasFactory;
 
-    protected $table = 'contrato_trechos';
+    protected $table = 'trecho_contrato';
 
     protected $guarded = ['id', 'created_at'];
 

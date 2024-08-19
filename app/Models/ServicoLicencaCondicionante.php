@@ -10,13 +10,13 @@ class ServicoLicencaCondicionante extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_licenca_condicionantes';
+    protected $table = 'servico_licenca_condicionante';
     protected $guarded = ['id', 'created_at'];
     protected $appends = ['segmentos'];
 
     public function licenca()
     {
-        return $this->belongsTo(Licenca::class, 'licenca_id');
+        return $this->belongsTo(Licenca::class, 'id_licenca');
     }
 
     public function condicionante()

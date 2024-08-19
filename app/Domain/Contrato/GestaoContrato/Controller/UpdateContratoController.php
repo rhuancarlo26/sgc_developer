@@ -10,19 +10,22 @@ use Illuminate\Support\Facades\Auth;
 
 class UpdateContratoController extends Controller
 {
-  public function __construct(private readonly ListagemContratoService $listagemContrato)
-  {
-  }
+    public function __construct(private readonly ListagemContratoService $listagemContrato)
+    {
+    }
 
-  public function update(Contrato $contrato, UpdateContratoRequest $request)
-  {
-    $post = [
-      ...$request->all(),
-      'user_id' => Auth::user()->id,
-    ];
+    public function update(Contrato $contrato, UpdateContratoRequest $request)
+    {
+        $post = [
+            ...$request->all(),
+            'usuarios_id' => Auth::user()->id,
+        ];
 
-    $response = $this->listagemContrato->update($post);
+        $response = $this->listagemContrato->update($post);
 
-    return to_route('contratos.gestao.create', ['tipo' => $contrato->tipo_id, 'contrato' => $contrato->id])->with('message', $response['request']);
-  }
+        return to_route('contratos.gestao.create', [
+            'tipo'     => $contrato->tipo_contrato,
+            'contrato' => $contrato->id
+        ])->with('message', $response['request']);
+    }
 }

@@ -1,5 +1,5 @@
 <script setup>
-import {Head, Link} from "@inertiajs/vue3";
+import {Head, Link, useForm} from "@inertiajs/vue3";
 import {IconMap, IconLineDashed, IconTrash, IconEye, IconPencil} from "@tabler/icons-vue";
 import Table from "@/Components/Table.vue";
 import Navbar from "../../Components/Navbar.vue";
@@ -20,6 +20,7 @@ const props = defineProps({
     servico: {type: Object},
     tipos: {type: Array},
     licencas: {type: Array},
+    aprovacao: {type: Object}
 });
 
 const modalCadastroRef = ref();
@@ -41,6 +42,28 @@ const modalVisualizarRef = ref();
 const abrirModalVisualizar = (item) => {
     modalVisualizarRef.value.abrirModal(item);
 }
+
+const ap = (ap) => {
+    if (!ap?.fk_status) {
+        return true;
+    }
+    return ap?.fk_status === 2;
+}
+
+const form = useForm({
+    id: null,
+    fk_status: null
+});
+
+const enviaFiscal = (aprovacao) => {
+    form.fk_status = 1;
+    form.id = aprovacao?.id;
+    form.post(route('contratos.contratada.servicos.supressao.configuracao.envia-fiscal', {
+        contrato: props.contrato.id,
+        servico: props.servico.id
+    }));
+}
+
 </script>
 
 <template>
@@ -52,7 +75,7 @@ const abrirModalVisualizar = (item) => {
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-                    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+                    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
                     { route: '#', label: contrato.contratada }
                 ]"/>
                 <Link class="btn btn-dark"
@@ -66,10 +89,12 @@ const abrirModalVisualizar = (item) => {
             <template #body>
 
                 <div class="ms-auto mb-4">
+                    <NavButton type-button="primary" title="Enviar ao fiscal" v-if="ap(aprovacao)"
+                               @click="enviaFiscal(aprovacao)"/>
                     <NavButton @click="abrirModalCadastro(null)"
                        route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.importar"
                        :param="{ contrato: props.contrato.id, servico: props.servico.id }" type-button="success"
-                       title="Cadastrar pátio de estocagem" />
+                       title="Cadastrar pátio de estocagem" v-if="ap(aprovacao)"/>
                 </div>
                 <Table
                     :columns="['ID Código', 'Data do Cadastro', 'Nº ASV', 'Tipo de Pátio', 'Shapefile Pátio', 'Observação', 'Ação']"
@@ -95,8 +120,8 @@ const abrirModalVisualizar = (item) => {
                             <td>
                                 <div class="d-flex justify-content-center">
                                     <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon" :icon="IconEye" />
-                                    <NavButton @click="abrirModalCadastro(item)" type-button="warning" class="btn-icon" :icon="IconPencil" />
-                                    <LinkConfirmation v-slot="confirmation" :options="{ text: 'Você deseja remover o plano de supressão?' }">
+                                    <NavButton @click="abrirModalCadastro(item)" v-if="ap(aprovacao)" type-button="warning" class="btn-icon" :icon="IconPencil" />
+                                    <LinkConfirmation v-slot="confirmation" v-if="ap(aprovacao)" :options="{ text: 'Você deseja remover o plano de supressão?' }">
                                         <Link :onBefore="confirmation.show"
                                               :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.delete', item.id)"
                                               as="button" method="delete" type="button" class="btn btn-icon btn-danger">

@@ -9,12 +9,17 @@ class ServicoPmqaCampanha extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_campanhas';
+    protected $table = 'exec_campanhas';
     protected $guarded = ['id', 'created_at'];
 
     public function pontos()
     {
-        return $this->belongsToMany(ServicoPmqaPonto::class, 'servico_pmqa_campanha_pontos', 'campanha_id', 'ponto_id');
+        return $this->belongsToMany(
+            related: ServicoPmqaPonto::class,
+            table: 'exec_campanha_ponto',
+            foreignPivotKey: 'fk_exec_campanha',
+            relatedPivotKey: 'fk_ponto'
+        );
     }
 
     public function medicoes()

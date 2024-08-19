@@ -13,18 +13,18 @@ class Licenca extends Model
 {
     use HasFactory;
 
-    protected $table = 'licenca';
+    protected $table = 'licencas';
     protected $guarded = ['id', 'created_at'];
     protected $appends = ['iniciais', 'finais', 'brs'];
 
     public function tipo(): BelongsTo
     {
-        return $this->belongsTo(LicencaTipo::class, 'tipo_id');
+        return $this->belongsTo(LicencaTipo::class, 'tipo');
     }
 
     public function condicionantes(): HasMany
     {
-        return $this->hasMany(LicencaCondicionante::class, 'licenca_id');
+        return $this->hasMany(LicencaCondicionante::class, 'licencas_id');
     }
 
     public function segmentos(): HasMany
@@ -37,14 +37,14 @@ class Licenca extends Model
         return $this->hasOne(LicencaDocumento::class, 'licenca_id');
     }
 
-    public function shapefile(): HasOne
-    {
-        return $this->hasOne(LicencaShapefile::class, 'licenca_id');
-    }
+//    public function shapefile(): HasOne
+//    {
+//        return $this->hasOne(LicencaShapefile::class, 'licenca_id');
+//    }
 
     public function requerimentos(): HasMany
     {
-        return $this->hasMany(LicencaRequerimento::class, 'licenca_id');
+        return $this->hasMany(LicencaRequerimento::class, 'id_licenca');
     }
 
     public function iniciais(): Attribute
@@ -54,7 +54,7 @@ class Licenca extends Model
                 $ufs = [];
 
                 foreach ($this->segmentos as $value) {
-                    $uf = $value->uf_inicial->uf;
+                    $uf = $value->uf_inicial;
 
                     $uf ? array_push($ufs, trim($uf)) : '';
                 }
@@ -71,7 +71,7 @@ class Licenca extends Model
                 $ufs = [];
 
                 foreach ($this->segmentos as $value) {
-                    $uf = $value->uf_final->uf;
+                    $uf = $value->uf_final;
 
                     $uf ? array_push($ufs, trim($uf)) : '';
                 }
@@ -101,5 +101,10 @@ class Licenca extends Model
     public function licencaServicos(): HasMany
     {
         return $this->hasMany(ServicoLicenca::class, 'licenca_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
