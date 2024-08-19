@@ -65,7 +65,7 @@ const abrirModalResultado = (item) => {
             <tr>
               <td>{{ item.nome }}</td>
               <td>
-                <span v-for="campanha in item.campanhas.map(campanha => campanha.nome)" :key="campanha"
+                <span v-for="campanha in item.campanhas.map(campanha => campanha.nome_campanha)" :key="campanha"
                   class="badge bg-warning text-white m-1">
                   {{ campanha }}
                 </span>

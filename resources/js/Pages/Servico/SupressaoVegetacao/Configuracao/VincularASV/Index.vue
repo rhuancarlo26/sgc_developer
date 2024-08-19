@@ -102,7 +102,7 @@ const ap = (ap) => {
                             <td class="text-center">{{ item.volume ?? '-' }}</td>
                             <td class="text-center">{{ item.in_app ?? '-' }}</td>
                             <td class="text-center">{{ item.out_app ?? '-' }}</td>
-                            <td class="text-center">{{ item.total_app ?? '-' }}</td>
+                            <td class="text-center">{{ item.area_ha ?? '-' }}</td>
                             <td>
                                 <div class="d-flex justify-content-center">
                                     <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon" :icon="IconEye"/>
