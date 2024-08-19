@@ -10,16 +10,17 @@ class LicencaSegmento extends Model
 {
   use HasFactory;
 
-  protected $table = 'licenca_segmento';
-  protected $guarded = ['id', 'created_at'];
+  protected $table = 'licencas_br';
+  protected $primaryKey = 'idlicenca_br';
+  protected $guarded = ['idlicenca_br', 'created_at'];
 
   public function uf_inicial(): BelongsTo
   {
-    return $this->belongsTo(Uf::class, 'uf_inicial_id');
+    return $this->belongsTo(Uf::class, 'uf_inicial');
   }
 
   public function uf_final(): BelongsTo
   {
-    return $this->belongsTo(Uf::class, 'uf_final_id');
+    return $this->belongsTo(Uf::class, 'uf_final');
   }
 }

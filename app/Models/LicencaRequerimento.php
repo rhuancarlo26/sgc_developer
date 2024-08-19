@@ -9,7 +9,7 @@ class LicencaRequerimento extends Model
 {
   use HasFactory;
 
-  protected $table = 'licenca_requerimentos';
-
-  protected $guarded = ['id', 'created_at', 'updated_at'];
+  protected $table = 'arquivo_requerimento';
+  protected $guarded = ['id'];
+  public $timestamps = false;
 }

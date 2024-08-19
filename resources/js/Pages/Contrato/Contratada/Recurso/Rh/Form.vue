@@ -18,25 +18,25 @@ const props = defineProps({
 
 const form = useForm({
   id: null,
-  contrato_id: props.contrato.id,
+  id_contrato: props.contrato.id,
   nome: null,
   telefone: null,
   cpf: null,
   email: null,
-  formacao: null,
+  profissao: null,
   funcao: null,
   ctf: null,
   ctf_validade: null,
   conselho_classe: null,
   numero_registro: null,
   status: null,
-  observacao: null,
+  obs: null,
   ...props.rh
 });
 
 const form_documento = useForm({
-  recurso_rh_id: props.rh.id,
-  contrato_id: props.contrato.id,
+  cod_rh: props.rh.id,
+  id_contrato: props.contrato.id,
   documentos: null,
   documentos_baixa: null
 });
@@ -50,7 +50,7 @@ const salvarRh = () => {
 }
 
 const salvarDocumentoRh = () => {
-  form_documento.recurso_rh_id = props.rh.id;
+  form_documento.cod_hr = props.rh.id;
 
   if (!form_documento.documentos) {
     return toast.info('Selecione um arquivo para enviar');
@@ -64,7 +64,7 @@ const destroyDocumentoRh = (documento_id) => {
 }
 
 const salvarDocumentoBaixa = () => {
-  form_documento.recurso_rh_id = props.rh.id;
+  form_documento.cod_id = props.rh.id;
 
   if (!form_documento.documentos_baixa) {
     return toast.info('Selecione um arquivo para enviar');
@@ -114,10 +114,10 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
             <button class="nav-link" id="documentos-tab" data-bs-toggle="tab" data-bs-target="#documentos" type="button"
               role="tab" aria-controls="documentos" aria-selected="false">Documentos</button>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="documentos_baixa-tab" data-bs-toggle="tab" data-bs-target="#documentos_baixa"
-              type="button" role="tab" aria-controls="documentos_baixa" aria-selected="false">Documentos baixa</button>
-          </li>
+<!--          <li class="nav-item" role="presentation">-->
+<!--            <button class="nav-link" id="documentos_baixa-tab" data-bs-toggle="tab" data-bs-target="#documentos_baixa"-->
+<!--              type="button" role="tab" aria-controls="documentos_baixa" aria-selected="false">Documentos baixa</button>-->
+<!--          </li>-->
         </ul>
         <div class="tab-content" id="myTabContent">
           <div class="tab-pane fade show active" id="form" role="tabpanel" aria-labelledby="form-tab">
@@ -148,9 +148,9 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                   <InputError :message="form.errors.email" />
                 </div>
                 <div class="col form-group">
-                  <InputLabel value="Formação" for="formacao" />
-                  <input type="text" name="formacao" id="formacao" class="form-control" v-model="form.formacao">
-                  <InputError :message="form.errors.formacao" />
+                  <InputLabel value="Formação" for="profissao" />
+                  <input type="text" name="profissao" id="profissao" class="form-control" v-model="form.profissao">
+                  <InputError :message="form.errors.profissao" />
                 </div>
               </div>
               <div class="row mb-4">
@@ -200,8 +200,8 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                 <div class="col form-group">
                   <InputLabel value="Observação" for="observacao" />
                   <textarea name="observacao" id="observacao" rows="5" class="form-control"
-                    v-model="form.observacao"></textarea>
-                  <InputError :message="form.errors.observacao" />
+                    v-model="form.obs"></textarea>
+                  <InputError :message="form.errors.obserobsvacao" />
                 </div>
               </div>
               <div class="mb-4 d-flex justify-content-end">
@@ -242,9 +242,8 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                   </thead>
                   <tbody>
                     <tr v-for="documento in rh.documentos " :key="documento.id">
-                      <td>{{ documento.nome }}</td>
+                      <td>{{ documento.nome_arquivo }}</td>
                       <td>
-                        <span class="dropdown">
                           <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             <IconDots />
@@ -259,7 +258,6 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                               Excluir
                             </a>
                           </div>
-                        </span>
                       </td>
                     </tr>
                   </tbody>
@@ -270,64 +268,64 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
               <span class="h4 mt-4">É necessário que o formulário seja salvo antes de anexar documentos.</span>
             </div>
           </div>
-          <div class="tab-pane fade" id="documentos_baixa" role="tabpanel" aria-labelledby="documentos_baixa-tab">
-            <div v-if="rh.id">
-              <div class="row mb-4 mt-4">
-                <div class="col">
-                  <InputLabel value="Documentos de baixa" for="baixa" />
-                  <div class="row g-2">
-                    <div class="col">
-                      <input @input="form_documento.documentos_baixa = $event.target.files" type="file" id="baixa"
-                        name="baixa" class="form-control" multiple>
-                    </div>
-                    <div class="col-auto">
-                      <a @click="salvarDocumentoBaixa()" href="javascript:void(0)" class="btn btn-success"
-                        aria-label="Button">
-                        Salvar
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
+<!--          <div class="tab-pane fade" id="documentos_baixa" role="tabpanel" aria-labelledby="documentos_baixa-tab">-->
+<!--            <div v-if="rh.id">-->
+<!--              <div class="row mb-4 mt-4">-->
+<!--                <div class="col">-->
+<!--                  <InputLabel value="Documentos de baixa" for="baixa" />-->
+<!--                  <div class="row g-2">-->
+<!--                    <div class="col">-->
+<!--                      <input @input="form_documento.documentos_baixa = $event.target.files" type="file" id="baixa"-->
+<!--                        name="baixa" class="form-control" multiple>-->
+<!--                    </div>-->
+<!--                    <div class="col-auto">-->
+<!--                      <a @click="salvarDocumentoBaixa()" href="javascript:void(0)" class="btn btn-success"-->
+<!--                        aria-label="Button">-->
+<!--                        Salvar-->
+<!--                      </a>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--              </div>-->
 
-              <div class="table-responsive">
-                <table class="table table-hover non-hover">
-                  <thead>
-                    <tr>
-                      <th>Nome</th>
-                      <th>Açao</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="documento_baixa in rh.documentos_baixa " :key="documento_baixa.id">
-                      <td>{{ documento_baixa.nome }}</td>
-                      <td>
-                        <span class="dropdown">
-                          <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <IconDots />
-                          </button>
-                          <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" target="_blank"
-                              :href="route('contratos.contratada.recurso.rh.visualizar_documento_baixa', documento_baixa.id)">
-                              Visualizar
-                            </a>
-                            <a @click="destroyDocumentoBaixaRh(documento_baixa.id)" class="dropdown-item"
-                              href="javascript:void(0)">
-                              Excluir
-                            </a>
-                          </div>
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="d-flex justify-content-center" v-else>
-              <span class="h4 mt-4">É necessário que o formulário seja salvo antes de anexar documentos.</span>
-            </div>
-          </div>
+<!--              <div class="table-responsive">-->
+<!--                <table class="table table-hover non-hover">-->
+<!--                  <thead>-->
+<!--                    <tr>-->
+<!--                      <th>Nome</th>-->
+<!--                      <th>Açao</th>-->
+<!--                    </tr>-->
+<!--                  </thead>-->
+<!--                  <tbody>-->
+<!--                    <tr v-for="documento_baixa in rh.documentos_baixa " :key="documento_baixa.id">-->
+<!--                      <td>{{ documento_baixa.nome }}</td>-->
+<!--                      <td>-->
+<!--                        <span class="dropdown">-->
+<!--                          <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport"-->
+<!--                            data-bs-toggle="dropdown" aria-expanded="false">-->
+<!--                            <IconDots />-->
+<!--                          </button>-->
+<!--                          <div class="dropdown-menu dropdown-menu-end">-->
+<!--                            <a class="dropdown-item" target="_blank"-->
+<!--                              :href="route('contratos.contratada.recurso.rh.visualizar_documento_baixa', documento_baixa.id)">-->
+<!--                              Visualizar-->
+<!--                            </a>-->
+<!--                            <a @click="destroyDocumentoBaixaRh(documento_baixa.id)" class="dropdown-item"-->
+<!--                              href="javascript:void(0)">-->
+<!--                              Excluir-->
+<!--                            </a>-->
+<!--                          </div>-->
+<!--                        </span>-->
+<!--                      </td>-->
+<!--                    </tr>-->
+<!--                  </tbody>-->
+<!--                </table>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            <div class="d-flex justify-content-center" v-else>-->
+<!--              <span class="h4 mt-4">É necessário que o formulário seja salvo antes de anexar documentos.</span>-->
+<!--            </div>-->
+<!--          </div>-->
         </div>
       </template>
     </Navbar>

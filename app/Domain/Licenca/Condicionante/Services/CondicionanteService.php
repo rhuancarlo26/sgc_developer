@@ -18,7 +18,7 @@ class CondicionanteService extends BaseModelService
     public function listarCondicionantes($licenca, $searchParams): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return $this->search(...$searchParams)
-            ->where('licenca_id', $licenca['id'])
+            ->where('licencas_id', $licenca['id'])
             ->paginate()
             ->appends($searchParams);
     }
@@ -28,7 +28,7 @@ class CondicionanteService extends BaseModelService
         $condicionante = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
         return [
-            'licenca' => $request['licenca_id'],
+            'licenca' => $request['licencas_id'],
             'request' => $condicionante['request']
         ];
     }
@@ -37,7 +37,7 @@ class CondicionanteService extends BaseModelService
     {
         $condicionante = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
         return [
-            'licenca' => $request['licenca_id'],
+            'licenca' => $request['licencas_id'],
             'request' => $condicionante['request']
         ];
     }
@@ -50,15 +50,13 @@ class CondicionanteService extends BaseModelService
     public function storeImportacao($request): array
     {
         foreach ($request['condicionantes'] as $value) {
-            $value['licenca_id'] = $request['licenca']['id'];
+            $value['licencas_id'] = $request['licenca']['id'];
 
             $condicionante = $this->dataManagement->create(entity: $this->modelClass, infos: $value);
         }
 
         return [
-            'licenca' => $request['licenca']['id'],
             'request' => $condicionante['request']
         ];
     }
-
 }

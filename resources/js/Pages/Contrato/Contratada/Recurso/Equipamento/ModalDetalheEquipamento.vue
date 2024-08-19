@@ -36,7 +36,7 @@ defineExpose({ abrirModal });
           </h2>
           <div id="descricao" class="accordion-collapse collapse show" data-bs-parent="#accordion-example">
             <div class="accordion-body pt-0">
-              {{ equipamento.descricao }}
+              {{ equipamento.modelo }}
             </div>
           </div>
         </div>
@@ -49,7 +49,7 @@ defineExpose({ abrirModal });
           </h2>
           <div id="atividade" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
             <div class="accordion-body pt-0">
-              {{ equipamento.atividade }}
+              {{ equipamento.espec_tecnica }}
             </div>
           </div>
         </div>
@@ -62,7 +62,7 @@ defineExpose({ abrirModal });
           </h2>
           <div id="observacao" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
             <div class="accordion-body pt-0">
-              {{ equipamento.observacao }}
+              {{ equipamento.obs }}
             </div>
           </div>
         </div>

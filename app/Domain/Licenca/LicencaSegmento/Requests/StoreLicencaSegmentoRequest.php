@@ -13,9 +13,9 @@ class StoreLicencaSegmentoRequest extends FormRequest
       'rodovia'     => 'required',
       'uf_inicial'  => 'required',
       'uf_final'    => 'required',
-      'km_inicial'  => 'required',
-      'km_final'    => 'required',
-      'extensao'    => 'required',
+      'km_inicio'   => 'required',
+      'km_fim'      => 'required',
+      'extensao_br' => 'required',
       'trecho_tipo' => 'nullable',
       'coordenada'  => 'nullable',
     ];

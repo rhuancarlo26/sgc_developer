@@ -60,4 +60,13 @@ class PlanoSupressaoService extends BaseModelService
             'chave' => $this->getCodigo(prefix: 'PS'),
         ]);
     }
+
+    public function getSumAreaByServico(int $id)
+    {
+        return $this->model
+            ->selectRaw('SUM(area_em_app) as area_em_app, SUM(area_fora_app) as area_fora_app')
+            ->where('servico_id', $id)
+            ->first();
+    }
+
 }

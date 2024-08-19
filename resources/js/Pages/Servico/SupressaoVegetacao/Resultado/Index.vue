@@ -40,7 +40,7 @@ const abrirModalVisualizar = (item) => {
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-                    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+                    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
                     { route: '#', label: contrato.contratada }
                 ]"/>
                 <Link class="btn btn-dark"
@@ -77,7 +77,7 @@ const abrirModalVisualizar = (item) => {
                                     <LinkConfirmation v-slot="confirmation"
                                                       :options="{ text: 'Você deseja remover o plano de supressão?' }">
                                         <Link :onBefore="confirmation.show"
-                                              :href="route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.delete', item.id)"
+                                              :href="route('contratos.contratada.servicos.supressao-vegetacao.resultado.delete', item.id)"
                                               as="button" method="delete" type="button" class="btn btn-icon btn-danger">
                                             <IconTrash/>
                                         </Link>

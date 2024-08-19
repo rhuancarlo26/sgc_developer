@@ -13,13 +13,13 @@ use Inertia\Response;
 
 class CreateController extends Controller
 {
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPonto $ponto): Response
-  {
-    return Inertia::render('Servico/PMQA/Execucao/Coleta/Form', [
-      'contrato'  => $contrato,
-      'servico'   => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
-      'campanha' => $campanha,
-      'ponto' => $ponto->load(['ponto', 'coleta.arquivos'])
-    ]);
-  }
+    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPonto $ponto): Response
+    {
+        return Inertia::render('Servico/PMQA/Execucao/Coleta/Form', [
+            'contrato' => $contrato,
+            'servico'  => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'campanha' => $campanha,
+            'ponto'    => $ponto->load(['ponto', 'coleta.arquivos'])
+        ]);
+    }
 }

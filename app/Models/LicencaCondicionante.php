@@ -10,11 +10,11 @@ class LicencaCondicionante extends Model
 {
   use HasFactory;
 
-  protected $table = 'licenca_condicionantes';
+  protected $table = 'condicionantes';
   protected $guarded = ['id', 'created_at'];
 
   public function licenca(): BelongsTo
   {
-    return $this->belongsTo(Licenca::class, 'licenca_id');
+    return $this->belongsTo(Licenca::class, 'licencas_id');
   }
 }

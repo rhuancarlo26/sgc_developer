@@ -9,6 +9,6 @@ class ServicoTema extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_temas';
+    protected $table = 'temas';
     protected $guarded = ['id', 'created_at'];
 }

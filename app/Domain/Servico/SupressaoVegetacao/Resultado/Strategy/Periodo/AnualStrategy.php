@@ -12,4 +12,10 @@ class AnualStrategy implements DateSettingStrategy
             'dt_final' => date($request['ano'] . '-12-31') . ' 23:59:59',
         ];
     }
+
+    public function getDate(string $dataInicio): string
+    {
+        return date("Y", strtotime($dataInicio));
+    }
+
 }

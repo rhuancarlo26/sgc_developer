@@ -9,11 +9,11 @@ class ServicoPmqaCampanhaPontoMedicaoArquivo extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_campanha_ponto_medicao_arquivos';
+    protected $table   = 'exec_ponto_medicao_laudo';
     protected $guarded = ['id', 'created_at'];
 
     public function medicao()
     {
-        return $this->belongsTo(ServicoPmqaCampanhaPontoMedicao::class, 'medicao_id');
+        return $this->belongsTo(related: ServicoPmqaCampanhaPontoMedicao::class, foreignKey: 'fk_ponto_medicao');
     }
 }

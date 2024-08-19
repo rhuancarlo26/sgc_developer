@@ -9,6 +9,6 @@ class RecursoVeiculoCodigo extends Model
 {
     use HasFactory;
 
-    protected $table = 'recurso_veiculo_codigos';
+    protected $table = 'codigo_veiculos';
     protected $guarded = ['id', 'created_at'];
 }

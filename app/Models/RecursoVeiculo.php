@@ -12,7 +12,7 @@ class RecursoVeiculo extends Model
 {
     use HasFactory;
 
-    protected $table = 'recurso_veiculos';
+    protected $table = 'veiculos';
     protected $guarded = ['id', 'created_at'];
     protected $appends = ['group_data_km'];
 
@@ -22,12 +22,12 @@ class RecursoVeiculo extends Model
 
     public function codigo(): BelongsTo
     {
-        return $this->belongsTo(RecursoVeiculoCodigo::class, 'veiculo_codigo_id');
+        return $this->belongsTo(RecursoVeiculoCodigo::class, 'cod_veiculos');
     }
 
     public function documentos(): HasMany
     {
-        return $this->hasMany(RecursoVeiculoDocumento::class, 'recurso_veiculo_id');
+        return $this->hasMany(RecursoVeiculoDocumento::class, 'cod_veiculo');
     }
 
     public function quilometragens(): HasMany
