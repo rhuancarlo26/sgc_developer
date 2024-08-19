@@ -1,7 +1,7 @@
 <script setup>
 import Modal from "@/Components/Modal.vue";
 import { router } from "@inertiajs/vue3";
-import {IconEdit, IconEye, IconTrash} from "@tabler/icons-vue";
+import { IconEdit, IconEye, IconTrash } from "@tabler/icons-vue";
 import { ref } from "vue";
 import NavButton from "@/Components/NavButton.vue";
 import NavLink from "@/Components/NavLink.vue";
@@ -64,14 +64,14 @@ defineExpose({ abrirModal });
           </thead>
           <tbody>
             <tr v-for="requerimento, index in licenca.requerimentos" :key="requerimento.id">
-              <td>{{ requerimento.nome }}</td>
+              <td>{{ requerimento.nome_arquivo }}</td>
               <td>
                 <a class="btn btn-lg btn-info m-1" title="Visualizar" target="_blank"
-                   :href="route('licenca.requerimento.visualizar', requerimento.id)">
+                  :href="route('licenca.requerimento.visualizar', requerimento.id)">
                   <IconEye />
                 </a>
-                <a @click="excluirRequerimento(requerimento.id, index)" class="btn btn-lg btn-danger"
-                   title="Excluir" href="javascript:void(0)">
+                <a @click="excluirRequerimento(requerimento.id, index)" class="btn btn-lg btn-danger" title="Excluir"
+                  href="javascript:void(0)">
                   <IconTrash />
                 </a>
               </td>

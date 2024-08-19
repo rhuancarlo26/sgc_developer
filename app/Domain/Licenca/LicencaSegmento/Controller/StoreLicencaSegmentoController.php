@@ -18,8 +18,8 @@ class StoreLicencaSegmentoController extends Controller
     {
         $post = [
             ...$request->all(),
-            'uf_inicial_id' => $request->uf_inicial['id'],
-            'uf_final_id' => $request->uf_final['id'],
+            'uf_inicial' => $request->uf_inicial['id'],
+            'uf_final' => $request->uf_final['id'],
         ];
 
         $parameters = $this->listagemLicencaSegmento->create(post: $post);

@@ -17,6 +17,9 @@ const form = useForm({
 });
 
 const salvarLicencaCondicionante = () => {
+  form.contrato_id = props.servico?.contrato_id;
+  form.servico_id = props.servico?.id;
+
   form.post(route('contratos.contratada.servicos.condicionante.store'));
 }
 
@@ -46,8 +49,8 @@ const excluirLicencaCondicionante = (condicionante_id, licenca_id) => {
         <InputLabel value="Condicionante" for="condicionante" />
         <select name="condicionante" id="condicionante" class="form-select form-control" v-model="form.condicionante">
           <option v-for="condicionante in form.licenca?.condicionantes" :key="condicionante.id" :value="condicionante">
-            {{
-              condicionante.numero_condicionante }}</option>
+              {{ condicionante.numero}} - {{ condicionante.titulo_condicionante }}
+          </option>
         </select>
         <InputError :message="form.errors.licenca_id" />
       </div>

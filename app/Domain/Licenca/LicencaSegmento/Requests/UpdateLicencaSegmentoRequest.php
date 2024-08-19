@@ -9,15 +9,16 @@ class UpdateLicencaSegmentoRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'licenca_id'  => 'required',
-      'rodovia'     => 'required',
-      'uf_inicial'  => 'required',
-      'uf_final'    => 'required',
-      'km_inicial'  => 'required',
-      'km_final'    => 'required',
-      'extensao'    => 'required',
-      'trecho_tipo' => 'nullable',
-      'coordenada'  => 'nullable',
+      'idlicenca_br' => 'required',
+      'licenca_id'   => 'required',
+      'rodovia'      => 'required',
+      'uf_inicial'   => 'required',
+      'uf_final'     => 'required',
+      'km_inicio'    => 'required',
+      'km_fim'       => 'required',
+      'extensao_br'  => 'required',
+      'trecho_tipo'  => 'nullable',
+      'coordenada'   => 'nullable',
     ];
   }
 

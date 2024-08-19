@@ -9,6 +9,7 @@ class ContratoHistorico extends Model
 {
     use HasFactory;
 
-    protected $table = 'contrato_historico';
+    protected $table = 'contrato_observacao';
     protected $guarded = ['id', 'created_at'];
+
 }

@@ -12,16 +12,21 @@ use Illuminate\Http\RedirectResponse;
 
 class DeleteArquivoController extends Controller
 {
-  public function __construct(private readonly ColetaService $coletaService)
-  {
-  }
+    public function __construct(private readonly ColetaService $coletaService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPontoColetaArquivo $arquivo): RedirectResponse
-  {
-    $arquivo->load(['coleta']);
+    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPontoColetaArquivo $arquivo): RedirectResponse
+    {
+        $arquivo->load(['coleta']);
 
-    $response = $this->coletaService->deleteArquivo($arquivo);
+        $response = $this->coletaService->deleteArquivo($arquivo);
 
-    return to_route('contratos.contratada.servicos.pmqa.execucao.coleta.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id, 'ponto' => $arquivo->coleta['campanha_ponto_id']])->with('message', $response['request']);
-  }
+        return to_route('contratos.contratada.servicos.pmqa.execucao.coleta.create', [
+            'contrato' => $contrato->id,
+            'servico'  => $servico->id,
+            'campanha' => $campanha->id,
+            'ponto'    => $arquivo->coleta['fk_campanha_ponto']
+        ])->with('message', $response['request']);
+    }
 }

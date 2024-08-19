@@ -9,6 +9,7 @@ class ContratoAnexo extends Model
 {
     use HasFactory;
 
-    protected $table = 'contrato_anexos';
+    protected $table = 'contrato_obs_anexo';
     protected $guarded = ['id', 'created_at'];
+
 }

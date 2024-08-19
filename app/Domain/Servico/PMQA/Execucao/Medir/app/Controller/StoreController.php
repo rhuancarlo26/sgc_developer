@@ -23,6 +23,7 @@ class StoreController extends Controller
   {
     $post = [];
 
+    $post['campanha_id']        = $request->validated('campanha_id');
     $post['campanha_ponto_id']  = $request->validated('campanha_ponto_id');
     $post['sem_coleta']         = $request->validated('sem_coleta');
 

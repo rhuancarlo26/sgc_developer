@@ -28,12 +28,12 @@ let uf_rodovias = [];
 const form_trecho = useForm({
   id: null,
   contrato_id: null,
-  tipo_id: null,
+  tipo_contrato: null,
   uf: {},
   rodovia: {},
   km_inicial: null,
   km_final: null,
-  trecho_tipo: null
+  tipo_trecho: null
 });
 
 const mapContainer = ref();
@@ -75,7 +75,7 @@ const modalTechoMap = (objeto) => {
   <span><strong>BR: </strong> ${objeto.rodovia.rodovia}</span><br>
   <span><strong>Km Inicial: </strong> ${objeto.km_inicial}</span><br>
   <span><strong>Km Final: </strong> ${objeto.km_final}</span><br>
-  <span><strong>Tipo: </strong> ${objeto.trecho_tipo}</span>
+  <span><strong>Tipo: </strong> ${objeto.tipo_trecho}</span>
   `;
 }
 
@@ -89,7 +89,7 @@ const zoomFitBounds = () => {
 
 const salvarTrecho = () => {
   form_trecho.contrato_id = props.contrato.id;
-  form_trecho.tipo_id = props.tipo.id;
+  form_trecho.tipo_contrato = props.tipo.id;
 
   form_trecho.transform((data) => Object.assign({}, data))
 
@@ -150,11 +150,11 @@ defineExpose({ abaTrecho })
           <InputError :message="form_trecho.errors.km_final" />
         </div>
         <div class="col">
-          <InputLabel value="Tipo" for="trecho_tipo" />
+          <InputLabel value="Tipo" for="tipo_trecho" />
           <div class="row g-2">
             <div class="col">
-              <select name="trecho_tipo" id="trecho_tipo" class="form-control form-select"
-                v-model="form_trecho.trecho_tipo">
+              <select name="tipo_trecho" id="tipo_trecho" class="form-control form-select"
+                v-model="form_trecho.tipo_trecho">
                 <option value="B">B</option>
                 <option value="U">U</option>
                 <option value="A">A</option>
@@ -198,7 +198,7 @@ defineExpose({ abaTrecho })
             <td>{{ trecho.rodovia?.rodovia }}</td>
             <td>{{ trecho.km_inicial }}</td>
             <td>{{ trecho.km_final }}</td>
-            <td>{{ trecho.trecho_tipo }}</td>
+            <td>{{ trecho.tipo_trecho }}</td>
             <td class="w-1">
               <div class="d-flex">
                 <button @click="zoomTrecho(trecho.coordenada)" type="button" class="btn btn-icon btn-primary me-2"

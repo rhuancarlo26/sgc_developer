@@ -36,7 +36,7 @@ const abrirModalVisualizarPonto = (item) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+          { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
           { route: '#', label: contrato.contratada }
         ]
           " />
@@ -57,11 +57,11 @@ const abrirModalVisualizarPonto = (item) => {
           :records="pontos" :axios-pagination="true" table-class="table-hover">
           <template #body="{ item }">
             <tr>
-              <td>{{ item.ponto?.nomepontocoleta }}</td>
-              <td>{{ item.ponto?.classe }}</td>
-              <td>{{ item.ponto?.tipoambiente }}</td>
-              <td>{{ item.ponto?.uf }}</td>
-              <td>{{ item.ponto?.municipio }}</td>
+              <td class="text-center">{{ item.ponto?.nome_ponto_coleta }}</td>
+              <td class="text-center">{{ item.ponto?.classe }}</td>
+              <td class="text-center">{{ item.ponto?.tipo_ambiente }}</td>
+              <td class="text-center">{{ item.ponto?.UF }}</td>
+              <td class="text-center">{{ item.ponto?.municipio }}</td>
               <td>
                 <div class="d-flex align-item-center justify-content-center text-success">
                   <NavButton v-if="item.coleta" :icon="IconSquareCheck" class="btn-icon text-success"
@@ -74,7 +74,7 @@ const abrirModalVisualizarPonto = (item) => {
                     type-button="default" />
                 </div>
               </td>
-              <td>
+              <td class="text-center">
                 <NavButton @click="abrirModalVisualizarPonto(item)" :icon="IconEye" class="btn-icon"
                   type-button="info" />
                 <Link class="btn btn-icon btn-primary me-1"

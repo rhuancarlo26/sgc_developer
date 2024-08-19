@@ -9,21 +9,33 @@ class ServicoPmqaPonto extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_pontos';
+    protected $table = 'config_pontos';
     protected $guarded = ['id', 'created_at'];
 
     public function vinculado()
     {
-        return $this->hasOne(ServicoPmqaListaPonto::class, 'ponto_id');
+        return $this->hasOne(related: ServicoPmqaListaPonto::class, foreignKey: 'fk_ponto');
     }
 
     public function campanhas()
     {
-        return $this->belongsToMany(ServicoPmqaCampanha::class, 'servico_pmqa_campanha_pontos', 'ponto_id', 'campanha_id');
+        return $this->belongsToMany(
+            related: ServicoPmqaPonto::class,
+            table: 'exec_campanha_ponto',
+            foreignPivotKey: 'fk_ponto',
+            relatedPivotKey: 'fk_exec_campanha'
+        );
     }
 
     public function lista()
     {
-        return $this->hasOneThrough(ServicoPmqaParametroLista::class, ServicoPmqaListaPonto::class, 'ponto_id', 'id', 'id', 'lista_parametro_id');
+        return $this->hasOneThrough(
+            related: ServicoPmqaParametroLista::class,
+            through: ServicoPmqaListaPonto::class,
+            firstKey: 'fk_ponto',
+            secondKey: 'id',
+            localKey: 'id',
+            secondLocalKey: 'fk_lista'
+        );
     }
 }

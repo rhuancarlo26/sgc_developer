@@ -53,10 +53,10 @@ const abaTrecho = () => {
                                 Básicos</a>
                         </li>
                         <template v-if="contrato.id">
-                            <li class="nav-item" role="presentation">
-                                <a href="#tabs-aditivo" class="nav-link" data-bs-toggle="tab" aria-selected="false"
-                                    role="tab" tabindex="-1">Aditivos</a>
-                            </li>
+<!--                            <li class="nav-item" role="presentation">-->
+<!--                                <a href="#tabs-aditivo" class="nav-link" data-bs-toggle="tab" aria-selected="false"-->
+<!--                                    role="tab" tabindex="-1">Aditivos</a>-->
+<!--                            </li>-->
                             <li class="nav-item" role="presentation">
                                 <a @click="abaTrecho()" href="#tabs-profile-1" class="nav-link" data-bs-toggle="tab"
                                     aria-selected="false" role="tab" tabindex="-1">Trechos</a>
@@ -70,9 +70,9 @@ const abaTrecho = () => {
                             <TabDadosGerais :contrato="contrato" :tipo="tipo" />
                         </div>
 
-                        <div class="tab-pane" id="tabs-aditivo" role="tabpanel">
-                            <TabAditivos :tipo="tipo" :contrato="contrato" />
-                        </div>
+<!--                        <div class="tab-pane" id="tabs-aditivo" role="tabpanel">-->
+<!--                            <TabAditivos :tipo="tipo" :contrato="contrato" />-->
+<!--                        </div>-->
 
                         <div class="tab-pane" id="tabs-profile-1" role="tabpanel">
                             <TabTrechos :contrato="contrato" :ufs="ufs" :rodovias="rodovias" :tipo="tipo" :tipos="tipos"

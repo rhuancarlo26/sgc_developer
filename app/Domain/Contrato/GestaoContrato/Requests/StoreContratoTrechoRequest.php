@@ -10,12 +10,12 @@ class StoreContratoTrechoRequest extends FormRequest
   {
     return [
       'contrato_id' => 'required',
-      'tipo_id' => 'required',
+      'tipo_contrato' => 'required',
       'uf' => 'required',
       'rodovia' => 'required',
       'km_inicial' => 'required',
       'km_final' => 'required',
-      'trecho_tipo' => 'required'
+      'tipo_trecho' => 'required'
     ];
   }
 

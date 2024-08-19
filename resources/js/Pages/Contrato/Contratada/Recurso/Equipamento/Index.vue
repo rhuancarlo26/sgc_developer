@@ -39,7 +39,7 @@ const abrirModal = (equipamento) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
     { route: '#', label: contrato.contratada }
   ]
     " />
@@ -64,7 +64,7 @@ const abrirModal = (equipamento) => {
           <template #body="{ item }">
             <tr>
               <td>{{ item.nome }}</td>
-              <td>{{ item.descricao }}</td>
+              <td>{{ item.modelo }}</td>
               <td>
                 <a class="btn btn-lg btn-info" title="Visualizar" @click="abrirModal(item)" href="javascript:void(0)">
                   <IconEye />

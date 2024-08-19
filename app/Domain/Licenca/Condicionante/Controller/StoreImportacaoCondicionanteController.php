@@ -17,6 +17,6 @@ class StoreImportacaoCondicionanteController extends Controller
   {
     $response = $this->condicionanteService->storeImportacao($request->all());
 
-    return to_route(route: 'licenca.condicionante.index', parameters: $response['licenca'])->with('message', $response['request']);
+    return to_route(route: 'licenca.condicionante.index', parameters: $request['licenca']['id'])->with('message', $response['request']);
   }
 }

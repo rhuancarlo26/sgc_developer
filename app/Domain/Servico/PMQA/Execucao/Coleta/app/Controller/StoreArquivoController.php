@@ -12,14 +12,19 @@ use Illuminate\Http\RedirectResponse;
 
 class StoreArquivoController extends Controller
 {
-  public function __construct(private readonly ColetaService $coletaService)
-  {
-  }
+    public function __construct(private readonly ColetaService $coletaService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, StoreArquivoRequest $request): RedirectResponse
-  {
-    $response = $this->coletaService->storeArquivo($request->validated());
+    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, StoreArquivoRequest $request): RedirectResponse
+    {
+        $response = $this->coletaService->storeArquivo($request->validated());
 
-    return to_route('contratos.contratada.servicos.pmqa.execucao.coleta.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id, 'ponto' => $request->campanha_ponto_id])->with('message', $response['request']);
-  }
+        return to_route('contratos.contratada.servicos.pmqa.execucao.coleta.create', [
+            'contrato' => $contrato->id,
+            'servico' => $servico->id,
+            'campanha' => $campanha->id,
+            'ponto' => $request->fk_campanha_ponto
+        ])->with('message', $response['request']);
+    }
 }

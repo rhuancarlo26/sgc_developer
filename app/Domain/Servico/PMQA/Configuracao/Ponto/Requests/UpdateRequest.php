@@ -9,19 +9,19 @@ class UpdateRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'id'                => ['required'],
-      'nomepontocoleta'   => ['required'],
-      'lat_x'             => ['required'],
-      'long_y'            => ['required'],
-      'classificacao'     => ['required'],
-      'classe'            => ['required'],
-      'tipoambiente'      => ['required'],
-      'uf'                => ['required'],
-      'municipio'         => ['required'],
-      'baciahidrografica' => ['required'],
-      'km_rodovia'        => ['required'],
-      'estaca'            => ['required'],
-      'observacoes'       => ['required']
+      'id'                 => ['required'],
+      'nome_ponto_coleta'  => ['required'],
+      'lat_x'              => ['required'],
+      'long_y'             => ['required'],
+      'classificacao'      => ['required'],
+      'classe'             => ['required'],
+      'tipo_ambiente'      => ['required'],
+      'UF'                 => ['required'],
+      'municipio'          => ['required'],
+      'bacia_hidrografica' => ['required'],
+      'km_rodovia'         => ['required'],
+      'estaca'             => ['required'],
+      'observacoes'        => ['required']
     ];
   }
 
