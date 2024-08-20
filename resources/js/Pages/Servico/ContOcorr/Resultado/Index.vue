@@ -9,7 +9,7 @@ import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
 import ModalFormResultado from "./ModalFormResultado.vue";
 import {ref} from "vue";
 import NavButton from "@/Components/NavButton.vue";
-import {IconPencil, IconTrash} from "@tabler/icons-vue";
+import {IconPencil, IconTrash, IconEye} from "@tabler/icons-vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 const modalFormResultado = ref({});
@@ -60,6 +60,10 @@ const abrirModalFormResultado = (item) => {
                             <td>{{ dateTimeFormat(item.dt_inicio) }}</td>
                             <td>{{ dateTimeFormat(item.dt_final) }}</td>
                             <td>
+                                <a class="btn btn-icon btn-primary me-1"
+                                   :href="route('contratos.contratada.servicos.cont_ocorrencia.resultado.resultado', { contrato: contrato.id, servico: servico.id, resultado: item.id })">
+                                    <IconEye/>
+                                </a>
                                 <NavButton @click="abrirModalFormResultado(item)" class="btn-icon" type-button="primary"
                                            :icon="IconPencil"/>
                                 <LinkConfirmation v-slot="confirmation"
