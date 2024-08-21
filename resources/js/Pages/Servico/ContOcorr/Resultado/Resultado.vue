@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../Navbar.vue";
-import {Head} from "@inertiajs/vue3";
+import {Head, useForm} from "@inertiajs/vue3";
 import TabRoaAtendido from "./TabRoaAtendido.vue";
 import TabRoaAberto from "./TabRoaAberto.vue";
 import TabRncAtendido from "./TabRncAtendido.vue";
@@ -12,12 +12,34 @@ import TabOcorrenciaLocal from "./TabOcorrenciaLocal.vue";
 import TabOcorrenciaClassificacao from "./TabOcorrenciaClassificacao.vue";
 import TabOcorrenciaLote from "./TabOcorrenciaLote.vue";
 import TabAca from "./TabAca.vue";
+import TabOutraAnalise from "@/Pages/Servico/ContOcorr/Resultado/TabOutraAnalise.vue";
 
 const props = defineProps({
     contrato: {type: Object},
     servico: {type: Object},
     resultado: {type: Object},
     tabs: {type: Object}
+});
+
+const form = useForm({
+    contrato_id: props.contrato.id,
+    servico_id: props.servico.id,
+    form: 0,
+    id_resultado: props.resultado.id,
+    rncs_em_aberto: null,
+    rncs_atendidos: null,
+    roas_atendidos: null,
+    roas_em_aberto: null,
+    ocorr_por_intensidade: null,
+    ocorr_por_local: null,
+    ocorr_por_classificacao: null,
+    ocorr_por_lote: null,
+    aca_gerados: null,
+    graf_reg_classificacao: null,
+    graf_reg_intensidade: null,
+    graf_reg_local: null,
+    graf_reg_lote: null,
+    ...props.resultado.analise
 });
 
 </script>
@@ -90,34 +112,34 @@ const props = defineProps({
                     <div class="card-body">
                         <div class="tab-content">
                             <div class="tab-pane active show" id="roa_atendido" role="tabpanel">
-                                <TabRoaAtendido :roa_atendido="tabs['roa_atendido']"/>
+                                <TabRoaAtendido :form="form" :roa_atendido="tabs['roa_atendido']"/>
                             </div>
                             <div class="tab-pane" id="roa_aberto" role="tabpanel">
-                                <TabRoaAberto :roa_aberto="tabs['roa_aberto']"/>
+                                <TabRoaAberto :form="form" :roa_aberto="tabs['roa_aberto']"/>
                             </div>
                             <div class="tab-pane" id="rnc_atendido" role="tabpanel">
-                                <TabRncAtendido :rnc_atendido="tabs['rnc_atendido']"/>
+                                <TabRncAtendido :form="form" :rnc_atendido="tabs['rnc_atendido']"/>
                             </div>
                             <div class="tab-pane" id="rnc_aberto" role="tabpanel">
-                                <TabRncAberto :rnc_aberto="tabs['rnc_aberto']"/>
+                                <TabRncAberto :form="form" :rnc_aberto="tabs['rnc_aberto']"/>
                             </div>
                             <div class="tab-pane" id="ocorrencia_intendidade" role="tabpanel">
-                                <TabOcorrenciaIntensidade :intensidades="tabs['intensidades']"/>
+                                <TabOcorrenciaIntensidade :form="form" :intensidades="tabs['intensidades']"/>
                             </div>
                             <div class="tab-pane" id="ocorrencia_local" role="tabpanel">
-                                <TabOcorrenciaLocal :locais="tabs['locais']"/>
+                                <TabOcorrenciaLocal :form="form" :locais="tabs['locais']"/>
                             </div>
                             <div class="tab-pane" id="ocorrencia_classificacao" role="tabpanel">
-                                <TabOcorrenciaClassificacao :classificacoes="tabs['classificacoes']"/>
+                                <TabOcorrenciaClassificacao :form="form" :classificacoes="tabs['classificacoes']"/>
                             </div>
                             <div class="tab-pane" id="ocorrencia_lote" role="tabpanel">
-                                <TabOcorrenciaLote :lotes="tabs['lotes']"/>
+                                <TabOcorrenciaLote :form="form" :lotes="tabs['lotes']"/>
                             </div>
                             <div class="tab-pane" id="aca_gerado" role="tabpanel">
-                                <TabAca :acas="tabs['acas']"/>
+                                <TabAca :form="form" :acas="tabs['acas']"/>
                             </div>
                             <div class="tab-pane" id="outra_analise" role="tabpanel">
-                                10
+                                <TabOutraAnalise :contrato="contrato" :servico="servico" :resultado="resultado"/>
                             </div>
                         </div>
                     </div>

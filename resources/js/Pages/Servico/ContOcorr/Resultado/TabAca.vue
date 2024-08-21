@@ -1,13 +1,22 @@
 <script setup>
 import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
-import {IconEye, IconTrash} from "@tabler/icons-vue";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
-import {Link} from "@inertiajs/vue3";
 import NavButton from "@/Components/NavButton.vue";
+import {IconDeviceFloppy} from "@tabler/icons-vue";
 
 const props = defineProps({
+    form: {type: Object},
     acas: {type: Array}
 });
+
+const salvar = () => {
+    props.form.form = 8;
+
+    props.form.post(route('contratos.contratada.servicos.cont_ocorrencia.resultado.store_analise', {
+        contrato: props.form.contrato_id,
+        servico: props.form.servico_id,
+        resultado: props.form.id_resultado
+    }))
+}
 </script>
 
 <template>
@@ -54,6 +63,17 @@ const props = defineProps({
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <textarea class="form-control" v-model="form.aca_gerados" rows="5"></textarea>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col d-flex justify-content-end">
+            <NavButton @click="salvar()" type-button="success" :icon="IconDeviceFloppy"
+                       title="Salvar"/>
         </div>
     </div>
 </template>
