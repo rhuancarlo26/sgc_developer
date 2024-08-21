@@ -33,7 +33,7 @@ const salvarDescricao = () => {
 <template>
   <div class="row mb-4">
     <div class="col">
-      <InputLabel value="Local da Ocorrência" for="local" />
+      <InputLabel value="Local da ocorrência" for="local" />
       <select class="form-control form-select" v-model="form.local">
         <option value="APP">APP</option>
         <option value="Faixa de Domínio">Faixa de Domínio</option>
@@ -46,7 +46,7 @@ const salvarDescricao = () => {
       <InputError :message="form.errors.local" />
     </div>
     <div class="col">
-      <InputLabel value="Classificação da Ocorrência" for="classificacao" />
+      <InputLabel value="Classificação da ocorrência" for="classificacao" />
       <select class="form-control form-select" v-model="form.classificacao">
         <option value="Erosão">Erosão</option>
         <option value="Escorregamento">Escorregamento</option>
@@ -65,19 +65,19 @@ const salvarDescricao = () => {
   </div>
   <div class="row mb-4">
     <div class="col">
-      <InputLabel value="Data da Ocorrência" for="descricao" />
+      <InputLabel value="Descrição da ocorrência" for="descricao" />
       <textarea class="form-control" rows="5" v-model="form.descricao"></textarea>
       <InputError :message="form.errors.descricao" />
     </div>
   </div>
   <div class="row mb-4">
     <div class="col">
-      <InputLabel value="Área total da Ocorrência (m²)" for="area_total" />
+      <InputLabel value="Área total da ocorrência (m²)" for="area_total" />
       <input type="text" class="form-control" v-model="form.area_total">
       <InputError :message="form.errors.area_total" />
     </div>
     <div class="col">
-      <InputLabel value="Prazo para Correção (dias)" for="prazo" />
+      <InputLabel value="Prazo para correção (dias)" for="prazo" />
       <input type="text" class="form-control" :value="ocorrencia.prazo" disabled>
       <InputError :message="form.errors.prazo" />
     </div>

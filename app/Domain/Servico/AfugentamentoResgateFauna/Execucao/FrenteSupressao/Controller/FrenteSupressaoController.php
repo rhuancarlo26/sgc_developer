@@ -2,6 +2,8 @@
 
 namespace App\Domain\Servico\AfugentamentoResgateFauna\Execucao\FrenteSupressao\Controller;
 
+use App\Domain\Servico\AfugentamentoResgateFauna\Execucao\FrenteSupressao\Service\FrenteSupressaoService;
+use App\Models\AfugentFaunaExecFrenteModel;
 use App\Shared\Http\Controllers\Controller;
 use App\Models\Contrato;
 use App\Models\Servicos;
@@ -10,19 +12,17 @@ use Inertia\Response;
 
 class FrenteSupressaoController extends Controller
 {
-    public function __construct()
+    public function __construct(private readonly FrenteSupressaoService $frenteSupressaoService)
     {
     }
 
     public function index(Contrato $contrato, Servicos $servico): Response
     {
-        $estados = $contrato->ufs;
-        $rodovias = $contrato->brs;
-        // dd($rodovias);
+        $frenteSupressao = $this->frenteSupressaoService->getFrenteSupressao($servico);
         return Inertia::render('Servico/AfugentamentoResgateFauna/Execucao/FrenteSupressao', [
             'contrato'  => $contrato,
             'servico'   => $servico->load(['tipo']),
-            // ...$response
+            'frenteSupressao' => $frenteSupressao->load(['rodovia', 'ufInicial', 'ufFinal']),
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Domain\Servico\SupressaoVegetacao\Execucao\Pilhas\Services;
 
 use App\Domain\Licenca\Shapefile\Services\LicencaShapefileService;
+use App\Domain\Servico\SupressaoVegetacao\Execucao\Pilhas\Enums\TipoPilha;
 use App\Models\AreaSupressao;
 use App\Models\Arquivo;
 use App\Models\ControlePilha;
@@ -15,6 +16,8 @@ use App\Shared\Traits\ShapefileHandler;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class PilhasService extends BaseModelService
 {
@@ -69,11 +72,51 @@ class PilhasService extends BaseModelService
 
     public function deleteFoto(Arquivo $arquivo, ControlePilha $pilha): bool
     {
-        if($this->arquivoUtils->delete(arquivo: $arquivo)) {
+        if ($this->arquivoUtils->delete(arquivo: $arquivo)) {
             $pilha->fotos()->detach($arquivo->id);
             return true;
         }
         return false;
+    }
+
+    public function getByPeriodo(Servicos $servico, Carbon $dtInicio, Carbon $dtFinal): array
+    {
+        $query = $this->model
+            ->select([
+                'controle_pilhas.*',
+                'l.numero_licenca',
+                'aas.chave as area_supressao',
+                'pe.chave as patio',
+                'tp.nome as produto',
+                'ce.nome as corte',
+                'ce.qtd_corte as qtd_cortes',
+            ])
+            ->join('licencas as l', 'l.id', '=', 'controle_pilhas.licenca_id')
+            ->join('area_supressao as aas', 'aas.id', '=', 'controle_pilhas.area_supressao_id')
+            ->leftJoin('patio_estocagem as pe', 'pe.id', '=', 'controle_pilhas.patio_estocagem_id')
+            ->leftJoin('corte_especie as ce', 'ce.id', '=', 'controle_pilhas.corte_especie_id')
+            ->leftJoin('tipo_produto as tp', 'tp.id', '=', 'controle_pilhas.tipo_produto_id')
+            ->where('controle_pilhas.servico_id', $servico->id);
+        $query2 = clone $query;
+        return [
+            'pilhas' => $query
+                ->where('aas.dt_inicial', '>=', $dtInicio)
+                ->where('aas.dt_final', '<=', $dtFinal)
+                ->get(),
+            'pilhasProtegidas' => $query2
+                ->where('controle_pilhas.tipo_pilha', TipoPilha::ESPECIE_AMEACADA_PROTEGIDA)
+                ->where('controle_pilhas.created_at', '>=', $dtInicio)
+                ->where('controle_pilhas.created_at', '>=', $dtFinal)
+                ->get()
+        ];
+    }
+
+    public function getTotalEstocado(Servicos $servico): Model
+    {
+        return $this->model
+            ->selectRaw('SUM(volume) as volume')
+            ->where('servico_id', $servico->id)
+            ->first();
     }
 
 }

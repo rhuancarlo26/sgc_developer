@@ -11,6 +11,8 @@ use App\Shared\Traits\Searchable;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DestinacaoService extends BaseModelService
 {
@@ -69,6 +71,27 @@ class DestinacaoService extends BaseModelService
             afterSave: fn(array $fotosId) => $destinacao?->arquivos()->attach($fotosId)
         );
         return $response;
+    }
+
+    public function getByPeriodo(Servicos $servico, Carbon $dtInicio, Carbon $dtFinal): \Illuminate\Database\Eloquent\Collection|array
+    {
+        return $this->model
+            ->select([
+                'destinacaos.*',
+                DB::raw('DATE_FORMAT(destinacaos.dt_envio, "%d/%m/%Y") as dt_envioF'),
+                'cp.tipo_produto_id',
+                DB::raw('GROUP_CONCAT(cp.chave) as pilhas'),
+                DB::raw('sum(cp.volume) as volume')
+            ])
+            ->join('destinacao_pilhas as dp', 'destinacaos.id', '=', 'dp.destinacao_id')
+            ->leftJoin('controle_pilhas as cp', 'cp.id', '=', 'dp.controle_pilha_id')
+            ->where('destinacaos.servico_id', $servico->id)
+            ->whereBetween('destinacaos.dt_envio', [$dtInicio, $dtFinal])
+            ->groupBy([
+                'destinacaos.id',
+                'cp.tipo_produto_id',
+            ])
+            ->get();
     }
 
 }
