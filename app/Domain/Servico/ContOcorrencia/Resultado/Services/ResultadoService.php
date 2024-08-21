@@ -3,18 +3,24 @@
 namespace App\Domain\Servico\ContOcorrencia\Resultado\Services;
 
 use App\Models\ServicoConOcorrOcorrenciSupervisaoExecOcorrencia;
+use App\Models\ServicoConOcorrSupervicaoExecOcorrenciaRegistro;
 use App\Models\ServicoConOcorrSupervisaoExecAca;
 use App\Models\ServicoConOcorrSupervisaoResultado;
+use App\Models\ServicoConOcorrSupervisaoResultadoAnalise;
+use App\Models\ServicoConOcorrSupervisaoResultadoOutrasAnalises;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ResultadoService extends BaseModelService
 {
     use Searchable, Deletable;
 
     protected string $modelClass = ServicoConOcorrSupervisaoResultado::class;
+    protected string $modelClassAnalise = ServicoConOcorrSupervisaoResultadoAnalise::class;
+    protected string $modelClassOutraAnalise = ServicoConOcorrSupervisaoResultadoOutrasAnalises::class;
 
     public function index(int $servico_id, array $searchParams): array
     {
@@ -249,13 +255,62 @@ class ResultadoService extends BaseModelService
         return $this->dataManagement->create(entity: $this->modelClass, infos: $post);
     }
 
+    public function storeOutraAnalise(array $post): array
+    {
+        $nome = $post['arquivo']->getClientOriginalName();
+        $tipo = $post['arquivo']->extension();
+        $caminho = $post['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'OutraAnalise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+
+        return $this->dataManagement->create(entity: $this->modelClassOutraAnalise, infos: [
+            'id_resultado' => $post['id_resultado'],
+            'nome' => $post['nome'],
+            'analise' => $post['analise'],
+            'caminho_arquivo' => str_replace("public\\", "", $caminho),
+            'extensao' => $tipo,
+        ]);
+    }
+
+    public function storeAnalise(array $post): array
+    {
+        return $this->dataManagement->create(entity: $this->modelClassAnalise, infos: $post);
+    }
+
     public function update(array $post): array
     {
         return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
     }
 
+    public function updateAnalise(array $post): array
+    {
+        return $this->dataManagement->update(entity: $this->modelClassAnalise, infos: $post, id: $post['id']);
+    }
+
+    public function updateOutraAnalise(array $post): array
+    {
+        Storage::delete('public' . DIRECTORY_SEPARATOR . $post['caminho_arquivo']);
+
+        $nome = $post['arquivo']->getClientOriginalName();
+        $tipo = $post['arquivo']->extension();
+        $caminho = $post['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'OutraAnalise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+
+        return $this->dataManagement->update(entity: $this->modelClassOutraAnalise, infos: [
+            'id_resultado' => $post['id_resultado'],
+            'nome' => $post['nome'],
+            'analise' => $post['analise'],
+            'caminho_arquivo' => str_replace("public\\", "", $caminho),
+            'extensao' => $tipo,
+        ], id: $post['id']);
+    }
+
     public function destroy(int $resultado_id): array
     {
         return $this->dataManagement->delete(entity: $this->modelClass, id: $resultado_id);
+    }
+
+    public function destroyOutraAnalise($outra_analise): array
+    {
+        Storage::delete('public' . DIRECTORY_SEPARATOR . $outra_analise->caminho_arquivo);
+
+        return $this->dataManagement->delete(entity: $this->modelClassOutraAnalise, id: $outra_analise->id);
     }
 }
