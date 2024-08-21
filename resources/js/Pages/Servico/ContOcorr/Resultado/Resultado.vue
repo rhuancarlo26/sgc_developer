@@ -22,6 +22,7 @@ const props = defineProps({
 });
 
 const form = useForm({
+    id: null,
     contrato_id: props.contrato.id,
     servico_id: props.servico.id,
     form: 0,
@@ -112,34 +113,41 @@ const form = useForm({
                     <div class="card-body">
                         <div class="tab-content">
                             <div class="tab-pane active show" id="roa_atendido" role="tabpanel">
-                                <TabRoaAtendido :form="form" :roa_atendido="tabs['roa_atendido']"/>
+                                <TabRoaAtendido :resultado="resultado" :form="form"
+                                                :roa_atendido="tabs['roa_atendido']"/>
                             </div>
                             <div class="tab-pane" id="roa_aberto" role="tabpanel">
-                                <TabRoaAberto :form="form" :roa_aberto="tabs['roa_aberto']"/>
+                                <TabRoaAberto :resultado="resultado" :form="form"
+                                              :roa_aberto="tabs['roa_aberto']"/>
                             </div>
                             <div class="tab-pane" id="rnc_atendido" role="tabpanel">
-                                <TabRncAtendido :form="form" :rnc_atendido="tabs['rnc_atendido']"/>
+                                <TabRncAtendido :resultado="resultado" :form="form"
+                                                :rnc_atendido="tabs['rnc_atendido']"/>
                             </div>
                             <div class="tab-pane" id="rnc_aberto" role="tabpanel">
-                                <TabRncAberto :form="form" :rnc_aberto="tabs['rnc_aberto']"/>
+                                <TabRncAberto :resultado="resultado" :form="form"
+                                              :rnc_aberto="tabs['rnc_aberto']"/>
                             </div>
                             <div class="tab-pane" id="ocorrencia_intendidade" role="tabpanel">
-                                <TabOcorrenciaIntensidade :form="form" :intensidades="tabs['intensidades']"/>
+                                <TabOcorrenciaIntensidade :resultado="resultado" :form="form"
+                                                          :intensidades="tabs['intensidades']"/>
                             </div>
                             <div class="tab-pane" id="ocorrencia_local" role="tabpanel">
-                                <TabOcorrenciaLocal :form="form" :locais="tabs['locais']"/>
+                                <TabOcorrenciaLocal :resultado="resultado" :form="form" :locais="tabs['locais']"/>
                             </div>
                             <div class="tab-pane" id="ocorrencia_classificacao" role="tabpanel">
-                                <TabOcorrenciaClassificacao :form="form" :classificacoes="tabs['classificacoes']"/>
+                                <TabOcorrenciaClassificacao :resultado="resultado" :form="form"
+                                                            :classificacoes="tabs['classificacoes']"/>
                             </div>
                             <div class="tab-pane" id="ocorrencia_lote" role="tabpanel">
-                                <TabOcorrenciaLote :form="form" :lotes="tabs['lotes']"/>
+                                <TabOcorrenciaLote :resultado="resultado" :form="form" :lotes="tabs['lotes']"/>
                             </div>
                             <div class="tab-pane" id="aca_gerado" role="tabpanel">
-                                <TabAca :form="form" :acas="tabs['acas']"/>
+                                <TabAca :resultado="resultado" :form="form" :acas="tabs['acas']"/>
                             </div>
                             <div class="tab-pane" id="outra_analise" role="tabpanel">
-                                <TabOutraAnalise :contrato="contrato" :servico="servico" :resultado="resultado"/>
+                                <TabOutraAnalise :contrato="contrato" :servico="servico"
+                                                 :resultado="resultado"/>
                             </div>
                         </div>
                     </div>

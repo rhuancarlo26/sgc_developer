@@ -7,6 +7,7 @@ import {IconDeviceFloppy} from "@tabler/icons-vue";
 import html2canvas from "html2canvas";
 
 const props = defineProps({
+    resultado: {type: Object},
     form: {type: Object},
     lotes: {type: Object}
 });
@@ -40,7 +41,8 @@ const captureChart = () => {
 }
 
 const salvar = () => {
-    props.form.form = 7;
+    props.form.id = props.resultado.analise?.id;
+    props.form.form = 8;
 
     props.form.post(route('contratos.contratada.servicos.cont_ocorrencia.resultado.store_analise', {
         contrato: props.form.contrato_id,

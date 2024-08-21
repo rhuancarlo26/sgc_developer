@@ -54,13 +54,13 @@ class StoreAnaliseRequest extends FormRequest
                 'ocorr_por_classificacao' => ['required'],
                 'graf_reg_classificacao' => ['required']
             ];
-        } elseif ($request['form'] === 7) {
+        } elseif ($request['form'] === 8) {
             $rules = [
                 ...$rules,
                 'ocorr_por_lote' => ['required'],
                 'graf_reg_lote' => ['required']
             ];
-        } elseif ($request['form'] === 8) {
+        } elseif ($request['form'] === 9) {
             $rules = [
                 ...$rules,
                 'aca_gerados' => ['required']
