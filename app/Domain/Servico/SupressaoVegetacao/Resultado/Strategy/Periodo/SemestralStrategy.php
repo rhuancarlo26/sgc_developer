@@ -16,4 +16,10 @@ class SemestralStrategy implements DateSettingStrategy
             'dt_final' => date($request['ano'] . $semestres[$request['semestre']][1])
         ];
     }
+
+    public function getDate(string $dataInicio): int
+    {
+        $date = date("m-d", strtotime($dataInicio));
+        return ($date === '01-01') ? 1 : 2;
+    }
 }

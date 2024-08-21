@@ -9,6 +9,6 @@ class ServicoPmqaResultadoOutraAnalise extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_resultado_outras_analises';
+    protected $table = 'pmqa_resultado_outras_analises';
     protected $guarded = ['id', 'created_at'];
 }

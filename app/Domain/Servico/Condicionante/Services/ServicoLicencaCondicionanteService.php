@@ -13,7 +13,7 @@ class ServicoLicencaCondicionanteService extends BaseModelService
 
   protected string $modelClass = ServicoLicencaCondicionante::class;
 
-  public function storeServicoLicencaCondicionte($request)
+  public function storeServicoLicencaCondicionte($request): array
   {
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
@@ -22,12 +22,12 @@ class ServicoLicencaCondicionanteService extends BaseModelService
     ];
   }
 
-  public function deleteServicoLicencaCondicionte($request)
+  public function deleteServicoLicencaCondicionte($request): array
   {
     try {
-      $this->modelClass::Where('condicionante_id', $request['condicionante_id'])
-        ->where('servico_id', $request['servico_id'])
-        ->where('licenca_id', $request['licenca_id'])
+      $this->modelClass::Where('id_condicionante', $request['condicionante_id'])
+        ->where('id_servico', $request['servico_id'])
+        ->where('id_licenca', $request['licenca_id'])
         ->firstOrFail()->delete();
 
       $response = [
