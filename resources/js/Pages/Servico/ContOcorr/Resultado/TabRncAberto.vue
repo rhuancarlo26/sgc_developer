@@ -4,11 +4,13 @@ import NavButton from "@/Components/NavButton.vue";
 import {IconDeviceFloppy} from "@tabler/icons-vue";
 
 const props = defineProps({
+    resultado: {type: Object},
     form: {type: Object},
     rnc_aberto: {type: Array}
 });
 
 const salvar = () => {
+    props.form.id = props.resultado.analise?.id;
     props.form.form = 4;
 
     props.form.post(route('contratos.contratada.servicos.cont_ocorrencia.resultado.store_analise', {

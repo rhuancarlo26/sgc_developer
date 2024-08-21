@@ -7,6 +7,7 @@ import {IconDeviceFloppy} from "@tabler/icons-vue";
 import NavButton from "@/Components/NavButton.vue";
 
 const props = defineProps({
+    resultado: {type: Object},
     form: {type: Object},
     locais: {type: Object}
 });
@@ -41,6 +42,7 @@ const captureChart = () => {
 }
 
 const salvar = () => {
+    props.form.id = props.resultado.analise?.id;
     props.form.form = 6;
 
     props.form.post(route('contratos.contratada.servicos.cont_ocorrencia.resultado.store_analise', {

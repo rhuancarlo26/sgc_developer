@@ -7,6 +7,7 @@ import {IconDeviceFloppy} from "@tabler/icons-vue";
 import NavButton from "@/Components/NavButton.vue";
 
 const props = defineProps({
+    resultado: {type: Object},
     form: {type: Object},
     classificacoes: {type: Object}
 });
@@ -41,7 +42,8 @@ const captureChart = () => {
 }
 
 const salvar = () => {
-    props.form.form = 8;
+    props.form.id = props.resultado.analise?.id;
+    props.form.form = 7;
 
     props.form.post(route('contratos.contratada.servicos.cont_ocorrencia.resultado.store_analise', {
         contrato: props.form.contrato_id,
@@ -53,8 +55,7 @@ const salvar = () => {
 
 <template>
     <div name="graf_reg_classificacao" id="graf_reg_classificacao" class="d-flex justify-content-center mb-4">
-        <BarChart name="graf_reg_classificacao" id="graf_reg_classificacao"
-                  :style="{ height: '400px', position: 'relative' }" :chart_data="classificacoes"
+        <BarChart :style="{ height: '400px', position: 'relative' }" :chart_data="classificacoes"
                   :chart_options="chartOptions"/>
     </div>
     <div class="row mb-4">

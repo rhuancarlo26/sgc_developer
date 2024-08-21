@@ -282,6 +282,7 @@ class ResultadoService extends BaseModelService
 
     public function updateAnalise(array $post): array
     {
+        //dd($post);
         return $this->dataManagement->update(entity: $this->modelClassAnalise, infos: $post, id: $post['id']);
     }
 
