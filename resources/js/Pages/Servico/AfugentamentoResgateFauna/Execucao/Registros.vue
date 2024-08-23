@@ -18,7 +18,10 @@ const props = defineProps({
     grupoAmostrado: { type: Array },
     frenteSupressao: { type: Array },
     formaRegistro: { type: Array },
-    registros: { type: Array }
+    registros: { type: Array },
+    ufs: { type: Array },
+    statusConservacaoFederal: { type: Array },
+    statusConservacaoIucn: { type: Array },
 });
 
 const novoRegistroModal = ref();
@@ -138,7 +141,7 @@ const destroy = (registro) => {
             </template>
         </Navbar>
         <NovoRegistroModal ref="novoRegistroModal" :grupoAmostrado="grupoAmostrado" :frenteSupressao="frenteSupressao"
-            :formaRegistro="formaRegistro" />
+            :formaRegistro="formaRegistro" :ufs="ufs" :statusConservacaoFederal="statusConservacaoFederal" :statusConservacaoIucn="statusConservacaoIucn" />
 
         <VisualizarRegistroModal ref="visualizarRegistroModal" />
     </AuthenticatedLayout>
