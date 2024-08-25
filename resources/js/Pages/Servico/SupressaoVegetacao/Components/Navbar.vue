@@ -79,9 +79,9 @@ const getAprovacao = () => {
                         :param="{ contrato: contrato.id, servico: servico.id }" title="Resultado"
                         :icon="IconLayoutDashboard" v-if="aprovacao.fk_status === 3"/>
 
-                      <NavLink route-name="contratos.contratada.servicos.pmqa.resultado.index"
-                        active-on-route-prefix="contratos.contratada.servicos.pmqa.resultado*"
-                        :param="{ contrato: contrato.id, servico: servico.id }" title="Resultado"
+                      <NavLink route-name="contratos.contratada.servicos.supressao-vegetacao.relatorio.index"
+                        active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.relatorio.*"
+                        :param="{ contrato: contrato.id, servico: servico.id }" title="Relatórios"
                         :icon="IconLayoutDashboard" v-if="aprovacao.fk_status === 3"/>
                     </ul>
                   </div>
