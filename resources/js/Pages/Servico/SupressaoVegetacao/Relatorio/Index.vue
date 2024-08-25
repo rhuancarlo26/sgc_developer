@@ -9,6 +9,7 @@ import {computed, ref} from "vue";
 import {IconDots} from "@tabler/icons-vue";
 import ModalCadastro from "./Components/ModalCadastro.vue";
 import ModalVisualizar from "./Components/ModalVisualizar.vue";
+import ModalConclusao from "./Components/ModalConclusao.vue";
 
 const props = defineProps({
     data: {type: Object},
@@ -20,6 +21,11 @@ const props = defineProps({
 const modalCadastroRef = ref();
 const abrirModalCadastro = (item = null) => {
     modalCadastroRef.value.abrirModal(item);
+}
+
+const modalConclusaoRef = ref();
+const abrirModalConclusao = (item = null) => {
+    modalConclusaoRef.value.abrirModal(item);
 }
 
 const modalVisualizarRef = ref();
@@ -73,10 +79,10 @@ const urlQueryParams = computed(() => {
                         <tr>
                             <td>{{item.nome_relatorio}}</td>
                             <td>
-                                <span v-if="item.fk_status === 1" class="shadow-none badge badge-primary">Em confecção</span>
-                                <span v-if="item.fk_status === 2" class="shadow-none badge badge-warning">Em análise</span>
-                                <span v-if="item.fk_status === 3" class="shadow-none badge badge-primary">Aprovado</span>
-                                <span v-if="item.fk_status === 4" class="shadow-none badge badge-danger">Pendente</span>
+                                <span v-if="item.fk_status === 1" class="badge text-bg-primary">Em confecção</span>
+                                <span v-if="item.fk_status === 2" class="badge text-bg-warning">Em análise</span>
+                                <span v-if="item.fk_status === 3" class="badge text-bg-primary">Aprovado</span>
+                                <span v-if="item.fk_status === 4" class="badge text-bg-danger">Pendente</span>
                             </td>
                             <td>{{item.sobre_relatorio}}</td>
                             <td class="text-center">
@@ -86,8 +92,8 @@ const urlQueryParams = computed(() => {
                                     <IconDots/>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end" style="">
-                                    <a class="dropdown-item" href="javascript:void(0);" @click="modalConclusao(item)"
-                                       v-if="item.fk_status === '1' || item.fk_status === '4'">
+                                    <a class="dropdown-item" href="javascript:void(0);" @click="abrirModalConclusao(item)"
+                                       v-if="item.fk_status === 1 || item.fk_status === 4">
                                         Conclusão
                                     </a>
                                     <a class="dropdown-item" @click="modalRelatorio(r)" href="javascript:void(0);" data-toggle="modal"
@@ -95,14 +101,14 @@ const urlQueryParams = computed(() => {
                                         Visualizar relatório
                                     </a>
                                     <a class="dropdown-item" href="javascript:void(0);" @click="novoRelatorio(r, item.fk_resultado)"
-                                       v-if="item.fk_status === '1' || item.fk_status === '4'">
+                                       v-if="item.fk_status === 1 || item.fk_status === 4">
                                         Editar
                                     </a>
                                     <a class="dropdown-item" href="javascript:void(0);" @click="deleteRelatorio(item.id)"
-                                       v-if="item.fk_status === '1' || item.fk_status === '4'">
+                                       v-if="item.fk_status === 1 || item.fk_status === 4">
                                         Excluir
                                     </a>
-                                    <a @click="enviarRelatorioFiscal(item)" v-if="item.fk_status === '1' || item.fk_status === '4'"
+                                    <a @click="enviarRelatorioFiscal(item)" v-if="item.fk_status === 1 || item.fk_status === 4"
                                        class="dropdown-item" href="#javascript:void(0);">
                                         Enviar para o fiscal
                                     </a>
@@ -123,6 +129,9 @@ const urlQueryParams = computed(() => {
             :servico="servico"
             :resultados="resultados"
             :relatorios="data.data"
+        />
+        <ModalConclusao
+            ref="modalConclusaoRef"
         />
     </AuthenticatedLayout>
 
