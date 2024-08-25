@@ -12,4 +12,9 @@ class SupressaoRelatorio extends Model
     protected $table = 'supressao_relatorio';
 
     protected $guarded = ['id'];
+
+    public function anexos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SupressaoRelatorioAnexo::class, 'fk_relatorio');
+    }
 }
