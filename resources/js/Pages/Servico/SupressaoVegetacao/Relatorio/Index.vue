@@ -16,7 +16,6 @@ const props = defineProps({
     data: {type: Object},
     contrato: {type: Object},
     servico: {type: Object},
-    resultados: {type: Array},
 });
 
 const modalCadastroRef = ref();
@@ -59,7 +58,7 @@ const gerarRelatorio = (r) => {
 
 <template>
 
-    <Head title="Destinação"/>
+    <Head title="Relatórios"/>
 
     <AuthenticatedLayout>
 

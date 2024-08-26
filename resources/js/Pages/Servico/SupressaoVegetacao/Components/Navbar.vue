@@ -83,6 +83,11 @@ const getAprovacao = () => {
                         active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.relatorio.*"
                         :param="{ contrato: contrato.id, servico: servico.id }" title="Relatórios"
                         :icon="IconLayoutDashboard" v-if="aprovacao.fk_status === 3"/>
+
+                      <NavLink route-name="contratos.contratada.servicos.supressao-vegetacao.pareceres.index"
+                        active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.pareceres.*"
+                        :param="{ contrato: contrato.id, servico: servico.id }" title="Pareceres"
+                        :icon="IconLayoutDashboard"/>
                     </ul>
                   </div>
                 </div>
