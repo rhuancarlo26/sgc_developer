@@ -15,9 +15,9 @@ class StoreLicencaCondicionanteServicoController extends Controller
   public function index(Request $request)
   {
     $post = [
-      'servico_id' => $request->servico_id,
-      'licenca_id' => $request->licenca['id'],
-      'condicionante_id' => $request->condicionante['id']
+      'id_servico' => $request->servico_id,
+      'id_licenca' => $request->licenca['id'],
+      'id_condicionante' => $request->condicionante['id']
     ];
 
     $response = $this->servicoLicencaCondicionanteService->storeServicoLicencaCondicionte($post);
