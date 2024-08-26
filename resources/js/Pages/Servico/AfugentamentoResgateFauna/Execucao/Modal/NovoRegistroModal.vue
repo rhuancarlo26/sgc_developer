@@ -92,6 +92,7 @@ const form = useForm({
     nome_local: '',
     coletado: '',
     n_registro_tombamento: '',
+    documento: null,
     id_status_conservacao_federal: null,
     id_status_conservacao_iucn: null,
 });
@@ -190,7 +191,13 @@ const tipoDestinacaoRegistro = () => {
 }
 
 const salvarImagens = () => {
-    form.post(route('',));
+    form.post(route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.fotografico', { registro: form.id }), {forceFormData: true}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            modalDetalhes.value.getBsModal().hide();
+            form.reset();
+        },
+    });
 }
 
 defineExpose({ abrirModal, updateModal });
@@ -623,10 +630,10 @@ defineExpose({ abrirModal, updateModal });
                                                 </div>
 
                                                 <div class="mt-2">
-                                                    <a @click="salvarImagens()" href="#" class="btn btn-success"
-                                                        aria-label="Button" :disabled="form.processing">
+                                                    <button type="button" @click="salvarImagens" class="btn btn-success"
+                                                        aria-label="Button" :disabled="form.processing || !form.id">
                                                         Enviar
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>

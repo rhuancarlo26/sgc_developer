@@ -3,6 +3,7 @@
 namespace App\Domain\Servico\AfugentamentoResgateFauna\Execucao\Registros\Service;
 
 use App\Models\AfugentFaunaExecFrenteModel;
+use App\Models\AfugentFaunaExecRegistroImagemModel;
 use App\Models\AfugentFaunaExecRegistroModel;
 use App\Models\AfugentFaunaFormaRegistroModel;
 use App\Models\AtFaunaGrupoAmostradoModel;
@@ -129,5 +130,20 @@ class RegistrosService
         return DB::table('fauna_exec_status_conservacao')
             ->whereIn('id', [2, 3, 4, 5, 6, 7, 8, 9, 10])
             ->get();
+    }
+
+    public function storeFile($registro, $file)
+    {
+        $nome = $file->getClientOriginalName();
+        $key = uniqid();
+        $caminho = $file->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Afuget_fauna' . DIRECTORY_SEPARATOR . 'Registro' . DIRECTORY_SEPARATOR . 'Img' . DIRECTORY_SEPARATOR . $key . $nome);
+
+        return AfugentFaunaExecRegistroImagemModel::create([
+            'chave' => $key,
+            'id_registro' => $registro->id,
+            'nome' => $nome,
+            'caminho_imagem' => str_replace("public\\", "", $caminho)
+        ]);
+
     }
 }
