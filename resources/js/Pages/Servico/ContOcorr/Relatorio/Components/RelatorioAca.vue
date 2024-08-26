@@ -8,7 +8,8 @@ const props = defineProps({
 </script>
 <template>
     <div class="mb-4">
-        <h4>8. Tabela de empreendimentos</h4>
+        <h2>10. Resultados</h2>
+        <h4>10.9 Tabela com os ACA's gerados</h4>
         <div class="card mb-4">
             <div class="table-responsive">
                 <table class="table card-table table-bordered">

@@ -14,20 +14,20 @@ use Inertia\Response;
 
 class IndexController extends Controller
 {
-  public function __construct(private readonly OcorrenciaService $ocorrenciaService)
-  {
-  }
+    public function __construct(private readonly OcorrenciaService $ocorrenciaService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, Request $request): Response
-  {
-    $searchParams = $request->all('columns', 'value');
+    public function index(Contrato $contrato, Servicos $servico, Request $request): Response
+    {
+        $searchParams = $request->all('columns', 'value');
 
-    $response = $this->ocorrenciaService->index($servico, $searchParams);
+        $response = $this->ocorrenciaService->index($servico, $searchParams);
 
-    return Inertia::render('Servico/ContOcorr/Execucao/Ocorrencia/Index', [
-      'contrato' => $contrato,
-      'servico' => $servico->load(['tipo']),
-      ...$response
-    ]);
-  }
+        return Inertia::render('Servico/ContOcorr/Execucao/Ocorrencia/Index', [
+            'contrato' => $contrato,
+            'servico' => $servico->load(['tipo', 'cont_ocorr_parecer_configuracao']),
+            ...$response
+        ]);
+    }
 }
