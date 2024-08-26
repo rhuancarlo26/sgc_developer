@@ -8,7 +8,6 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {computed, ref} from "vue";
 import {IconDots} from "@tabler/icons-vue";
 import ModalCadastro from "./Components/ModalCadastro.vue";
-import ModalVisualizar from "./Components/ModalVisualizar.vue";
 import ModalConclusao from "./Components/ModalConclusao.vue";
 import ModalRelatorio from "./Components/ModalRelatorio.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
@@ -42,19 +41,19 @@ const deleteRelatorio = (id) => {
     })
 }
 
-const modalVisualizarRef = ref();
-const abrirModalVisualizar = (item) => {
-    modalVisualizarRef.value.abrirModal(item);
+const linkConfirmationFiscalRef = ref()
+const enviarRelatorioFiscal = (item) => {
+    linkConfirmationFiscalRef.value.show(() => {
+        router.patch(route('contratos.contratada.servicos.supressao-vegetacao.relatorio.update'), {
+            id: item.id,
+            fk_status: 2
+        })
+    })
 }
 
-const urlQueryParams = computed(() => {
-    const params = new URLSearchParams(window.location.search);
-    const result = {};
-    for (const [key, value] of params.entries()) {
-        result[key] = value;
-    }
-    return result;
-})
+const gerarRelatorio = (r) => {
+    window.open(`${window.location.origin}/supressao/relatorio/pdf/${r.id}/${r.fk_resultado}`, '_blank');
+}
 
 </script>
 
@@ -137,7 +136,6 @@ const urlQueryParams = computed(() => {
                 </Table>
             </template>
         </Navbar>
-        <ModalVisualizar ref="modalVisualizarRef"/>
         <ModalCadastro
             ref="modalCadastroRef"
             :servico="servico"
@@ -152,6 +150,7 @@ const urlQueryParams = computed(() => {
             :contrato="contrato"
         />
         <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Excluir registro?' }" />
+        <LinkConfirmation ref="linkConfirmationFiscalRef" :options="{ text: 'Deseja realmente enviar esse relatório para o fiscal?' }" />
     </AuthenticatedLayout>
 
 </template>
