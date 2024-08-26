@@ -6,6 +6,7 @@ use App\Models\AfugentFaunaExecFrenteModel;
 use App\Models\AfugentFaunaExecRegistroModel;
 use App\Models\AfugentFaunaFormaRegistroModel;
 use App\Models\AtFaunaGrupoAmostradoModel;
+use App\Models\Uf;
 use Illuminate\Support\Facades\DB;
 
 class RegistrosService
@@ -56,6 +57,11 @@ class RegistrosService
     public function getFormaRegistro()
     {
         return AfugentFaunaFormaRegistroModel::all();
+    }
+
+    public function getUfs()
+    {
+        return Uf::all();
     }
 
     public function getRegistros($servico)
@@ -109,5 +115,19 @@ class RegistrosService
         }
 
         return $nome_registro;
+    }
+
+    public function getStatusConservacaoFederal()
+    {
+        return DB::table('fauna_exec_status_conservacao')
+            ->whereIn('id', [1, 7, 9, 10])
+            ->get();
+    }
+
+    public function getStatusConservacaoIucn()
+    {
+        return DB::table('fauna_exec_status_conservacao')
+            ->whereIn('id', [2, 3, 4, 5, 6, 7, 8, 9, 10])
+            ->get();
     }
 }

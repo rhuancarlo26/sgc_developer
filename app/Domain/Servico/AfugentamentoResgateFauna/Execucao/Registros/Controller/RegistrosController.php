@@ -25,6 +25,9 @@ class RegistrosController extends Controller
         $frenteSupressao = $this->registrosService->getFrenteSupressao($servico);
         $formaRegistro = $this->registrosService->getFormaRegistro();
         $registros = $this->registrosService->getRegistros($servico);
+        $ufs = $this->registrosService->getUfs();
+        $statusConservacaoFederal = $this->registrosService->getStatusConservacaoFederal();
+        $statusConservacaoIucn = $this->registrosService->getStatusConservacaoIucn();
         return Inertia::render('Servico/AfugentamentoResgateFauna/Execucao/Registros', [
             'contrato'  => $contrato,
             'servico'   => $servico->load(['tipo']),
@@ -32,6 +35,9 @@ class RegistrosController extends Controller
             'frenteSupressao' => $frenteSupressao,
             'formaRegistro' => $formaRegistro,
             'registros' => $registros,
+            'ufs' => $ufs,
+            'statusConservacaoFederal' => $statusConservacaoFederal,
+            'statusConservacaoIucn' => $statusConservacaoIucn,
         ]);
     }
 }
