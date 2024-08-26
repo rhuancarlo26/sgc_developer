@@ -9,6 +9,7 @@ use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class VincularASVService extends BaseModelService
 {
@@ -37,6 +38,22 @@ class VincularASVService extends BaseModelService
             ->first();
 
         return $this->delete(model: $licencaServico);
+    }
+
+    public static function getLicencaServico($servicoId)
+    {
+        return ServicoLicenca::select([
+            'servico_licenca.id as sv_id',
+            'licencas.*',
+            'tipo_licencas.nome as nome_licenca',
+            'tipo_licencas.sigla',
+            DB::raw('DATE_FORMAT(licencas.data_emissao, "%d/%m/%Y") as data_emissaoF'),
+            DB::raw('DATE_FORMAT(licencas.vencimento, "%d/%m/%Y") as vencimentoF'),
+        ])
+            ->join('licencas', 'licencas.id', '=', 'servico_licenca.licenca_id')
+            ->join('tipo_licencas', 'licencas.tipo', '=', 'tipo_licencas.id')
+            ->where('servico_id', $servicoId)
+            ->get();
     }
 
 }
