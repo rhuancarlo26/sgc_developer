@@ -10,12 +10,9 @@ use App\Domain\Servico\SupressaoVegetacao\Relatorio\Controller\UpdateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/{contrato}/{servico}',                              IndexController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.index');
-//Route::get('/anlise-resultado/{servico}/{resultado}',            SupressaoAnaliseController::class)->name('contratos.contratada.servicos.supressao-vegetacao.resultado.supressao-analise');
-//Route::get('/anlise-resultado/{servico}/{resultado}/pilha',      PilhaAnaliseController::class)->name('contratos.contratada.servicos.supressao-vegetacao.resultado.pilha-analise');
 Route::get('/relatorio',                                         RelatorioController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.get-relatorio');
 Route::post('/store',                                            StoreController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.store');
 Route::post('/store-anexo',                                      StoreAnexoController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.relatorio-anexo.store');
 Route::delete('/delete-anexo/{anexo}',                           DeleteAnexoController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.relatorio-anexo.delete');
 Route::patch('/update',                                          UpdateController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.update');
 Route::delete('{relatorio}/delete',                              DeleteController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.delete');
-//
