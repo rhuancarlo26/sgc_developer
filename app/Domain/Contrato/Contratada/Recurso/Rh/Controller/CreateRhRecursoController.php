@@ -12,15 +12,15 @@ use Inertia\Inertia;
 
 class CreateRhRecursoController extends Controller
 {
-  public function __construct(private readonly RhRecursoService $rhRecursoService)
-  {
-  }
+    public function __construct(private readonly RhRecursoService $rhRecursoService)
+    {
+    }
 
-  public function index(Contrato $contrato, RecursoRh $rh)
-  {
-    return Inertia::render('Contrato/Contratada/Recurso/Rh/Form', [
-      'contrato' => $contrato,
-      'rh' => $rh->load(['documentos', 'documentosBaixa']),
-    ]);
-  }
+    public function index(Contrato $contrato, RecursoRh $rh)
+    {
+        return Inertia::render('Contrato/Contratada/Recurso/Rh/Form', [
+            'contrato' => $contrato,
+            'rh'       => $rh->load(['documentos'])
+        ]);
+    }
 }

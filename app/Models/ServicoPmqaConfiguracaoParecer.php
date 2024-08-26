@@ -9,6 +9,6 @@ class ServicoPmqaConfiguracaoParecer extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_configuracao_parecer';
+    protected $table = 'pmqa_parecer_configuracao';
     protected $guarded = ['id', 'created_at'];
 }

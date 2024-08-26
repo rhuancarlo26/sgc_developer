@@ -38,7 +38,7 @@ const abrirModalResultado = (item) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+          { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
           { route: '#', label: contrato.contratada }
         ]
           " />
@@ -65,7 +65,7 @@ const abrirModalResultado = (item) => {
             <tr>
               <td>{{ item.nome }}</td>
               <td>
-                <span v-for="campanha in item.campanhas.map(campanha => campanha.nome)" :key="campanha"
+                <span v-for="campanha in item.campanhas.map(campanha => campanha.nome_campanha)" :key="campanha"
                   class="badge bg-warning text-white m-1">
                   {{ campanha }}
                 </span>

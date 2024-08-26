@@ -9,5 +9,5 @@ class LicencaTipo extends Model
 {
   use HasFactory;
 
-  protected $table = 'licenca_tipo';
+  protected $table = 'tipo_licencas';
 }

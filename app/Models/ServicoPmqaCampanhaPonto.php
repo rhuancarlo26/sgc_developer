@@ -10,21 +10,21 @@ class ServicoPmqaCampanhaPonto extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_campanha_pontos';
+    protected $table   = 'exec_campanha_ponto';
     protected $guarded = ['id', 'created_at'];
 
     public function ponto()
     {
-        return $this->belongsTo(ServicoPmqaPonto::class, 'ponto_id');
+        return $this->belongsTo(related: ServicoPmqaPonto::class, foreignKey: 'fk_ponto');
     }
 
     public function coleta()
     {
-        return $this->hasOne(ServicoPmqaCampanhaPontoColeta::class, 'campanha_ponto_id');
+        return $this->hasOne(related: ServicoPmqaCampanhaPontoColeta::class, foreignKey: 'fk_campanha_ponto');
     }
 
     public function medicao(): HasOne
     {
-        return $this->hasOne(ServicoPmqaCampanhaPontoMedicao::class, 'campanha_ponto_id');
+        return $this->hasOne(related: ServicoPmqaCampanhaPontoMedicao::class, foreignKey: 'fk_campanha_ponto');
     }
 }

@@ -9,5 +9,5 @@ class Uf extends Model
 {
     use HasFactory;
 
-    protected $table = 'ufs';
+    protected $table = 'estados';
 }

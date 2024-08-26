@@ -17,15 +17,15 @@ const props = defineProps({
 
 const form = useForm({
   id: null,
-  nomepontocoleta: null,
+  nome_ponto_coleta: null,
   lat_x: null,
   long_y: null,
   classificacao: null,
   classe: null,
-  tipoambiente: null,
-  uf: null,
+  tipo_ambiente: null,
+  UF: null,
   municipio: null,
-  baciahidrografica: null,
+  bacia_hidrografica: null,
   km_rodovia: null,
   estaca: null,
   observacoes: null,
@@ -47,9 +47,9 @@ const alterarPonto = () => {
         <form @submit.prevent="salvarServico()">
           <div class="row mb-4">
             <div class="col form-group">
-              <InputLabel value="Nome" for="nomepontocoleta" />
-              <input type="text" class="form-control" v-model="form.nomepontocoleta">
-              <InputError :message="form.errors.nomepontocoleta" />
+              <InputLabel value="Nome" for="nome_ponto_coleta" />
+              <input type="text" class="form-control" v-model="form.nome_ponto_coleta">
+              <InputError :message="form.errors.nome_ponto_coleta" />
             </div>
             <div class="col form-group">
               <InputLabel value="Latitude" for="lat_x" />
@@ -74,16 +74,16 @@ const alterarPonto = () => {
               <InputError :message="form.errors.classe" />
             </div>
             <div class="col form-group">
-              <InputLabel value="Tipo de ambiente" for="tipoambiente" />
-              <input type="text" class="form-control" v-model="form.tipoambiente">
-              <InputError :message="form.errors.tipoambiente" />
+              <InputLabel value="Tipo de ambiente" for="tipo_ambiente" />
+              <input type="text" class="form-control" v-model="form.tipo_ambiente">
+              <InputError :message="form.errors.tipo_ambiente" />
             </div>
           </div>
           <div class="row mb-4">
             <div class="col form-group">
-              <InputLabel value="UF" for="uf" />
-              <input type="text" class="form-control" v-model="form.uf">
-              <InputError :message="form.errors.uf" />
+              <InputLabel value="UF" for="UF" />
+              <input type="text" class="form-control" v-model="form.UF">
+              <InputError :message="form.errors.UF" />
             </div>
             <div class="col form-group">
               <InputLabel value="Municipio" for="municipio" />
@@ -91,9 +91,9 @@ const alterarPonto = () => {
               <InputError :message="form.errors.municipio" />
             </div>
             <div class="col form-group">
-              <InputLabel value="Bacia hidrografica" for="baciahidrografica" />
-              <input type="text" class="form-control" v-model="form.baciahidrografica">
-              <InputError :message="form.errors.baciahidrografica" />
+              <InputLabel value="Bacia hidrografica" for="bacia_hidrografica" />
+              <input type="text" class="form-control" v-model="form.bacia_hidrografica">
+              <InputError :message="form.errors.bacia_hidrografica" />
             </div>
           </div>
           <div class="row mb-4">
@@ -108,9 +108,9 @@ const alterarPonto = () => {
               <InputError :message="form.errors.estaca" />
             </div>
             <div class="col form-group">
-              <InputLabel value="Bacia hidrografica" for="baciahidrografica" />
-              <input type="text" class="form-control" v-model="form.baciahidrografica">
-              <InputError :message="form.errors.baciahidrografica" />
+              <InputLabel value="Bacia hidrografica" for="bacia_hidrografica" />
+              <input type="text" class="form-control" v-model="form.bacia_hidrografica">
+              <InputError :message="form.errors.bacia_hidrografica" />
             </div>
           </div>
           <div class="row mb-4">

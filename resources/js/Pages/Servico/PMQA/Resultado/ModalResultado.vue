@@ -103,7 +103,7 @@ defineExpose({ abrirModal });
             <InputLabel value="Campanha" for="campanha" />
             <div class="row g-2">
               <div class="col">
-                <v-select :options="campanhas" label="nome" v-model="form.campanha">
+                <v-select :options="campanhas" label="nome_campanha" v-model="form.campanha">
                   <template #no-options="{}">
                     Nenhum registro encontrado.
                   </template>
@@ -132,7 +132,7 @@ defineExpose({ abrirModal });
               </thead>
               <tbody>
                 <tr v-for="campanha, index in form.campanhas_selecionadas" :key="campanha.id">
-                  <td>{{ campanha.nome }}</td>
+                  <td>{{ campanha.nome_campanha }}</td>
                   <td>
                     <NavButton @click="removerCampanha(index)" :icon="IconTrash" class="btn-icon"
                       type-button="danger" />

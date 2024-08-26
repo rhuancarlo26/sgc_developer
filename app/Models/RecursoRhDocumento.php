@@ -9,6 +9,6 @@ class RecursoRhDocumento extends Model
 {
     use HasFactory;
 
-    protected $table = 'recurso_rh_documentos';
+    protected $table = 'rh_arquivo';
     protected $guarded = ['id', 'created_at'];
 }

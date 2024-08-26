@@ -10,14 +10,17 @@ use App\Shared\Http\Controllers\Controller;
 
 class StoreController extends Controller
 {
-  public function __construct(private readonly ParametroService $parametroService)
-  {
-  }
+    public function __construct(private readonly ParametroService $parametroService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, StoreRequest $request)
-  {
-    $response = $this->parametroService->store($servico, $request->validated());
+    public function index(Contrato $contrato, Servicos $servico, StoreRequest $request)
+    {
+        $response = $this->parametroService->store($servico, $request->validated());
 
-    return to_route('contratos.contratada.servicos.pmqa.configuracao.parametro.index', ['contrato' => $contrato->id, 'servico' => $servico->id])->with('message', $response);
-  }
+        return to_route('contratos.contratada.servicos.pmqa.configuracao.parametro.index', [
+            'contrato' => $contrato->id,
+            'servico' => $servico->id
+        ])->with('message', $response);
+    }
 }

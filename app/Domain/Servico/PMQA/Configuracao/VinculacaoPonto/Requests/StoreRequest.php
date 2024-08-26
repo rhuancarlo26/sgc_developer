@@ -11,7 +11,7 @@ class StoreRequest extends FormRequest
     return [
       'servico_id'          => ['required'],
       'lista'               => ['required'],
-      'periodicidade'       => ['required'],
+//      'periodicidade'       => ['required'],
       'pontos'              => ['required'],
       'relatorio_parcial'   => ['nullable'],
       'relatorio_acomulado' => ['nullable']
