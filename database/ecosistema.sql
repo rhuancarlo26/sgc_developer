@@ -6103,27 +6103,7 @@ INSERT INTO `supervisao_resultado_outras_analises` (`id`, `chave`, `id_resultado
 -- Table structure for table `supressao_relatorio`
 --
 
-CREATE TABLE `supressao_relatorio` (
-  `id` int(11) NOT NULL,
-  `fk_servico` int(11) NOT NULL,
-  `fk_resultado` int(11) NOT NULL,
-  `nome_relatorio` tinytext NOT NULL,
-  `conclusao` tinytext NOT NULL,
-  `sobre_relatorio` tinytext NOT NULL,
-  `fk_status` int(11) NOT NULL,
-  `parecer_fiscal` text DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
---
--- Dumping data for table `supressao_relatorio`
---
-
-INSERT INTO `supressao_relatorio` (`id`, `fk_servico`, `fk_resultado`, `nome_relatorio`, `conclusao`, `sobre_relatorio`, `fk_status`, `parecer_fiscal`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 74, 2, 'Teste', '', '', 1, NULL, '2023-11-14 18:41:12', '2023-11-14 18:41:12', NULL),
-(2, 127, 5, 'Relatório de Supressão ASV nº 2024.5.2023.86702', '', '', 1, NULL, '2024-04-12 14:33:14', '2024-04-12 14:33:14', NULL);
 
 -- --------------------------------------------------------
 
@@ -6131,15 +6111,7 @@ INSERT INTO `supressao_relatorio` (`id`, `fk_servico`, `fk_resultado`, `nome_rel
 -- Table structure for table `supressao_relatorio_anexos`
 --
 
-CREATE TABLE `supressao_relatorio_anexos` (
-  `id` int(11) NOT NULL,
-  `fk_relatorio` int(11) NOT NULL,
-  `nome_arquivo` text NOT NULL,
-  `caminho_arquivo` text NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
 
 -- --------------------------------------------------------
 
