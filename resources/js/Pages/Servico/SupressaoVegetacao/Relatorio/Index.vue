@@ -1,5 +1,5 @@
 <script setup>
-import {Head, Link} from "@inertiajs/vue3";
+import {Head, Link, router} from "@inertiajs/vue3";
 import Table from "@/Components/Table.vue";
 import Navbar from "../Components/Navbar.vue";
 import NavButton from "@/Components/NavButton.vue";
@@ -11,6 +11,7 @@ import ModalCadastro from "./Components/ModalCadastro.vue";
 import ModalVisualizar from "./Components/ModalVisualizar.vue";
 import ModalConclusao from "./Components/ModalConclusao.vue";
 import ModalRelatorio from "./Components/ModalRelatorio.vue";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 const props = defineProps({
     data: {type: Object},
@@ -32,6 +33,13 @@ const abrirModalConclusao = (item = null) => {
 const modalRelatorioRef = ref();
 const abrirModalRelatorio = (item = null) => {
     modalRelatorioRef.value.abrirModal(item);
+}
+
+const linkConfirmationRef = ref()
+const deleteRelatorio = (id) => {
+    linkConfirmationRef.value.show(() => {
+        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.relatorio.delete', id))
+    })
 }
 
 const modalVisualizarRef = ref();
@@ -106,7 +114,7 @@ const urlQueryParams = computed(() => {
                                        data-target="#visualizarRelatorio">
                                         Visualizar relatório
                                     </a>
-                                    <a class="dropdown-item" href="javascript:void(0);" @click="novoRelatorio(r, item.fk_resultado)"
+                                    <a class="dropdown-item" href="javascript:void(0);" @click="abrirModalCadastro(item)"
                                        v-if="item.fk_status === 1 || item.fk_status === 4">
                                         Editar
                                     </a>
@@ -143,6 +151,7 @@ const urlQueryParams = computed(() => {
             ref="modalRelatorioRef"
             :contrato="contrato"
         />
+        <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Excluir registro?' }" />
     </AuthenticatedLayout>
 
 </template>

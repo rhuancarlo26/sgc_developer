@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Servico\SupressaoVegetacao\Relatorio\Controller\DeleteAnexoController;
+use App\Domain\Servico\SupressaoVegetacao\Relatorio\Controller\DeleteController;
 use App\Domain\Servico\SupressaoVegetacao\Relatorio\Controller\IndexController;
 use App\Domain\Servico\SupressaoVegetacao\Relatorio\Controller\RelatorioController;
 use App\Domain\Servico\SupressaoVegetacao\Relatorio\Controller\StoreAnexoController;
@@ -16,5 +17,5 @@ Route::post('/store',                                            StoreController
 Route::post('/store-anexo',                                      StoreAnexoController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.relatorio-anexo.store');
 Route::delete('/delete-anexo/{anexo}',                           DeleteAnexoController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.relatorio-anexo.delete');
 Route::patch('/update',                                          UpdateController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.update');
-//Route::delete('{resultado}/delete',                              DeleteController::class)->name('contratos.contratada.servicos.supressao-vegetacao.resultado.delete');
+Route::delete('{relatorio}/delete',                              DeleteController::class)->name('contratos.contratada.servicos.supressao-vegetacao.relatorio.delete');
 //
