@@ -24,7 +24,7 @@ class IndexController extends Controller
 
         return Inertia::render('Servico/ContOcorr/Configuracao/Empreendimento/Index', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'servico' => $servico->load(['tipo', 'cont_ocorr_parecer_configuracao']),
             ...$response
         ]);
     }

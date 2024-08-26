@@ -37,7 +37,16 @@ class OcorrenciaService extends BaseModelService
     {
         return [
             'ocorrencias' => $this->searchAllColumns(...$searchParams)
-                ->with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento', 'vistorias', 'ocorrencia_anterior'])
+                ->with([
+                    'lote',
+                    'rodovia.uf',
+                    'registros',
+                    'historico.levantamento',
+                    'ocorrencia_anterior',
+                    'vistorias' => function ($query) {
+                        $query->latest();
+                    }
+                ])
                 ->where('id_servico', $servico->id)
                 ->paginate()
                 ->appends($searchParams),
@@ -179,11 +188,11 @@ class OcorrenciaService extends BaseModelService
                             $ocorrencia['prazo'] = $post['vistoria']['prazo_vistoria'];
                             $ocorrencia['dias_restantes'] = $post['vistoria']['prazo_vistoria'];
                         } else {
-                            $ocorrencia['dias_restantes'] = $post['vistoria']['dias_restantes'];
+//                            $ocorrencia['dias_restantes'] = $post['vistoria']['dias_restantes'];
                         }
                     }
 
-                    $this->dataManagement->update(entity: $this->modelClassHistorico, infos: $ocorrencia, id: $post['ocorrencia']['id']);
+                    $this->dataManagement->update(entity: $this->modelClass, infos: $ocorrencia, id: $post['ocorrencia']['id']);
                 }
             } else {
 //                se a ocorrencia for corrigida

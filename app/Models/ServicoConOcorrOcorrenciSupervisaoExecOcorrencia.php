@@ -45,6 +45,6 @@ class ServicoConOcorrOcorrenciSupervisaoExecOcorrencia extends Model
 
     public function ocorrencia_anterior()
     {
-        return $this->hasOneThrough(ServicoConOcorrOcorrenciSupervisaoExecOcorrencia::class, ServicoConOcorrSupervisaoExecOcorrenciaAnterior::class, 'id_ocorrencia_anterior', 'id', 'id', 'id_ocorrencia_vigente');
+        return $this->hasOneThrough(ServicoConOcorrOcorrenciSupervisaoExecOcorrencia::class, ServicoConOcorrSupervisaoExecOcorrenciaAnterior::class, 'id_ocorrencia_vigente', 'id', 'id', 'id_ocorrencia_anterior');
     }
 }
