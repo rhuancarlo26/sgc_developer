@@ -19,6 +19,7 @@
         "laravel/tinker": "^2.8",
         "maatwebsite/excel": "^3.1",
         "mjaschen/phpgeo": "4.2",
+        "rap2hpoutre/fast-excel": "^5.5",
         "rap2hpoutre/laravel-log-viewer": "^2.3",
         "spatie/laravel-permission": "^6.0",
         "tightenco/ziggy": "^1.0"

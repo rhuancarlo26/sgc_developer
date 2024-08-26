@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('/Registros')->group(function () {
-    Route::get('{contrato}/{servico}/',     [RegistrosController::class,        'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.index');
-    Route::post('/{servico}',               [CreateRegistroController::class,   'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.create');
-    Route::patch('/{registro}',             [UpdateRegistroController::class,   'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.update');
-    Route::delete('/{registro}',            [DestroyRegistroController::class,  'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.delete');
-    Route::get('{servico}/download',        [DownloadRegistroController::class, 'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.download');
+    Route::get('/listagem/{contrato}/{servico}',   [RegistrosController::class,        'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.index');
+    Route::post('/{servico}',                      [CreateRegistroController::class,   'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.create');
+    Route::patch('/{registro}',                    [UpdateRegistroController::class,   'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.update');
+    Route::delete('/{registro}',                   [DestroyRegistroController::class,  'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.delete');
+    Route::get('/download/{servico}',              [DownloadRegistroController::class, 'index'])->name('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.download');
 });
