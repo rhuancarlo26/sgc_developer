@@ -10,6 +10,7 @@ import {IconDots} from "@tabler/icons-vue";
 import ModalCadastro from "./Components/ModalCadastro.vue";
 import ModalVisualizar from "./Components/ModalVisualizar.vue";
 import ModalConclusao from "./Components/ModalConclusao.vue";
+import ModalRelatorio from "./Components/ModalRelatorio.vue";
 
 const props = defineProps({
     data: {type: Object},
@@ -26,6 +27,11 @@ const abrirModalCadastro = (item = null) => {
 const modalConclusaoRef = ref();
 const abrirModalConclusao = (item = null) => {
     modalConclusaoRef.value.abrirModal(item);
+}
+
+const modalRelatorioRef = ref();
+const abrirModalRelatorio = (item = null) => {
+    modalRelatorioRef.value.abrirModal(item);
 }
 
 const modalVisualizarRef = ref();
@@ -96,7 +102,7 @@ const urlQueryParams = computed(() => {
                                        v-if="item.fk_status === 1 || item.fk_status === 4">
                                         Conclusão
                                     </a>
-                                    <a class="dropdown-item" @click="modalRelatorio(r)" href="javascript:void(0);" data-toggle="modal"
+                                    <a class="dropdown-item" @click="abrirModalRelatorio(item)" href="javascript:void(0);" data-toggle="modal"
                                        data-target="#visualizarRelatorio">
                                         Visualizar relatório
                                     </a>
@@ -132,6 +138,10 @@ const urlQueryParams = computed(() => {
         />
         <ModalConclusao
             ref="modalConclusaoRef"
+        />
+        <ModalRelatorio
+            ref="modalRelatorioRef"
+            :contrato="contrato"
         />
     </AuthenticatedLayout>
 
