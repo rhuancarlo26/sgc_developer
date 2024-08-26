@@ -75,7 +75,7 @@ const abrirModalEnviarOcorrencia = () => {
                     </template>
                 </ModelSearchFormAllColumns>
                 <Table
-                    :columns="['ID Ocorrência', 'Intensidade Ocorrência', 'Data da Ocorrência', 'Ocorrênia anterior', 'Prazo Ocorrência', 'Lote', 'Construtora', 'Status Aprovação', 'Envio', 'Ação']"
+                    :columns="['ID Ocorrência', 'Intensidade Ocorrência', 'Data da Ocorrência', 'Data fim', 'Ocorrência anterior', 'Prazo de correção', 'Lote', 'Construtora', 'Status Aprovação', 'Envio', 'Ação']"
                     :records="ocorrencias" table-class="table-hover">
                     <template #body="{ item }">
                         <tr>
@@ -83,6 +83,7 @@ const abrirModalEnviarOcorrencia = () => {
                             <td>{{ item.intensidade }}</td>
                             <td>{{ dateTimeFormat(item.data_ocorrencia) }}</td>
                             <td>-</td>
+                            <td>{{ item.ocorrencia_anterior?.nome_id }}</td>
                             <td>-</td>
                             <td>{{ item.lote?.nome_id }}</td>
                             <td>{{ item.lote?.empresa }}</td>
