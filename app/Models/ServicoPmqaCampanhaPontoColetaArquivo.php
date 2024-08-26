@@ -9,11 +9,11 @@ class ServicoPmqaCampanhaPontoColetaArquivo extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_campanha_ponto_coleta_arquivos';
+    protected $table   = 'exec_ponto_coleta_imagem';
     protected $guarded = ['id', 'created_at'];
 
     public function coleta()
     {
-        return $this->belongsTo(ServicoPmqaCampanhaPontoColeta::class, 'coleta_id');
+        return $this->belongsTo(related: ServicoPmqaCampanhaPontoColeta::class, foreignKey: 'fk_ponto_coleta');
     }
 }

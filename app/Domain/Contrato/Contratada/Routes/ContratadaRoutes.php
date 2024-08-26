@@ -14,7 +14,6 @@ use App\Domain\Contrato\Contratada\DadosGerais\Empreendimento\Controller\UpdateC
 use App\Domain\Contrato\Contratada\DadosGerais\Historico\Controller\DestroyHistoricoContratadaController;
 use App\Domain\Contrato\Contratada\DadosGerais\Historico\Controller\StoreHistoricoContratadaController;
 use App\Domain\Contrato\Contratada\DadosGerais\Historico\Controller\UpdateHistoricoContratadaController;
-use App\Domain\Contrato\Contratada\DadosGerais\Introducao\Controller\StoreIntroducaoContratadaController;
 use App\Domain\Contrato\Contratada\DadosGerais\Introducao\Controller\UpdateIntroducaoContratadaController;
 use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Controller\DeleteLicenciamentoContratadaController;
 use App\Domain\Contrato\Contratada\DadosGerais\Licenciamento\Controller\StoreLicenciamentoContratadaController;
@@ -34,6 +33,7 @@ use App\Domain\Servico\Rh\Controller\DeleteServicoRhContratadaController;
 use App\Domain\Servico\Rh\Controller\StoreServicoRhContratadaController;
 use App\Domain\Servico\Veiculo\Controller\DeleteServicoVeiculoContratadaController;
 use App\Domain\Servico\Veiculo\Controller\StoreServicoVeiculoContratadaController;
+use App\Domain\Servico\app\Controller\EnviaServicoFiscalController;
 
 Route::prefix('/contratada')->group(function () {
     Route::get('{contrato}/',                                      [ContratoContratadaController::class,                    'index'])->name('contratos.contratada.index');
@@ -72,6 +72,7 @@ Route::prefix('/contratada')->group(function () {
         Route::post('servicos/store',                       [StoreServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.store');
         Route::patch('servicos/update',                     [UpdateServicosContratadaController::class, 'index'])->name('contratos.contratada.servicos.update');
         Route::delete('servicos/delete/{servico}',          [DeleteServicoContratadaController::class, 'index'])->name('contratos.contratada.servicos.delete');
+        Route::post('servicos/envia-fiscal/{servico}',      [EnviaServicoFiscalController::class, 'index'])->name('contratos.contratada.servicos.envia-fiscal');
 
         Route::prefix('servico/rh')->group(function () {
             Route::post('store',                            [StoreServicoRhContratadaController::class, 'index'])->name('contratos.contratada.servicos.rh.store');
@@ -93,7 +94,9 @@ Route::prefix('/contratada')->group(function () {
         Route::prefix('servico')->group(function () {
             require __DIR__ . '/../../../Servico/PMQA/app/Routes/PMQARoutes.php';
             require __DIR__ . '/../../../Servico/MonAtpFauna/app/Routes/MonAtpFaunaRoutes.php';
-            require __DIR__ . '/../../../Servico/ControleDeOcorrencias/app/Routes/ControleDeOcorrenciasRoutes.php';
+            require __DIR__ . '/../../../Servico/AfugentamentoResgateFauna/app/Routes/AfugentamentoResgateFaunaRoutes.php';
+            require __DIR__ . '/../../../Servico/ContOcorrencia/app/Routes/ContOcorrenciaRoutes.php';
+            require __DIR__ . '/../../../Servico/SupressaoVegetacao/app/Routes/SupressaoVegetacaoRoutes.php';
         });
     });
 });

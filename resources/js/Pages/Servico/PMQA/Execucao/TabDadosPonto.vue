@@ -9,7 +9,7 @@ defineProps({
       <span><strong>ID do ponto: </strong>{{ ponto.ponto?.id }}</span>
     </div>
     <div class="col">
-      <span><strong>Nome: </strong>{{ ponto.ponto?.nomepontocoleta }}</span>
+      <span><strong>Nome: </strong>{{ ponto.ponto?.nome_ponto_coleta }}</span>
     </div>
   </div>
   <div class="row mb-4">
@@ -28,10 +28,10 @@ defineProps({
       <span><strong>Classe: </strong>{{ ponto.ponto?.classe }}</span>
     </div>
     <div class="col">
-      <span><strong>Tipo de ambiente: </strong>{{ ponto.ponto?.tipoambiente }}</span>
+      <span><strong>Tipo de ambiente: </strong>{{ ponto.ponto?.tipo_ambiente }}</span>
     </div>
     <div class="col">
-      <span><strong>UF: </strong>{{ ponto.ponto?.uf }}</span>
+      <span><strong>UF: </strong>{{ ponto.ponto?.UF }}</span>
     </div>
   </div>
   <div class="row mb-4">
@@ -39,7 +39,7 @@ defineProps({
       <span><strong>Município: </strong>{{ ponto.ponto?.municipio }}</span>
     </div>
     <div class="col">
-      <span><strong>Bacia: </strong>{{ ponto.ponto?.baciahidrografica }}</span>
+      <span><strong>Bacia: </strong>{{ ponto.ponto?.bacia_hidrografica }}</span>
     </div>
     <div class="col">
       <span><strong>Km da rodovia: </strong>{{ ponto.ponto?.km_rodovia }}</span>

@@ -21,7 +21,8 @@ const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
   parametros: { type: Array },
-  listas: { type: Object }
+  listas: { type: Object },
+  aprovacao: {type: Object}
 });
 
 const abrirModalParametros = () => {
@@ -30,6 +31,13 @@ const abrirModalParametros = () => {
 
 const editarLista = (item) => {
   modalParametros.value.abrirModal(item);
+}
+
+const ap = (ap) => {
+    if (!ap?.fk_status) {
+        return true;
+    }
+    return ap?.fk_status === 2;
 }
 
 </script>
@@ -42,7 +50,7 @@ const editarLista = (item) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+          { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
           { route: '#', label: contrato.contratada }
         ]
           " />
@@ -55,7 +63,7 @@ const editarLista = (item) => {
 
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
-        <ModelSearchFormAllColumns :columns="['nome', 'parametros.nome']">
+        <ModelSearchFormAllColumns :columns="['nome', 'parametros.nome']" v-if="ap(aprovacao)">
           <template #action
             v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
             <NavButton @click="abrirModalParametros()" type-button="success" title="Novo parâmetro" />
@@ -67,10 +75,10 @@ const editarLista = (item) => {
             <tr>
               <td>{{ item.nome }}</td>
               <td>
-                <p v-if="item.lista_parametros">
-                  <span v-for="parametro in item.lista_parametros.split(',')" :key="parametro"
+                <p v-if="item.parametros" >
+                  <span v-for="(record, i) in item.parametros" :key="parametro"
                     class="badge bg-warning text-white m-1">
-                    {{ parametro }}
+                    {{record.parametro}}
                   </span>
                 </p>
               </td>
@@ -78,9 +86,9 @@ const editarLista = (item) => {
                 <div class="d-flex">
                   <template
                     v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
-                    <NavButton :icon="IconPencil" class="btn-icon" type-button="primary" @click="editarLista(item)" />
+                    <NavButton :icon="IconPencil" class="btn-icon" type-button="primary" @click="editarLista(item)" v-if="ap(aprovacao)" />
                     <LinkConfirmation v-slot="confirmation"
-                      :options="{ text: 'A remoção de um ponto será permanente.' }">
+                      :options="{ text: 'A remoção de um ponto será permanente.' }" v-if="ap(aprovacao)">
                       <Link :onBefore="confirmation.show"
                         :href="route('contratos.contratada.servicos.pmqa.configuracao.parametro.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"
                         as="button" method="delete" type="button" class="btn btn-icon btn-danger">

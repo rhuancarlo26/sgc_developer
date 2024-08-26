@@ -36,7 +36,7 @@ const excluirVeiculo = (veiculo_id) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-    { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
     { route: '#', label: contrato.contratada }
   ]
     " />
@@ -52,15 +52,14 @@ const excluirVeiculo = (veiculo_id) => {
 
       <template #body>
         <!-- Pesquisa-->
-        <ModelSearchForm :search-columns="{
-    'nome': 'Nome'
-  }" />
+        <ModelSearchForm :search-columns="{'nome': 'Nome'}" />
 
         <!-- Listagem-->
-        <Table :columns="['Código', 'Descrição', 'Ação']" :records="veiculos" table-class="table-hover">
+        <Table :columns="['id','Código', 'Descrição', 'Ação']" :records="veiculos" table-class="table-hover">
           <template #body="{ item }">
             <tr>
-              <td>{{ item.codigo?.codigo }}</td>
+                <td class="text-center">{{ item.id }}</td>
+                <td class="text-center">{{ item.codigo?.codigo }}</td>
               <td>{{ item.codigo?.descricao }}</td>
               <td>
                 <button type="button" class="btn btn-icon dropdown-toggle p-2" data-bs-boundary="viewport"

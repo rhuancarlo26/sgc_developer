@@ -44,7 +44,7 @@ class TrechoContratoService extends BaseModelService
       $request['rodovia']['rodovia'],
       $request['km_inicial'],
       $request['km_final'],
-      $request['trecho_tipo'] ?? 'B'
+      $request['tipo_trecho'] ?? 'B'
     );
   }
 }

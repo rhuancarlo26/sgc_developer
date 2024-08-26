@@ -12,17 +12,17 @@ use Inertia\Response;
 
 class CreateController extends Controller
 {
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPonto $ponto): Response
-  {
-    return Inertia::render('Servico/PMQA/Execucao/Medir/Form', [
-      'contrato'  => $contrato,
-      'servico'   => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
-      'campanha' => $campanha,
-      'ponto' => $ponto->load([
-        'ponto.lista.parametros_vinculados.parametro',
-        'medicao.arquivos',
-        'medicao.parametros'
-      ])
-    ]);
-  }
+    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPonto $ponto): Response
+    {
+        return Inertia::render('Servico/PMQA/Execucao/Medir/Form', [
+            'contrato' => $contrato,
+            'servico'  => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'campanha' => $campanha,
+            'ponto'    => $ponto->load([
+                'ponto.lista.parametros_vinculados.parametro',
+                'medicao.arquivos',
+                'medicao.parametros'
+            ])
+        ]);
+    }
 }

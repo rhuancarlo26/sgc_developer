@@ -22,16 +22,20 @@ class UpdateLicencaSegmentoController extends Controller
 
     public function index(UpdateLicencaSegmentoRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $post = $request->all();
+        $post = [
+            ...$request->validated(),
+            'uf_inicial' => $request->uf_inicial['id'],
+            'uf_final' => $request->uf_final['id']
+        ];
         $parameters = $this->listagemLicencaSegmento->update(post: $post);
 
         return to_route(
             route: 'licenca.create',
             parameters: [
-                'tipos'           => $this->licencaTipoService->getLicencaTipo(),
-                'licenca'         => $this->licencaService->getLicenca($post['licenca_id']),
-                'licencaSegmento' => $parameters['licencaSegmento'],
-                'brs'             => $this->licencaBRService->getLicencaBR(),
+                // 'tipos'           => $this->licencaTipoService->getLicencaTipo(),
+                'licenca'         => $this->licencaService->getLicenca($request->licenca_id),
+                // 'licencaSegmento' => $parameters['licencaSegmento'],
+                // 'brs'             => $this->licencaBRService->getLicencaBR(),
             ]
         )
             ->with('message', $parameters['request']);

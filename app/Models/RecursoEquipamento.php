@@ -9,7 +9,7 @@ class RecursoEquipamento extends Model
 {
     use HasFactory;
 
-    protected $table = 'recurso_equipamentos';
+    protected $table = 'equipamentos';
     protected $guarded = ['id', 'created_at'];
 
     protected $casts = [
@@ -18,6 +18,6 @@ class RecursoEquipamento extends Model
 
     public function documentos()
     {
-        return $this->hasMany(RecursoEquipamentoDocumento::class, 'equipamento_id');
+        return $this->hasMany(RecursoEquipamentoDocumento::class, 'cod_equipamento');
     }
 }

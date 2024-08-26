@@ -50,8 +50,6 @@ defineExpose({ visualizarTrecho });
 </script>
 
 <template>
-  <!-- <h4>Dados Básicos do contrato</h4> -->
-
   <div class="mt-4">
     <div class="card-header">
       <h3 class="my-0">Dados Básicos do Contrato</h3>
@@ -70,13 +68,13 @@ defineExpose({ visualizarTrecho });
         <span class="col"><strong>Número do Processo (DNIT): </strong>{{ contrato.processo_sei
           }}</span>
         <span class="col"><strong>Início da Vigência: </strong>{{
-          dateTimeFormat(contrato.data_inicio_vigencia ?? null, {
+          dateTimeFormat(contrato.data_inicio?? null, {
             dateStyle: 'short',
             timeStyle: 'short'
           })
         }}</span>
         <span class="col"><strong>Término da Vigência: </strong>{{
-          dateTimeFormat(contrato.data_termino_vigencia ?? null, {
+          dateTimeFormat(contrato.data_termino ?? null, {
             dateStyle: 'short',
             timeStyle: 'short'
           })
@@ -133,7 +131,7 @@ defineExpose({ visualizarTrecho });
               <th>BR</th>
               <th>Km Inicial</th>
               <th>Km Final</th>
-              <th>Tipo</th>
+              <th>Trecho</th>
             </tr>
           </thead>
           <tbody>
@@ -142,7 +140,7 @@ defineExpose({ visualizarTrecho });
               <td>{{ trecho.rodovia?.rodovia }}</td>
               <td>{{ trecho.km_inicial }}</td>
               <td>{{ trecho.km_final }}</td>
-              <td>{{ trecho.trecho_tipo }}</td>
+              <td>{{ trecho.tipo_trecho }}</td>
             </tr>
           </tbody>
         </table>

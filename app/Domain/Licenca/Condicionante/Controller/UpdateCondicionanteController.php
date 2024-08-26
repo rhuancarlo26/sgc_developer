@@ -17,7 +17,7 @@ class UpdateCondicionanteController extends Controller
     {
         $response = $this->condicionanteService->update($request->all());
 
-        return to_route(route: 'licenca.condicionante.index', parameters: $response['licenca'])
+        return to_route(route: 'licenca.condicionante.index', parameters: ['licenca' => $request->licencas_id])
             ->with('message', $response['request']);
     }
 }

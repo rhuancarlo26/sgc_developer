@@ -6,27 +6,23 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreEquipamentoRecursoRequest extends FormRequest
 {
-  public function rules(): array
-  {
-    return [
-      'contrato_id'       => 'required',
-      'nome'              => 'required',
-      'descricao'         => 'required',
-      'atividade'         => 'required',
-      'observacao'        => 'required',
-      'alugado'           => 'required',
-      'numero_serie'      => 'required',
-      'ultima_calibracao' => 'required'
-    ];
-  }
+    public function rules(): array
+    {
+        return [
+            'id_contrato'       => 'required',
+            'nome'              => 'required',
+            'modelo'            => 'required',
+            'ultima_calibracao' => 'required'
+        ];
+    }
 
-  public function messages(): array
-  {
-    return [];
-  }
+    public function messages(): array
+    {
+        return [];
+    }
 
-  public function authorize(): bool
-  {
-    return true;
-  }
+    public function authorize(): bool
+    {
+        return true;
+    }
 }

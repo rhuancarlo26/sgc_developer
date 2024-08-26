@@ -9,6 +9,6 @@ class ServicoTipo extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_tipos';
+    protected $table = 'programas';
     protected $guarded = ['id', 'created_at'];
 }
