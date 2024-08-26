@@ -2,19 +2,13 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../../Navbar.vue";
-import {Head, Link, router, useForm} from "@inertiajs/vue3";
+import {Head, Link, useForm} from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import {ref} from "vue";
-import {IconDeviceFloppy, IconDots, IconEye, IconSettings} from "@tabler/icons-vue";
-import {IconList} from "@tabler/icons-vue";
-import {IconPencil} from "@tabler/icons-vue";
-import {IconTrash} from "@tabler/icons-vue";
+import {IconDots} from "@tabler/icons-vue";
 import NavLink from "@/Components/NavLink.vue";
-import NavLinkVoid from "@/Components/NavLinkVoid.vue";
-import {IconMap} from "@tabler/icons-vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils";
 import ModalEnviarOcorrencia from "./ModalEnviarOcorrencia.vue";
 import ModalVisualizarOcorrenciaHistorico
@@ -99,7 +93,7 @@ const enviarOcorrencia = (item) => {
                     </template>
                 </ModelSearchFormAllColumns>
                 <Table
-                    :columns="['ID Ocorrência', 'Intensidade Ocorrência', 'Data da Ocorrência', 'Data fim', 'Ocorrênia anterior', 'Prazo correção', 'Lote', 'Construtora', 'Status Atendimento', 'Envio', 'Ação']"
+                    :columns="['ID Ocorrência', 'Intensidade Ocorrência', 'Data da Ocorrência', 'Data fim', 'Ocorrência anterior', 'Prazo correção', 'Lote', 'Construtora', 'Status aprovação', 'Status Atendimento', 'Envio', 'Ação']"
                     :records="ocorrencias" table-class="table-hover">
                     <template #body="{ item }">
                         <tr>
@@ -111,6 +105,7 @@ const enviarOcorrencia = (item) => {
                             <td>-</td>
                             <td>{{ item.lote?.nome_id }}</td>
                             <td>{{ item.lote?.empresa }}</td>
+                            <td>-</td>
                             <td>{{ item.status }}</td>
                             <td>{{ item.envio_empresa }}</td>
                             <td>
