@@ -50,23 +50,23 @@ class ResultadoService extends BaseModelService
 
     public function storeAnalises(array $request): array
     {
-        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $request['fk_resultado'] . '_' . $request['fk_parametro'] . '.png';
-        Storage::disk()->put($path, $request['graf_analise_parametro']);
+        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $request['resultado_id'] . '_' . $request['parametro_id'] . '.png';
+        Storage::disk()->put($path, $request['imagem']);
 
         return $this->dataManagement->create(entity: $this->modelClassAnalise, infos: [
             ...$request,
-            'graf_analise_parametro' => str_replace("public\\", "", $path)
+            'caminho' => str_replace("public\\", "", $path)
         ]);
     }
 
     public function storeAnaliseIqa(array $request): array
     {
-        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['fk_resultado'] . '.png';
-        Storage::disk()->put($path, $request['graf_analise_iqa']);
+        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['resultado_id'] . '.png';
+        Storage::disk()->put($path, $request['imagem']);
 
         return $this->dataManagement->create(entity: $this->modelClassAnaliseIqa, infos: [
             ...$request,
-            'graf_analise_iqa' => str_replace("public\\", "", $path)
+            'caminho' => str_replace("public\\", "", $path)
         ]);
     }
 
@@ -90,8 +90,8 @@ class ResultadoService extends BaseModelService
     public function updateOutraAnalise(array $request): array
     {
         if ($outraAnalise = ServicoPmqaResultadoOutraAnalise::find($request['id'])) {
-            if (isset($outraAnalise->caminho_arquivo)) {
-                Storage::delete('public' . DIRECTORY_SEPARATOR . $outraAnalise->caminho_arquivo);
+            if ($outraAnalise->caminho) {
+                Storage::delete('public' . DIRECTORY_SEPARATOR . $outraAnalise->caminho);
             }
         }
 
@@ -174,7 +174,7 @@ class ResultadoService extends BaseModelService
         return $this->dataManagement->delete(entity: $this->modelClassOutraAnalise, id: $outra_analise->id);
     }
 
-    public function getRandomColor()
+    public function getRandomColor(): string
     {
         $letters = '0123456789ABCDEF';
         $color = '#';
@@ -184,19 +184,16 @@ class ResultadoService extends BaseModelService
         return $color;
     }
 
-    public function resultado($resultado)
+    public function resultado($resultado): array
     {
         $parametros = ServicoPmqaParametro::all();
         $resultado->load([
             'analises',
             'analise_iqa',
             'outras_analises',
-            'campanhas.pontos',
-            'campanhas.campanha_pontos.ponto',
-            'campanhas.campanha_pontos.medicao.parametros'
-//            'campanhas.medicoes.ponto_medicao',
-//            'campanhas.medicoes.lista_parametro.parametro_lista',
-//            'campanhas.pontos.lista.parametros_vinculados.medicao'
+            'campanhas.medicoes.ponto_medicao',
+            'campanhas.medicoes.lista_parametro.parametro_lista',
+            'campanhas.pontos.lista.parametros_vinculados.medicao'
         ]);
 
         $chartDataIqa = [

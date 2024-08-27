@@ -59,12 +59,12 @@
                                 </span>
                             </p>
                         </td>
-                        <td>{{ item.numero_contrato }}</td>
-                        <td>{{ formatarCnpj(item.cnpj) }}</td>
+                        <td class="text-center">{{ item.numero_contrato }}</td>
+                        <td class="text-center">{{ formatarCnpj(item.cnpj) }}</td>
                         <td>{{ item.contratada }}</td>
                         <td>{{ item.processo_sei }}</td>
-                        <td>{{ item.situacao }}</td>
-                        <td>
+                        <td class="text-center">{{ item.situacao }}</td>
+                        <td class="text-center">
                             <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
                                     data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
                                 <IconDots/>

@@ -83,12 +83,12 @@
                                        :href="route('contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
-                                    <a class="dropdown-item"
+                                    <a class="dropdown-item" v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4"
                                        :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
                                         Editar
                                     </a>
                                     <a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)"
-                                       v-if="item.status_aprovacao === 1">
+                                       v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4">
                                         Excluir
                                     </a>
                                     <a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"

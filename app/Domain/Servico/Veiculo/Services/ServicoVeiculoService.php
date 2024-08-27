@@ -38,4 +38,19 @@ class ServicoVeiculoService extends BaseModelService
 
         return ['request' => $response];
     }
+
+    public static function getVeiculoServico($servicoId)
+    {
+        return ServicoVeiculo::select([
+            'servico_veiculo.id',
+            'veiculos.id AS id_veiculo',
+            'codv.codigo',
+            'codv.descricao',
+            'veiculos.obs'
+        ])
+            ->join('veiculos', 'veiculos.id', '=', 'servico_veiculo.id_veiculo')
+            ->join('codigo_veiculos as codv', 'codv.id', '=', 'veiculos.cod_veiculos')
+            ->where('id_servico', $servicoId)
+            ->get();
+    }
 }

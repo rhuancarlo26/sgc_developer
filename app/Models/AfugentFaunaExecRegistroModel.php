@@ -14,5 +14,18 @@ class AfugentFaunaExecRegistroModel extends Model
 
     protected $guarded = ['id', 'created_at'];
 
+    public function formaRegistro()
+    {
+        return $this->belongsTo(AfugentFaunaFormaRegistroModel::class, 'id_forma_registro');
+    }
 
+    public function tipoRegistro()
+    {
+        return $this->belongsTo(AfugentFaunaTipoRegistroModel::class, 'id_tipo_registro');
+    }
+
+    public function destinacaoRegistro()
+    {
+        return $this->belongsTo(AfugentFaunaDestinacaoRegistroModel::class, 'id_destinacao_registro');
+    }
 }

@@ -59,7 +59,7 @@ class LicencaService extends BaseModelService
         return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
     }
 
-    public function storeDocumento($documento, $licenca_id)
+    public function storeDocumento($documento, $licenca_id): array
     {
         try {
             if ($documento->isvalid()) {
@@ -83,5 +83,21 @@ class LicencaService extends BaseModelService
         } catch (\Exception $th) {
             return ['type' => 'error', 'content' => $th->getMessage()];
         }
+    }
+
+    public function getSumArea(array $licencaIds)
+    {
+        return $this->model
+            ->selectRaw('SUM(in_app) as in_app, SUM(out_app) as out_app')
+            ->whereIn('id', $licencaIds)
+            ->first();
+    }
+
+    public function getSumTotalASV(array $licencaIds)
+    {
+        return $this->model
+            ->selectRaw('SUM(volume) as volume')
+            ->whereIn('id', $licencaIds)
+            ->first();
     }
 }
