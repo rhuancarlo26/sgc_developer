@@ -14,12 +14,12 @@ class LicencaSegmento extends Model
     protected $primaryKey = 'idlicenca_br';
     protected $guarded = ['idlicenca_br', 'created_at'];
 
-    public function uf_inicial_rel(): BelongsTo
+    public function uf_inicial(): BelongsTo
     {
         return $this->belongsTo(Uf::class, 'uf_inicial');
     }
 
-    public function uf_final_rel(): BelongsTo
+    public function uf_final(): BelongsTo
     {
         return $this->belongsTo(Uf::class, 'uf_final');
     }

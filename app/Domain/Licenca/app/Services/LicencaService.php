@@ -59,7 +59,7 @@ class LicencaService extends BaseModelService
         return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
     }
 
-    public function storeDocumento($documento, $licenca_id)
+    public function storeDocumento($documento, $licenca_id): array
     {
         try {
             if ($documento->isvalid()) {

@@ -17,7 +17,7 @@ class UpdateLicencaController extends Controller
     {
         $post = [
             ...$request->all(),
-            'tipo' => $request->tipo_licenca['id']
+            'tipo' => $request->tipo['id']
         ];
 
         if ($post['tipo'] !== 3) {
