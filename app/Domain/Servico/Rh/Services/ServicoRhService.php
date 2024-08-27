@@ -6,6 +6,7 @@ use App\Models\ServicoRh;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Support\Facades\DB;
 
 class ServicoRhService extends BaseModelService
 {
@@ -36,5 +37,17 @@ class ServicoRhService extends BaseModelService
         }
 
         return ['request' => $response];
+    }
+
+    public static function getRhServico($servicoId)
+    {
+        return ServicoRh::select([
+            'servico_rh.id',
+            DB::raw("(select GROUP_CONCAT(foto.id SEPARATOR ',') from rh_arquivo as foto where rh.id = foto.cod_rh) as fotos"),
+            'rh.*'
+        ])
+            ->join('rh', 'rh.id', '=', 'servico_rh.id_rh')
+            ->where('id_servico', $servicoId)
+            ->get();
     }
 }

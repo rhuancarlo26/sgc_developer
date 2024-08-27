@@ -12,6 +12,7 @@ use App\Shared\Traits\Searchable;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class PlanoSupressaoService extends BaseModelService
 {
@@ -69,4 +70,16 @@ class PlanoSupressaoService extends BaseModelService
             ->first();
     }
 
+    public static function getPlanoSupressaoServico($servicoId)
+    {
+        return PlanoSupressao::select([
+            'plano_supressao.*',
+            'a.nome_arquivo',
+            DB::raw('DATE_FORMAT(plano_supressao.dt_inicial, "%d/%m/%Y") as dt_inicialF'),
+            DB::raw('DATE_FORMAT(plano_supressao.dt_final, "%d/%m/%Y") as dt_finalF')
+        ])
+            ->leftJoin('arquivos as a', 'plano_supressao.arquivo_id', '=', 'a.id')
+            ->where('plano_supressao.servico_id', $servicoId)
+            ->get();
+    }
 }
