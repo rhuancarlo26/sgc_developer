@@ -29,7 +29,7 @@
 
             <!-- Pesquisa-->
             <ModelSearchForm :columns="[
-                'tipo_licenca.sigla',
+                'tipo.sigla',
                 'numero_licenca',
                 'empreendimento',
                 'data_emissao',
