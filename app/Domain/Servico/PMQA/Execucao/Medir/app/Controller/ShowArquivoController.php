@@ -12,8 +12,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class ShowArquivoController extends Controller
 {
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPontoMedicaoArquivo $arquivo): BinaryFileResponse
-  {
-    return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . $arquivo->caminho);
-  }
+    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPontoMedicaoArquivo $arquivo): BinaryFileResponse
+    {
+        return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . $arquivo->caminho_arquivo);
+    }
 }

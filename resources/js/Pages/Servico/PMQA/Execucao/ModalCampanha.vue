@@ -19,7 +19,7 @@ const modalCampanha = ref();
 
 const form = useForm({
     id: null,
-    servico_id: props.servico.id,
+    fk_servico: props.servico.id,
     nome_campanha: null,
     dt_inicio: null,
     dt_fim: null,
@@ -117,7 +117,8 @@ defineExpose({abrirModal});
                         <tr v-for="ponto in pontosFiltrados" :key="ponto.id">
                             <td class="text-center">
                                 <label class="form-check">
-                                    <input class="form-check-input" type="checkbox" :value="ponto.id" v-model="form.pontos">
+                                    <input class="form-check-input" type="checkbox" :value="ponto.id"
+                                           v-model="form.pontos">
                                     <span class="form-check-label">{{ ponto.id }}</span>
                                 </label>
                             </td>

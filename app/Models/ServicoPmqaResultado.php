@@ -9,26 +9,26 @@ class ServicoPmqaResultado extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_resultados';
+    protected $table = 'pmqa_resultado';
     protected $guarded = ['id', 'created_at'];
 
     public function campanhas()
     {
-        return $this->belongsToMany(ServicoPmqaCampanha::class, 'servico_pmqa_resultado_campanhas', 'resultado_id', 'campanha_id');
+        return $this->belongsToMany(ServicoPmqaCampanha::class, 'pmqa_resultado_campanhas', 'fk_resultado', 'fk_campanha');
     }
 
     public function analises()
     {
-        return $this->hasMany(ServicoPmqaResultadoAnaliseParametro::class, 'resultado_id');
+        return $this->hasMany(ServicoPmqaResultadoAnaliseParametro::class, 'fk_resultado');
     }
 
     public function analise_iqa()
     {
-        return $this->hasOne(ServicoPmqaResultadoAnaliseIqa::class, 'resultado_id');
+        return $this->hasOne(ServicoPmqaResultadoAnaliseIqa::class, 'fk_resultado');
     }
 
     public function outras_analises()
     {
-        return $this->hasMany(ServicoPmqaResultadoOutraAnalise::class, 'resultado_id');
+        return $this->hasMany(ServicoPmqaResultadoOutraAnalise::class, 'fk_resultado');
     }
 }
