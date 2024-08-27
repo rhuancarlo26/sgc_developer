@@ -45,4 +45,12 @@ class ResultadoService extends BaseModelService
         ], id: $request['id']);
     }
 
+    public function getByServico(Servicos $servico): array|\Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model
+            ->with('relatorios')
+            ->where('servico_id', $servico->id)
+            ->get();
+    }
+
 }

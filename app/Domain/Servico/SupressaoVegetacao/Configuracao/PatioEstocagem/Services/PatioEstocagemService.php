@@ -14,7 +14,7 @@ use App\Shared\Traits\ShapefileHandler;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 
 class PatioEstocagemService extends BaseModelService
 {
@@ -75,5 +75,19 @@ class PatioEstocagemService extends BaseModelService
             return true;
         }
         return false;
+    }
+
+    public static function getPatioEstocagemServico($servicoId)
+    {
+        return PatioEstocagem::select([
+            'patio_estocagem.*',
+            'l.numero_licenca',
+            'tp.nome as tipo_patio',
+            DB::raw('DATE_FORMAT(patio_estocagem.created_at, "%d/%m/%Y") as dt_cadastroF'),
+        ])
+            ->join('licencas as l', 'l.id', '=', 'patio_estocagem.licenca_id')
+            ->join('tipo_patio as tp', 'tp.id', '=', 'patio_estocagem.tipo_patio_id')
+            ->where('servico_id', $servicoId)
+            ->get();
     }
 }
