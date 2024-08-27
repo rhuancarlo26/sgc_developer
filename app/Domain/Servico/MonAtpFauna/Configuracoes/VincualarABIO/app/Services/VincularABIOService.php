@@ -2,17 +2,12 @@
 
 namespace App\Domain\Servico\MonAtpFauna\Configuracoes\VincualarABIO\app\Services;
 
-use App\Domain\Servico\PMQA\Configuracao\Ponto\Imports\PMQAPontoImport;
 use App\Models\Licenca;
 use App\Models\ServicoMonAtpFaunaVincularABIO;
-use App\Models\ServicoPmqaPonto;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 
 class VincularABIOService extends BaseModelService
 {
@@ -24,7 +19,7 @@ class VincularABIOService extends BaseModelService
   {
     return [
       'vinculacoes' => $this->searchAllColumns(...$searchParams)
-        ->with(['licenca.tipo'])
+        ->with(['licenca.tipo', 'rets' => fn($query) => $query->orderBy('id', 'desc')])
         ->where('fk_servico', $servico->id)
         ->paginate()
         ->appends($searchParams),

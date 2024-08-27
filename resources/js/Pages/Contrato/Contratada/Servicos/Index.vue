@@ -1,36 +1,3 @@
-<script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import Breadcrumb from "@/Components/Breadcrumb.vue";
-import Table from "@/Components/Table.vue";
-import ModelSearchForm from "@/Components/ModelSearchForm.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
-import Navbar from "../Navbar.vue";
-import { IconDots } from "@tabler/icons-vue";
-import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
-import ModalVisualizarServico from "./ModalVisualizarServico.vue";
-import { ref } from "vue";
-
-defineProps({
-    contrato: Object,
-    servicos: Object
-});
-
-const modalVisualizarLicenca = ref();
-const modalVisualizarServico = ref();
-
-const abrirModalLicenca = (servico) => {
-    modalVisualizarLicenca.value.abrirModal(servico);
-}
-
-const abrirModalServico = (servico) => {
-    modalVisualizarServico.value.abrirModal(servico);
-}
-
-const deleteServico = (servico_id) => {
-    router.delete(route('contratos.contratada.servicos.delete', servico_id));
-}
-
-</script>
 
 <template>
 
@@ -104,7 +71,7 @@ const deleteServico = (servico_id) => {
                                        :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
-                                    <a v-else-if="item.servico_tipo_id === 3" class="dropdown-item"
+                                    <a v-else-if="item.servico === 3" class="dropdown-item"
                                         :href="route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
