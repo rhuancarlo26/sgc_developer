@@ -9,12 +9,12 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id'            => ['required'],
-            'servico_id'    => ['required'],
+            'id' => ['required'],
+            'fk_servico' => ['required'],
             'nome_campanha' => ['required'],
-            'dt_inicio'     => ['required'],
-            'dt_fim'        => ['required'],
-            'pontos'        => []
+            'dt_inicio' => ['required'],
+            'dt_fim' => ['required'],
+            'pontos' => []
         ];
     }
 
