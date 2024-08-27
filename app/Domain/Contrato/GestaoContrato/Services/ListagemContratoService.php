@@ -17,7 +17,7 @@ class ListagemContratoService extends BaseModelService
 
     protected string $modelClass = Contrato::class;
 
-    public function ListagemContratos($tipo, $searchParams)
+    public function ListagemContratos($tipo, $searchParams): array
     {
         return [
             'contratos' => $this->searchAllColumns(...$searchParams)
@@ -28,11 +28,11 @@ class ListagemContratoService extends BaseModelService
         ];
     }
 
-    public function create($contrato)
+    public function create($contrato): array
     {
-        $ufs = Cache::rememberForever('ufs', fn () => Uf::all());
+        $ufs      = Cache::rememberForever('ufs', fn () => Uf::all());
         $rodovias = Cache::rememberForever('rodovias', fn () => Rodovia::all());
-        $tipos = Cache::rememberForever('contrato_tipos', fn () => ContratoTipo::all());
+        $tipos    = Cache::rememberForever('contrato_tipos', fn () => ContratoTipo::all());
 
         if ($contrato) {
             $contrato->load([
@@ -45,20 +45,21 @@ class ListagemContratoService extends BaseModelService
         }
 
         return [
-            'ufs' => $ufs,
+            'ufs'      => $ufs,
             'rodovias' => $rodovias,
-            'tipos' => $tipos,
+            'tipos'    => $tipos,
             'contrato' => $contrato
         ];
     }
 
-    public function store($request)
+    public function store($request): array
     {
         return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
     }
 
-    public function update($request)
+    public function update($request): array
     {
         return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
     }
+
 }

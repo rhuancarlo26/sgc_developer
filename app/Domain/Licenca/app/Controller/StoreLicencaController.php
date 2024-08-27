@@ -18,15 +18,15 @@ class StoreLicencaController extends Controller
     {
         $post = [
             ...$request->all(),
-            'tipo' => $request->tipo_licenca['id']
+            'tipo' => $request->tipo['id']
         ];
 
         if ($post['tipo'] !== 3) {
-            $post['in_app'] = null;
-            $post['out_app'] = null;
+            $post['in_app']    = null;
+            $post['out_app']   = null;
             $post['total_app'] = null;
-            $post['volume'] = null;
-            $post['sinaflor'] = null;
+            $post['volume']    = null;
+            $post['sinaflor']  = null;
         }
 
         $response = $this->listagemLicenca->store(request: $post);
