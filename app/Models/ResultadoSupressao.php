@@ -8,6 +8,7 @@ use App\Domain\Servico\SupressaoVegetacao\Resultado\Strategy\Periodo\SemestralSt
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ResultadoSupressao extends Model
@@ -44,6 +45,11 @@ class ResultadoSupressao extends Model
         return Attribute::make(
             get: fn() => (new SemestralStrategy())->getDate($this->dt_inicio)
         );
+    }
+
+    public function relatorios(): HasMany
+    {
+        return $this->hasMany(SupressaoRelatorio::class, 'fk_resultado');
     }
 
 }
