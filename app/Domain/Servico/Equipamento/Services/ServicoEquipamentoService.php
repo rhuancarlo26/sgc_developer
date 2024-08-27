@@ -40,4 +40,24 @@ class ServicoEquipamentoService extends BaseModelService
             'request' => $response
         ];
     }
+
+    public static function getEquipamentoServico($servicoId)
+    {
+        return ServicoEquipamento::select([
+            'servico_equipamento.id',
+            'equipamentos.id AS id_equipamento',
+            'equipamentos.nome',
+            'equipamentos.tipo',
+            'equipamentos.numero_interno',
+            'equipamentos.modelo',
+            'equipamentos.numero_serie',
+            'equipamentos.espec_tecnica',
+            'equipamentos.obs',
+            'equipamentos.numero_patrimonio',
+            'equipamentos.cod_sicro',
+        ])
+            ->join('equipamentos', 'equipamentos.id', '=', 'servico_equipamento.id_equipamento')
+            ->where('id_servico', $servicoId)
+            ->get();
+    }
 }

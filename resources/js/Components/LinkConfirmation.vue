@@ -34,6 +34,12 @@ const show = (request) => {
     // On Confirm...
     confirmButton.value.addEventListener('click', (e) => {
 
+        if(typeof request === 'function') {
+            request();
+            modal.hide();
+            return false;
+        }
+
         // Wait for the modal to be closed before making the request, so it doesn't interrupt the modal closing animation
         modal._element.addEventListener(
             'hidden.bs.modal',
@@ -53,6 +59,7 @@ const show = (request) => {
 
 }
 
+defineExpose({show});
 
 </script>
 

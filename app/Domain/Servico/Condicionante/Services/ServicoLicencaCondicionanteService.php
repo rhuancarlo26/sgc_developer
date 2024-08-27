@@ -45,4 +45,21 @@ class ServicoLicencaCondicionanteService extends BaseModelService
       'request' => $response
     ];
   }
+
+    public static function getLicencaCondicionanteServico($servicoId)
+    {
+        return ServicoLicencaCondicionante::select([
+            'servico_licenca_condicionante.id',
+            'servico_licenca_condicionante.vigente',
+            'licencas.chave',
+            'licencas.numero_licenca',
+            'condicionantes.numero',
+            'condicionantes.titulo_condicionante',
+            'condicionantes.descricao'
+        ])
+            ->join('licencas', 'licencas.id', '=', 'servico_licenca_condicionante.id_licenca')
+            ->join('condicionantes', 'condicionantes.id', '=', 'servico_licenca_condicionante.id_condicionante')
+            ->where('id_servico', $servicoId)
+            ->get();
+    }
 }

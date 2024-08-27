@@ -12,6 +12,7 @@ use App\Models\ServicoTipo;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Support\Facades\DB;
 
 class ServicoService extends BaseModelService
 {
@@ -65,13 +66,13 @@ class ServicoService extends BaseModelService
         }
 
         return [
-            'tipos'        => $tipos,
-            'temas'        => $temas,
-            'licencasLi'   => $licencasLi,
-            'rhs'          => $rhs,
-            'veiculos'     => $veiculos,
+            'tipos' => $tipos,
+            'temas' => $temas,
+            'licencasLi' => $licencasLi,
+            'rhs' => $rhs,
+            'veiculos' => $veiculos,
             'equipamentos' => $equipamentos,
-            'servico'      => $servico
+            'servico' => $servico
         ];
     }
 
@@ -92,4 +93,55 @@ class ServicoService extends BaseModelService
         return ['request' => $response['request']];
     }
 
+    public static function getServicos($id = false, $contratoId = null)
+    {
+        $query = Servicos::select([
+            'servicos.id',
+            'servicos.chave',
+            'servicos.introducao',
+            'servicos.justificativa',
+            'servicos.objetivos',
+            'servicos.metodologia',
+            'servicos.publico_alvo',
+            'servicos.tema_servico',
+            'servicos.servico',
+            'servicos.especificacao',
+            'p.nome As servico_nome',
+            'status_aprovacao',
+            'sp.id as id_parecer',
+            'sp.parecer',
+            DB::raw("DATE_FORMAT(sp.created_at, '%d/%m/%Y') as data_parecer"),
+            DB::raw("'Serviço' AS tipo"),
+            DB::raw('status_aprovacao AS fk_status'),
+            't.nome_tema',
+            DB::raw('(
+                    SELECT
+                        CONCAT(IF(LENGTH(tl.sigla), tl.sigla, "N/A"), " - ", IF(LENGTH(l.numero_licenca), l.numero_licenca, "N/A"), " - ", IF(LENGTH(c.titulo_condicionante), c.titulo_condicionante, "N/A"), "_", IF(LENGTH(c.descricao), c.descricao, "N/A"))
+                    FROM servico_licenca_condicionante AS slc
+
+                    JOIN licencas AS l on slc.id_licenca = l.id
+                    JOIN tipo_licencas AS tl on l.tipo = tl.id
+                    JOIN condicionantes AS c on slc.id_condicionante = c.id
+                    WHERE slc.id_servico = servicos.id
+                    ORDER BY slc.id DESC
+                    LIMIT 1
+                ) as licenca')
+        ])
+            ->join('programas AS p', 'p.id', '=', 'servicos.servico')
+            ->join('temas AS t', 't.id', '=', 'p.cod_tema')
+            ->leftJoin('servico_parecer AS sp', 'sp.fk_servico', '=', 'servicos.id')
+//            ->when($contratoId, fn($query) => $query->where('id_contrato', $id))
+            ->orderBy('servicos.id');
+
+        if ($id) {
+            $query->where('servicos.id', $id);
+            return $query->first();
+        }
+
+//        if (session()->get('auth')['id_perfil'] == '2' || session()->get('auth')['id_perfil'] == '4') {
+//            $query->whereIn('status_aprovacao', [2, 3, 4]);
+//        }
+
+        return $query->get();
+    }
 }
