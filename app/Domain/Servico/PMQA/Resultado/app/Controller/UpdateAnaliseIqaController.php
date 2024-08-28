@@ -13,26 +13,26 @@ use Illuminate\Http\Request;
 
 class UpdateAnaliseIqaController extends Controller
 {
-  public function __construct(private readonly ResultadoService $resultadoService)
-  {
-  }
+    public function __construct(private readonly ResultadoService $resultadoService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado, UpdateAnaliseIqaRequest $request): RedirectResponse
-  {
-    $image = $request->validated('imagem');
+    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado, UpdateAnaliseIqaRequest $request): RedirectResponse
+    {
+        $image = $request->validated('graf_analise_iqa');
 
-    $image = str_replace('data:image/png;base64,', '', $image);
-    $image = str_replace(' ', '+', $image);
+        $image = str_replace('data:image/png;base64,', '', $image);
+        $image = str_replace(' ', '+', $image);
 
-    $imageData = base64_decode($image);
+        $imageData = base64_decode($image);
 
-    $post = [
-      ...$request->validated(),
-      'imagem' => $imageData
-    ];
+        $post = [
+            ...$request->validated(),
+            'graf_analise_iqa' => $imageData
+        ];
 
-    $response = $this->resultadoService->updateAnaliseIqa($post);
+        $response = $this->resultadoService->updateAnaliseIqa($post);
 
-    return to_route('contratos.contratada.servicos.pmqa.resultado.resultado', ['contrato' => $contrato->id, 'servico' => $servico->id, 'resultado' => $resultado->id])->with('message', $response['request']);
-  }
+        return to_route('contratos.contratada.servicos.pmqa.resultado.resultado', ['contrato' => $contrato->id, 'servico' => $servico->id, 'resultado' => $resultado->id])->with('message', $response['request']);
+    }
 }

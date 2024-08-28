@@ -17,6 +17,7 @@ class Licenca extends Model
     protected $guarded = ['id', 'created_at'];
     protected $appends = ['iniciais', 'finais', 'brs'];
 
+
     public function tipo(): BelongsTo
     {
         return $this->belongsTo(LicencaTipo::class, 'tipo');

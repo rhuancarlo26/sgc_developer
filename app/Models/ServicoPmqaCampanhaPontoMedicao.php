@@ -10,9 +10,9 @@ class ServicoPmqaCampanhaPontoMedicao extends Model
 {
     use HasFactory;
 
-    protected $table   = 'exec_ponto_medicao';
+    protected $table = 'exec_ponto_medicao';
     protected $guarded = ['id', 'created_at'];
-    protected $casts   = ['sem_coleta' => 'bool'];
+    protected $casts = ['medido' => 'bool'];
 
     public function parametros()
     {

@@ -76,7 +76,7 @@ const rodoviasUnicas = computed(() => {
 
 const ufsDaRodovia = computed(() => {
   if (form.rodovia) {
-    const ufIdsDaRodoviaSelecionada = props.rodovias.filter(br => br.rodovia === form.rodovia).map(br => br.estados_id);
+    const ufIdsDaRodoviaSelecionada = props.rodovias.filter(br => br.rodovia === form.rodovia).map(br => br.uf_id);
 
     return props.ufs.filter(uf => ufIdsDaRodoviaSelecionada.includes(uf.id));
   } else {
