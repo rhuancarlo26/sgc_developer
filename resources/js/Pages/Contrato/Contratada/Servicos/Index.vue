@@ -1,3 +1,4 @@
+
 <template>
 
     <Head :title="`${contrato.contratada.slice(0, 10)}...`"/>
@@ -68,6 +69,10 @@
                                     </a>
                                     <a v-if="item.servico === 1 && item.status_aprovacao === 3" class="dropdown-item"
                                        :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
+                                        Gerenciar
+                                    </a>
+                                    <a v-else-if="item.servico === 3" class="dropdown-item"
+                                        :href="route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.index', { contrato: contrato.id, servico: item.id })">
                                         Gerenciar
                                     </a>
                                     <a v-else-if="item.servico === 2 && item.status_aprovacao === 3"
