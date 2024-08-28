@@ -21,10 +21,9 @@ const props = defineProps({
 
 const form = useForm({
     id: null,
-    campanha_id: props.campanha.id,
-    campanha_ponto_id: props.ponto.id,
-    sem_coleta: false,
-    justificativa: null,
+    fk_campanha_ponto: props.ponto.id,
+    medido: false,
+    observacao: null,
     iqa: null,
     parametros: [],
     arquivo: null
@@ -33,13 +32,14 @@ const form = useForm({
 onMounted(() => {
     if (props.ponto.medicao) {
         form.id = props.ponto.medicao.id;
-        form.sem_coleta = props.ponto.medicao.sem_coleta;
+        form.medido = props.ponto.medicao.medido;
         form.iqa = props.ponto.medicao.iqa;
-        form.justificativa = props.ponto.medicao.justificativa;
-
+        form.observacao = props.ponto.medicao.observacao;
+        console.log('ponto', props.ponto.medicao);
         if (props.ponto.medicao.parametros.length) {
             props.ponto.medicao.parametros.forEach(parametro => {
-                form.parametros[parametro.lista_parametro_id] = parametro.medicao;
+                console.log('parametro', parametro)
+                form.parametros[parametro.fk_parametro] = parametro.medicao;
             });
         }
     }
@@ -103,13 +103,13 @@ const saveArquivo = () => {
                 <div class="row mb-4">
                     <div class="col d-flex align-self-end">
                         <label class="form-check">
-                            <input class="form-check-input" type="checkbox" v-model="form.sem_coleta">
+                            <input class="form-check-input" type="checkbox" v-model="form.medido">
                             <span class="form-check-label">Não foi possível realizar a coleta</span>
                         </label>
-                        <InputError :message="form.errors.sem_coleta"/>
+                        <InputError :message="form.errors.medido"/>
                     </div>
                 </div>
-                <div v-if="!form.sem_coleta" class="row">
+                <div v-if="!form.medido" class="row">
                     <div class="table-responsive">
                         <table class="table card-table table-bordered">
                             <thead>
@@ -132,7 +132,8 @@ const saveArquivo = () => {
                                 <td>{{ vinculado.parametro.unidade }}</td>
                                 <td>{{ vinculado.parametro.limite ? vinculado.parametro.classe_2 : 'Sem limite' }}</td>
                                 <td>
-                                    <input type="text" class="form-control" v-model="form.parametros[vinculado.id]">
+                                    <input type="text" class="form-control"
+                                           v-model="form.parametros[vinculado.parametro.id]">
                                 </td>
                             </tr>
                             </tbody>
@@ -142,16 +143,16 @@ const saveArquivo = () => {
                 <div v-else class="row">
                     <div class="col">
                         <InputLabel value="Justificativa" for="transporte_amostra"/>
-                        <textarea class="form-control" name="justificativa" id="justificativa" rows="5"
-                                  v-model="form.justificativa"></textarea>
-                        <InputError :message="form.errors.justificativa"/>
+                        <textarea class="form-control" name="observacao" id="observacao" rows="5"
+                                  v-model="form.observacao"></textarea>
+                        <InputError :message="form.errors.observacao"/>
                     </div>
                 </div>
                 <div class="d-flex justify-content-end mt-4">
                     <NavButton @click="saveMedicao()" type-button="success" :icon="IconDeviceFloppy"
                                :title="form.id ? 'Alterar' : 'Salvar'"/>
                 </div>
-                <div v-if="ponto.medicao?.id && !form.sem_coleta">
+                <div v-if="ponto.medicao?.id && !form.medido">
                     <hr>
                     <div class="row">
                         <div class="col">

@@ -11,4 +11,5 @@ class ServicoPmqaResultadoAnaliseParametro extends Model
 
     protected $table = 'pmqa_resultado_analises_parametros';
     protected $guarded = ['id', 'created_at'];
+    public $timestamps = false;
 }

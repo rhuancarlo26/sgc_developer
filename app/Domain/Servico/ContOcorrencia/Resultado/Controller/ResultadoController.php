@@ -22,7 +22,7 @@ class ResultadoController extends Controller
 
         return Inertia::render('Servico/ContOcorr/Resultado/Resultado', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo']),
+            'servico' => $servico->load(['tipo', 'cont_ocorr_parecer_configuracao']),
             'resultado' => $resultado->load(['analise', 'outras_analises']),
             ...$response
         ]);

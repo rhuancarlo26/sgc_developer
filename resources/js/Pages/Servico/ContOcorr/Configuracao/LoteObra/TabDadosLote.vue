@@ -2,18 +2,18 @@
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import NavButton from "@/Components/NavButton.vue";
-import { useForm } from "@inertiajs/vue3";
-import { useToast } from "vue-toastification";
+import {useForm} from "@inertiajs/vue3";
+import {useToast} from "vue-toastification";
 import axios from "axios";
-import { computed, onMounted } from "vue";
-import { IconDeviceFloppy } from "@tabler/icons-vue";
+import {computed, onMounted} from "vue";
+import {IconDeviceFloppy} from "@tabler/icons-vue";
 
 const toast = useToast();
 const props = defineProps({
-    contrato: { type: Object },
-    servico: { type: Object },
-    lote: { type: Object },
-    rodovias: { type: Array }
+    contrato: {type: Object},
+    servico: {type: Object},
+    lote: {type: Object},
+    rodovias: {type: Array}
 });
 
 const form = useForm({
@@ -33,9 +33,9 @@ const form = useForm({
     km_final: null,
     estaca_inicial: null,
     estaca_final: null,
-    lat_inicial: null,
+    lat_inical: null,
     lat_final: null,
-    long_inicial: null,
+    long_inical: null,
     long_final: null,
     ...props.lote
 });
@@ -109,7 +109,7 @@ const brs = computed(() => {
 <template>
     <div class="row mb-4">
         <div class="col">
-            <InputLabel value="Tem contrato de obra?" for="temContrato" />
+            <InputLabel value="Tem contrato de obra?" for="temContrato"/>
             <div>
                 <label class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" :value="true" v-model="form.temContrato">
@@ -120,130 +120,130 @@ const brs = computed(() => {
                     <span class="form-check-label">Não</span>
                 </label>
             </div>
-            <InputError :message="form.errors.temContrato" />
+            <InputError :message="form.errors.temContrato"/>
         </div>
         <div class="col" v-if="form.temContrato === true">
-            <InputLabel value="Número do contrato" for="num_contrato" />
+            <InputLabel value="Número do contrato" for="num_contrato"/>
             <div class="row g-2">
                 <div class="col">
                     <input type="text" class="form-control" v-model="form.num_contrato">
                 </div>
                 <div class="col-auto">
                     <NavButton @click="getDadosContrato()"
-                        route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.importar"
-                        :param="{ contrato: props.contrato.id, servico: props.servico.id }" type-button="success"
-                        title="Buscar" />
+                               route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.importar"
+                               :param="{ contrato: props.contrato.id, servico: props.servico.id }" type-button="success"
+                               title="Buscar"/>
                 </div>
             </div>
         </div>
-        <InputError :message="form.errors.num_contrato" />
+        <InputError :message="form.errors.num_contrato"/>
     </div>
     <div class="row mb-4">
         <div class="col">
-            <InputLabel value="ID lote" for="nome_id" />
+            <InputLabel value="ID lote" for="nome_id"/>
             <input type="text" class="form-control" v-model="form.nome_id" disabled>
-            <InputError :message="form.errors.nome_id" />
+            <InputError :message="form.errors.nome_id"/>
         </div>
         <div class="col">
-            <InputLabel value="Nome lote" for="nome" />
+            <InputLabel value="Nome lote" for="nome"/>
             <input type="text" class="form-control" v-model="form.nome" :disabled="form.temContrato">
-            <InputError :message="form.errors.nome" />
+            <InputError :message="form.errors.nome"/>
         </div>
         <div class="col">
-            <InputLabel value="Trecho" for="rodovia" />
+            <InputLabel value="Trecho" for="rodovia"/>
             <select class="form-control form-select" v-model="form.rodovia">
                 <option v-for="rodovia in brs" :key="rodovia" :value="rodovia">{{
-                    `${rodovia.rodovia} - (${rodovia.uf.nome})`
-                }}
+                        `${rodovia.rodovia} - (${rodovia.uf.nome})`
+                    }}
                 </option>
             </select>
-            <InputError :message="form.errors.rodovia" />
+            <InputError :message="form.errors.rodovia"/>
         </div>
     </div>
     <div class="row mb-4">
         <div class="col">
-            <InputLabel value="Empresa/Consórcio" for="empresa" />
+            <InputLabel value="Empresa/Consórcio" for="empresa"/>
             <input type="text" class="form-control" v-model="form.empresa" :disabled="form.temContrato">
-            <InputError :message="form.errors.empresa" />
+            <InputError :message="form.errors.empresa"/>
         </div>
         <div class="col">
-            <InputLabel value="N° do contrato" for="num_contrato" />
+            <InputLabel value="N° do contrato" for="num_contrato"/>
             <input type="text" class="form-control" v-model="form.num_contrato" :disabled="form.temContrato">
-            <InputError :message="form.errors.num_contrato" />
+            <InputError :message="form.errors.num_contrato"/>
         </div>
         <div class="col">
-            <InputLabel value="Situação do contrato" for="situacao_contrato" />
+            <InputLabel value="Situação do contrato" for="situacao_contrato"/>
             <v-select :options="['ATIVO', 'PARALISADO', 'CONCLUIDO', 'RESCINDIDO', 'SEM CONTRATO']"
-                v-model="form.situacao_contrato" :disabled="form.temContrato">
+                      v-model="form.situacao_contrato" :disabled="form.temContrato">
                 <template #no-options="{}">
                     Nenhum registro encontrado.
                 </template>
             </v-select>
-            <InputError :message="form.errors.situacao_contrato" />
+            <InputError :message="form.errors.situacao_contrato"/>
         </div>
     </div>
     <div class="row mb-4">
         <div class="col">
-            <InputLabel value="Objeto do contrato" for="obj_contrato" />
+            <InputLabel value="Objeto do contrato" for="obj_contrato"/>
             <textarea class="form-control" rows="5" v-model="form.obj_contrato" :disabled="form.temContrato"></textarea>
-            <InputError :message="form.errors.obj_contrato" />
+            <InputError :message="form.errors.obj_contrato"/>
         </div>
     </div>
     <div class="row mb-4">
         <div class="col">
-            <InputLabel value="Fiscal do contrato" for="fiscal_contrato" />
+            <InputLabel value="Fiscal do contrato" for="fiscal_contrato"/>
             <input type="text" class="form-control" v-model="form.fiscal_contrato" :disabled="form.temContrato">
-            <InputError :message="form.errors.fiscal_contrato" />
+            <InputError :message="form.errors.fiscal_contrato"/>
         </div>
     </div>
     <div class="row mb-4">
         <div class="col">
-            <InputLabel value="KM inicial" for="km_inicial" />
+            <InputLabel value="KM inicial" for="km_inicial"/>
             <input type="text" class="form-control" v-model="form.km_inicial">
-            <InputError :message="form.errors.km_inicial" />
+            <InputError :message="form.errors.km_inicial"/>
         </div>
         <div class="col">
-            <InputLabel value="KM final" for="km_final" />
+            <InputLabel value="KM final" for="km_final"/>
             <input type="text" class="form-control" v-model="form.km_final">
-            <InputError :message="form.errors.km_final" />
+            <InputError :message="form.errors.km_final"/>
         </div>
         <div class="col">
-            <InputLabel value="Estaca inicial" for="estaca_inicial" />
+            <InputLabel value="Estaca inicial" for="estaca_inicial"/>
             <input type="text" class="form-control" v-model="form.estaca_inicial">
-            <InputError :message="form.errors.estaca_inicial" />
+            <InputError :message="form.errors.estaca_inicial"/>
         </div>
         <div class="col">
-            <InputLabel value="Estaca final" for="estaca_final" />
+            <InputLabel value="Estaca final" for="estaca_final"/>
             <input type="text" class="form-control" v-model="form.estaca_final">
-            <InputError :message="form.errors.estaca_final" />
+            <InputError :message="form.errors.estaca_final"/>
         </div>
     </div>
     <div class="row mb-4">
         <div class="col">
-            <InputLabel value="Latitude inicial" for="lat_inicial" />
-            <input type="text" class="form-control" v-model="form.lat_inicial">
-            <InputError :message="form.errors.lat_inicial" />
+            <InputLabel value="Latitude inicial" for="lat_inical"/>
+            <input type="text" class="form-control" v-model="form.lat_inical">
+            <InputError :message="form.errors.lat_inical"/>
         </div>
         <div class="col">
-            <InputLabel value="Latitude final" for="lat_final" />
+            <InputLabel value="Latitude final" for="lat_final"/>
             <input type="text" class="form-control" v-model="form.lat_final">
-            <InputError :message="form.errors.lat_final" />
+            <InputError :message="form.errors.lat_final"/>
         </div>
         <div class="col">
-            <InputLabel value="Longitude inicial" for="long_inicial" />
-            <input type="text" class="form-control" v-model="form.long_inicial">
-            <InputError :message="form.errors.long_inicial" />
+            <InputLabel value="Longitude inicial" for="long_inical"/>
+            <input type="text" class="form-control" v-model="form.long_inical">
+            <InputError :message="form.errors.long_inical"/>
         </div>
         <div class="col">
-            <InputLabel value="Longitude final" for="long_final" />
+            <InputLabel value="Longitude final" for="long_final"/>
             <input type="text" class="form-control" v-model="form.long_final">
-            <InputError :message="form.errors.long_final" />
+            <InputError :message="form.errors.long_final"/>
         </div>
     </div>
     <div class="row">
         <div class="col d-flex justify-content-end">
             <NavButton @click="salvarLote()" type-button="success" :icon="IconDeviceFloppy"
-                :title="form.id ? 'Alterar' : 'Salvar'" />
+                       :title="form.id ? 'Alterar' : 'Salvar'"/>
         </div>
     </div>
 </template>
