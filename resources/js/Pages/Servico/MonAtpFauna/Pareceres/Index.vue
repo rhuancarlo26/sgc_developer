@@ -6,7 +6,7 @@ import NavButton from "@/Components/NavButton.vue";
 import NavLink from "@/Components/NavLink.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
-import ModalVincularABIO from "./ModalVincularABIO.vue";
+// import ModalVincularABIO from "./ModalVincularABIO.vue";
 import { ref } from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconDots } from "@tabler/icons-vue";
@@ -85,7 +85,7 @@ const abrirModalVincularABIO = () => {
       </template>
     </Navbar>
 
-    <ModalVincularABIO :contrato="contrato" :servico="servico" :licencas="licencas" ref="modalVincularABIO" />
+<!--    <ModalVincularABIO :contrato="contrato" :servico="servico" :licencas="licencas" ref="modalVincularABIO" />-->
 
   </AuthenticatedLayout>
 </template>
