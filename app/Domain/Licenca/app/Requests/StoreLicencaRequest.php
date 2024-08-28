@@ -10,7 +10,7 @@ class StoreLicencaRequest extends FormRequest
   {
     return [
       'user_id'          => 'nullable',
-      'tipo_licenca'     => 'required',
+      'tipo'             => 'required',
       'numero_licenca'   => 'required',
       'modal'            => 'required',
       'data_emissao'     => 'required',

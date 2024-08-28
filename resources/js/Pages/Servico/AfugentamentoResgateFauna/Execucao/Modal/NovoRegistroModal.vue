@@ -8,7 +8,10 @@ import { useForm } from '@inertiajs/vue3';
 const props = defineProps({
     grupoAmostrado: { type: Array },
     frenteSupressao: { type: Array },
-    formaRegistro: { type: Array }
+    formaRegistro: { type: Array },
+    ufs: { type: Array },
+    statusConservacaoFederal: { type: Array },
+    statusConservacaoIucn: { type: Array },
 });
 
 const modalDetalhes = ref(null);
@@ -18,6 +21,7 @@ const servico = ref({});
 const abrirModal = (itemContrato, itemServico) => {
     contrato.value = itemContrato;
     servico.value = itemServico;
+    form.reset();
     modalDetalhes.value.getBsModal().show();
 }
 
@@ -88,6 +92,7 @@ const form = useForm({
     nome_local: '',
     coletado: '',
     n_registro_tombamento: '',
+    documento: null,
     id_status_conservacao_federal: null,
     id_status_conservacao_iucn: null,
 });
@@ -102,7 +107,7 @@ const salvar = () => {
             },
         });
     }
-return;
+
     form.post(route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.create', servico.value.id), {
         preserveScroll: true,
         onSuccess: () => {
@@ -116,21 +121,83 @@ const classeRegistro = ref([]);
 
 const classe = () => {
     if (form.id_grupo_amostrado === 1) {
+        classeRegistro.value = [];
         classeRegistro.value.push('Aves');
         form.classe = 'Aves';
     }
     if (form.id_grupo_amostrado === 2) {
+        classeRegistro.value = [];
         classeRegistro.value.push('Anfíbios');
-        classeRegistro.push('Répteis');
+        classeRegistro.value.push('Répteis');
     }
     if (form.id_grupo_amostrado === 3) {
+        classeRegistro.value = [];
         classeRegistro.value.push('Mamíferos');
         form.classe = 'Mamíferos';
     }
 }
 
+const tipoRegistro = ref([]);
+
+const formaTipoRegistro = () => {
+    if (form.id_forma_registro === 1) {
+        tipoRegistro.value = [];
+        tipoRegistro.value.push({id: 1, nome: 'Vivo sem ferimento'});
+        tipoRegistro.value.push({id: 2, nome: 'Vivo com ferimento'});
+    }
+    if (form.id_forma_registro === 2) {
+        tipoRegistro.value = [];
+        tipoRegistro.value.push({id: 4, nome: 'Vivo sem ferimento'});
+        tipoRegistro.value.push({id: 5, nome: 'Vivo com ferimento'});
+        tipoRegistro.value.push({id: 6, nome: 'Ninho'});
+        tipoRegistro.value.push({id: 7, nome: 'Colméia'});
+    }
+    if (form.id_forma_registro === 3) {
+        tipoRegistro.value = [];
+        tipoRegistro.value.push({id: 3, nome: 'Morto'});
+    }
+    if (form.id_forma_registro === 4) {
+        tipoRegistro.value = [];
+        tipoRegistro.value.push({id: 8, nome: 'Ninho'});
+        
+    }
+}
+
+const destinacaoRegistro = ref([]);
+
+const tipoDestinacaoRegistro = () => {
+    if (form.id_tipo_registro === 1){
+        destinacaoRegistro.value = [];
+        destinacaoRegistro.value.push({id: 1, nome: 'Soltura em área adjacente'});
+    }
+    if (form.id_tipo_registro === 5){
+        destinacaoRegistro.value = [];
+        destinacaoRegistro.value.push({id: 4, nome: 'Eutanásia'});
+        destinacaoRegistro.value.push({id: 8, nome: 'Encaminhado ao hospital'});
+        destinacaoRegistro.value.push({id: 2, nome: 'Encaminhado ao Veterinário'});
+    }
+    if (form.id_tipo_registro === 6){
+        destinacaoRegistro.value = [];
+        destinacaoRegistro.value.push({id: 6, nome: 'Área adjacente'});
+    }
+    if (form.id_tipo_registro === 7){
+        destinacaoRegistro.value = [];
+        destinacaoRegistro.value.push({id: 5, nome: 'Realocação'});
+    }
+    if (form.id_tipo_registro === 8){
+        destinacaoRegistro.value = [];
+        destinacaoRegistro.value.push({id: 7, nome: 'Monitoramento'});
+    }
+}
+
 const salvarImagens = () => {
-    form.post(route('',));
+    form.post(route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.fotografico', { registro: form.id }), {forceFormData: true}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            modalDetalhes.value.getBsModal().hide();
+            form.reset();
+        },
+    });
 }
 
 defineExpose({ abrirModal, updateModal });
@@ -157,8 +224,9 @@ defineExpose({ abrirModal, updateModal });
                                         <div class="d-flex">
                                             <div class="col-lg-4 me-2">
                                                 <InputLabel for="nome_registro" value="ID registro" />
-                                                <input id="nome_registro" type="number" class="form-control" v-model="form.nome_registro"
-                                                    autofocus placeholder="ID do registro" autocomplete="nome_registro" disabled />
+                                                <input id="nome_registro" type="number" class="form-control"
+                                                    v-model="form.nome_registro" autofocus placeholder="ID do registro"
+                                                    autocomplete="nome_registro" disabled />
                                                 <InputError class="mt-2" :message="form.errors.nome_registro" />
                                             </div>
 
@@ -211,9 +279,9 @@ defineExpose({ abrirModal, updateModal });
                                                 <select class="form-select" v-model="form.id_estado"
                                                     aria-label="Default select example">
                                                     <option selected>Selecione a UF</option>
-                                                    <option v-for="uf in contrato.trechos" :value="uf.uf?.id">{{
-                                                        uf.uf?.uf
-                                                        }}</option>
+                                                    <option v-for="uf in ufs" :value="uf.id">
+                                                        {{ uf.uf }}
+                                                    </option>
                                                     <InputError class="mt-2" :message="form.errors.id_estado" />
                                                 </select>
                                             </div>
@@ -400,7 +468,7 @@ defineExpose({ abrirModal, updateModal });
                                             <div class="col-lg-4 me-2">
                                                 <InputLabel for="id_forma_registro" value="Forma Registro" />
                                                 <select class="form-select" v-model="form.id_forma_registro"
-                                                    aria-label="Default select example">
+                                                    @change="formaTipoRegistro()" aria-label="Default select example">
                                                     <option selected>Selecione a forma registro</option>
                                                     <option v-for="forma in formaRegistro" :value="forma.id">
                                                         {{ forma.nome }}
@@ -412,24 +480,24 @@ defineExpose({ abrirModal, updateModal });
                                             <div class="col-lg-4 me-2">
                                                 <InputLabel for="" value="Tipo de Registro" />
                                                 <select class="form-select" :disabled="form.id_forma_registro == 3"
-                                                    v-model="form.id_tipo_registro" aria-label="Default select example">
+                                                    v-model="form.id_tipo_registro" @change="tipoDestinacaoRegistro()" aria-label="Default select example">
                                                     <option selected>Selecione o Tipo de Registro</option>
-                                                    <option value="1">Frente 1</option>
-                                                    <option value="2">Frente 2</option>
-                                                    <option value="3">Frente 3</option>
+                                                    <option v-for="tipo in tipoRegistro" :value="tipo.id">
+                                                        {{ tipo.nome }}
+                                                    </option>
                                                 </select>
-                                                <!-- <InputError class="mt-2" :message="form.errors." /> -->
+                                                <InputError class="mt-2" :message="form.errors.id_tipo_registro" />
                                             </div>
 
                                             <div class="col-lg-4 me-2">
                                                 <InputLabel for="" value="Destinação" />
-                                                <select class="form-select" :disabled="form.id_forma_registro == 3"
+                                                <select class="form-select" :disabled="form.id_forma_registro == 3 || form.id_forma_registro == 1"
                                                     v-model="form.id_destinacao_registro"
                                                     aria-label="Default select example">
                                                     <option selected>Selecione a Destinação</option>
-                                                    <option value="1">Frente 1</option>
-                                                    <option value="2">Frente 2</option>
-                                                    <option value="3">Frente 3</option>
+                                                    <option v-for="destinacao in destinacaoRegistro" value="1">
+                                                        {{ destinacao.nome }}
+                                                    </option>
                                                 </select>
                                                 <InputError class="mt-2"
                                                     :message="form.errors.id_destinacao_registro" />
@@ -516,24 +584,28 @@ defineExpose({ abrirModal, updateModal });
                                         <div class="d-flex">
                                             <div class="col-lg-6 me-2">
                                                 <InputLabel for="id_status_conservacao_federal" value="Federal" />
-                                                <select class="form-select" v-model="form.id_status_conservacao_federal" aria-label="Default select example">
+                                                <select class="form-select" v-model="form.id_status_conservacao_federal"
+                                                    aria-label="Default select example">
                                                     <option selected>Selecione a Federal</option>
-                                                    <option value="1">Frente 1</option>
-                                                    <option value="2">Frente 2</option>
-                                                    <option value="3">Frente 3</option>
+                                                    <option v-for="federal in statusConservacaoFederal" :value="federal.id">
+                                                        {{ federal.nome }} - {{ federal.sigla }}
+                                                    </option>
                                                 </select>
-                                                <InputError class="mt-2" :message="form.errors.id_status_conservacao_federal" />
+                                                <InputError class="mt-2"
+                                                    :message="form.errors.id_status_conservacao_federal" />
                                             </div>
 
                                             <div class="col-lg-6 me-2">
                                                 <InputLabel for="" value="IUCN" />
-                                                <select class="form-select" v-model="form.id_status_conservacao_iucn" aria-label="Default select example">
+                                                <select class="form-select" v-model="form.id_status_conservacao_iucn"
+                                                    aria-label="Default select example">
                                                     <option selected>Selecione a IUCN</option>
-                                                    <option value="1">Frente 1</option>
-                                                    <option value="2">Frente 2</option>
-                                                    <option value="3">Frente 3</option>
+                                                    <option v-for="iucn in statusConservacaoIucn" value="1">
+                                                        {{ iucn.sigla }} - {{ iucn.nome }}
+                                                    </option>
                                                 </select>
-                                                <InputError class="mt-2" :message="form.errors.id_status_conservacao_iucn" />
+                                                <InputError class="mt-2"
+                                                    :message="form.errors.id_status_conservacao_iucn" />
                                             </div>
                                         </div>
                                     </div>
@@ -558,10 +630,10 @@ defineExpose({ abrirModal, updateModal });
                                                 </div>
 
                                                 <div class="mt-2">
-                                                    <a @click="salvarImagens()" href="#" class="btn btn-success"
-                                                        aria-label="Button" :disabled="form.processing">
+                                                    <button type="button" @click="salvarImagens" class="btn btn-success"
+                                                        aria-label="Button" :disabled="form.processing || !form.id">
                                                         Enviar
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>

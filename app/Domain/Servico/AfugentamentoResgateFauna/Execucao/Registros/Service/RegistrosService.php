@@ -3,9 +3,12 @@
 namespace App\Domain\Servico\AfugentamentoResgateFauna\Execucao\Registros\Service;
 
 use App\Models\AfugentFaunaExecFrenteModel;
+use App\Models\AfugentFaunaExecRegistroImagemModel;
 use App\Models\AfugentFaunaExecRegistroModel;
 use App\Models\AfugentFaunaFormaRegistroModel;
 use App\Models\AtFaunaGrupoAmostradoModel;
+use App\Models\Uf;
+use Illuminate\Support\Facades\DB;
 
 class RegistrosService
 {
@@ -57,16 +60,28 @@ class RegistrosService
         return AfugentFaunaFormaRegistroModel::all();
     }
 
+    public function getUfs()
+    {
+        return Uf::all();
+    }
+
     public function getRegistros($servico)
     {
-        // estados e base_rodovias está comentado porque não existe a tabela estados no local
-        return AfugentFaunaExecRegistroModel::join('at_fauna_grupo_amostrado', 'afugent_fauna_exec_registro.id_grupo_amostrado', '=', 'at_fauna_grupo_amostrado.id')
-            // ->join('estados', 'afugent_fauna_exec_registro.id_estado', '=', 'estados.id')
-            // ->join('base_rodovias', 'afugent_fauna_exec_registro.id_rodovia', '=', 'base_rodovias.id')
+        return AfugentFaunaExecRegistroModel::leftJoin('afugent_fauna_exec_frente', 'afugent_fauna_exec_registro.id_frente', '=', 'afugent_fauna_exec_frente.id')
+            ->leftJoin('at_fauna_grupo_amostrado', 'afugent_fauna_exec_registro.id_grupo_amostrado', '=', 'at_fauna_grupo_amostrado.id')
+            ->leftJoin('estados', 'afugent_fauna_exec_registro.id_estado', '=', 'estados.id')
+            ->select(
+                'afugent_fauna_exec_registro.*',
+                'afugent_fauna_exec_frente.rodovia',
+                'estados.uf as uf',
+                'at_fauna_grupo_amostrado.nome as nome_grupo',
+                DB::raw("DATE_FORMAT(afugent_fauna_exec_registro.data_registro, '%d/%m/%Y') as data_registroF"),
+                DB::raw("(SELECT nome FROM fauna_exec_status_conservacao WHERE id = afugent_fauna_exec_registro.id_status_conservacao_federal) as nome_status_conserv_federal"),
+                DB::raw("(SELECT sigla FROM fauna_exec_status_conservacao WHERE id = afugent_fauna_exec_registro.id_status_conservacao_federal) as sigla_status_conserv_federal"),
+                DB::raw("(SELECT nome FROM fauna_exec_status_conservacao WHERE id = afugent_fauna_exec_registro.id_status_conservacao_iucn) as nome_status_conserv_iucn"),
+                DB::raw("(SELECT sigla FROM fauna_exec_status_conservacao WHERE id = afugent_fauna_exec_registro.id_status_conservacao_iucn) as sigla_status_conserv_iucn")
+            )
             ->where('afugent_fauna_exec_registro.id_servico', $servico->id)
-            ->select('afugent_fauna_exec_registro.*', 'at_fauna_grupo_amostrado.nome as nome_grupo_amostrado')
-            // ->select('afugent_fauna_exec_registro.*', 'estados.uf as uf')
-            // ->select('afugent_fauna_exec_registro.*', 'base_rodovias.rodovia as rodovia')
             ->paginate(10);
     }
 
@@ -101,5 +116,34 @@ class RegistrosService
         }
 
         return $nome_registro;
+    }
+
+    public function getStatusConservacaoFederal()
+    {
+        return DB::table('fauna_exec_status_conservacao')
+            ->whereIn('id', [1, 7, 9, 10])
+            ->get();
+    }
+
+    public function getStatusConservacaoIucn()
+    {
+        return DB::table('fauna_exec_status_conservacao')
+            ->whereIn('id', [2, 3, 4, 5, 6, 7, 8, 9, 10])
+            ->get();
+    }
+
+    public function storeFile($registro, $file)
+    {
+        $nome = $file->getClientOriginalName();
+        $key = uniqid();
+        $caminho = $file->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Afuget_fauna' . DIRECTORY_SEPARATOR . 'Registro' . DIRECTORY_SEPARATOR . 'Img' . DIRECTORY_SEPARATOR . $key . $nome);
+
+        return AfugentFaunaExecRegistroImagemModel::create([
+            'chave' => $key,
+            'id_registro' => $registro->id,
+            'nome' => $nome,
+            'caminho_imagem' => str_replace("public\\", "", $caminho)
+        ]);
+
     }
 }

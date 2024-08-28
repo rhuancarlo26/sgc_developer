@@ -22,8 +22,8 @@ class ServicoPmqaCampanha extends Model
         );
     }
 
-    public function medicoes()
+    public function campanha_pontos()
     {
-        return $this->hasMany(ServicoPmqaCampanhaPontoMedicaoParametro::class, 'campanha_id');
+        return $this->hasMany(ServicoPmqaCampanhaPonto::class, 'fk_exec_campanha');
     }
 }

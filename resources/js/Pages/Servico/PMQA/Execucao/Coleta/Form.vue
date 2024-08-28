@@ -22,7 +22,7 @@ const form = useForm({
     id: null,
     fk_campanha_ponto: props.ponto.id,
     dt_coleta: null,
-    sem_coleta: false,
+    coleta: false,
     numero_amostra: null,
     preservacao_amostra: null,
     acondicionamento_amostra: null,
@@ -92,13 +92,13 @@ const saveArquivo = () => {
                     </div>
                     <div class="col d-flex align-self-end justify-content-center form-group ">
                         <label class="form-check">
-                            <input class="form-check-input" type="checkbox" v-model="form.sem_coleta">
+                            <input class="form-check-input" type="checkbox" v-model="form.coleta">
                             <span class="form-check-label">Não foi possível realizar a coleta</span>
                         </label>
-                        <InputError :message="form.errors.sem_coleta"/>
+                        <InputError :message="form.errors.coleta"/>
                     </div>
                 </div>
-                <div v-if="form.sem_coleta === false">
+                <div v-if="form.coleta === false">
                     <div class="row mb-4">
                         <div class="col form-group">
                             <InputLabel value="Número da amostra" for="numero_amostra"/>
@@ -145,7 +145,7 @@ const saveArquivo = () => {
                                    :title="form.id ? 'Alterar' : 'Salvar'"/>
                     </div>
                 </div>
-                <div v-if="ponto.coleta?.id && !form.sem_coleta">
+                <div v-if="ponto.coleta?.id && !form.coleta">
                     <hr>
                     <div class="row">
                         <div class="col">
