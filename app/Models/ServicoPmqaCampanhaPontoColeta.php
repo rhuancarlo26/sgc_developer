@@ -10,9 +10,9 @@ class ServicoPmqaCampanhaPontoColeta extends Model
 {
     use HasFactory;
 
-    protected $table   = 'exec_ponto_coleta';
+    protected $table = 'exec_ponto_coleta';
     protected $guarded = ['id', 'created_at'];
-    protected $casts   = ['sem_coleta' => 'bool'];
+    protected $casts = ['coleta' => 'bool'];
 
     public function arquivos(): HasMany
     {

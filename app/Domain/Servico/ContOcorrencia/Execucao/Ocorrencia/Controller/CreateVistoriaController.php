@@ -29,6 +29,7 @@ class CreateVistoriaController extends Controller
             'contrato' => $contrato,
             'servico' => $servico->load([
                 'tipo',
+                'cont_ocorr_parecer_configuracao',
                 'licencas_condicionantes.licenca.segmentos.uf_inicial_rel',
                 'licencas_condicionantes.licenca.segmentos.uf_final_rel'
             ]),

@@ -9,11 +9,11 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'servico_id'    => ['required'],
+            'fk_servico' => ['required'],
             'nome_campanha' => ['required'],
-            'dt_inicio'     => ['required'],
-            'dt_fim'        => ['required'],
-            'pontos'        => []
+            'dt_inicio' => ['required'],
+            'dt_fim' => ['required'],
+            'pontos' => []
         ];
     }
 

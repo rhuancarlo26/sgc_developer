@@ -76,10 +76,12 @@ const enviaFiscal = (aprovacao) => {
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
                 <ModelSearchFormAllColumns :columns="['nome']">
-                    <NavButton type-button="primary" title="Enviar ao fiscal" v-if="ap(aprovacao)"
-                               @click="enviaFiscal(aprovacao)"/>
-                    <NavButton @click="abrirModalVincularPonto()" type-button="success" title="Vincular"
-                               v-if="ap(aprovacao)"/>
+                    <template #action>
+                        <NavButton type-button="primary" title="Enviar ao fiscal"
+                                   @click="enviaFiscal(aprovacao)"/>
+                        <NavButton @click="abrirModalVincularPonto()" type-button="success" title="Vincular"
+                        />
+                    </template>
                 </ModelSearchFormAllColumns>
 
 
@@ -92,21 +94,18 @@ const enviaFiscal = (aprovacao) => {
                             <td class="text-center">
                                 <NavButton :icon="IconEye" class="btn-icon" type-button="info"
                                            @click="abrirModalVisualizarPonto(item)"/>
-                                <template
-                                    v-if="!servico.pmqa_config_lista_parecer || servico.pmqa_config_lista_parecer?.status_id === 1">
-                                    <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
-                                               v-if="ap(aprovacao)"
-                                               @click="abrirModalVincularPonto(item)"/>
-                                    <LinkConfirmation v-slot="confirmation"
-                                                      :options="{ text: 'A remoção de um ponto será permanente.' }"
-                                                      v-if="ap(aprovacao)">
-                                        <Link :onBefore="confirmation.show"
-                                              :href="route('contratos.contratada.servicos.pmqa.configuracao.vinculacao_ponto.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"
-                                              as="button" method="delete" type="button" class="btn btn-icon btn-danger">
-                                            <IconTrash/>
-                                        </Link>
-                                    </LinkConfirmation>
-                                </template>
+                                <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
+
+                                           @click="abrirModalVincularPonto(item)"/>
+                                <LinkConfirmation v-slot="confirmation"
+                                                  :options="{ text: 'A remoção de um ponto será permanente.' }"
+                                >
+                                    <Link :onBefore="confirmation.show"
+                                          :href="route('contratos.contratada.servicos.pmqa.configuracao.vinculacao_ponto.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"
+                                          as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                                        <IconTrash/>
+                                    </Link>
+                                </LinkConfirmation>
                             </td>
                         </tr>
                     </template>
