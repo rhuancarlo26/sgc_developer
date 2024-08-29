@@ -1,7 +1,7 @@
 <script setup>
 import InputLabel from "@/Components/InputLabel.vue";
 import Modal from "@/Components/Modal.vue";
-import {Link} from "@inertiajs/vue3";
+import {Link, router} from "@inertiajs/vue3";
 import {computed, ref} from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils.js";
 import { IconTrash} from "@tabler/icons-vue";
@@ -21,6 +21,17 @@ const arquivoRetAtual = computed(() => {
     const first = data.value.rets.shift()
     return [first];
 })
+
+const saveRET = (e) => {
+    router.post(route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.store_ret'), {
+        fk_at_config_vinculacao: data.value.id,
+        arquivo_ret: e.target.files[0],
+    }, {
+        onSuccess() {
+            modalRef.value.getBsModal().hide();
+        }
+    })
+}
 
 defineExpose({ abrirModal });
 </script>
