@@ -10,8 +10,9 @@ import ModalVincularABIO from "./ModalVincularABIO.vue";
 import ModalAdicionarRet from "./ModalAdicionarRet.vue";
 import { ref } from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
-import { IconDots } from "@tabler/icons-vue";
-import {Head} from '@inertiajs/vue3';
+import {IconDots} from "@tabler/icons-vue";
+import {Head, Link, router} from '@inertiajs/vue3';
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 
 const props = defineProps({
@@ -40,6 +41,13 @@ const openArquivoLicenca = (item) => {
 const openRet = (rets) => {
     const lastRet = rets[0];
     window.open('/atropelamento-fauna/ret/' + lastRet.id, '_blank');
+}
+
+const linkConfirmationRef = ref()
+const deleteVinculoAbio = (id) => {
+    linkConfirmationRef.value.show(() => {
+        router.delete(route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.delete', id))
+    })
 }
 
 </script>
@@ -100,7 +108,9 @@ const openRet = (rets) => {
                     <a @click="abrirModalAdicionarRet(item)" href="javascript:void(0);" class="dropdown-item">
                         Adicionar RET
                     </a>
-                  <NavLink route-name="home" title="Excluir" class="dropdown-item" />
+                    <a @click="deleteVinculoAbio(item.id)" href="javascript:void(0);" class="dropdown-item">
+                        Excluir
+                    </a>
                 </div>
               </td>
             </tr>
@@ -108,6 +118,8 @@ const openRet = (rets) => {
         </Table>
       </template>
     </Navbar>
+
+    <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Excluir registro?' }" />
 
     <ModalVincularABIO :contrato="contrato" :servico="servico" :licencas="licencas" ref="modalVincularABIO" />
       <ModalAdicionarRet ref="modalAdicionarRet" />
