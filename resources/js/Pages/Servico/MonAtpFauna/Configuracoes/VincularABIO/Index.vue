@@ -53,7 +53,7 @@ const deleteVinculoAbio = (id) => {
 </script>
 <template>
 
-  <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
+  <Head title="Vincular ABIO" />
 
   <AuthenticatedLayout>
 
