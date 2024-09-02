@@ -13,24 +13,24 @@ class UpdateLicencaController extends Controller
     {
     }
 
-    public function index(Licenca $licenca, UpdateLicencaRequest $request): \Illuminate\Http\RedirectResponse
+    public function index(UpdateLicencaRequest $request): \Illuminate\Http\RedirectResponse
     {
         $post = [
             ...$request->all(),
-            'tipo' => $request->tipo['id']
+            'tipo' => $request->tipo_rel['id']
         ];
 
         if ($post['tipo'] !== 3) {
-            $post['in_app'] = null;
-            $post['out_app'] = null;
-            $post['total_app'] = null;
-            $post['volume'] = null;
-            $post['sinaflor'] = null;
+            $post['in_app'] = '';
+            $post['out_app'] = '';
+            $post['total_app'] = '';
+            $post['volume'] = '';
+            $post['sinaflor'] = '';
         }
 
         $response = $this->listagemLicenca->update(post: $post);
 
-        return to_route(route: 'licenca.create', parameters: ['licenca' => $licenca->id])
+        return to_route(route: 'licenca.create', parameters: ['licenca' => $post['id']])
             ->with('message', $response['request']);
     }
 }

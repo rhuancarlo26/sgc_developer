@@ -26,12 +26,12 @@ class ServicoVeiculoService extends BaseModelService
             $this->modelClass::Where('id_veiculo', $veiculo->id)->where('id_servico', $request['servico_id'])->firstOrFail()->delete();
 
             $response = [
-                'type'    => 'success',
+                'type' => 'success',
                 'content' => 'Recurso deletado com sucesso!'
             ];
         } catch (\Exception $e) {
             $response = [
-                'type'    => 'error',
+                'type' => 'error',
                 'content' => $e->getMessage()
             ];
         }

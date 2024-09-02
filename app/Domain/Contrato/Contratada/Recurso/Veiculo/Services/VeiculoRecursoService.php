@@ -99,7 +99,7 @@ class VeiculoRecursoService extends BaseModelService
     public function destroyVeiculo($veiculo)
     {
         try {
-            $documentos = $this->modelClassDocumento::Where('recurso_veiculo_id', $veiculo->id)->get();
+            $documentos = $this->modelClassDocumento::Where('cod_veiculo', $veiculo->id)->get();
 
             foreach ($documentos as $value) {
                 Storage::delete($value->caminho);

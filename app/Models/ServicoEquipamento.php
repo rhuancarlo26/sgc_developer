@@ -11,4 +11,5 @@ class ServicoEquipamento extends Model
 
     protected $table = 'servico_equipamento';
     protected $guarded = ['id', 'created_at'];
+    public $timestamps = false;
 }
