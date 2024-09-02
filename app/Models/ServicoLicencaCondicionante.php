@@ -13,6 +13,7 @@ class ServicoLicencaCondicionante extends Model
 
     protected $table = 'servico_licenca_condicionante';
     protected $guarded = ['id', 'created_at'];
+    public $timestamps = false;
 
     public function licenca()
     {
