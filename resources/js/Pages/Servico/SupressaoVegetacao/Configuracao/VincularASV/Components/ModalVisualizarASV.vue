@@ -23,15 +23,30 @@ defineExpose({abrirModal});
                     <span>{{ licenca.numero_licenca }}</span>
                 </p>
                 <p class="text-uppercase"><span class="fw-bold">Orgão Expeditor:</span> {{ licenca.emissor }} </p>
-                <p class="text-uppercase"><span class="fw-bold">Rodovia:</span> {{ licenca.rodovia }} </p>
                 <p class="text-uppercase">
                     <span class="fw-bold">Tipo da Licença:</span>
-                    <span>{{ licenca.tipo?.sigla }} - {{ licenca.numero_licenca }} </span>
+                    <span>{{ licenca.tipo_rel?.sigla }} - {{ licenca.numero_licenca }} </span>
                 </p>
-                <p class="text-uppercase"><span class="fw-bold">KM Inicial:</span> {{ licenca.km_inicio }} </p>
-                <p class="text-uppercase"><span class="fw-bold">KM Final:</span> {{ licenca.km_fim }} </p>
-                <p class="text-uppercase"><span class="fw-bold">Data Inicial:</span> {{ licenca.data_inicio }} </p>
-                <p class="text-uppercase"><span class="fw-bold">Vencimento:</span> {{ licenca.vencimento }} </p>
+                <p class="text-uppercase"><span class="fw-bold">Rodovia:</span>
+                    <span v-for="br in licenca.brs?.split(',')" :key="br"
+                          class="badge bg-warning text-white m-1">
+                                                        {{ br }}
+                                                    </span>
+                </p>
+                <p class="text-uppercase"><span class="fw-bold">KM Inicial:</span>
+                    <span v-if="licenca.segmentos">
+                                    {{ Math.min(...licenca.segmentos?.map(segmento => segmento.km_inicio)) }}
+                                    </span>
+                </p>
+                <p class="text-uppercase"><span class="fw-bold">KM Final:</span>
+                    <span v-if="licenca.segmentos">
+                                        {{ Math.max(...licenca.segmentos?.map(segmento => segmento.km_fim)) }}
+                                    </span>
+                </p>
+                <p class="text-uppercase"><span class="fw-bold">Data Inicial:</span>
+                    {{ dateTimeFormat(licenca.data_emissao) }} </p>
+                <p class="text-uppercase"><span class="fw-bold">Vencimento:</span> {{ licenca.vencimento }}
+                </p>
             </div>
         </template>
         <template #footer>
