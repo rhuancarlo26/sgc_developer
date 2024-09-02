@@ -60,7 +60,6 @@ class RhRecursoService extends BaseModelService
                 $response = $this->dataManagement->create(entity: $this->modelClassDocumento, infos: $request);
 
                 $return = [
-                    'rh' => $response['model']['id'],
                     'request' => $response['request']
                 ];
             }

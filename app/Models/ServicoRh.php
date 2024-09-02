@@ -11,4 +11,5 @@ class ServicoRh extends Model
 
     protected $table = 'servico_rh';
     protected $guarded = ['id', 'created_at'];
+    public $timestamps = false;
 }
