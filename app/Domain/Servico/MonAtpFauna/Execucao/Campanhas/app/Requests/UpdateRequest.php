@@ -4,12 +4,12 @@ namespace App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     public function rules(): array
     {
         return [
-            'id' => 'nullable',
+            'id' => 'required',
             'fk_servico_licenca' => 'required',
             'uf_inicial' => 'required',
             'km_inicial' => 'required',

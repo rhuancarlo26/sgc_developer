@@ -45,4 +45,30 @@ class ServicoLicencaCondicionanteService extends BaseModelService
       'request' => $response
     ];
   }
+
+    public function getLicencaMalhaViariaVigente($servicoId)
+    {
+        return $this->model
+            ->select([
+                'servico_licenca_condicionante.id AS fk_servico_licenca',
+                'licencas.id as id_licenca',
+                'servico_licenca_condicionante.vigente',
+                'br.id AS id_rodovia',
+                'br.rodovia',
+                'estados.id AS id_estados',
+                'estados.uf',
+                'estados.nome as nome_estado',
+                'licencas_br.extensao_br AS extensao',
+                'licencas_br.km_fim',
+                'licencas_br.km_inicio',
+            ])
+            ->join('licencas', 'licencas.id', '=', 'servico_licenca_condicionante.id_licenca')
+            ->leftJoin('licencas_br', 'licencas_br.licenca_id', '=', 'licencas.id')
+            ->join('base_rodovia AS br', 'br.rodovia', '=', 'licencas_br.rodovia')
+            ->join('estados', 'estados.id', '=', 'licencas_br.uf_inicial')
+            ->where('servico_licenca_condicionante.vigente', 1)
+            ->where('id_servico', $servicoId)
+            ->whereRaw('br.estados_id = licencas_br.uf_inicial')
+            ->get();
+    }
 }
