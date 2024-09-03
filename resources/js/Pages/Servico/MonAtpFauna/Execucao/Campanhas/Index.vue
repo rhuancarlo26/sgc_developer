@@ -26,16 +26,15 @@ const modalEditarCampanha = ref({});
 const modalVisualizarCampanha = ref({});
 const modalExcluirCampanha = ref({});
 
+const showActionsModal = ref(true);
 const abrirModalNovaCampanha = (item) => {
+    showActionsModal.value = true;
     modalNovaCampanha.value.abrirModal(item);
 }
 
-const abrirModalEditarCampanha = () => {
-    modalEditarCampanha.value.abrirModal();
-}
-
-const abrirModalVisualizarCampanha = () => {
-    modalVisualizarCampanha.value.abrirModal();
+const abrirModalVisualizarCampanha = (item) => {
+    showActionsModal.value = false;
+    modalNovaCampanha.value.abrirModal(item);
 }
 
 const abrirModalExcluirCampanha = () => {
@@ -92,7 +91,7 @@ const abrirModalExcluirCampanha = () => {
                                     <a href="#" class="dropdown-item" @click.prevent="abrirModalNovaCampanha(item)">
                                         Editar
                                     </a>
-                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalVisualizarCampanha">
+                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalVisualizarCampanha(item)">
                                         Visualizar
                                     </a>
                                     <a href="#" class="dropdown-item" @click.prevent="abrirModalExcluirCampanha">
@@ -107,7 +106,7 @@ const abrirModalExcluirCampanha = () => {
             </template>
         </Navbar>
 
-        <ModalNovaCampanha ref="modalNovaCampanha" :licencasVigente="licencasVigente" :configVinculacao="configVinculacao" />
+        <ModalNovaCampanha ref="modalNovaCampanha" :licencasVigente="licencasVigente" :configVinculacao="configVinculacao" :show-action="showActionsModal" />
         <ModalEditarCampanha ref="modalEditarCampanha" />
         <ModalVisualizarCampanha ref="modalVisualizarCampanha" />
         <ModalExcluirCampanha ref="modalExcluirCampanha" />

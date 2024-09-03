@@ -401,26 +401,7 @@ INSERT INTO `afugent_fauna_tipo_registro` (`id`, `id_forma_registro`, `nome`, `c
 -- --------------------------------------------------------
 
 --
--- Table structure for table `at_fauna_execucao_campanha_ret`
---
 
-CREATE TABLE `at_fauna_execucao_campanha_ret` (
-  `id` int(11) NOT NULL,
-  `fk_execucao_campanha` int(11) NOT NULL,
-  `fk_config_ret` int(11) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `at_fauna_execucao_campanha_ret`
---
-
-INSERT INTO `at_fauna_execucao_campanha_ret` (`id`, `fk_execucao_campanha`, `fk_config_ret`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 1, 4, '2023-08-28 18:28:46', '2023-08-28 18:28:46', NULL),
-(2, 3, 5, '2023-11-13 17:11:35', '2023-11-13 17:11:35', NULL),
-(3, 10, 6, '2024-03-28 17:25:06', '2024-03-28 17:25:06', NULL);
 
 -- --------------------------------------------------------
 

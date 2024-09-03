@@ -39,4 +39,21 @@ class ExecucaoCampanhaService extends BaseModelService
             ->where('at_fauna_execucao_campanha_abio.fk_execucao_campanha', $campanhaId)
             ->get();
     }
+
+    public function getRetsCampanhas($campanhaId)
+    {
+        return $this->model
+            ->select([
+                'afcvr.id',
+                'licencas.numero_licenca',
+                'afcvr.nome_arquivo'
+            ])
+            ->join('at_fauna_config_vinculacao AS afcv', 'afcv.id', '=', 'at_fauna_execucao_campanha_abio.fk_config_vinculacao')
+            ->join('at_fauna_config_vinculacao_ret AS afcvr', 'afcv.id', '=', 'afcvr.fk_at_config_vinculacao')
+            ->join('licencas', 'licencas.id', '=', 'afcv.fk_licenca')
+            ->join('tipo_licencas', 'licencas.tipo', '=', 'tipo_licencas.id')
+            ->where('at_fauna_execucao_campanha_abio.fk_execucao_campanha', $campanhaId)
+            ->get();
+    }
+
 }
