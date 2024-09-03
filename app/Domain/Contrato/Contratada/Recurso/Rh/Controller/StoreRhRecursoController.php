@@ -15,10 +15,8 @@ class StoreRhRecursoController extends Controller
     public function index(Request $request): \Illuminate\Http\RedirectResponse
     {
         $response = $this->rhRecursoService->salvarRh($request->all());
-
-        return back()->withInput([
-            'contrato' => $request->contrato_id,
-            'rh' => $response['rh']
-        ])->with('message', $response['request']);
+        
+        return to_route(route: 'contratos.contratada.recurso.rh.create', parameters: ['contrato' => $request->id_contrato, 'rh' => $response['rh']])
+            ->with('message', $response['request']);
     }
 }

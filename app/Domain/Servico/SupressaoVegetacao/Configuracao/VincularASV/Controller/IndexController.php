@@ -15,8 +15,8 @@ use Inertia\Response;
 class IndexController extends Controller
 {
     public function __construct(
-        private readonly LicencaService     $licencaService,
-        private readonly VincularASVService $vincularASVService,
+        private readonly LicencaService      $licencaService,
+        private readonly VincularASVService  $vincularASVService,
         private readonly ConfigucacaoParecer $configucacaoParecer
     )
     {

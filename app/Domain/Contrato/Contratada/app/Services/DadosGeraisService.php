@@ -27,11 +27,10 @@ class DadosGeraisService extends BaseModelService
                 'historico',
                 'licenciamentos',
                 'licenciamentos.requerimentos',
-                'licenciamentos.tipo',
+                'licenciamentos.tipo_rel',
                 'licenciamento_observacoes',
-//                'empreendimento_trechos',
-//                'empreendimento_trechos.uf',
-//                'empreendimento_trechos.rodovia'
+                'servicos.supervisao_lotes.rodovia',
+                'servicos.supervisao_lotes.uf'
             ]);
         }
 

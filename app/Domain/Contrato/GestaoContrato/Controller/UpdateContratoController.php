@@ -14,7 +14,7 @@ class UpdateContratoController extends Controller
     {
     }
 
-    public function update(Contrato $contrato, UpdateContratoRequest $request)
+    public function update(UpdateContratoRequest $request)
     {
         $post = [
             ...$request->all(),
@@ -24,8 +24,8 @@ class UpdateContratoController extends Controller
         $response = $this->listagemContrato->update($post);
 
         return to_route('contratos.gestao.create', [
-            'tipo'     => $contrato->tipo_contrato,
-            'contrato' => $contrato->id
+            'tipo' => $request->tipo_contrato,
+            'contrato' => $request->id,
         ])->with('message', $response['request']);
     }
 }
