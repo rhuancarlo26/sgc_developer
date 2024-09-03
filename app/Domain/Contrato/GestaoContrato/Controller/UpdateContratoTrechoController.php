@@ -14,11 +14,16 @@ class UpdateContratoTrechoController extends Controller
 
     public function updateTrecho(UpdateContratoTrechoRequest $request)
     {
-        $response = $this->trechoContratoService->update($request->all());
+        $post = [
+            ...$request->validated(),
+            'extensao' => $request->km_final - $request->km_inicial,
+        ];
+
+        $response = $this->trechoContratoService->update($post);
 
         return to_route('contratos.gestao.create',
             [
-                'tipo'     => $request->tipo_contrato,
+                'tipo' => $request->tipo_contrato,
                 'contrato' => $request->contrato_id
             ])->with('message', $response['request']);
     }

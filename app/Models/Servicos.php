@@ -133,4 +133,9 @@ class Servicos extends Model
         return $this->hasOne(related: ServicoContOcorrSupervisaoParecerConfiguracao::class, foreignKey: 'fk_servico');
     }
 
+    public function supervisao_lotes()
+    {
+        return $this->hasMany(ServicoContOcorrSupervisaoConfigLote::class, 'id_servico');
+    }
+
 }

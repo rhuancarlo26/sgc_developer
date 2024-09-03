@@ -10,8 +10,9 @@ const props = defineProps({
 });
 
 const form = useForm({
+    id: null,
     licenca_id: props.licenca.id,
-    tipo: null,
+    tipo_rel: null,
     status: null,
     modal: null,
     numero_licenca: null,
@@ -49,13 +50,11 @@ const somaExtensao = props.licenca?.segmentos.reduce((total, formSegmento) => {
 }, 0);
 
 const salvarLicenca = () => {
-    form.transform((data) => Object.assign({}, data))
+    const url = form.id ? 'update' : 'store';
 
-    if (props.licenca.id) {
-        form.patch(route('licenca.update', props.licenca.id));
-    } else {
-        form.post(route('licenca.store'));
-    }
+    form.post(route('licenca.' + url), {
+        onSuccess: () => Object.assign(form, props.licenca)
+    });
 }
 
 const atualizarDatasPrazos = () => {
@@ -87,13 +86,13 @@ const calcularArea = () => {
 <template>
     <div class="row mb-4">
         <div class="col">
-            <InputLabel value="Tipo de Contrato:" for="tipo_id"/>
-            <v-select :options="tipos" label="nome" v-model="form.tipo">
+            <InputLabel value="Tipo de Contrato:" for="tipo_rel"/>
+            <v-select :options="tipos" label="nome" v-model="form.tipo_rel">
                 <template #no-options="{}">
                     Nenhum registro encontrado.
                 </template>
             </v-select>
-            <InputError :message="form.errors.tipo"/>
+            <InputError :message="form.errors.tipo_rel"/>
         </div>
 
         <div class="col">
@@ -106,7 +105,7 @@ const calcularArea = () => {
             <InputError :message="form.errors.status"/>
         </div>
 
-        <div class="col" v-if="form.status !== 'Nova'">
+        <div class="col" v-if="form.status && form.status !== 'Nova'">
             <InputLabel value="Busca Licença:" for="numero_licenca"/>
             <div class="d-flex">
                 <input type="text" id="numero_licenca" name="numero_licenca" class="form-control me-2"
@@ -307,7 +306,7 @@ const calcularArea = () => {
             </a>
             <a class="btn btn-primary" @click="salvarLicenca()">
                 <IconDeviceFloppy class="me-2"/>
-                {{ licenca.id ? 'Editar' : 'Salvar' }}
+                {{ form.id ? 'Editar' : 'Salvar' }}
             </a>
         </div>
     </div>
