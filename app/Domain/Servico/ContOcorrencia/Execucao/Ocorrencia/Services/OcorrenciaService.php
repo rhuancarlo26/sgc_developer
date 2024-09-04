@@ -51,7 +51,7 @@ class OcorrenciaService extends BaseModelService
                 ->paginate()
                 ->appends($searchParams),
             'ocorrencias_em_aberto' => $this->modelClass::with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
-                ->where('id_servico', $servico->id)->where('rnc_direto', 'RNC')->get()
+                ->where('id_servico', $servico->id)->where('rnc_direto', 1)->get()
         ];
     }
 

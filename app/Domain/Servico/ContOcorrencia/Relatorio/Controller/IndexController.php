@@ -30,7 +30,7 @@ class IndexController extends Controller
                 'rhs',
                 'equipamentos',
                 'veiculos.codigo',
-                'licencas_condicionantes.licenca.tipo',
+                'licencas_condicionantes.licenca.tipo_rel',
                 'licencas_condicionantes.condicionante',
             ]),
             ...$response
