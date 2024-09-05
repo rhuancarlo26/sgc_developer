@@ -106,6 +106,7 @@ const salvar = () => {
                 form.reset();
             },
         });
+        return;
     }
 
     form.post(route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.create', servico.value.id), {
