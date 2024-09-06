@@ -25,5 +25,6 @@ Route::prefix('afugentamento-resgate-fauna')->group(function () {
     Route::prefix('/resultado')->group(function () {
         require __DIR__ . '/../../Resultado/Routes/ResultadoRoutes.php';
         require __DIR__ . '/../../Resultado/Routes/Analise/AnaliseRoutes.php';
+        require __DIR__ . '/../../Resultado/Routes/OutraAnalise/OutraAnaliseRoutes.php';
     });
 });
