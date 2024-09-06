@@ -4,8 +4,9 @@ namespace App\Domain\Servico\AfugentamentoResgateFauna\Resultado\Controller\Anal
 
 use App\Domain\Servico\AfugentamentoResgateFauna\Resultado\Service\Analise\AnaliseService;
 use App\Models\AfugentFaunaResultadoModel;
+use App\Shared\Http\Controllers\Controller;
 
-class AnaliseController
+class AnaliseController extends Controller
 {
     public function __construct(private readonly AnaliseService $analiseService) {}
 

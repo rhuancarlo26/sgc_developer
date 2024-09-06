@@ -8,6 +8,9 @@ import BarChart from "@/Components/BarChart.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import { useToast } from 'vue-toastification';
+import { usePage } from "@inertiajs/vue3";
+import { IconEye, IconEyeClosed, IconDots } from "@tabler/icons-vue";
+import Swal from "sweetalert2";
 
 const toast = useToast();
 
@@ -44,6 +47,8 @@ const form = useForm({
 
 const outraAnalise = useForm({
     nome: '',
+    arquivo: null,
+    analise: '',
 });
 
 const chartData = ref({ labels: [], datasets: [] });
@@ -392,6 +397,7 @@ const montarRegistrosEspecie = () => {
 const abrirModal = (item) => {
     resultado.value = item;
     consultaDados();
+    outraAnaliseGet();
     modalDetalhes.value.getBsModal().show();
 }
 
@@ -459,6 +465,19 @@ const consultaDados = () => {
         });
 }
 
+const resultadoOutraAnalise = ref([]);
+
+const outraAnaliseGet = () => {
+    axios.get(route('contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.outra.analise.get', resultado.value.id))
+        .then(response => {
+            console.log(response.data);
+            resultadoOutraAnalise.value = response.data;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+}
+
 const salvarAnalise = (coluna) => {
     if (form.id) {
         form.transform((data) => {
@@ -485,6 +504,62 @@ const salvarAnalise = (coluna) => {
 const cancelar = (ref) => {
     ref.querySelector('.accordion-collapse').classList.remove('show');
     preencheAnalise();
+};
+
+const editarOutraAnalise = (analise) => {
+    outraAnalise.nome = analise.nome;
+    outraAnalise.analise = analise.analise;
+    outraAnalise.id = analise.id;
+};
+
+const salvarOutraAnalise = () => {
+    console.log(outraAnalise);
+    
+    if (outraAnalise.id) {
+        outraAnalise.patch(route('contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.outra.analise.update', { outraAnalise: outraAnalise.id }), {
+            onSuccess: () => {
+                toast.success('Outra análise atualizada com sucesso!');
+                outraAnalise.reset();
+                outraAnaliseGet();
+            }
+        });
+        return;
+    }
+
+    outraAnalise.post(route('contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.outra.analise.create', { resultado: resultado.value.id }), {
+        onSuccess: () => {
+            toast.success('Outra análise salva com sucesso!');
+            outraAnalise.reset();
+            outraAnaliseGet();
+        }
+    });
+};
+
+const destroyOutraAnalise = (analise) => {
+    Swal.fire({
+        title: "Excluir Análise",
+        text: "Deseja continuar?",
+        icon: "warning",
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+    }).then((r) => {
+        if (r.isConfirmed) {
+            axios.delete(route('contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.outra.analise.delete', { outraAnalise: analise.id }))
+                .then(response => {
+                    toast.success('Análise excluída com sucesso!');
+                    outraAnaliseGet();
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        }
+    })
+};
+
+const cancelarOutraAnalise = (ref) => {
+    ref.querySelector('.accordion-collapse').classList.remove('show');
+    outraAnalise.reset();
 };
 
 defineExpose({ abrirModal });
@@ -722,8 +797,8 @@ defineExpose({ abrirModal });
                                 </h2>
                                 <div id="accordion-8" class="accordion-collapse collapse" data-bs-parent="#servico">
                                     <div class="accordion-body pt-0 card-body space-y-5">
-                                        <InputLabel value="Nome da Análise" v-model="outraAnalise.nome" />
-                                        <input type="text" class="form-control" />
+                                        <InputLabel value="Nome da Análise" for="nome" />
+                                        <input type="text" class="form-control" id="nome" v-model="outraAnalise.nome" />
                                         <InputError :message="outraAnalise.errors.nome" />
 
                                         <input type="file" @input="outraAnalise.arquivo = $event.target.files[0]"
@@ -739,6 +814,58 @@ defineExpose({ abrirModal });
                                             <button type="button" class="btn btn-primary mt-2"
                                                 @click="salvarOutraAnalise(outraAnalise)">Salvar</button>
                                         </div>
+
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nome</th>
+                                                    <th>Análise dos Resultados</th>
+                                                    <th>Visualizar Arquivo</th>
+                                                    <th>Ação</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="analise in resultadoOutraAnalise">
+                                                    <td>{{ analise.nome }}</td>
+                                                    <td>{{ analise.analise }}</td>
+                                                    <td>
+                                                        <a v-if="analise.caminho_arquivo"
+                                                            :href="usePage().props.app_url + '/storage/' + analise.caminho_arquivo"
+                                                            target="_blank" title="Visualizar Arquivo">
+                                                            <IconEye />
+                                                        </a>
+                                                        <a v-else href="javascript:void(0);"
+                                                            title="Não é possível visualizar Arquivo">
+                                                            <IconEyeClosed />
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <span class="dropdown">
+                                                            <button class="btn dropdown-toggle align-text-top"
+                                                                data-bs-boundary="viewport" data-bs-toggle="dropdown"
+                                                                aria-expanded="false">
+                                                                <IconDots />
+                                                            </button>
+                                                            <ul class="dropdown-menu"
+                                                                aria-labelledby="dropdownMenuButton">
+                                                                <li>
+                                                                    <a class="dropdown-item"
+                                                                        @click="editarOutraAnalise(analise)"
+                                                                        href="javascript:void(0);">Editar</a>
+                                                                </li>
+                                                                <li>
+                                                                    <a class="dropdown-item"
+                                                                        @click="destroyOutraAnalise(analise)"
+                                                                        href="javascript:void(0);">
+                                                                        Excluir
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
