@@ -11,7 +11,8 @@ import ModalVisualizarCampanha from "./ModalVisualizarCampanha.vue";
 import ModalExcluirCampanha from "./ModalExcluirCampanha.vue";
 import { ref } from "vue";
 import { IconDots } from "@tabler/icons-vue";
-import {Head} from "@inertiajs/vue3";
+import {Head, router} from "@inertiajs/vue3";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 const props = defineProps({
     contrato: { type: Object },
@@ -37,8 +38,11 @@ const abrirModalVisualizarCampanha = (item) => {
     modalNovaCampanha.value.abrirModal(item);
 }
 
-const abrirModalExcluirCampanha = () => {
-    modalExcluirCampanha.value.abrirModal();
+const linkConfirmationRef = ref()
+const abrirModalExcluirCampanha = (id) => {
+    linkConfirmationRef.value.show(() => {
+        router.delete(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete', id))
+    })
 }
 </script>
 
@@ -94,7 +98,7 @@ const abrirModalExcluirCampanha = () => {
                                     <a href="#" class="dropdown-item" @click.prevent="abrirModalVisualizarCampanha(item)">
                                         Visualizar
                                     </a>
-                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalExcluirCampanha">
+                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalExcluirCampanha(item.id)">
                                         Excluir
                                     </a>
                                 </div>
@@ -110,6 +114,7 @@ const abrirModalExcluirCampanha = () => {
         <ModalEditarCampanha ref="modalEditarCampanha" />
         <ModalVisualizarCampanha ref="modalVisualizarCampanha" />
         <ModalExcluirCampanha ref="modalExcluirCampanha" />
+        <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Você tem certeza que deseja excluir esta campanha?' }" />
 
     </AuthenticatedLayout>
 </template>
