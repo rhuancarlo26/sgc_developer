@@ -8,6 +8,7 @@ use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CampanhasService extends BaseModelService
@@ -31,7 +32,7 @@ class CampanhasService extends BaseModelService
         return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
     }
 
-    private function getCampanhas(int $servicoId, array $searchParams, ?array $idsCampanhas = null): LengthAwarePaginator
+    public function getCampanhas(int $servicoId, array $searchParams, ?array $idsCampanhas = null, bool $paginate = true): LengthAwarePaginator|Collection
     {
         return $this->searchAllColumns(...$searchParams)
             ->select([
@@ -66,6 +67,6 @@ class CampanhasService extends BaseModelService
             ->join('estados AS estado_final', 'estado_final.id', '=', 'at_fauna_execucao_campanhas.uf_final')
             ->where('slc.id_servico', $servicoId)
             ->when($idsCampanhas, fn($query) => $query->whereIn('at_fauna_execucao_campanhas.id', $idsCampanhas))
-            ->paginate();
+            ->when($paginate, fn($query) => $query->paginate(), fn($query) => $query->get());
     }
 }
