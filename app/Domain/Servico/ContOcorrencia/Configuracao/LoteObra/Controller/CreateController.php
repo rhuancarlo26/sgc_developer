@@ -14,24 +14,24 @@ use Inertia\Response;
 
 class CreateController extends Controller
 {
-  public function __construct(private readonly LoteObraService $loteObraService)
-  {
-  }
+    public function __construct(private readonly LoteObraService $loteObraService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoContOcorrSupervisaoConfigLote $lote): Response
-  {
-    $response = $this->loteObraService->create($servico);
+    public function index(Contrato $contrato, Servicos $servico, ServicoContOcorrSupervisaoConfigLote $lote): Response
+    {
+        $response = $this->loteObraService->create($servico);
 
-    return Inertia::render('Servico/ContOcorr/Configuracao/LoteObra/Form', [
-      'contrato' => $contrato,
-      'servico' => $servico->load([
-        'tipo',
-        'pmqa_config_lista_parecer',
-        'licencas_condicionantes.licenca.segmentos.uf_inicial',
-        'licencas_condicionantes.licenca.segmentos.uf_final'
-      ]),
-      'lote' => $lote->load(['rodovia.uf']),
-      ...$response
-    ]);
-  }
+        return Inertia::render('Servico/ContOcorr/Configuracao/LoteObra/Form', [
+            'contrato' => $contrato,
+            'servico' => $servico->load([
+                'tipo',
+                'pmqa_config_lista_parecer',
+                'licencas_condicionantes.licenca.segmentos.uf_inicial_rel',
+                'licencas_condicionantes.licenca.segmentos.uf_final_rel'
+            ]),
+            'lote' => $lote->load(['rodovia.uf']),
+            ...$response
+        ]);
+    }
 }

@@ -33,9 +33,9 @@ const form = useForm({
     km_final: null,
     estaca_inicial: null,
     estaca_final: null,
-    lat_inicial: null,
+    lat_inical: null,
     lat_final: null,
-    long_inicial: null,
+    long_inical: null,
     long_final: null,
     ...props.lote
 });
@@ -153,7 +153,7 @@ const brs = computed(() => {
             <InputLabel value="Trecho" for="rodovia"/>
             <select class="form-control form-select" v-model="form.rodovia">
                 <option v-for="rodovia in brs" :key="rodovia" :value="rodovia">{{
-                        `${rodovia.rodovia} - (${rodovia.uf.estado})`
+                        `${rodovia.rodovia} - (${rodovia.uf.nome})`
                     }}
                 </option>
             </select>
@@ -220,9 +220,9 @@ const brs = computed(() => {
     </div>
     <div class="row mb-4">
         <div class="col">
-            <InputLabel value="Latitude inicial" for="lat_inicial"/>
-            <input type="text" class="form-control" v-model="form.lat_inicial">
-            <InputError :message="form.errors.lat_inicial"/>
+            <InputLabel value="Latitude inicial" for="lat_inical"/>
+            <input type="text" class="form-control" v-model="form.lat_inical">
+            <InputError :message="form.errors.lat_inical"/>
         </div>
         <div class="col">
             <InputLabel value="Latitude final" for="lat_final"/>
@@ -230,9 +230,9 @@ const brs = computed(() => {
             <InputError :message="form.errors.lat_final"/>
         </div>
         <div class="col">
-            <InputLabel value="Longitude inicial" for="long_inicial"/>
-            <input type="text" class="form-control" v-model="form.long_inicial">
-            <InputError :message="form.errors.long_inicial"/>
+            <InputLabel value="Longitude inicial" for="long_inical"/>
+            <input type="text" class="form-control" v-model="form.long_inical">
+            <InputError :message="form.errors.long_inical"/>
         </div>
         <div class="col">
             <InputLabel value="Longitude final" for="long_final"/>

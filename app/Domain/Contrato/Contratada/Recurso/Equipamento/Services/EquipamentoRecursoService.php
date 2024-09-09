@@ -57,7 +57,7 @@ class EquipamentoRecursoService extends BaseModelService
                     $caminho = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Equipamento' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $nome);
 
                     $this->modelClassDocumento::create([
-                        'cod_equipamento' => $request['equipamento_id'],
+                        'cod_equipamento' => $request['cod_equipamento'],
                         'nome_arquivo' => $nome,
                         'tipo' => $tipo,
                         'arquivo' => $caminho

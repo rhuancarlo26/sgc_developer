@@ -19,7 +19,7 @@
                         <a @click="abrirVisualizarTrecho()" class="dropdown-item" href="javascript:void(0)">
                             Mapa dos contratos
                         </a>
-                        <a class="dropdown-item" :href="route('contratos.gestao.excel_export')">
+                        <a target="_blank" class="dropdown-item" :href="route('contratos.gestao.excel_export')">
                             Exportar excel
                         </a>
                     </div>
@@ -59,18 +59,19 @@
                                 </span>
                             </p>
                         </td>
-                        <td>{{ item.numero_contrato }}</td>
-                        <td>{{ formatarCnpj(item.cnpj) }}</td>
+                        <td class="text-center">{{ item.numero_contrato }}</td>
+                        <td class="text-center">{{ formatarCnpj(item.cnpj) }}</td>
                         <td>{{ item.contratada }}</td>
                         <td>{{ item.processo_sei }}</td>
-                        <td>{{ item.situacao }}</td>
-                        <td>
+                        <td class="text-center">{{ item.situacao }}</td>
+                        <td class="text-center">
                             <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
                                     data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
                                 <IconDots/>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <NavLink route-name="contratos.contratada.dados_gerais.index" :param="item.id" title="Entrar"
+                                <NavLink route-name="contratos.contratada.dados_gerais.index" :param="item.id"
+                                         title="Entrar"
                                          class="dropdown-item"/>
                                 <a @click="abrirVisualizarContrato(item)" class="dropdown-item"
                                    href="javascript:void(0)">

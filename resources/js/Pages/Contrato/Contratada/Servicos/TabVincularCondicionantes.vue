@@ -10,14 +10,14 @@ const props = defineProps({
 });
 
 const form = useForm({
-  contrato_id: props.servico.contrato_id,
+  contrato_id: props.servico.id_contrato,
   servico_id: props.servico.id,
   licenca: null,
   condicionante: null
 });
 
 const salvarLicencaCondicionante = () => {
-  form.contrato_id = props.servico?.contrato_id;
+  form.contrato_id = props.servico?.id_contrato;
   form.servico_id = props.servico?.id;
 
   form.post(route('contratos.contratada.servicos.condicionante.store'));
@@ -25,7 +25,7 @@ const salvarLicencaCondicionante = () => {
 
 const excluirLicencaCondicionante = (condicionante_id, licenca_id) => {
   router.post(route('contratos.contratada.servicos.condicionante.delete'), {
-    contrato_id: props.servico.contrato_id,
+    contrato_id: props.servico.id_contrato,
     servico_id: props.servico.id,
     licenca_id: licenca_id,
     condicionante_id: condicionante_id
@@ -49,8 +49,8 @@ const excluirLicencaCondicionante = (condicionante_id, licenca_id) => {
         <InputLabel value="Condicionante" for="condicionante" />
         <select name="condicionante" id="condicionante" class="form-select form-control" v-model="form.condicionante">
           <option v-for="condicionante in form.licenca?.condicionantes" :key="condicionante.id" :value="condicionante">
-            {{
-              condicionante.numero_condicionante }}</option>
+              {{ condicionante.numero}} - {{ condicionante.titulo_condicionante }}
+          </option>
         </select>
         <InputError :message="form.errors.licenca_id" />
       </div>

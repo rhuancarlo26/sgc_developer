@@ -2,6 +2,7 @@
 
 namespace App\Domain\Licenca\Shapefile\Services;
 
+use App\Models\Licenca;
 use App\Models\LicencaShapefile;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
@@ -16,18 +17,17 @@ class LicencaShapefileService extends BaseModelService
 {
     use Searchable, Deletable;
 
-    protected string $modelClass = LicencaShapefile::class;
+    protected string $modelClass = Licenca::class;
 
     public function store($request)
     {
-        dd($post);
         $post = [
             'licenca_id' => $request['licenca_id'],
-            'nome_arquivo' => $request['shapefile']->getClientOriginalName(),
-            'coordenada' => $this->getFeatureCollection($request['shapefile'])
+            'nome_file_shape' => $request['shapefile']->getClientOriginalName(),
+            'geo_json' => $this->getFeatureCollection($request['shapefile'])
         ];
-
-        $shapefile = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
+        
+        $shapefile = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['licenca_id']);
 
         return [
             'request' => $shapefile['request']

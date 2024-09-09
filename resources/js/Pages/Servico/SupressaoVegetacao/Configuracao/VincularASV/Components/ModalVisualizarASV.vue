@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import {ref} from "vue";
 import Modal from "@/Components/Modal.vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
 
@@ -10,31 +10,43 @@ const abrirModal = (item) => {
     modalVisualizarASVRef.value.getBsModal().show();
 }
 
-defineExpose({ abrirModal });
+defineExpose({abrirModal});
 </script>
 
 <template>
-    <Modal ref="modalVisualizarASVRef" title="Detalhes" modal-dialog-class="modal-xl">
+    <Modal ref="modalVisualizarASVRef" title="Visualizar ASV" modal-dialog-class="modal-xl">
         <template #body>
-            <div class="row mb-4">
-                <span class="col"><strong>Número: </strong>{{ licenca.numero_licenca ?? '-' }}</span>
-                <span class="col"><strong>Data de emissão: </strong>{{ licenca.data_emissao ? dateTimeFormat(licenca.data_emissao) : '-' }}</span>
-                <span class="col"><strong>Data da vencimento: </strong>{{ licenca.vencimento ? dateTimeFormat(licenca.vencimento) : '-' }}</span>
-            </div>
-            <div class="row mb-4">
-                <span class="col"><strong>Número SEI: </strong>{{ licenca.numero_sei ?? '-'}}</span>
-                <span class="col"><strong>Processo DNIT: </strong>{{ licenca.processo_dnit ?? '-'}}</span>
-                <span class="col"><strong>Emissor: </strong>{{ licenca.emissor ?? '-'}}</span>
-            </div>
-            <div class="row mb-4">
-                <span class="col"><strong>Início subtrecho: </strong>{{ licenca.inicio_subtrecho ?? '-'}}</span>
-                <span class="col"><strong>Fim subtrecho: </strong>{{ licenca.fim_subtrecho ?? '-'}}</span>
-                <span class="col"><strong>Extensão: </strong>{{ licenca.extensao ?? '-'}}</span>
-            </div>
-            <div class="row mb-4">
-                <span class="col"><strong>Empreendimento: </strong>{{ licenca.empreendimento ?? '-'}}</span>
-                <span class="col"><strong>Dias renovação: </strong>{{ licenca.dias_renovacao ?? '-'}}</span>
-                <span class="col"><strong>Renovação: </strong>{{ licenca.renovacao ?? '-'}}</span>
+            <div v-if="licenca">
+                <h3>Informações da Licença</h3>
+                <p class="text-uppercase">
+                    <span class="fw-bold">Número Licença:</span>
+                    <span>{{ licenca.numero_licenca }}</span>
+                </p>
+                <p class="text-uppercase"><span class="fw-bold">Orgão Expeditor:</span> {{ licenca.emissor }} </p>
+                <p class="text-uppercase">
+                    <span class="fw-bold">Tipo da Licença:</span>
+                    <span>{{ licenca.tipo_rel?.sigla }} - {{ licenca.numero_licenca }} </span>
+                </p>
+                <p class="text-uppercase"><span class="fw-bold">Rodovia:</span>
+                    <span v-for="br in licenca.brs?.split(',')" :key="br"
+                          class="badge bg-warning text-white m-1">
+                                                        {{ br }}
+                                                    </span>
+                </p>
+                <p class="text-uppercase"><span class="fw-bold">KM Inicial:</span>
+                    <span v-if="licenca.segmentos">
+                                    {{ Math.min(...licenca.segmentos?.map(segmento => segmento.km_inicio)) }}
+                                    </span>
+                </p>
+                <p class="text-uppercase"><span class="fw-bold">KM Final:</span>
+                    <span v-if="licenca.segmentos">
+                                        {{ Math.max(...licenca.segmentos?.map(segmento => segmento.km_fim)) }}
+                                    </span>
+                </p>
+                <p class="text-uppercase"><span class="fw-bold">Data Inicial:</span>
+                    {{ dateTimeFormat(licenca.data_emissao) }} </p>
+                <p class="text-uppercase"><span class="fw-bold">Vencimento:</span> {{ licenca.vencimento }}
+                </p>
             </div>
         </template>
         <template #footer>

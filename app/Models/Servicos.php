@@ -21,6 +21,11 @@ class Servicos extends Model
 //        return $this->belongsTo(ServicoStatus::class, 'status_aprovacao');
 //    }
 
+    public function contrato(): BelongsTo
+    {
+        return $this->belongsTo(related: Contrato::class, foreignKey: 'id_contrato');
+    }
+
     public function tema(): BelongsTo
     {
         return $this->belongsTo(related: ServicoTema::class, foreignKey: 'tema_servico');
@@ -28,7 +33,7 @@ class Servicos extends Model
 
     public function tipo(): BelongsTo
     {
-        return $this->belongsTo(related: ServicoTipo::class, foreignKey: 'servico');
+        return $this->belongsTo(related: ServicoTipo::class, foreignKey: 'tipo_servico');
     }
 
     public function rhs(): HasManyThrough
@@ -85,7 +90,7 @@ class Servicos extends Model
 
     public function licencas_condicionantes()
     {
-        return $this->hasMany(ServicoLicencaCondicionante::class, 'servico_id');
+        return $this->hasMany(ServicoLicencaCondicionante::class, 'id_servico');
     }
 
     public function pontos(): HasMany
@@ -126,6 +131,11 @@ class Servicos extends Model
     public function parecerOcorrencia(): HasOne
     {
         return $this->hasOne(related: ServicoContOcorrSupervisaoParecerConfiguracao::class, foreignKey: 'fk_servico');
+    }
+
+    public function supervisao_lotes()
+    {
+        return $this->hasMany(ServicoContOcorrSupervisaoConfigLote::class, 'id_servico');
     }
 
 }
