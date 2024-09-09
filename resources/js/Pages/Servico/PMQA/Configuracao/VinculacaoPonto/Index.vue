@@ -7,7 +7,6 @@ import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
 import {Head, Link, router, useForm} from "@inertiajs/vue3";
 import ModalVincularPonto from "./ModalVincularPonto.vue";
-import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
 import {ref} from "vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import {IconTrash} from "@tabler/icons-vue";
@@ -78,9 +77,9 @@ const enviaFiscal = (aprovacao) => {
                 <ModelSearchFormAllColumns :columns="['nome']">
                     <template #action>
                         <NavButton type-button="primary" title="Enviar ao fiscal"
-                                   @click="enviaFiscal(aprovacao)"/>
+                                   @click="enviaFiscal(aprovacao)" v-if="ap(aprovacao)"/>
                         <NavButton @click="abrirModalVincularPonto()" type-button="success" title="Vincular"
-                        />
+                                   v-if="ap(aprovacao)"/>
                     </template>
                 </ModelSearchFormAllColumns>
 
@@ -95,11 +94,10 @@ const enviaFiscal = (aprovacao) => {
                                 <NavButton :icon="IconEye" class="btn-icon" type-button="info"
                                            @click="abrirModalVisualizarPonto(item)"/>
                                 <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
-
+                                           v-if="ap(aprovacao)"
                                            @click="abrirModalVincularPonto(item)"/>
-                                <LinkConfirmation v-slot="confirmation"
-                                                  :options="{ text: 'A remoção de um ponto será permanente.' }"
-                                >
+                                <LinkConfirmation v-slot="confirmation" v-if="ap(aprovacao)"
+                                                  :options="{ text: 'A remoção de um ponto será permanente.' }">
                                     <Link :onBefore="confirmation.show"
                                           :href="route('contratos.contratada.servicos.pmqa.configuracao.vinculacao_ponto.destroy', { contrato: contrato.id, servico: servico.id, lista: item.id })"
                                           as="button" method="delete" type="button" class="btn btn-icon btn-danger">
