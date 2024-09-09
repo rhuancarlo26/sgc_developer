@@ -2,21 +2,17 @@
 
 namespace App\Domain\Servico\MonAtpFauna\Execucao\Registros\app\Services;
 
-use App\Domain\Servico\PMQA\Configuracao\Ponto\Imports\PMQAPontoImport;
 use App\Models\AtFaunaExecucaoRegistro;
 use App\Models\AtFaunaExecucaoRegistroImagem;
-use App\Models\Licenca;
-use App\Models\ServicoMonAtpFaunaVincularABIO;
-use App\Models\ServicoPmqaPonto;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use App\Shared\Utils\ArquivoUtils;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 
 class RegistrosService extends BaseModelService
 {
@@ -24,7 +20,7 @@ class RegistrosService extends BaseModelService
 
     protected string $modelClass = AtFaunaExecucaoRegistro::class;
 
-    public function index(Servicos $servico, array $searchParams)
+    public function index(Servicos $servico, array $searchParams, bool $paginate = true): LengthAwarePaginator|Builder
     {
         return $this->searchAllColumns(...$searchParams)
             ->select([
@@ -43,7 +39,7 @@ class RegistrosService extends BaseModelService
             ->leftJoin('estados', 'estados.id', '=', 'at_fauna_execucao_registro.fk_estado')
             ->join('at_fauna_grupo_amostrado AS fga', 'fga.id', '=', 'at_fauna_execucao_registro.fk_grupo_amostrado')
             ->where('at_fauna_execucao_registro.fk_servico', $servico->id)
-            ->paginate();
+            ->when($paginate, fn($q) => $q->paginate());
     }
 
     public function store(array $request): array
