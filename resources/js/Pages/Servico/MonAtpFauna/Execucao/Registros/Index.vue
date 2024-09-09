@@ -3,15 +3,12 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../../Navbar.vue";
 import NavButton from "@/Components/NavButton.vue";
-import NavLink from "@/Components/NavLink.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import ModalNovoRegistro from "./ModalNovoRegistro.vue";
 import ModalEditarRegistro from "./ModalEditarRegistro.vue";
-import ModalVisualizarRegistro from "./ModalVisualizarRegistro.vue";
 import ModalExcluirRegistro from "./ModalExcluirRegistro.vue";
 import { ref } from "vue";
-import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconDots } from "@tabler/icons-vue";
 import {Head, router} from "@inertiajs/vue3";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
@@ -115,7 +112,6 @@ const abrirModalExcluirRegistro = (id) => {
 
         <ModalNovoRegistro ref="modalNovoRegistro" :campanhas="campanhas" :ufs="ufs" :servico="servico" :show-action="showActionsModal" />
         <ModalEditarRegistro ref="modalEditarRegistro" />
-        <ModalVisualizarRegistro ref="modalVisualizarRegistro" />
         <ModalExcluirRegistro ref="modalExcluirRegistro" />
         <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Você tem certeza que deseja excluir esta foto?' }" />
 

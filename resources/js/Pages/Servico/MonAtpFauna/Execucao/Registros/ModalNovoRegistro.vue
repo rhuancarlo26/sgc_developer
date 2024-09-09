@@ -5,7 +5,7 @@ import {Link, router, useForm} from "@inertiajs/vue3";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
-import {IconDots, IconTrash} from "@tabler/icons-vue";
+import { IconTrash} from "@tabler/icons-vue";
 import Table from "@/Components/Table.vue";
 import axios from "axios";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
@@ -100,7 +100,7 @@ onMounted(() => {
     modalRef.value.$el.addEventListener('hidden.bs.modal', () => {
         form.reset()
         tab.value = null;
-        // imagensRegistro.value = null;
+        imagensRegistro.value = null;
     });
 });
 
@@ -437,7 +437,7 @@ defineExpose({abrirModal});
                                                                       modalRef.getBsModal().hide();
                                                                   }
                                                                 })"
-                                                                   :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete-abio', item.id)"
+                                                                   :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.imagens-delete', item.id)"
                                                                    as="button" method="delete" type="button" class="btn btn-icon btn-danger">
                                                                 <IconTrash/>
                                                             </Link>
