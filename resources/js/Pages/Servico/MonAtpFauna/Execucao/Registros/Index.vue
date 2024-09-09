@@ -8,7 +8,7 @@ import Table from "@/Components/Table.vue";
 import ModalNovoRegistro from "./ModalNovoRegistro.vue";
 import ModalEditarRegistro from "./ModalEditarRegistro.vue";
 import ModalExcluirRegistro from "./ModalExcluirRegistro.vue";
-import { ref } from "vue";
+import {computed, ref} from "vue";
 import { IconDots } from "@tabler/icons-vue";
 import {Head, router} from "@inertiajs/vue3";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
@@ -44,6 +44,15 @@ const abrirModalExcluirRegistro = (id) => {
         router.delete(route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.delete', id))
     })
 }
+
+const urlQueryParams = computed(() => {
+    const params = new URLSearchParams(window.location.search);
+    const result = {};
+    for (const [key, value] of params.entries()) {
+        result[key] = value;
+    }
+    return result;
+})
 </script>
 
 <template>
@@ -70,6 +79,9 @@ const abrirModalExcluirRegistro = (id) => {
             <template #body>
                 <ModelSearchFormAllColumns :columns="[]">
                     <template #action>
+                        <a v-if="data.data?.length" class="btn btn-success me-1" :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.export', { servico: servico.id, _query: urlQueryParams })">
+                            Exportar Excel
+                        </a>
                         <NavButton @click="abrirModalNovoRegistro()" type-button="info" title="Novo Registro" />
                     </template>
                 </ModelSearchFormAllColumns>
