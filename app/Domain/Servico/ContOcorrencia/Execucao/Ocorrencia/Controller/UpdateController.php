@@ -32,9 +32,9 @@ class UpdateController extends Controller
         ];
 
         if ($request->form === 1) {
-            $post['nome_id'] = $request['tipo'] . '.' . $request->num_por_servico . '.' . $request->rodovia['rodovia'] . '-' . Uf::find($request->rodovia['uf_id'])->uf;
+            $post['nome_id'] = $request['tipo'] . '.' . $request->num_por_servico . '.' . $request->rodovia['rodovia'] . '-' . Uf::find($request->rodovia['uf']['id'])->uf;
             $post['id_rodovia'] = $request->rodovia['id'];
-            $post['id_uf'] = $request->rodovia['uf_id'];
+            $post['id_uf'] = $request->rodovia['uf']['id'];
             $post['id_lote'] = $request->lote['id'];
         }
 

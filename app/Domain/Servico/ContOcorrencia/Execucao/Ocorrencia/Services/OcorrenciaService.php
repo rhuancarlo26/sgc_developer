@@ -3,6 +3,7 @@
 namespace App\Domain\Servico\ContOcorrencia\Execucao\Ocorrencia\Services;
 
 use App\Models\Rodovia;
+use App\Models\ServicoConOcorrSupervisaoExecOcorrenciaAnterior;
 use App\Models\ServicoConOcorrOcorrenciSupervisaoExecOcorrencia;
 use App\Models\ServicoConOcorrSupervicaoExecOcorrenciaRegistro;
 use App\Models\ServicoConOcorrSupervisaoExecOcorrenciaHistorico;
@@ -29,17 +30,28 @@ class OcorrenciaService extends BaseModelService
     protected string $modelClassVistoria = ServicoConOcorrSupervisaoExecOcorrenciaVistoria::class;
     protected string $modelClassVistoriaImg = ServicoConOcorrSupervisaoExecOcorrenciaVistoriaImg::class;
     protected string $modelClassVistoriaArquivo = ServicoConOcorrSupervisaoExecOcorrenciaVistoriaArquivoPrazo::class;
+    protected string $modelClassOcorrenciaAnterior = ServicoConOcorrSupervisaoExecOcorrenciaAnterior::class;
+
 
     public function index(Servicos $servico, array $searchParams): array
     {
         return [
             'ocorrencias' => $this->searchAllColumns(...$searchParams)
-                ->with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento', 'vistorias'])
+                ->with([
+                    'lote',
+                    'rodovia.uf',
+                    'registros',
+                    'historico.levantamento',
+                    'ocorrencia_anterior',
+                    'vistorias' => function ($query) {
+                        $query->latest();
+                    }
+                ])
                 ->where('id_servico', $servico->id)
                 ->paginate()
                 ->appends($searchParams),
             'ocorrencias_em_aberto' => $this->modelClass::with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
-                ->where('id_servico', $servico->id)->where('rnc_direto', 'RNC')->get()
+                ->where('id_servico', $servico->id)->where('rnc_direto', 1)->get()
         ];
     }
 
@@ -82,6 +94,145 @@ class OcorrenciaService extends BaseModelService
 
     public function storeVistoria(array $post)
     {
+        $dataOcorrencia = Carbon::parse($post['ocorrencia']['data_ocorrencia'])->addDays($post['ocorrencia']['prazo']);
+        $dataVistoria = Carbon::parse($post['vistoria']['data_vistoria']);
+
+        $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
+            'id_ocorrencia' => $post['ocorrencia']['id'],
+            'id_ocorrencia_levantamento' => 3
+        ]);
+
+        // verifica se o prazo é um caractere numérico
+        if (ctype_digit($post['ocorrencia']['prazo'])) {
+
+            if ($post['vistoria']['corrigido'] === 'Não') {
+                // se vistoria_dias for maior que prazo da ocorrencia então, CRIA-SE UMA NOVA OCORRENCIA
+                if ($dataVistoria->greaterThanOrEqualTo($dataOcorrencia)) {
+                    // se o tipo_vistoria for 'RNC' e tipo da ocorrencia for 'ROA'
+                    if ($post['vistoria']['tipo_vistoria'] != $post['ocorrencia']['tipo']) {
+                        // atualizando o status da ocorrencia anterior como 'não atendida'
+                        $this->dataManagement->update(entity: $this->modelClass, infos: [
+                            ...$post['ocorrencia'],
+                            'status' => 'Não Antendida'
+                        ], id: $post['ocorrencia']['id']);
+                        // inserindo na nova ocorrencia alguns dados vindos da vistoria
+
+                        $ocorrencia = [
+                            ...$post['ocorrencia'],
+//                            'intensidade' => $post['vistoria']['intensidade_vistoria'],
+//                            'tipo' => $post['vistoria']['tipo_vistoria'],
+                            'status' => 'Em aberto',
+                            'envio_empresa' => 'Não',
+//                            'zona' => $post['ocorrencia']['zona'] ?? '-',
+//                            'possivel_causa' => $post['ocorrencia']['possivel_causa'] ?? '-',
+//                            'descricao_causa' => $post['ocorrencia']['descricao_causa'] ?? '-',
+//                            'aprovado_rnc' => $post['ocorrencia']['aprovado_rnc'] ?? '-',
+                        ];
+//                        if (array_key_exists('acordo_prazo', $post['vistoria'])) {
+//                            $ocorrencia['prazo'] = $post['vistoria']['prazo_vistoria'];
+//                            $ocorrencia['dias_restantes'] = $post['vistoria']['prazo_vistoria'];
+//                        } else {
+//                            $ocorrencia['prazo'] = $post['ocorrencia']['prazo'];
+//                            $ocorrencia['dias_restantes'] = $post['ocorrencia']['prazo'];
+//                        }
+                        $lastOcorrencia = $this->modelClass::where('id_servico', $post['ocorrencia']['id_servico'])->where('tipo', $post['ocorrencia']['tipo'])->orderby('num_por_servico', 'DESC')->first() ?? 0;
+
+                        $ocorrencia['nome_id'] = $post['ocorrencia']['tipo'] . '.' . str_pad(($lastOcorrencia->num_por_servico ?? 0) + 1, 2, '0', STR_PAD_LEFT) . '.' . $post['ocorrencia']['rodovia']['rodovia'] . '-' . Uf::find($post['ocorrencia']['rodovia']['estados_id'])->uf;
+                        $ocorrencia['num_por_servico'] = str_pad(($lastOcorrencia->num_por_servico ?? 0) + 1, 2, '0', STR_PAD_LEFT);
+
+                        $novaOcorrencia = $this->dataManagement->create(entity: $this->modelClass, infos: $ocorrencia);
+
+                        $this->dataManagement->create(entity: $this->modelClassOcorrenciaAnterior, infos: [
+                            'id_ocorrencia_vigente' => $novaOcorrencia['model']['id'],
+                            'id_ocorrencia_anterior' => $post['ocorrencia']['id']
+                        ]);
+
+                        $imagens = $this->modelClassRegistro::where('id_ocorrencia', $post['ocorrencia']['id'])->get();
+
+                        foreach ($imagens as $imagem) {
+                            $this->dataManagement->create(entity: $this->modelClassRegistro, infos: [
+                                ...$imagem,
+                                'id_ocorrencia' => $novaOcorrencia['model']['id']
+                            ]);
+                        }
+
+                        $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
+                            'id_ocorrencia' => $novaOcorrencia['model']['id'],
+                            'id_ocorrencia_levantamento' => 1
+                        ]);
+                    } else {
+//                      se o tipo_vistoria for igual ao tipo da ocorrencia, então atualiza a ocorrencia
+                        $ocorrencia = [
+                            ...$post['ocorrencia'],
+//                            'intensidade' => $post['ocorrencia']['intensidade'],
+                            'envio_empresa' => 'Não'
+                        ];
+
+//                        if (array_key_exists('acordo_prazo', $post['vistoria'])) {
+//                            $ocorrencia['prazo'] = $post['vistoria']['prazo_vistoria'];
+//                            $ocorrencia['dias_restantes'] = $post['vistoria']['prazo_vistoria'];
+//                        }
+
+                        $this->dataManagement->update(entity: $this->modelClass, infos: $ocorrencia, id: $post['ocorrencia']['id']);
+                    }
+                } else {
+//                    se vistoria_dias for menor que prazo da ocorrencia então atualiza a ocorrencia
+                    $ocorrencia = [
+                        ...$post['ocorrencia'],
+                        'intensidade' => $post['vistoria']['intensidade_vistoria'],
+                        'envio_empresa' => 'Não'
+                    ];
+
+                    if (array_key_exists('acordo_prazo', $post['vistoria'])) {
+                        if ($post['vistoria']['tipo_vistoria'] === 'RNC') {
+                            $ocorrencia['prazo'] = $post['vistoria']['prazo_vistoria'];
+                            $ocorrencia['dias_restantes'] = $post['vistoria']['prazo_vistoria'];
+                        } else {
+//                            $ocorrencia['dias_restantes'] = $post['vistoria']['dias_restantes'];
+                        }
+                    }
+
+                    $this->dataManagement->update(entity: $this->modelClass, infos: $ocorrencia, id: $post['ocorrencia']['id']);
+                }
+            } else {
+//                se a ocorrencia for corrigida
+                $ocorrencia = [
+                    ...$post['ocorrencia'],
+                    'envio_empresa' => 'Não',
+                    'status' => 'Atendida'
+                ];
+
+                $this->dataManagement->update(entity: $this->modelClass, infos: $ocorrencia, id: $post['ocorrencia']['id']);
+
+                $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
+                    'id_ocorrencia' => $post['ocorrencia']['id'],
+                    'id_ocorrencia_levantamento' => 9
+                ]);
+            }
+        } else {
+//            se o prazo não um caractere numérico a ocorrencia será um 'RNC' automaticamente atualizar o campo de envio
+            $ocorrencia = [
+                ...$post['ocorrencia'],
+                'intensidade' => $post['vistoria']['intensidade_vistoria'],
+                'envio_empresa' => 'Não'
+            ];
+
+//            e atualizar o campo de status da ocorrencia como 'atendida' se estiver corrigida
+            if ($post['vistoria']['corrigido'] === 'Sim') {
+                $ocorrencia['status'] = 'Atendida';
+
+                $this->dataManagement->create(entity: $this->modelClassHistorico, infos: [
+                    'id_ocorrencia' => $post['ocorrencia']['id'],
+                    'id_ocorrencia_levantamento' => 9
+                ]);
+            } else {
+                $ocorrencia['prazo'] = $post['vistoria']['prazo_vistoria'];
+                $ocorrencia['dias_restantes'] = $post['vistoria']['prazo_vistoria'];
+            }
+
+            $this->dataManagement->update(entity: $this->modelClassHistorico, infos: $ocorrencia, id: $post['ocorrencia']['id']);
+        }
+
         return $this->dataManagement->create(entity: $this->modelClassVistoria, infos: $post['vistoria']);
     }
 

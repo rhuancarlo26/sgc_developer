@@ -22,4 +22,10 @@ Route::prefix('/cont_ocorrencia')->group(function () {
             require __DIR__ . '/../../Execucao/ACA/Routes/ACARoutes.php';
         });
     });
+    Route::prefix('/resultado')->group(function () {
+        require __DIR__ . '/../../Resultado/Routes/ResultadoRoutes.php';
+    });
+    Route::prefix('/relatorio')->group(function () {
+        require __DIR__ . '/../../Relatorio/Routes/RelatorioRoutes.php';
+    });
 });

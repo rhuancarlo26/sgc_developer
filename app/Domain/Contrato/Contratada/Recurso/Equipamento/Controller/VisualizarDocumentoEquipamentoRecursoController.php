@@ -10,12 +10,12 @@ use Illuminate\Http\Request;
 
 class VisualizarDocumentoEquipamentoRecursoController extends Controller
 {
-  public function __construct(private readonly EquipamentoRecursoService $equimentoRecursoService)
-  {
-  }
+    public function __construct(private readonly EquipamentoRecursoService $equimentoRecursoService)
+    {
+    }
 
-  public function index(RecursoEquipamentoDocumento $documento)
-  {
-    return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . $documento->caminho);
-  }
+    public function index(RecursoEquipamentoDocumento $documento)
+    {
+        return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . $documento->arquivo);
+    }
 }

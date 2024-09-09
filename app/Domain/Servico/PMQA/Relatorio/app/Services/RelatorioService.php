@@ -15,44 +15,43 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class RelatorioService extends BaseModelService
 {
-  use Searchable, Deletable;
+    use Searchable, Deletable;
 
-  protected string $modelClass = ServicoPmqaRelatorio::class;
+    protected string $modelClass = ServicoPmqaRelatorio::class;
 
-  public function index(Servicos $servico, array $searchParams): array
-  {
-    $relatorios = $this->searchAllColumns(...$searchParams)
-      ->with([
-        'status',
-        'resultado.analises',
-        'resultado.analise_iqa',
-        'resultado.outras_analises',
-        'resultado.campanhas.pontos.lista.parametros'
-      ])
-      ->where('servico_id', $servico->id)
-      ->paginate()
-      ->appends($searchParams);
+    public function index(Servicos $servico, array $searchParams): array
+    {
+        $relatorios = $this->searchAllColumns(...$searchParams)
+            ->with([
+                'resultado.analises',
+                'resultado.analise_iqa',
+                'resultado.outras_analises',
+                'resultado.campanhas.pontos.lista.parametros'
+            ])
+            ->where('fk_servico', $servico->id)
+            ->paginate()
+            ->appends($searchParams);
 
-    $resultados = ServicoPmqaResultado::with(['campanhas'])->where('servico_id', $servico->id)->get();
+        $resultados = ServicoPmqaResultado::with(['campanhas'])->where('fk_servico', $servico->id)->get();
 
-    return [
-      'relatorios' => $relatorios,
-      'resultados' => $resultados
-    ];
-  }
+        return [
+            'relatorios' => $relatorios,
+            'resultados' => $resultados
+        ];
+    }
 
-  public function store(array $request): array
-  {
-    return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
-  }
+    public function store(array $request): array
+    {
+        return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+    }
 
-  public function update(array $request): array
-  {
-    return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
-  }
+    public function update(array $request): array
+    {
+        return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+    }
 
-  public function destroy(ServicoPmqaRelatorio $relatorio): array
-  {
-    return $this->dataManagement->delete(entity: $this->modelClass, id: $relatorio->id);
-  }
+    public function destroy(ServicoPmqaRelatorio $relatorio): array
+    {
+        return $this->dataManagement->delete(entity: $this->modelClass, id: $relatorio->id);
+    }
 }

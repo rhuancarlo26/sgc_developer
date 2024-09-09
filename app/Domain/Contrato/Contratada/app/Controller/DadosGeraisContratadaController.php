@@ -10,14 +10,14 @@ use Inertia\Response;
 
 class DadosGeraisContratadaController extends Controller
 {
-  public function __construct(private readonly DadosGeraisService $dadosGeraisService)
-  {
-  }
+    public function __construct(private readonly DadosGeraisService $dadosGeraisService)
+    {
+    }
 
-  public function index(Contrato $contrato): Response
-  {
-    $response = $this->dadosGeraisService->index($contrato);
+    public function index(Contrato $contrato): Response
+    {
+        $response = $this->dadosGeraisService->index($contrato);
 
-    return Inertia::render('Contrato/Contratada/DadosGerais/Index', $response);
-  }
+        return Inertia::render('Contrato/Contratada/DadosGerais/Index', $response);
+    }
 }

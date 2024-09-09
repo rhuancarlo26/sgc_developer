@@ -14,7 +14,7 @@ use App\Domain\Servico\PMQA\app\Utils\ConfigucacaoParecer;
 class IndexController extends Controller
 {
     public function __construct(
-        private readonly PontoService $pontoService,
+        private readonly PontoService        $pontoService,
         private readonly ConfigucacaoParecer $configucacaoParecer
     )
     {
@@ -28,7 +28,7 @@ class IndexController extends Controller
 
         return Inertia::render('Servico/PMQA/Configuracao/Ponto/Index', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo']),
+            'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
             ...$response,
             ...$this->configucacaoParecer->get($servico->id)
         ]);

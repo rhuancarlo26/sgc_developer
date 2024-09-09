@@ -9,16 +9,16 @@ class ServicoPmqaRelatorio extends Model
 {
     use HasFactory;
 
-    protected $table = 'servico_pmqa_relatorios';
+    protected $table = 'relatorio';
     protected $guarded = ['id', 'created_at'];
 
     public function status()
     {
-        return $this->belongsTo(ServicoStatus::class, 'status_id');
+        return $this->belongsTo(ServicoStatus::class, 'fk_status');
     }
 
     public function resultado()
     {
-        return $this->belongsTo(ServicoPmqaResultado::class, 'resultado_id');
+        return $this->belongsTo(ServicoPmqaResultado::class, 'fk_resultado');
     }
 }
