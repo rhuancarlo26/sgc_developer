@@ -11,4 +11,9 @@ class ServicoPassagemFaunaConfigAbioRet extends Model
 
     protected $table = 'passagem_fauna_config_abio_ret';
     protected $guarded = ['id'];
+
+    public function abio()
+    {
+        return $this->belongsTo(ServicoPassagemFaunaConfigAbio::class, 'id_abio');
+    }
 }
