@@ -24,7 +24,7 @@ class CreateController extends Controller
         return Inertia::render('Servico/PassagemFauna/Execucao/Registro/Form', [
             'contrato' => $contrato,
             'servico' => $servico->load(['tipo']),
-            'registro' => $registro,
+            'registro' => $registro->load(['imagem']),
             ...$response
         ]);
     }

@@ -7,6 +7,8 @@ import TabDadosGerais from "./TabDadosGerais.vue";
 import TabIdentificacaoEspecime from "./TabIdentificacaoEspecime.vue";
 import TabDadosEspecime from "./TabDadosEspecime.vue";
 import TabConservacaoEspecime from "./TabConservacaoEspecime.vue";
+import TabRegistroFotografico from "./TabRegistroFotografico.vue";
+import TabObservacao from "./TabObservacao.vue";
 
 const props = defineProps({
     contrato: {type: Object},
@@ -29,7 +31,8 @@ const form = useForm({
     latitude: null,
     longitude: null,
     tipo: null,
-    ...props.registro
+    ...props.registro,
+    arquivo: null
 });
 
 const salvarRegistro = () => {
@@ -42,6 +45,25 @@ const salvarRegistro = () => {
         servico: props.servico.id
     }), {
         onSuccess: () => form.id = props.registro.id
+    });
+}
+
+const salvarArquivo = () => {
+    form.post(route('contratos.contratada.servicos.passagem_fauna.execucao.registro.store_arquivo', {
+        contrato: props.contrato.id,
+        servico: props.servico.id
+    }), {
+        onSuccess: () => form.imagem = props.registro.imagem
+    });
+}
+
+const excluirArquivo = () => {
+    form.delete(route('contratos.contratada.servicos.passagem_fauna.execucao.registro.delete_imagem', {
+        contrato: props.contrato.id,
+        servico: props.servico.id,
+        imagem: form.imagem.id
+    }), {
+        onSuccess: () => form.imagem = props.registro.imagem
     });
 }
 
@@ -94,6 +116,18 @@ const salvarRegistro = () => {
                                    tabindex="-1"
                                    role="tab">Status de conservação do espécime</a>
                             </li>
+                            <li class="nav-item" role="presentation">
+                                <a href="#tab-registro-fotografico" class="nav-link" data-bs-toggle="tab"
+                                   aria-selected="false"
+                                   tabindex="-1"
+                                   role="tab">Registro fotográfico</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a href="#tab-observacao" class="nav-link" data-bs-toggle="tab"
+                                   aria-selected="false"
+                                   tabindex="-1"
+                                   role="tab">Observações</a>
+                            </li>
                         </ul>
                     </div>
                     <div class="card-body">
@@ -111,6 +145,14 @@ const salvarRegistro = () => {
                             <div class="tab-pane" id="tab-conservacao-especime" role="tabpanel">
                                 <TabConservacaoEspecime @salvar-registro="salvarRegistro()" :form="form"
                                                         :status_conservacoes="status_conservacoes"/>
+                            </div>
+                            <div class="tab-pane" id="tab-registro-fotografico" role="tabpanel">
+                                <TabRegistroFotografico @salvar-arquivo="salvarArquivo()"
+                                                        @excluir-registro="excluirArquivo()" :contrato="contrato"
+                                                        :servico="servico" :form="form"/>
+                            </div>
+                            <div class="tab-pane" id="tab-observacao" role="tabpanel">
+                                <TabObservacao @salvar-registro="salvarRegistro()" :form="form"/>
                             </div>
                         </div>
                     </div>
