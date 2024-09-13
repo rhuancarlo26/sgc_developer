@@ -31,6 +31,20 @@ const form = useForm({
     latitude: null,
     longitude: null,
     tipo: null,
+    classe: null,
+    ordem: null,
+    familia: null,
+    genero: null,
+    especie: null,
+    nome_comum: null,
+    sexo: null,
+    faixa_etaria: null,
+    n_individuos: null,
+    data_registro: null,
+    hora_registro: null,
+    id_status_conservacao_federal: null,
+    id_status_conservacao_iucn: null,
+    obs: null,
     ...props.registro,
     arquivo: null
 });
@@ -98,36 +112,38 @@ const excluirArquivo = () => {
                                    aria-selected="true"
                                    role="tab">Dados gerais</a>
                             </li>
-                            <li class="nav-item" role="presentation">
-                                <a href="#tab-identificacao-especime" class="nav-link" data-bs-toggle="tab"
-                                   aria-selected="false"
-                                   tabindex="-1"
-                                   role="tab">Identificação do espécime</a>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <a href="#tab-dados-especime" class="nav-link" data-bs-toggle="tab"
-                                   aria-selected="false"
-                                   tabindex="-1"
-                                   role="tab">Dados do espécime</a>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <a href="#tab-conservacao-especime" class="nav-link" data-bs-toggle="tab"
-                                   aria-selected="false"
-                                   tabindex="-1"
-                                   role="tab">Status de conservação do espécime</a>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <a href="#tab-registro-fotografico" class="nav-link" data-bs-toggle="tab"
-                                   aria-selected="false"
-                                   tabindex="-1"
-                                   role="tab">Registro fotográfico</a>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <a href="#tab-observacao" class="nav-link" data-bs-toggle="tab"
-                                   aria-selected="false"
-                                   tabindex="-1"
-                                   role="tab">Observações</a>
-                            </li>
+                            <template v-if="form.id">
+                                <li class="nav-item" role="presentation">
+                                    <a href="#tab-identificacao-especime" class="nav-link" data-bs-toggle="tab"
+                                       aria-selected="false"
+                                       tabindex="-1"
+                                       role="tab">Identificação do espécime</a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a href="#tab-dados-especime" class="nav-link" data-bs-toggle="tab"
+                                       aria-selected="false"
+                                       tabindex="-1"
+                                       role="tab">Dados do espécime</a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a href="#tab-conservacao-especime" class="nav-link" data-bs-toggle="tab"
+                                       aria-selected="false"
+                                       tabindex="-1"
+                                       role="tab">Status de conservação do espécime</a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a href="#tab-registro-fotografico" class="nav-link" data-bs-toggle="tab"
+                                       aria-selected="false"
+                                       tabindex="-1"
+                                       role="tab">Registro fotográfico</a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a href="#tab-observacao" class="nav-link" data-bs-toggle="tab"
+                                       aria-selected="false"
+                                       tabindex="-1"
+                                       role="tab">Observações</a>
+                                </li>
+                            </template>
                         </ul>
                     </div>
                     <div class="card-body">
@@ -136,24 +152,26 @@ const excluirArquivo = () => {
                                 <TabDadosGerais @salvar-registro="salvarRegistro()" :form="form" :campanhas="campanhas"
                                                 :passagens="passagens"/>
                             </div>
-                            <div class="tab-pane" id="tab-identificacao-especime" role="tabpanel">
-                                <TabIdentificacaoEspecime @salvar-registro="salvarRegistro()" :form="form"/>
-                            </div>
-                            <div class="tab-pane" id="tab-dados-especime" role="tabpanel">
-                                <TabDadosEspecime @salvar-registro="salvarRegistro()" :form="form"/>
-                            </div>
-                            <div class="tab-pane" id="tab-conservacao-especime" role="tabpanel">
-                                <TabConservacaoEspecime @salvar-registro="salvarRegistro()" :form="form"
-                                                        :status_conservacoes="status_conservacoes"/>
-                            </div>
-                            <div class="tab-pane" id="tab-registro-fotografico" role="tabpanel">
-                                <TabRegistroFotografico @salvar-arquivo="salvarArquivo()"
-                                                        @excluir-registro="excluirArquivo()" :contrato="contrato"
-                                                        :servico="servico" :form="form"/>
-                            </div>
-                            <div class="tab-pane" id="tab-observacao" role="tabpanel">
-                                <TabObservacao @salvar-registro="salvarRegistro()" :form="form"/>
-                            </div>
+                            <template v-if="form.id">
+                                <div class="tab-pane" id="tab-identificacao-especime" role="tabpanel">
+                                    <TabIdentificacaoEspecime @salvar-registro="salvarRegistro()" :form="form"/>
+                                </div>
+                                <div class="tab-pane" id="tab-dados-especime" role="tabpanel">
+                                    <TabDadosEspecime @salvar-registro="salvarRegistro()" :form="form"/>
+                                </div>
+                                <div class="tab-pane" id="tab-conservacao-especime" role="tabpanel">
+                                    <TabConservacaoEspecime @salvar-registro="salvarRegistro()" :form="form"
+                                                            :status_conservacoes="status_conservacoes"/>
+                                </div>
+                                <div class="tab-pane" id="tab-registro-fotografico" role="tabpanel">
+                                    <TabRegistroFotografico @salvar-arquivo="salvarArquivo()"
+                                                            @excluir-registro="excluirArquivo()" :contrato="contrato"
+                                                            :servico="servico" :form="form"/>
+                                </div>
+                                <div class="tab-pane" id="tab-observacao" role="tabpanel">
+                                    <TabObservacao @salvar-registro="salvarRegistro()" :form="form"/>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
