@@ -18,7 +18,7 @@ defineProps({
         </Link>
     </li>
 </template>
-<style scoped> 
+<style scoped>
     .dropdown-item {
         width: 176px;
         height: 36px;

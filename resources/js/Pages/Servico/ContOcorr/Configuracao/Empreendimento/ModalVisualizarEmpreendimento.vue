@@ -33,7 +33,7 @@ defineExpose({abrirModal});
                         <tbody>
                         <tr>
                             <th>Nome</th>
-                            <td>{{ empreendimento.licenca?.tipo?.nome }}</td>
+                            <td>{{ empreendimento.licenca?.tipo_rel?.nome }}</td>
                         </tr>
                         <tr>
                             <th>Empreendimento</th>
