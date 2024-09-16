@@ -1,328 +1,462 @@
-<!-- resources\js\Pages\Servico\MonAtpFauna\Execucao\Registros\ModalNovoRegistro.vue -->
+<script setup>
+
+import {onMounted, ref, watch} from "vue";
+import {Link, router, useForm} from "@inertiajs/vue3";
+import InputLabel from "@/Components/InputLabel.vue";
+import InputError from "@/Components/InputError.vue";
+import Modal from "@/Components/Modal.vue";
+import { IconTrash} from "@tabler/icons-vue";
+import Table from "@/Components/Table.vue";
+import axios from "axios";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+
+const props = defineProps({
+    showAction: {type: Boolean, default: true},
+    ufs: {type: Array},
+    campanhas: {type: Array},
+    servico: {type: Object},
+})
+
+const form = useForm({
+    id: null,
+    arquivo: null,
+    fk_servico: null,
+    fk_campanha: null,
+    fk_grupo_amostrado: null,
+    data_registro: null,
+    fk_estado: null,
+    km: null,
+    hora_registro: null,
+    latitude: null,
+    longitude: null,
+    sentido: null,
+    margem: null,
+    classe: null,
+    ordem: null,
+    familia: null,
+    genero: null,
+    especie: null,
+    nome_comum: null,
+    sexo: null,
+    faixa_etaria: null,
+    coletado: null,
+    n_registro_tombamento: null,
+    carcaca_removida: null,
+    reducao_biologica: null,
+    n_individuos: null,
+    estadual: null,
+    federal: null,
+    iucn: null,
+});
+
+const save = () => {
+    form.transform((data) => ({
+        ...data,
+        fk_servico: props.servico.id,
+    }));
+
+    const onSuccess = () => {
+        modalRef.value.getBsModal().hide();
+        form.reset();
+    }
+
+    if (form.id !== null) {
+        form.patch(route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.update'), {
+            preserveState: true,
+            onSuccess
+        })
+        return
+    }
+
+    form.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.store'), {
+        preserveState: true,
+        onSuccess
+    })
+}
+
+const tab = ref(null)
+const modalRef = ref();
+const abrirModal = (item = null) => {
+    form.reset()
+    Object.assign(form, item)
+    modalRef.value.getBsModal().show();
+    tab.value = 'registro_local';
+}
+
+const getImagensRegistro = async () => {
+    const {data} = await axios.get(route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.imagens', form.id));
+    return data;
+}
+
+const imagensRegistro = ref(null)
+
+watch(tab, async (value) => {
+    if (value === 'registro_fotografico' && !imagensRegistro.value) {
+        imagensRegistro.value = await getImagensRegistro();
+    }
+}, {immediate: true});
+
+onMounted(() => {
+    modalRef.value.$el.addEventListener('hidden.bs.modal', () => {
+        form.reset()
+        tab.value = null;
+        imagensRegistro.value = null;
+    });
+});
+
+defineExpose({abrirModal});
+
+</script>
+
 <template>
-    <div class="modal fade" ref="modalNovoRegistro" tabindex="-1" aria-labelledby="modalNovoRegistroLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalNovoRegistroLabel">
-                        Novo Registro
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-bs-toggle="tab" href="#local" role="tab">
-                                Local
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#ident_especime" role="tab">
-                                Identificação do Espécime
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#dados_especime" role="tab"> 
-                                Dados do Espécime
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#status_especime" role="tab">
-                                Status de conservação do espécime
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#registro_fotografico" role="tab">
-                                Registro fotográfico
-                            </a>
-                        </li>
-                    </ul>
-                    <div id="myTabContent" class="tab-content">
-                        <div class="tab-pane fade show active" id="local" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-2">
-                                    <label for="campanha_id">ID registro</label> 
-                                    <input type="text" id="campanha_id" disabled="disabled" class="form-control">
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <label>Selecionar campanha</label> 
-                                    <select class="form-control">
-                                        <option value="1"> 1</option>
-                                        <option value="2"> 2</option>
-                                        <option value="3"> 3</option>
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <label>Grupo amostrado</label> 
-                                    <select id="id_grupo" class="form-control">
-                                        <option value="1">Avifauna</option>
-                                        <option value="2">Herpetofauna</option>
-                                        <option value="3">Mastofauna</option>
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <label>hora Registro</label> 
-                                    <input type="date" class="form-control">
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <label for="tipo_ambiente">UF:</label> 
-                                    <select name="uf" id="uf" class="form-control form-control">
-                                        <option value="1">AC</option>
-                                        <option value="2">AL</option>
-                                        <option value="3">AM</option>
-                                        <option value="4">AP</option>
-                                        <option value="5">BA</option>
-                                        <option value="6">CE</option>
-                                        <option value="7">DF</option>
-                                        <option value="8">ES</option>
-                                        <option value="9">GO</option>
-                                        <option value="10">MA</option>
-                                        <option value="11">MG</option>
-                                        <option value="12">MS</option>
-                                        <option value="13">MT</option>
-                                        <option value="14">PA</option>
-                                        <option value="15">PB</option>
-                                        <option value="16">PE</option>
-                                        <option value="17">PI</option>
-                                        <option value="18">PR</option>
-                                        <option value="19">RJ</option>
-                                        <option value="20">RN</option>
-                                        <option value="21">RO</option>
-                                        <option value="22">RR</option>
-                                        <option value="23">RS</option>
-                                        <option value="24">SC</option>
-                                        <option value="25">SE</option>
-                                        <option value="26">SP</option>
-                                        <option value="27">TO</option>
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <label>KM</label> 
-                                    <input type="text" class="form-control">
-                                </div>
-                                <div class="col-4">
-                                    <label>Hora Registro</label> 
-                                    <input type="time" class="form-control">
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <label>Latitude</label> 
-                                    <input type="text" class="form-control">
-                                </div>
-                                <div class="col-4">
-                                    <label>Longitude</label> 
-                                    <input type="text" class="form-control">
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-2">
-                                    <label>Sentido</label>
-                                    <br> 
-                                    <input type="radio" name="registro_sentido" value="C">
-                                    Crescente
-                                    <br> 
-                                    <input type="radio" name="registro_sentido" value="D">
-                                    Decrescente
-                                </div>
-                                <div class="col-2">
-                                    <label>Margem</label>
-                                    <br> 
-                                    <input type="radio" name="registro_margem" value="E">
-                                    Esquerda
-                                    <br> 
-                                    <input type="radio" name="registro_margem" value="D">
-                                    Direita
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="ident_especime" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <label>Classe</label> 
-                                    <select class="form-control"></select>
-                                </div>
-                                <div class="col-4">
-                                    <label>Ordem</label> 
-                                    <input type="text" class="form-control">
-                                </div>
-                                <div class="col-4">
-                                    <label>Família</label> 
-                                    <input type="text" class="form-control">
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <label>Gênero</label> <input type="text" class="form-control">
-                                </div>
-                                <div class="col-4">
-                                    <label>Espécie</label> <input type="text" class="form-control">
-                                </div>
-                                <div class="col-4">
-                                    <label>Nome comum</label> 
-                                    <input type="text" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="dados_especime" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <label>Sexo</label> 
-                                    <select class="form-control">
-                                        <option value="macho">Macho</option>
-                                        <option value="femea">Fêmea</option>
-                                        <option value="sem indentificacao">Sem indentificação</option>
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <label>Faixa etária</label> 
-                                    <select class="form-control">
-                                        <option value="Jovem">Jovem</option>
-                                        <option value="Adulto">Adulto</option>
-                                        <option value="Inderteminado">Inderteminado</option>
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <label>Coletado</label> 
-                                    <select class="form-control">
-                                        <option value="sim">Sim</option>
-                                        <option value="nao">Não</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <label>Carcaça removida:</label> 
-                                    <select class="form-control">
-                                        <option value="sim">Sim</option>
-                                        <option value="nao">Não</option>
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <label>Redução Biológica com Cal:</label> 
-                                    <select class="form-control">
-                                        <option value="sim">Sim</option>
-                                        <option value="nao">Não</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <label>Nº de indivíduos do registro:</label> 
-                                    <input type="text" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="status_especime" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <label>Estadual:</label> 
-                                    <select class="form-control">
-                                        <option value="Ameaçado (CR,EN e VU)">Ameaçado (CR,EN e VU)</option>
-                                        <option value="NT - Quase Ameaçada">NT - Quase Ameaçada</option>
-                                        <option value="DD - Dados Insuficientes">DD - Dados Insuficientes</option>
-                                        <option value="NE - Não Avaliado">NE - Não Avaliado</option>
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <label>Federal:</label> 
-                                    <select class="form-control">
-                                        <option value="Ameaçado (CR,EN e VU)">Ameaçado (CR,EN e VU)</option>
-                                        <option value="NT - Quase Ameaçada">NT - Quase Ameaçada</option>
-                                        <option value="DD - Dados Insuficientes">DD - Dados Insuficientes</option>
-                                        <option value="NE - Não Avaliado">NE - Não Avaliado</option>
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <label>IUCN:</label> 
-                                    <select class="form-control">
-                                        <option value="EX - Extinto">EX - Extinto</option>
-                                        <option value="EW - Extinto na Natureza">EW - Extinto na Natureza</option>
-                                        <option value="CR - Criticamente em Perigo">CR - Criticamente em Perigo</option>
-                                        <option value="EN - Em Perigo">EN - Em Perigo</option>
-                                        <option value="VU - Vulnerável">VU - Vulnerável</option>
-                                        <option value="NT - Quase Ameaçada">NT - Quase Ameaçada</option>
-                                        <option value="LC - Pouco Preocupante">LC - Pouco Preocupante</option>
-                                        <option value="DD - Dados Insuficientes">DD - Dados Insuficientes</option>
-                                        <option value="NE - Não Avaliado">NE - Não Avaliado</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="registro_fotografico" role="tabpanel">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3 error-placeholder">
-                                        <div data-upload-id="myFirstImage" class="custom-file-container">
-                                            <label>Buscar Arquivo (.jpg/png)</label> 
-                                            <input type="file" accept="image/png, image/jpeg" id="arquivo_registro_fotografico" class="form-control-file">
-                                        </div>
+    <form @submit.prevent="save">
+        <Modal ref="modalRef" title="Registro" modal-dialog-class="modal-xl">
+            <template #body>
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
+                            <li class="nav-item">
+                                <a href="#registro_local" @click="tab = 'registro_local'" :class="{active: tab === 'registro_local'}"
+                                   class="nav-link" data-bs-toggle="tab">Local</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#registro_identificacao" @click="tab = 'registro_identificacao'" :class="{active: tab === 'registro_identificacao'}" class="nav-link"
+                                   data-bs-toggle="tab"> Identificação do Espécime</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#registro_dados_especime" @click="tab = 'registro_dados_especime'" :class="{active: tab === 'registro_dados_especime'}" class="nav-link"
+                                   data-bs-toggle="tab">Dados do Espécime</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#condicionantes" @click="tab = 'condicionantes'" :class="{active: tab === 'condicionantes'}" class="nav-link"
+                                   data-bs-toggle="tab">Status de conservação do espécime</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#registro_fotografico" @click="tab = 'registro_fotografico'" :class="{active: tab === 'registro_fotografico'}" class="nav-link"
+                                   data-bs-toggle="tab">Registro fotográfico</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div :class="[tab === 'registro_local' ? 'active show' : '']" class="tab-pane" id="registro_local">
+
+                                <div class="row row-gap-2 mb-2">
+                                    <div class="col-lg-2">
+                                        <InputLabel value="ID registro" for="campanha_id"/>
+                                        <input v-model="form.id" type="text" id="campanha_id" class="form-control"
+                                               disabled/>
+                                        <InputError :message="form.errors.id"/>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label for="anexo_foto">Imagens do Espécime</label>
-                                    <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Arquivo</th>
-                                                <th class="col-md-1">Ação</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-
-                                        </tbody>
-                                    </table>
+                                <div class="row row-gap-2 mb-2">
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Selecionar campanha" for="fk_campanha"/>
+                                        <v-select :options="campanhas" v-model="form.fk_campanha" :reduce="t => t.id"
+                                                  :disabled="!showAction" label="id">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.fk_campanha"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Grupo amostrado" for="fk_campanha"/>
+                                        <v-select :options="[
+                                            { id: '1', label: 'Avifauna' },
+                                            { id: '2', label: 'Herpetofauna' },
+                                            { id: '3', label: 'Mastofauna' }
+                                        ]" v-model="form.fk_grupo_amostrado" :reduce="t => t.id" :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.fk_grupo_amostrado"/>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <InputLabel value="Hora Registro" for="data_registro"/>
+                                        <input v-model="form.data_registro" type="date" id="data_registro"
+                                               class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.data_registro"/>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-2">
+                                    <div class="col-lg-4">
+                                        <InputLabel value="UF" for="fk_estado"/>
+                                        <v-select :options="ufs" v-model="form.fk_estado" :reduce="t => t.id" label="uf"
+                                                  :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.fk_estado"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="KM" for="km"/>
+                                        <input v-model="form.km" type="text" id="km"
+                                               class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.km"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Hora Registro" for="km"/>
+                                        <input v-model="form.hora_registro" type="time" id="hora_registro"
+                                               class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.hora_registro"/>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-2">
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Latitude" for="latitude"/>
+                                        <input v-model="form.latitude" type="text" id="latitude"
+                                               class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.latitude"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Longitude" for="longitude"/>
+                                        <input v-model="form.longitude" type="text" id="longitude"
+                                               class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.longitude"/>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-2">
+                                    <div class="col-3">
+                                        <InputLabel value="Sentido"/>
+                                        <input type="radio" value="C" v-model="form.sentido" :disabled="!showAction">
+                                        Crescente
+                                        <br/>
+                                        <input type="radio" value="D" v-model="form.sentido" :disabled="!showAction">
+                                        Decrescente
+                                    </div>
+                                    <div class="col-2">
+                                        <InputLabel value="Margem"/>
+                                        <input type="radio" value="E" v-model="form.margem" :disabled="!showAction">
+                                        Esquerda
+                                        <br/>
+                                        <input type="radio" value="D" v-model="form.margem" :disabled="!showAction">
+                                        Direita
+                                    </div>
+                                </div>
+                            </div>
+                            <div :class="[tab === 'registro_identificacao' ? 'active show' : '']" class="tab-pane" id="registro_identificacao">
+                                <div class="row mb-2">
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Classe" for="classe"/>
+                                        <v-select :options="[
+                                            { id: '1', label: 'Avifauna' },
+                                            { id: '2', label: 'Herpetofauna' },
+                                            { id: '3', label: 'Mastofauna' }
+                                        ]" v-model="form.classe" :reduce="t => t.id" :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.classe"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Ordem" for="ordem"/>
+                                        <input v-model="form.ordem" type="text" id="ordem"
+                                               class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.ordem"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Família" for="familia"/>
+                                        <input v-model="form.familia" type="text" id="familia"
+                                               class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.familia"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Gênero" for="genero"/>
+                                        <input v-model="form.genero" type="text" id="genero"
+                                               class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.genero"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Espécie" for="especie"/>
+                                        <input v-model="form.especie" type="text" id="especie"
+                                               class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.especie"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Nome comum" for="nome_comum"/>
+                                        <input v-model="form.nome_comum" type="text" id="nome_comum"
+                                               class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.nome_comum"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div :class="[tab === 'registro_dados_especime' ? 'active show' : '']" class="tab-pane" id="registro_dados_especime">
+                                <div class="row mb-2">
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Sexo" for="sexo"/>
+                                        <v-select :options="[
+                                            { id: 'macho', label: 'Macho' },
+                                            { id: 'femea', label: 'Fêmea' },
+                                            { id: 'sem_indentificacao', label: 'Sem indentificação' }
+                                        ]" v-model="form.sexo" :reduce="t => t.id" :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.sexo"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Faixa etária" for="faixa_etaria"/>
+                                        <v-select :options="[
+                                            { id: 'Jovem', label: 'Jovem' },
+                                            { id: 'Adulto', label: 'Adulto' },
+                                            { id: 'Indeterminado', label: 'Indeterminado' }
+                                        ]" v-model="form.faixa_etaria" :reduce="t => t.id" :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.faixa_etaria"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Coletado" for="coletado"/>
+                                        <v-select :options="[
+                                            { id: 'sim', label: 'Sim' },
+                                            { id: 'nao', label: 'Não' },
+                                        ]" v-model="form.coletado" :reduce="t => t.id" :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.coletado"/>
+                                    </div>
+                                    <div v-if="form.coletado === 'sim'" class="col-lg-12">
+                                        <InputLabel value="N° tombamento ou Registro de entrada na coleção:" for="n_registro_tombamento"/>
+                                        <input v-model="form.n_registro_tombamento" type="text" id="n_registro_tombamento" class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.n_registro_tombamento"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Carcaça removida:" for="carcaca_removida"/>
+                                        <v-select :options="[
+                                            { id: 'sim', label: 'Sim' },
+                                            { id: 'nao', label: 'Não' },
+                                        ]" v-model="form.carcaca_removida" :reduce="t => t.id" :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.carcaca_removida"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Redução Biológica com Cal:" for="reducao_biologica"/>
+                                        <v-select :options="[
+                                            { id: 'sim', label: 'Sim' },
+                                            { id: 'nao', label: 'Não' },
+                                        ]" v-model="form.reducao_biologica" :reduce="t => t.id" :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.reducao_biologica"/>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-2">
+                                    <div class="col-lg-12">
+                                        <InputLabel value="Nº de indivíduos do registro:" for="n_individuos"/>
+                                        <input v-model="form.n_individuos" type="text" id="n_individuos" class="form-control" :disabled="!showAction"/>
+                                        <InputError :message="form.errors.n_individuos"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div :class="[tab === 'condicionantes' ? 'active show' : '']" class="tab-pane" id="condicionantes">
+                                <div class="row row-gap-2 mb-2">
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Estadual:" for="estadual"/>
+                                        <v-select :options="[
+                                            { id: 'Ameaçado (CR,EN e VU)', label: 'Ameaçado (CR,EN e VU)' },
+                                            { id: 'NT – Quase Ameaçada', label: 'NT – Quase Ameaçada' },
+                                            { id: 'DD – Dados Insuficientes', label: 'DD – Dados Insuficientes' },
+                                            { id: 'NE – Não Avaliado', label: 'NE – Não Avaliado' }
+                                        ]" v-model="form.estadual" :reduce="t => t.id" :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.estadual"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="Federal:" for="federal"/>
+                                        <v-select :options="[
+                                            { id: 'Ameaçado (CR,EN e VU)', label: 'Ameaçado (CR,EN e VU)' },
+                                            { id: 'NT – Quase Ameaçada', label: 'NT – Quase Ameaçada' },
+                                            { id: 'DD – Dados Insuficientes', label: 'DD – Dados Insuficientes' },
+                                            { id: 'NE – Não Avaliado', label: 'NE – Não Avaliado' }
+                                        ]" v-model="form.federal" :reduce="t => t.id" :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.federal"/>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <InputLabel value="IUCN:" for="iucn"/>
+                                        <v-select :options="[
+                                            { id: 'EX – Extinto', label: 'EX – Extinto' },
+                                            { id: 'EW – Extinto na Natureza', label: 'EW – Extinto na Natureza' },
+                                            { id: 'CR – Criticamente em Perigo', label: 'CR – Criticamente em Perigo' },
+                                            { id: 'EN – Em Perigo', label: 'EN – Em Perigo' },
+                                            { id: 'VU – Vulnerável', label: 'VU – Vulnerável' },
+                                            { id: 'NT – Quase Ameaçada', label: 'NT – Quase Ameaçada' },
+                                            { id: 'LC – Pouco Preocupante', label: 'LC – Pouco Preocupante' },
+                                            { id: 'DD – Dados Insuficientes', label: 'DD – Dados Insuficientes' },
+                                            { id: 'NE – Não Avaliado', label: 'NE – Não Avaliado' }
+                                        ]" v-model="form.iucn" :reduce="t => t.id" :disabled="!showAction">
+                                            <template #no-options="{}">
+                                                Nenhum registro encontrado.
+                                            </template>
+                                        </v-select>
+                                        <InputError :message="form.errors.iucn"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div :class="[tab === 'registro_fotografico' ? 'active show' : '']" class="tab-pane" id="registro_fotografico">
+                                <div class="row row-gap-2 mb-2">
+                                    <div class="col-lg-6">
+                                        <InputLabel value="Buscar Arquivo (.jpg/png)" for="n_registro_tombamento"/>
+                                        <input @input="form.arquivo = $event.target.files[0]" type="file" accept="image/png, image/jpeg" class="form-control">
+                                        <InputError :message="form.errors.arquivo"/>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <InputLabel value="Imagens do Espécime:" for="anexo_foto"/>
+                                        <Table
+                                            :columns="['Arquivo', ...[showAction ? 'Ação' : null]]"
+                                            :records="{ data: imagensRegistro, links: []}" table-class="table-hover">
+                                            <template #body="{ item }">
+                                                <tr>
+                                                    <td>{{ item.nome }}</td>
+                                                    <td v-if="showAction">
+                                                        <LinkConfirmation v-slot="confirmation" :options="{ text: 'Excluir registro?' }">
+                                                            <Link  :onBefore="(request) => confirmation.show({
+                                                                  ...request,
+                                                                  preserveState: true,
+                                                                  onSuccess: () => {
+                                                                      modalRef.getBsModal().hide();
+                                                                  }
+                                                                })"
+                                                                   :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.imagens-delete', item.id)"
+                                                                   as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                                                                <IconTrash/>
+                                                            </Link>
+                                                        </LinkConfirmation>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </Table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <NavButton @click="cadastrarNovRegistro" type-button="success" title="Cadastrar Registro" />
-                    <NavButton @click="fecharModal" type-button="secondary" title="Fechar" />
-                </div>
-            </div>
-        </div>
-    </div>
+            </template>
+            <template #footer>
+                <button @click="modalRef.getBsModal().hide()" type="button" class="btn btn-secondary">Fechar</button>
+                <button v-if="showAction" type="submit" class="btn btn-success">Salvar</button>
+            </template>
+        </Modal>
+    </form>
 </template>
-
-<script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
-import NavButton from "@/Components/NavButton.vue";
-
-const modalNovoRegistro = ref(null);
-let modalInstance = null;
-
-const abrirModal = () => {
-    modalInstance.show();
-};
-
-const fecharModal = () => {
-    modalInstance.hide();
-};
-
-const cadastrarNovRegistro = () => {
-    console.log("cadastrarNovRegistro");
-};
-
-onMounted(() => {
-    modalInstance = new bootstrap.Modal(modalNovoRegistro.value);
-});
-
-onBeforeUnmount(() => {
-    modalInstance.dispose();
-});
-
-defineExpose({ abrirModal, fecharModal });
-</script>
-
-
-<style scoped>
-.tab-pane {
-    margin-top: 30px;
-}
-</style>

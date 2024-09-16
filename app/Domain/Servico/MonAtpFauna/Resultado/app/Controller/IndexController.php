@@ -2,6 +2,7 @@
 
 namespace App\Domain\Servico\MonAtpFauna\Resultado\app\Controller;
 
+use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Services\CampanhasService;
 use App\Domain\Servico\MonAtpFauna\Resultado\app\Services\ResultadoService;
 use App\Domain\Servico\PMQA\Configuracao\Parametro\Services\ParametroService;
 use App\Models\Contrato;
@@ -13,20 +14,22 @@ use Inertia\Response;
 
 class IndexController extends Controller
 {
-  public function __construct(private readonly ResultadoService $resultadoService)
-  {
-  }
+    public function __construct(
+        private readonly ResultadoService $resultadoService,
+        private readonly CampanhasService $campanhasService,
+    )
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, Request $request): Response
-  {
-    $searchParams = $request->all('columns', 'value');
+    public function index(Contrato $contrato, Servicos $servico, Request $request): Response
+    {
+        $searchParams = $request->all('columns', 'value');
 
-    $response = $this->resultadoService->index($servico, $searchParams);
-
-    return Inertia::render('Servico/MonAtpFauna/Resultado/Index', [
-      'contrato' => $contrato,
-      'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
-      ...$response
-    ]);
-  }
+        return Inertia::render('Servico/MonAtpFauna/Resultado/Index', [
+            'contrato' => $contrato,
+            'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'campanhas' => $this->campanhasService->getCampanhas(servicoId: $servico->id, searchParams: ['', ''], paginate: false),
+            'data' => $this->resultadoService->index($servico, $searchParams),
+        ]);
+    }
 }
