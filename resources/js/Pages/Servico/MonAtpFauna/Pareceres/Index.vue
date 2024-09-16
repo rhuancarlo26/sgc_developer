@@ -18,11 +18,11 @@ const props = defineProps({
   licencas: { type: Array }
 });
 
-const modalVincularABIO = ref({});
-
-const abrirModalVincularABIO = () => {
-  modalVincularABIO.value.abrirModal();
-}
+// const modalVincularABIO = ref({});
+//
+// const abrirModalVincularABIO = () => {
+//   modalVincularABIO.value.abrirModal();
+// }
 
 </script>
 <template>
@@ -49,7 +49,7 @@ const abrirModalVincularABIO = () => {
       <template #body>
         <ModelSearchFormAllColumns :columns="[]">
           <template #action>
-            <NavButton @click="abrirModalVincularABIO()" type-button="info" title="Vincular ABIO" />
+<!--            <NavButton @click="abrirModalVincularABIO()" type-button="info" title="Vincular ABIO" />-->
           </template>
         </ModelSearchFormAllColumns>
 
