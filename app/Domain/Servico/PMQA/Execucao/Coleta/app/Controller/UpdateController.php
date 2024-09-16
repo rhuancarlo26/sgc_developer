@@ -20,32 +20,32 @@ class UpdateController extends Controller
     {
         $post = [];
 
-        $post['id']                = $request->validated('id');
-        $post['campanha_ponto_id'] = $request->validated('campanha_ponto_id');
-        $post['data_coleta']       = $request->validated('data_coleta');
-        $post['sem_coleta']        = $request->validated('sem_coleta');
+        $post['id'] = $request->validated('id');
+        $post['fk_campanha_ponto'] = $request->validated('fk_campanha_ponto');
+        $post['dt_coleta'] = $request->validated('dt_coleta');
+        $post['sem_coleta'] = $request->validated('sem_coleta');
 
         if ($request->validated('sem_coleta') === true) {
-            $post['numero_amostra']           = null;
-            $post['preservacao_amostra']      = null;
+            $post['numero_amostra'] = null;
+            $post['preservacao_amostra'] = null;
             $post['acondicionamento_amostra'] = null;
-            $post['transporte_amostra']       = null;
-            $post['justificativa']            = $request->validated('justificativa');
+            $post['transporte_amostra'] = null;
+            $post['observacao'] = $request->validated('observacao');
         } else {
-            $post['numero_amostra']           = $request->validated('numero_amostra');
-            $post['preservacao_amostra']      = $request->validated('preservacao_amostra');
+            $post['numero_amostra'] = $request->validated('numero_amostra');
+            $post['preservacao_amostra'] = $request->validated('preservacao_amostra');
             $post['acondicionamento_amostra'] = $request->validated('acondicionamento_amostra');
-            $post['transporte_amostra']       = $request->validated('transporte_amostra');
-            $post['justificativa']            = null;
+            $post['transporte_amostra'] = $request->validated('transporte_amostra');
+            $post['observacao'] = '';
         }
 
         $response = $this->coletaService->update($post);
 
         return to_route('contratos.contratada.servicos.pmqa.execucao.coleta.create', [
             'contrato' => $contrato->id,
-            'servico'  => $servico->id,
+            'servico' => $servico->id,
             'campanha' => $campanha->id,
-            'ponto'    => $request->fk_campanha_ponto
+            'ponto' => $request->fk_campanha_ponto
         ])->with('message', $response['request']);
     }
 }

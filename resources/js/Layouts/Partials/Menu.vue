@@ -50,7 +50,7 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                 <NavLink route-name="licenca.index" title="Licenças" :icon="IconFileCheck" />
 
                                 <!-- Ambiente Geo -->
-                                <NavLink route-name="ambienteGeo" title="Ambiente Geo" :icon="IconWorld" />
+<!--                                <NavLink route-name="ambienteGeo" title="Ambiente Geo" :icon="IconWorld" />-->
 
                                 <!-- Fiscal -->
                                 <NavDropdown prefix="fiscal.*" title="Fiscal" :icon="IconFileCertificate">

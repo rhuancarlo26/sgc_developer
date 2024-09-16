@@ -25,4 +25,7 @@ Route::prefix('/cont_ocorrencia')->group(function () {
     Route::prefix('/resultado')->group(function () {
         require __DIR__ . '/../../Resultado/Routes/ResultadoRoutes.php';
     });
+    Route::prefix('/relatorio')->group(function () {
+        require __DIR__ . '/../../Relatorio/Routes/RelatorioRoutes.php';
+    });
 });

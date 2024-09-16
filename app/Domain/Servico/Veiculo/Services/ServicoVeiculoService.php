@@ -26,16 +26,31 @@ class ServicoVeiculoService extends BaseModelService
             $this->modelClass::Where('id_veiculo', $veiculo->id)->where('id_servico', $request['servico_id'])->firstOrFail()->delete();
 
             $response = [
-                'type'    => 'success',
+                'type' => 'success',
                 'content' => 'Recurso deletado com sucesso!'
             ];
         } catch (\Exception $e) {
             $response = [
-                'type'    => 'error',
+                'type' => 'error',
                 'content' => $e->getMessage()
             ];
         }
 
         return ['request' => $response];
+    }
+
+    public static function getVeiculoServico($servicoId)
+    {
+        return ServicoVeiculo::select([
+            'servico_veiculo.id',
+            'veiculos.id AS id_veiculo',
+            'codv.codigo',
+            'codv.descricao',
+            'veiculos.obs'
+        ])
+            ->join('veiculos', 'veiculos.id', '=', 'servico_veiculo.id_veiculo')
+            ->join('codigo_veiculos as codv', 'codv.id', '=', 'veiculos.cod_veiculos')
+            ->where('id_servico', $servicoId)
+            ->get();
     }
 }

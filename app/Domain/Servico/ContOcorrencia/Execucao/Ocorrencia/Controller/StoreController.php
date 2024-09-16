@@ -25,7 +25,7 @@ class StoreController extends Controller
     public function index(Contrato $contrato, Servicos $servico, StoreRequest $request): RedirectResponse
     {
         $lastOcorrencia = ServicoConOcorrOcorrenciSupervisaoExecOcorrencia::where('id_servico', $servico->id)->where('tipo', $request->tipo)->orderby('num_por_servico', 'DESC')->first() ?? 0;
-        $nome = $request['tipo'] . '.' . str_pad(($lastOcorrencia->num_por_servico ?? 0) + 1, 2, '0', STR_PAD_LEFT) . '.' . $request->rodovia['rodovia'] . '-' . Uf::find($request->rodovia['estados_id'])->uf;
+        $nome = $request['tipo'] . '.' . str_pad(($lastOcorrencia->num_por_servico ?? 0) + 1, 2, '0', STR_PAD_LEFT) . '.' . $request->rodovia['rodovia'] . '-' . Uf::find($request->rodovia['uf']['id'])->uf;
 
         $post = [
             ...$request->validated(),
@@ -33,7 +33,7 @@ class StoreController extends Controller
             'num_por_servico' => str_pad(($lastOcorrencia->num_por_servico ?? 0) + 1, 2, '0', STR_PAD_LEFT),
             'id_servico' => $servico->id,
             'id_rodovia' => $request->rodovia['id'],
-            'id_uf' => $request->rodovia['estados_id'],
+            'id_uf' => $request->rodovia['uf']['id'],
             'id_lote' => $request->lote['id'],
             'dias_restantes' => $request->prazo,
             'status' => 'Em aberto',

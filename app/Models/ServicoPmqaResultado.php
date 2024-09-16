@@ -17,21 +17,21 @@ class ServicoPmqaResultado extends Model
 
     public function campanhas(): BelongsToMany
     {
-        return $this->belongsToMany(related: ServicoPmqaCampanha::class, table: 'pmqa_resultado_campanhas', foreignPivotKey: 'fk_resultado', relatedPivotKey: 'fk_campanha');
+        return $this->belongsToMany(ServicoPmqaCampanha::class, 'pmqa_resultado_campanhas', 'fk_resultado', 'fk_campanha');
     }
 
     public function analises(): HasMany
     {
-        return $this->hasMany(related: ServicoPmqaResultadoAnaliseParametro::class, foreignKey: 'fk_resultado');
+        return $this->hasMany(ServicoPmqaResultadoAnaliseParametro::class, 'fk_resultado');
     }
 
     public function analise_iqa(): Hasone
     {
-        return $this->hasOne(related: ServicoPmqaResultadoAnaliseIqa::class, foreignKey: 'fk_resultado');
+        return $this->hasOne(ServicoPmqaResultadoAnaliseIqa::class, 'fk_resultado');
     }
 
     public function outras_analises(): HasMany
     {
-        return $this->hasMany(related: ServicoPmqaResultadoOutraAnalise::class, foreignKey: 'fk_resultado');
+        return $this->hasMany(ServicoPmqaResultadoOutraAnalise::class, 'fk_resultado');
     }
 }

@@ -1,7 +1,7 @@
 <script setup>
 import InputLabel from '@/Components/InputLabel.vue';
 import { router, useForm } from '@inertiajs/vue3';
-import { IconDots } from '@tabler/icons-vue';
+import {IconDots, IconTrash} from '@tabler/icons-vue';
 
 const props = defineProps({
   servico: Object,
@@ -95,15 +95,9 @@ const excluirEquipamento = (equipamento_id) => {
             <td>{{ rh.nome }}</td>
             <td>{{ rh.obs }}</td>
             <td>
-              <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <IconDots />
+              <button @click="excluirRh(rh.id)" type="button" class="btn btn-danger">
+                <IconTrash />
               </button>
-              <div class="dropdown-menu dropdown-menu-end">
-                <a @click="excluirRh(rh.id)" class="dropdown-item" href="javascript:void(0)">
-                  Excluir
-                </a>
-              </div>
             </td>
           </tr>
         </tbody>
@@ -143,15 +137,9 @@ const excluirEquipamento = (equipamento_id) => {
           <tr v-for="veiculo in servico.veiculos" :key="veiculo.id" class="cursor-pointer">
             <td>{{ veiculo.codigo?.codigo }}</td>
             <td>
-              <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <IconDots />
+              <button @click="excluirVeiculo(veiculo.id)" type="button" class="btn btn-danger">
+                <IconTrash />
               </button>
-              <div class="dropdown-menu dropdown-menu-end">
-                <a @click="excluirVeiculo(veiculo.id)" class="dropdown-item" href="javascript:void(0)">
-                  Excluir
-                </a>
-              </div>
             </td>
           </tr>
         </tbody>
@@ -190,15 +178,9 @@ const excluirEquipamento = (equipamento_id) => {
           <tr v-for="equipamento in servico.equipamentos" :key="equipamento.id" class="cursor-pointer">
             <td>{{ equipamento.nome }}</td>
             <td>
-              <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <IconDots />
+              <button @click="excluirEquipamento(equipamento.id)" type="button" class="btn btn-danger">
+                <IconTrash />
               </button>
-              <div class="dropdown-menu dropdown-menu-end">
-                <a @click="excluirEquipamento(equipamento.id)" class="dropdown-item" href="javascript:void(0)">
-                  Excluir
-                </a>
-              </div>
             </td>
           </tr>
         </tbody>

@@ -11,4 +11,9 @@ class ServicoConOcorrSupervisaoRelatorio extends Model
 
     protected $table = 'supervisao_relatorio';
     protected $guarded = ['id'];
+
+    public function resultado()
+    {
+        return $this->belongsTo(ServicoConOcorrSupervisaoResultado::class, 'id_resultado');
+    }
 }
