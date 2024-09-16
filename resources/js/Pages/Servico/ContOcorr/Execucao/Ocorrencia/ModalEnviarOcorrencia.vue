@@ -52,7 +52,6 @@ defineExpose({abrirModal});
 <template>
     <Modal ref="modalEnviarOcorrencia" title="Enviar ocorrência" modal-dialog-class="modal-xl">
         <template #body>
-            <h3></h3>
             <div class="row col mb-4">
                 <div class="card-body">
                     <div class="table-responsive">
