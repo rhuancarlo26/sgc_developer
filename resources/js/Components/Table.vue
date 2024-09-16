@@ -41,6 +41,9 @@ function updateRecordsState(records) {
                         </td>
                     </tr>
                 </tbody>
+                <tfoot>
+                    <slot name="footer" />
+                </tfoot>
             </table>
         </div>
         <div class="card-footer" v-if="records?.data?.length">
