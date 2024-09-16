@@ -13,14 +13,14 @@ use Illuminate\Http\RedirectResponse;
 
 class StoreArquivoController extends Controller
 {
-  public function __construct(private readonly MedicaoService $medicaoService)
-  {
-  }
+    public function __construct(private readonly MedicaoService $medicaoService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPonto $ponto, StoreArquivoRequest $request): RedirectResponse
-  {
-    $response = $this->medicaoService->storeArquivo($request->validated());
+    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPonto $ponto, StoreArquivoRequest $request): RedirectResponse
+    {
+        $response = $this->medicaoService->storeArquivo($request->validated());
 
-    return to_route('contratos.contratada.servicos.pmqa.execucao.medir.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id, 'ponto' => $ponto->id])->with('message', $response['request']);
-  }
+        return to_route('contratos.contratada.servicos.pmqa.execucao.medir.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id, 'ponto' => $ponto->id])->with('message', $response['request']);
+    }
 }

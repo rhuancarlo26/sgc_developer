@@ -12,14 +12,14 @@ use App\Domain\Licenca\Trecho\Controller\GetCoordenadaTrechoController;
 
 Route::prefix('licenca')->group(function () {
     // Licença
-    Route::get('/',                                 [IndexController::class,         'index'])->name('licenca.index');
-    Route::get('/arquivo/{arquivo}',                [IndexController::class,         'index'])->name('licenca.arquivo');
-    Route::get('/create/{licenca?}',                [CreateLicencaController::class, 'index'])->name('licenca.create');
-    Route::post('/store',                           [StoreLicencaController::class,  'index'])->name('licenca.store');
-    Route::patch('/update/{licenca}',               [UpdateLicencaController::class, 'index'])->name('licenca.update');
-    Route::get('/search/{licenca?}',                [SearchLicencaController::class, 'index'])->name('licenca.search')->where('licenca', '(.*)');
-    Route::patch('/gerenciar-licenca/{licenca}',    [GerenciarLicencaController::class, 'index'])->name('licenca.gerenciar-licenca');
-    Route::post('/get_all',                         [GetAllLicencaController::class,  'index'])->name('licenca.get_all');
+    Route::get('/', [IndexController::class, 'index'])->name('licenca.index');
+    Route::get('/arquivo/{arquivo}', [IndexController::class, 'index'])->name('licenca.arquivo');
+    Route::get('/create/{licenca?}', [CreateLicencaController::class, 'index'])->name('licenca.create');
+    Route::post('/store', [StoreLicencaController::class, 'index'])->name('licenca.store');
+    Route::post('/update', [UpdateLicencaController::class, 'index'])->name('licenca.update');
+    Route::get('/search/{licenca?}', [SearchLicencaController::class, 'index'])->name('licenca.search')->where('licenca', '(.*)');
+    Route::patch('/gerenciar-licenca/{licenca}', [GerenciarLicencaController::class, 'index'])->name('licenca.gerenciar-licenca');
+    Route::post('/get_all', [GetAllLicencaController::class, 'index'])->name('licenca.get_all');
 
     // Trecho
     Route::prefix('trecho')->group(function () {

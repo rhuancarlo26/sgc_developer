@@ -12,6 +12,7 @@ use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use Carbon\Carbon;
+use FontLib\Table\Type\post;
 use Illuminate\Support\Facades\Storage;
 
 class ResultadoService extends BaseModelService
@@ -272,6 +273,48 @@ class ResultadoService extends BaseModelService
 
     public function storeAnalise(array $post): array
     {
+        if (array_key_exists('graf_reg_intensidade', $post)) {
+            $image = str_replace('data:image/png;base64,', '', $post['graf_reg_intensidade']);
+            $image = str_replace(' ', '+', $image);
+
+            $imageData = base64_decode($image);
+
+            $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $post['id_resultado'] . '.png';
+            Storage::disk()->put($path, $imageData);
+
+            $post['graf_reg_intensidade'] = str_replace("public\\", "", $path);
+        } elseif (array_key_exists('graf_reg_classificacao', $post)) {
+            $image = str_replace('data:image/png;base64,', '', $post['graf_reg_classificacao']);
+            $image = str_replace(' ', '+', $image);
+
+            $imageData = base64_decode($image);
+
+            $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $post['id_resultado'] . '.png';
+            Storage::disk()->put($path, $imageData);
+
+            $post['graf_reg_classificacao'] = str_replace("public\\", "", $path);
+        } elseif (array_key_exists('graf_reg_local', $post)) {
+            $image = str_replace('data:image/png;base64,', '', $post['graf_reg_local']);
+            $image = str_replace(' ', '+', $image);
+
+            $imageData = base64_decode($image);
+
+            $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $post['id_resultado'] . '.png';
+            Storage::disk()->put($path, $imageData);
+
+            $post['graf_reg_local'] = str_replace("public\\", "", $path);
+        } elseif (array_key_exists('graf_reg_lote', $post)) {
+            $image = str_replace('data:image/png;base64,', '', $post['graf_reg_lote']);
+            $image = str_replace(' ', '+', $image);
+
+            $imageData = base64_decode($image);
+
+            $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $post['id_resultado'] . '.png';
+            Storage::disk()->put($path, $imageData);
+
+            $post['graf_reg_lote'] = str_replace("public\\", "", $path);
+        }
+
         return $this->dataManagement->create(entity: $this->modelClassAnalise, infos: $post);
     }
 
@@ -282,7 +325,56 @@ class ResultadoService extends BaseModelService
 
     public function updateAnalise(array $post): array
     {
-        //dd($post);
+        if (array_key_exists('graf_reg_intensidade', $post)) {
+            Storage::delete('public' . DIRECTORY_SEPARATOR . $post['graf_reg_intensidade']);
+
+            $image = str_replace('data:image/png;base64,', '', $post['graf_reg_intensidade']);
+            $image = str_replace(' ', '+', $image);
+
+            $imageData = base64_decode($image);
+
+            $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $post['id_resultado'] . '.png';
+            Storage::disk()->put($path, $imageData);
+
+            $post['graf_reg_intensidade'] = str_replace("public\\", "", $path);
+        } elseif (array_key_exists('graf_reg_classificacao', $post)) {
+            Storage::delete('public' . DIRECTORY_SEPARATOR . $post['graf_reg_classificacao']);
+
+            $image = str_replace('data:image/png;base64,', '', $post['graf_reg_classificacao']);
+            $image = str_replace(' ', '+', $image);
+
+            $imageData = base64_decode($image);
+
+            $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $post['id_resultado'] . '.png';
+            Storage::disk()->put($path, $imageData);
+
+            $post['graf_reg_classificacao'] = str_replace("public\\", "", $path);
+        } elseif (array_key_exists('graf_reg_local', $post)) {
+            Storage::delete('public' . DIRECTORY_SEPARATOR . $post['graf_reg_local']);
+
+            $image = str_replace('data:image/png;base64,', '', $post['graf_reg_local']);
+            $image = str_replace(' ', '+', $image);
+
+            $imageData = base64_decode($image);
+
+            $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $post['id_resultado'] . '.png';
+            Storage::disk()->put($path, $imageData);
+
+            $post['graf_reg_local'] = str_replace("public\\", "", $path);
+        } elseif (array_key_exists('graf_reg_lote', $post)) {
+            Storage::delete('public' . DIRECTORY_SEPARATOR . $post['graf_reg_lote']);
+
+            $image = str_replace('data:image/png;base64,', '', $post['graf_reg_lote']);
+            $image = str_replace(' ', '+', $image);
+
+            $imageData = base64_decode($image);
+
+            $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $post['id_resultado'] . '.png';
+            Storage::disk()->put($path, $imageData);
+
+            $post['graf_reg_lote'] = str_replace("public\\", "", $path);
+        }
+
         return $this->dataManagement->update(entity: $this->modelClassAnalise, infos: $post, id: $post['id']);
     }
 

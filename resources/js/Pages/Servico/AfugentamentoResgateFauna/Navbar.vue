@@ -78,10 +78,10 @@ const getAprovacao = () => {
 
                                             </NavDropdown>
 
-                                            <!-- <NavLink route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv.index"
-                                                active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv.index*"
-                                                :param="{ contrato: contrato.id, servico: servico.id }" title="Execução"
-                                                :icon="IconLayoutDashboard" /> -->
+                                            <NavLink route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.index"
+                                                active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.index*"
+                                                :param="{ contrato: contrato.id, servico: servico.id }" title="Resultado"
+                                                :icon="IconLayoutDashboard" />
 
                                         </ul>
                                     </div>

@@ -21,4 +21,10 @@ Route::prefix('afugentamento-resgate-fauna')->group(function () {
         require __DIR__ . '/../../Execucao/FrenteSupressao/Routes/FrenteSupressaoRoutes.php';
         require __DIR__ . '/../../Execucao/Registros/Routes/RegistrosRoutes.php';
     });
+
+    Route::prefix('/resultado')->group(function () {
+        require __DIR__ . '/../../Resultado/Routes/ResultadoRoutes.php';
+        require __DIR__ . '/../../Resultado/Routes/Analise/AnaliseRoutes.php';
+        require __DIR__ . '/../../Resultado/Routes/OutraAnalise/OutraAnaliseRoutes.php';
+    });
 });

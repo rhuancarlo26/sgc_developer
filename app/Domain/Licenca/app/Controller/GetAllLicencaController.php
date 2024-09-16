@@ -10,19 +10,18 @@ use Illuminate\Http\Request;
 
 class GetAllLicencaController extends Controller
 {
-  public function __construct(private readonly LicencaService $listagemLicenca)
-  {
-  }
+    public function __construct(private readonly LicencaService $listagemLicenca)
+    {
+    }
 
-  public function index(): JsonResponse
-  {
-    $licencas = Licenca::with([
-      'segmentos',
-      'segmentos.uf_inicial',
-      'segmentos.uf_final',
-      'shapefile'
-    ])->get();
+    public function index(): JsonResponse
+    {
+        $licencas = Licenca::with([
+            'segmentos',
+            'segmentos.uf_inicial_rel',
+            'segmentos.uf_final_rel'
+        ])->get();
 
-    return response()->json($licencas);
-  }
+        return response()->json($licencas);
+    }
 }

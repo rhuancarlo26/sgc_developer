@@ -28,7 +28,7 @@ const form = useForm({
 });
 
 const form_documento = useForm({
-    equipamento_id: props.equipamento.id,
+    cod_equipamento: props.equipamento.id,
     contrato_id: props.contrato.id,
     documentos: null
 });
@@ -42,9 +42,9 @@ const salvarEquipamento = () => {
 }
 
 const salvarDocumentoEquipamento = () => {
-    form_documento.equipamento_id = props.equipamento.id;
+    form_documento.cod_equipamento = props.equipamento.id;
 
-    form_documento.post(route('contratos.contratada.recurso.equipamento.store_documento'))
+    form_documento.post(route('contratos.contratada.recurso.equipamento.store_documento', {contrato: props.contrato.id}))
 }
 
 const destroyDocumentoEquipamento = (documento_id) => {

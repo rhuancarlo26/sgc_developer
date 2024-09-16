@@ -13,28 +13,28 @@ use Illuminate\Http\Request;
 
 class UpdateAnaliseController extends Controller
 {
-  public function __construct(private readonly ResultadoService $resultadoService)
-  {
-  }
+    public function __construct(private readonly ResultadoService $resultadoService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado, UpdateAnaliseRequest $request): RedirectResponse
-  {
-    $image = $request->validated('imagem');
+    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado, UpdateAnaliseRequest $request): RedirectResponse
+    {
+        $image = $request->validated('graf_analise_parametro');
 
-    $image = str_replace('data:image/png;base64,', '', $image);
-    $image = str_replace(' ', '+', $image);
+        $image = str_replace('data:image/png;base64,', '', $image);
+        $image = str_replace(' ', '+', $image);
 
-    $imageData = base64_decode($image);
+        $imageData = base64_decode($image);
 
-    $post = [
-      'resultado_id' => $request->validated('resultado_id'),
-      'parametro_id' => $request->validated('parametro_id'),
-      'analise' => $request->validated('analises')[$request->validated('parametro_id')],
-      'imagem' => $imageData
-    ];
+        $post = [
+            'fk_resultado' => $request->validated('fk_resultado'),
+            'fk_parametro' => $request->validated('fk_parametro'),
+            'analise_parametro' => $request->validated('analises')[$request->validated('fk_parametro')],
+            'graf_analise_parametro' => $imageData
+        ];
 
-    $response = $this->resultadoService->updateAnalises($post);
+        $response = $this->resultadoService->updateAnalises($post);
 
-    return to_route('contratos.contratada.servicos.pmqa.resultado.resultado', ['contrato' => $contrato->id, 'servico' => $servico->id, 'resultado' => $resultado->id])->with('message', $response['request']);
-  }
+        return to_route('contratos.contratada.servicos.pmqa.resultado.resultado', ['contrato' => $contrato->id, 'servico' => $servico->id, 'resultado' => $resultado->id])->with('message', $response['request']);
+    }
 }

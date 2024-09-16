@@ -37,7 +37,7 @@ class IndexController extends Controller
             'estagios' => $this->estagioSucessionalService->all(columns: ['id', 'nome']),
             'biomas' => $this->tipoBiomaService->all(columns: ['id', 'nome']),
             'licencas' => $this->vincularASVService->search('servico_id', $servico->id)
-                ->with(['licenca.tipo'])
+                ->with(['licenca.tipo_rel'])
                 ->get(),
         ]);
     }

@@ -21,7 +21,7 @@ class LicencaService extends BaseModelService
     public function get(array $searchParams, bool $arquivado = false)
     {
         return $this->searchAllColumns(...$searchParams)
-            ->with(relations: ['tipo', 'requerimentos'])
+            ->with(relations: ['tipo_rel', 'requerimentos'])
             ->where('arquivado', $arquivado)
             ->paginate(10)
             ->appends($searchParams);
@@ -30,7 +30,7 @@ class LicencaService extends BaseModelService
     public function all(array $searchParams, bool $arquivado = false)
     {
         return $this->searchAllColumns(...$searchParams)
-            ->with(relations: 'tipo')
+            ->with(relations: 'tipo_rel')
             ->where('arquivado', $arquivado)
             ->get();
     }
@@ -43,9 +43,9 @@ class LicencaService extends BaseModelService
     public function create(): array
     {
         return [
-            'tipos' => Cache::rememberForever('licenca_tipos', fn () => LicencaTipo::all()),
-            'ufs' => Cache::rememberForever('ufs', fn () => Uf::all()),
-            'rodovias' => Cache::rememberForever('rodovias', fn () => Rodovia::all()),
+            'tipos' => Cache::rememberForever('licenca_tipos', fn() => LicencaTipo::all()),
+            'ufs' => Cache::rememberForever('ufs', fn() => Uf::all()),
+            'rodovias' => Cache::rememberForever('rodovias', fn() => Rodovia::all()),
         ];
     }
 
@@ -59,7 +59,7 @@ class LicencaService extends BaseModelService
         return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
     }
 
-    public function storeDocumento($documento, $licenca_id)
+    public function storeDocumento($documento, $licenca_id): array
     {
         try {
             if ($documento->isvalid()) {

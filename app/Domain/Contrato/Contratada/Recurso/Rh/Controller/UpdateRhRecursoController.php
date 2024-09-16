@@ -16,9 +16,7 @@ class UpdateRhRecursoController extends Controller
     {
         $response = $this->rhRecursoService->updateRh($request->all());
 
-        return back()->withInput([
-            'contrato' => $request->contrato_id,
-            'rh' => $request->id
-        ])->with('message', $response['request']);
+        return to_route(route: 'contratos.contratada.recurso.rh.create', parameters: ['contrato' => $request->id_contrato, 'rh' => $request->id])
+            ->with('message', $response['request']);
     }
 }
