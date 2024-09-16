@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ServicoLicencaCondicionante extends Model
 {
-    use HasFactory;
 
     protected $table = 'servico_licenca_condicionante';
     protected $guarded = ['id', 'created_at'];
+    public $timestamps = false;
 
     public function licenca()
     {

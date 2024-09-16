@@ -1,75 +1,134 @@
-<!-- resources\js\Pages\Servico\MonAtpFauna\Resultado\ModalNovoResultado.vue -->
-<template>
-    <div class="modal fade" ref="modalNovoResultado" tabindex="-1" aria-labelledby="modalNovoResultadoLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-md">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalNovoResultadoLabel">
-                        Novo Resultado
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row mb-2">
-                        <div class="col-6">
-                            <label for="resultado_id">ID resultado</label> 
-                            <input type="text" id="resultado_id" disabled="disabled" class="form-control">
-                        </div>
-                        <div class="col-6">
-                            <label>Data de criação</label> 
-                            <input type="datetime-local" disabled="disabled" class="form-control">
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-12">
-                            <label>Nome do resultado</label> 
-                            <input type="text" class="form-control">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <NavButton @click="cadastrarNovoResultado" type-button="success" title="Cadastrar Resultado" />
-                    <NavButton @click="fecharModal" type-button="secondary" title="Fechar" />
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
-import NavButton from "@/Components/NavButton.vue";
 
-const modalNovoResultado = ref(null);
-let modalInstance = null;
+import {onMounted, ref, watch} from "vue";
+import {Link, router, useForm} from "@inertiajs/vue3";
+import Modal from "@/Components/Modal.vue";
+import InputError from "@/Components/InputError.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import {IconTrash} from "@tabler/icons-vue";
+import Table from "@/Components/Table.vue";
 
-const abrirModal = () => {
-    modalInstance.show();
-};
+const props = defineProps({
+    showAction: { type: Boolean, default: true },
+    campanhas: { type: Array },
+})
 
-const fecharModal = () => {
-    modalInstance.hide();
-};
-
-const cadastrarNovoResultado = () => {
-    console.log("cadastrarNovoResultado");
-};
-
-onMounted(() => {
-    modalInstance = new bootstrap.Modal(modalNovoResultado.value);
+const form = useForm({
+    id: null,
+    uf_inicial: null,
+    km_inicial: null,
+    latitude_inicial: null,
+    longitude_inicial: null,
+    uf_final: null,
+    km_final: null,
+    latitude_final: null,
+    longitude_final: null,
+    data_inicial: null,
+    data_final: null,
+    observacao: null,
 });
 
-onBeforeUnmount(() => {
-    modalInstance.dispose();
-});
+const save = () => {
+    form.transform((data) => ({
+        ...data,
+        fk_servico_licenca: props.licencasVigente[0].fk_servico_licenca,
+    }));
 
-defineExpose({ abrirModal, fecharModal });
+    const onSuccess = () => {
+        modalRef.value.getBsModal().hide();
+        form.reset();
+    }
+
+    if (form.id !== null) {
+        form.patch(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.update'), {
+            preserveState: true,
+            onSuccess
+        })
+        return
+    }
+
+    form.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.store'), {
+        preserveState: true,
+        onSuccess
+    })
+}
+
+const modalRef = ref();
+const abrirModal = (item = null) => {
+    form.reset()
+    modalRef.value.getBsModal().show();
+}
+
+defineExpose({abrirModal});
+
 </script>
 
-
-<style scoped>
-.tab-pane {
-    margin-top: 30px;
-}
-</style>
+<template>
+    <form @submit.prevent="save">
+        <Modal ref="modalRef" title="Resultado" modal-dialog-class="modal-xl">
+            <template #body>
+                <div class="row row-gap-2 mb-2">
+                    <div class="col-lg-3">
+                        <InputLabel value="ID resultado" for="resultado_id"/>
+                        <input v-model="form.id" type="text" id="resultado_id" class="form-control" disabled />
+                        <InputError :message="form.errors.id"/>
+                    </div>
+                    <div class="col-lg-3">
+                        <InputLabel value="Data de criação" for="created_at"/>
+                        <input :value="form.created_at" type="date" id="created_at" class="form-control" disabled />
+                        <InputError :message="form.errors.created_at"/>
+                    </div>
+                </div>
+                <div class="row row-gap-2 mb-2">
+                    <div class="col-lg-6">
+                        <InputLabel value="Nome do resultado" for="nome_resultado"/>
+                        <input v-model="form.nome_resultado" type="text" id="nome_resultado" class="form-control" />
+                        <InputError :message="form.errors.nome_resultado"/>
+                    </div>
+                </div>
+                <div v-if="form.id" class="row row-gap-2 mb-2">
+                    <div class="col-lg-6">
+                        <InputLabel value="Selecionar campanha" for="fk_campanha"/>
+                        <v-select :options="campanhas" label="id" :reduce="t => t.id">
+                            <template #no-options="{}">
+                                Nenhum registro encontrado.
+                            </template>
+                        </v-select>
+                    </div>
+                    <div class="col-lg-12">
+                        <Table
+                            :columns="['ID', 'Campanha', 'Ação']"
+                            :records="{ data: [], links: []}" table-class="table-hover">
+                            <template #body="{ item }">
+                                <tr>
+                                    <td>{{ item.id }}</td>
+                                    <td>{{ item.id_campanha }}</td>
+                                    <td v-if="showAction">
+                                        <LinkConfirmation v-slot="confirmation" :options="{ text: 'Excluir registro?' }">
+                                            <Link  :onBefore="(request) => confirmation.show({
+                                                  ...request,
+                                                  preserveState: true,
+                                                  onSuccess: () => {
+                                                      modalRef.getBsModal().hide();
+                                                  }
+                                                })"
+                                               :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete-abio', item.id)"
+                                               as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                                                <IconTrash/>
+                                            </Link>
+                                        </LinkConfirmation>
+                                    </td>
+                                </tr>
+                            </template>
+                        </Table>
+                    </div>
+                </div>
+            </template>
+            <template #footer>
+                <button @click="modalRef.getBsModal().hide()" type="button" class="btn btn-secondary">Fechar</button>
+                <button v-if="showAction" type="submit" class="btn btn-success">Salvar</button>
+            </template>
+        </Modal>
+    </form>
+</template>
