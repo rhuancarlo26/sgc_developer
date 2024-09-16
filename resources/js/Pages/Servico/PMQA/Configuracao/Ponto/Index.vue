@@ -65,12 +65,12 @@ const ap = (ap) => {
                 <ModelSearchFormAllColumns
                     :columns="['id', 'nomepontocoleta', 'lat_x', 'long_y', 'classificacao', 'classe', 'tipoambiente', 'uf', 'municipio', 'baciahidrografica', 'km_rodovia', 'estaca']">
                     <template #action>
-                        <a class="btn btn-info me-1" target="_blank"
+                        <a class="btn btn-info me-1" target="_blank" v-if="ap(aprovacao)"
                            :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.download_modelo')">Modelo</a>
                         <NavButton @click="abrirModalImportar()"
                                    route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.importar"
                                    :param="{ contrato: props.contrato.id, servico: props.servico.id }"
-                                   type-button="success"
+                                   type-button="success" v-if="ap(aprovacao)"
                                    title="Importar"/>
                     </template>
                 </ModelSearchFormAllColumns>
@@ -95,11 +95,11 @@ const ap = (ap) => {
                             <td class="text-center">
                                 <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon"
                                            :icon="IconEye"/>
-                                <NavLink class="btn btn-icon btn-primary me-1"
+                                <NavLink class="btn btn-icon btn-primary me-1" v-if="ap(aprovacao)"
                                          route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.create"
                                          :param="{ contrato: contrato.id, servico: servico.id, ponto: item.id }"
                                          :icon="IconPencil"/>
-                                <LinkConfirmation v-slot="confirmation"
+                                <LinkConfirmation v-slot="confirmation" v-if="ap(aprovacao)"
                                                   :options="{ text: 'A remoção de um ponto será permanente.' }">
                                     <Link :onBefore="confirmation.show"
                                           :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.delete', { contrato: contrato.id, servico: servico.id, ponto: item.id })"

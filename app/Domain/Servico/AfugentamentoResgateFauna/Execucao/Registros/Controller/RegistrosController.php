@@ -3,10 +3,6 @@
 namespace App\Domain\Servico\AfugentamentoResgateFauna\Execucao\Registros\Controller;
 
 use App\Domain\Servico\AfugentamentoResgateFauna\Execucao\Registros\Service\RegistrosService;
-use App\Models\AfugentFaunaExecFrenteModel;
-use App\Models\AfugentFaunaExecRegistroModel;
-use App\Models\AfugentFaunaFormaRegistroModel;
-use App\Models\AtFaunaGrupoAmostradoModel;
 use App\Shared\Http\Controllers\Controller;
 use App\Models\Contrato;
 use App\Models\Servicos;

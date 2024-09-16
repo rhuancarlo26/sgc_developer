@@ -19,7 +19,7 @@ class EmpreendimentoService extends BaseModelService
         return [
             'empreendimentos' => $this->searchAllColumns(...$searchParams)
                 ->with([
-                    'licenca.tipo',
+                    'licenca.tipo_rel',
                     'licenca.segmentos',
                     'condicionante'
                 ])
