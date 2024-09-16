@@ -138,4 +138,9 @@ class Servicos extends Model
         return $this->hasMany(ServicoContOcorrSupervisaoConfigLote::class, 'id_servico');
     }
 
+    public function passagem_fauna_abios()
+    {
+        return $this->hasMany(ServicoPassagemFaunaConfigAbio::class, 'id_servico');
+    }
+
 }
