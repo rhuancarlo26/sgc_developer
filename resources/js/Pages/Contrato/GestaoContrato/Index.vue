@@ -19,7 +19,7 @@
                         <a @click="abrirVisualizarTrecho()" class="dropdown-item" href="javascript:void(0)">
                             Mapa dos contratos
                         </a>
-                        <a class="dropdown-item" :href="route('contratos.gestao.excel_export')">
+                        <a target="_blank" class="dropdown-item" :href="route('contratos.gestao.excel_export')">
                             Exportar excel
                         </a>
                     </div>
@@ -70,7 +70,8 @@
                                 <IconDots/>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <NavLink route-name="contratos.contratada.dados_gerais.index" :param="item.id" title="Entrar"
+                                <NavLink route-name="contratos.contratada.dados_gerais.index" :param="item.id"
+                                         title="Entrar"
                                          class="dropdown-item"/>
                                 <a @click="abrirVisualizarContrato(item)" class="dropdown-item"
                                    href="javascript:void(0)">

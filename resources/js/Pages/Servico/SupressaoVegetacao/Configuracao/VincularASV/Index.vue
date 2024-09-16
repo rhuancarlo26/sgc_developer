@@ -28,7 +28,7 @@ const form = useForm({
 const toast = useToast();
 
 watch(() => form.licenca_id, (value) => {
-    if(!value) return;
+    if (!value) return;
     form.post(route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.vincular'), {
         preserveState: false,
         onError: (error) => {
@@ -80,9 +80,10 @@ const ap = (ap) => {
 
                 <div class="row justify-content-between align-items-center" v-if="ap(aprovacao)">
                     <div class="col-5 mb-2">
-                        <v-select :options="licencas" label="numero_licenca" v-model="form.licenca_id" :reduce="r => r.id">
+                        <v-select :options="licencas" label="numero_licenca" v-model="form.licenca_id"
+                                  :reduce="r => r.id">
                             <template v-slot:option="option">
-                                {{option.numero_licenca}} - {{option.emissor}} - {{option.tipo.sigla}}
+                                {{ option.numero_licenca }} - {{ option.emissor }} - {{ option.tipo.sigla }}
                             </template>
                             <template #no-options="{}">
                                 Nenhum registro encontrado.
@@ -97,7 +98,10 @@ const ap = (ap) => {
                     <template #body="{ item }">
                         <tr>
                             <td class="text-center">{{ item.numero_licenca ?? '-' }}</td>
-                            <td class="text-center">{{ item.data_emissao ? dateTimeFormat(item.data_emissao) : '-' }}</td>
+                            <td class="text-center">{{
+                                    item.data_emissao ? dateTimeFormat(item.data_emissao) : '-'
+                                }}
+                            </td>
                             <td class="text-center">{{ item.vencimento ? dateTimeFormat(item.vencimento) : '-' }}</td>
                             <td class="text-center">{{ item.volume ?? '-' }}</td>
                             <td class="text-center">{{ item.in_app ?? '-' }}</td>
@@ -105,10 +109,15 @@ const ap = (ap) => {
                             <td class="text-center">{{ item.area_ha ?? '-' }}</td>
                             <td>
                                 <div class="d-flex justify-content-center">
-                                    <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon" :icon="IconEye"/>
-                                    <NavButton v-if="item.documento === null" type-button="primary" class="btn-icon" :icon="IconFile" disabled />
-                                    <a v-else class="btn btn-primary btn-icon me-1" :href="item.documento.caminho"><IconFile /></a>
-                                    <LinkConfirmation v-if="ap(aprovacao)" v-slot="confirmation" :options="{ text: 'Você deseja remover o vínculo?' }">
+                                    <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon"
+                                               :icon="IconEye"/>
+                                    <NavButton v-if="item.documento === null" type-button="primary" class="btn-icon"
+                                               :icon="IconFile" disabled/>
+                                    <a v-else class="btn btn-primary btn-icon me-1" :href="item.documento?.caminho">
+                                        <IconFile/>
+                                    </a>
+                                    <LinkConfirmation v-if="ap(aprovacao)" v-slot="confirmation"
+                                                      :options="{ text: 'Você deseja remover o vínculo?' }">
                                         <Link :onBefore="confirmation.show"
                                               :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.delete', { contrato: contrato.id, servico: servico.id, licenca: item.id })"
                                               as="button" method="delete" type="button" class="btn btn-icon btn-danger">
@@ -122,7 +131,7 @@ const ap = (ap) => {
                 </Table>
             </template>
         </Navbar>
-        <ModalVisualizarASV ref="modalVisualizarASVRef" />
+        <ModalVisualizarASV ref="modalVisualizarASVRef"/>
     </AuthenticatedLayout>
 
 </template>

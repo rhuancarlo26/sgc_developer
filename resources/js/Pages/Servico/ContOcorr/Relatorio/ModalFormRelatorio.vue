@@ -25,9 +25,16 @@ const form = useForm({
     sobre_relatorio: null
 });
 
+const reset = () => {
+    form.id = null;
+    form.nome_relatorio = null;
+    form.id_resultado = null;
+    form.sobre_relatorio = null;
+}
+
 const abrirModal = (item) => {
-    form.reset();
-    
+    reset();
+
     if (item) {
         Object.assign(form, item);
     }

@@ -14,11 +14,16 @@ class StoreContratoTrechoController extends Controller
 
     public function storeTrecho(StoreContratoTrechoRequest $request)
     {
-        $response = $this->trechoContratoService->create($request->all());
+        $post = [
+            ...$request->validated(),
+            'extensao' => $request->km_final - $request->km_inicial,
+        ];
+
+        $response = $this->trechoContratoService->create($post);
 
         return to_route('contratos.gestao.create',
             [
-                'tipo'     => $request->tipo_contrato,
+                'tipo' => $request->tipo_contrato,
                 'contrato' => $request->contrato_id])
             ->with('message', $response['request']);
     }

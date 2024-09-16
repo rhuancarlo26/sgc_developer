@@ -18,7 +18,7 @@ class Licenca extends Model
     protected $appends = ['iniciais', 'finais', 'brs'];
 
 
-    public function tipo(): BelongsTo
+    public function tipo_rel(): BelongsTo
     {
         return $this->belongsTo(LicencaTipo::class, 'tipo');
     }

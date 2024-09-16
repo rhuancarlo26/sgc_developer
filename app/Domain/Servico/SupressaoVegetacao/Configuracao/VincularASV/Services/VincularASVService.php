@@ -20,7 +20,7 @@ class VincularASVService extends BaseModelService
     public function index(Servicos $servico): LengthAwarePaginator
     {
         return Licenca::query()
-            ->with(['documento', 'tipo'])
+            ->with(['documento', 'tipo_rel', 'segmentos'])
             ->whereHas('licencaServicos', fn($q) => $q->where('servico_id', $servico->id))
             ->paginate();
     }
