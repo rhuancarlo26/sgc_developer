@@ -18,5 +18,8 @@ Route::prefix('/passagem_fauna')->group(function () {
         Route::prefix('/registro')->group(function () {
             require __DIR__ . '/../../Execucao/Registro/Routes/RegistroRoutes.php';
         });
+        Route::prefix('/resultado')->group(function () {
+            require __DIR__ . '/../../Resultado/Routes/ResultadoRoutes.php';
+        });
     });
 });
