@@ -7,8 +7,10 @@ import NavButton from "@/Components/NavButton.vue";
 const emit = defineEmits(['salvar']);
 
 const props = defineProps({
+    contrato: {type: Object},
+    servico: {type: Object},
+    resultado: {type: Object},
     form: {type: Object},
-    resultado: {type: Object}
 });
 
 const numTotalIndividuos = computed(() => {
