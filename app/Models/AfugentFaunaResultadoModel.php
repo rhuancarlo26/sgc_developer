@@ -15,6 +15,25 @@ class AfugentFaunaResultadoModel extends Model
 
     protected $guarded = ['id', 'created_at'];
 
+    public function getResultados($id_servico)
+    {
+        return $this
+            ->select([
+                'afugent_fauna_resultado.id',
+                'afugent_fauna_resultado.nome',
+                'afugent_fauna_resultado.periodo',
+                DB::raw("DATE_FORMAT(afugent_fauna_resultado.dt_inicio, '%Y-%m-%d') as dt_inicio"),
+                DB::raw("DATE_FORMAT(afugent_fauna_resultado.dt_inicio, '%d/%m/%Y') as data_inicio_f"),
+                DB::raw("DATE_FORMAT(afugent_fauna_resultado.dt_final, '%Y-%m-%d') as dt_final"),
+                DB::raw("DATE_FORMAT(afugent_fauna_resultado.dt_final, '%d/%m/%Y') as data_final_f"),
+                'afugent_fauna_relatorio.fk_status AS fk_status_relatorio'
+            ])
+            ->leftJoin('afugent_fauna_relatorio', 'afugent_fauna_relatorio.id_resultado', '=', 'afugent_fauna_resultado.id')
+            ->where('afugent_fauna_resultado.id_servico', $id_servico)
+            ->paginate(10);
+    }
+
+
     public function getRegistrosIdentificados($id_resultado, $dt_inicio, $dt_final)
     {
         return $this
