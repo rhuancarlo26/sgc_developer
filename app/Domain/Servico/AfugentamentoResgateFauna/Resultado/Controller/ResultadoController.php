@@ -6,6 +6,7 @@ use App\Domain\Servico\AfugentamentoResgateFauna\Resultado\Service\ResultadoServ
 use App\Models\Contrato;
 use App\Models\Servicos;
 use App\Shared\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -23,5 +24,12 @@ class ResultadoController extends Controller
             'servico'   => $servico->load(['tipo']),
             'resultado' => $resultado,
         ]);
+    }
+
+    
+    public function getResultados(Contrato $contrato, Servicos $servico): JsonResponse
+    {
+        $resultado = $this->resultadoService->getResultado($servico);
+        return response()->json(['resultado' => $resultado]);
     }
 }
