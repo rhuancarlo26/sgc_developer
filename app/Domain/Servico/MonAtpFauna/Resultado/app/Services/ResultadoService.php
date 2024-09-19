@@ -48,9 +48,9 @@ class ResultadoService extends BaseModelService
             ->paginate();
     }
 
-    public function store(array $post)
+    public function store(array $request)
     {
-        return $this->dataManagement->create(entity: $this->modelClass, infos: $post);
+        return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
     }
 
     public function getResultadoAnalise(AtFaunaResultado $resultado): array

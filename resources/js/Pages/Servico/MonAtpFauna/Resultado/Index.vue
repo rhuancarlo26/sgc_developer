@@ -22,8 +22,8 @@ const props = defineProps({
 const modalNovoResultado = ref({});
 const modalAnalise = ref({});
 
-const abrirModalNovoResultado = () => {
-    modalNovoResultado.value.abrirModal();
+const abrirModalNovoResultado = (item) => {
+    modalNovoResultado.value.abrirModal(item);
 }
 
 const showActionsModal = ref(true);
@@ -86,7 +86,7 @@ const abrirModalAnalise = (item, show = true) => {
                                     <a href="#" class="dropdown-item" @click.prevent="abrirModalAnalise(item, false)">
                                         Visualizar
                                     </a>
-                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalAnalise(item)">
+                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalNovoResultado(item)">
                                         Editar
                                     </a>
                                     <a href="#" class="dropdown-item" @click.prevent="abrirModalAnalise(item)">
@@ -100,7 +100,7 @@ const abrirModalAnalise = (item, show = true) => {
             </template>
         </Navbar>
 
-        <ModalNovoResultado ref="modalNovoResultado" :campanhas="campanhas" />
+        <ModalNovoResultado ref="modalNovoResultado" :campanhas="campanhas" :servico="servico" />
         <ModalAnalise ref="modalAnalise" :showActionsModal="showActionsModal"/>
 
     </AuthenticatedLayout>

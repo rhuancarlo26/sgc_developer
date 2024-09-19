@@ -8,3 +8,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('{contrato}/{servico}/',                         [IndexController::class,        'index'])->name('contratos.contratada.servicos.mon_atp_fauna.resultado.index');
 Route::get('resultado/{resultado}/analise', ResultadoAnaliseController::class)->name('contratos.contratada.servicos.mon_atp_fauna.resultado.analise');
+Route::post('/store', ResultadoAnaliseController::class)->name('contratos.contratada.servicos.mon_atp_fauna.resultado.store');
