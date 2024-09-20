@@ -19,8 +19,8 @@ class IndexController extends Controller
 
     public function index(Contrato $contrato, Servicos $servico): Response
     {
-        $licencaASV = Licenca::where('tipo', 3)->with('tipo')->get();
-        $licencaVinculadas = AfugentFaunaConfigASVModel::with(['licenca.tipo', 'licenca.user'])
+        $licencaASV = Licenca::where('tipo', 3)->with('tipo_rel')->get();
+        $licencaVinculadas = AfugentFaunaConfigASVModel::with(['licenca.tipo_rel', 'licenca.user'])
             ->where('id_servico', $servico->id)->get();
 
         return Inertia::render('Servico/AfugentamentoResgateFauna/Configuracao/VincularASV', [

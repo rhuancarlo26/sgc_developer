@@ -20,7 +20,11 @@ class ParecerService extends BaseModelService
 
     public function emiteParecerServico($post): array
     {
-        $this->dataManagement->update(entity: ServicoParecer::class, infos: $post, id: $post['id_parecer']);
+        if (!isset($post['id_parecer'])) {
+            $this->dataManagement->create(entity: ServicoParecer::class, infos: $post);
+        } else {
+            $this->dataManagement->update(entity: ServicoParecer::class, infos: $post, id: $post['id_parecer']);
+        }
         $response = $this->dataManagement->update(entity: Servicos::class, infos: $post, id: $post['fk_servico']);
 
         return [

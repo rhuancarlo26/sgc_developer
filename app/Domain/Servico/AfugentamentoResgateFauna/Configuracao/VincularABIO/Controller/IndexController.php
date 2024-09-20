@@ -19,8 +19,8 @@ class IndexController extends Controller
 
     public function index(Contrato $contrato, Servicos $servico): Response
     {
-        $licencaABIO = Licenca::where('tipo', 12)->with('tipo')->get();
-        $licencaVinculadas = AfugentFaunaConfigABIOModel::with(['licenca.tipo', 'licenca.user'])
+        $licencaABIO = Licenca::where('tipo', 12)->with('tipo_rel')->get();
+        $licencaVinculadas = AfugentFaunaConfigABIOModel::with(['licenca.tipo_rel', 'licenca.user'])
             ->where('id_servico', $servico->id)->get();
 
         return Inertia::render('Servico/AfugentamentoResgateFauna/Configuracao/VincularABIO', [
