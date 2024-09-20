@@ -24,7 +24,7 @@ class RelatoriosService extends BaseModelService
   {
     return [
       'vinculacoes' => $this->searchAllColumns(...$searchParams)
-        ->with(['licenca.tipo'])
+        ->with(['licenca.tipo_rel'])
         ->where('fk_servico', $servico->id)
         ->paginate()
         ->appends($searchParams),
