@@ -83,6 +83,11 @@ const getAprovacao = () => {
                                                 :param="{ contrato: contrato.id, servico: servico.id }" title="Resultado"
                                                 :icon="IconLayoutDashboard" />
 
+                                            <NavLink route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.relatorios.index"
+                                                active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.relatorios.index*"
+                                                :param="{ contrato: contrato.id, servico: servico.id }" title="Relatórios"
+                                                :icon="IconLayoutDashboard" />
+
                                         </ul>
                                     </div>
                                 </div>

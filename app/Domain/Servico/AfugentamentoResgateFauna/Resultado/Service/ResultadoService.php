@@ -68,7 +68,7 @@ class ResultadoService
 
     public function getResultado($servico)
     {
-        return $this->afugentFaunaResultadoModel->where('id_servico', $servico->id)->paginate(10);
+        return $this->afugentFaunaResultadoModel->getResultados($servico->id);
     }
 
     public function getResultadoAnalise($resultado)
