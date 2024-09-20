@@ -39,22 +39,39 @@ const porps = defineProps({
                                                     title="Lote de obra"/>
                                             </NavDropdown>
 
-                                            <NavDropdown
-                                                prefix="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia*"
-                                                title="Execução" :icon="IconLayoutDashboard">
-                                                <NavDropdownLink
-                                                    route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index"
-                                                    :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Ocorrência"/>
-                                                <NavDropdownLink
-                                                    route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.controle_rnc.index"
-                                                    :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Controle RNC"/>
-                                                <NavDropdownLink
-                                                    route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.aca.index"
-                                                    :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="ACA"/>
-                                            </NavDropdown>
+                                            <template
+                                                v-if="servico.cont_ocorr_parecer_configuracao?.fk_status === 3">
+                                                <NavDropdown
+                                                    prefix="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia*"
+                                                    title="Execução" :icon="IconLayoutDashboard">
+                                                    <NavDropdownLink
+                                                        route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index"
+                                                        :route-param="{ contrato: contrato.id, servico: servico.id }"
+                                                        title="Ocorrência"/>
+                                                    <NavDropdownLink
+                                                        route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.controle_rnc.index"
+                                                        :route-param="{ contrato: contrato.id, servico: servico.id }"
+                                                        title="Controle RNC"/>
+                                                    <NavDropdownLink
+                                                        route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.aca.index"
+                                                        :route-param="{ contrato: contrato.id, servico: servico.id }"
+                                                        title="ACA"/>
+                                                </NavDropdown>
+
+                                                <NavLink
+                                                    route-name="contratos.contratada.servicos.cont_ocorrencia.resultado.index"
+                                                    active-on-route-prefix="contratos.contratada.servicos.cont_ocorrencia.resultado*"
+                                                    :param="{ contrato: contrato.id, servico: servico.id }"
+                                                    title="Resultado"
+                                                    :icon="IconLayoutDashboard"/>
+
+                                                <NavLink
+                                                    route-name="contratos.contratada.servicos.cont_ocorrencia.relatorio.index"
+                                                    active-on-route-prefix="contratos.contratada.servicos.cont_ocorrencia.relatorio*"
+                                                    :param="{ contrato: contrato.id, servico: servico.id }"
+                                                    title="Relatorio"
+                                                    :icon="IconLayoutDashboard"/>
+                                            </template>
                                         </ul>
                                     </div>
                                 </div>

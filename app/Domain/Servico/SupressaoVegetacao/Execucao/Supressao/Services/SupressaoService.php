@@ -102,11 +102,13 @@ class SupressaoService extends BaseModelService
             ->get();
     }
 
-    public function getSumAreaByServico(int $id)
+    public function getSumAreaByServico(Servicos $servico, Carbon $dtInicio, Carbon $dtFinal)
     {
         return $this->model
             ->selectRaw('SUM(area_em_app) as area_em_app, SUM(area_fora_app) as area_fora_app')
-            ->where('servico_id', $id)
+            ->where('servico_id', $servico->id)
+            ->where('dt_inicial', '>=', $dtInicio->format('Y-m-d'))
+            ->where('dt_final', '<=', $dtFinal->format('Y-m-d'))
             ->first();
     }
 
@@ -131,7 +133,7 @@ class SupressaoService extends BaseModelService
             "))
             ->join('tipo_biomas as b', 'area_supressao.tipo_bioma_id', '=', 'b.id')
             ->join('estagio_sucessional as e', 'area_supressao.estagio_sucessional_id', '=', 'e.id')
-            ->join('licenca as l', 'area_supressao.licenca_id', '=', 'l.id')
+            ->join('licencas as l', 'area_supressao.licenca_id', '=', 'l.id')
             ->where('servico_id', $servico->id)
             ->whereDate('dt_inicial', '>=', $dtInicio)
             ->whereDate('dt_final', '<=', $dtFinal)

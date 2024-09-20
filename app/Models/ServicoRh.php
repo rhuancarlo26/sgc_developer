@@ -11,4 +11,10 @@ class ServicoRh extends Model
 
     protected $table = 'servico_rh';
     protected $guarded = ['id', 'created_at'];
+    public $timestamps = false;
+
+    public function rh()
+    {
+        return $this->belongsTo(RecursoRh::class, 'id_rh');
+    }
 }

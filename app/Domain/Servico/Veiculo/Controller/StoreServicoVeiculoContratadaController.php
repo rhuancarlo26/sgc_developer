@@ -20,7 +20,7 @@ class StoreServicoVeiculoContratadaController extends Controller
         ];
 
         $response = $this->servicoVeiculoService->storeServicoVeiculo($post);
-
+        
         return to_route('contratos.contratada.servicos.create', [
             'contrato' => $request->id_contrato,
             'servico' => $request->servico_id

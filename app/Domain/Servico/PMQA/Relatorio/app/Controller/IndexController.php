@@ -13,29 +13,29 @@ use Inertia\Response;
 
 class IndexController extends Controller
 {
-  public function __construct(private readonly RelatorioService $relatorioService)
-  {
-  }
+    public function __construct(private readonly RelatorioService $relatorioService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, Request $request): Response
-  {
-    $searchParams = $request->all('columns', 'value');
+    public function index(Contrato $contrato, Servicos $servico, Request $request): Response
+    {
+        $searchParams = $request->all('columns', 'value');
 
-    $response = $this->relatorioService->index(servico: $servico, searchParams: $searchParams);
+        $response = $this->relatorioService->index(servico: $servico, searchParams: $searchParams);
 
-    return Inertia::render('Servico/PMQA/Relatorio/Index', [
-      'contrato' => $contrato,
-      'servico' => $servico->load([
-        'tipo',
-        'pmqa_config_lista_parecer',
-        'rhs',
-        'equipamentos',
-        'veiculos.codigo',
-        'licencas_condicionantes.licenca',
-        'licencas_condicionantes.condicionante',
-        'pontos'
-      ]),
-      ...$response
-    ]);
-  }
+        return Inertia::render('Servico/PMQA/Relatorio/Index', [
+            'contrato' => $contrato,
+            'servico' => $servico->load([
+                'tipo',
+                'pmqa_config_lista_parecer',
+                'rhs',
+                'equipamentos',
+                'veiculos.codigo',
+                'licencas_condicionantes.licenca',
+                'licencas_condicionantes.condicionante',
+                'pontos'
+            ]),
+            ...$response
+        ]);
+    }
 }
