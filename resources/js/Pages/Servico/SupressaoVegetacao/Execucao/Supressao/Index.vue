@@ -90,7 +90,7 @@ const urlQueryParams = computed(() => {
                         <tr>
                             <td class="text-center">{{ item.chave ?? '-' }}</td>
                             <td class="text-center">{{ item.dt_inicial ? dateTimeFormat(item.dt_inicial) : '-' }}</td>
-                            <td class="text-center">{{ item.dt_final?.numero_licenca ?? '-' }}</td>
+                            <td class="text-center">{{ item.dt_final ? dateTimeFormat(item.dt_final) : '-'  }}</td>
                             <td class="text-center">{{ item.licenca?.numero_licenca ?? '-' }}</td>
                             <td class="text-center">{{ item.bioma?.nome ?? '-' }}</td>
                             <td class="text-center">

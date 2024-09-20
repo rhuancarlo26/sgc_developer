@@ -26,7 +26,7 @@ class ServicoPmqaPonto extends Model
             relatedPivotKey: 'fk_exec_campanha'
         );
     }
-
+    
     public function lista()
     {
         return $this->hasOneThrough(

@@ -14,7 +14,6 @@ class StoreLicencaShapefileController extends Controller
 
     public function index(StoreLicencaShapefileRequest $request)
     {
-        dd($request);
         $response = $this->licencaShapefileService->store($request->validated());
 
         return to_route('licenca.create', ['licenca' => $request->licenca_id])->with('message', $response['request']);

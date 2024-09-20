@@ -6,6 +6,7 @@ use App\Domain\Servico\PMQA\Configuracao\Ponto\Services\PontoService;
 use App\Models\Contrato;
 use App\Models\ServicoPmqaCampanha;
 use App\Models\ServicoPmqaCampanhaPonto;
+use App\Models\ServicoPmqaCampanhaPontoColeta;
 use App\Models\Servicos;
 use App\Shared\Http\Controllers\Controller;
 use Inertia\Inertia;
@@ -17,9 +18,9 @@ class CreateController extends Controller
     {
         return Inertia::render('Servico/PMQA/Execucao/Coleta/Form', [
             'contrato' => $contrato,
-            'servico'  => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
             'campanha' => $campanha,
-            'ponto'    => $ponto->load(['ponto', 'coleta.arquivos'])
+            'ponto' => $ponto->load(['ponto', 'coleta.arquivos'])
         ]);
     }
 }

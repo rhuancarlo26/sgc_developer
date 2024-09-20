@@ -6,25 +6,25 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRequest extends FormRequest
 {
-  public function rules(): array
-  {
-    return [
-      'servico_id'          => ['required'],
-      'lista'               => ['required'],
+    public function rules(): array
+    {
+        return [
+            'fk_servico' => ['required'],
+            'lista' => ['required'],
 //      'periodicidade'       => ['required'],
-      'pontos'              => ['required'],
-      'relatorio_parcial'   => ['nullable'],
-      'relatorio_acomulado' => ['nullable']
-    ];
-  }
+            'pontos' => ['required'],
+            'relatorio_parcial' => ['nullable'],
+            'relatorio_acomulado' => ['nullable']
+        ];
+    }
 
-  public function messages(): array
-  {
-    return [];
-  }
+    public function messages(): array
+    {
+        return [];
+    }
 
-  public function authorize(): bool
-  {
-    return true;
-  }
+    public function authorize(): bool
+    {
+        return true;
+    }
 }

@@ -17,7 +17,8 @@ class Licenca extends Model
     protected $guarded = ['id', 'created_at'];
     protected $appends = ['iniciais', 'finais', 'brs'];
 
-    public function tipo(): BelongsTo
+
+    public function tipo_rel(): BelongsTo
     {
         return $this->belongsTo(LicencaTipo::class, 'tipo');
     }
@@ -54,9 +55,9 @@ class Licenca extends Model
                 $ufs = [];
 
                 foreach ($this->segmentos as $value) {
-                    $uf = $value->uf_inicial;
+                    $uf = $value->uf_inicial_rel;
 
-                    $uf ? array_push($ufs, trim($uf)) : '';
+                    $uf ? array_push($ufs, trim($uf->uf)) : '';
                 }
 
                 return implode(",", array_unique($ufs));
@@ -71,9 +72,9 @@ class Licenca extends Model
                 $ufs = [];
 
                 foreach ($this->segmentos as $value) {
-                    $uf = $value->uf_final;
+                    $uf = $value->uf_final_rel;
 
-                    $uf ? array_push($ufs, trim($uf)) : '';
+                    $uf ? array_push($ufs, trim($uf->uf)) : '';
                 }
 
                 return implode(",", array_unique($ufs));
