@@ -10,6 +10,7 @@ class StoreRequest extends FormRequest
     {
         return [
             'fk_servico' => 'required',
+            'nome_resultado' => 'required',
         ];
     }
 

@@ -4,10 +4,13 @@ namespace App\Domain\Servico\MonAtpFauna\Resultado\app\Services;
 
 use App\Models\AtFaunaResultadoCampanha;
 use App\Shared\Abstract\BaseModelService;
+use App\Shared\Traits\Deletable;
 use Illuminate\Support\Facades\DB;
 
 class ResultadoCampanhaService extends BaseModelService
 {
+    use Deletable;
+
     protected string $modelClass = AtFaunaResultadoCampanha::class;
 
     public function getTabelaRegistrosIdentificados(int $resultadoId)
@@ -109,6 +112,24 @@ class ResultadoCampanhaService extends BaseModelService
             ->selectRaw('at_fauna_execucao_registro.km, COALESCE(SUM(at_fauna_execucao_registro.n_individuos), 0) as n_individuos')
             ->groupBy('at_fauna_execucao_registro.km')
             ->orderBy('at_fauna_execucao_registro.km')
+            ->get();
+    }
+
+    public function store(array $request)
+    {
+        return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+    }
+
+    public function getResultadoCampanhas($id)
+    {
+        return $this->model
+            ->select([
+                'at_fauna_resultado_campanha.id',
+                'fec.id AS id_campanha'
+            ])
+            ->join('at_fauna_execucao_campanhas AS fec', 'fec.id', '=', 'at_fauna_resultado_campanha.fk_campanha')
+            ->where('at_fauna_resultado_campanha.fk_resultado', $id)
+            ->whereNotNull('at_fauna_resultado_campanha.deleted_at')
             ->get();
     }
 }
