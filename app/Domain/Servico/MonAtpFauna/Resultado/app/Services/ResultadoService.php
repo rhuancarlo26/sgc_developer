@@ -5,6 +5,7 @@ namespace App\Domain\Servico\MonAtpFauna\Resultado\app\Services;
 use App\Domain\Servico\PMQA\Configuracao\Ponto\Imports\PMQAPontoImport;
 use App\Models\AtFaunaResultado;
 use App\Models\AtFaunaResultadoAnalise;
+use App\Models\AtFaunaResultadoOutrasAnalise;
 use App\Models\Licenca;
 use App\Models\ServicoMonAtpFaunaVincularABIO;
 use App\Models\ServicoPmqaPonto;
@@ -69,6 +70,7 @@ class ResultadoService extends BaseModelService
             'atropelados_especie' => $this->resultadoCampanhaService->getAtropeladoEspecie($resultado->id),
             'atropelados_mes' => $this->resultadoCampanhaService->getAtropeladoMes($resultado->id),
             'atropelados_km' => $this->resultadoCampanhaService->getAtropeladoKm($resultado->id),
+            'outras_analises' => AtFaunaResultadoOutrasAnalise::where('fk_resultado', $resultado->id)->get(),
         ];
     }
 }
