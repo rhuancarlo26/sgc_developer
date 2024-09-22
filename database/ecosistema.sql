@@ -440,19 +440,6 @@ CREATE TABLE `at_fauna_grupo_classe` (
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `at_fauna_relatorio_anexos`
---
-
-CREATE TABLE `at_fauna_relatorio_anexos` (
-  `id` int(11) NOT NULL,
-  `fk_relatorio` int(11) NOT NULL,
-  `nome_arquivo` text NOT NULL,
-  `caminho_arquivo` text NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 -- --------------------------------------------------------
 
@@ -2673,27 +2660,6 @@ INSERT INTO `plano_supressao` (`id`, `chave`, `area_em_app`, `shapefile_em_app`,
 
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `programas_tipo`
---
-
-CREATE TABLE `programas_tipo` (
-  `id` int(11) NOT NULL,
-  `chave` varchar(255) DEFAULT NULL,
-  `nome` varchar(100) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `programas_tipo`
---
-
-INSERT INTO `programas_tipo` (`id`, `chave`, `nome`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, '36a26b926d723984100b0b4fa85c96f7', 'Execução de Programas Ambientais', '2023-02-10 14:09:00', NULL, NULL),
-(2, 'cb243de0d9bad313330a439c0c20106f', 'Supervisão Ambiental', '2023-02-10 14:09:00', NULL, NULL);
 
 -- --------------------------------------------------------
 

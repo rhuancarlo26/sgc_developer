@@ -132,4 +132,29 @@ class ResultadoCampanhaService extends BaseModelService
             ->whereNotNull('at_fauna_resultado_campanha.deleted_at')
             ->get();
     }
+
+    public function getAbiosCampanhas($id_resultado)
+    {
+        return $this->model
+            ->select([
+                'feca.fk_execucao_campanha as campanha',
+                'l.numero_licenca',
+                'l.empreendimento',
+                'l.emissor',
+                DB::raw('DATE_FORMAT(l.data_emissao, "%d/%m/%Y") as data_emissao'),
+                'l.vencimento',
+                'l.processo_dnit',
+                'l.arquivo_licenca',
+                'l.fiscal'
+            ])
+            ->join('at_fauna_execucao_campanha_abio AS feca', 'feca.fk_execucao_campanha', '=', 'at_fauna_resultado_campanha.fk_campanha')
+            ->join('at_fauna_config_vinculacao AS fcv', 'fcv.id', '=', 'feca.fk_config_vinculacao')
+            ->join('licencas AS l', 'l.id', '=', 'fcv.fk_licenca')
+            ->where('at_fauna_resultado_campanha.fk_resultado', $id_resultado)
+            ->groupBy('feca.fk_execucao_campanha')
+            ->orderBy('feca.fk_execucao_campanha')
+            ->get();
+    }
+
+
 }
