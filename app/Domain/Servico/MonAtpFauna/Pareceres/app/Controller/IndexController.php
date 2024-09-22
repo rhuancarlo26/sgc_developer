@@ -13,20 +13,18 @@ use Inertia\Response;
 
 class IndexController extends Controller
 {
-  public function __construct(private readonly PareceresService $pareceresService)
-  {
-  }
+    public function __construct(private readonly PareceresService $pareceresService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, Request $request): Response
-  {
-    $searchParams = $request->all('columns', 'value');
+    public function index(Contrato $contrato, Servicos $servico, Request $request): Response
+    {
+        $searchParams = $request->all('columns', 'value');
 
-    $response = $this->pareceresService->index($servico, $searchParams);
-
-    return Inertia::render('Servico/MonAtpFauna/Pareceres/Index', [
-      'contrato' => $contrato,
-      'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
-      ...$response
-    ]);
-  }
+        return Inertia::render('Servico/MonAtpFauna/Pareceres/Index', [
+            'contrato' => $contrato,
+            'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'data' => $this->pareceresService->index($servico, $searchParams)
+        ]);
+    }
 }

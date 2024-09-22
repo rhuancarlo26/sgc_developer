@@ -2,28 +2,22 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../Navbar.vue";
-import NavButton from "@/Components/NavButton.vue";
-import NavLink from "@/Components/NavLink.vue";
-import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
-import ModalVincularABIO from "./ModalVincularABIO.vue";
-import { ref } from "vue";
-import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+import { Head } from "@inertiajs/vue3";
 import { IconDots } from "@tabler/icons-vue";
+import ModalVisualizar from "./ModalVisualizar.vue";
+import {ref} from "vue";
 
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
-  vinculacoes: { type: Object },
-  licencas: { type: Array }
+  data: { type: Object },
 });
 
-const modalVincularABIO = ref({});
-
-const abrirModalVincularABIO = () => {
-  modalVincularABIO.value.abrirModal();
+const modalRef = ref()
+const openParecer = (item) => {
+    modalRef.value.abrirModal(item)
 }
-
 </script>
 <template>
 
@@ -34,7 +28,7 @@ const abrirModalVincularABIO = () => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+          { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
           { route: '#', label: contrato.contratada }
         ]
           " />
@@ -47,36 +41,27 @@ const abrirModalVincularABIO = () => {
 
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
-        <ModelSearchFormAllColumns :columns="[]">
-          <template #action>
-            <NavButton @click="abrirModalVincularABIO()" type-button="info" title="Vincular ABIO" />
-          </template>
-        </ModelSearchFormAllColumns>
-
-        <!-- Listagem-->
         <Table
-          :columns="['Tipo', 'N° licença', 'Empreendimento', 'Emissor', 'Data de emissão', 'Vencimento', 'Responsável', 'Processo DNIT', 'Ação']"
-          :records="vinculacoes" table-class="table-hover">
+          :columns="['Tipo', 'Status', 'Data do parecer', 'Ação']"
+          :records="data" table-class="table-hover">
           <template #body="{ item }">
             <tr>
-              <td>{{ item.licenca?.tipo?.nome }}</td>
-              <td>{{ item.licenca?.numero_licenca }}</td>
-              <td>{{ item.licenca?.empreendimento }}</td>
-              <td>{{ item.licenca?.emissor }}</td>
-              <td>{{ dateTimeFormat(item.licenca?.data_emissao) }}</td>
-              <td>{{ dateTimeFormat(item.licenca?.vencimento) }}</td>
-              <td>{{ item.licenca?.fiscal }}</td>
-              <td>{{ item.licenca?.processo_dnit }}</td>
+              <td>{{ item.tipo }}</td>
+              <td>
+                  <span v-if="item.fk_status === 2" class="shadow-none badge badge-warning">Em análise</span>
+                  <span v-if="item.fk_status === 3" class="shadow-none badge badge-primary">Aprovado</span>
+                  <span v-if="item.fk_status === 4" class="shadow-none badge badge-danger">Pendente</span>
+              </td>
+              <td>{{ item.data_parecer }}</td>
               <td>
                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   <IconDots />
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
-                  <NavLink route-name="home" title="Visualizar AABIO" class="dropdown-item" />
-                  <NavLink route-name="home" title="Visualizar RET" class="dropdown-item" />
-                  <NavLink route-name="home" title="Adicionar RET" class="dropdown-item" />
-                  <NavLink route-name="home" title="Excluir" class="dropdown-item" />
+                    <a @click="openParecer(item)" class="dropdown-item" href="#">
+                        Visualizar
+                    </a>
                 </div>
               </td>
             </tr>
@@ -84,8 +69,6 @@ const abrirModalVincularABIO = () => {
         </Table>
       </template>
     </Navbar>
-
-    <ModalVincularABIO :contrato="contrato" :servico="servico" :licencas="licencas" ref="modalVincularABIO" />
-
+    <ModalVisualizar ref="modalRef" />
   </AuthenticatedLayout>
 </template>
