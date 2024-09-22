@@ -33,7 +33,7 @@ class ResultadoService extends BaseModelService
         parent::__construct($dataManagement);
     }
 
-    public function index(Servicos $servico, array $searchParams)
+    public function index(Servicos $servico, array $searchParams, $paginate = true)
     {
         return $this->searchAllColumns(...$searchParams)
             ->select([
@@ -46,7 +46,7 @@ class ResultadoService extends BaseModelService
             ->leftJoin('at_fauna_relatorio AS relat', 'relat.fk_resultado', '=', 'at_fauna_resultado.id')
             ->where('at_fauna_resultado.fk_servico', $servico->id)
             ->groupBy('at_fauna_resultado.created_at', 'at_fauna_resultado.id')
-            ->paginate();
+            ->when($paginate, fn($q) => $q->paginate(), fn($q) => $q->get());
     }
 
     public function store(array $request)
