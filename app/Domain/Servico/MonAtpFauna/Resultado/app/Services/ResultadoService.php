@@ -53,6 +53,11 @@ class ResultadoService extends BaseModelService
         return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
     }
 
+    public function update(array $request): array
+    {
+        return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+    }
+
     public function getResultadoAnalise(AtFaunaResultado $resultado): array
     {
         return [
