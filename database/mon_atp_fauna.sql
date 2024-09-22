@@ -2777,3 +2777,45 @@ INSERT INTO `at_fauna_resultado_analise` (`id`, `fk_resultado`, `analise_registr
                                           `graf_by_especie`, `graf_by_km`, `graf_by_mes`, `created_at`, `updated_at`,
                                           `deleted_at`)
 VALUES (2, 2, '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+--
+-- Table structure for table `at_fauna_resultado_outras_analises`
+--
+
+CREATE TABLE `at_fauna_resultado_outras_analises`
+(
+    `id`              int(11) NOT NULL AUTO_INCREMENT,
+    `fk_resultado`    int(11) NOT NULL,
+    `analise`         text    NOT NULL,
+    `nome_arquivo`    text    NOT NULL,
+    `caminho_arquivo` text    NOT NULL,
+    `created_at`      datetime    DEFAULT NULL,
+    `updated_at`      datetime    DEFAULT NULL,
+    `deleted_at`      datetime    DEFAULT NULL,
+    `extensao`        varchar(45) DEFAULT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb3
+  COLLATE = utf8mb3_general_ci;
+
+--
+-- Dumping data for table `at_fauna_resultado_outras_analises`
+--
+
+INSERT INTO `at_fauna_resultado_outras_analises` (`id`, `fk_resultado`, `analise`, `nome_arquivo`, `caminho_arquivo`,
+                                                  `created_at`, `updated_at`, `deleted_at`, `extensao`)
+VALUES (1, 0, 'teste', 'Cleber PE - 2 pontos.jpeg', 'uploads/atropelamento_fauna/anexos/undefined262696269.jpeg',
+        '2023-11-13 17:19:58', '2023-11-13 17:19:58', NULL, NULL),
+       (2, 0, 'eee', 'WhatsApp Image 2022-07-19 at 15.34.26.jpeg',
+        'uploads/atropelamento_fauna/anexos/undefined1750796465.jpeg', '2023-11-13 17:25:40', '2023-11-13 17:25:40',
+        NULL, NULL),
+       (3, 1, 'testetesteteste', 'Screenshot (1).png', 'uploads/atropelamento_fauna/anexos/1.1371850989.png',
+        '2023-11-13 19:12:08', '2023-11-13 19:12:08', NULL, NULL),
+       (4, 1, 'Teste', 'Correções - Ecosistema - Rev. 03.11 (1).pptx',
+        'uploads/atropelamento_fauna/anexos/1.1169928814.pptx', '2023-11-14 17:05:43', '2023-11-14 17:05:43', NULL,
+        'pptx'),
+       (5, 1, 'Teste', 'color.png', 'uploads/atropelamento_fauna/anexos/1.924059914.png', '2023-11-14 17:06:00',
+        '2023-11-14 17:06:00', NULL, 'png'),
+       (6, 3, 'teste', 'Cleber PE - 2 pontos.jpeg', 'uploads/atropelamento_fauna/anexos/3.499832628.jpeg',
+        '2023-11-14 18:29:54', '2023-11-14 18:29:54', NULL, 'jpeg');
+
