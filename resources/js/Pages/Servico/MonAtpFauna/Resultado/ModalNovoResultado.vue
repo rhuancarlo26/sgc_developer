@@ -18,21 +18,22 @@ const props = defineProps({
 const form = useForm({
     id: null,
     nome_resultado: null,
+    fk_campanha: null,
 });
 
+const modalRef = ref();
+const onSuccess = () => {
+    modalRef.value.getBsModal().hide();
+    form.reset();
+}
 const save = () => {
     form.transform((data) => ({
         ...data,
         fk_servico: props.servico.id
     }));
-    console.log(form); return;
-    const onSuccess = () => {
-        modalRef.value.getBsModal().hide();
-        form.reset();
-    }
 
     if (form.id !== null) {
-        form.patch(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.update'), {
+        form.patch(route('contratos.contratada.servicos.mon_atp_fauna.resultado.update'), {
             preserveState: true,
             onSuccess
         })
@@ -45,12 +46,26 @@ const save = () => {
     })
 }
 
-const modalRef = ref();
-const abrirModal = (item = null) => {
+const saveResultadoCampanha = () => {
+    form.transform((data) => ({
+        ...data,
+        fk_resultado: form.id,
+    }));
+    form.post(route('contratos.contratada.servicos.mon_atp_fauna.resultado.store-campanha'), {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess
+    })
+}
+
+const resultadosCampanha = ref([])
+const abrirModal = async (item = null) => {
     form.reset()
-    console.log(item)
+    resultadosCampanha.value = [];
     if(item !== null) {
         Object.assign(form, item)
+        const {data} = await axios.get(route('contratos.contratada.servicos.mon_atp_fauna.resultado.get-campanhas', form.id))
+        resultadosCampanha.value = data;
     }
     modalRef.value.getBsModal().show();
 }
@@ -86,10 +101,11 @@ defineExpose({abrirModal});
                         </div>
                     </div>
                     <div class="col-lg-6">
+
                         <div v-if="form.id" class="row row-gap-2 mb-2">
                             <div class="col-lg-12">
                                 <InputLabel value="Selecionar campanha" for="fk_campanha"/>
-                                <v-select :options="campanhas" label="id" :reduce="t => t.id">
+                                <v-select @option:selected="saveResultadoCampanha" v-model="form.fk_campanha" :options="campanhas" label="id" :reduce="t => t.id">
                                     <template #no-options="{}">
                                         Nenhum registro encontrado.
                                     </template>
@@ -98,7 +114,7 @@ defineExpose({abrirModal});
                             <div class="col-lg-12">
                                 <Table
                                     :columns="['ID', 'Campanha', 'Ação']"
-                                    :records="{ data: [], links: []}" table-class="table-hover">
+                                    :records="{ data: resultadosCampanha, links: []}" table-class="table-hover">
                                     <template #body="{ item }">
                                         <tr>
                                             <td>{{ item.id }}</td>
@@ -107,12 +123,11 @@ defineExpose({abrirModal});
                                                 <LinkConfirmation v-slot="confirmation" :options="{ text: 'Excluir registro?' }">
                                                     <Link  :onBefore="(request) => confirmation.show({
                                                   ...request,
-                                                  preserveState: true,
                                                   onSuccess: () => {
                                                       modalRef.getBsModal().hide();
                                                   }
                                                 })"
-                                                           :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete-abio', item.id)"
+                                                           :href="route('contratos.contratada.servicos.mon_atp_fauna.resultado.delete-campanha', item.id)"
                                                            as="button" method="delete" type="button" class="btn btn-icon btn-danger">
                                                         <IconTrash/>
                                                     </Link>
