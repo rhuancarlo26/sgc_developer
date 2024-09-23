@@ -11,7 +11,7 @@ class ServicoPmqaListaParametro extends Model
 {
     use HasFactory;
 
-    protected $table   = 'config_parametros';
+    protected $table = 'config_parametros';
     protected $guarded = ['id', 'created_at'];
 
     public function parametro(): BelongsTo
@@ -24,8 +24,8 @@ class ServicoPmqaListaParametro extends Model
         return $this->belongsTo(related: ServicoPmqaParametroLista::class, foreignKey: 'fk_parametro_lista');
     }
 
-    public function medicao(): HasOne
+    public function medicao(): BelongsTo
     {
-        return $this->hasOne(related: ServicoPmqaCampanhaPontoMedicaoParametro::class, foreignKey: 'fk_parametro_lista');
+        return $this->belongsTo(related: ServicoPmqaCampanhaPontoMedicaoParametro::class, foreignKey: 'fk_parametro_lista');
     }
 }
