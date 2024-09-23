@@ -23,7 +23,7 @@ class ResultadoController extends Controller
 
         return Inertia::render('Servico/PassagemFauna/Resultado/Resultado', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo']),
+            'servico' => $servico->load(['tipo', 'parecer_passagem_fauna']),
             ...$response
         ]);
     }
