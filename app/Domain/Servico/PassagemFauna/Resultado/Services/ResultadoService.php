@@ -71,7 +71,7 @@ class ResultadoService extends BaseModelService
                 [
                     'label' => 'Qtd',
                     'data' => $classes->values()->toArray(),
-                    'backgroundColor' => $colors
+                    'backgroundColor' => array_values($colors)
                 ]
             ]
         ];
@@ -86,7 +86,7 @@ class ResultadoService extends BaseModelService
                 [
                     'label' => 'Qtd',
                     'data' => $tipos->values()->toArray(),
-                    'backgroundColor' => $colors
+                    'backgroundColor' => array_values($colors)
                 ]
             ]
         ];
@@ -101,7 +101,7 @@ class ResultadoService extends BaseModelService
                 [
                     'label' => 'Qtd',
                     'data' => $passagens->values()->toArray(),
-                    'backgroundColor' => $colors
+                    'backgroundColor' => array_values($colors)
                 ]
             ]
         ];
@@ -116,7 +116,7 @@ class ResultadoService extends BaseModelService
                 [
                     'label' => 'Qtd',
                     'data' => $especies->values()->toArray(),
-                    'backgroundColor' => $colors
+                    'backgroundColor' => array_values($colors)
                 ]
             ]
         ];
