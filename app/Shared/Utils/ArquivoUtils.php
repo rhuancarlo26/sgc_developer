@@ -17,7 +17,7 @@ class ArquivoUtils
         );
     }
 
-    public function salvar(UploadedFile $arquivo, string $diretorio, ?string $prefixo = null): ?Arquivo
+    public function salvar(UploadedFile $arquivo, string $diretorio, ?string $prefixo = null, $createModel = true): ?Arquivo
     {
         if (!$arquivo->isValid()) {
             return null;
@@ -26,14 +26,21 @@ class ArquivoUtils
         $nomeArquivo = $prefixo . rand() . '.' . $arquivo->clientExtension();
         $arquivo->storeAs($diretorio, $nomeArquivo);
 
+
         /** @var Arquivo */
-        return Arquivo::query()->create([
+        $model = new Arquivo([
             'chave'        => md5(uniqid(rand(), true)),
             'arquivo'      => $nomeArquivo,
             'extensao'     => $arquivo->clientExtension(),
             'diretorio'    => $diretorio,
             'nome_arquivo' => $arquivo->getClientOriginalName(),
         ]);
+
+        if($createModel) {
+            $model->save();
+        }
+
+        return $model;
     }
 
     public function delete(Arquivo $arquivo): bool
