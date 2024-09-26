@@ -69,9 +69,10 @@ const servico = ref(null);
 const modalParecer = ref(null);
 
 const abrirModal = (item) => {
+    console.log(item)
     servico.value = item;
-    form.id_parecer = item.parecer.id
-    form.parecer = item.parecer.parecer
+    form.id_parecer = item.parecer?.id
+    form.parecer = item.parecer?.parecer
     modalParecer.value.getBsModal().show();
 }
 
