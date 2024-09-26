@@ -27,4 +27,9 @@ class ServicoPassagemFaunaExecCampanha extends Model
     {
         return $this->hasMany(ServicoPassagemFaunaExecCampanhasRet::class, 'id_campanha');
     }
+
+    public function registros()
+    {
+        return $this->hasMany(ServicoPassagemFaunaExecRegistro::class, 'id_campanha');
+    }
 }
