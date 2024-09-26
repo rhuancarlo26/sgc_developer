@@ -2,15 +2,15 @@
 import Navbar from '@/Pages/Contrato/Contratada/Navbar.vue';
 import NavDropdown from '@/Components/NavDropdown.vue';
 import NavDropdownLink from '@/Components/NavDropdownLink.vue';
-import {IconLayoutDashboard} from '@tabler/icons-vue';
+import { IconLayoutDashboard } from '@tabler/icons-vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import NavLink from '@/Components/NavLink.vue';
 import axios from "axios";
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 
 const props = defineProps({
-    contrato: {type: Object},
-    servico: {type: Object}
+    contrato: { type: Object },
+    servico: { type: Object }
 });
 
 const aprovacao = ref({});
@@ -20,7 +20,7 @@ onMounted(() => {
 })
 
 const getAprovacao = () => {
-    axios.get(route('aprovacao-config-afugentamento.get', {servico: props.servico.id}))
+    axios.get(route('aprovacao-config-afugentamento.get', { servico: props.servico.id }))
         .then(response => {
             aprovacao.value = response.data.aprovacao
         })
@@ -32,7 +32,7 @@ const getAprovacao = () => {
         <template #body>
             <div class="mb-4">
                 <Breadcrumb
-                    :links="[{ route: route('contratos.contratada.servicos.index', { contrato: contrato.id, servico: servico.id }), label: 'Serviços' }, { route: '#', label: servico?.tipo?.nome }]"/>
+                    :links="[{ route: route('contratos.contratada.servicos.index', { contrato: contrato.id, servico: servico.id }), label: 'Serviços' }, { route: '#', label: servico?.tipo?.nome }]" />
             </div>
             <div class="card card-body p-0 space-y-3">
                 <header class="navbar-expand-md">
@@ -50,13 +50,13 @@ const getAprovacao = () => {
                                                     route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv.index"
                                                     active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv*"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Vincular ASV"/>
+                                                    title="Vincular ASV" />
 
                                                 <NavDropdownLink
                                                     route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.abio.index"
                                                     active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.abio*"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Vincular Abio"/>
+                                                    title="Vincular Abio" />
 
                                             </NavDropdown>
 
@@ -68,20 +68,33 @@ const getAprovacao = () => {
                                                     route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.frente.supressao.index"
                                                     active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.frente.supressao*"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Frente de Supressão"/>
+                                                    title="Frente de Supressão" />
 
                                                 <NavDropdownLink
                                                     route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.index"
                                                     active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros*"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Registros"/>
+                                                    title="Registros" />
 
                                             </NavDropdown>
 
-                                            <!-- <NavLink route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv.index"
-                                                active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv.index*"
-                                                :param="{ contrato: contrato.id, servico: servico.id }" title="Execução"
-                                                :icon="IconLayoutDashboard" /> -->
+                                            <NavLink
+                                                route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.index"
+                                                active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.index*"
+                                                :param="{ contrato: contrato.id, servico: servico.id }"
+                                                title="Resultado" :icon="IconLayoutDashboard" />
+
+                                            <NavLink
+                                                route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.relatorios.index"
+                                                active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.relatorios.index*"
+                                                :param="{ contrato: contrato.id, servico: servico.id }"
+                                                title="Relatórios" :icon="IconLayoutDashboard" />
+
+                                            <NavLink
+                                                route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.pareceres.index"
+                                                active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.pareceres.index*"
+                                                :param="{ contrato: contrato.id, servico: servico.id }"
+                                                title="Pareceres" :icon="IconLayoutDashboard" />
 
                                         </ul>
                                     </div>
@@ -91,7 +104,7 @@ const getAprovacao = () => {
                     </div>
                 </header>
                 <div class="mt-2 card card-body">
-                    <slot name="body"/>
+                    <slot name="body" />
                 </div>
             </div>
         </template>

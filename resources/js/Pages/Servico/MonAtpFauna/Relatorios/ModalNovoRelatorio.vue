@@ -1,115 +1,106 @@
-<!-- resources\js\Pages\Servico\MonAtpFauna\Relatorios\ModalNovoRelatorio.vue -->
-<template>
-    <div class="modal fade" ref="modalNovoRelatorio" tabindex="-1" aria-labelledby="modalNovoRelatorioLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalNovoRelatorioLabel">
-                        Novo Resultado
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="form-fauna-relatorio" action="javascript:void(0);" novalidate="novalidate" class="simple-example">
-                        <div class="form-row">
-                            <div class="col-md-8 mb-4">
-                                <label for="nome_relatorio">Nome do relatório</label> 
-                                <input type="text" id="nome_relatorio" name="nome_relatorio" class="form-control">
-                            </div>
-                            <div class="col-md-12 mb-4">
-                                <label for="lista_campanhas" class="mb-2 mr-2">Selecionar resultado</label>
-                                <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
-                                    <thead>
-                                        <tr class="bg-light">
-                                            <th class="col-md-3">Nome do Resultado</th>
-                                            <th class="col-md-3">Campanhas</th>
-                                            <th class="col-md-3">Data</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <input type="radio" id="2" class="mr-1" value="2"> 
-                                                &nbsp;
-                                                <label for="2">teste</label>
-                                            </td>
-                                            <td class="d-flex flex-wrap">
-                                                <span class="badge badge-warning m-1">
-                                                    1
-                                                </span>
-                                            </td>
-                                            <td>
-                                                08/10/2024
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <input type="radio" id="4" class="mr-1" value="4"> 
-                                                &nbsp;
-                                                <label for="4">teste</label>
-                                            </td>
-                                            <td class="d-flex flex-wrap">
-                                                <span class="badge badge-warning m-1">
-                                                    2
-                                                </span>
-                                            </td>
-                                            <td>
-                                                08/10/2024
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="col-md-12 mb-4">
-                                <label for="sobre">Sobre o Relatório</label> 
-                                <textarea id="sobre" rows="5" class="form-control"></textarea>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <NavButton @click="cadastrarNovoRelatorio" type-button="success" title="Cadastrar Resultado" />
-                    <NavButton @click="fecharModal" type-button="secondary" title="Fechar" />
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
-import NavButton from "@/Components/NavButton.vue";
 
-const modalNovoRelatorio = ref(null);
-let modalInstance = null;
+import {onMounted, ref, watch} from "vue";
+import {Link, router, useForm} from "@inertiajs/vue3";
+import Modal from "@/Components/Modal.vue";
+import InputError from "@/Components/InputError.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import {IconTrash} from "@tabler/icons-vue";
+import Table from "@/Components/Table.vue";
+import {dateTimeFormat} from "../../../../Utils/DateTimeUtils.js";
 
-const abrirModal = () => {
-    modalInstance.show();
-};
+const props = defineProps({
+    resultados: {type: Array},
+    servico: {type: Object},
+})
 
-const fecharModal = () => {
-    modalInstance.hide();
-};
-
-const cadastrarNovoRelatorio = () => {
-    console.log("cadastrarNovoRelatorio");
-};
-
-onMounted(() => {
-    modalInstance = new bootstrap.Modal(modalNovoRelatorio.value);
+const form = useForm({
+    id: null,
+    nome_relatorio: null,
+    fk_resultado: null,
+    sobre_relatorio: null,
 });
 
-onBeforeUnmount(() => {
-    modalInstance.dispose();
-});
+const modalRef = ref();
+const onSuccess = () => {
+    modalRef.value.getBsModal().hide();
+    form.reset();
+}
+const save = () => {
+    form.transform((data) => ({
+        ...data,
+        fk_servico: props.servico.id
+    }));
 
-defineExpose({ abrirModal, fecharModal });
+    if (form.id !== null) {
+        form.patch(route('contratos.contratada.servicos.mon_atp_fauna.relatorios.update'), {
+            preserveState: true,
+            onSuccess
+        })
+        return
+    }
+
+    form.post(route('contratos.contratada.servicos.mon_atp_fauna.relatorios.store'), {
+        preserveState: true,
+        onSuccess
+    })
+}
+
+const abrirModal = async (item = null) => {
+    form.reset()
+    if (item !== null) {
+        Object.assign(form, item)
+    }
+    modalRef.value.getBsModal().show();
+}
+
+defineExpose({abrirModal});
+
 </script>
 
-
-<style scoped>
-.tab-pane {
-    margin-top: 30px;
-}
-</style>
+<template>
+    <form @submit.prevent="save">
+        <Modal ref="modalRef" title="Resultado" modal-dialog-class="modal-xl">
+            <template #body>
+                <div class="row row-gap-2 mb-2">
+                    <div class="col-lg-6">
+                        <InputLabel value="Nome do relatório" for="nome_relatorio"/>
+                        <input v-model="form.nome_relatorio" type="text" id="nome_relatorio" class="form-control"/>
+                        <InputError :message="form.errors.nome_relatorio"/>
+                    </div>
+                    <div class="col-lg-12">
+                        <Table
+                            :columns="['Nome do Resultado', 'Campanhas', 'Data']"
+                            :records="{ data: resultados, links: []}" table-class="table-hover">
+                            <template #body="{ item }">
+                                <tr>
+                                    <td>
+                                        <span class="d-flex align-items-center gap-2">
+                                            <input type="radio" :id="item.id" :value="item.id" v-model="form.fk_resultado" >
+                                            <label :for="item.id">{{ item.nome_resultado }}</label>
+                                        </span>
+                                    </td>
+                                    <td class="d-flex flex-wrap">
+                                      <span v-for="lista in item.campanhas.split(',')" class="badge badge-warning m-1">
+                                        {{ lista }}
+                                      </span>
+                                    </td>
+                                    <td>{{ dateTimeFormat(item.created_at) }}</td>
+                                </tr>
+                            </template>
+                        </Table>
+                    </div>
+                    <div class="col-12">
+                        <InputLabel>Sobre o Relatório:</InputLabel>
+                        <textarea v-model="form.sobre_relatorio" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+            </template>
+            <template #footer>
+                <button @click="modalRef.getBsModal().hide()" type="button" class="btn btn-secondary">Fechar</button>
+                <button type="submit" class="btn btn-success">Salvar</button>
+            </template>
+        </Modal>
+    </form>
+</template>

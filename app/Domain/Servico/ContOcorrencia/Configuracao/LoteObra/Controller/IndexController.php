@@ -13,20 +13,20 @@ use Inertia\Response;
 
 class IndexController extends Controller
 {
-  public function __construct(private readonly LoteObraService $loteObraService)
-  {
-  }
+    public function __construct(private readonly LoteObraService $loteObraService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, Request $request): Response
-  {
-    $searchParams = $request->all('columns', 'value');
+    public function index(Contrato $contrato, Servicos $servico, Request $request): Response
+    {
+        $searchParams = $request->all('columns', 'value');
 
-    $response = $this->loteObraService->index($servico, $searchParams);
+        $response = $this->loteObraService->index($servico, $searchParams);
 
-    return Inertia::render('Servico/ContOcorr/Configuracao/LoteObra/Index', [
-      'contrato' => $contrato,
-      'servico' => $servico->load(['tipo', 'cont_ocorr_parecer_configuracao']),
-      ...$response
-    ]);
-  }
+        return Inertia::render('Servico/ContOcorr/Configuracao/LoteObra/Index', [
+            'contrato' => $contrato,
+            'servico' => $servico->load(['tipo', 'cont_ocorr_parecer_configuracao']),
+            ...$response
+        ]);
+    }
 }
