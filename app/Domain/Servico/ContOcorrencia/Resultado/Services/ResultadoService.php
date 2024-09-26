@@ -72,143 +72,71 @@ class ResultadoService extends BaseModelService
                 return $item->intensidade;
             });
 
-        $local = $collection
+//        COMEÇO LOCAL
+        $locais = $filtered
             ->where(key: 'tipo', value: 'RNC')
             //->where('status', value: 'Não Atendida')
             ->groupBy(function ($item) {
-                return "{$item->intensidade}_{$item->local}";
+                return "{$item->local}";
             });
 
-        $classificacao = $collection
-            ->where(key: 'tipo', value: 'RNC')
-            //->where('status', value: 'Não Atendida')
-            ->groupBy(function ($item) {
-                return "{$item->intensidade}_{$item->classificacao}";
-            });
-
-        $lote = $collection
-            ->where(key: 'tipo', value: 'RNC')
-            //->where('status', value: 'Não Atendida')
-            ->groupBy(function ($item) {
-                return "{$item->intensidade}_{$item->lote['nome_id']} - {$item->lote['empresa']}";
-            });
-
-        $groupedLocal = $local->mapWithKeys(function ($value, $key) {
-            list($category, $subcategory) = explode('_', $key);
-            return ["$category.$subcategory" => 1];
-        })->reduce(function ($carry, $item, $key) {
-            list($category, $subcategory) = explode('.', $key);
-            if (!isset($carry[$category])) {
-                $carry[$category] = [];
-            }
-            if (!isset($carry[$category][$subcategory])) {
-                $carry[$category][$subcategory] = 0;
-            }
-            $carry[$category][$subcategory] += $item;
-            return $carry;
-        }, []);
-
-        $subcategories = [];
-        foreach ($groupedLocal as $category => $subcat) {
-            $subcategories = array_merge($subcategories, array_keys($subcat));
-        }
-        $subcategories = array_unique($subcategories);
-
-        $chartData = [
-            'labels' => ['Leve', 'Moderada', 'Grave'],
-            'datasets' => []
-        ];
-
-        foreach ($subcategories as $subcategory) {
-            $data = [];
-            foreach (['Leve', 'Moderada', 'Grave'] as $category) {
-                $data[] = $groupedLocal[$category][$subcategory] ?? 0;
-            }
-
-            $chartData['datasets'][] = [
-                'label' => $subcategory,
-                'backgroundColor' => $this->getRandomColor(),
-                'data' => $data
+        foreach ($locais as $local => $dados) {
+            $datasets[] = [
+                'label' => $local,
+                'data' => [count($dados)],
+                'backgroundColor' => $this->getRandomColor()
             ];
         }
 
-        $groupedClassificacao = $classificacao->mapWithKeys(function ($value, $key) {
-            list($category, $subcategory) = explode('_', $key);
-            return ["$category.$subcategory" => 1];
-        })->reduce(function ($carry, $item, $key) {
-            list($category, $subcategory) = explode('.', $key);
-            if (!isset($carry[$category])) {
-                $carry[$category] = [];
-            }
-            if (!isset($carry[$category][$subcategory])) {
-                $carry[$category][$subcategory] = 0;
-            }
-            $carry[$category][$subcategory] += $item;
-            return $carry;
-        }, []);
-
-        $subcategoriesClass = [];
-        foreach ($groupedClassificacao as $category => $subcat) {
-            $subcategoriesClass = array_merge($subcategoriesClass, array_keys($subcat));
-        }
-        $subcategoriesClass = array_unique($subcategoriesClass);
-
-        $chartDataClass = [
-            'labels' => ['Leve', 'Moderada', 'Grave'],
-            'datasets' => []
+        $chartDataLocal = [
+            'labels' => ['Locais'],
+            'datasets' => $datasets
         ];
+//        FIM LOCAL
 
-        foreach ($subcategoriesClass as $subcategory) {
-            $data = [];
-            foreach (['Leve', 'Moderada', 'Grave'] as $category) {
-                $data[] = $groupedClassificacao[$category][$subcategory] ?? 0;
-            }
+//        COMEÇO CLASSIFICAÇÃO
+        $classificacoes = $filtered
+            ->where(key: 'tipo', value: 'RNC')
+            //->where('status', value: 'Não Atendida')
+            ->groupBy(function ($item) {
+                return "{$item->classificacao}";
+            });
 
-            $chartDataClass['datasets'][] = [
-                'label' => $subcategory,
-                'backgroundColor' => $this->getRandomColor(),
-                'data' => $data
+        foreach ($classificacoes as $classificacao => $dados) {
+            $datasets[] = [
+                'label' => $classificacao,
+                'data' => [count($dados)],
+                'backgroundColor' => $this->getRandomColor()
             ];
         }
 
-        $groupedLote = $lote->mapWithKeys(function ($value, $key) {
-            list($category, $subcategory) = explode('_', $key);
-            return ["$category///$subcategory" => 1];
-        })->reduce(function ($carry, $item, $key) {
-            list($category, $subcategory) = explode('///', $key);
-            if (!isset($carry[$category])) {
-                $carry[$category] = [];
-            }
-            if (!isset($carry[$category][$subcategory])) {
-                $carry[$category][$subcategory] = 0;
-            }
-            $carry[$category][$subcategory] += $item;
-            return $carry;
-        }, []);
+        $chartDataClassificacao = [
+            'labels' => ['Classificações'],
+            'datasets' => $datasets
+        ];
+//        FIM CLASSIFICAÇÃO
 
-        $subcategoriesLote = [];
-        foreach ($groupedLote as $category => $subcat) {
-            $subcategoriesLote = array_merge($subcategoriesLote, array_keys($subcat));
+//        COMEÇO LOTE
+        $lotes = $filtered
+            ->where(key: 'tipo', value: 'RNC')
+            //->where('status', value: 'Não Atendida')
+            ->groupBy(function ($item) {
+                return "{$item->lote['nome_id']} - {$item->lote['empresa']}";
+            });
+
+        foreach ($lotes as $lote => $dados) {
+            $datasets[] = [
+                'label' => $lote,
+                'data' => [count($dados)],
+                'backgroundColor' => $this->getRandomColor()
+            ];
         }
-        $subcategoriesLote = array_unique($subcategoriesLote);
 
         $chartDataLote = [
-            'labels' => ['Leve', 'Moderada', 'Grave'],
-            'datasets' => []
+            'labels' => ['Lotes'],
+            'datasets' => $datasets
         ];
-
-        foreach ($subcategoriesLote as $subcategory) {
-            $data = [];
-            foreach (['Leve', 'Moderada', 'Grave'] as $category) {
-                $data[] = $groupedLote[$category][$subcategory] ?? 0;
-            }
-
-            $chartDataLote['datasets'][] = [
-                'label' => $subcategory,
-                'backgroundColor' => $this->getRandomColor(),
-                'data' => $data
-            ];
-        }
+//        FIM LOTE
 
         return [
             'tabs' => [
@@ -233,8 +161,8 @@ class ResultadoService extends BaseModelService
                         ]
                     ]
                 ],
-                'locais' => $chartData,
-                'classificacoes' => $chartDataClass,
+                'locais' => $chartDataLocal,
+                'classificacoes' => $chartDataClassificacao,
                 'lotes' => $chartDataLote,
                 'acas' => $acaFiltered
             ]

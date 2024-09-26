@@ -51,7 +51,7 @@ class OcorrenciaService extends BaseModelService
                 ->paginate()
                 ->appends($searchParams),
             'ocorrencias_em_aberto' => $this->modelClass::with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
-                ->where('id_servico', $servico->id)->where('rnc_direto', 1)->get()
+                ->where('id_servico', $servico->id)->where('rnc_direto', 1)->where('envio_empresa', 'Não')->get()
         ];
     }
 
@@ -291,11 +291,12 @@ class OcorrenciaService extends BaseModelService
         foreach ($post['ocorrencias'] as $item) {
             if ($item['tipo'] == 'RNC') {
                 $data['aprovado_rnc'] = 'Em análise';
-                $data['envio_empresa'] = 'Não';
+                $data['envio_empresa'] = 'Sim';
                 $data['envio_fiscal'] = 'Sim';
                 $tipo = 5;
             } else {
                 $data['envio_empresa'] = 'Sim';
+                $data['envio_fiscal'] = 'Sim';
                 $tipo = 4;
             }
 
