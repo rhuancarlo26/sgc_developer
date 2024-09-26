@@ -7,7 +7,7 @@ use App\Domain\Servico\MonAtpFauna\Resultado\app\Services\ResultadoService;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 
-class StoreController extends Controller
+class UpdateController extends Controller
 {
     public function __construct(private readonly ResultadoService $resultadoService)
     {
@@ -15,7 +15,7 @@ class StoreController extends Controller
 
     public function __invoke(StoreRequest $request): RedirectResponse
     {
-        $response = $this->resultadoService->store(request: $request->all());
+        $response = $this->resultadoService->update(request: $request->all());
 
         return redirect()->back()->with('message', $response['request']);
     }

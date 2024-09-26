@@ -10,7 +10,8 @@ import ModalAnalise from "./ModalAnalise.vue";
 import {ref} from "vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils";
 import {IconDots} from "@tabler/icons-vue";
-import {Head} from "@inertiajs/vue3";
+import {Head, router} from "@inertiajs/vue3";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 const props = defineProps({
     contrato: {type: Object},
@@ -22,14 +23,21 @@ const props = defineProps({
 const modalNovoResultado = ref({});
 const modalAnalise = ref({});
 
-const abrirModalNovoResultado = () => {
-    modalNovoResultado.value.abrirModal();
+const abrirModalNovoResultado = (item) => {
+    modalNovoResultado.value.abrirModal(item);
 }
 
 const showActionsModal = ref(true);
 const abrirModalAnalise = (item, show = true) => {
     showActionsModal.value = show;
     modalAnalise.value.abrirModal(item);
+}
+
+const linkConfirmationRef = ref()
+const abrirModalExcluirRegistro = (id) => {
+    linkConfirmationRef.value.show(() => {
+        router.delete(route('contratos.contratada.servicos.mon_atp_fauna.resultado.delete', id))
+    })
 }
 
 </script>
@@ -86,10 +94,10 @@ const abrirModalAnalise = (item, show = true) => {
                                     <a href="#" class="dropdown-item" @click.prevent="abrirModalAnalise(item, false)">
                                         Visualizar
                                     </a>
-                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalAnalise(item)">
+                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalNovoResultado(item)">
                                         Editar
                                     </a>
-                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalAnalise(item)">
+                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalExcluirRegistro(item.id)">
                                         Excluir
                                     </a>
                                 </div>
@@ -100,8 +108,8 @@ const abrirModalAnalise = (item, show = true) => {
             </template>
         </Navbar>
 
-        <ModalNovoResultado ref="modalNovoResultado" :campanhas="campanhas" />
+        <ModalNovoResultado ref="modalNovoResultado" :campanhas="campanhas" :servico="servico" />
         <ModalAnalise ref="modalAnalise" :showActionsModal="showActionsModal"/>
-
+        <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Excluir registro?' }" />
     </AuthenticatedLayout>
 </template>
