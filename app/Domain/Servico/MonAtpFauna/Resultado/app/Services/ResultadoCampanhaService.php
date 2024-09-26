@@ -4,10 +4,13 @@ namespace App\Domain\Servico\MonAtpFauna\Resultado\app\Services;
 
 use App\Models\AtFaunaResultadoCampanha;
 use App\Shared\Abstract\BaseModelService;
+use App\Shared\Traits\Deletable;
 use Illuminate\Support\Facades\DB;
 
 class ResultadoCampanhaService extends BaseModelService
 {
+    use Deletable;
+
     protected string $modelClass = AtFaunaResultadoCampanha::class;
 
     public function getTabelaRegistrosIdentificados(int $resultadoId)
@@ -111,4 +114,47 @@ class ResultadoCampanhaService extends BaseModelService
             ->orderBy('at_fauna_execucao_registro.km')
             ->get();
     }
+
+    public function store(array $request)
+    {
+        return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+    }
+
+    public function getResultadoCampanhas($id)
+    {
+        return $this->model
+            ->select([
+                'at_fauna_resultado_campanha.id',
+                'fec.id AS id_campanha'
+            ])
+            ->join('at_fauna_execucao_campanhas AS fec', 'fec.id', '=', 'at_fauna_resultado_campanha.fk_campanha')
+            ->where('at_fauna_resultado_campanha.fk_resultado', $id)
+            ->whereNotNull('at_fauna_resultado_campanha.deleted_at')
+            ->get();
+    }
+
+    public function getAbiosCampanhas($id_resultado)
+    {
+        return $this->model
+            ->select([
+                'feca.fk_execucao_campanha as campanha',
+                'l.numero_licenca',
+                'l.empreendimento',
+                'l.emissor',
+                DB::raw('DATE_FORMAT(l.data_emissao, "%d/%m/%Y") as data_emissao'),
+                'l.vencimento',
+                'l.processo_dnit',
+                'l.arquivo_licenca',
+                'l.fiscal'
+            ])
+            ->join('at_fauna_execucao_campanha_abio AS feca', 'feca.fk_execucao_campanha', '=', 'at_fauna_resultado_campanha.fk_campanha')
+            ->join('at_fauna_config_vinculacao AS fcv', 'fcv.id', '=', 'feca.fk_config_vinculacao')
+            ->join('licencas AS l', 'l.id', '=', 'fcv.fk_licenca')
+            ->where('at_fauna_resultado_campanha.fk_resultado', $id_resultado)
+            ->groupBy('feca.fk_execucao_campanha')
+            ->orderBy('feca.fk_execucao_campanha')
+            ->get();
+    }
+
+
 }

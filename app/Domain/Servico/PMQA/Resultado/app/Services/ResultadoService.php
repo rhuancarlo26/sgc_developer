@@ -50,23 +50,23 @@ class ResultadoService extends BaseModelService
 
     public function storeAnalises(array $request): array
     {
-        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $request['resultado_id'] . '_' . $request['parametro_id'] . '.png';
-        Storage::disk()->put($path, $request['imagem']);
+        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $request['fk_resultado'] . '_' . $request['fk_parametro'] . '.png';
+        Storage::disk()->put($path, $request['graf_analise_parametro']);
 
         return $this->dataManagement->create(entity: $this->modelClassAnalise, infos: [
             ...$request,
-            'caminho' => str_replace("public\\", "", $path)
+            'graf_analise_parametro' => str_replace("public\\", "", $path)
         ]);
     }
 
     public function storeAnaliseIqa(array $request): array
     {
-        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['resultado_id'] . '.png';
-        Storage::disk()->put($path, $request['imagem']);
+        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['fk_resultado'] . '.png';
+        Storage::disk()->put($path, $request['graf_analise_iqa']);
 
         return $this->dataManagement->create(entity: $this->modelClassAnaliseIqa, infos: [
             ...$request,
-            'caminho' => str_replace("public\\", "", $path)
+            'graf_analise_iqa' => str_replace("public\\", "", $path)
         ]);
     }
 
@@ -191,9 +191,7 @@ class ResultadoService extends BaseModelService
             'analises',
             'analise_iqa',
             'outras_analises',
-            'campanhas.medicoes.ponto_medicao',
-            'campanhas.medicoes.lista_parametro.parametro_lista',
-            'campanhas.pontos.lista.parametros_vinculados.medicao'
+            //'campanhas.pontos.lista.parametros_vinculados.medicao'
         ]);
 
         $chartDataIqa = [
@@ -224,38 +222,7 @@ class ResultadoService extends BaseModelService
                 'backgroundColor' => $this->getRandomColor(),
                 'data' => array_values($iqas)
             ];
-
-
-//            }
-//
-//            $chartDataIqa['datasets'][] = [
-//                'label' => $campanha->nome,
-//                'backgroundColor' => $this->getRandomColor(),
-//                'data' => array_values($iqas)
-//            ];
         }
-//        foreach ($resultado->campanhas as $campanha) {
-//            $chartDataIqa['labels'][] = $campanha->nome;
-//
-//            $iqas = [];
-//
-//            foreach ($campanha->medicoes as $medicao) {
-//                $id = $medicao->ponto_medicao->id;
-//                $iqa = $medicao->ponto_medicao->iqa;
-//
-//                if (!isset($iqas[$id])) {
-//                    if ($iqa) {
-//                        $iqas[$id] = $iqa;
-//                    }
-//                }
-//            }
-//
-//            $chartDataIqa['datasets'][] = [
-//                'label' => $campanha->nome,
-//                'backgroundColor' => $this->getRandomColor(),
-//                'data' => array_values($iqas)
-//            ];
-//        }
 
         $parametrosIds = collect($resultado->campanhas)->flatMap(function ($campanha) {
             return collect($campanha->campanha_pontos)->flatMap(function ($campanhaPonto) {
@@ -306,44 +273,6 @@ class ResultadoService extends BaseModelService
             }
             return false;
         })->keyBy('id')->toArray();
-
-//        $uniqueParametros = collect($parametros)->filter(function ($parametro) use ($parametrosIds, $resultado) {
-//            if (in_array($parametro->id, $parametrosIds)) {
-//                $datasets = collect($resultado->campanhas)
-//                    ->map(function ($campanha) use ($parametro) {
-//                        $medicoes = collect($campanha->medicoes)
-//                            ->filter(function ($medicao) use ($parametro) {
-//                                return $medicao->lista_parametro->parametro_id == $parametro->id;
-//                            })
-//                            ->pluck('medicao')
-//                            ->toArray();
-//
-//                        return [
-//                            'label' => $campanha->nome,
-//                            'backgroundColor' => $this->getRandomColor(),
-//                            'data' => $medicoes
-//                        ];
-//                    })
-//                    ->toArray();
-//
-//                $maxSize = 0;
-//
-//                foreach ($datasets as $dataset) {
-//                    $currentSize = count($dataset['data']);
-//                    if ($currentSize > $maxSize) {
-//                        $maxSize = $currentSize;
-//                    }
-//                }
-//
-//                $parametro->datasets = [
-//                    'labels' => range(1, $maxSize),
-//                    'datasets' => $datasets
-//                ];
-//
-//                return true;
-//            }
-//            return false;
-//        })->keyBy('id')->toArray();
 
         return [
             'parametros' => $parametros,

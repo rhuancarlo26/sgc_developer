@@ -21,10 +21,10 @@ class IndexController extends Controller
         $searchParams = $request->all('columns', 'value');
 
         $response = $this->vincularABIO->index($servico, $searchParams);
-        
+
         return Inertia::render('Servico/PassagemFauna/Configuracao/VincularABIO/Index', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo']),
+            'servico' => $servico->load(['tipo', 'parecer_passagem_fauna']),
             ...$response
         ]);
     }
