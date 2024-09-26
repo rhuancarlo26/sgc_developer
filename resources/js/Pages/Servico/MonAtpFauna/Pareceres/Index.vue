@@ -6,7 +6,7 @@ import NavButton from "@/Components/NavButton.vue";
 import NavLink from "@/Components/NavLink.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
-import ModalVincularABIO from "./ModalVincularABIO.vue";
+// import ModalVincularABIO from "./ModalVincularABIO.vue";
 import { ref } from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconDots } from "@tabler/icons-vue";
@@ -18,11 +18,11 @@ const props = defineProps({
   licencas: { type: Array }
 });
 
-const modalVincularABIO = ref({});
-
-const abrirModalVincularABIO = () => {
-  modalVincularABIO.value.abrirModal();
-}
+// const modalVincularABIO = ref({});
+//
+// const abrirModalVincularABIO = () => {
+//   modalVincularABIO.value.abrirModal();
+// }
 
 </script>
 <template>
@@ -49,7 +49,7 @@ const abrirModalVincularABIO = () => {
       <template #body>
         <ModelSearchFormAllColumns :columns="[]">
           <template #action>
-            <NavButton @click="abrirModalVincularABIO()" type-button="info" title="Vincular ABIO" />
+<!--            <NavButton @click="abrirModalVincularABIO()" type-button="info" title="Vincular ABIO" />-->
           </template>
         </ModelSearchFormAllColumns>
 
@@ -85,7 +85,7 @@ const abrirModalVincularABIO = () => {
       </template>
     </Navbar>
 
-    <ModalVincularABIO :contrato="contrato" :servico="servico" :licencas="licencas" ref="modalVincularABIO" />
+<!--    <ModalVincularABIO :contrato="contrato" :servico="servico" :licencas="licencas" ref="modalVincularABIO" />-->
 
   </AuthenticatedLayout>
 </template>

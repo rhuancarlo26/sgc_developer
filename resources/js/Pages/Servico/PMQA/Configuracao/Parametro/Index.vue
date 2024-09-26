@@ -63,7 +63,7 @@ const ap = (ap) => {
 
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
-                <ModelSearchFormAllColumns :columns="['nome', 'parametros.nome']">
+                <ModelSearchFormAllColumns :columns="['nome', 'parametros.nome']" v-if="ap(aprovacao)">
                     <template #action>
                         <NavButton @click="abrirModalParametros()" type-button="success" title="Novo parâmetro"/>
                     </template>
@@ -75,13 +75,13 @@ const ap = (ap) => {
                             <td>{{ item.nome }}</td>
                             <td>
                                 <p v-if="item.parametros">
-                  <span v-for="(record, i) in item.parametros" :key="parametro"
-                        class="badge bg-warning text-white m-1">
-                    {{ record.parametro }}
-                  </span>
+                                    <span v-for="(record, i) in item.parametros" :key="parametro"
+                                        class="badge bg-warning text-white m-1">
+                                        {{ record.parametro }}
+                                    </span>
                                 </p>
                             </td>
-                            <td>
+                            <td v-if="ap(aprovacao)">
                                 <div class="d-flex">
                                     <NavButton :icon="IconPencil" class="btn-icon" type-button="primary"
                                                @click="editarLista(item)"/>
