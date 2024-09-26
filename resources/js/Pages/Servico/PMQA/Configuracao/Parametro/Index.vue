@@ -7,11 +7,8 @@ import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vu
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
 import {ref} from "vue";
-import {IconEye} from "@tabler/icons-vue";
-import {IconPlus} from "@tabler/icons-vue";
 import {IconPencil} from "@tabler/icons-vue";
 import {IconTrash} from "@tabler/icons-vue";
-import NavLink from "@/Components/NavLink.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import ModalParametros from "./ModalParametros.vue";
 

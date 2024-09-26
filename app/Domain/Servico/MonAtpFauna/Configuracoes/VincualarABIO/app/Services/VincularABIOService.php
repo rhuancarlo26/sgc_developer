@@ -32,7 +32,7 @@ class VincularABIOService extends BaseModelService
     {
         return [
             'vinculacoes' => $this->searchAllColumns(...$searchParams)
-                ->with(['licenca.tipo', 'rets' => fn($query) => $query->orderBy('id', 'desc')])
+                ->with(['licenca.tipo_rel', 'rets' => fn($query) => $query->orderBy('id', 'desc')])
                 ->where('fk_servico', $servico->id)
                 ->paginate()
                 ->appends($searchParams),
