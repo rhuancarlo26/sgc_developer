@@ -6,20 +6,12 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRequest extends FormRequest
 {
-  public function rules(): array
-  {
-    return [
-      'licenca_id'  => ['required']
-    ];
-  }
+    public function rules(): array
+    {
+        return [
+            'fk_servico' => 'required',
+            'nome_resultado' => 'required',
+        ];
+    }
 
-  public function messages(): array
-  {
-    return [];
-  }
-
-  public function authorize(): bool
-  {
-    return true;
-  }
 }

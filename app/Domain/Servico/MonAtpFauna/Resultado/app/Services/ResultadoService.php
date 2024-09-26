@@ -5,6 +5,7 @@ namespace App\Domain\Servico\MonAtpFauna\Resultado\app\Services;
 use App\Domain\Servico\PMQA\Configuracao\Ponto\Imports\PMQAPontoImport;
 use App\Models\AtFaunaResultado;
 use App\Models\AtFaunaResultadoAnalise;
+use App\Models\AtFaunaResultadoOutrasAnalise;
 use App\Models\Licenca;
 use App\Models\ServicoMonAtpFaunaVincularABIO;
 use App\Models\ServicoPmqaPonto;
@@ -32,7 +33,7 @@ class ResultadoService extends BaseModelService
         parent::__construct($dataManagement);
     }
 
-    public function index(Servicos $servico, array $searchParams)
+    public function index(Servicos $servico, array $searchParams, $paginate = true)
     {
         return $this->searchAllColumns(...$searchParams)
             ->select([
@@ -45,12 +46,17 @@ class ResultadoService extends BaseModelService
             ->leftJoin('at_fauna_relatorio AS relat', 'relat.fk_resultado', '=', 'at_fauna_resultado.id')
             ->where('at_fauna_resultado.fk_servico', $servico->id)
             ->groupBy('at_fauna_resultado.created_at', 'at_fauna_resultado.id')
-            ->paginate();
+            ->when($paginate, fn($q) => $q->paginate(), fn($q) => $q->get());
     }
 
-    public function store(array $post)
+    public function store(array $request)
     {
-        return $this->dataManagement->create(entity: $this->modelClass, infos: $post);
+        return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+    }
+
+    public function update(array $request): array
+    {
+        return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
     }
 
     public function getResultadoAnalise(AtFaunaResultado $resultado): array
@@ -64,6 +70,7 @@ class ResultadoService extends BaseModelService
             'atropelados_especie' => $this->resultadoCampanhaService->getAtropeladoEspecie($resultado->id),
             'atropelados_mes' => $this->resultadoCampanhaService->getAtropeladoMes($resultado->id),
             'atropelados_km' => $this->resultadoCampanhaService->getAtropeladoKm($resultado->id),
+            'outras_analises' => AtFaunaResultadoOutrasAnalise::where('fk_resultado', $resultado->id)->get(),
         ];
     }
 }

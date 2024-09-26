@@ -19,4 +19,10 @@ Route::prefix('/passagem_fauna')->group(function () {
             require __DIR__ . '/../../Execucao/Registro/Routes/RegistroRoutes.php';
         });
     });
+    Route::prefix('/resultado')->group(function () {
+        require __DIR__ . '/../../Resultado/Routes/ResultadoRoutes.php';
+    });
+    Route::prefix('/relatorio')->group(function () {
+        require __DIR__ . '/../../Relatorio/Routes/RelatorioRoutes.php';
+    });
 });
