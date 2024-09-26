@@ -143,4 +143,9 @@ class Servicos extends Model
         return $this->hasMany(ServicoPassagemFaunaConfigAbio::class, 'id_servico');
     }
 
+    public function passagem_fauna_passagens()
+    {
+        return $this->hasMany(ServicoPassagemFaunaConfigPassagem::class, 'id_servico');
+    }
+
 }
