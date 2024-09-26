@@ -2,38 +2,33 @@
 
 namespace App\Domain\Servico\MonAtpFauna\Relatorios\app\Services;
 
-use App\Domain\Servico\PMQA\Configuracao\Ponto\Imports\PMQAPontoImport;
-use App\Models\Licenca;
-use App\Models\ServicoMonAtpFaunaVincularABIO;
-use App\Models\ServicoPmqaPonto;
+use App\Models\AtFaunaRelatorio;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 
 class RelatoriosService extends BaseModelService
 {
   use Searchable, Deletable;
 
-  protected string $modelClass = ServicoMonAtpFaunaVincularABIO::class;
+  protected string $modelClass = AtFaunaRelatorio::class;
 
-  public function index(Servicos $servico, array $searchParams): array
+  public function index(Servicos $servico, array $searchParams)
   {
-    return [
-      'vinculacoes' => $this->searchAllColumns(...$searchParams)
-        ->with(['licenca.tipo'])
+    return $this->searchAllColumns(...$searchParams)
         ->where('fk_servico', $servico->id)
-        ->paginate()
-        ->appends($searchParams),
-      'licencas' => Licenca::get(['id', 'numero_licenca'])
-    ];
+        ->paginate();
   }
 
-  public function store(array $post)
+  public function store(array $request): array
   {
-    return $this->dataManagement->create(entity: $this->modelClass, infos: $post);
+    return $this->dataManagement->create(entity: $this->modelClass, infos: $request);
   }
+
+    public function update(array $request)
+    {
+        return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+
+    }
 }

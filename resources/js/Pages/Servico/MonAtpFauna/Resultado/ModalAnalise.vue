@@ -4,10 +4,13 @@ import Modal from "@/Components/Modal.vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
 import Table from "@/Components/Table.vue";
 import axios from "axios";
-import {useForm} from "@inertiajs/vue3";
+import {Link, useForm} from "@inertiajs/vue3";
 import BarChart from "@/Components/BarChart.vue";
 import PieChart from "@/Components/PieChart.vue";
 import InputLabel from "@/Components/InputLabel.vue";
+import InputError from "@/Components/InputError.vue";
+import {IconTrash} from "@tabler/icons-vue";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 defineProps({
     showActionsModal: {type: Boolean}
@@ -233,7 +236,59 @@ defineExpose({abrirModal});
                                 </div>
                             </div>
                             <div :class="[tab === 'outras-analises' ? 'active show' : '']" class="tab-pane" id="outras-analises">
-                                outras analises
+                                <div v-if="analise" class="row row-gap-2">
+                                    <div class="col-lg-12">
+                                        <InputLabel value="Nome da Análise" />
+                                        <input type="text" class="form-control">
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <InputLabel value="Buscar arquivo" for="arquivo"/>
+                                        <input @input="form.shapefile = $event.target.files[0]" id="arquivo"
+                                               type="file" class="form-control">
+                                        <InputError :message="form.errors.shapefile"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <InputLabel>Análise dos resultados::</InputLabel>
+                                        <textarea v-model="form.analise" class="form-control" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <button class="btn btn-success" @click="" type="button">
+                                            Incluir Análise
+                                        </button>
+                                    </div>
+                                    <div class="col-12">
+                                        <Table
+                                            :columns="['Nome', 'Análise dos resultados', 'Visualizar Arquivo', 'Ação']"
+                                            :records="{ data: analise.outras_analises, links: [] }"
+                                            table-class="table-hover">
+                                            <template #body="{ item, key }">
+                                                <tr>
+                                                    <td>{{item.analise}}</td>
+                                                    <td>
+                                                        <a  href="javascript:void(0);">
+                                                            {{item.nome_arquivo}}
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <span v-if="!item.caminho_arquivo">-</span>
+                                                        <span v-else-if="item.extensao === 'jpg' || item.extensao === 'png'">
+
+                                                        </span>
+                                                        <span v-else>
+
+                                                        </span>
+                                                    </td>
+                                                    <td>
+
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                            <template #footer>
+                                                <th colspan="6">Número Total de Indivíduos: <b>{{analise.total_individuos}}</b></th>
+                                            </template>
+                                        </Table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
