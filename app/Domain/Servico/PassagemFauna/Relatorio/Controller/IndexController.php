@@ -26,6 +26,7 @@ class IndexController extends Controller
             'contrato' => $contrato,
             'servico' => $servico->load([
                 'tipo',
+                'parecer_passagem_fauna',
                 'rhs',
                 'equipamentos',
                 'veiculos.codigo',

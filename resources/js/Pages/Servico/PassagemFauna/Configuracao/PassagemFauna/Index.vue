@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../../Navbar.vue";
-import {Head, Link} from "@inertiajs/vue3";
+import {Head, Link, router} from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
@@ -35,6 +35,13 @@ const abrirModalForm = (item) => {
     modalForm.value.abrirModal(item)
 }
 
+const submeterFiscal = () => {
+    router.post(route('contratos.contratada.servicos.passagem_fauna.configuracao.passagem_fauna.submeter_fiscal', {
+        contrato: props.contrato.id,
+        servico: props.servico.id
+    }));
+}
+
 </script>
 <template>
 
@@ -60,6 +67,8 @@ const abrirModalForm = (item) => {
             <template #body>
                 <ModelSearchFormAllColumns :columns="[]">
                     <template #action>
+                        <NavButton v-if="!servico.parecer_passagem_fauna" @click="submeterFiscal()"
+                                   type-button="primary" title="Submeter ao fiscal"/>
                         <a class="btn btn-info me-1" target="_blank"
                            :href="route('contratos.contratada.servicos.passagem_fauna.configuracao.passagem_fauna.download_modelo', {contrato: contrato.id, servico: servico.id})">Modelo</a>
                         <NavButton @click="abrirModalImportarPassagem()" class="nav-item"
