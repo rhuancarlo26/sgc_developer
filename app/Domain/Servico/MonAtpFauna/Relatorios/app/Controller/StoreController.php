@@ -14,19 +14,13 @@ use Inertia\Response;
 
 class StoreController extends Controller
 {
-  public function __construct(private readonly RelatoriosService $relatoriosService)
-  {
-  }
+    public function __construct(private readonly RelatoriosService $relatoriosService)
+    {
+    }
 
-  public function index(Contrato $contrato, Servicos $servico, StoreRequest $request): RedirectResponse
-  {
-    $post = [
-      'fk_servico' => $servico->id,
-      'fk_licenca' => $request->validated('licenca_id')
-    ];
-
-    $response = $this->relatoriosService->store(post: $post);
-
-    return to_route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.malha_viaria.index', ['contrato' => $contrato->id, 'servico' => $servico->id])->with('message', $response['request']);
-  }
+    public function __invoke(StoreRequest $request): RedirectResponse
+    {
+        $response = $this->relatoriosService->store(request: $request->all());
+        return redirect()->back()->with('message', $response['request']);
+    }
 }

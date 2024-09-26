@@ -33,7 +33,7 @@ class Servicos extends Model
 
     public function tipo(): BelongsTo
     {
-        return $this->belongsTo(related: ServicoTipo::class, foreignKey: 'servico');
+        return $this->belongsTo(related: ServicoTipo::class, foreignKey: 'tipo_servico');
     }
 
     public function rhs(): HasManyThrough

@@ -1,470 +1,304 @@
-<!-- resources\js\Pages\Servico\MonAtpFauna\Resultado\ModalAnalise.vue -->
+<script setup>
+import {onMounted, ref, watch} from "vue";
+import Modal from "@/Components/Modal.vue";
+import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
+import Table from "@/Components/Table.vue";
+import axios from "axios";
+import {Link, useForm} from "@inertiajs/vue3";
+import BarChart from "@/Components/BarChart.vue";
+import PieChart from "@/Components/PieChart.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import InputError from "@/Components/InputError.vue";
+import {IconTrash} from "@tabler/icons-vue";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+
+defineProps({
+    showActionsModal: {type: Boolean}
+})
+
+const modalRef = ref();
+const resultado = ref(null);
+
+const tab = ref(null);
+
+const form = useForm({
+    id: null,
+    analise_registros_identificados: null,
+    analise_animais_atropelados_campanha: null,
+    analise_animais_atropelados_km: null,
+    analise_animais_atropelados_mes: null,
+    analise_animais_atropelados_especie: null,
+})
+
+const analise = ref(null)
+
+const abrirModal = async (item) => {
+    Object.assign(form, item)
+    tab.value = 'tabela-registros-identificados';
+    const {data} = await axios.get(route('contratos.contratada.servicos.mon_atp_fauna.resultado.analise', item.id))
+    analise.value = data;
+    data.analise ? Object.assign(form, data.analise) : Object.assign(form, {fk_resultado: item.id});
+    modalRef.value.getBsModal().show();
+}
+
+const save = () => {
+    form.post(route('contratos.contratada.servicos.supressao-vegetacao.resultado.store-analisar'), {
+        preserveState: true,
+        onSuccess: () => {
+            modalRef.value.getBsModal().hide();
+            form.reset();
+        }
+    })
+}
+
+onMounted(() => {
+    modalRef.value.$el.addEventListener('hidden.bs.modal', () => {
+        form.reset()
+        tab.value = null;
+        analise.value = null;
+        resultado.value = null;
+    });
+});
+
+defineExpose({abrirModal});
+</script>
+
 <template>
-    <div class="modal fade" ref="modalAnalise" tabindex="-1" aria-labelledby="modalAnaliseLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalAnaliseLabel">
-                        Análise dos resultados programa de atropelamento de fauna
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <ul id="myTab" role="tablist" class="nav nav-tabs mb-3">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-bs-toggle="tab" href="#tabela_registros_identificados"
-                                role="tab">
-                                Tabela com os registros identificados
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#frequencia_atropelamentos" role="tab">
-                                Frequência de Atropelamentos por Classe
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#animais_atropelados_campanha" role="tab">
-                                Número de Animais Atropelados por Campanha
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#animais_atropelados_km" role="tab">
-                                Número de Animais Atropelados por Km
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#animais_atropelados_mes" role="tab">
-                                Número de Animais Atropelados por Mês
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#animais_atropelados_especie" role="tab">
-                                Número de Animais Atropelados por espécie
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#outras_analises" role="tab">
-                                Outras análises
-                            </a>
-                        </li>
-                    </ul>
-                    <div id="myTabContent" class="tab-content">
-                        <div class="tab-pane fade show active" id="tabela_registros_identificados" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <table id="table-resultado" class="table table-hover non-hover"
-                                        style="width: 100% !important;">
-                                        <thead>
-                                            <tr role="row">
-                                                <th rowspan="2">Espécie</th>
-                                                <th rowspan="2">Nome comum</th>
-                                                <th rowspan="2" class="text-center">Nº Indivíduos</th>
-                                                <th rowspan="2" class="text-center">Frequência (%)</th>
-                                                <th colspan="2" class="text-center">Status Conservação</th>
-                                            </tr>
-                                            <tr role="row">
-                                                <th class="text-center">IUCN</th>
-                                                <th class="text-center">FEDERAL</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td></td>
-                                                <td></td>
-                                                <td class="text-center">0</td>
-                                                <td class="text-center">0.00%
-                                                </td>
-                                                <td class="text-center"></td>
-                                                <td class="text-center"></td>
-                                            </tr>
-                                            <tr>
-                                                <td>1</td>
-                                                <td>1</td>
-                                                <td class="text-center">2</td>
-                                                <td class="text-center">1.60%
-                                                </td>
-                                                <td class="text-center">CR - Criticamente em Perigo</td>
-                                                <td class="text-center">NT - Quase Ameaçada</td>
-                                            </tr>
-                                            <tr>
-                                                <td>123</td>
-                                                <td>123</td>
-                                                <td class="text-center">123</td>
-                                                <td class="text-center">98.40%
-                                                </td>
-                                                <td class="text-center">EX - Extinto</td>
-                                                <td class="text-center">Ameaçado (CR,EN e VU)</td>
-                                            </tr>
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <th colspan="5">Número Total de Indivíduos: <b>125</b></th>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <label>Análise: </label>
-                                    <textarea class="form-control"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="animais_atropelados_campanha" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <div id="chartLine">
-                                        <div class="statbox widget box">
-                                            <div id="chart-campanha-at" class="widget-content widget-content-area pt-2">
-                                                <div style="min-height: 320px;">
-                                                    Grafico - 01
-                                                </div>
-                                                <div class="resize-triggers">
-                                                    <div class="expand-trigger">
-                                                        <div style="width: 1px; height: 1px;"></div>
-                                                    </div>
-                                                    <div class="contract-trigger"></div>
-                                                </div>
-                                            </div>
-                                        </div>
+    <form @submit.prevent="save">
+        <Modal ref="modalRef" title="Análise dos resultados programa de atropelamento de fauna" modal-dialog-class="modal-xl">
+            <template #body>
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
+                            <li class="nav-item">
+                                <a href="#tabela-registros-identificados" @click="tab = 'tabela-registros-identificados'" :class="{active: tab === 'tabela-registros-identificados'}" class="nav-link"
+                                   data-bs-toggle="tab">Tabela com os registros identificados</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#frequencia-atropelamentos" @click="tab = 'frequencia-atropelamentos'" :class="{active: tab === 'frequencia-atropelamentos'}" class="nav-link"
+                                   data-bs-toggle="tab">Frequência de Atropelamentos por Classe</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#animais-atropelados-campanha" @click="tab = 'animais-atropelados-campanha'" :class="{active: tab === 'animais-atropelados-campanha'}" class="nav-link"
+                                   data-bs-toggle="tab">Número de Animais Atropelados por Campanha</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#animais-atropelados-km" @click="tab = 'animais-atropelados-km'" :class="{active: tab === 'animais-atropelados-km'}" class="nav-link"
+                                   data-bs-toggle="tab">Número de Animais Atropelados por Km</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#animais-atropelados-mes" @click="tab = 'animais-atropelados-mes'" :class="{active: tab === 'animais-atropelados-mes'}" class="nav-link"
+                                   data-bs-toggle="tab">Número de Animais Atropelados por Mês</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#animais-atropelados-especie" @click="tab = 'animais-atropelados-especie'" :class="{active: tab === 'animais-atropelados-especie'}" class="nav-link"
+                                   data-bs-toggle="tab">Número de Animais Atropelados por espécie</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#outras-analises" @click="tab = 'outras-analises'" :class="{active: tab === 'outras-analises'}" class="nav-link"
+                                   data-bs-toggle="tab">Outras análises</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div :class="[tab === 'tabela-registros-identificados' ? 'active show' : '']" class="tab-pane" id="tabela-registros-identificados">
+                                <div v-if="analise" class="row row-gap-2">
+                                    <div class="col-12">
+                                        <Table
+                                            :columns="['Espécie', 'Nome comum', 'Nº Indivíduos', 'Frequência (%)', 'IUCN', 'Federal']"
+                                            :records="{ data: analise.tabela_registro, links: [] }"
+                                            table-class="table-hover">
+                                            <template #body="{ item, key }">
+                                                <tr>
+                                                    <td>{{ item.especie }}</td>
+                                                    <td>{{ item.nome_comum }}</td>
+                                                    <td>{{ item.n_individuos }}</td>
+                                                    <td>{{(item.n_individuos * 100 / analise.total_individuos).toFixed(2)}}%</td>
+                                                    <td>{{ item.iucn }}</td>
+                                                    <td>{{ item.federal }}</td>
+                                                </tr>
+                                            </template>
+                                            <template #footer>
+                                                <th colspan="6">Número Total de Indivíduos: <b>{{analise.total_individuos}}</b></th>
+                                            </template>
+                                        </Table>
+                                    </div>
+                                    <div class="col-12">
+                                        <InputLabel>Análise:</InputLabel>
+                                        <textarea v-model="form.analise_registros_identificados" class="form-control" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <label>Análise:</label>
-                                    <textarea class="form-control"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="animais_atropelados_km" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <div id="chartLine">
-                                        <div class="statbox widget box">
-                                            <div id="chart-km-at" class="widget-content widget-content-area pt-2">
-                                                <div style="min-height: 320px;">
-                                                    Grafico - 02
-                                                </div>
-                                                <div class="resize-triggers">
-                                                    <div class="expand-trigger">
-                                                        <div style="width: 1px; height: 1px;"></div>
-                                                    </div>
-                                                    <div class="contract-trigger"></div>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div :class="[tab === 'frequencia-atropelamentos' ? 'active show' : '']" class="tab-pane" id="frequencia-atropelamentos">
+                                <div v-if="analise" class="row row-gap-2 justify-content-center">
+                                    <div class="col-4">
+                                        <PieChart
+                                            :chart_data="{
+                                                labels: analise.atropelados_classe?.map((item) => item.nome),
+                                                datasets: [{
+                                                    label: 'Atropelamentos por classe',
+                                                    backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16'],
+                                                    data: analise.atropelados_classe?.map((item) => parseInt(item.n_individuos))
+                                                }]
+                                            }"
+                                            :chart_options="{ responsive: true }"
+                                        />
+                                    </div>
+                                    <div class="col-12">
+                                        <InputLabel>Análise:</InputLabel>
+                                        <textarea v-model="form.analise_animais_atropelados_campanha" class="form-control" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <label>Análise:</label>
-                                    <textarea class="form-control"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="frequencia_atropelamentos" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <div id="chartLine">
-                                        <div class="statbox widget box">
-                                            <div id="chart-classe-at" class="widget-content widget-content-area pt-2">
-                                                <div style="min-height: 305px;">
-                                                    Grafico - 03
-                                                </div>
-                                                <div class="resize-triggers">
-                                                    <div class="expand-trigger">
-                                                        <div style="width: 1px; height: 1px;"></div>
-                                                    </div>
-                                                    <div class="contract-trigger"></div>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div :class="[tab === 'animais-atropelados-campanha' ? 'active show' : '']" class="tab-pane" id="animais-atropelados-campanha">
+                                <div v-if="analise" class="row row-gap-2">
+                                    <div class="col-12">
+                                        <BarChart
+                                            :style="{ height: 300 }"
+                                            :chart_data="{
+                                                labels: analise.atropelados_campanha?.map((item) => 'Campanha: ' + item.id),
+                                                datasets: [{
+                                                    label: 'Atropelamentos por campanha',
+                                                    data: analise.atropelados_campanha?.map((item) => parseInt(item.n_individuos))
+                                                }]
+                                            }"
+                                            :chart_options="{ responsive: true }"
+                                        />
+                                    </div>
+                                    <div class="col-12">
+                                        <InputLabel>Análise:</InputLabel>
+                                        <textarea v-model="form.analise_animais_atropelados_campanha" class="form-control" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <label>Análise:</label>
-                                    <textarea class="form-control"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="animais_atropelados_especie" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <div id="chartLine">
-                                        <div class="statbox widget box">
-                                            <div id="chart-especie-at" class="widget-content widget-content-area pt-2">
-                                                <div style="min-height: 320px;">
-                                                    Grafico - 04
-                                                </div>
-                                                <div class="resize-triggers">
-                                                    <div class="expand-trigger">
-                                                        <div style="width: 1181px; height: 329px;"></div>
-                                                    </div>
-                                                    <div class="contract-trigger"></div>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div :class="[tab === 'animais-atropelados-km' ? 'active show' : '']" class="tab-pane" id="animais-atropelados-km">
+                                <div v-if="analise" class="row row-gap-2">
+                                    <div class="col-12">
+                                        <BarChart
+                                            :style="{ height: 300 }"
+                                            :chart_data="{
+                                                labels: analise.atropelados_km?.map((item) => item.km),
+                                                datasets: [{
+                                                    label: 'Atropelamentos por KM',
+                                                    data: analise.atropelados_km?.map((item) => item.n_individuos)
+                                                }]
+                                            }"
+                                            :chart_options="{ responsive: true }"
+                                        />
+                                    </div>
+                                    <div class="col-12">
+                                        <InputLabel>Análise:</InputLabel>
+                                        <textarea v-model="form.analise_animais_atropelados_km" class="form-control" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <label>Análise:</label>
-                                    <textarea class="form-control"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="animais_atropelados_mes" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <div id="chartLine">
-                                        <div class="statbox widget box">
-                                            <div id="chart-mes-at" class="widget-content widget-content-area pt-2">
-                                                <div style="min-height: 320px;">
-                                                    Grafico - 05
-                                                </div>
-                                                <div class="resize-triggers">
-                                                    <div class="expand-trigger">
-                                                        <div style="width: 1181px; height: 329px;"></div>
-                                                    </div>
-                                                    <div class="contract-trigger"></div>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div :class="[tab === 'animais-atropelados-mes' ? 'active show' : '']" class="tab-pane" id="animais-atropelados-mes">
+                                <div v-if="analise" class="row row-gap-2">
+                                    <div class="col-12">
+                                        <BarChart
+                                            :style="{ height: 300 }"
+                                            :chart_data="{
+                                                labels: analise.atropelados_mes?.map((item) => item.mes + ' - Campanha: ' + item.campanha),
+                                                datasets: [{
+                                                    label: 'Atropelamentos por mês',
+                                                    data: analise.atropelados_mes?.map((item) => item.n_individuos)
+                                                }]
+                                            }"
+                                            :chart_options="{ responsive: true }"
+                                        />
+                                    </div>
+                                    <div class="col-12">
+                                        <InputLabel>Análise:</InputLabel>
+                                        <textarea v-model="form.analise_animais_atropelados_mes" class="form-control" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <label>Análise:</label>
-                                    <textarea class="form-control"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="outras_analises" role="tabpanel">
-                            <div class="row mb-2">
-                                <div class="col-12 mb-2">
-                                    <label>Nome da Análise</label>
-                                    <input type="text" name="nome" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3 error-placeholder">
-                                        <div id="file" data-upload-id="myFirstImage" class="custom-file-container">
-                                            <label>Buscar arquivo</label>
-                                            <input type="file" id="arquivo-outra-analise" class="form-control-file">
-                                        </div>
+                            <div :class="[tab === 'animais-atropelados-especie' ? 'active show' : '']" class="tab-pane" id="animais-atropelados-especie">
+                                <div v-if="analise" class="row row-gap-2">
+                                    <div class="col-12">
+                                        <BarChart
+                                            :style="{ height: 300 }"
+                                            :chart_data="{
+                                                labels: analise.atropelados_especie?.map((item) => item.especie),
+                                                datasets: [{
+                                                    label: 'Atropelamentos por espécie',
+                                                    data: analise.atropelados_especie?.map((item) => item.n_individuos)
+                                                }]
+                                            }"
+                                            :chart_options="{ responsive: true }"
+                                        />
+                                    </div>
+                                    <div class="col-12">
+                                        <InputLabel>Análise:</InputLabel>
+                                        <textarea v-model="form.analise_animais_atropelados_especie" class="form-control" rows="3"></textarea>
                                     </div>
                                 </div>
-                                <div class="col-md-12 mb-4">
-                                    <label>Análise dos resultados:</label>
-                                    <textarea class="form-control"></textarea>
-                                </div>
-                                <div class="col-12 mb-4">
-                                    <button type="button" class="btn btn-success btn-lg">
-                                        Incluir Análise
-                                    </button>
-                                </div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <table id="table-resultado" class="table table-hover non-hover"
-                                        style="width: 100% !important;">
-                                        <thead>
-                                            <tr role="row">
-                                                <th>Nome</th>
-                                                <th class="text-center">Análise dos resultados</th>
-                                                <th class="text-center">Visualizar Arquivo</th>
-                                                <th>Ação</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>testetesteteste</td>
-                                                <td>
-                                                    <a href="javascript:void(0);">
-                                                        Screenshot (1).png
-                                                    </a>
-                                                </td>
-                                                <td class="text-center">
-                                                    <div class="icon-container">
-                                                        <a
-                                                            href="https://servicos.dnit.gov.br/DPP/ecosistema//atropelamento-fauna/resultados/outra-analise/download-arquivo/3">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" fill="currentColor" viewBox="0 0 16 16"
-                                                                class="bi bi-download">
-                                                                <path
-                                                                    d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z">
-                                                                </path>
-                                                                <path
-                                                                    d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z">
-                                                                </path>
-                                                            </svg>
+                            <div :class="[tab === 'outras-analises' ? 'active show' : '']" class="tab-pane" id="outras-analises">
+                                <div v-if="analise" class="row row-gap-2">
+                                    <div class="col-lg-12">
+                                        <InputLabel value="Nome da Análise" />
+                                        <input type="text" class="form-control">
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <InputLabel value="Buscar arquivo" for="arquivo"/>
+                                        <input @input="form.shapefile = $event.target.files[0]" id="arquivo"
+                                               type="file" class="form-control">
+                                        <InputError :message="form.errors.shapefile"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <InputLabel>Análise dos resultados::</InputLabel>
+                                        <textarea v-model="form.analise" class="form-control" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <button class="btn btn-success" @click="" type="button">
+                                            Incluir Análise
+                                        </button>
+                                    </div>
+                                    <div class="col-12">
+                                        <Table
+                                            :columns="['Nome', 'Análise dos resultados', 'Visualizar Arquivo', 'Ação']"
+                                            :records="{ data: analise.outras_analises, links: [] }"
+                                            table-class="table-hover">
+                                            <template #body="{ item, key }">
+                                                <tr>
+                                                    <td>{{item.analise}}</td>
+                                                    <td>
+                                                        <a  href="javascript:void(0);">
+                                                            {{item.nome_arquivo}}
                                                         </a>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <div class=" dropdown-menu-right">
-                                                            <a href="#" role="button" id="dropdownMenuLink-1"
-                                                                data-toggle="dropdown" aria-haspopup="true"
-                                                                aria-expanded="true" class="dropdown-toggle">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="24"
-                                                                    height="24" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round"
-                                                                    class="feather feather-more-horizontal">
-                                                                    <circle cx="12" cy="12" r="1"></circle>
-                                                                    <circle cx="19" cy="12" r="1"></circle>
-                                                                    <circle cx="5" cy="12" r="1"></circle>
-                                                                </svg>
-                                                            </a>
-                                                            <div aria-labelledby="dropdownMenuLink-1"
-                                                                class="dropdown-menu">
-                                                                <a href="javascript:void(0);" class="dropdown-item">
-                                                                    Excluir
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Teste</td>
-                                                <td>
-                                                    <a href="javascript:void(0);">
-                                                        Correções - Ecosistema - Rev. 03.11 (1).pptx
-                                                    </a>
-                                                </td>
-                                                <td class="text-center">
-                                                    <div class="icon-container">
-                                                        <a
-                                                            href="https://servicos.dnit.gov.br/DPP/ecosistema//atropelamento-fauna/resultados/outra-analise/download-arquivo/4">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" fill="currentColor" viewBox="0 0 16 16"
-                                                                class="bi bi-download">
-                                                                <path
-                                                                    d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z">
-                                                                </path>
-                                                                <path
-                                                                    d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z">
-                                                                </path>
-                                                            </svg>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <div class=" dropdown-menu-right">
-                                                            <a href="#" role="button" id="dropdownMenuLink-1"
-                                                                data-toggle="dropdown" aria-haspopup="true"
-                                                                aria-expanded="true" class="dropdown-toggle">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="24"
-                                                                    height="24" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round"
-                                                                    class="feather feather-more-horizontal">
-                                                                    <circle cx="12" cy="12" r="1"></circle>
-                                                                    <circle cx="19" cy="12" r="1"></circle>
-                                                                    <circle cx="5" cy="12" r="1"></circle>
-                                                                </svg>
-                                                            </a>
-                                                            <div aria-labelledby="dropdownMenuLink-1"
-                                                                class="dropdown-menu">
-                                                                <a href="javascript:void(0);" class="dropdown-item">
-                                                                    Excluir
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Teste</td>
-                                                <td>
-                                                    <a href="javascript:void(0);">
-                                                        color.png
-                                                    </a>
-                                                </td>
-                                                <td class="text-center">
-                                                    <div class="icon-container">
-                                                        <a href="javascript:void(0);">
-                                                            <i class="far fa-eye"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <div class=" dropdown-menu-right">
-                                                            <a href="#" role="button" id="dropdownMenuLink-1"
-                                                                data-toggle="dropdown" aria-haspopup="true"
-                                                                aria-expanded="true" class="dropdown-toggle">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="24"
-                                                                    height="24" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round"
-                                                                    class="feather feather-more-horizontal">
-                                                                    <circle cx="12" cy="12" r="1"></circle>
-                                                                    <circle cx="19" cy="12" r="1"></circle>
-                                                                    <circle cx="5" cy="12" r="1"></circle>
-                                                                </svg>
-                                                            </a>
-                                                            <div aria-labelledby="dropdownMenuLink-1"
-                                                                class="dropdown-menu">
-                                                                <a href="javascript:void(0);" class="dropdown-item">
-                                                                    Excluir
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                                    </td>
+                                                    <td>
+                                                        <span v-if="!item.caminho_arquivo">-</span>
+                                                        <span v-else-if="item.extensao === 'jpg' || item.extensao === 'png'">
+
+                                                        </span>
+                                                        <span v-else>
+
+                                                        </span>
+                                                    </td>
+                                                    <td>
+
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                            <template #footer>
+                                                <th colspan="6">Número Total de Indivíduos: <b>{{analise.total_individuos}}</b></th>
+                                            </template>
+                                        </Table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <NavButton @click="salvarAnalise" type-button="success" title="Salvar Analise" />
-                <NavButton @click="fecharModal" type-button="secondary" title="Fechar" />
-            </div>
-        </div>
-    </div>
+            </template>
+            <template #footer>
+                <button @click="modalRef.getBsModal().hide()" type="button" class="btn btn-secondary">Fechar</button>
+                <button v-if="showActionsModal" type="submit" class="btn btn-success">Salvar</button>
+            </template>
+        </Modal>
+    </form>
+
 </template>
-
-<script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
-import NavButton from "@/Components/NavButton.vue";
-
-const modalAnalise = ref(null);
-let modalInstance = null;
-
-const abrirModal = () => {
-    modalInstance.show();
-};
-
-const fecharModal = () => {
-    modalInstance.hide();
-};
-
-const salvarAnalise = () => {
-    console.log("salvarAnalise");
-};
-
-onMounted(() => {
-    modalInstance = new bootstrap.Modal(modalAnalise.value);
-});
-
-onBeforeUnmount(() => {
-    modalInstance.dispose();
-});
-
-defineExpose({ abrirModal, fecharModal });
-</script>
