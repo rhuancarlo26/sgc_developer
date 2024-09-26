@@ -23,6 +23,11 @@ class ServicoConOcorrOcorrenciSupervisaoExecOcorrencia extends Model
         return $this->belongsTo(Rodovia::class, 'id_rodovia');
     }
 
+    public function rncs()
+    {
+        return $this->hasMany(ServicoConOcorrSupervisaoExecAcaRnc::class, 'id_ocorrencia');
+    }
+
     public function lote(): BelongsTo
     {
         return $this->belongsTo(ServicoContOcorrSupervisaoConfigLote::class, 'id_lote');

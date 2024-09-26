@@ -27,7 +27,7 @@ class ACAService extends BaseModelService
                 ->appends($searchParams),
             'acas_nao_enviadas' => $this->modelClass::with(['lote', 'rncs'])->where('id_servico', $servico_id)->where('enviado', 'Não')->get(),
             'lotes' => $this->modelClassLote::where('id_servico', $servico_id)->get(),
-            'ocorrencias_aprovadas' => $this->modelClassOcorrencia::with(['lote'])->where('id_servico', $servico_id)->get()
+            'ocorrencias_aprovadas' => $this->modelClassOcorrencia::with(['lote'])->where('id_servico', $servico_id)->whereDoesntHave('rncs')->get()
         ];
     }
 

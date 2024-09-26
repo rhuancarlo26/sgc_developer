@@ -24,7 +24,7 @@ class ControleRNCService extends BaseModelService
                 ->paginate()
                 ->appends($searchParams),
             'ocorrencias_fiscal' => $this->modelClass::with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
-                ->where('id_servico', $servico_id)->where('tipo', '<>', 'Não Atendida')->where('envio_fiscal', '<>', null)->get()
+                ->where('id_servico', $servico_id)->where('tipo', '<>', 'RNC')->where('envio_fiscal', '<>', null)->where('envio_empresa', 'Não')->get()
         ];
     }
 
