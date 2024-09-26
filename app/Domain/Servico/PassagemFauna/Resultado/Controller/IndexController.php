@@ -24,7 +24,7 @@ class IndexController extends Controller
 
         return Inertia::render('Servico/PassagemFauna/Resultado/Index', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo']),
+            'servico' => $servico->load(['tipo', 'parecer_passagem_fauna']),
             ...$response
         ]);
     }

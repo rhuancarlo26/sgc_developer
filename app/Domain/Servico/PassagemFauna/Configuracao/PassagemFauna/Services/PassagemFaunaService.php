@@ -4,6 +4,7 @@ namespace App\Domain\Servico\PassagemFauna\Configuracao\PassagemFauna\Services;
 
 use App\Domain\Servico\PassagemFauna\Configuracao\PassagemFauna\Imports\PassagemFaunaImport;
 use App\Models\ServicoPassagemFaunaConfigPassagem;
+use App\Models\ServicoPassagemFaunaParecerConfiguracao;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
@@ -15,6 +16,7 @@ class PassagemFaunaService extends BaseModelService
     use Searchable, Deletable;
 
     protected string $modelClass = ServicoPassagemFaunaConfigPassagem::class;
+    protected string $modelClassParecer = ServicoPassagemFaunaParecerConfiguracao::class;
 
     public function index(Servicos $servico, array $searchParams): array
     {
@@ -66,5 +68,10 @@ class PassagemFaunaService extends BaseModelService
     public function update(array $post)
     {
         return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
+    }
+
+    public function submeterFiscal(array $post)
+    {
+        return $this->dataManagement->create(entity: $this->modelClassParecer, infos: $post);
     }
 }

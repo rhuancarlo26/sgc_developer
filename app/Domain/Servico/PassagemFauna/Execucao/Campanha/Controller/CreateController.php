@@ -25,6 +25,7 @@ class CreateController extends Controller
             'contrato' => $contrato,
             'servico' => $servico->load([
                 'tipo',
+                'parecer_passagem_fauna',
                 'rhs',
                 'passagem_fauna_abios.licenca',
                 'passagem_fauna_abios.abio_ret'
