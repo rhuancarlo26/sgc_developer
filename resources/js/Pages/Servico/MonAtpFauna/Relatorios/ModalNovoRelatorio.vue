@@ -1,18 +1,16 @@
 <script setup>
 
-import {onMounted, ref, watch} from "vue";
-import {Link, router, useForm} from "@inertiajs/vue3";
+import { ref } from "vue";
+import { useForm } from "@inertiajs/vue3";
 import Modal from "@/Components/Modal.vue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
-import {IconTrash} from "@tabler/icons-vue";
 import Table from "@/Components/Table.vue";
-import {dateTimeFormat} from "../../../../Utils/DateTimeUtils.js";
+import { dateTimeFormat } from "../../../../Utils/DateTimeUtils.js";
 
 const props = defineProps({
-    resultados: {type: Array},
-    servico: {type: Object},
+    resultados: { type: Array },
+    servico: { type: Object },
 })
 
 const form = useForm({
@@ -55,7 +53,7 @@ const abrirModal = async (item = null) => {
     modalRef.value.getBsModal().show();
 }
 
-defineExpose({abrirModal});
+defineExpose({ abrirModal });
 
 </script>
 
@@ -65,26 +63,27 @@ defineExpose({abrirModal});
             <template #body>
                 <div class="row row-gap-2 mb-2">
                     <div class="col-lg-6">
-                        <InputLabel value="Nome do relatório" for="nome_relatorio"/>
-                        <input v-model="form.nome_relatorio" type="text" id="nome_relatorio" class="form-control"/>
-                        <InputError :message="form.errors.nome_relatorio"/>
+                        <InputLabel value="Nome do relatório" for="nome_relatorio" />
+                        <input v-model="form.nome_relatorio" type="text" id="nome_relatorio" class="form-control" />
+                        <InputError :message="form.errors.nome_relatorio" />
                     </div>
                     <div class="col-lg-12">
-                        <Table
-                            :columns="['Nome do Resultado', 'Campanhas', 'Data']"
-                            :records="{ data: resultados, links: []}" table-class="table-hover">
+                        <Table :columns="['Nome do Resultado', 'Campanhas', 'Data']"
+                            :records="{ data: resultados, links: [] }" table-class="table-hover">
                             <template #body="{ item }">
                                 <tr>
                                     <td>
                                         <span class="d-flex align-items-center gap-2">
-                                            <input type="radio" :id="item.id" :value="item.id" v-model="form.fk_resultado" >
+                                            <input type="radio" :id="item.id" :value="item.id"
+                                                v-model="form.fk_resultado">
                                             <label :for="item.id">{{ item.nome_resultado }}</label>
                                         </span>
                                     </td>
                                     <td class="d-flex flex-wrap">
-                                      <span v-for="lista in item.campanhas.split(',')" class="badge badge-warning m-1">
-                                        {{ lista }}
-                                      </span>
+                                        <span v-for="lista in item.campanhas.split(',')"
+                                            class="badge badge-warning m-1">
+                                            {{ lista }}
+                                        </span>
                                     </td>
                                     <td>{{ dateTimeFormat(item.created_at) }}</td>
                                 </tr>
