@@ -1,23 +1,11 @@
 <script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import Breadcrumb from "@/Components/Breadcrumb.vue";
-import Navbar from "../../Navbar.vue";
-import {Head, Link, router, useForm} from "@inertiajs/vue3";
-import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
+import {useForm} from "@inertiajs/vue3";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
-import {ref} from "vue";
-import {IconEye} from "@tabler/icons-vue";
-import {IconPlus} from "@tabler/icons-vue";
-import {IconPencil} from "@tabler/icons-vue";
-import {IconTrash} from "@tabler/icons-vue";
-import NavLink from "@/Components/NavLink.vue";
-import {IconMap} from "@tabler/icons-vue";
+import {computed, ref} from "vue";
+import {IconDeviceFloppy} from "@tabler/icons-vue";
 import {dateTimeFormat} from "@/Utils/DateTimeUtils";
 import Modal from "@/Components/Modal.vue";
-import {usePage} from "@inertiajs/vue3";
-import {IconDeviceFloppy} from "@tabler/icons-vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 
@@ -41,7 +29,20 @@ const form = useForm({
     ocorrencias: []
 });
 
+const reset = () => {
+    form.nome_id = null;
+    form.data_aca = null;
+    form.lote = null;
+    form.id_lote = null;
+    form.nome_lote = null;
+    form.empresa = null;
+    form.num_contrato = null;
+    form.ocorrencias = [];
+}
+
 const abrirModal = () => {
+    reset();
+
     modalGerarACA.value.getBsModal().show();
 }
 
@@ -62,6 +63,10 @@ const changeLote = () => {
         form.num_contrato = form.lote?.num_contrato;
     }
 }
+
+const filtroOcorrencia = computed(() => {
+    return props.ocorrencias.filter(ocorrencia => ocorrencia.lote?.id == form.lote?.id);
+})
 
 defineExpose({abrirModal});
 </script>
@@ -123,7 +128,7 @@ defineExpose({abrirModal});
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
+                            <tr v-for="ocorrencia in filtroOcorrencia" :key="ocorrencia.id">
                                 <td>
                                     <label class="form-check">
                                         <input class="form-check-input" type="checkbox" :value="ocorrencia"
