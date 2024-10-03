@@ -26,7 +26,7 @@ class CreateController extends Controller
             'contrato' => $contrato,
             'servico' => $servico->load([
                 'tipo',
-                'pmqa_config_lista_parecer',
+                'cont_ocorr_parecer_configuracao',
                 'licencas_condicionantes.licenca.segmentos.uf_inicial_rel',
                 'licencas_condicionantes.licenca.segmentos.uf_final_rel'
             ]),
