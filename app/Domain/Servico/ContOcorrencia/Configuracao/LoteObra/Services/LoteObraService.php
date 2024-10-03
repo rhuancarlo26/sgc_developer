@@ -14,44 +14,44 @@ use App\Shared\Traits\Searchable;
 
 class LoteObraService extends BaseModelService
 {
-  use Searchable, Deletable;
+    use Searchable, Deletable;
 
-  protected string $modelClass = ServicoContOcorrSupervisaoConfigLote::class;
-  protected string $modelClassLoteFiscal = ServicoContOcorrSupervisaoParecerConfiguracao::class;
+    protected string $modelClass = ServicoContOcorrSupervisaoConfigLote::class;
+    protected string $modelClassLoteFiscal = ServicoContOcorrSupervisaoParecerConfiguracao::class;
 
-  public function index(Servicos $servico, array $searchParams): array
-  {
-    return [
-      'lotes' => $this->searchAllColumns(...$searchParams)
-        ->with(['rodovia', 'uf'])
-        ->where('id_servico', $servico->id)
-        ->paginate()
-        ->appends($searchParams)
-    ];
-  }
+    public function index(Servicos $servico, array $searchParams): array
+    {
+        return [
+            'lotes' => $this->searchAllColumns(...$searchParams)
+                ->with(['rodovia', 'uf'])
+                ->where('id_servico', $servico->id)
+                ->paginate()
+                ->appends($searchParams)
+        ];
+    }
 
-  public function create(): array
-  {
-    return ['rodovias' => Rodovia::with(['uf'])->get()];
-  }
+    public function create(): array
+    {
+        return ['rodovias' => Rodovia::with(['uf'])->get()];
+    }
 
-  public function store(array $post): array
-  {
-    return $this->dataManagement->create(entity: $this->modelClass, infos: $post);
-  }
+    public function store(array $post): array
+    {
+        return $this->dataManagement->create(entity: $this->modelClass, infos: $post);
+    }
 
-  public function update(array $post): array
-  {
-    return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
-  }
+    public function update(array $post): array
+    {
+        return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
+    }
 
-  public function enviarLoteFiscal(array $post): array
-  {
-    return $this->dataManagement->create(entity: $this->modelClassLoteFiscal, infos: $post);
-  }
+    public function enviarLoteFiscal(array $post): array
+    {
+        return $this->dataManagement->create(entity: $this->modelClassLoteFiscal, infos: $post);
+    }
 
-  public function destroy(ServicoContOcorrSupervisaoConfigLote $lote)
-  {
-    return $this->dataManagement->delete(entity: $this->modelClass, id: $lote->id);
-  }
+    public function destroy(ServicoContOcorrSupervisaoConfigLote $lote)
+    {
+        return $this->dataManagement->delete(entity: $this->modelClass, id: $lote->id);
+    }
 }

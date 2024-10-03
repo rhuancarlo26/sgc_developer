@@ -13,6 +13,7 @@ const props = defineProps({
 
 const form = useForm({
     id: null,
+    form: null,
     obs: null,
     ...props.lote
 });
@@ -20,6 +21,7 @@ const form = useForm({
 const salvarObra = () => {
     form.id = props.lote.id;
     form.rodovia = props.lote.rodovia;
+    form.form = 3;
 
     form.post(route('contratos.contratada.servicos.cont_ocorrencia.configuracao.lote_obra.update', {
         contrato: props.contrato.id,
