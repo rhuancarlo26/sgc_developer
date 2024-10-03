@@ -6,42 +6,59 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRequest extends FormRequest
 {
-  public function rules(): array
-  {
-    return [
-      'id'                            => ['nullable'],
-      'id_servico'                    => ['nullable'],
-      'num_contrato'                  => ['nullable'],
-      'nome'                          => ['nullable'],
-      'rodovia'                       => ['nullable'],
-      'empresa'                       => ['nullable'],
-      'situacao_contrato'             => ['nullable'],
-      'obj_contrato'                  => ['nullable'],
-      'fiscal_contrato'               => ['nullable'],
-      'km_inicial'                    => ['nullable'],
-      'km_final'                      => ['nullable'],
-      'estaca_inicial'                => ['nullable'],
-      'estaca_final'                  => ['nullable'],
-      'lat_inicial'                   => ['nullable'],
-      'lat_final'                     => ['nullable'],
-      'long_inicial'                  => ['nullable'],
-      'long_final'                    => ['nullable'],
-      'supervisora_obras'             => ['nullable'],
-      'num_contrato_supervisora'      => ['nullable'],
-      'obj_contrato_supervisora'      => ['nullable'],
-      'fiscal_contrato_supervisora'   => ['nullable'],
-      'situacao_contrato_supervisora' => ['nullable'],
-      'obs'                           => ['nullable']
-    ];
-  }
+    public function rules(): array
+    {
+        $request = request()->all();
+        $rules = [
+            'id' => ['required'],
+        ];
 
-  public function messages(): array
-  {
-    return [];
-  }
+        if ($request['form'] === 1) {
+            $rules = [
+                ...$rules,
+                'id_servico' => ['required'],
+                'num_contrato' => ['nullable'],
+                'nome' => ['required'],
+                'rodovia' => ['required'],
+                'empresa' => ['required'],
+                'situacao_contrato' => ['required'],
+                'obj_contrato' => ['required'],
+                'fiscal_contrato' => ['required'],
+                'km_inicial' => ['required'],
+                'km_final' => ['required'],
+                'estaca_inicial' => ['required'],
+                'estaca_final' => ['required'],
+                'lat_inical' => ['required'],
+                'lat_final' => ['required'],
+                'long_inical' => ['required'],
+                'long_final' => ['required'],
+            ];
+        } elseif ($request['form'] === 2) {
+            $rules = [
+                ...$rules,
+                'supervisora_obras' => ['required'],
+                'num_contrato_supervisora' => ['required'],
+                'obj_contrato_supervisora' => ['required'],
+                'fiscal_contrato_supervisora' => ['required'],
+                'situacao_contrato_supervisora' => ['required'],
+            ];
+        } elseif ($request['form'] === 3) {
+            $rules = [
+                ...$rules,
+                'obs' => ['required'],
+            ];
+        }
 
-  public function authorize(): bool
-  {
-    return true;
-  }
+        return $rules;
+    }
+
+    public function messages(): array
+    {
+        return [];
+    }
+
+    public function authorize(): bool
+    {
+        return true;
+    }
 }
