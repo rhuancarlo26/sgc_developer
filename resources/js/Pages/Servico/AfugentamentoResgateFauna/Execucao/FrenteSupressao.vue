@@ -69,17 +69,21 @@ const destroy = (frente) => {
                         :href="route('contratos.contratada.servicos.index', { contrato: props.contrato.id })">
                     Voltar
                     </Link>
-                    <a @click="abrirModalNovaFrenteSupressaoModal(servico)" class="btn ms-3" href="javascript:void(0)">
-                        Novo Frente de Supressão
-                    </a>
                 </div>
             </div>
         </template>
 
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
-                <!-- Pesquisa-->
                 <ModelSearchFormAllColumns :columns="[]">
+                    <!-- Pesquisa-->
+
+                    <template #action>
+                        <a @click="abrirModalNovaFrenteSupressaoModal(servico)" class="btn btn-success me-1"
+                            href="javascript:void(0)">
+                            Novo Frente de Supressão
+                        </a>
+                    </template>
                 </ModelSearchFormAllColumns>
 
                 <table class="table table-hover">
