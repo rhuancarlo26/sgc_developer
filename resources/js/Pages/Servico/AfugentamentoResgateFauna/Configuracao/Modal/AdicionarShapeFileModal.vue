@@ -33,7 +33,7 @@ defineExpose({ abrirModal });
                     <div class="d-flex">
                         <div class="col-md-6">
                             <div class="mb-2">
-                                <strong>Tipo: </strong> {{ licenca.licenca?.tipo?.sigla }}
+                                <strong>Tipo: </strong> {{ licenca.licenca?.tipo_rel?.sigla }}
                             </div>
                             <div class="mb-2">
                                 <strong>Nº Licença: </strong> {{ licenca.licenca?.numero_licenca }}
