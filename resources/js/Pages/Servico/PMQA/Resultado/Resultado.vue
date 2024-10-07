@@ -265,7 +265,15 @@ const horizontalLine = ref({
                                                 title: {
                                                   display: true,
                                                   text: `Gráfico de ${parametro.parametro}`
-                                                }
+                                                },
+                                                datalabels: {
+                                                    display: true,
+                                                    color: 'white',
+                                                    align: 'top',
+                                                    font: {
+                                                      weight: 'bold',
+                                                    },
+                                                  }
                                               }
                                       }"/>
 
