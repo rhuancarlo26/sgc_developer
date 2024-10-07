@@ -12,6 +12,7 @@ import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import {IconTrash} from "@tabler/icons-vue";
 import {IconEye} from "@tabler/icons-vue";
 import {IconPencil} from "@tabler/icons-vue";
+import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
 
 const modalVincularPonto = ref({});
 const modalVisualizarPonto = ref({});

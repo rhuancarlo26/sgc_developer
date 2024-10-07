@@ -255,13 +255,19 @@ const horizontalLine = ref({
                                       :id="'divs-parametro-' + parametro.id"
                                       :name="'divs-parametro-' + parametro.id" :chart_data="parametro.datasets"
                                       :chart_options="{
-                  responsive: true, plugins: {
-                    title: {
-                      display: true,
-                      text: `Gráfico de ${parametro.parametro}`
-                    }
-                  }
-                }"/>
+                                          responsive: true,
+                                            scales: {
+                                                x: {
+                                                    display: false
+                                                }
+                                            },
+                                              plugins: {
+                                                title: {
+                                                  display: true,
+                                                  text: `Gráfico de ${parametro.parametro}`
+                                                }
+                                              }
+                                      }"/>
 
                             <div class="card mb-4">
                                 <DivTabelaParametro :parametro="parametro"/>
