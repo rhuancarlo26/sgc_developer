@@ -121,7 +121,7 @@ const ap = (ap) => {
                     </thead>
                     <tbody>
                         <tr v-for="item in licencaVinculadas" :key="item.id">
-                            <td>{{ item.licenca?.tipo?.sigla }}</td>
+                            <td>{{ item.licenca?.tipo_rel?.sigla }}</td>
                             <td>{{ item.licenca?.numero_licenca }}</td>
                             <td>{{ item.licenca?.empreendimento }}</td>
                             <td>{{ item.licenca?.emissor }}</td>
