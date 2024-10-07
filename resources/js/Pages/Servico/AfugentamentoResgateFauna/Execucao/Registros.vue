@@ -75,27 +75,29 @@ const destroy = (registro) => {
                         :href="route('contratos.contratada.servicos.index', { contrato: props.contrato.id })">
                     Voltar
                     </Link>
-                    <a @click="abrirModalNovoRegistro(contrato, servico)" class="btn ms-3" href="javascript:void(0)">
-                        Novo Registro
-                    </a>
                 </div>
             </div>
         </template>
 
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
-                <div class="d-flex justify-content-between">
-                    <!-- Pesquisa-->
-                    <ModelSearchFormAllColumns class="w-100" :columns="[]">
-                    </ModelSearchFormAllColumns>
 
-                    <!-- Download -->
-                    <a type="button" class="btn col h-5"
-                        :href="route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.download', { servico: props.servico.id })"
-                        title="Download de registros">
-                        <IconDownload />
-                    </a>
-                </div>
+                <ModelSearchFormAllColumns :columns="[]">
+                    <!-- Pesquisa-->
+
+                    <template #action>
+                        <a @click="abrirModalNovoRegistro(contrato, servico)" class="btn btn-success me-3"
+                            href="javascript:void(0)">
+                            Novo Registro
+                        </a>
+                        <a class="btn btn-primary "
+                            :href="route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.download', { servico: props.servico.id })"
+                            title="Download de registros">
+                            <IconDownload class="icon m-0" />
+                        </a>
+                    </template>
+                </ModelSearchFormAllColumns>
+
                 <Table :columns="['Nome do Registro', 'Nº da frente de Supressão', 'BR', 'UF', 'KM',
                     'Grupo Amostrado', 'Espécie', 'Data Registro', 'Categoria', 'Ação']" :records="registros"
                     table-class="table-hover">
@@ -141,7 +143,8 @@ const destroy = (registro) => {
             </template>
         </Navbar>
         <NovoRegistroModal ref="novoRegistroModal" :grupoAmostrado="grupoAmostrado" :frenteSupressao="frenteSupressao"
-            :formaRegistro="formaRegistro" :ufs="ufs" :statusConservacaoFederal="statusConservacaoFederal" :statusConservacaoIucn="statusConservacaoIucn" />
+            :formaRegistro="formaRegistro" :ufs="ufs" :statusConservacaoFederal="statusConservacaoFederal"
+            :statusConservacaoIucn="statusConservacaoIucn" />
 
         <VisualizarRegistroModal ref="visualizarRegistroModal" />
     </AuthenticatedLayout>
