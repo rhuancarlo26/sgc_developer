@@ -7,14 +7,13 @@ const props = defineProps({
 });
 
 const parametrosVinculados = computed(() => {
-    return props.relatorio.resultado?.campanhas.map(campanha => campanha.pontos.map(ponto => ponto.lista.parametros)).flat(2).reduce((acc, curr) => {
-        if (!acc.some(item => item.id === curr.id)) {
+    return props.relatorio?.resultado?.campanhas.flatMap(campanha => campanha.pontos.flatMap(ponto => ponto.lista?.parametros).filter(parametro => parametro !== null && parametro !== undefined).reduce((acc, curr) => {
+        if (curr && !acc.some(item => item.id === curr.id)) {
             acc.push(curr);
         }
-
         return acc;
-    }, []);
-})
+    }, []));
+});
 </script>
 <template>
     <div class="overflow-auto">
