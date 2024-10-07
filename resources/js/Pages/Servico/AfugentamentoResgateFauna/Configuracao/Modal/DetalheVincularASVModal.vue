@@ -35,7 +35,7 @@ defineExpose({ abrirModal });
                                 <strong>Nº Licença: </strong> {{ licenca.numero_licenca }}
                             </div>
                             <div class="mb-2">
-                                <strong>Nome Licença: </strong> {{ licenca.tipo?.nome }}
+                                <strong>Nome Licença: </strong> {{ licenca.tipo_rel?.nome }}
                             </div>
                             <div class="mb-2">
                                 <strong>Data de emissão: </strong> {{ dateTimeFormat(licenca.data_emissao) }}
