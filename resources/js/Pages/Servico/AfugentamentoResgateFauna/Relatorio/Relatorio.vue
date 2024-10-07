@@ -69,9 +69,6 @@ const destroy = (relatorio) => {
                         :href="route('contratos.contratada.servicos.index', { contrato: props.contrato.id })">
                     Voltar
                     </Link>
-                    <a @click="abrirModalNovoRelatorio(contrato, servico)" class="btn ms-3" href="javascript:void(0)">
-                        Novo Relatório
-                    </a>
                 </div>
             </div>
         </template>
@@ -81,6 +78,12 @@ const destroy = (relatorio) => {
 
                 <!-- Pesquisa-->
                 <ModelSearchFormAllColumns class="w-100" :columns="[]">
+                    <template #action>
+                        <a @click="abrirModalNovoRelatorio(contrato, servico)" class="btn btn-success"
+                            href="javascript:void(0)">
+                            Novo Relatório
+                        </a>
+                    </template>
                 </ModelSearchFormAllColumns>
 
                 <Table :columns="['ID Relatório', 'Nome Relatório', 'Data Relatório', 'Status', 'Ação']"
@@ -111,7 +114,9 @@ const destroy = (relatorio) => {
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                     <li>
-                                        <a class="dropdown-item" @click="abrirModalConclusaoRelatorio(item, 1, contrato, servico)" href="javascript:void(0);"
+                                        <a class="dropdown-item"
+                                            @click="abrirModalConclusaoRelatorio(item, 1, contrato, servico)"
+                                            href="javascript:void(0);"
                                             v-if="item.fk_status === 1 || item.fk_status === 4">
                                             Conclusão
                                         </a>
@@ -123,14 +128,15 @@ const destroy = (relatorio) => {
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" @click="abrirModalEditarRelatorio(item, 0, contrato, servico)" href="javascript:void(0);"
+                                        <a class="dropdown-item"
+                                            @click="abrirModalEditarRelatorio(item, 0, contrato, servico)"
+                                            href="javascript:void(0);"
                                             v-if="item.fk_status === 1 || item.fk_status === 4">
                                             Editar
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" @click="destroy(item.id)"
-                                            href="javascript:void(0);"
+                                        <a class="dropdown-item" @click="destroy(item.id)" href="javascript:void(0);"
                                             v-if="item.fk_status === 1 || item.fk_status === 4">
                                             Excluir
                                         </a>
