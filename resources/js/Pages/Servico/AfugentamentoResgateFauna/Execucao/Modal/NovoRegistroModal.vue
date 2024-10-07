@@ -507,16 +507,16 @@ defineExpose({ abrirModal, updateModal });
 
                                         <div class="d-flex">
                                             <div class="col-lg-12 me-2">
-                                                <InputLabel for="latitude_soltura" value="Local de Soltura" />
+                                                <InputLabel for="latitude_soltura" value="Local" />
                                                 <div class="d-flex">
                                                     <div class="d-flex flex-column col-md-4 me-2">
                                                         <!-- v-if="soltura" -->
                                                         <div class="mb-3">
                                                             <InputLabel for="latitude_soltura"
-                                                                value="Latitude de Soltura" />
+                                                                value="Latitude" />
                                                             <input id="latitude_soltura" type="text"
                                                                 class="form-control" v-model="form.latitude_soltura"
-                                                                autofocus placeholder="latitude de soltura"
+                                                                autofocus placeholder="latitude"
                                                                 autocomplete="" />
                                                             <InputError class="mt-2"
                                                                 :message="form.errors.latitude_soltura" />
@@ -526,10 +526,10 @@ defineExpose({ abrirModal, updateModal });
                                                         <!-- v-if="soltura" -->
                                                         <div class="mb-3">
                                                             <InputLabel for="longitude_soltura"
-                                                                value="Longitude de Soltura" />
+                                                                value="Longitude" />
                                                             <input id="longitude_soltura" type="text"
                                                                 class="form-control" v-model="form.longitude_soltura"
-                                                                autofocus placeholder="longitude de soltura"
+                                                                autofocus placeholder="longitude"
                                                                 autocomplete="" />
                                                             <InputError class="mt-2"
                                                                 :message="form.errors.longitude_soltura" />
