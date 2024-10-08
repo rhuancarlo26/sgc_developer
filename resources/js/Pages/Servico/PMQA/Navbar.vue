@@ -66,18 +66,18 @@ const getAprovacao = () => {
                                             <NavLink route-name="contratos.contratada.servicos.pmqa.execucao.index"
                                                      active-on-route-prefix="contratos.contratada.servicos.pmqa.execucao*"
                                                      :param="{ contrato: contrato.id, servico: servico.id }"
-                                                     title="Execução" v-if="aprovacao.fk_status === 3"
+                                                     title="Execução" v-if="aprovacao?.fk_status === 3"
                                                      :icon="IconLayoutDashboard"/>
 
                                             <NavLink route-name="contratos.contratada.servicos.pmqa.resultado.index"
                                                      active-on-route-prefix="contratos.contratada.servicos.pmqa.resultado*"
                                                      :param="{ contrato: contrato.id, servico: servico.id }"
-                                                     title="Resultado" v-if="aprovacao.fk_status === 3"
+                                                     title="Resultado" v-if="aprovacao?.fk_status === 3"
                                                      :icon="IconLayoutDashboard"/>
                                             <NavLink route-name="contratos.contratada.servicos.pmqa.relatorio.index"
                                                      active-on-route-prefix="contratos.contratada.servicos.pmqa.relatorio*"
                                                      :param="{ contrato: contrato.id, servico: servico.id }"
-                                                     title="Relatório" v-if="aprovacao.fk_status === 3"
+                                                     title="Relatório" v-if="aprovacao?.fk_status === 3"
                                                      :icon="IconLayoutDashboard"/>
                                         </ul>
                                     </div>
