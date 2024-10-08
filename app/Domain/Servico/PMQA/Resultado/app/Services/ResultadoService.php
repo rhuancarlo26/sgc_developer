@@ -190,8 +190,7 @@ class ResultadoService extends BaseModelService
         $resultado->load([
             'analises',
             'analise_iqa',
-            'outras_analises',
-            //'campanhas.pontos.lista.parametros_vinculados.medicao'
+            'outras_analises'
         ]);
 
         $chartDataIqa = [
@@ -219,7 +218,7 @@ class ResultadoService extends BaseModelService
 
             $chartDataIqa['datasets'][] = [
                 'label' => $campanha->nome_campanha,
-                'backgroundColor' => $this->getRandomColor(),
+                'backgroundColor' => '#' . substr(md5($campanha->nome_campanha), 0, 6),
                 'data' => array_values($iqas)
             ];
         }
@@ -247,8 +246,8 @@ class ResultadoService extends BaseModelService
                                         ->toArray();
                                 }
                                 return [
-                                    'label' => $campanhaPonto->ponto->nome_ponto_coleta, // Use o nome do ponto de campanha, se aplicável
-                                    'backgroundColor' => $this->getRandomColor(),
+                                    'label' => $campanhaPonto->ponto->nome_ponto_coleta,
+                                    'backgroundColor' => '#' . substr(md5($campanhaPonto->ponto->nome_ponto_coleta), 0, 6),
                                     'data' => $medicoes ?? []
                                 ];
                             });

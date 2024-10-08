@@ -20,7 +20,7 @@ const props = defineProps({
 
 const novoResultadoModal = ref();
 
-const abrirModalNovoResultado = (servico) => {    
+const abrirModalNovoResultado = (servico) => {
     novoResultadoModal.value.abrirModal(servico);
 }
 
@@ -69,9 +69,6 @@ const destroy = (resultado) => {
                         :href="route('contratos.contratada.servicos.index', { contrato: props.contrato.id })">
                     Voltar
                     </Link>
-                    <a @click="abrirModalNovoResultado(servico)" class="btn ms-3" href="javascript:void(0)">
-                        Novo Resultado
-                    </a>
                 </div>
             </div>
         </template>
@@ -81,6 +78,11 @@ const destroy = (resultado) => {
 
                 <!-- Pesquisa-->
                 <ModelSearchFormAllColumns class="w-100" :columns="[]">
+                    <template #action>
+                        <a @click="abrirModalNovoResultado(servico)" class="btn btn-success" href="javascript:void(0)">
+                            Novo Resultado
+                        </a>
+                    </template>
                 </ModelSearchFormAllColumns>
 
                 <Table :columns="['ID Resultado', 'Nome Resultado', 'Data Início', 'Data Final', 'Ação']"

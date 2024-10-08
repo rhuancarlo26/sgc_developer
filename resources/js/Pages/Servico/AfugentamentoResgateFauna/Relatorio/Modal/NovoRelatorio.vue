@@ -117,7 +117,7 @@ defineExpose({ abrirModal, updateModal });
                             <tr class="text-center" v-for="item in resultado" :key="item.id">
                                 <td class="text-start">
                                     <input type="radio" :id="item.id" :value="item.id" v-model="form.id_resultado">
-                                    {{ item }}
+                                    {{ item.nome }}
                                 </td>
                                 <td>{{ item.data_inicio_f }}</td>
                                 <td>{{ item.data_final_f }}</td>
