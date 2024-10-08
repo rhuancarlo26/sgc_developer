@@ -38,6 +38,7 @@ class PontoService extends BaseModelService
             try {
                 $this->dataManagement->create(entity: $this->modelClass, infos: [
                     ...$row,
+                    'UF' => $row['uf'],
                     'fk_servico' => $servico->id
                 ]);
             } catch (\Throwable $e) {
