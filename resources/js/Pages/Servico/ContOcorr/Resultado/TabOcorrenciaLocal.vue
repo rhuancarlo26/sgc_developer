@@ -1,21 +1,36 @@
 <script setup>
 
-import {ref} from "vue";
+import { ref } from "vue";
 import BarChart from "@/Components/BarChart.vue";
 import html2canvas from "html2canvas";
-import {IconDeviceFloppy} from "@tabler/icons-vue";
+import { IconDeviceFloppy } from "@tabler/icons-vue";
 import NavButton from "@/Components/NavButton.vue";
 
 const props = defineProps({
-    resultado: {type: Object},
-    form: {type: Object},
-    locais: {type: Object}
+    resultado: { type: Object },
+    form: { type: Object },
+    locais: { type: Object }
 });
 
 const chartOptions = ref({
     indexAxis: 'y',
+    scales: {
+        y: {
+            display: false
+        }
+    },
     responsive: true,
     plugins: {
+        tooltip: {
+            enabled: false
+        },
+        datalabels: {
+            display: true,
+            color: 'white',
+            font: {
+                weight: 'bold',
+            },
+        },
         legend: {
             position: 'top',
         },
@@ -56,7 +71,7 @@ const salvar = () => {
 <template>
     <div name="graf_reg_local" id="graf_reg_local" class="d-flex justify-content-center mb-4">
         <BarChart :style="{ height: '400px', position: 'relative' }" :chart_data="locais"
-                  :chart_options="chartOptions"/>
+            :chart_options="chartOptions" />
     </div>
     <div class="row mb-4">
         <div class="col">
@@ -65,12 +80,9 @@ const salvar = () => {
     </div>
     <div class="row mb-4">
         <div class="col d-flex justify-content-end">
-            <NavButton @click="captureChart()" type-button="success" :icon="IconDeviceFloppy"
-                       title="Salvar"/>
+            <NavButton @click="captureChart()" type-button="success" :icon="IconDeviceFloppy" title="Salvar" />
         </div>
     </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
