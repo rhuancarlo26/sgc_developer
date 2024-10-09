@@ -60,10 +60,16 @@ class RegistrosService
     {
         return AfugentFaunaExecRegistroModel::leftJoin('afugent_fauna_exec_frente', 'afugent_fauna_exec_registro.id_frente', '=', 'afugent_fauna_exec_frente.id')
             ->leftJoin('at_fauna_grupo_amostrado', 'afugent_fauna_exec_registro.id_grupo_amostrado', '=', 'at_fauna_grupo_amostrado.id')
+            ->leftJoin('afugent_fauna_forma_registro', 'afugent_fauna_exec_registro.id_forma_registro', '=', 'afugent_fauna_forma_registro.id')
+            ->leftJoin('afugent_fauna_tipo_registro', 'afugent_fauna_exec_registro.id_tipo_registro', '=', 'afugent_fauna_tipo_registro.id')
+            ->leftJoin('afugent_fauna_destinacao_registro', 'afugent_fauna_exec_registro.id_destinacao_registro', '=', 'afugent_fauna_destinacao_registro.id')
             ->leftJoin('estados', 'afugent_fauna_exec_registro.id_estado', '=', 'estados.id')
             ->select(
                 'afugent_fauna_exec_registro.*',
                 'afugent_fauna_exec_frente.rodovia',
+                'afugent_fauna_forma_registro.nome as nome_forma_registro',
+                'afugent_fauna_tipo_registro.nome as nome_tipo_registro',
+                'afugent_fauna_destinacao_registro.nome as nome_destinacao_registro',
                 'estados.uf as uf',
                 'at_fauna_grupo_amostrado.nome as nome_grupo',
                 DB::raw("DATE_FORMAT(afugent_fauna_exec_registro.data_registro, '%d/%m/%Y') as data_registroF"),
