@@ -65,7 +65,7 @@ defineExpose({ abrirModal });
       </div>
       <div class="row mb-4">
         <div class="col">
-          <span><strong>Estado: </strong>{{ registro.id_estado }}</span>
+          <span><strong>Estado: </strong>{{ registro.uf }}</span>
         </div>
         <div class="col">
           <span><strong>Km: </strong>{{ registro.km }}</span>
@@ -123,15 +123,15 @@ defineExpose({ abrirModal });
           <span><strong>Número de Indivíduos: </strong>{{ registro.n_individuos }}</span>
         </div>
         <div class="col">
-          <span><strong>Forma de Registro: </strong>{{ registro.id_forma_registro }}</span>
+          <span><strong>Forma de Registro: </strong>{{ registro.nome_forma_registro }}</span>
         </div>
         <div class="col">
-          <span><strong>Tipo de Registro: </strong>{{ registro.id_tipo_registro }}</span>
+          <span><strong>Tipo de Registro: </strong>{{ registro.nome_tipo_registro }}</span>
         </div>
       </div>
       <div class="row mb-4">
         <div class="col">
-          <span><strong>Destinação do Registro: </strong>{{ registro.id_destinacao_registro }}</span>
+          <span><strong>Destinação do Registro: </strong>{{ registro.nome_destinacao_registro }}</span>
         </div>
         <div class="col">
           <span><strong>Latitude de Soltura: </strong>{{ registro.latitude_soltura }}</span>
@@ -153,10 +153,10 @@ defineExpose({ abrirModal });
       </div>
       <div class="row mb-4">
         <div class="col">
-          <span><strong>Status de Conservação Federal: </strong>{{ registro.id_status_conservacao_federal }}</span>
+          <span><strong>Status de Conservação Federal: </strong>{{ registro.nome_status_conserv_federal }} - {{ registro.sigla_status_conserv_federal }}</span>
         </div>
         <div class="col">
-          <span><strong>Status de Conservação IUCN: </strong>{{ registro.id_status_conservacao_iucn }}</span>
+          <span><strong>Status de Conservação IUCN: </strong>{{ registro.nome_status_conserv_iucn }} - {{ registro.sigla_status_conserv_iucn }}</span>
         </div>
         <div class="col">
           <span><strong></strong></span>

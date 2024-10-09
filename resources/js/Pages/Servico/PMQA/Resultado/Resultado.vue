@@ -133,6 +133,16 @@ const salvarOutraAnalise = () => {
 
 const horizontalLine = ref({
     plugins: {
+        tooltip: {
+            enabled: false
+        },
+        datalabels: {
+            display: true,
+            color: 'white',
+            font: {
+                weight: 'bold',
+            },
+        },
         annotation: {
             annotations: {
                 line1: {
@@ -262,6 +272,9 @@ const horizontalLine = ref({
                                                 }
                                             },
                                               plugins: {
+                                              tooltip: {
+            enabled: false
+          },
                                                 title: {
                                                   display: true,
                                                   text: `Gráfico de ${parametro.parametro}`
@@ -304,8 +317,7 @@ const horizontalLine = ref({
                             <BarChart id="div-parametro-iqa" :style="{
                 height: '70px',
                 position: 'relative'
-              }" :chart_data="chartDataIqa" :options="horizontalLine" :chart_options="{ responsive: true }"/>
-
+              }" :chart_data="chartDataIqa" :options="horizontalLine"/>
                             <div class="card mb-4">
                                 <DivTabelaMedirIqaVue/>
                             </div>

@@ -1,15 +1,15 @@
 <script setup>
 
-import {onMounted, ref, watch} from "vue";
-import {Link, router, useForm} from "@inertiajs/vue3";
+import { onMounted, ref, watch } from "vue";
+import { Link, router, useForm } from "@inertiajs/vue3";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
-import {IconDots, IconTrash} from "@tabler/icons-vue";
+import { IconDots, IconTrash } from "@tabler/icons-vue";
 import Table from "@/Components/Table.vue";
 import axios from "axios";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
-import {dateTimeFormat} from "../../../../../Utils/DateTimeUtils.js";
+import { dateTimeFormat } from "../../../../../Utils/DateTimeUtils.js";
 
 const props = defineProps({
     showAction: { type: Boolean, default: true },
@@ -67,7 +67,7 @@ const abrirModal = (item = null) => {
 }
 
 const getAbio = async () => {
-    const {data} = await axios.get(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.get-abio', {
+    const { data } = await axios.get(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.get-abio', {
         campanha_id: form.id,
     }))
     return data
@@ -100,7 +100,7 @@ watch(tab, async (value) => {
     if (value === 'rets' && !rets.value && !retsVinculacao.value.length) {
         [retsVinculacao.value, rets.value] = await getRets();
     }
-}, {immediate: true});
+}, { immediate: true });
 
 const saveCampanhaAbio = (value) => {
     router.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.vincular-abio'), {
@@ -137,7 +137,7 @@ onMounted(() => {
     });
 });
 
-defineExpose({abrirModal});
+defineExpose({ abrirModal });
 
 </script>
 
@@ -149,13 +149,16 @@ defineExpose({abrirModal});
                     <div class="card-header">
                         <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
                             <li class="nav-item">
-                                <a href="#dados" @click="tab = 'campanhas'" :class="{active: tab === 'campanhas'}" class="nav-link" data-bs-toggle="tab">CAMPANHAS</a>
+                                <a href="#dados" @click="tab = 'campanhas'" :class="{ active: tab === 'campanhas' }"
+                                    class="nav-link" data-bs-toggle="tab">CAMPANHAS</a>
                             </li>
                             <li v-if="form.id" class="nav-item">
-                                <a href="#abio" @click="tab = 'abio'" :class="{active: tab === 'abio'}" class="nav-link" data-bs-toggle="tab">ABIO</a>
+                                <a href="#abio" @click="tab = 'abio'" :class="{ active: tab === 'abio' }"
+                                    class="nav-link" data-bs-toggle="tab">ABIO</a>
                             </li>
                             <li v-if="form.id" class="nav-item">
-                                <a href="#rets" @click="tab = 'rets'" :class="{active: tab === 'rets'}" class="nav-link" data-bs-toggle="tab">RET's</a>
+                                <a href="#rets" @click="tab = 'rets'" :class="{ active: tab === 'rets' }"
+                                    class="nav-link" data-bs-toggle="tab">RET's</a>
                             </li>
                         </ul>
                     </div>
@@ -165,91 +168,121 @@ defineExpose({abrirModal});
 
                                 <div class="row row-gap-2 mb-2">
                                     <div class="col-lg-2">
-                                        <InputLabel value="ID campanha" for="campanha_id"/>
-                                        <input v-model="form.id" type="text" id="campanha_id" class="form-control" disabled />
-                                        <InputError :message="form.errors.id"/>
+                                        <InputLabel value="ID campanha" for="campanha_id" />
+                                        <input v-model="form.id" type="text" id="campanha_id" class="form-control"
+                                            disabled />
+                                        <InputError :message="form.errors.id" />
                                     </div>
                                     <div class="col-lg-2">
-                                        <InputLabel value="Rodovia" for="campanha_rodovia"/>
-                                        <input :value="licencasVigente[0]?.rodovia" type="text" id="campanha_rodovia" class="form-control" disabled />
-                                        <InputError :message="form.errors.dt_inicial"/>
+                                        <InputLabel value="Rodovia" for="campanha_rodovia" />
+                                        <input :value="licencasVigente[0]?.rodovia" type="text" id="campanha_rodovia"
+                                            class="form-control" disabled />
+                                        <InputError :message="form.errors.dt_inicial" />
                                     </div>
                                 </div>
                                 <div class="row row-gap-2 mb-2">
                                     <div class="col-lg-3">
-                                        <InputLabel value="UF inicial" for="uf_inicial"/>
-                                        <v-select :options="licencasVigente" v-model="form.uf_inicial" :get-option-label="(item) => `${item.uf} - ${item.nome_estado}`" :reduce="t => t.id_estados" :disabled="!showAction">
+                                        <InputLabel value="UF inicial" for="uf_inicial" />
+                                        <v-select :options="licencasVigente" v-model="form.uf_inicial"
+                                            :get-option-label="(item) => `${item.uf} - ${item.nome_estado}`"
+                                            :reduce="t => t.id_estados" :disabled="!showAction">
                                             <template #no-options="{}">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
-                                        <InputError :message="form.errors.uf_inicial"/>
+                                        <InputError :message="form.errors.uf_inicial" />
                                     </div>
                                     <div class="col-lg-3">
-                                        <InputLabel value="KM inicial" for="km_inicial"/>
-                                        <input v-model="form.km_inicial" type="text" id="km_inicial" class="form-control" :disabled="!showAction" />
-                                        <InputError :message="form.errors.km_inicial"/>
+                                        <InputLabel value="KM inicial" for="km_inicial" />
+                                        <input v-model="form.km_inicial" type="text" id="km_inicial"
+                                            class="form-control" :disabled="!showAction" />
+                                        <InputError :message="form.errors.km_inicial" />
                                     </div>
                                     <div class="col-lg-3">
-                                        <InputLabel value="Latitude inicial" for="latitude_inicial"/>
-                                        <input v-model="form.latitude_inicial" type="text" id="latitude_inicial" class="form-control" :disabled="!showAction" />
-                                        <InputError :message="form.errors.latitude_inicial"/>
+                                        <div class="d-flex">
+                                            <InputLabel class="me-1" value="Latitude inicial" for="latitude_inicial" />
+                                            <span class="text-red">(DDDºDDDDD)</span>
+                                        </div>
+                                        <input v-model="form.latitude_inicial" type="text" id="latitude_inicial"
+                                            class="form-control" :disabled="!showAction" />
+                                        <InputError :message="form.errors.latitude_inicial" />
                                     </div>
                                     <div class="col-lg-3">
-                                        <InputLabel value="Longitude inicial" for="longitude_inicial"/>
-                                        <input v-model="form.longitude_inicial" type="text" id="longitude_inicial" class="form-control" :disabled="!showAction" />
-                                        <InputError :message="form.errors.longitude_inicial"/>
+                                        <div class="d-flex">
+                                            <InputLabel class="me-1" value="Longitude inicial"
+                                                for="longitude_inicial" />
+                                            <span class="text-red">(DDDºDDDDD)</span>
+                                        </div>
+                                        <input v-model="form.longitude_inicial" type="text" id="longitude_inicial"
+                                            class="form-control" :disabled="!showAction" />
+                                        <InputError :message="form.errors.longitude_inicial" />
                                     </div>
                                 </div>
                                 <div class="row row-gap-2 mb-2">
                                     <div class="col-lg-3">
-                                        <InputLabel value="UF final" for="uf_final"/>
-                                        <v-select :options="licencasVigente" v-model="form.uf_final" :get-option-label="(item) => `${item.uf} - ${item.nome_estado}`" :reduce="t => t.id_estados" :disabled="!showAction">
+                                        <InputLabel value="UF final" for="uf_final" />
+                                        <v-select :options="licencasVigente" v-model="form.uf_final"
+                                            :get-option-label="(item) => `${item.uf} - ${item.nome_estado}`"
+                                            :reduce="t => t.id_estados" :disabled="!showAction">
                                             <template #no-options="{}">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
-                                        <InputError :message="form.errors.uf_final"/>
+                                        <InputError :message="form.errors.uf_final" />
                                     </div>
                                     <div class="col-lg-3">
-                                        <InputLabel value="KM final" for="km_final"/>
-                                        <input v-model="form.km_final" type="text" id="km_final" class="form-control" :disabled="!showAction" />
-                                        <InputError :message="form.errors.km_final"/>
+                                        <InputLabel value="KM final" for="km_final" />
+                                        <input v-model="form.km_final" type="text" id="km_final" class="form-control"
+                                            :disabled="!showAction" />
+                                        <InputError :message="form.errors.km_final" />
                                     </div>
                                     <div class="col-lg-3">
-                                        <InputLabel value="Latitude final" for="latitude_final"/>
-                                        <input v-model="form.latitude_final" id="latitude_final" class="form-control" :disabled="!showAction" />
-                                        <InputError :message="form.errors.latitude_final"/>
+                                        <div class="d-flex">
+                                            <InputLabel class="me-1" value="Latitude final" for="latitude_final" />
+                                            <span class="text-red">(DDDºDDDDD)</span>
+                                        </div>
+                                        <input v-model="form.latitude_final" id="latitude_final" class="form-control"
+                                            :disabled="!showAction" />
+                                        <InputError :message="form.errors.latitude_final" />
                                     </div>
                                     <div class="col-lg-3">
-                                        <InputLabel value="Longitude final" for="longitude_final"/>
-                                        <input v-model="form.longitude_final" type="text" id="longitude_final" class="form-control" :disabled="!showAction" />
-                                        <InputError :message="form.errors.longitude_final"/>
+                                        <div class="d-flex">
+                                            <InputLabel class="me-1" value="Longitude final" for="longitude_final" />
+                                            <span class="text-red">(DDDºDDDDD)</span>
+                                        </div>
+                                        <input v-model="form.longitude_final" type="text" id="longitude_final"
+                                            class="form-control" :disabled="!showAction" />
+                                        <InputError :message="form.errors.longitude_final" />
                                     </div>
                                 </div>
                                 <div class="row row-gap-2 mb-2">
                                     <div class="col-lg-4">
-                                        <InputLabel value="Data inicial" for="data_inicial"/>
-                                        <input v-model="form.data_inicial" type="date" id="data_inicial" class="form-control" :disabled="!showAction" />
-                                        <InputError :message="form.errors.data_inicial"/>
+                                        <InputLabel value="Data inicial" for="data_inicial" />
+                                        <input v-model="form.data_inicial" type="date" id="data_inicial"
+                                            class="form-control" :disabled="!showAction" />
+                                        <InputError :message="form.errors.data_inicial" />
                                     </div>
                                     <div class="col-lg-4">
-                                        <InputLabel value="Data final" for="data_final"/>
-                                        <input v-model="form.data_final" type="date" id="data_final" class="form-control" :disabled="!showAction" />
-                                        <InputError :message="form.errors.data_final"/>
+                                        <InputLabel value="Data final" for="data_final" />
+                                        <input v-model="form.data_final" type="date" id="data_final"
+                                            class="form-control" :disabled="!showAction" />
+                                        <InputError :message="form.errors.data_final" />
                                     </div>
                                     <div class="col-12">
-                                        <InputLabel value="Observação" for="observacao"/>
-                                        <textarea v-model="form.observacao" class="form-control" id="observacao" rows="2" :disabled="!showAction" ></textarea>
-                                        <InputError :message="form.errors.observacao"/>
+                                        <InputLabel value="Observação" for="observacao" />
+                                        <textarea v-model="form.observacao" class="form-control" id="observacao"
+                                            rows="2" :disabled="!showAction"></textarea>
+                                        <InputError :message="form.errors.observacao" />
                                     </div>
                                 </div>
                             </div>
                             <div :class="[tab === 'abio' ? 'active show' : '']" class="tab-pane" id="abio">
                                 <div class="row mb-2">
                                     <div class="col-lg-3 mb-2">
-                                        <InputLabel value="ABIO vinculadas" for="uf_final"/>
-                                        <v-select v-if="showAction" @option:selected="saveCampanhaAbio" :options="configVinculacao" label="numero_licenca" :reduce="t => t.id" :disabled="!showAction">
+                                        <InputLabel value="ABIO vinculadas" for="uf_final" />
+                                        <v-select v-if="showAction" @option:selected="saveCampanhaAbio"
+                                            :options="configVinculacao" label="numero_licenca" :reduce="t => t.id"
+                                            :disabled="!showAction">
                                             <template #no-options="{}">
                                                 Nenhum registro encontrado.
                                             </template>
@@ -258,7 +291,7 @@ defineExpose({abrirModal});
                                     <div class="col-lg-12">
                                         <Table
                                             :columns="['Nº Licença', 'Empreendimento', 'Emissor', 'Data de emissão', 'Vencimento', 'Responsável', 'Processo DNIT', ...[showAction ? 'Ação' : null]]"
-                                            :records="{ data: abio, links: []}" table-class="table-hover">
+                                            :records="{ data: abio, links: [] }" table-class="table-hover">
                                             <template #body="{ item }">
                                                 <tr>
                                                     <td>{{ item.numero_licenca }}</td>
@@ -269,17 +302,18 @@ defineExpose({abrirModal});
                                                     <td>{{ item.fiscal }}</td>
                                                     <td>{{ item.processo_dnit }}</td>
                                                     <td v-if="showAction">
-                                                        <LinkConfirmation v-slot="confirmation" :options="{ text: 'Excluir registro?' }">
-                                                            <Link  :onBefore="(request) => confirmation.show({
-                                                                  ...request,
-                                                                  preserveState: true,
-                                                                  onSuccess: () => {
-                                                                      modalRef.getBsModal().hide();
-                                                                  }
-                                                                })"
-                                                                  :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete-abio', item.id)"
-                                                                  as="button" method="delete" type="button" class="btn btn-icon btn-danger">
-                                                                <IconTrash/>
+                                                        <LinkConfirmation v-slot="confirmation"
+                                                            :options="{ text: 'Excluir registro?' }">
+                                                            <Link :onBefore="(request) => confirmation.show({
+                                                                ...request,
+                                                                preserveState: true,
+                                                                onSuccess: () => {
+                                                                    modalRef.getBsModal().hide();
+                                                                }
+                                                            })" :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete-abio', item.id)"
+                                                                as="button" method="delete" type="button"
+                                                                class="btn btn-icon btn-danger">
+                                                            <IconTrash />
                                                             </Link>
                                                         </LinkConfirmation>
                                                     </td>
@@ -292,8 +326,11 @@ defineExpose({abrirModal});
                             <div :class="[tab === 'rets' ? 'active show' : '']" class="tab-pane" id="rets">
                                 <div class="row mb-2">
                                     <div class="col-lg-3 mb-2">
-                                        <InputLabel value="RET's vinculadas" for="uf_final"/>
-                                        <v-select v-if="showAction" @option:selected="saveCampanhaRet" :options="retsVinculacao" :get-option-label="(item) => `${item.numero_licenca} - ${item.nome_arquivo}`" :reduce="t => t.id">
+                                        <InputLabel value="RET's vinculadas" for="uf_final" />
+                                        <v-select v-if="showAction" @option:selected="saveCampanhaRet"
+                                            :options="retsVinculacao"
+                                            :get-option-label="(item) => `${item.numero_licenca} - ${item.nome_arquivo}`"
+                                            :reduce="t => t.id">
                                             <template #no-options="{}">
                                                 Nenhum registro encontrado.
                                             </template>
@@ -302,23 +339,24 @@ defineExpose({abrirModal});
                                     <div class="col-lg-12">
                                         <Table
                                             :columns="['Nome do Arquivo', 'Data de inclusão', ...[showAction ? 'Ação' : null]]"
-                                            :records="{ data: rets, links: []}" table-class="table-hover">
+                                            :records="{ data: rets, links: [] }" table-class="table-hover">
                                             <template #body="{ item }">
                                                 <tr>
                                                     <td>{{ item.nome_arquivo }}</td>
                                                     <td>{{ dateTimeFormat(item.created_at) }}</td>
                                                     <td v-if="showAction">
-                                                        <LinkConfirmation v-slot="confirmation" :options="{ text: 'Excluir registro?' }">
-                                                            <Link  :onBefore="(request) => confirmation.show({
-                                                                  ...request,
-                                                                  preserveState: true,
-                                                                  onSuccess: () => {
-                                                                      modalRef.getBsModal().hide();
-                                                                  }
-                                                                })"
-                                                                  :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete-ret', item.id)"
-                                                                  as="button" method="delete" type="button" class="btn btn-icon btn-danger">
-                                                                <IconTrash/>
+                                                        <LinkConfirmation v-slot="confirmation"
+                                                            :options="{ text: 'Excluir registro?' }">
+                                                            <Link :onBefore="(request) => confirmation.show({
+                                                                ...request,
+                                                                preserveState: true,
+                                                                onSuccess: () => {
+                                                                    modalRef.getBsModal().hide();
+                                                                }
+                                                            })" :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete-ret', item.id)"
+                                                                as="button" method="delete" type="button"
+                                                                class="btn btn-icon btn-danger">
+                                                            <IconTrash />
                                                             </Link>
                                                         </LinkConfirmation>
                                                     </td>
