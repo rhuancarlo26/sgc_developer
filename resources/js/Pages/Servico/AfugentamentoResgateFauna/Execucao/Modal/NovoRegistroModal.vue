@@ -26,11 +26,13 @@ const abrirModal = (itemContrato, itemServico) => {
 }
 
 const updateModal = (itemRegistro) => {
+    console.log(itemRegistro);
+    
     form.id = itemRegistro.id;
     form.nome_registro = itemRegistro.nome_registro;
     form.id_frente = itemRegistro.id_frente;
     form.id_grupo_amostrado = itemRegistro.id_grupo_amostrado;
-    form.data_registro = itemRegistro.data_registro;
+    form.data_registro = formatDate(itemRegistro.data_registro);
     form.hora_registro = itemRegistro.hora_registro;
     form.id_estado = itemRegistro.id_estado;
     form.km = itemRegistro.km;
@@ -58,6 +60,11 @@ const updateModal = (itemRegistro) => {
     form.n_registro_tombamento = itemRegistro.n_registro_tombamento;
     form.id_status_conservacao_federal = itemRegistro.id_status_conservacao_federal;
     form.id_status_conservacao_iucn = itemRegistro.id_status_conservacao_iucn;
+    console.log(form);
+    
+    classe();
+    formaTipoRegistro();
+    tipoDestinacaoRegistro();
     modalDetalhes.value.getBsModal().show();
 }
 
@@ -141,58 +148,58 @@ const classe = () => {
 const tipoRegistro = ref([]);
 
 const formaTipoRegistro = () => {
-    if (form.id_forma_registro === 1) {
+    if (form.id_forma_registro == 1) {
         tipoRegistro.value = [];
-        tipoRegistro.value.push({id: 1, nome: 'Vivo sem ferimento'});
-        tipoRegistro.value.push({id: 2, nome: 'Vivo com ferimento'});
+        tipoRegistro.value.push({ id: 1, nome: 'Vivo sem ferimento' });
+        tipoRegistro.value.push({ id: 2, nome: 'Vivo com ferimento' });
     }
-    if (form.id_forma_registro === 2) {
+    if (form.id_forma_registro == 2) {
         tipoRegistro.value = [];
-        tipoRegistro.value.push({id: 4, nome: 'Vivo sem ferimento'});
-        tipoRegistro.value.push({id: 5, nome: 'Vivo com ferimento'});
-        tipoRegistro.value.push({id: 6, nome: 'Ninho'});
-        tipoRegistro.value.push({id: 7, nome: 'Colméia'});
+        tipoRegistro.value.push({ id: 4, nome: 'Vivo sem ferimento' });
+        tipoRegistro.value.push({ id: 5, nome: 'Vivo com ferimento' });
+        tipoRegistro.value.push({ id: 6, nome: 'Ninho' });
+        tipoRegistro.value.push({ id: 7, nome: 'Colméia' });
     }
-    if (form.id_forma_registro === 3) {
+    if (form.id_forma_registro == 3) {
         tipoRegistro.value = [];
-        tipoRegistro.value.push({id: 3, nome: 'Morto'});
+        tipoRegistro.value.push({ id: 3, nome: 'Morto' });
     }
-    if (form.id_forma_registro === 4) {
+    if (form.id_forma_registro == 4) {
         tipoRegistro.value = [];
-        tipoRegistro.value.push({id: 8, nome: 'Ninho'});
-        
+        tipoRegistro.value.push({ id: 8, nome: 'Ninho' });
+
     }
 }
 
 const destinacaoRegistro = ref([]);
 
 const tipoDestinacaoRegistro = () => {
-    if (form.id_tipo_registro === 1){
+    if (form.id_tipo_registro == 1) {
         destinacaoRegistro.value = [];
-        destinacaoRegistro.value.push({id: 1, nome: 'Soltura em área adjacente'});
+        destinacaoRegistro.value.push({ id: 1, nome: 'Soltura em área adjacente' });
     }
-    if (form.id_tipo_registro === 5){
+    if (form.id_tipo_registro == 5) {
         destinacaoRegistro.value = [];
-        destinacaoRegistro.value.push({id: 4, nome: 'Eutanásia'});
-        destinacaoRegistro.value.push({id: 8, nome: 'Encaminhado ao hospital'});
-        destinacaoRegistro.value.push({id: 2, nome: 'Encaminhado ao Veterinário'});
+        destinacaoRegistro.value.push({ id: 4, nome: 'Eutanásia' });
+        destinacaoRegistro.value.push({ id: 8, nome: 'Encaminhado ao hospital' });
+        destinacaoRegistro.value.push({ id: 2, nome: 'Encaminhado ao Veterinário' });
     }
-    if (form.id_tipo_registro === 6){
+    if (form.id_tipo_registro == 6) {
         destinacaoRegistro.value = [];
-        destinacaoRegistro.value.push({id: 6, nome: 'Área adjacente'});
+        destinacaoRegistro.value.push({ id: 6, nome: 'Área adjacente' });
     }
-    if (form.id_tipo_registro === 7){
+    if (form.id_tipo_registro == 7) {
         destinacaoRegistro.value = [];
-        destinacaoRegistro.value.push({id: 5, nome: 'Realocação'});
+        destinacaoRegistro.value.push({ id: 5, nome: 'Realocação' });
     }
-    if (form.id_tipo_registro === 8){
+    if (form.id_tipo_registro == 8) {
         destinacaoRegistro.value = [];
-        destinacaoRegistro.value.push({id: 7, nome: 'Monitoramento'});
+        destinacaoRegistro.value.push({ id: 7, nome: 'Monitoramento' });
     }
 }
 
 const salvarImagens = () => {
-    form.post(route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.fotografico', { registro: form.id }), {forceFormData: true}, {
+    form.post(route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.fotografico', { registro: form.id }), { forceFormData: true }, {
         preserveScroll: true,
         onSuccess: () => {
             modalDetalhes.value.getBsModal().hide();
@@ -200,6 +207,21 @@ const salvarImagens = () => {
         },
     });
 }
+
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+const close = () => {
+    modalDetalhes.value.getBsModal().hide();
+    form.clearErrors();
+    form.reset();
+};
 
 defineExpose({ abrirModal, updateModal });
 
@@ -224,11 +246,10 @@ defineExpose({ abrirModal, updateModal });
                                     <div class="accordion-body pt-0 card-body space-y-5">
                                         <div class="d-flex">
                                             <div class="col-lg-4 me-2">
-                                                <InputLabel for="nome_registro" value="ID registro" />
-                                                <input id="nome_registro" type="number" class="form-control"
-                                                    v-model="form.nome_registro" autofocus placeholder="ID do registro"
-                                                    autocomplete="nome_registro" disabled />
-                                                <InputError class="mt-2" :message="form.errors.nome_registro" />
+                                                <InputLabel for="id" value="ID registro" />
+                                                <input id="id" type="number" class="form-control" v-model="form.id"
+                                                    autofocus placeholder="ID do registro" autocomplete="id" disabled />
+                                                <InputError class="mt-2" :message="form.errors.id" />
                                             </div>
 
                                             <div class="col-lg-4 me-2">
@@ -260,8 +281,8 @@ defineExpose({ abrirModal, updateModal });
 
                                         <div class="d-flex">
                                             <div class="col-lg-4 me-2">
-                                                <InputLabel for="" value="Data Registro" />
-                                                <input id="" type="date" class="form-control"
+                                                <InputLabel for="data_registro" value="Data Registro" />
+                                                <input id="data_registro" type="date" class="form-control"
                                                     v-model="form.data_registro" autofocus placeholder="Data registro"
                                                     autocomplete="data_registro" />
                                                 <InputError class="mt-2" :message="form.errors.data_registro" />
@@ -481,7 +502,8 @@ defineExpose({ abrirModal, updateModal });
                                             <div class="col-lg-4 me-2">
                                                 <InputLabel for="" value="Tipo de Registro" />
                                                 <select class="form-select" :disabled="form.id_forma_registro == 3"
-                                                    v-model="form.id_tipo_registro" @change="tipoDestinacaoRegistro()" aria-label="Default select example">
+                                                    v-model="form.id_tipo_registro" @change="tipoDestinacaoRegistro()"
+                                                    aria-label="Default select example">
                                                     <option selected>Selecione o Tipo de Registro</option>
                                                     <option v-for="tipo in tipoRegistro" :value="tipo.id">
                                                         {{ tipo.nome }}
@@ -492,11 +514,12 @@ defineExpose({ abrirModal, updateModal });
 
                                             <div class="col-lg-4 me-2">
                                                 <InputLabel for="" value="Destinação" />
-                                                <select class="form-select" :disabled="form.id_forma_registro == 3 || form.id_forma_registro == 1"
+                                                <select class="form-select"
+                                                    :disabled="form.id_forma_registro == 3 || form.id_forma_registro == 1"
                                                     v-model="form.id_destinacao_registro"
                                                     aria-label="Default select example">
                                                     <option selected>Selecione a Destinação</option>
-                                                    <option v-for="destinacao in destinacaoRegistro" value="1">
+                                                    <option v-for="destinacao in destinacaoRegistro" :value="destinacao.id">
                                                         {{ destinacao.nome }}
                                                     </option>
                                                 </select>
@@ -588,7 +611,8 @@ defineExpose({ abrirModal, updateModal });
                                                 <select class="form-select" v-model="form.id_status_conservacao_federal"
                                                     aria-label="Default select example">
                                                     <option selected>Selecione a Federal</option>
-                                                    <option v-for="federal in statusConservacaoFederal" :value="federal.id">
+                                                    <option v-for="federal in statusConservacaoFederal"
+                                                        :value="federal.id">
                                                         {{ federal.nome }} - {{ federal.sigla }}
                                                     </option>
                                                 </select>
@@ -601,7 +625,7 @@ defineExpose({ abrirModal, updateModal });
                                                 <select class="form-select" v-model="form.id_status_conservacao_iucn"
                                                     aria-label="Default select example">
                                                     <option selected>Selecione a IUCN</option>
-                                                    <option v-for="iucn in statusConservacaoIucn" value="1">
+                                                    <option v-for="iucn in statusConservacaoIucn" :value="iucn.id">
                                                         {{ iucn.sigla }} - {{ iucn.nome }}
                                                     </option>
                                                 </select>
@@ -632,7 +656,7 @@ defineExpose({ abrirModal, updateModal });
 
                                                 <div class="mt-2">
                                                     <button type="button" @click="salvarImagens" class="btn btn-success"
-                                                        aria-label="Button" :disabled="form.processing || !form.id">
+                                                        aria-label="Button" :disabled="form.processing">
                                                         Enviar
                                                     </button>
                                                 </div>
@@ -647,7 +671,8 @@ defineExpose({ abrirModal, updateModal });
             </template>
             <template #footer>
                 <div class="mt-2">
-                    <a @click="" href="#" class="btn btn-danger me-2" aria-label="Button" :disabled="form.processing">
+                    <a @click="close" href="#" class="btn btn-danger me-2" aria-label="Button"
+                        :disabled="form.processing">
                         Cancelar
                     </a>
                     <button type="submit" class="btn btn-success" aria-label="Button" :disabled="form.processing">

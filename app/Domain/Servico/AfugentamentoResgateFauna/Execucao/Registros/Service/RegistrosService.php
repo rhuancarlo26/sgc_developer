@@ -27,16 +27,7 @@ class RegistrosService
     public function update($request, $registro)
     {
         $registro->update([
-            ...$request,
-            'id_servico' => $request['id_servico']['id'],
-            'id_frente' => $request['id_frente']['id'],
-            'id_grupo_amostrado' => $request['id_grupo_amostrado']['id'],
-            'id_estado' => $request['id_estado']['id'],
-            'id_forma_registro' => $request['id_forma_registro']['id'],
-            'id_tipo_registro' => $request['id_tipo_registro']['id'],
-            'id_destinacao_registro' => $request['id_destinacao_registro']['id'],
-            'id_status_conservacao_federal' => $request['id_status_conservacao_federal']['id'],
-            'id_status_conservacao_iucn' => $request['id_status_conservacao_iucn']['id'],
+            ...$request
         ]);
     }
 
@@ -144,6 +135,5 @@ class RegistrosService
             'nome' => $nome,
             'caminho_imagem' => str_replace("public\\", "", $caminho)
         ]);
-
     }
 }
