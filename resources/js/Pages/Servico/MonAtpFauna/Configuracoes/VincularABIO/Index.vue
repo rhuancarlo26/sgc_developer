@@ -10,8 +10,8 @@ import ModalVincularABIO from "./ModalVincularABIO.vue";
 import ModalAdicionarRet from "./ModalAdicionarRet.vue";
 import { ref } from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
-import {IconDots} from "@tabler/icons-vue";
-import {Head, Link, router} from '@inertiajs/vue3';
+import { IconDots } from "@tabler/icons-vue";
+import { Head, Link, router } from '@inertiajs/vue3';
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 
@@ -35,19 +35,14 @@ const abrirModalAdicionarRet = (item) => {
 }
 
 const openArquivoLicenca = (item) => {
-    window.open('/licenca/arquivo/' + item.licenca.chave, '_blank');
-}
-
-const openRet = (rets) => {
-    const lastRet = rets[0];
-    window.open('/atropelamento-fauna/ret/' + lastRet.id, '_blank');
+  window.open('/licenca/arquivo/' + item.licenca.chave, '_blank');
 }
 
 const linkConfirmationRef = ref()
 const deleteVinculoAbio = (id) => {
-    linkConfirmationRef.value.show(() => {
-        router.delete(route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.delete', id))
-    })
+  linkConfirmationRef.value.show(() => {
+    router.delete(route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.delete', id))
+  })
 }
 
 </script>
@@ -60,9 +55,9 @@ const deleteVinculoAbio = (id) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-        { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
-        { route: '#', label: contrato.contratada }
-    ]
+          { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
+          { route: '#', label: contrato.contratada }
+        ]
           " />
         <Link class="btn btn-dark"
           :href="route('contratos.contratada.servicos.index', { contrato: props.contrato.id })">
@@ -85,7 +80,7 @@ const deleteVinculoAbio = (id) => {
           :records="vinculacoes" table-class="table-hover">
           <template #body="{ item }">
             <tr>
-              <td>{{ item.licenca?.tipo?.sigla }}</td>
+              <td>{{ item.licenca?.tipo_rel?.sigla }}</td>
               <td>{{ item.licenca?.numero_licenca }}</td>
               <td>{{ item.licenca?.empreendimento }}</td>
               <td>{{ item.licenca?.emissor }}</td>
@@ -99,18 +94,21 @@ const deleteVinculoAbio = (id) => {
                   <IconDots />
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
-                    <a v-if="item.licenca.arquivo_licenca" @click="openArquivoLicenca(item)" href="javascript:void(0);" class="dropdown-item">
-                        Visualizar AABIO
-                    </a>
-                    <a v-if="item.rets?.length" @click="openRet(item.rets)" href="javascript:void(0);" class="dropdown-item">
-                        Visualizar RET
-                    </a>
-                    <a @click="abrirModalAdicionarRet(item)" href="javascript:void(0);" class="dropdown-item">
-                        Adicionar RET
-                    </a>
-                    <a @click="deleteVinculoAbio(item.id)" href="javascript:void(0);" class="dropdown-item">
-                        Excluir
-                    </a>
+                  <a v-if="item.licenca.arquivo_licenca" @click="openArquivoLicenca(item)" href="javascript:void(0);"
+                    class="dropdown-item">
+                    Visualizar ABIO
+                  </a>
+                  <a v-if="item.rets?.length" target="_blank"
+                    :href="route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.visualizar_ret', item.rets[0].id)"
+                    class="dropdown-item">
+                    Visualizar RET
+                  </a>
+                  <a @click="abrirModalAdicionarRet(item)" href="javascript:void(0);" class="dropdown-item">
+                    Adicionar RET
+                  </a>
+                  <a @click="deleteVinculoAbio(item.id)" href="javascript:void(0);" class="dropdown-item">
+                    Excluir
+                  </a>
                 </div>
               </td>
             </tr>
@@ -122,7 +120,7 @@ const deleteVinculoAbio = (id) => {
     <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Excluir registro?' }" />
 
     <ModalVincularABIO :contrato="contrato" :servico="servico" :licencas="licencas" ref="modalVincularABIO" />
-      <ModalAdicionarRet ref="modalAdicionarRet" />
+    <ModalAdicionarRet ref="modalAdicionarRet" />
 
   </AuthenticatedLayout>
 </template>
