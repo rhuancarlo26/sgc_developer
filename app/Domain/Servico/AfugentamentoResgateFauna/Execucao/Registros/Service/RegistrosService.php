@@ -27,16 +27,7 @@ class RegistrosService
     public function update($request, $registro)
     {
         $registro->update([
-            ...$request,
-            'id_servico' => $request['id_servico']['id'],
-            'id_frente' => $request['id_frente']['id'],
-            'id_grupo_amostrado' => $request['id_grupo_amostrado']['id'],
-            'id_estado' => $request['id_estado']['id'],
-            'id_forma_registro' => $request['id_forma_registro']['id'],
-            'id_tipo_registro' => $request['id_tipo_registro']['id'],
-            'id_destinacao_registro' => $request['id_destinacao_registro']['id'],
-            'id_status_conservacao_federal' => $request['id_status_conservacao_federal']['id'],
-            'id_status_conservacao_iucn' => $request['id_status_conservacao_iucn']['id'],
+            ...$request
         ]);
     }
 
@@ -69,10 +60,16 @@ class RegistrosService
     {
         return AfugentFaunaExecRegistroModel::leftJoin('afugent_fauna_exec_frente', 'afugent_fauna_exec_registro.id_frente', '=', 'afugent_fauna_exec_frente.id')
             ->leftJoin('at_fauna_grupo_amostrado', 'afugent_fauna_exec_registro.id_grupo_amostrado', '=', 'at_fauna_grupo_amostrado.id')
+            ->leftJoin('afugent_fauna_forma_registro', 'afugent_fauna_exec_registro.id_forma_registro', '=', 'afugent_fauna_forma_registro.id')
+            ->leftJoin('afugent_fauna_tipo_registro', 'afugent_fauna_exec_registro.id_tipo_registro', '=', 'afugent_fauna_tipo_registro.id')
+            ->leftJoin('afugent_fauna_destinacao_registro', 'afugent_fauna_exec_registro.id_destinacao_registro', '=', 'afugent_fauna_destinacao_registro.id')
             ->leftJoin('estados', 'afugent_fauna_exec_registro.id_estado', '=', 'estados.id')
             ->select(
                 'afugent_fauna_exec_registro.*',
                 'afugent_fauna_exec_frente.rodovia',
+                'afugent_fauna_forma_registro.nome as nome_forma_registro',
+                'afugent_fauna_tipo_registro.nome as nome_tipo_registro',
+                'afugent_fauna_destinacao_registro.nome as nome_destinacao_registro',
                 'estados.uf as uf',
                 'at_fauna_grupo_amostrado.nome as nome_grupo',
                 DB::raw("DATE_FORMAT(afugent_fauna_exec_registro.data_registro, '%d/%m/%Y') as data_registroF"),
@@ -144,6 +141,5 @@ class RegistrosService
             'nome' => $nome,
             'caminho_imagem' => str_replace("public\\", "", $caminho)
         ]);
-
     }
 }
