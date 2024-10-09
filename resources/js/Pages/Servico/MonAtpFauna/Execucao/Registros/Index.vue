@@ -8,9 +8,9 @@ import Table from "@/Components/Table.vue";
 import ModalNovoRegistro from "./ModalNovoRegistro.vue";
 import ModalEditarRegistro from "./ModalEditarRegistro.vue";
 import ModalExcluirRegistro from "./ModalExcluirRegistro.vue";
-import {computed, ref} from "vue";
+import { computed, ref } from "vue";
 import { IconDots } from "@tabler/icons-vue";
-import {Head, router} from "@inertiajs/vue3";
+import { Head, router } from "@inertiajs/vue3";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 const props = defineProps({
@@ -18,6 +18,7 @@ const props = defineProps({
     servico: { type: Object },
     data: { type: Object },
     campanhas: { type: Array },
+    licencasVigente: { type: Array },
     ufs: { type: Array },
 });
 
@@ -64,10 +65,10 @@ const urlQueryParams = computed(() => {
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-        { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
-        { route: '#', label: contrato.contratada }
-    ]
-        " />
+                    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
+                    { route: '#', label: contrato.contratada }
+                ]
+                    " />
                 <Link class="btn btn-dark"
                     :href="route('contratos.contratada.servicos.index', { contrato: props.contrato.id })">
                 Voltar
@@ -79,7 +80,8 @@ const urlQueryParams = computed(() => {
             <template #body>
                 <ModelSearchFormAllColumns :columns="[]">
                     <template #action>
-                        <a v-if="data.data?.length" class="btn btn-success me-1" :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.export', { servico: servico.id, _query: urlQueryParams })">
+                        <a v-if="data.data?.length" class="btn btn-success me-1"
+                            :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.export', { servico: servico.id, _query: urlQueryParams })">
                             Exportar Excel
                         </a>
                         <NavButton @click="abrirModalNovoRegistro()" type-button="info" title="Novo Registro" />
@@ -108,10 +110,12 @@ const urlQueryParams = computed(() => {
                                     <a href="#" class="dropdown-item" @click.prevent="abrirModalNovoRegistro(item)">
                                         Editar
                                     </a>
-                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalVisualizarRegistro(item)">
+                                    <a href="#" class="dropdown-item"
+                                        @click.prevent="abrirModalVisualizarRegistro(item)">
                                         Visualizar
                                     </a>
-                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalExcluirRegistro(item.id)">
+                                    <a href="#" class="dropdown-item"
+                                        @click.prevent="abrirModalExcluirRegistro(item.id)">
                                         Excluir
                                     </a>
                                 </div>
@@ -122,10 +126,12 @@ const urlQueryParams = computed(() => {
             </template>
         </Navbar>
 
-        <ModalNovoRegistro ref="modalNovoRegistro" :campanhas="campanhas" :ufs="ufs" :servico="servico" :show-action="showActionsModal" />
+        <ModalNovoRegistro ref="modalNovoRegistro" :licencasVigente="licencasVigente" :campanhas="campanhas" :ufs="ufs"
+            :servico="servico" :show-action="showActionsModal" />
         <ModalEditarRegistro ref="modalEditarRegistro" />
         <ModalExcluirRegistro ref="modalExcluirRegistro" />
-        <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Você tem certeza que deseja excluir esta foto?' }" />
+        <LinkConfirmation ref="linkConfirmationRef"
+            :options="{ text: 'Você tem certeza que deseja excluir esta foto?' }" />
 
     </AuthenticatedLayout>
 </template>
