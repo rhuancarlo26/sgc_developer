@@ -1,20 +1,20 @@
 <script setup>
-import {ref} from "vue";
+import { ref } from "vue";
 import Modal from "@/Components/Modal.vue";
-import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils.js";
 import Table from "@/Components/Table.vue";
 import axios from "axios";
 import BarChart from "@/Components/BarChart.vue";
 import PieChart from "@/Components/PieChart.vue";
 
 const props = defineProps({
-    contrato: {type: Object},
+    contrato: { type: Object },
 })
 
 const modalRef = ref();
 const relatorio = ref({});
 const abrirModal = async (item) => {
-    const {data} = await axios.post(route('contratos.contratada.servicos.mon_atp_fauna.relatorios.relatorio'), item)
+    const { data } = await axios.post(route('contratos.contratada.servicos.mon_atp_fauna.relatorios.relatorio'), item)
     relatorio.value = {
         nome: item.nome_relatorio,
         data_relatorio: item.created_at,
@@ -25,7 +25,7 @@ const abrirModal = async (item) => {
     modalRef.value.getBsModal().show();
 }
 
-defineExpose({abrirModal});
+defineExpose({ abrirModal });
 </script>
 
 <template>
@@ -61,15 +61,25 @@ defineExpose({abrirModal});
                             <div class="execucao global">
                                 <ul class="lista">
                                     <li class="lista_content titulo_lista">1. Introdução</li>
-                                    <li class="lista_content titulo_lista"><h6 class="">{{relatorio.servico.introducao}}</h6></li>
+                                    <li class="lista_content titulo_lista">
+                                        <h6 class="">{{ relatorio.servico.introducao }}</h6>
+                                    </li>
                                     <li class="lista_content titulo_lista">2. Justificativa</li>
-                                    <li class="lista_content titulo_lista"><h6 class="">{{relatorio.servico.justificativa}}</h6></li>
+                                    <li class="lista_content titulo_lista">
+                                        <h6 class="">{{ relatorio.servico.justificativa }}</h6>
+                                    </li>
                                     <li class="lista_content titulo_lista">3. Objetivos</li>
-                                    <li class="lista_content titulo_lista"><h6 class="">{{relatorio.servico.objetivos}}</h6></li>
+                                    <li class="lista_content titulo_lista">
+                                        <h6 class="">{{ relatorio.servico.objetivos }}</h6>
+                                    </li>
                                     <li class="lista_content titulo_lista">4. Metodologia</li>
-                                    <li class="lista_content titulo_lista"><h6 class="">{{relatorio.servico.metodologia}}</h6></li>
+                                    <li class="lista_content titulo_lista">
+                                        <h6 class="">{{ relatorio.servico.metodologia }}</h6>
+                                    </li>
                                     <li class="lista_content titulo_lista">5. Público Alvo</li>
-                                    <li class="lista_content titulo_lista"><h6 class="">{{relatorio.servico.publico_alvo}}</h6></li>
+                                    <li class="lista_content titulo_lista">
+                                        <h6 class="">{{ relatorio.servico.publico_alvo }}</h6>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -87,10 +97,10 @@ defineExpose({abrirModal});
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                            <tr v-for="i in relatorio.rh">
-                                                <td class="tbody_relatorio">{{i.nome}}</td>
-                                                <td class="tbody_relatorio">{{i.profissao}}</td>
-                                            </tr>
+                                                <tr v-for="i in relatorio.rh">
+                                                    <td class="tbody_relatorio">{{ i.nome }}</td>
+                                                    <td class="tbody_relatorio">{{ i.profissao }}</td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </ul>
@@ -101,13 +111,13 @@ defineExpose({abrirModal});
                                                 <tr>
                                                     <th class="thead_relatorio"><span>Nome do Veiculo</span></th>
                                                     <th class="thead_relatorio"><span>Modelo</span></th>
-                                            </tr>
+                                                </tr>
                                             </thead>
                                             <tbody>
-                                            <tr v-for="i in relatorio.veiculo">
-                                                <td class="tbody_relatorio">{{i.tipo}}-{{i.marca}}</td>
-                                                <td class="tbody_relatorio">{{i.modelo}}</td>
-                                            </tr>
+                                                <tr v-for="i in relatorio.veiculo">
+                                                    <td class="tbody_relatorio">{{ i.tipo }}-{{ i.marca }}</td>
+                                                    <td class="tbody_relatorio">{{ i.modelo }}</td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </ul>
@@ -121,10 +131,10 @@ defineExpose({abrirModal});
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                            <tr v-for="i in relatorio.equipamento">
-                                                <td class="tbody_relatorio">{{i.nome}}</td>
-                                                <td class="tbody_relatorio">{{i.modelo}}</td>
-                                            </tr>
+                                                <tr v-for="i in relatorio.equipamento">
+                                                    <td class="tbody_relatorio">{{ i.nome }}</td>
+                                                    <td class="tbody_relatorio">{{ i.modelo }}</td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </ul>
@@ -138,10 +148,10 @@ defineExpose({abrirModal});
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                            <tr v-for="i in relatorio.licenca">
-                                                <td class="tbody_relatorio">{{i.numero_licenca}}</td>
-                                                <td class="tbody_relatorio">{{i.titulo_condicionante}}</td>
-                                            </tr>
+                                                <tr v-for="i in relatorio.licenca">
+                                                    <td class="tbody_relatorio">{{ i.numero_licenca }}</td>
+                                                    <td class="tbody_relatorio">{{ i.titulo_condicionante }}</td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </ul>
@@ -152,8 +162,8 @@ defineExpose({abrirModal});
                             <ul class="lista table_relatorio">
                                 <li class="lista titulo_lista">7. Campanha</li>
                                 <ul class="lista" v-for="c in relatorio.campanhas">
-                                    <li class="lista_content subtitulo_lista">Campanha: {{c.fk_campanha}}</li>
-                                    <table id="table-parametros" class="table_relatorio col-12" >
+                                    <li class="lista_content subtitulo_lista">Campanha: {{ c.fk_campanha }}</li>
+                                    <table id="table-parametros" class="table_relatorio col-12">
                                         <thead>
                                             <tr>
                                                 <th class="thead_relatorio">Nº Licença</th>
@@ -166,27 +176,28 @@ defineExpose({abrirModal});
                                             </tr>
                                         </thead>
                                         <tbody>
-                                        <tr v-for="lista in relatorio.abios_campanha">
-                                            <td class="tbody_relatorio">{{lista.numero_licenca}}</td>
-                                            <td class="tbody_relatorio">{{lista.empreendimento}}</td>
-                                            <td class="tbody_relatorio">{{lista.emissor}}</td>
-                                            <td class="tbody_relatorio">{{lista.data_emissao}}</td>
-                                            <td class="tbody_relatorio">{{lista.vencimento}}</td>
-                                            <td class="tbody_relatorio">{{lista.fiscal}}</td>
-                                            <td class="tbody_relatorio">{{lista.processo_dnit}}</td>
-                                        </tr>
+                                            <tr v-for="lista in relatorio.abios_campanha">
+                                                <td class="tbody_relatorio">{{ lista.numero_licenca }}</td>
+                                                <td class="tbody_relatorio">{{ lista.empreendimento }}</td>
+                                                <td class="tbody_relatorio">{{ lista.emissor }}</td>
+                                                <td class="tbody_relatorio">{{ lista.data_emissao }}</td>
+                                                <td class="tbody_relatorio">{{ lista.vencimento }}</td>
+                                                <td class="tbody_relatorio">{{ lista.fiscal }}</td>
+                                                <td class="tbody_relatorio">{{ lista.processo_dnit }}</td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </ul>
                                 <li class="lista titulo_lista">8. Sobre o relatório</li>
                                 <div class="conclusao">
-                                    <span>{{relatorio.sobre_relatorio}}</span>
+                                    <span>{{ relatorio.sobre_relatorio }}</span>
                                 </div>
                             </ul>
                         </div>
                         <div class="carousel-item">
                             <ul class="lista table_relatorio">
-                                <li class="lista titulo_lista">9. Tabela com a relação de Abio emitidas para o empreendimento.</li>
+                                <li class="lista titulo_lista">9. Tabela com a relação de Abio emitidas para o
+                                    empreendimento.</li>
                                 <li class="lista">
                                     <table id="table-parametros" class="table_relatorio col-12">
                                         <thead>
@@ -202,16 +213,16 @@ defineExpose({abrirModal});
                                             </tr>
                                         </thead>
                                         <tbody>
-                                        <tr v-for="lista in relatorio.abios">
-                                            <td class="tbody_relatorio">{{lista.sigla}}</td>
-                                            <td class="tbody_relatorio">{{lista.numero_licenca}}</td>
-                                            <td class="tbody_relatorio">{{lista.empreendimento}}</td>
-                                            <td class="tbody_relatorio">{{lista.emissor}}</td>
-                                            <td class="tbody_relatorio">{{lista.data_emissao}}</td>
-                                            <td class="tbody_relatorio">{{lista.vencimento}}</td>
-                                            <td class="tbody_relatorio">{{lista.fiscal}}</td>
-                                            <td class="tbody_relatorio">{{lista.processo_dnit}}</td>
-                                        </tr>
+                                            <tr v-for="lista in relatorio.abios">
+                                                <td class="tbody_relatorio">{{ lista.sigla }}</td>
+                                                <td class="tbody_relatorio">{{ lista.numero_licenca }}</td>
+                                                <td class="tbody_relatorio">{{ lista.empreendimento }}</td>
+                                                <td class="tbody_relatorio">{{ lista.emissor }}</td>
+                                                <td class="tbody_relatorio">{{ lista.data_emissao }}</td>
+                                                <td class="tbody_relatorio">{{ lista.vencimento }}</td>
+                                                <td class="tbody_relatorio">{{ lista.fiscal }}</td>
+                                                <td class="tbody_relatorio">{{ lista.processo_dnit }}</td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </li>
@@ -219,30 +230,35 @@ defineExpose({abrirModal});
                                 <li class="lista">
                                     <div class="grupo_cards">
                                         <div class="card_relatorio">
-                                            <div class="card_r" >
+                                            <div class="card_r">
                                                 <div class="info">
                                                     <div class="info_relatorio">BR:</div>
-                                                    <div class="valor_relatorio">{{relatorio.malha_viaria?.rodovia}}</div>
+                                                    <div class="valor_relatorio">{{ relatorio.malha_viaria?.rodovia }}
+                                                    </div>
                                                 </div>
                                                 <div class="border_bottom"></div>
                                                 <div class="info">
                                                     <div class="info_relatorio">Empreendimento:</div>
-                                                    <div class="valor_relatorio">{{relatorio.malha_viaria?.empreendimento}}</div>
+                                                    <div class="valor_relatorio">
+                                                        {{ relatorio.malha_viaria?.empreendimento }}</div>
                                                 </div>
                                                 <div class="border_bottom"></div>
                                                 <div class="info">
                                                     <div class="info_relatorio">KM inicial:</div>
-                                                    <div class="valor_relatorio">{{relatorio.malha_viaria?.km_inicio}}</div>
+                                                    <div class="valor_relatorio">{{ relatorio.malha_viaria?.km_inicio }}
+                                                    </div>
                                                 </div>
                                                 <div class="border_bottom"></div>
                                                 <div class="info">
                                                     <div class="info_relatorio">KM final:</div>
-                                                    <div class="valor_relatorio">{{relatorio.malha_viaria?.km_fim}}</div>
+                                                    <div class="valor_relatorio">{{ relatorio.malha_viaria?.km_fim }}
+                                                    </div>
                                                 </div>
                                                 <div class="border_bottom"></div>
                                                 <div class="info">
                                                     <div class="info_relatorio">Extensão:</div>
-                                                    <div class="valor_relatorio">{{relatorio.malha_viaria?.extensao}}</div>
+                                                    <div class="valor_relatorio">{{ relatorio.malha_viaria?.extensao }}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -252,7 +268,8 @@ defineExpose({abrirModal});
                         </div>
                         <div class="carousel-item">
                             <ul class="lista table_relatorio">
-                                <li class="lista titulo_lista">11. Mapa com a localização da malha viária objeto par ao programa de atropelamento de fauna</li>
+                                <li class="lista titulo_lista">11. Mapa com a localização da malha viária objeto par ao
+                                    programa de atropelamento de fauna</li>
                                 <div id="relatorio_map"></div>
                             </ul>
                         </div>
@@ -261,41 +278,45 @@ defineExpose({abrirModal});
                             <ul class="lista">
                                 <li class="lista_content titulo_lista">12. Resultados</li>
                                 <ul class="lista">
-                                    <li class="lista_content subtitulo_lista">12.1 Tabela com a relação de espécies atropeladas da malha viária</li>
+                                    <li class="lista_content subtitulo_lista">12.1 Tabela com a relação de espécies
+                                        atropeladas da malha viária</li>
                                     <ul class="lista">
-                                        <table id="table-resultado" class="table table-hover non-hover" style="width:100% !important;">
+                                        <table id="table-resultado" class="table table-hover non-hover"
+                                            style="width:100% !important;">
                                             <thead>
-                                            <tr role="row">
-                                                <th rowspan="2">Espécie</th>
-                                                <th rowspan="2">Nome comum</th>
-                                                <th rowspan="2" class="text-center">Nº Indivíduos</th>
-                                                <th rowspan="2" class="text-center">Frequência (%)</th>
-                                                <th colspan="2" class="text-center">Status Conservação</th>
-                                            </tr>
-                                            <tr role="row">
-                                                <th class="text-center">IUCN</th>
-                                                <th class="text-center">FEDERAL</th>
-                                            </tr>
+                                                <tr role="row">
+                                                    <th rowspan="2">Espécie</th>
+                                                    <th rowspan="2">Nome comum</th>
+                                                    <th rowspan="2" class="text-center">Nº Indivíduos</th>
+                                                    <th rowspan="2" class="text-center">Frequência (%)</th>
+                                                    <th colspan="2" class="text-center">Status Conservação</th>
+                                                </tr>
+                                                <tr role="row">
+                                                    <th class="text-center">IUCN</th>
+                                                    <th class="text-center">FEDERAL</th>
+                                                </tr>
                                             </thead>
                                             <tbody>
-                                            <tr v-for="lista in tabela_registro">
-                                                <td>{{lista.especie}}</td>
-                                                <td>{{lista.nome_comum}}</td>
-                                                <td class="text-center">{{lista.n_individuos}}</td>
-                                                <td class="text-center">{{(lista.n_individuos * 100 /
-                                                    total_individuos).toFixed(2)}}%
-                                                </td>
-                                                <td class="text-center">{{lista.iucn}}</td>
-                                                <td class="text-center">{{lista.federal}}</td>
-                                            </tr>
+                                                <tr v-for="lista in tabela_registro">
+                                                    <td>{{ lista.especie }}</td>
+                                                    <td>{{ lista.nome_comum }}</td>
+                                                    <td class="text-center">{{ lista.n_individuos }}</td>
+                                                    <td class="text-center">{{ (lista.n_individuos * 100 /
+                                                        total_individuos).toFixed(2) }}%
+                                                    </td>
+                                                    <td class="text-center">{{ lista.iucn }}</td>
+                                                    <td class="text-center">{{ lista.federal }}</td>
+                                                </tr>
                                             </tbody>
                                             <tfoot>
-                                            <th colspan="5">Número Total de Indivíduos: <b>{{total_individuos}}</b></th>
+                                                <th colspan="5">Número Total de Indivíduos: <b>{{ total_individuos
+                                                        }}</b>
+                                                </th>
                                             </tfoot>
                                         </table>
                                     </ul>
                                     <div class="conclusao">
-                                        <span>{{relatorio.analise?.analise_registros_identificados}}</span>
+                                        <span>{{ relatorio.analise?.analise_registros_identificados }}</span>
                                     </div>
                                 </ul>
                             </ul>
@@ -304,21 +325,33 @@ defineExpose({abrirModal});
                             <ul class="lista">
                                 <li class="lista_content titulo_lista">12. Resultados</li>
                                 <ul class="lista">
-                                    <li class="lista_content subtitulo_lista">12.2 Gráfico com o número de animais atropelados por campanha</li>
-                                    <BarChart
-                                        :style="{ height: 300 }"
-                                        :chart_data="{
-                                                labels: relatorio.atropelados_campanha?.map((item) => 'Campanha: ' + item.id),
-                                                datasets: [{
-                                                    label: 'Atropelamentos por campanha',
-                                                    data: relatorio.atropelados_campanha?.map((item) => parseInt(item.n_individuos))
-                                                }]
-                                            }"
-                                        :chart_options="{ responsive: true }"
-                                    />
+                                    <li class="lista_content subtitulo_lista">12.2 Gráfico com o número de animais
+                                        atropelados por campanha</li>
+                                    <BarChart :style="{ height: 300 }" :chart_data="{
+                                        labels: relatorio.atropelados_campanha?.map((item) => 'Campanha: ' + item.id),
+                                        datasets: [{
+                                            label: 'Atropelamentos por campanha',
+                                            data: relatorio.atropelados_campanha?.map((item) => parseInt(item.n_individuos))
+                                        }]
+                                    }" :chart_options="{
+                                        responsive: true,
+                                        plugins: {
+                                            tooltip: {
+                                                enabled: false
+                                            },
+                                            datalabels: {
+                                                display: true,
+                                                color: 'white',
+                                                align: 'top',
+                                                font: {
+                                                    weight: 'bold',
+                                                },
+                                            }
+                                        }
+                                    }" />
                                 </ul>
                                 <div class="conclusao">
-                                    <span>{{relatorio.analise?.analise_animais_atropelados_campanha}}</span>
+                                    <span>{{ relatorio.analise?.analise_animais_atropelados_campanha }}</span>
                                 </div>
                             </ul>
                         </div>
@@ -326,21 +359,33 @@ defineExpose({abrirModal});
                             <ul class="lista">
                                 <li class="lista_content titulo_lista">12. Resultados</li>
                                 <ul class="lista">
-                                    <li class="lista_content subtitulo_lista">12.3 Gráfico com o número de animais atropelados por km</li>
-                                    <BarChart
-                                        :style="{ height: 300 }"
-                                        :chart_data="{
-                                                labels: relatorio.atropelados_km?.map((item) => 'Km: ' + item.km),
-                                                datasets: [{
-                                                    label: 'Atropelamentos por km',
-                                                    data: relatorio.atropelados_km?.map((item) => parseInt(item.n_individuos))
-                                                }]
-                                            }"
-                                        :chart_options="{ responsive: true }"
-                                    />
+                                    <li class="lista_content subtitulo_lista">12.3 Gráfico com o número de animais
+                                        atropelados por km</li>
+                                    <BarChart :style="{ height: 300 }" :chart_data="{
+                                        labels: relatorio.atropelados_km?.map((item) => 'Km: ' + item.km),
+                                        datasets: [{
+                                            label: 'Atropelamentos por km',
+                                            data: relatorio.atropelados_km?.map((item) => parseInt(item.n_individuos))
+                                        }]
+                                    }" :chart_options="{
+                                        responsive: true,
+                                        plugins: {
+                                            tooltip: {
+                                                enabled: false
+                                            },
+                                            datalabels: {
+                                                display: true,
+                                                color: 'white',
+                                                align: 'top',
+                                                font: {
+                                                    weight: 'bold',
+                                                },
+                                            }
+                                        }
+                                    }" />
                                 </ul>
                                 <div class="conclusao">
-                                    <span>{{relatorio.analise?.analise_animais_atropelados_km}}</span>
+                                    <span>{{ relatorio.analise?.analise_animais_atropelados_km }}</span>
                                 </div>
                             </ul>
                         </div>
@@ -348,21 +393,33 @@ defineExpose({abrirModal});
                             <ul class="lista">
                                 <li class="lista_content titulo_lista">12. Resultados</li>
                                 <ul class="lista">
-                                    <li class="lista_content subtitulo_lista">12.4 Gráfico de Frequência de atropelamentos por classe</li>
-                                    <PieChart
-                                        :style="{ height: 300 }"
-                                        :chart_data="{
-                                                labels: relatorio.atropelados_classe?.map((item) => item.nome),
-                                                datasets: [{
-                                                    label: 'Atropelamentos por classe',
-                                                    data: relatorio.atropelados_classe?.map((item) => parseInt(item.n_individuos))
-                                                }]
-                                            }"
-                                        :chart_options="{ responsive: true }"
-                                    />
+                                    <li class="lista_content subtitulo_lista">12.4 Gráfico de Frequência de
+                                        atropelamentos por classe</li>
+                                    <PieChart :style="{ height: 300 }" :chart_data="{
+                                        labels: relatorio.atropelados_classe?.map((item) => item.nome),
+                                        datasets: [{
+                                            label: 'Atropelamentos por classe',
+                                            data: relatorio.atropelados_classe?.map((item) => parseInt(item.n_individuos))
+                                        }]
+                                    }" :chart_options="{
+                                        responsive: true,
+                                        plugins: {
+                                            tooltip: {
+                                                enabled: false
+                                            },
+                                            datalabels: {
+                                                display: true,
+                                                color: 'white',
+                                                align: 'top',
+                                                font: {
+                                                    weight: 'bold',
+                                                },
+                                            }
+                                        }
+                                    }" />
                                 </ul>
                                 <div class="conclusao">
-                                    <span>{{relatorio.analise?.analise_frequencia_atropelamentos}}</span>
+                                    <span>{{ relatorio.analise?.analise_frequencia_atropelamentos }}</span>
                                 </div>
                             </ul>
                         </div>
@@ -370,21 +427,33 @@ defineExpose({abrirModal});
                             <ul class="lista">
                                 <li class="lista_content titulo_lista">12. Resultados</li>
                                 <ul class="lista">
-                                    <li class="lista_content subtitulo_lista">12.5 Gráfico com o número de animais atropelados por espécies</li>
-                                    <BarChart
-                                        :style="{ height: 300 }"
-                                        :chart_data="{
-                                                labels: relatorio.atropelados_especie?.map((item) => item.especie),
-                                                datasets: [{
-                                                    label: 'Atropelamentos por espécie',
-                                                    data: relatorio.atropelados_especie?.map((item) => parseInt(item.n_individuos))
-                                                }]
-                                            }"
-                                        :chart_options="{ responsive: true }"
-                                    />
+                                    <li class="lista_content subtitulo_lista">12.5 Gráfico com o número de animais
+                                        atropelados por espécies</li>
+                                    <BarChart :style="{ height: 300 }" :chart_data="{
+                                        labels: relatorio.atropelados_especie?.map((item) => item.especie),
+                                        datasets: [{
+                                            label: 'Atropelamentos por espécie',
+                                            data: relatorio.atropelados_especie?.map((item) => parseInt(item.n_individuos))
+                                        }]
+                                    }" :chart_options="{
+                                        responsive: true,
+                                        plugins: {
+                                            tooltip: {
+                                                enabled: false
+                                            },
+                                            datalabels: {
+                                                display: true,
+                                                color: 'white',
+                                                align: 'top',
+                                                font: {
+                                                    weight: 'bold',
+                                                },
+                                            }
+                                        }
+                                    }" />
                                 </ul>
                                 <div class="conclusao">
-                                    <span>{{relatorio.analise?.analise_animais_atropelados_especie}}</span>
+                                    <span>{{ relatorio.analise?.analise_animais_atropelados_especie }}</span>
                                 </div>
                             </ul>
                         </div>
@@ -395,20 +464,31 @@ defineExpose({abrirModal});
                                     <li class="lista_content subtitulo_lista">
                                         12.6 Gráfico com o número de animais atropelados por mês de campanha (s).
                                     </li>
-                                    <BarChart
-                                        :style="{ height: 300 }"
-                                        :chart_data="{
-                                                labels: relatorio.atropelados_mes?.map((item) => item.mes + ' - Campanha: ' + item.campanha),
-                                                datasets: [{
-                                                    label: '',
-                                                    data: relatorio.atropelados_mes?.map((item) => parseInt(item.n_individuos))
-                                                }]
-                                            }"
-                                        :chart_options="{ responsive: true }"
-                                    />
+                                    <BarChart :style="{ height: 300 }" :chart_data="{
+                                        labels: relatorio.atropelados_mes?.map((item) => item.mes + ' - Campanha: ' + item.campanha),
+                                        datasets: [{
+                                            label: '',
+                                            data: relatorio.atropelados_mes?.map((item) => parseInt(item.n_individuos))
+                                        }]
+                                    }" :chart_options="{
+                                        responsive: true,
+                                        plugins: {
+                                            tooltip: {
+                                                enabled: false
+                                            },
+                                            datalabels: {
+                                                display: true,
+                                                color: 'white',
+                                                align: 'top',
+                                                font: {
+                                                    weight: 'bold',
+                                                },
+                                            }
+                                        }
+                                    }" />
                                 </ul>
                                 <div class="conclusao">
-                                    <span>{{relatorio.analise?.analise_animais_atropelados_mes}}</span>
+                                    <span>{{ relatorio.analise?.analise_animais_atropelados_mes }}</span>
                                 </div>
                             </ul>
                         </div>
@@ -417,11 +497,12 @@ defineExpose({abrirModal});
                                 <li class="lista_content titulo_lista">13. Outras análises</li>
                                 <ul class="lista" v-for="(i, key) in relatorio.outras_analises">
                                     <li class="lista_content subtitulo_lista">
-                                        13.{{key+1}} <span>{{i.analise}}</span>
+                                        13.{{ key + 1 }} <span>{{ i.analise }}</span>
                                     </li>
                                     <div class="row">
                                         <div class="col-6">
-                                            <img :src="'/atropelamento-fauna/arquivo/analise/' + i.id" class="w-100 h-100" />
+                                            <img :src="'/atropelamento-fauna/arquivo/analise/' + i.id"
+                                                class="w-100 h-100" />
                                         </div>
                                     </div>
                                 </ul>
@@ -436,31 +517,32 @@ defineExpose({abrirModal});
                                             <div class="card_r">
                                                 <div class="info">
                                                     <div class="info_relatorio">Familia:</div>
-                                                    <div class="valor_relatorio">{{i.familia}}</div>
+                                                    <div class="valor_relatorio">{{ i.familia }}</div>
                                                 </div>
                                                 <div class="border_bottom"></div>
                                                 <div class="info">
                                                     <div class="info_relatorio">Espécie:</div>
-                                                    <div class="valor_relatorio">{{i.especie}}</div>
+                                                    <div class="valor_relatorio">{{ i.especie }}</div>
                                                 </div>
                                                 <div class="border_bottom"></div>
                                                 <div class="info">
                                                     <div class="info_relatorio">Nome comum:</div>
-                                                    <div class="valor_relatorio">{{i.nome_comum}}</div>
+                                                    <div class="valor_relatorio">{{ i.nome_comum }}</div>
                                                 </div>
                                                 <div class="border_bottom"></div>
                                                 <div class="info">
                                                     <div class="info_relatorio">KM:</div>
-                                                    <div class="valor_relatorio">{{i.km}}</div>
+                                                    <div class="valor_relatorio">{{ i.km }}</div>
                                                 </div>
                                                 <div class="border_bottom"></div>
                                                 <div class="info">
                                                     <div class="info_relatorio">Status de conservação:</div>
-                                                    <div class="valor_relatorio">{{i.familia}}</div>
+                                                    <div class="valor_relatorio">{{ i.familia }}</div>
                                                 </div>
                                                 <div class="border_bottom"></div>
                                                 <div class="info">
-                                                    <img :src="'/arquivo/registro/fotografico/' + i.id" width="100%" alt="" />
+                                                    <img :src="'/arquivo/registro/fotografico/' + i.id" width="100%"
+                                                        alt="" />
                                                 </div>
                                             </div>
                                         </div>
@@ -472,7 +554,7 @@ defineExpose({abrirModal});
                             <ul class="lista">
                                 <li class="lista_content titulo_lista">15. Conclusão</li>
                                 <div class="conclusao">
-                                    <span>{{relatorio.conclusao}}</span>
+                                    <span>{{ relatorio.conclusao }}</span>
                                 </div>
                             </ul>
                         </div>
@@ -483,18 +565,18 @@ defineExpose({abrirModal});
                                     <li class="lista_content subtitulo_lista">
                                         <table id="table-parametros" class="table_relatorio col-12">
                                             <thead>
-                                            <tr>
-                                                <th class="thead_relatorio"><span>Arquivos</span></th>
-                                            </tr>
+                                                <tr>
+                                                    <th class="thead_relatorio"><span>Arquivos</span></th>
+                                                </tr>
                                             </thead>
                                             <tbody>
-                                            <tr v-for="i in relatorio.anexos">
-                                                <td class="tbody_relatorio">
-                                                    <a  href="javascript:void(0);">
-                                                        {{i.nome_arquivo}}
-                                                    </a>
-                                                </td>
-                                            </tr>
+                                                <tr v-for="i in relatorio.anexos">
+                                                    <td class="tbody_relatorio">
+                                                        <a href="javascript:void(0);">
+                                                            {{ i.nome_arquivo }}
+                                                        </a>
+                                                    </td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </li>
@@ -697,7 +779,7 @@ ul.lista {
     border: 1px solid #000;
 }
 
-.img > img {
+.img>img {
     width: 100%;
 }
 
@@ -715,7 +797,7 @@ ul.lista {
     padding-bottom: 20px;
 }
 
-.analise > span {
+.analise>span {
     font-weight: bold;
 }
 
@@ -733,5 +815,4 @@ ul.lista {
 .titulo_anexos {
     top: 530px;
 }
-
 </style>
