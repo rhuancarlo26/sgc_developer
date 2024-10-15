@@ -18,9 +18,7 @@ class IndexController extends Controller
         private readonly CampanhasService $campanhasService,
         private readonly VincularABIOService $abioService,
         private readonly ServicoLicencaCondicionanteService $servicoLicencaCondicionanteService,
-    )
-    {
-    }
+    ) {}
 
     public function index(Contrato $contrato, Servicos $servico, Request $request): Response
     {
