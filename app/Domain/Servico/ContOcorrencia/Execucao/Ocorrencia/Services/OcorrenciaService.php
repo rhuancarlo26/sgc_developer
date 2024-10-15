@@ -47,11 +47,11 @@ class OcorrenciaService extends BaseModelService
                         $query->latest();
                     }
                 ])
-                ->where('id_servico', $servico->id)
+                ->where('id_servico', $servico->id)->where('envio_empresa', '=', 'Não')
                 ->paginate()
                 ->appends($searchParams),
             'ocorrencias_em_aberto' => $this->modelClass::with(['lote', 'rodovia.uf', 'registros', 'historico.levantamento'])
-                ->where('id_servico', $servico->id)->where('rnc_direto', 1)->where('envio_empresa', 'Não')->get()
+                ->where('id_servico', $servico->id)->where('envio_empresa', '=', 'Não')->get()
         ];
     }
 
@@ -119,22 +119,22 @@ class OcorrenciaService extends BaseModelService
 
                         $ocorrencia = [
                             ...$post['ocorrencia'],
-//                            'intensidade' => $post['vistoria']['intensidade_vistoria'],
-//                            'tipo' => $post['vistoria']['tipo_vistoria'],
+                            //                            'intensidade' => $post['vistoria']['intensidade_vistoria'],
+                            //                            'tipo' => $post['vistoria']['tipo_vistoria'],
                             'status' => 'Em aberto',
                             'envio_empresa' => 'Não',
-//                            'zona' => $post['ocorrencia']['zona'] ?? '-',
-//                            'possivel_causa' => $post['ocorrencia']['possivel_causa'] ?? '-',
-//                            'descricao_causa' => $post['ocorrencia']['descricao_causa'] ?? '-',
-//                            'aprovado_rnc' => $post['ocorrencia']['aprovado_rnc'] ?? '-',
+                            //                            'zona' => $post['ocorrencia']['zona'] ?? '-',
+                            //                            'possivel_causa' => $post['ocorrencia']['possivel_causa'] ?? '-',
+                            //                            'descricao_causa' => $post['ocorrencia']['descricao_causa'] ?? '-',
+                            //                            'aprovado_rnc' => $post['ocorrencia']['aprovado_rnc'] ?? '-',
                         ];
-//                        if (array_key_exists('acordo_prazo', $post['vistoria'])) {
-//                            $ocorrencia['prazo'] = $post['vistoria']['prazo_vistoria'];
-//                            $ocorrencia['dias_restantes'] = $post['vistoria']['prazo_vistoria'];
-//                        } else {
-//                            $ocorrencia['prazo'] = $post['ocorrencia']['prazo'];
-//                            $ocorrencia['dias_restantes'] = $post['ocorrencia']['prazo'];
-//                        }
+                        //                        if (array_key_exists('acordo_prazo', $post['vistoria'])) {
+                        //                            $ocorrencia['prazo'] = $post['vistoria']['prazo_vistoria'];
+                        //                            $ocorrencia['dias_restantes'] = $post['vistoria']['prazo_vistoria'];
+                        //                        } else {
+                        //                            $ocorrencia['prazo'] = $post['ocorrencia']['prazo'];
+                        //                            $ocorrencia['dias_restantes'] = $post['ocorrencia']['prazo'];
+                        //                        }
                         $lastOcorrencia = $this->modelClass::where('id_servico', $post['ocorrencia']['id_servico'])->where('tipo', $post['ocorrencia']['tipo'])->orderby('num_por_servico', 'DESC')->first() ?? 0;
 
                         $ocorrencia['nome_id'] = $post['ocorrencia']['tipo'] . '.' . str_pad(($lastOcorrencia->num_por_servico ?? 0) + 1, 2, '0', STR_PAD_LEFT) . '.' . $post['ocorrencia']['rodovia']['rodovia'] . '-' . Uf::find($post['ocorrencia']['rodovia']['estados_id'])->uf;
@@ -161,22 +161,22 @@ class OcorrenciaService extends BaseModelService
                             'id_ocorrencia_levantamento' => 1
                         ]);
                     } else {
-//                      se o tipo_vistoria for igual ao tipo da ocorrencia, então atualiza a ocorrencia
+                        //                      se o tipo_vistoria for igual ao tipo da ocorrencia, então atualiza a ocorrencia
                         $ocorrencia = [
                             ...$post['ocorrencia'],
-//                            'intensidade' => $post['ocorrencia']['intensidade'],
+                            //                            'intensidade' => $post['ocorrencia']['intensidade'],
                             'envio_empresa' => 'Não'
                         ];
 
-//                        if (array_key_exists('acordo_prazo', $post['vistoria'])) {
-//                            $ocorrencia['prazo'] = $post['vistoria']['prazo_vistoria'];
-//                            $ocorrencia['dias_restantes'] = $post['vistoria']['prazo_vistoria'];
-//                        }
+                        //                        if (array_key_exists('acordo_prazo', $post['vistoria'])) {
+                        //                            $ocorrencia['prazo'] = $post['vistoria']['prazo_vistoria'];
+                        //                            $ocorrencia['dias_restantes'] = $post['vistoria']['prazo_vistoria'];
+                        //                        }
 
                         $this->dataManagement->update(entity: $this->modelClass, infos: $ocorrencia, id: $post['ocorrencia']['id']);
                     }
                 } else {
-//                    se vistoria_dias for menor que prazo da ocorrencia então atualiza a ocorrencia
+                    //                    se vistoria_dias for menor que prazo da ocorrencia então atualiza a ocorrencia
                     $ocorrencia = [
                         ...$post['ocorrencia'],
                         'intensidade' => $post['vistoria']['intensidade_vistoria'],
@@ -188,14 +188,14 @@ class OcorrenciaService extends BaseModelService
                             $ocorrencia['prazo'] = $post['vistoria']['prazo_vistoria'];
                             $ocorrencia['dias_restantes'] = $post['vistoria']['prazo_vistoria'];
                         } else {
-//                            $ocorrencia['dias_restantes'] = $post['vistoria']['dias_restantes'];
+                            //                            $ocorrencia['dias_restantes'] = $post['vistoria']['dias_restantes'];
                         }
                     }
 
                     $this->dataManagement->update(entity: $this->modelClass, infos: $ocorrencia, id: $post['ocorrencia']['id']);
                 }
             } else {
-//                se a ocorrencia for corrigida
+                //                se a ocorrencia for corrigida
                 $ocorrencia = [
                     ...$post['ocorrencia'],
                     'envio_empresa' => 'Não',
@@ -210,14 +210,14 @@ class OcorrenciaService extends BaseModelService
                 ]);
             }
         } else {
-//            se o prazo não um caractere numérico a ocorrencia será um 'RNC' automaticamente atualizar o campo de envio
+            //            se o prazo não um caractere numérico a ocorrencia será um 'RNC' automaticamente atualizar o campo de envio
             $ocorrencia = [
                 ...$post['ocorrencia'],
                 'intensidade' => $post['vistoria']['intensidade_vistoria'],
                 'envio_empresa' => 'Não'
             ];
 
-//            e atualizar o campo de status da ocorrencia como 'atendida' se estiver corrigida
+            //            e atualizar o campo de status da ocorrencia como 'atendida' se estiver corrigida
             if ($post['vistoria']['corrigido'] === 'Sim') {
                 $ocorrencia['status'] = 'Atendida';
 
