@@ -28,25 +28,29 @@ class ResultadoService extends BaseModelService
     public function __construct(
         DataManagement $dataManagement,
         private readonly ResultadoCampanhaService $resultadoCampanhaService,
-    )
-    {
+    ) {
         parent::__construct($dataManagement);
     }
 
     public function index(Servicos $servico, array $searchParams, $paginate = true)
     {
         return $this->searchAllColumns(...$searchParams)
-            ->select([
-                'at_fauna_resultado.*',
-                DB::raw('GROUP_CONCAT(fec.id) AS campanhas'),
-                'relat.fk_status as fk_status_relatorio'
-            ])
-            ->join('at_fauna_resultado_campanha AS frc', 'frc.fk_resultado', '=', 'at_fauna_resultado.id')
-            ->join('at_fauna_execucao_campanhas AS fec', 'fec.id', '=', 'frc.fk_campanha')
-            ->leftJoin('at_fauna_relatorio AS relat', 'relat.fk_resultado', '=', 'at_fauna_resultado.id')
-            ->where('at_fauna_resultado.fk_servico', $servico->id)
-            ->groupBy('at_fauna_resultado.created_at', 'at_fauna_resultado.id')
-            ->when($paginate, fn($q) => $q->paginate(), fn($q) => $q->get());
+            ->with(['campanhas.campanha'])
+            ->where('fk_servico', $servico->id)
+            ->paginate()
+            ->appends($searchParams);
+        // return $this->searchAllColumns(...$searchParams)
+        //     ->select([
+        //         'at_fauna_resultado.*',
+        //         DB::raw('GROUP_CONCAT(fec.id) AS campanhas'),
+        //         'relat.fk_status as fk_status_relatorio'
+        //     ])
+        //     ->join('at_fauna_resultado_campanha AS frc', 'frc.fk_resultado', '=', 'at_fauna_resultado.id')
+        //     ->join('at_fauna_execucao_campanhas AS fec', 'fec.id', '=', 'frc.fk_campanha')
+        //     ->leftJoin('at_fauna_relatorio AS relat', 'relat.fk_resultado', '=', 'at_fauna_resultado.id')
+        //     ->where('at_fauna_resultado.fk_servico', $servico->id)
+        //     ->groupBy('at_fauna_resultado.created_at', 'at_fauna_resultado.id')
+        //     ->paginate();
     }
 
     public function store(array $request)
