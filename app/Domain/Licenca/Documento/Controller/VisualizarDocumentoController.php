@@ -11,7 +11,6 @@ class VisualizarDocumentoController extends Controller
 {
     public function index(Licenca $licenca)
     {
-        $arquivo = new ArquivoUtils();
-        return $arquivo->visualizar($licenca->arquivo_licenca);
+        return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . $licenca->arquivo_licenca);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Domain\Servico\MonAtpFauna\Execucao\Registros\app\Controller;
 
+use App\Domain\Servico\Condicionante\Services\ServicoLicencaCondicionanteService;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Services\CampanhasService;
 use App\Domain\Servico\MonAtpFauna\Execucao\Registros\app\Services\RegistrosService;
 use App\Domain\Servico\PMQA\Configuracao\Parametro\Services\ParametroService;
@@ -19,9 +20,8 @@ class IndexController extends Controller
     public function __construct(
         private readonly RegistrosService $registrosService,
         private readonly CampanhasService $campanhasService,
-    )
-    {
-    }
+        private readonly ServicoLicencaCondicionanteService $servicoLicencaCondicionanteService
+    ) {}
 
     public function index(Contrato $contrato, Servicos $servico, Request $request): Response
     {
@@ -33,6 +33,7 @@ class IndexController extends Controller
             'ufs' => Cache::rememberForever('ufs', fn() => Uf::all()),
             'data' => $this->registrosService->index($servico, $searchParams),
             'campanhas' => $this->campanhasService->getCampanhas(servicoId: $servico->id, searchParams: ['', ''], paginate: false),
+            'licencasVigente' => $this->servicoLicencaCondicionanteService->getLicencaMalhaViariaVigente($servico->id),
         ]);
     }
 }

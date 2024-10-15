@@ -12,4 +12,9 @@ class AtFaunaResultado extends Model
     protected $table = 'at_fauna_resultado';
 
     protected $guarded = ['id'];
+
+    public function campanhas()
+    {
+        return $this->hasMany(AtFaunaResultadoCampanha::class, 'fk_resultado');
+    }
 }
