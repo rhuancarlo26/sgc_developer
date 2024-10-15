@@ -3,7 +3,9 @@ import Modal from "@/Components/Modal.vue";
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { ref } from "vue";
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
+import axios from "axios";
+import Swal from 'sweetalert2';
 
 const props = defineProps({
     grupoAmostrado: { type: Array },
@@ -26,8 +28,6 @@ const abrirModal = (itemContrato, itemServico) => {
 }
 
 const updateModal = (itemRegistro) => {
-    console.log(itemRegistro);
-    
     form.id = itemRegistro.id;
     form.nome_registro = itemRegistro.nome_registro;
     form.id_frente = itemRegistro.id_frente;
@@ -60,11 +60,11 @@ const updateModal = (itemRegistro) => {
     form.n_registro_tombamento = itemRegistro.n_registro_tombamento;
     form.id_status_conservacao_federal = itemRegistro.id_status_conservacao_federal;
     form.id_status_conservacao_iucn = itemRegistro.id_status_conservacao_iucn;
-    console.log(form);
-    
+
     classe();
     formaTipoRegistro();
     tipoDestinacaoRegistro();
+    buscarImagens();
     modalDetalhes.value.getBsModal().show();
 }
 
@@ -206,6 +206,40 @@ const salvarImagens = () => {
             form.reset();
         },
     });
+}
+
+const fotos = ref([]);
+
+const buscarImagens = () => {
+    axios.get(route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.buscar.fotografia', { registro: form.id }))
+        .then(response => {
+            fotos.value = response.data;
+        })
+        .catch(error => {
+            console.error('Erro ao buscar imagens:', error);
+        });
+};
+
+const destroy = (fotoId) => {
+    Swal.fire({
+        title: "Excluir fotografia",
+        text: "Ao excluir a fotografia, a foto será desvinculada do registro. Deseja continuar?",
+        icon: "warning",
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+    }).then((r) => {
+        if (r.isConfirmed) {
+            axios.delete(route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registro.destroy.fotografia', { fotografia: fotoId })
+            ).then(response => {
+                buscarImagens();
+                Swal.fire('Sucesso!', 'Fotografia excluída com sucesso.', 'success');
+            }).catch(error => {
+                console.error('Erro ao excluir fotografia:', error);
+                Swal.fire('Erro!', 'Erro ao excluir fotografia.', 'error');
+            })
+        }
+    })
 }
 
 const formatDate = (dateString) => {
@@ -519,7 +553,8 @@ defineExpose({ abrirModal, updateModal });
                                                     v-model="form.id_destinacao_registro"
                                                     aria-label="Default select example">
                                                     <option selected>Selecione a Destinação</option>
-                                                    <option v-for="destinacao in destinacaoRegistro" :value="destinacao.id">
+                                                    <option v-for="destinacao in destinacaoRegistro"
+                                                        :value="destinacao.id">
                                                         {{ destinacao.nome }}
                                                     </option>
                                                 </select>
@@ -535,12 +570,10 @@ defineExpose({ abrirModal, updateModal });
                                                     <div class="d-flex flex-column col-md-4 me-2">
                                                         <!-- v-if="soltura" -->
                                                         <div class="mb-3">
-                                                            <InputLabel for="latitude_soltura"
-                                                                value="Latitude" />
+                                                            <InputLabel for="latitude_soltura" value="Latitude" />
                                                             <input id="latitude_soltura" type="text"
                                                                 class="form-control" v-model="form.latitude_soltura"
-                                                                autofocus placeholder="latitude"
-                                                                autocomplete="" />
+                                                                autofocus placeholder="latitude" autocomplete="" />
                                                             <InputError class="mt-2"
                                                                 :message="form.errors.latitude_soltura" />
                                                         </div>
@@ -548,12 +581,10 @@ defineExpose({ abrirModal, updateModal });
                                                     <div class="d-flex flex-column col-md-4 me-2">
                                                         <!-- v-if="soltura" -->
                                                         <div class="mb-3">
-                                                            <InputLabel for="longitude_soltura"
-                                                                value="Longitude" />
+                                                            <InputLabel for="longitude_soltura" value="Longitude" />
                                                             <input id="longitude_soltura" type="text"
                                                                 class="form-control" v-model="form.longitude_soltura"
-                                                                autofocus placeholder="longitude"
-                                                                autocomplete="" />
+                                                                autofocus placeholder="longitude" autocomplete="" />
                                                             <InputError class="mt-2"
                                                                 :message="form.errors.longitude_soltura" />
                                                         </div>
@@ -656,10 +687,35 @@ defineExpose({ abrirModal, updateModal });
 
                                                 <div class="mt-2">
                                                     <button type="button" @click="salvarImagens" class="btn btn-success"
-                                                        aria-label="Button" :disabled="form.processing">
+                                                        aria-label="Button" :disabled="form.processing || !form.id"
+                                                        :title="form.id ? 'Adicione o registro fotográfico' : 'Adicione o registro fotográfico após salvar o registro'">
                                                         Enviar
                                                     </button>
                                                 </div>
+                                            </div>
+                                            <div class="col-lg-6" v-if="form.id && fotos">
+                                                <InputLabel for="" value="Fotografias" />
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Foto</th>
+                                                            <th>Ações</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="foto in fotos" :key="foto.id">
+                                                            <td>
+                                                                <img :src="usePage().props.app_url + '/storage/' + foto.caminho_imagem"
+                                                                    alt="Foto" class="img-thumbnail"
+                                                                    style="max-width: 100px;">
+                                                            </td>
+                                                            <td>
+                                                                <button @click="destroy(foto.id)" type="button"
+                                                                    class="btn btn-danger btn-sm">Remover</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
