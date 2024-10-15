@@ -1,5 +1,6 @@
 <script setup>
 import { Pie } from 'vue-chartjs';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 
@@ -8,7 +9,7 @@ const props = defineProps({
   chart_options: { type: Object, default: () => ({}) }
 });
 
-ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, annotationPlugin);
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, annotationPlugin, ChartDataLabels);
 </script>
 
 <template>
