@@ -33,7 +33,7 @@ class IndexController extends Controller
             'servico' => $servico->load(['tipo']),
             'tipos' => $this->tipoPatioService->all(['id', 'nome']),
             'licencas' => $this->vincularASVService->search('servico_id', $servico->id)
-                ->with(['licenca.tipo'])
+                ->with(['licenca.tipo_rel'])
                 ->get(),
             ...$this->configucacaoParecer->get($servico->id)
         ]);
