@@ -142,4 +142,14 @@ class RegistrosService
             'caminho_imagem' => str_replace("public\\", "", $caminho)
         ]);
     }
+
+    public function getRegistroFotografico($registro)
+    {
+        return AfugentFaunaExecRegistroImagemModel::where('id_registro', $registro->id)->get();
+    }
+
+    public function destroyRegistroFotografico($fotografia)
+    {
+        return $fotografia->delete();
+    }
 }
