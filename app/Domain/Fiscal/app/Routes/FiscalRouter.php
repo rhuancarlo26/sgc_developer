@@ -6,6 +6,8 @@ use App\Domain\Fiscal\app\Controllers\ListagemServicosController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesSupressaoVegetacaoController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesAfugentamentoController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesControleOcorrenciaController;
+use App\Domain\Fiscal\app\Controllers\ParecerFiscalController;
+use App\Domain\Fiscal\app\Controllers\TabRNCController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('fiscal')->group(function () {
@@ -28,6 +30,10 @@ Route::prefix('fiscal')->group(function () {
             ->name('fiscal.configuracoes.ocorrencia.index');
     });
 
-    require __DIR__ . '/../../Parecer/Routes/ParecerRouter.php';
+    Route::prefix('/rnc')->group(function () {
+        Route::get('{contrato}/', [TabRNCController::class, 'index'])->name('fiscal.rnc.index');
+        Route::post('{contrato}/parecer_fiscal', [ParecerFiscalController::class, 'index'])->name('fiscal.rnc.parecer_fiscal');
+    });
 
+    require __DIR__ . '/../../Parecer/Routes/ParecerRouter.php';
 });
