@@ -8,13 +8,13 @@
             <ModelSearchForm :search-columns="{}" />
 
             <!-- Listagem -->
-            <Table :columns="['#', 'Serviço', 'Parecer','Status Aprovação', 'Ação']" :records="servicos"
+            <Table :columns="['#', 'Serviço', 'Parecer', 'Status Aprovação', 'Ação']" :records="servicos"
                 table-class="table-hover">
                 <template #body="{ item }">
                     <tr>
-                        <td class="text-center">{{item.id}}</tD>
-                        <td class="text-center">{{item.tema.nome_tema}} - {{ item.tipo?.nome }}</td>
-                        <td> {{item.parecer_ocorrencia?.parecer}}</td>
+                        <td class="text-center">{{ item.id }}</td>
+                        <td class="text-center">{{ item.tema?.nome_tema }} - {{ item.tipo?.nome }}</td>
+                        <td> {{ item.parecer_ocorrencia?.parecer }}</td>
                         <td class="text-center">
                             <span v-if="item.parecer_ocorrencia?.fk_status === 1" class="badge bg-yellow-lt">
                                 Em análise
@@ -35,10 +35,12 @@
                                 <IconDots />
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-<!--                                <a @click="abrirModalServicoFiscal(item)" class="dropdown-item" href="javascript:void(0)">-->
-<!--                                    Visualizar-->
-<!--                                </a>-->
-                                <a @click="abrirModalParecerFiscal(item)" class="dropdown-item" href="javascript:void(0)">
+                                <a @click="abrirModalVisualizarSupervisao(item)" class="dropdown-item"
+                                    href="javascript:void(0)">
+                                    Visualizar
+                                </a>
+                                <a @click="abrirModalParecerFiscal(item)" class="dropdown-item"
+                                    href="javascript:void(0)">
                                     Parecer
                                 </a>
                             </div>
@@ -50,7 +52,7 @@
     </Navbar>
 
     <ModalParecerControleOcorrencia ref="modalParecerControleOcorrencia" />
-<!--    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />-->
+    <ModalVisualizarSupervisao ref="modalVisualizarSupervisao" />
 
 </template>
 
@@ -62,7 +64,7 @@ import Navbar from "../Navbar.vue";
 import { IconDots } from "@tabler/icons-vue";
 import { ref } from "vue";
 import ModalParecerControleOcorrencia from "./ModalParecerControleOcorrencia.vue";
-
+import ModalVisualizarSupervisao from "../ModalVisualizarSupervisao.vue";
 
 defineProps({
     contrato: Object,
@@ -70,10 +72,14 @@ defineProps({
 });
 
 const modalParecerControleOcorrencia = ref();
-const modalVisualizarServicoFiscal = ref();
+const modalVisualizarSupervisao = ref();
 
 const abrirModalParecerFiscal = (item) => {
     modalParecerControleOcorrencia.value.abrirModal(item);
+}
+
+const abrirModalVisualizarSupervisao = (item) => {
+    modalVisualizarSupervisao.value.abrirModal(item);
 }
 
 </script>
