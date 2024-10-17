@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import NavLink from '@/Components/NavLink.vue';
-import {IconLayoutDashboard} from "@tabler/icons-vue";
+import { IconLayoutDashboard } from "@tabler/icons-vue";
 import NavDropdown from "@/Components/NavDropdown.vue";
 import NavDropdownLink from "@/Components/NavDropdownLink.vue";
 
@@ -17,9 +17,9 @@ const props = defineProps({
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-          { route: route('fiscal.index', { tipo: contrato.tipo_contrato }), label: '🡰 Fiscal', title: 'voltar'  },
-          { route: '#', label: contrato.contratada }
-        ]"/>
+                    { route: route('fiscal.index', { tipo: contrato.tipo_contrato }), label: '🡰 Fiscal', title: 'voltar' },
+                    { route: '#', label: contrato.contratada }
+                ]" />
             </div>
         </template>
 
@@ -32,38 +32,36 @@ const props = defineProps({
                                 <div class="col">
                                     <ul class="navbar-nav">
                                         <NavLink route-name="fiscal.dados.servicos.index" :param="contrato.id"
-                                                 title="Serviços" :icon="IconLayoutDashboard"/>
+                                            title="Serviços" :icon="IconLayoutDashboard" />
 
-                                        <NavDropdown prefix="fiscal.dados.configuracoes*"
-                                                     title="Configurações" :icon="IconLayoutDashboard">
+                                        <NavDropdown prefix="fiscal.dados.configuracoes*" title="Configurações"
+                                            :icon="IconLayoutDashboard">
                                             <NavDropdownLink route-name="fiscal.configuracoes.afugentamento.index"
-                                                             :route-param="{ contrato: contrato.id }"
-                                                             active-on-route-prefix="fiscal.configuracoes.supressao.index"
-                                                             title="Fauna - Afugentamento e resgate de fauna"/>
+                                                :route-param="{ contrato: contrato.id }"
+                                                active-on-route-prefix="fiscal.configuracoes.supressao.index"
+                                                title="Fauna - Afugentamento e resgate de fauna" />
                                             <NavDropdownLink route-name="fiscal.configuracoes.supressao.index"
-                                                             :route-param="{ contrato: contrato.id }"
-                                                             active-on-route-prefix="fiscal.configuracoes.supressao.index"
-                                                             title="Flora - Supressão da vegetação"/>
+                                                :route-param="{ contrato: contrato.id }"
+                                                active-on-route-prefix="fiscal.configuracoes.supressao.index"
+                                                title="Flora - Supressão da vegetação" />
                                             <NavDropdownLink route-name="fiscal.configuracoes.pmqa.index"
-                                                             :route-param="{ contrato: contrato.id }"
-                                                             active-on-route-prefix="fiscal.configuracoes.pmqa.index"
-                                                             title="Programa de Monitoramento da Qualidade da Água"/>
+                                                :route-param="{ contrato: contrato.id }"
+                                                active-on-route-prefix="fiscal.configuracoes.pmqa.index"
+                                                title="Programa de Monitoramento da Qualidade da Água" />
                                             <NavDropdownLink route-name="fiscal.configuracoes.ocorrencia.index"
-                                                             :route-param="{ contrato: contrato.id }"
-                                                             active-on-route-prefix="fiscal.configuracoes.ocorrencia.index"
-                                                             title="Supervisão ambiental - Controle de ocorrência"/>
+                                                :route-param="{ contrato: contrato.id }"
+                                                active-on-route-prefix="fiscal.configuracoes.ocorrencia.index"
+                                                title="Supervisão ambiental - Controle de ocorrência" />
                                         </NavDropdown>
 
-                                        <NavLink route-name="contratos.contratada.dados_gerais.index"
-                                                 :param="contrato.id" title="RNC"
-                                                 :icon="IconLayoutDashboard"/>
+                                        <NavLink route-name="fiscal.rnc.index" :param="contrato.id" title="RNC"
+                                            active-on-route-prefix="fiscal.rnc*" :icon="IconLayoutDashboard" />
 
                                         <NavLink route-name="contratos.contratada.dados_gerais.index"
-                                                 :param="contrato.id" title="Relatórios" :icon="IconLayoutDashboard"/>
+                                            :param="contrato.id" title="Relatórios" :icon="IconLayoutDashboard" />
 
                                         <NavLink route-name="contratos.contratada.dados_gerais.index"
-                                                 :param="contrato.id" title="Acompanhamentos"
-                                                 :icon="IconLayoutDashboard"/>
+                                            :param="contrato.id" title="Acompanhamentos" :icon="IconLayoutDashboard" />
 
                                     </ul>
                                 </div>
@@ -73,7 +71,7 @@ const props = defineProps({
                 </div>
             </header>
             <div class="mt-2 card card-body">
-                <slot name="body"/>
+                <slot name="body" />
             </div>
         </div>
     </AuthenticatedLayout>
