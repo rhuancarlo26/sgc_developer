@@ -48,6 +48,9 @@ class FiscalService extends BaseModelService
                 'pontos',
                 'parametros',
                 'parametros.pontos',
+                'supervisao_lotes.uf',
+                'supervisao_lotes.rodovia',
+                'licencas_condicionantes.licenca'
             ])
             ->where('id_contrato', $contrato->id)
             ->where('servico', $id_servico)
