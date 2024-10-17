@@ -6,6 +6,7 @@ use App\Domain\Fiscal\app\Controllers\ListagemServicosController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesSupressaoVegetacaoController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesAfugentamentoController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesControleOcorrenciaController;
+use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesPassagemFaunaController;
 use App\Domain\Fiscal\app\Controllers\ParecerFiscalController;
 use App\Domain\Fiscal\app\Controllers\TabRNCController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,9 @@ Route::prefix('fiscal')->group(function () {
 
         Route::get('{contrato}/configuracoes/ocorrencia', [ListagemConfiguracoesControleOcorrenciaController::class, 'index'])
             ->name('fiscal.configuracoes.ocorrencia.index');
+
+        Route::get('{contrato}/configuracoes/passagem_fauna', [ListagemConfiguracoesPassagemFaunaController::class, 'index'])
+            ->name('fiscal.configuracoes.passagem_fauna.index');
     });
 
     Route::prefix('/rnc')->group(function () {

@@ -45,12 +45,15 @@ class FiscalService extends BaseModelService
                 'parecerSupressaoVegetacao',
                 'parecerAfugentamento',
                 'parecerOcorrencia',
+                'parecer_passagem_fauna',
                 'pontos',
                 'parametros',
                 'parametros.pontos',
                 'supervisao_lotes.uf',
                 'supervisao_lotes.rodovia',
-                'licencas_condicionantes.licenca'
+                'licencas_condicionantes.licenca',
+                'passagem_fauna_passagens',
+                'passagem_fauna_abios.licenca.tipo_rel'
             ])
             ->where('id_contrato', $contrato->id)
             ->where('servico', $id_servico)
