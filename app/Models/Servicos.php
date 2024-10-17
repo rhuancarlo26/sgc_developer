@@ -16,10 +16,10 @@ class Servicos extends Model
     protected $table = 'servicos';
     protected $guarded = ['id', 'created_at'];
 
-//    public function status(): BelongsTo
-//    {
-//        return $this->belongsTo(ServicoStatus::class, 'status_aprovacao');
-//    }
+    //    public function status(): BelongsTo
+    //    {
+    //        return $this->belongsTo(ServicoStatus::class, 'status_aprovacao');
+    //    }
 
     public function contrato(): BelongsTo
     {
@@ -67,7 +67,8 @@ class Servicos extends Model
             through: ServicoEquipamento::class,
             firstKey: 'id_servico',
             secondKey: 'id',
-            localKey: 'id', secondLocalKey: 'id_equipamento'
+            localKey: 'id',
+            secondLocalKey: 'id_equipamento'
         );
     }
 
@@ -133,6 +134,11 @@ class Servicos extends Model
         return $this->hasOne(related: ServicoContOcorrSupervisaoParecerConfiguracao::class, foreignKey: 'fk_servico');
     }
 
+    public function parecer_atropelamento(): HasOne
+    {
+        return $this->hasOne(related: AtFaunaParecerConfiguracao::class, foreignKey: 'fk_servico');
+    }
+
     public function supervisao_lotes()
     {
         return $this->hasMany(ServicoContOcorrSupervisaoConfigLote::class, 'id_servico');
@@ -152,5 +158,9 @@ class Servicos extends Model
     {
         return $this->hasOne(ServicoPassagemFaunaParecerConfiguracao::class, 'fk_servico');
     }
-
+    
+    public function atropelamento_abios()
+    {
+        return $this->hasMany(ServicoMonAtpFaunaVincularABIO::class, 'fk_servico');
+    }
 }

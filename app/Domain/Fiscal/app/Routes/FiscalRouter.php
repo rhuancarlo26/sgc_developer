@@ -5,6 +5,7 @@ use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesPMQAController;
 use App\Domain\Fiscal\app\Controllers\ListagemServicosController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesSupressaoVegetacaoController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesAfugentamentoController;
+use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesAtropelamentoFaunaController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesControleOcorrenciaController;
 use App\Domain\Fiscal\app\Controllers\ListagemConfiguracoesPassagemFaunaController;
 use App\Domain\Fiscal\app\Controllers\ParecerFiscalController;
@@ -32,6 +33,9 @@ Route::prefix('fiscal')->group(function () {
 
         Route::get('{contrato}/configuracoes/passagem_fauna', [ListagemConfiguracoesPassagemFaunaController::class, 'index'])
             ->name('fiscal.configuracoes.passagem_fauna.index');
+
+        Route::get('{contrato}/configuracoes/atropelamento', [ListagemConfiguracoesAtropelamentoFaunaController::class, 'index'])
+            ->name('fiscal.configuracoes.atropelamento.index');
     });
 
     Route::prefix('/rnc')->group(function () {
