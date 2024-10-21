@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class AnaliseRelatorioService
 {
-    public function __construct(private readonly ResultadoCampanhaService $resultadoCampanhaService)
-    {
-    }
+    public function __construct(private readonly ResultadoCampanhaService $resultadoCampanhaService) {}
 
     public function getAnalise(array $request)
     {
@@ -38,7 +36,8 @@ class AnaliseRelatorioService
                 DB::raw("'Serviço' AS tipo"),
                 'status_aprovacao AS fk_status',
                 't.nome_tema',
-                DB::raw('(
+                DB::raw(
+                    '(
                     SELECT
                         l.numero_licenca
                         FROM servico_licenca_condicionante AS slc
@@ -184,8 +183,8 @@ class AnaliseRelatorioService
             ->leftJoin('licencas_br', 'licencas_br.licenca_id', '=', 'licencas.id')
             ->join('base_rodovia AS br', 'br.rodovia', '=', 'licencas_br.rodovia')
             ->join('estados', 'estados.id', '=', 'licencas_br.uf_inicial')
-            ->where('id_servico', $request['fk_resultado'])
-            ->where('br.estados_id', '=', 'licencas_br.uf_inicial')
+            ->where('id_servico', $request['fk_servico'])
+            // ->where('br.estados_id', '=', 'licencas_br.uf_inicial')
             ->first();
         $dados['analise'] = AtFaunaResultadoAnalise::where('fk_resultado', $request['fk_resultado'])->first();
         $dados['tabela_registro'] = $this->resultadoCampanhaService->getTabelaRegistrosIdentificados($request['fk_resultado']);
