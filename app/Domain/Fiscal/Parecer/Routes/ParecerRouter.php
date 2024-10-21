@@ -4,6 +4,7 @@ use App\Domain\Fiscal\Parecer\Controllers\EmiteParecerServicoController;
 use App\Domain\Fiscal\Parecer\Controllers\EmiteParecerConfigPMQAController;
 use App\Domain\Fiscal\Parecer\Controllers\EmiteParecerConfigSupressaoController;
 use App\Domain\Fiscal\Parecer\Controllers\EmiteParecerConfigAfugentamentoController;
+use App\Domain\Fiscal\Parecer\Controllers\EmiteParecerConfigPassagemFaunaController;
 use App\Domain\Fiscal\Parecer\Controllers\EmiteParecerConfigSupervisaoController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,3 +13,4 @@ Route::post('/emite-parecer-config-pmqa',          [EmiteParecerConfigPMQAContro
 Route::post('/emite-parecer-config-supressao',     [EmiteParecerConfigSupressaoController::class,     'index'])->name('fiscal.emite-parecer-config-supressao');
 Route::post('/emite-parecer-config-supervisao',    [EmiteParecerConfigSupervisaoController::class,     'index'])->name('fiscal.emite-parecer-config-supervisao');
 Route::post('/emite-parecer-config-afugentamento', [EmiteParecerConfigAfugentamentoController::class, 'index'])->name('fiscal.emite-parecer-config-afugentamento');
+Route::post('/emite_parecer_config_passagem_fauna', [EmiteParecerConfigPassagemFaunaController::class, 'index'])->name('fiscal.emite_parecer_config_passagem_fauna');
