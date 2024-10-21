@@ -11,6 +11,7 @@ use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use App\Models\Contrato;
+use App\Models\ServicoContOcorrSupervisaoParecerConfiguracao;
 
 class ParecerService extends BaseModelService
 {
@@ -44,6 +45,15 @@ class ParecerService extends BaseModelService
     public function emiteParecerConfigSupressao($post): array
     {
         $response = $this->dataManagement->update(entity: ServicoParecerSupressaoConfiguracao::class, infos: $post, id: $post['id']);
+
+        return [
+            'request' => $response['request']
+        ];
+    }
+
+    public function emiteParecerConfigSupervisao($post): array
+    {
+        $response = $this->dataManagement->update(entity: ServicoContOcorrSupervisaoParecerConfiguracao::class, infos: $post, id: $post['id']);
 
         return [
             'request' => $response['request']
