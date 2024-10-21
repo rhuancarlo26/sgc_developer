@@ -11,6 +11,7 @@ import { ref } from "vue";
 
 const props = defineProps({
     contrato: Object,
+    rncs: Object
 });
 
 const dataDados = [
@@ -99,8 +100,7 @@ const abrirModalRNCFiscal = (item) => {
                                     href="javascript:void(0)">
                                     Log de Atividades
                                 </a>
-                                <a @click="abrirModalRNCFiscal(item)" class="dropdown-item"
-                                    href="javascript:void(0)">
+                                <a @click="abrirModalRNCFiscal(item)" class="dropdown-item" href="javascript:void(0)">
                                     Visualizar RNC
                                 </a>
                                 <a @click="abrirModalParecerRNCFiscal(item)" class="dropdown-item"
