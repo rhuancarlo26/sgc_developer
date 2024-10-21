@@ -2,6 +2,7 @@
 
 namespace App\Domain\Fiscal\Parecer\Services;
 
+use App\Models\AtFaunaParecerConfiguracao;
 use App\Models\ServicoParecer;
 use App\Models\ServicoParecerAfugentamentoConfiguracao;
 use App\Models\ServicoParecerPMQAConfiguracao;
@@ -64,6 +65,15 @@ class ParecerService extends BaseModelService
     public function emiteParecerConfigPassagemFauna($post): array
     {
         $response = $this->dataManagement->update(entity: ServicoPassagemFaunaParecerConfiguracao::class, infos: $post, id: $post['id']);
+
+        return [
+            'request' => $response['request']
+        ];
+    }
+
+    public function emiteParecerConfigAtropelamentoFauna($post): array
+    {
+        $response = $this->dataManagement->update(entity: AtFaunaParecerConfiguracao::class, infos: $post, id: $post['id']);
 
         return [
             'request' => $response['request']
