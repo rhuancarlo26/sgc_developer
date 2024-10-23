@@ -21,4 +21,9 @@ class ServicoPmqaRelatorio extends Model
     {
         return $this->belongsTo(ServicoPmqaResultado::class, 'fk_resultado');
     }
+
+    public function servico()
+    {
+        return $this->belongsTo(Servicos::class, 'fk_servico');
+    }
 }

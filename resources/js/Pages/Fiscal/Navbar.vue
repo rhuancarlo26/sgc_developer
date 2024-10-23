@@ -65,12 +65,17 @@ const props = defineProps({
                                         <NavLink route-name="fiscal.rnc.index" :param="contrato.id" title="RNC"
                                             active-on-route-prefix="fiscal.rnc*" :icon="IconLayoutDashboard" />
 
-                                        <NavLink route-name="contratos.contratada.dados_gerais.index"
-                                            :param="contrato.id" title="Relatórios" :icon="IconLayoutDashboard" />
+                                        <NavDropdown prefix="fiscal.relatorio*" title="Relatórios"
+                                            :icon="IconLayoutDashboard">
+
+                                            <NavDropdownLink route-name="fiscal.relatorio.pmqa.index"
+                                                :route-param="{ contrato: contrato.id }"
+                                                active-on-route-prefix="fiscal.relatorio.pmqa*"
+                                                title="Programa de Monitoramento da Qualidade da Água" />
+                                        </NavDropdown>
 
                                         <NavLink route-name="contratos.contratada.dados_gerais.index"
                                             :param="contrato.id" title="Acompanhamentos" :icon="IconLayoutDashboard" />
-
                                     </ul>
                                 </div>
                             </div>
