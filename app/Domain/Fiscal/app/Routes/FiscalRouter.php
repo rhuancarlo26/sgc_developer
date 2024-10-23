@@ -43,5 +43,9 @@ Route::prefix('fiscal')->group(function () {
         Route::post('{contrato}/parecer_fiscal', [ParecerFiscalController::class, 'index'])->name('fiscal.rnc.parecer_fiscal');
     });
 
+    Route::prefix('/relatorio')->group(function () {
+        require __DIR__ . "../../../Relatorio/app/Routes/RelatorioRouter.php";
+    });
+
     require __DIR__ . '/../../Parecer/Routes/ParecerRouter.php';
 });
