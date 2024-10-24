@@ -17,6 +17,7 @@ class PMQAService extends BaseModelService
   public function index(object $contrato, array $searchParams): array
   {
     $servicoIds = Servicos::where('id_contrato', $contrato->id)
+      ->where('servico', 1)
       ->pluck('id')
       ->toArray();
 
