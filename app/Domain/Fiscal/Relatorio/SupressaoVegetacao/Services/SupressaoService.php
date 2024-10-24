@@ -1,23 +1,23 @@
 <?php
 
-namespace App\Domain\Fiscal\Relatorio\ContOcorrencia\Services;
+namespace App\Domain\Fiscal\Relatorio\SupressaoVegetacao\Services;
 
-use App\Models\ServicoConOcorrSupervisaoRelatorio;
 use App\Models\Servicos;
+use App\Models\SupressaoRelatorio;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 
-class ContOcorrenciaService extends BaseModelService
+class SupressaoService extends BaseModelService
 {
   use Searchable, Deletable;
 
-  protected string $modelClass = ServicoConOcorrSupervisaoRelatorio::class;
+  protected string $modelClass = SupressaoRelatorio::class;
 
   public function index(object $contrato, array $searchParams): array
   {
     $servicoIds = Servicos::where('id_contrato', $contrato->id)
-      ->where('servico', 7)
+      ->where('servico', 6)
       ->pluck('id')
       ->toArray();
 
@@ -26,7 +26,7 @@ class ContOcorrenciaService extends BaseModelService
         'servico.tipo',
         'servico.tema'
       ])
-      ->whereIn('id_servico', $servicoIds)
+      ->whereIn('fk_servico', $servicoIds)
       ->paginate()
       ->appends($searchParams);
 
