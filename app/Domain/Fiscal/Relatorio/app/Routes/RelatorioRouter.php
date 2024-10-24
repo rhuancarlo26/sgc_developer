@@ -17,3 +17,7 @@ Route::prefix('/supressao_vegetacao')->group(function () {
 Route::prefix('/mont_atp_fauna')->group(function () {
   require __DIR__ . "../../../MonAtpFauna/Routes/AtropelamentoRoutes.php";
 });
+
+Route::prefix('/afugentamento')->group(function () {
+  require __DIR__ . "../../../AfugentamentoResgateFauna/Routes/afugentamentoRoutes.php";
+});
