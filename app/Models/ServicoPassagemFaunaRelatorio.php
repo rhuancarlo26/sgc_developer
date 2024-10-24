@@ -17,4 +17,9 @@ class ServicoPassagemFaunaRelatorio extends Model
     {
         return $this->belongsTo(ServicoPassagemFaunaResultado::class, 'id_resultado');
     }
+
+    public function servico()
+    {
+        return $this->belongsTo(Servicos::class, 'id_servico');
+    }
 }
