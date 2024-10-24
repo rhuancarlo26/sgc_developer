@@ -80,6 +80,10 @@ const props = defineProps({
                                                 :route-param="{ contrato: contrato.id }"
                                                 active-on-route-prefix="fiscal.relatorio.supressao_vegetacao*"
                                                 title="Flora - Supressão da vegetação" />
+                                            <NavDropdownLink route-name="fiscal.relatorio.atropelamento.index"
+                                                :route-param="{ contrato: contrato.id }"
+                                                active-on-route-prefix="fiscal.relatorio.atropelamento*"
+                                                title="Fauna - Atropelamento da Fauna" />
                                         </NavDropdown>
 
                                         <NavLink route-name="contratos.contratada.dados_gerais.index"
