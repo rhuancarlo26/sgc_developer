@@ -13,9 +13,7 @@ use Inertia\Response;
 
 class IndexController extends Controller
 {
-    public function __construct(private readonly ConfigucacaoParecer $configucacaoParecer)
-    {
-    }
+    public function __construct(private readonly ConfigucacaoParecer $configucacaoParecer) {}
 
     public function index(Contrato $contrato, Servicos $servico): Response
     {
@@ -25,7 +23,7 @@ class IndexController extends Controller
 
         return Inertia::render('Servico/AfugentamentoResgateFauna/Configuracao/VincularASV', [
             'contrato'  => $contrato,
-            'servico'   => $servico->load(['tipo']),
+            'servico'   => $servico->load(['tipo', 'parecerAfugentamento']),
             'licencaASV' => $licencaASV,
             'licencaVinculadas' => $licencaVinculadas,
             ...$this->configucacaoParecer->get($servico->id)
