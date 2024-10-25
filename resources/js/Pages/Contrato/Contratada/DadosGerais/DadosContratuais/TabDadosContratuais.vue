@@ -15,9 +15,10 @@ const props = defineProps({
 const mapaVisualizarTrecho = ref();
 
 const visualizarTrecho = () => {
-  mapaVisualizarTrecho.value.renderMapa();
 
   setTimeout(() => {
+    mapaVisualizarTrecho.value.renderMapa();
+
     mapaVisualizarTrecho.value.setLinestrings(trechosVisualizacao.value, true);
   }, 500);
 }
@@ -68,7 +69,7 @@ defineExpose({ visualizarTrecho });
         <span class="col"><strong>Número do Processo (DNIT): </strong>{{ contrato.processo_sei
           }}</span>
         <span class="col"><strong>Início da Vigência: </strong>{{
-          dateTimeFormat(contrato.data_inicio?? null, {
+          dateTimeFormat(contrato.data_inicio ?? null, {
             dateStyle: 'short',
             timeStyle: 'short'
           })
