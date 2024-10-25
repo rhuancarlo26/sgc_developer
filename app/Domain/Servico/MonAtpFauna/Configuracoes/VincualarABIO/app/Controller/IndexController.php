@@ -13,9 +13,7 @@ use Inertia\Response;
 
 class IndexController extends Controller
 {
-  public function __construct(private readonly VincularABIOService $vincularABIOService)
-  {
-  }
+  public function __construct(private readonly VincularABIOService $vincularABIOService) {}
 
   public function index(Contrato $contrato, Servicos $servico, Request $request): Response
   {
@@ -25,7 +23,7 @@ class IndexController extends Controller
 
     return Inertia::render('Servico/MonAtpFauna/Configuracoes/VincularABIO/Index', [
       'contrato' => $contrato,
-      'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+      'servico' => $servico->load(['tipo', 'parecer_atropelamento']),
       ...$response
     ]);
   }
