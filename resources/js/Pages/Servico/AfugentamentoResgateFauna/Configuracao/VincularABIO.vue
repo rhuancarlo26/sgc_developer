@@ -100,7 +100,8 @@ const destroy = (item) => {
                 <ModelSearchFormAllColumns class="w-100" :columns="[]">
                     <!-- Pesquisa-->
                     <template #action>
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between"
+                            v-if="!servico.parecer_afugentamento || ![1, 3].includes(servico.parecer_afugentamento.fk_status)">
                             <v-select :options="licencaABIO" class="w-100 me-3" label="numero_licenca"
                                 placeholder="Número da ABIO">
                                 <template v-slot:option="option">
@@ -154,12 +155,15 @@ const destroy = (item) => {
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                         <li><a class="dropdown-item" href="javascript:void(0);">Visualizar PDF</a></li>
-                                        <li><a class="dropdown-item" @click="abrirModalAdicionarRET(item)"
-                                                href="javascript:void(0);">Adicionar RET</a>
-                                        </li>
-                                        <li><a class="dropdown-item" @click="destroy(item)"
-                                                href="javascript:void(0);">Excluir</a>
-                                        </li>
+                                        <template
+                                            v-if="!servico.parecer_afugentamento || ![1, 3].includes(servico.parecer_afugentamento.fk_status)">
+                                            <li><a class="dropdown-item" @click="abrirModalAdicionarRET(item)"
+                                                    href="javascript:void(0);">Adicionar RET</a>
+                                            </li>
+                                            <li><a class="dropdown-item" @click="destroy(item)"
+                                                    href="javascript:void(0);">Excluir</a>
+                                            </li>
+                                        </template>
                                     </ul>
                                 </span>
                             </td>
