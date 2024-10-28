@@ -16,4 +16,9 @@ class ServicoConOcorrSupervisaoRelatorio extends Model
     {
         return $this->belongsTo(ServicoConOcorrSupervisaoResultado::class, 'id_resultado');
     }
+
+    public function servico()
+    {
+        return $this->belongsTo(Servicos::class, 'id_servico');
+    }
 }
