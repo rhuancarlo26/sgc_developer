@@ -68,12 +68,12 @@ const openArquivoLicenca = (item) => {
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
                 <ModelSearchFormAllColumns :columns="[]">
-                    <template #action>
+                    <template #action
+                        v-if="!servico.parecer_atropelamento || ![1, 3].includes(servico.parecer_atropelamento.fk_status)">
                         <NavButton v-if="data.data?.length" @click="modalEnviarFiscal" type-button="info"
                             title="Submeter ao fiscal" />
                     </template>
                 </ModelSearchFormAllColumns>
-
                 <!-- Listagem-->
                 <Table
                     :columns="['Tipo', 'N° licença', 'Empreendimento', 'KM Inicial', 'KM Final', 'Extensão', 'Shapefile', 'Ação']"
@@ -104,14 +104,17 @@ const openArquivoLicenca = (item) => {
                                         class="dropdown-item">
                                         Visualizar
                                     </a>
-                                    <a @click="modalAdicionaShapeFile(item)" href="javascript:void(0);"
-                                        class="dropdown-item">
-                                        Adicionar Shapefile
-                                    </a>
-                                    <a @click="abrirModalVisualizarMalhaViaria(item)" href="javascript:void(0);"
-                                        class="dropdown-item">
-                                        Visualizar malha viária
-                                    </a>
+                                    <template
+                                        v-if="!servico.parecer_atropelamento || ![1, 3].includes(servico.parecer_atropelamento.fk_status)">
+                                        <a @click="modalAdicionaShapeFile(item)" href="javascript:void(0);"
+                                            class="dropdown-item">
+                                            Adicionar Shapefile
+                                        </a>
+                                        <a @click="abrirModalVisualizarMalhaViaria(item)" href="javascript:void(0);"
+                                            class="dropdown-item">
+                                            Visualizar malha viária
+                                        </a>
+                                    </template>
                                 </div>
                             </td>
                         </tr>

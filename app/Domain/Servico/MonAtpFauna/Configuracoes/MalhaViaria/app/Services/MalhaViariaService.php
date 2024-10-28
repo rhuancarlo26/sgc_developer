@@ -69,10 +69,10 @@ class MalhaViariaService extends BaseModelService
 
     public function sendFiscal(?int $servico): void
     {
-        if(!$servico) {
+        if (!$servico) {
             return;
         }
 
-        AtFaunaParecerConfiguracao::query()->updateOrCreate(['fk_servico' => $servico], ['fk_status' => 2]);
+        AtFaunaParecerConfiguracao::query()->updateOrCreate(['fk_servico' => $servico], ['fk_status' => 1]);
     }
 }
