@@ -20,7 +20,7 @@ const props = defineProps({
     servico: { type: Object },
     licencaASV: { type: Array },
     licencaVinculadas: { type: Array },
-    aprovacao: {type: Object}
+    aprovacao: { type: Object }
 });
 
 const modalDetalheVincularASV = ref();
@@ -88,12 +88,13 @@ const ap = (ap) => {
                         </ModelSearchFormAllColumns>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-6"
+                        v-if="!servico.parecer_afugentamento || ![1, 3].includes(servico.parecer_afugentamento.fk_status)">
                         <!-- <InputLabel value="Número da ASV" for="asv" /> -->
                         <v-select :options="licencaASV" label="numero_licenca" placeholder="Número da ASV">
                             <template v-slot:option="option">
                                 <a href="javascript:void" @click="abrirModalDetalheVincularASV(option, servico)">
-                                    {{ option.tipo.sigla }} - {{ option.numero_licenca }}
+                                    {{ option.tipo_rel.sigla }} - {{ option.numero_licenca }}
                                 </a>
                             </template>
                             <template #no-options="{}">
@@ -138,12 +139,15 @@ const ap = (ap) => {
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                         <li><a class="dropdown-item" href="javascript:void(0);">Visualizar PDF</a></li>
-                                        <li><a class="dropdown-item" @click="abrirModalAdicionarShapeFile(item)"
-                                                href="javascript:void(0);">Adicionar ShapeFile</a>
-                                        </li>
-                                        <li><a class="dropdown-item" @click="destroy(item)"
-                                                href="javascript:void(0);">Excluir</a>
-                                        </li>
+                                        <template
+                                            v-if="!servico.parecer_afugentamento || ![1, 3].includes(servico.parecer_afugentamento.fk_status)">
+                                            <li><a class="dropdown-item" @click="abrirModalAdicionarShapeFile(item)"
+                                                    href="javascript:void(0);">Adicionar ShapeFile</a>
+                                            </li>
+                                            <li><a class="dropdown-item" @click="destroy(item)"
+                                                    href="javascript:void(0);">Excluir</a>
+                                            </li>
+                                        </template>
                                     </ul>
                                 </span>
                             </td>
