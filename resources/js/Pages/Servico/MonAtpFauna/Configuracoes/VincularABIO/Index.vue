@@ -69,7 +69,8 @@ const deleteVinculoAbio = (id) => {
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
         <ModelSearchFormAllColumns :columns="[]">
-          <template #action>
+          <template #action
+            v-if="!servico.parecer_atropelamento || ![1, 3].includes(servico.parecer_atropelamento.fk_status)">
             <NavButton @click="abrirModalVincularABIO()" type-button="info" title="Vincular ABIO" />
           </template>
         </ModelSearchFormAllColumns>
@@ -103,12 +104,15 @@ const deleteVinculoAbio = (id) => {
                     class="dropdown-item">
                     Visualizar RET
                   </a>
-                  <a @click="abrirModalAdicionarRet(item)" href="javascript:void(0);" class="dropdown-item">
-                    Adicionar RET
-                  </a>
-                  <a @click="deleteVinculoAbio(item.id)" href="javascript:void(0);" class="dropdown-item">
-                    Excluir
-                  </a>
+                  <template
+                    v-if="!servico.parecer_atropelamento || ![1, 3].includes(servico.parecer_atropelamento.fk_status)">
+                    <a @click="abrirModalAdicionarRet(item)" href="javascript:void(0);" class="dropdown-item">
+                      Adicionar RET
+                    </a>
+                    <a @click="deleteVinculoAbio(item.id)" href="javascript:void(0);" class="dropdown-item">
+                      Excluir
+                    </a>
+                  </template>
                 </div>
               </td>
             </tr>

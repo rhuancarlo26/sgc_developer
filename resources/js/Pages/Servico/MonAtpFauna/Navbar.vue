@@ -43,44 +43,46 @@ const porps = defineProps({
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
                                                     title="Malha Viaria" />
                                             </NavDropdown>
+                                            <template v-if="servico.parecer_atropelamento?.fk_status === 3">
+                                                <!-- Execução -->
+                                                <NavDropdown
+                                                    prefix="contratos.contratada.servicos.mon_atp_fauna.execucao*"
+                                                    title="Execução" :icon="IconLayoutDashboard">
+                                                    <!-- Campanhas -->
+                                                    <NavDropdownLink
+                                                        route-name="contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.index"
+                                                        active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas*"
+                                                        :route-param="{ contrato: contrato.id, servico: servico.id }"
+                                                        title="Campanhas" />
+                                                    <!-- Registros -->
+                                                    <NavDropdownLink
+                                                        route-name="contratos.contratada.servicos.mon_atp_fauna.execucao.registros.index"
+                                                        active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.execucao.registros*"
+                                                        :route-param="{ contrato: contrato.id, servico: servico.id }"
+                                                        title="Registros" />
+                                                </NavDropdown>
 
-                                            <!-- Execução -->
-                                            <NavDropdown prefix="contratos.contratada.servicos.mon_atp_fauna.execucao*"
-                                                title="Execução" :icon="IconLayoutDashboard">
-                                                <!-- Campanhas -->
-                                                <NavDropdownLink
-                                                    route-name="contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.index"
-                                                    active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas*"
-                                                    :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Campanhas" />
-                                                <!-- Registros -->
-                                                <NavDropdownLink
-                                                    route-name="contratos.contratada.servicos.mon_atp_fauna.execucao.registros.index"
-                                                    active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.execucao.registros*"
-                                                    :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Registros" />
-                                            </NavDropdown>
+                                                <!-- Resultado -->
+                                                <NavLink
+                                                    route-name="contratos.contratada.servicos.mon_atp_fauna.resultado.index"
+                                                    active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.resultado*"
+                                                    :param="{ contrato: contrato.id, servico: servico.id }"
+                                                    title="Resultado" :icon="IconLayoutDashboard" />
 
-                                            <!-- Resultado -->
-                                            <NavLink
-                                                route-name="contratos.contratada.servicos.mon_atp_fauna.resultado.index"
-                                                active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.resultado*"
-                                                :param="{ contrato: contrato.id, servico: servico.id }"
-                                                title="Resultado" :icon="IconLayoutDashboard" />
+                                                <!-- Relatorios -->
+                                                <NavLink
+                                                    route-name="contratos.contratada.servicos.mon_atp_fauna.relatorios.index"
+                                                    active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.relatorios*"
+                                                    :param="{ contrato: contrato.id, servico: servico.id }"
+                                                    title="Relatorios" :icon="IconLayoutDashboard" />
 
-                                            <!-- Relatorios -->
-                                            <NavLink
-                                                route-name="contratos.contratada.servicos.mon_atp_fauna.relatorios.index"
-                                                active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.relatorios*"
-                                                :param="{ contrato: contrato.id, servico: servico.id }"
-                                                title="Relatorios" :icon="IconLayoutDashboard" />
-
-                                            <!-- Pareceres -->
-                                            <NavLink
-                                                route-name="contratos.contratada.servicos.mon_atp_fauna.pareceres.index"
-                                                active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.pareceres*"
-                                                :param="{ contrato: contrato.id, servico: servico.id }"
-                                                title="Pareceres" :icon="IconLayoutDashboard" />
+                                                <!-- Pareceres -->
+                                                <NavLink
+                                                    route-name="contratos.contratada.servicos.mon_atp_fauna.pareceres.index"
+                                                    active-on-route-prefix="contratos.contratada.servicos.mon_atp_fauna.pareceres*"
+                                                    :param="{ contrato: contrato.id, servico: servico.id }"
+                                                    title="Pareceres" :icon="IconLayoutDashboard" />
+                                            </template>
                                         </ul>
                                     </div>
                                 </div>
