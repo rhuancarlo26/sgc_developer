@@ -13,3 +13,7 @@ Route::prefix('/cont_ocorrencia')->group(function () {
 Route::prefix('/supressao_vegetacao')->group(function () {
   require __DIR__ . "../../../SupressaoVegetacao/Routes/SupressaoRoutes.php";
 });
+
+Route::prefix('/mont_atp_fauna')->group(function () {
+  require __DIR__ . "../../../MonAtpFauna/Routes/AtropelamentoRoutes.php";
+});
