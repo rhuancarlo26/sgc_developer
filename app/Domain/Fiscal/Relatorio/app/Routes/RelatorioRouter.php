@@ -21,3 +21,7 @@ Route::prefix('/mont_atp_fauna')->group(function () {
 Route::prefix('/afugentamento')->group(function () {
   require __DIR__ . "../../../AfugentamentoResgateFauna/Routes/afugentamentoRoutes.php";
 });
+
+Route::prefix('/passagem_fauna')->group(function () {
+  require __DIR__ . "../../../PassagemFauna/Routes/PassagemRoutes.php";
+});
