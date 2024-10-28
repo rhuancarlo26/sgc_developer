@@ -18,6 +18,8 @@ const mapaMalhaViaria = ref({});
 const relatorio = ref({});
 const pagina = ref(1);
 const abrirModal = async (item) => {
+    pagina.value = 1;
+
     const { data } = await axios.post(route('contratos.contratada.servicos.mon_atp_fauna.relatorios.relatorio'), item)
     relatorio.value = {
         nome: item.nome_relatorio,
@@ -35,9 +37,9 @@ watch(
         if (pagina.value === 6) {
             setTimeout(() => {
                 mapaMalhaViaria.value.renderMapa();
+                console.log('teste', relatorio.value);
 
-                console.log('relatorio', relatorio.value);
-
+                mapaMalhaViaria.value.setLinestrings([relatorio.value.malha_viaria.geo_json], false);
             }, 500);
         }
     },
@@ -248,7 +250,6 @@ defineExpose({ abrirModal });
                         <li class="lista titulo_lista">10. Dados da Malha viária</li>
 
                         <li class="lista">
-                            <pre>{{ relatorio.malha_viaria }}</pre>
                             <div class="grupo_cards">
                                 <div class="card_relatorio">
                                     <div class="card_r">
