@@ -60,7 +60,7 @@ const getAprovacao = () => {
 
                                             </NavDropdown>
 
-                                            <NavDropdown v-if="aprovacao.fk_status === 3"
+                                            <NavDropdown v-if="servico.parecer_afugentamento?.fk_status === 3"
                                                 prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao*"
                                                 title="Execução" :icon="IconLayoutDashboard">
 
