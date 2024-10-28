@@ -81,10 +81,11 @@ const abrirModalVisualizarPonto = (item) => {
                   :href="route('contratos.contratada.servicos.pmqa.execucao.coleta.create', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id, ponto: item.id })">
                 <IconRulerMeasure />
                 </Link>
-                <Link v-if="item.ponto.lista" class="btn btn-icon btn-primary me-1"
+                <Link v-if="item.ponto?.lista" class="btn btn-icon btn-primary me-1"
                   :href="route('contratos.contratada.servicos.pmqa.execucao.medir.create', { contrato: props.contrato.id, servico: props.servico.id, campanha: props.campanha.id, ponto: item.id })">
                 <IconChartHistogram />
                 </Link>
+                <NavButton v-else type-button="primary" class="btn-icon" disabled :icon="IconChartHistogram" />
               </td>
             </tr>
           </template>
