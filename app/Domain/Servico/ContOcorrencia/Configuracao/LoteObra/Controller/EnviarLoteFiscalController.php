@@ -12,15 +12,13 @@ use Illuminate\Http\RedirectResponse;
 
 class EnviarLoteFiscalController extends Controller
 {
-    public function __construct(private readonly LoteObraService $loteObraService)
-    {
-    }
+    public function __construct(private readonly LoteObraService $loteObraService) {}
 
-    public function index(Contrato $contrato, Servicos $servico, StoreRequest $request): RedirectResponse
+    public function index(Contrato $contrato, Servicos $servico): RedirectResponse
     {
         $post = [
             'fk_servico' => $servico->id,
-            'fk_status' => 3
+            'fk_status' => 1
         ];
 
         $response = $this->loteObraService->enviarLoteFiscal($post);
