@@ -23,4 +23,9 @@ class AfugentFaunaRelatorioModel extends Model
                 return $item;
             });
     }
+
+    public function servico()
+    {
+        return $this->belongsTo(Servicos::class, 'id_servico');
+    }
 }
