@@ -173,6 +173,7 @@ class AnaliseRelatorioService
                 'licencas.chave',
                 'licencas.arquivo_licenca',
                 'licencas.local_shape AS local_shape_licenca',
+                'licencas.geo_json AS geo_json',
                 'servico_licenca_condicionante.vigente',
                 'br.rodovia',
                 'estados.nome as nome_estado',
