@@ -1,13 +1,12 @@
 <script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../../Navbar.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import { IconDots } from "@tabler/icons-vue";
-import ModalEmitirParecer from "./ModalEmitirParecer.vue";
 import { ref } from "vue";
-import ModalVisualizarRelatorio from "@/Pages/Servico/PMQA/Relatorio/ModalVisualizarRelatorio.vue";
+import ModalEmitirParecer from "./ModalEmitirParecer.vue";
+import ModalVisualizarRelatorio from "@/Pages/Servico/ContOcorr/Relatorio/ModalVisualizarRelatorio.vue";
+
 
 const props = defineProps({
   contrato: { type: Object },
@@ -41,7 +40,7 @@ const abrirVisualizarRelatorio = (item) => {
         table-class="table-hover">
         <template #body="{ item }">
           <tr>
-            <td>{{ item.nome }}</td>
+            <td>{{ item.nome_relatorio }}</td>
             <td class="text-center">
               <span v-if="item.fk_status === 1" class="badge bg-yellow-lt">
                 Em análise
@@ -76,6 +75,7 @@ const abrirVisualizarRelatorio = (item) => {
     </template>
   </Navbar>
 
-  <ModalEmitirParecer :contrato="contrato" ref="modalEmitirParecerRef" />
-  <ModalVisualizarRelatorio :contrato="contrato" :servico="{}" ref="modalVisualizarRelatorioRef" />
+  <ModalEmitirParecer ref="modalEmitirParecerRef" :contrato="contrato" />
+  <ModalVisualizarRelatorio ref="modalVisualizarRelatorioRef" :contrato="contrato" :servico="{}" />
+
 </template>
