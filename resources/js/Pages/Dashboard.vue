@@ -1,10 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 
 </script>
 
 <template>
+
     <Head title="Dashboard" />
 
     <AuthenticatedLayout>
@@ -13,7 +14,8 @@ import { Head } from '@inertiajs/vue3';
         </template> -->
 
         <div class="card card-body">
-            <h3>Bem vindo, {{ $page.props.auth.user.name}}!</h3>
+            <h3>Bem vindo, {{ $page.props.auth.user.name }}!</h3>
+            <span class="text-white">{{ usePage().props.app_url }}</span>
         </div>
     </AuthenticatedLayout>
 </template>
