@@ -59,42 +59,43 @@ const getAprovacao = () => {
                                                     title="Vincular Abio" />
 
                                             </NavDropdown>
+                                            <template v-if="servico.parecer_afugentamento?.fk_status === 3">
+                                                <NavDropdown
+                                                    prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao*"
+                                                    title="Execução" :icon="IconLayoutDashboard">
 
-                                            <NavDropdown v-if="servico.parecer_afugentamento?.fk_status === 3"
-                                                prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao*"
-                                                title="Execução" :icon="IconLayoutDashboard">
+                                                    <NavDropdownLink
+                                                        route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.frente.supressao.index"
+                                                        active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.frente.supressao*"
+                                                        :route-param="{ contrato: contrato.id, servico: servico.id }"
+                                                        title="Frente de Supressão" />
 
-                                                <NavDropdownLink
-                                                    route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.frente.supressao.index"
-                                                    active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.frente.supressao*"
-                                                    :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Frente de Supressão" />
+                                                    <NavDropdownLink
+                                                        route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.index"
+                                                        active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros*"
+                                                        :route-param="{ contrato: contrato.id, servico: servico.id }"
+                                                        title="Registros" />
 
-                                                <NavDropdownLink
-                                                    route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros.index"
-                                                    active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.registros*"
-                                                    :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Registros" />
+                                                </NavDropdown>
 
-                                            </NavDropdown>
+                                                <NavLink
+                                                    route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.index"
+                                                    active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.index*"
+                                                    :param="{ contrato: contrato.id, servico: servico.id }"
+                                                    title="Resultado" :icon="IconLayoutDashboard" />
 
-                                            <NavLink
-                                                route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.index"
-                                                active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.resultado.index*"
-                                                :param="{ contrato: contrato.id, servico: servico.id }"
-                                                title="Resultado" :icon="IconLayoutDashboard" />
+                                                <NavLink
+                                                    route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.relatorios.index"
+                                                    active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.relatorios.index*"
+                                                    :param="{ contrato: contrato.id, servico: servico.id }"
+                                                    title="Relatórios" :icon="IconLayoutDashboard" />
 
-                                            <NavLink
-                                                route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.relatorios.index"
-                                                active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.relatorios.index*"
-                                                :param="{ contrato: contrato.id, servico: servico.id }"
-                                                title="Relatórios" :icon="IconLayoutDashboard" />
-
-                                            <NavLink
-                                                route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.pareceres.index"
-                                                active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.pareceres.index*"
-                                                :param="{ contrato: contrato.id, servico: servico.id }"
-                                                title="Pareceres" :icon="IconLayoutDashboard" />
+                                                <NavLink
+                                                    route-name="contratos.contratada.servicos.afugentamento.resgate.fauna.pareceres.index"
+                                                    active-on-route-prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.pareceres.index*"
+                                                    :param="{ contrato: contrato.id, servico: servico.id }"
+                                                    title="Pareceres" :icon="IconLayoutDashboard" />
+                                            </template>
 
                                         </ul>
                                     </div>
