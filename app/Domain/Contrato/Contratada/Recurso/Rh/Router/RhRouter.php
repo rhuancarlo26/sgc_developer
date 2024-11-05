@@ -5,7 +5,7 @@ use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\CreateRhRecursoControll
 use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyCurriculumController;
 use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyDocumentoBaixaRhRecursoController;
 use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyDocumentoRhRecursoController;
-use app\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyFotoPerfilController;
+use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyFotoPerfilController;
 use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\DestroyRhRecursoController;
 use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\ListagemRhRecursoController;
 use App\Domain\Contrato\Contratada\Recurso\Rh\Controller\StoreCurriculumVitaeController;
