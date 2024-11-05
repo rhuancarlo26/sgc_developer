@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Domain\Contrato\Contratada\Recurso\Rh\Controller;
+namespace App\Domain\Contrato\Contratada\Recurso\Rh\Controller;
 
 use App\Domain\Contrato\Contratada\Recurso\Rh\Services\RhRecursoService;
 use App\Models\Contrato;
