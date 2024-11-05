@@ -320,8 +320,8 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                             </div>
                             <div class="row mb-4">
                                 <div class="col">
+                                    <InputLabel value="Importar CV (.pdf)" for="curriculum_pdf" />
                                     <div v-if="!rh.curriculum_pdf">
-                                        <InputLabel value="Importar CV (.pdf)" for="curriculum_pdf" />
                                         <div class="row g-2">
                                             <div class="col">
                                                 <input @input="form.curriculum_pdf = $event.target.files[0]"
@@ -372,8 +372,8 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                             </div>
                             <div class="row">
                                 <div class="col">
+                                    <InputLabel value="Foto do Perfil" for="foto_perfil" />
                                     <div v-if="!rh.foto_perfil">
-                                        <InputLabel value="Foto do Perfil" for="foto_perfil" />
                                         <div class="row g-2">
                                             <div class="col">
                                                 <input @input="form.foto_perfil = $event.target.files[0]"
