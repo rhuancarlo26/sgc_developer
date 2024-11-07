@@ -12,4 +12,9 @@ class AtFaunaExecucaoCampanha extends Model
     protected $table = 'at_fauna_execucao_campanhas';
 
     protected $guarded = ['id'];
+
+    public function recurso_responsaveis()
+    {
+        return $this->hasMany(AtFaunaExecucaoCampanhaResposavel::class, 'at_fauna_execucao_campanha_id');
+    }
 }
