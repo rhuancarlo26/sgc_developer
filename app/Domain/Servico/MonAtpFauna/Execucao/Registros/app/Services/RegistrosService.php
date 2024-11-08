@@ -2,9 +2,11 @@
 
 namespace App\Domain\Servico\MonAtpFauna\Execucao\Registros\app\Services;
 
+use App\Domain\Servico\MonAtpFauna\Execucao\Registros\app\imports\RegistroImport;
 use App\Models\AtFaunaExecucaoRegistro;
 use App\Models\AtFaunaExecucaoRegistroImagem;
 use App\Models\Servicos;
+use App\Models\Uf;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RegistrosService extends BaseModelService
 {
@@ -46,7 +49,7 @@ class RegistrosService extends BaseModelService
     {
         $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
-        if($request['arquivo']) {
+        if ($request['arquivo']) {
             $this->saveImage($request['arquivo'], $response['model']['id']);
         }
 
@@ -57,12 +60,11 @@ class RegistrosService extends BaseModelService
     {
         $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
 
-        if($request['arquivo']) {
+        if ($request['arquivo']) {
             $this->saveImage($request['arquivo'], $request['id']);
         }
 
         return $response;
-
     }
 
     private function saveImage(UploadedFile $file, int $idRegistro): void
@@ -78,5 +80,37 @@ class RegistrosService extends BaseModelService
             'nome' => $arquivo['nome_arquivo'],
             'id_registro' => $idRegistro
         ]);
+    }
+
+    public function store_importar(array $post)
+    {
+        $response = [
+            'model' => null,
+            'request' => [
+                'type' => 'error',
+                'content' => 'Falha ao cadastrar!',
+                'error' => ''
+            ]
+        ];
+
+        $passagemFaunaImport = new RegistroImport();
+
+        $registros = Excel::toCollection($passagemFaunaImport, $post['arquivo'])->first();
+
+        foreach ($registros as $registro) {
+            $uf = Uf::where('nome', '=', $registro['estado'])->orWhere('uf', '=', $registro['estado'])->first();
+
+            $response = $this->dataManagement->create(entity: $this->modelClass, infos: [
+                ...$registro,
+                'fk_estado' => $uf->id ?? null,
+                'fk_campanha' => $post['campanha_id'],
+                'fk_servico' => $post['servico_id'],
+                'sentido' => strtoupper($registro['sentido'][0] ?? ''),
+                'margem' => strtoupper($registro['margem'][0] ?? ''),
+                'classe'
+            ]);
+        }
+
+        return $response;
     }
 }
