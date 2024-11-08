@@ -17,9 +17,7 @@ class IndexController extends Controller
     public function __construct(
         private readonly ResultadoService $resultadoService,
         private readonly CampanhasService $campanhasService,
-    )
-    {
-    }
+    ) {}
 
     public function index(Contrato $contrato, Servicos $servico, Request $request): Response
     {
@@ -27,7 +25,7 @@ class IndexController extends Controller
 
         return Inertia::render('Servico/MonAtpFauna/Resultado/Index', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'servico' => $servico->load(['tipo', 'parecer_atropelamento']),
             'campanhas' => $this->campanhasService->getCampanhas(servicoId: $servico->id, searchParams: ['', ''], paginate: false),
             'data' => $this->resultadoService->index($servico, $searchParams),
         ]);
