@@ -12,4 +12,9 @@ class ServicoVeiculo extends Model
     protected $table = 'servico_veiculo';
     protected $guarded = ['id', 'created_at'];
     public $timestamps = false;
+
+    public function veiculo()
+    {
+        return $this->belongsTo(RecursoVeiculo::class, 'id_veiculo');
+    }
 }

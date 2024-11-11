@@ -36,6 +36,11 @@ class Servicos extends Model
         return $this->belongsTo(related: ServicoTipo::class, foreignKey: 'servico');
     }
 
+    public function servico_rhs()
+    {
+        return $this->hasMany(ServicoRh::class, 'id_servico');
+    }
+
     public function rhs(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -48,6 +53,11 @@ class Servicos extends Model
         );
     }
 
+    public function servico_veiculos()
+    {
+        return $this->hasMany(ServicoVeiculo::class, 'id_servico');
+    }
+
     public function veiculos(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -58,6 +68,11 @@ class Servicos extends Model
             localKey: 'id',
             secondLocalKey: 'id_veiculo'
         );
+    }
+
+    public function servico_equipamentos()
+    {
+        return $this->hasMany(ServicoEquipamento::class, 'id_servico');
     }
 
     public function equipamentos(): HasManyThrough
@@ -158,7 +173,7 @@ class Servicos extends Model
     {
         return $this->hasOne(ServicoPassagemFaunaParecerConfiguracao::class, 'fk_servico');
     }
-    
+
     public function atropelamento_abios()
     {
         return $this->hasMany(ServicoMonAtpFaunaVincularABIO::class, 'fk_servico');
