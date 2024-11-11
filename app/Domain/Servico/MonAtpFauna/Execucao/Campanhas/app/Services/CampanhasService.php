@@ -3,6 +3,10 @@
 namespace App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Services;
 
 use App\Models\AtFaunaExecucaoCampanha;
+use App\Models\AtFaunaExecucaoCampanhaEquipamento;
+use App\Models\AtFaunaExecucaoCampanhaEquipe;
+use App\Models\AtFaunaExecucaoCampanhaResposavel;
+use App\Models\AtFaunaExecucaoCampanhaVeiculo;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
@@ -16,6 +20,10 @@ class CampanhasService extends BaseModelService
     use Searchable, Deletable;
 
     protected string $modelClass = AtFaunaExecucaoCampanha::class;
+    protected string $modelClassResponsavel = AtFaunaExecucaoCampanhaResposavel::class;
+    protected string $modelClassEquipe = AtFaunaExecucaoCampanhaEquipe::class;
+    protected string $modelClassEquipamento = AtFaunaExecucaoCampanhaEquipamento::class;
+    protected string $modelClassVeiculo = AtFaunaExecucaoCampanhaVeiculo::class;
 
     public function index(Servicos $servico, array $searchParams): LengthAwarePaginator
     {
@@ -68,5 +76,57 @@ class CampanhasService extends BaseModelService
             ->where('slc.id_servico', $servicoId)
             ->when($idsCampanhas, fn($query) => $query->whereIn('at_fauna_execucao_campanhas.id', $idsCampanhas))
             ->when($paginate, fn($query) => $query->paginate(), fn($query) => $query->get());
+    }
+
+    public function store_responsavel(array $post)
+    {
+        return $this->dataManagement->create(entity: $this->modelClassResponsavel, infos: [
+            'at_fauna_execucao_campanha_id' => $post['at_fauna_execucao_campanha_id'],
+            'servico_rh_id' => $post['responsavel_id']
+        ]);
+    }
+
+    public function store_equipe(array $post)
+    {
+        return $this->dataManagement->create(entity: $this->modelClassEquipe, infos: [
+            'at_fauna_execucao_campanha_id' => $post['at_fauna_execucao_campanha_id'],
+            'servico_rh_id' => $post['equipe_id']
+        ]);
+    }
+
+    public function store_equipamento(array $post)
+    {
+        return $this->dataManagement->create(entity: $this->modelClassEquipamento, infos: [
+            'at_fauna_execucao_campanha_id' => $post['at_fauna_execucao_campanha_id'],
+            'servico_equipamento_id' => $post['equipamento_id']
+        ]);
+    }
+
+    public function store_veiculo(array $post)
+    {
+        return $this->dataManagement->create(entity: $this->modelClassVeiculo, infos: [
+            'at_fauna_execucao_campanha_id' => $post['at_fauna_execucao_campanha_id'],
+            'servico_veiculo_id' => $post['veiculo_id']
+        ]);
+    }
+
+    public function delete_responsavel(array $post)
+    {
+        return $this->dataManagement->delete(entity: $this->modelClassResponsavel, id: $post['responsavel']['id']);
+    }
+
+    public function delete_equipe(array $post)
+    {
+        return $this->dataManagement->delete(entity: $this->modelClassEquipe, id: $post['equipe']['id']);
+    }
+
+    public function delete_equipamento(array $post)
+    {
+        return $this->dataManagement->delete(entity: $this->modelClassEquipamento, id: $post['equipamento']['id']);
+    }
+
+    public function delete_veiculo(array $post)
+    {
+        return $this->dataManagement->delete(entity: $this->modelClassVeiculo, id: $post['veiculo']['id']);
     }
 }

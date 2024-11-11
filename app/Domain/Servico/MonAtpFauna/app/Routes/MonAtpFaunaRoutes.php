@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Servico\MonAtpFauna\Execucao\Registros\app\Controller\DownloadModeloController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/mon_atp_fauna')->group(function () {
@@ -15,6 +16,9 @@ Route::prefix('/mon_atp_fauna')->group(function () {
         Route::prefix('/campanhas')->group(function () {
             require __DIR__ . '../../../Execucao/Campanhas/app/Routes/CampanhasRoutes.php';
         });
+
+        Route::get('modelo_importar', [DownloadModeloController::class, 'index'])->name('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.modelo_importar');
+
         Route::prefix('/registros')->group(function () {
             require __DIR__ . '../../../Execucao/Registros/app/Routes/RegistrosRoutes.php';
         });

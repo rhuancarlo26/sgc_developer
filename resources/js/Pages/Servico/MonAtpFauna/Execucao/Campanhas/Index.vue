@@ -112,7 +112,7 @@ const abrirModalExcluirCampanha = (id) => {
             </template>
         </Navbar>
 
-        <ModalNovaCampanha ref="modalNovaCampanha" :licencasVigente="licencasVigente"
+        <ModalNovaCampanha ref="modalNovaCampanha" :servico="servico" :licencasVigente="licencasVigente"
             :configVinculacao="configVinculacao" :show-action="showActionsModal" />
         <ModalEditarCampanha ref="modalEditarCampanha" />
         <ModalVisualizarCampanha ref="modalVisualizarCampanha" />

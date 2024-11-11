@@ -17,9 +17,7 @@ class IndexController extends Controller
     public function __construct(
         private readonly RelatoriosService $relatoriosService,
         private readonly ResultadoService $resultadoService,
-    )
-    {
-    }
+    ) {}
 
     public function __invoke(Contrato $contrato, Servicos $servico, Request $request): Response
     {
@@ -27,7 +25,7 @@ class IndexController extends Controller
 
         return Inertia::render('Servico/MonAtpFauna/Relatorios/Index', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'servico' => $servico->load(['tipo', 'parecer_atropelamento']),
             'data' => $this->relatoriosService->index($servico, $searchParams),
             'resultados' => $this->resultadoService->index(servico: $servico, searchParams: ['', ''], paginate: false),
         ]);

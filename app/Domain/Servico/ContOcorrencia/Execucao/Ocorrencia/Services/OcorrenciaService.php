@@ -45,7 +45,8 @@ class OcorrenciaService extends BaseModelService
                     'ocorrencia_anterior',
                     'vistorias' => function ($query) {
                         $query->latest();
-                    }
+                    },
+                    'vistorias.imagens'
                 ])
                 ->where('id_servico', $servico->id)->where('envio_empresa', '=', 'Não')
                 ->paginate()
