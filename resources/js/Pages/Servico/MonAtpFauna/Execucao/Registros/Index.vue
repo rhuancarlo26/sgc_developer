@@ -8,9 +8,10 @@ import Table from "@/Components/Table.vue";
 import ModalNovoRegistro from "./ModalNovoRegistro.vue";
 import ModalEditarRegistro from "./ModalEditarRegistro.vue";
 import ModalExcluirRegistro from "./ModalExcluirRegistro.vue";
+import ModalImportarRegistro from "./ModalImportarRegistro.vue";
 import { computed, ref } from "vue";
 import { IconDots } from "@tabler/icons-vue";
-import { Head, router } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 const props = defineProps({
@@ -26,6 +27,7 @@ const modalNovoRegistro = ref({});
 const modalEditarRegistro = ref({});
 const modalVisualizarRegistro = ref({});
 const modalExcluirRegistro = ref({});
+const modalImportarRegistroRef = ref({});
 
 const showActionsModal = ref(true);
 
@@ -37,6 +39,10 @@ const abrirModalNovoRegistro = (item) => {
 const abrirModalVisualizarRegistro = (item) => {
     showActionsModal.value = false;
     modalNovoRegistro.value.abrirModal(item);
+}
+
+const abrirModalImportarRegistro = () => {
+    modalImportarRegistroRef.value.abrirModal();
 }
 
 const linkConfirmationRef = ref()
@@ -84,6 +90,7 @@ const urlQueryParams = computed(() => {
                             :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.export', { servico: servico.id, _query: urlQueryParams })">
                             Exportar Excel
                         </a>
+                        <NavButton @click="abrirModalImportarRegistro()" type-button="info" title="Importar Registro" />
                         <NavButton @click="abrirModalNovoRegistro()" type-button="info" title="Novo Registro" />
                     </template>
                 </ModelSearchFormAllColumns>
@@ -130,6 +137,7 @@ const urlQueryParams = computed(() => {
             :servico="servico" :show-action="showActionsModal" />
         <ModalEditarRegistro ref="modalEditarRegistro" />
         <ModalExcluirRegistro ref="modalExcluirRegistro" />
+        <ModalImportarRegistro :campanhas="campanhas" :servico="servico" ref="modalImportarRegistroRef" />
         <LinkConfirmation ref="linkConfirmationRef"
             :options="{ text: 'Você tem certeza que deseja excluir esta foto?' }" />
 
