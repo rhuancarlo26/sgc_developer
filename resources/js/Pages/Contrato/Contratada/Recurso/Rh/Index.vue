@@ -36,13 +36,13 @@ const excluirRh = (rh_id) => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[
-    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
-    { route: '#', label: contrato.contratada }
-  ]
-    " />
+          { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
+          { route: '#', label: contrato.contratada }
+        ]
+          " />
         <div class="container-buttons">
           <Link class="btn btn-info me-2" :href="route('contratos.contratada.recurso.rh.create', contrato.id)">
-          Cadastrar rh
+          Cadastrar RH
           </Link>
         </div>
       </div>
@@ -53,8 +53,8 @@ const excluirRh = (rh_id) => {
       <template #body>
         <!-- Pesquisa-->
         <ModelSearchForm :search-columns="{
-    'nome': 'Nome'
-  }" />
+          'nome': 'Nome'
+        }" />
 
         <!-- Listagem-->
         <Table :columns="['Nome', 'CPF', 'E-mail', 'Função', 'Formação', 'Status', 'Ação']" :records="rhs"
@@ -68,8 +68,8 @@ const excluirRh = (rh_id) => {
               <td>{{ item.profissao }}</td>
               <td class="text-center">
                 <span :class="item.status == 0 ? 'badge bg-red-lt' : 'badge bg-green-lt'"
-                :title="item.status == 0 ? 'Item inativo' : 'Item ativo'">
-                  {{ item.status == 0 ? 'Inativo' : 'Ativo'}}
+                  :title="item.status == 0 ? 'Item inativo' : 'Item ativo'">
+                  {{ item.status == 0 ? 'Inativo' : 'Ativo' }}
                 </span>
               </td>
               <td class="text-center">
