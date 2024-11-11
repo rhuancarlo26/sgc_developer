@@ -11,11 +11,14 @@ use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use App\Shared\Utils\ArquivoUtils;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class RegistrosService extends BaseModelService
 {
@@ -99,6 +102,7 @@ class RegistrosService extends BaseModelService
 
         foreach ($registros as $registro) {
             $uf = Uf::where('nome', '=', $registro['estado'])->orWhere('uf', '=', $registro['estado'])->first();
+            $classe = ['Avifauna', 'Herpetofauna', 'Mastofauna'];
 
             $response = $this->dataManagement->create(entity: $this->modelClass, infos: [
                 ...$registro,
@@ -107,10 +111,30 @@ class RegistrosService extends BaseModelService
                 'fk_servico' => $post['servico_id'],
                 'sentido' => strtoupper($registro['sentido'][0] ?? ''),
                 'margem' => strtoupper($registro['margem'][0] ?? ''),
-                'classe'
+                'data_registro' => $this->getDateYMD($registro['data_registro'])
             ]);
         }
 
         return $response;
+    }
+
+    private function getDateYMD(string|int $date): string
+    {
+
+        if (is_string($date) && str_contains($date, '/')) {
+            return Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d');
+        }
+
+        if (is_string($date) && str_contains($date, '-')) {
+            return Carbon::parse($date)->format('Y-m-d');
+        }
+
+        if (is_int($date)) {
+            return Date::excelToDateTimeObject($date)->format('Y-m-d');
+        }
+
+        if ($date instanceof Carbon) {
+            return $date->format('Y-m-d');
+        }
     }
 }
