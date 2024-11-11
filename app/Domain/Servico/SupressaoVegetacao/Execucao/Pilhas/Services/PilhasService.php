@@ -7,7 +7,10 @@ use App\Domain\Servico\SupressaoVegetacao\Execucao\Pilhas\Enums\TipoPilha;
 use App\Models\AreaSupressao;
 use App\Models\Arquivo;
 use App\Models\ControlePilha;
+use App\Models\PatioEstocagem;
+use App\Models\ServicoLicenca;
 use App\Models\Servicos;
+use App\Models\TipoProduto;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\GenerateCode;
@@ -15,7 +18,6 @@ use App\Shared\Traits\Searchable;
 use App\Shared\Traits\ShapefileHandler;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
@@ -29,18 +31,24 @@ class PilhasService extends BaseModelService
         DataManagement                           $dataManagement,
         private readonly LicencaShapefileService $licencaShapefileService,
         private readonly ArquivoUtils            $arquivoUtils,
-    )
-    {
+    ) {
         parent::__construct($dataManagement);
     }
 
-    public function index(Servicos $servico, array $searchParams): LengthAwarePaginator
+    public function index(Servicos $servico, array $searchParams): array
     {
-        return $this->searchAllColumns(...$searchParams)
-            ->with(['areaSupressao', 'fotos', 'licenca', 'patio', 'produto', 'corteEspecie'])
-            ->where('servico_id', $servico->id)
-            ->paginate()
-            ->appends($searchParams);
+        return [
+            'pilhas' => $this->searchAllColumns(...$searchParams)
+                ->with(['areaSupressao', 'fotos', 'licenca', 'patio', 'produto', 'corteEspecie'])
+                ->where('servico_id', $servico->id)
+                ->paginate()
+                ->appends($searchParams),
+            'tipos' => TipoPilha::toArray(),
+            'patios' => PatioEstocagem::where('servico_id', $servico->id)->get(['id', 'chave']),
+            'produtos' => TipoProduto::all(columns: ['id', 'nome']),
+            'areasSuprimidas' => AreaSupressao::where('servico_id', $servico->id)->get(['id', 'chave']),
+            'licencas' => ServicoLicenca::where('servico_id', $servico->id)->with('licenca')->get()
+        ];
     }
 
     public function store(array $request): array
@@ -118,5 +126,4 @@ class PilhasService extends BaseModelService
             ->where('servico_id', $servico->id)
             ->first();
     }
-
 }

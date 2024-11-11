@@ -29,7 +29,7 @@ class IndexController extends Controller
 
         return Inertia::render('Servico/MonAtpFauna/Execucao/Registros/Index', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'servico' => $servico->load(['tipo', 'parecer_atropelamento']),
             'ufs' => Cache::rememberForever('ufs', fn() => Uf::all()),
             'data' => $this->registrosService->index($servico, $searchParams),
             'campanhas' => $this->campanhasService->getCampanhas(servicoId: $servico->id, searchParams: ['', ''], paginate: false),
