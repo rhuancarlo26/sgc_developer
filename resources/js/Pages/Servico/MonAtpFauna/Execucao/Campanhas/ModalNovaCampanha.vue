@@ -10,8 +10,13 @@ import Table from "@/Components/Table.vue";
 import axios from "axios";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import { dateTimeFormat } from "../../../../../Utils/DateTimeUtils.js";
+import NavButton from "@/Components/NavButton.vue";
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 const props = defineProps({
+    servico: { type: Object },
     showAction: { type: Boolean, default: true },
     licencasVigente: { type: Array },
     configVinculacao: { type: Array },
@@ -30,6 +35,14 @@ const form = useForm({
     data_inicial: null,
     data_final: null,
     observacao: null,
+});
+
+const form_recurso = useForm({
+    at_fauna_execucao_campanha_id: null,
+    responsavel_id: null,
+    equipe_id: null,
+    equipamento_id: null,
+    veiculo_id: null
 });
 
 const save = () => {
@@ -62,8 +75,20 @@ const modalRef = ref();
 const abrirModal = (item = null) => {
     form.reset()
     Object.assign(form, item)
+
+    getRelationship();
+
     modalRef.value.getBsModal().show();
     tab.value = 'campanhas';
+}
+
+const relationships = ref({});
+const getRelationship = () => {
+    axios.get(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.get-relationship', {
+        campanha_id: form.id,
+    })).then((resp) => {
+        relationships.value = resp.data;
+    });
 }
 
 const getAbio = async () => {
@@ -127,6 +152,62 @@ const saveCampanhaRet = (value) => {
     });
 }
 
+const saveResponsavel = () => {
+    form_recurso.at_fauna_execucao_campanha_id = form.id;
+
+    form_recurso.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.store_responsavel'), {
+        onSuccess: () => getRelationship()
+    });
+}
+
+const saveEquipe = () => {
+    form_recurso.at_fauna_execucao_campanha_id = form.id;
+
+    form_recurso.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.store_equipe'), {
+        onSuccess: () => getRelationship()
+    });
+}
+
+const saveVeiculo = () => {
+    form_recurso.at_fauna_execucao_campanha_id = form.id;
+
+    form_recurso.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.store_veiculo'), {
+        onSuccess: () => getRelationship()
+    });
+}
+
+const deleteResponsavel = ($responsavel) => {
+    axios.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete_responsavel'), { responsavel: $responsavel }).then((resp => {
+        relationships.value = resp.data.data;
+
+        toast.info(resp.data.message);
+    }));
+}
+
+const deleteEquipe = ($responsavel) => {
+    axios.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete_equipe'), { equipe: $responsavel }).then((resp => {
+        relationships.value = resp.data.data;
+
+        toast.info(resp.data.message);
+    }));
+}
+
+const deleteEquipamento = ($responsavel) => {
+    axios.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete_equipamento'), { equipamento: $responsavel }).then((resp => {
+        relationships.value = resp.data.data;
+
+        toast.info(resp.data.message);
+    }));
+}
+
+const deleteVeiculo = ($responsavel) => {
+    axios.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete_veiculo'), { veiculo: $responsavel }).then((resp => {
+        relationships.value = resp.data.data;
+
+        toast.info(resp.data.message);
+    }));
+}
+
 onMounted(() => {
     modalRef.value.$el.addEventListener('hidden.bs.modal', () => {
         form.reset()
@@ -143,7 +224,7 @@ defineExpose({ abrirModal });
 
 <template>
     <form @submit.prevent="save">
-        <Modal ref="modalRef" title="Cadastro Área de Supressão" modal-dialog-class="modal-xl">
+        <Modal ref="modalRef" title="Cadastro de Campanha" modal-dialog-class="modal-xl">
             <template #body>
                 <div class="card">
                     <div class="card-header">
@@ -151,6 +232,10 @@ defineExpose({ abrirModal });
                             <li class="nav-item">
                                 <a href="#dados" @click="tab = 'campanhas'" :class="{ active: tab === 'campanhas' }"
                                     class="nav-link" data-bs-toggle="tab">CAMPANHAS</a>
+                            </li>
+                            <li v-if="form.id" class="nav-item">
+                                <a href="#recurso" @click="tab = 'recurso'" :class="{ active: tab === 'recurso' }"
+                                    class="nav-link" data-bs-toggle="tab">RECURSO</a>
                             </li>
                             <li v-if="form.id" class="nav-item">
                                 <a href="#abio" @click="tab = 'abio'" :class="{ active: tab === 'abio' }"
@@ -200,8 +285,8 @@ defineExpose({ abrirModal });
                                     </div>
                                     <div class="col-lg-3">
                                         <div class="d-flex">
-                                            <InputLabel class="me-1" value="Latitude inicial" for="latitude_inicial" />
-                                            <span class="text-red">(DDDºDDDDD)</span>
+                                            <InputLabel class="me-2" value="Latitude inicial" for="latitude_inicial" />
+                                            <span class="position-relative top-0 small">(Graus decimais)</span>
                                         </div>
                                         <input v-model="form.latitude_inicial" type="text" id="latitude_inicial"
                                             class="form-control" :disabled="!showAction" />
@@ -209,9 +294,9 @@ defineExpose({ abrirModal });
                                     </div>
                                     <div class="col-lg-3">
                                         <div class="d-flex">
-                                            <InputLabel class="me-1" value="Longitude inicial"
+                                            <InputLabel class="me-2" value="Longitude inicial"
                                                 for="longitude_inicial" />
-                                            <span class="text-red">(DDDºDDDDD)</span>
+                                            <span class="position-relative top-0 small">(Graus decimais)</span>
                                         </div>
                                         <input v-model="form.longitude_inicial" type="text" id="longitude_inicial"
                                             class="form-control" :disabled="!showAction" />
@@ -238,8 +323,8 @@ defineExpose({ abrirModal });
                                     </div>
                                     <div class="col-lg-3">
                                         <div class="d-flex">
-                                            <InputLabel class="me-1" value="Latitude final" for="latitude_final" />
-                                            <span class="text-red">(DDDºDDDDD)</span>
+                                            <InputLabel class="me-2" value="Latitude final" for="latitude_final" />
+                                            <span class="position-relative top-0 small">(Graus decimais)</span>
                                         </div>
                                         <input v-model="form.latitude_final" id="latitude_final" class="form-control"
                                             :disabled="!showAction" />
@@ -247,8 +332,8 @@ defineExpose({ abrirModal });
                                     </div>
                                     <div class="col-lg-3">
                                         <div class="d-flex">
-                                            <InputLabel class="me-1" value="Longitude final" for="longitude_final" />
-                                            <span class="text-red">(DDDºDDDDD)</span>
+                                            <InputLabel class="me-2" value="Longitude final" for="longitude_final" />
+                                            <span class="position-relative top-0 small">(Graus decimais)</span>
                                         </div>
                                         <input v-model="form.longitude_final" type="text" id="longitude_final"
                                             class="form-control" :disabled="!showAction" />
@@ -273,6 +358,196 @@ defineExpose({ abrirModal });
                                         <textarea v-model="form.observacao" class="form-control" id="observacao"
                                             rows="2" :disabled="!showAction"></textarea>
                                         <InputError :message="form.errors.observacao" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div :class="[tab === 'recurso' ? 'active show' : '']" class="tab-pane" id="recurso">
+                                <div class="row mb-2">
+                                    <div class="col form-group">
+                                        <InputLabel value="Responsável pela Campanha" for="campanha" />
+                                        <div class="row g-2">
+                                            <div class="col">
+                                                <select name="responsavel" id="responsavel" class="form-select"
+                                                    v-model="form_recurso.responsavel_id">
+                                                    <option v-for="rh in servico.servico_rhs" :key="rh.id"
+                                                        :value="rh.id">{{
+                                                            rh.rh?.nome }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <NavButton @click="saveResponsavel" type-button="success"
+                                                    title="Salvar" />
+                                            </div>
+                                        </div>
+                                        <InputError />
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col">
+                                        <Table :columns="['Nome', 'Ação']"
+                                            :records="{ data: relationships?.recurso_responsaveis, links: [] }"
+                                            table-class="table-hover">
+                                            <template #body="{ item }">
+                                                <tr>
+                                                    <td>{{ item.servico_rh?.rh?.nome }}</td>
+                                                    <td>
+                                                        <button type="button"
+                                                            class="btn btn-icon btn-info dropdown-toggle p-2"
+                                                            data-bs-boundary="viewport" data-bs-toggle="dropdown"
+                                                            aria-expanded="false">
+                                                            <IconDots />
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-end">
+                                                            <a @click="deleteResponsavel(item)" href="#"
+                                                                class="dropdown-item">
+                                                                Excluir
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </Table>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col form-group">
+                                        <InputLabel value="Equipe" for="equipe" />
+                                        <div class="row g-2">
+                                            <div class="col">
+                                                <select name="equipe" id="equipe" class="form-select"
+                                                    v-model="form_recurso.equipe_id">
+                                                    <option v-for="rh in servico.servico_rhs" :key="rh.id"
+                                                        :value="rh.id">{{
+                                                            rh.rh?.nome }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <NavButton @click="saveEquipe()" type-button="success" title="Salvar" />
+                                            </div>
+                                        </div>
+                                        <InputError />
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col">
+                                        <Table :columns="['Nome', 'Ação']"
+                                            :records="{ data: relationships?.recurso_equipes, links: [] }"
+                                            table-class="table-hover">
+                                            <template #body="{ item }">
+                                                <tr>
+                                                    <td>{{ item.servico_rh?.rh?.nome }}</td>
+                                                    <td>
+                                                        <button type="button"
+                                                            class="btn btn-icon btn-info dropdown-toggle p-2"
+                                                            data-bs-boundary="viewport" data-bs-toggle="dropdown"
+                                                            aria-expanded="false">
+                                                            <IconDots />
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-end">
+                                                            <a @click="deleteEquipe(item)" href="#"
+                                                                class="dropdown-item">
+                                                                Excluir
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </Table>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col form-group">
+                                        <InputLabel value="Equipamentos" for="equipamento" />
+                                        <div class="row g-2">
+                                            <div class="col">
+                                                <select name="equipamento" id="equipamento" class="form-select"
+                                                    v-model="form_recurso.equipamento_id">
+                                                    <option v-for="equipamento in servico.servico_equipamentos"
+                                                        :key="equipamento.id" :value="equipamento.id">{{
+                                                            equipamento.equipamento?.nome }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <NavButton @click="saveEquipamento()" type-button="success"
+                                                    title="Salvar" />
+                                            </div>
+                                        </div>
+                                        <InputError />
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col">
+                                        <Table :columns="['Nome', 'Ação']"
+                                            :records="{ data: relationships?.recurso_equipamentos, links: [] }"
+                                            table-class="table-hover">
+                                            <template #body="{ item }">
+                                                <tr>
+                                                    <td>{{ item.servico_equipamento?.equipamento?.nome }}</td>
+                                                    <td>
+                                                        <button type="button"
+                                                            class="btn btn-icon btn-info dropdown-toggle p-2"
+                                                            data-bs-boundary="viewport" data-bs-toggle="dropdown"
+                                                            aria-expanded="false">
+                                                            <IconDots />
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-end">
+                                                            <a @click="deleteEquipamento(item)" href="#"
+                                                                class="dropdown-item">
+                                                                Excluir
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </Table>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col form-group">
+                                        <InputLabel value="Veículos" for="veiculo" />
+                                        <div class="row g-2">
+                                            <div class="col">
+                                                <select name="veiculo" id="veiculo" class="form-select"
+                                                    v-model="form_recurso.veiculo_id">
+                                                    <option v-for="veiculo in servico.servico_veiculos"
+                                                        :key="veiculo.id" :value="veiculo.id">{{
+                                                            veiculo.veiculo?.obs }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <NavButton @click="saveVeiculo()" type-button="success"
+                                                    title="Salvar" />
+                                            </div>
+                                        </div>
+                                        <InputError />
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col">
+                                        <Table :columns="['Nome', 'Ação']"
+                                            :records="{ data: relationships?.recurso_veiculos, links: [] }"
+                                            table-class="table-hover">
+                                            <template #body="{ item }">
+                                                <tr>
+                                                    <td>{{ item.servico_veiculo?.veiculo?.obs }}</td>
+                                                    <td>
+                                                        <button type="button"
+                                                            class="btn btn-icon btn-info dropdown-toggle p-2"
+                                                            data-bs-boundary="viewport" data-bs-toggle="dropdown"
+                                                            aria-expanded="false">
+                                                            <IconDots />
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-end">
+                                                            <a @click="deleteVeiculo(item)" href="#"
+                                                                class="dropdown-item">
+                                                                Excluir
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </Table>
                                     </div>
                                 </div>
                             </div>

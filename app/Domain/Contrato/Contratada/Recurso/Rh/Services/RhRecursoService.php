@@ -52,10 +52,10 @@ class RhRecursoService extends BaseModelService
         foreach ($request['documentos'] as $key => $value) {
             if ($value->isvalid()) {
                 $request['nome_arquivo'] = $value->getClientOriginalName();
-//                $request['tipo'] = $value->extension();
+                //                $request['tipo'] = $value->extension();
                 $request['arquivo'] = $value->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '_' . $key . '_' . $request['nome_arquivo']);
 
-//                unset($request['documentos_baixa']);
+                //                unset($request['documentos_baixa']);
 
                 $response = $this->dataManagement->create(entity: $this->modelClassDocumento, infos: $request);
 
@@ -65,6 +65,26 @@ class RhRecursoService extends BaseModelService
             }
         }
         return $return;
+    }
+
+    public function salvarCurriculum($request): array
+    {
+        $nome = $request['curriculum_pdf']->getClientOriginalName();
+        $caminho = $request['curriculum_pdf']->storeAs('Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '__' . $nome);
+
+        return $this->dataManagement->update(entity: $this->modelClass, infos: [
+            'curriculum_pdf' => $caminho
+        ], id: $request['id']);
+    }
+
+    public function salvarFotoPerfil($request): array
+    {
+        $nome = $request['foto_perfil']->getClientOriginalName();
+        $caminho = $request['foto_perfil']->storeAs('public' . DIRECTORY_SEPARATOR . 'Contrato' . DIRECTORY_SEPARATOR . 'Recurso' . DIRECTORY_SEPARATOR . 'Rh' . DIRECTORY_SEPARATOR . uniqid() . '__' . $nome);
+
+        return $this->dataManagement->update(entity: $this->modelClass, infos: [
+            'foto_perfil' => str_replace("public\\", "", $caminho)
+        ], id: $request['id']);
     }
 
     public function destroyRh($rh): array
@@ -120,6 +140,42 @@ class RhRecursoService extends BaseModelService
             ];
         } catch (\Exception $th) {
             return ['type' => 'error', 'content' => $th->getMessage()];
+        }
+    }
+
+    public function destroyCurriculum($rh): array
+    {
+        try {
+            Storage::delete($rh->curriculum_pdf);
+
+            return $this->dataManagement->update(entity: $this->modelClass, infos: [
+                'curriculum_pdf' => null
+            ], id: $rh->id);
+        } catch (\Exception $th) {
+            return [
+                'request' => [
+                    'type' => 'error',
+                    'content' => $th->getMessage()
+                ]
+            ];
+        }
+    }
+
+    public function destroyFotoPerfil($rh): array
+    {
+        try {
+            Storage::delete($rh->foto_perfil);
+
+            return $this->dataManagement->update(entity: $this->modelClass, infos: [
+                'foto_perfil' => null
+            ], id: $rh->id);
+        } catch (\Exception $th) {
+            return [
+                'request' => [
+                    'type' => 'error',
+                    'content' => $th->getMessage()
+                ]
+            ];
         }
     }
 }
