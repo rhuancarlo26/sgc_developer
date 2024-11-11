@@ -26,7 +26,7 @@ class IndexController extends Controller
 
         return Inertia::render('Servico/MonAtpFauna/Execucao/Campanhas/Index', [
             'contrato' => $contrato,
-            'servico' => $servico->load(['tipo', 'parecer_atropelamento']),
+            'servico' => $servico->load(['tipo', 'servico_rhs.rh', 'servico_equipamentos.equipamento', 'servico_veiculos.veiculo', 'parecer_atropelamento']),
             'data' => $this->campanhasService->index($servico, $searchParams),
             'licencasVigente' => $this->servicoLicencaCondicionanteService->getLicencaMalhaViariaVigente($servico->id),
             'configVinculacao' => $this->abioService->getVinculos($servico->id),
