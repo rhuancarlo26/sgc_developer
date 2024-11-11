@@ -11,7 +11,7 @@ import ModalVisualizarCampanha from "./ModalVisualizarCampanha.vue";
 import ModalExcluirCampanha from "./ModalExcluirCampanha.vue";
 import { ref } from "vue";
 import { IconDots } from "@tabler/icons-vue";
-import {Head, router} from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 
 const props = defineProps({
@@ -79,8 +79,8 @@ const abrirModalExcluirCampanha = (id) => {
                     <template #body="{ item }">
                         <tr>
                             <td>{{ item.rodovia }}</td>
-                            <td>{{ item.nome_uf_inicial }} - {{item.nome_estado_inicial}}</td>
-                            <td>{{ item.nome_uf_final }} - {{item.nome_estado_final}}</td>
+                            <td>{{ item.nome_uf_inicial }} - {{ item.nome_estado_inicial }}</td>
+                            <td>{{ item.nome_uf_final }} - {{ item.nome_estado_final }}</td>
                             <td>{{ item.km_inicial }}</td>
                             <td>{{ item.km_final }}</td>
                             <td>{{ item.data_inicialF }}</td>
@@ -95,10 +95,12 @@ const abrirModalExcluirCampanha = (id) => {
                                     <a href="#" class="dropdown-item" @click.prevent="abrirModalNovaCampanha(item)">
                                         Editar
                                     </a>
-                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalVisualizarCampanha(item)">
+                                    <a href="#" class="dropdown-item"
+                                        @click.prevent="abrirModalVisualizarCampanha(item)">
                                         Visualizar
                                     </a>
-                                    <a href="#" class="dropdown-item" @click.prevent="abrirModalExcluirCampanha(item.id)">
+                                    <a href="#" class="dropdown-item"
+                                        @click.prevent="abrirModalExcluirCampanha(item.id)">
                                         Excluir
                                     </a>
                                 </div>
@@ -110,11 +112,13 @@ const abrirModalExcluirCampanha = (id) => {
             </template>
         </Navbar>
 
-        <ModalNovaCampanha ref="modalNovaCampanha" :licencasVigente="licencasVigente" :configVinculacao="configVinculacao" :show-action="showActionsModal" />
+        <ModalNovaCampanha ref="modalNovaCampanha" :servico="servico" :licencasVigente="licencasVigente"
+            :configVinculacao="configVinculacao" :show-action="showActionsModal" />
         <ModalEditarCampanha ref="modalEditarCampanha" />
         <ModalVisualizarCampanha ref="modalVisualizarCampanha" />
         <ModalExcluirCampanha ref="modalExcluirCampanha" />
-        <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Você tem certeza que deseja excluir esta campanha?' }" />
+        <LinkConfirmation ref="linkConfirmationRef"
+            :options="{ text: 'Você tem certeza que deseja excluir esta campanha?' }" />
 
     </AuthenticatedLayout>
 </template>
