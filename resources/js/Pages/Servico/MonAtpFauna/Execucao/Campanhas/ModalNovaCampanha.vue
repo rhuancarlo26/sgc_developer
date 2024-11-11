@@ -143,7 +143,7 @@ defineExpose({ abrirModal });
 
 <template>
     <form @submit.prevent="save">
-        <Modal ref="modalRef" title="Cadastro Área de Supressão" modal-dialog-class="modal-xl">
+        <Modal ref="modalRef" title="Cadastro de Campanha" modal-dialog-class="modal-xl">
             <template #body>
                 <div class="card">
                     <div class="card-header">
@@ -200,8 +200,8 @@ defineExpose({ abrirModal });
                                     </div>
                                     <div class="col-lg-3">
                                         <div class="d-flex">
-                                            <InputLabel class="me-1" value="Latitude inicial" for="latitude_inicial" />
-                                            <span class="text-red">(DDDºDDDDD)</span>
+                                            <InputLabel class="me-2" value="Latitude inicial" for="latitude_inicial" />
+                                            <span class="position-relative top-0 small">(Graus decimais)</span>
                                         </div>
                                         <input v-model="form.latitude_inicial" type="text" id="latitude_inicial"
                                             class="form-control" :disabled="!showAction" />
@@ -209,9 +209,9 @@ defineExpose({ abrirModal });
                                     </div>
                                     <div class="col-lg-3">
                                         <div class="d-flex">
-                                            <InputLabel class="me-1" value="Longitude inicial"
+                                            <InputLabel class="me-2" value="Longitude inicial"
                                                 for="longitude_inicial" />
-                                            <span class="text-red">(DDDºDDDDD)</span>
+                                            <span class="position-relative top-0 small">(Graus decimais)</span>
                                         </div>
                                         <input v-model="form.longitude_inicial" type="text" id="longitude_inicial"
                                             class="form-control" :disabled="!showAction" />
@@ -238,8 +238,8 @@ defineExpose({ abrirModal });
                                     </div>
                                     <div class="col-lg-3">
                                         <div class="d-flex">
-                                            <InputLabel class="me-1" value="Latitude final" for="latitude_final" />
-                                            <span class="text-red">(DDDºDDDDD)</span>
+                                            <InputLabel class="me-2" value="Latitude final" for="latitude_final" />
+                                            <span class="position-relative top-0 small">(Graus decimais)</span>
                                         </div>
                                         <input v-model="form.latitude_final" id="latitude_final" class="form-control"
                                             :disabled="!showAction" />
@@ -247,8 +247,8 @@ defineExpose({ abrirModal });
                                     </div>
                                     <div class="col-lg-3">
                                         <div class="d-flex">
-                                            <InputLabel class="me-1" value="Longitude final" for="longitude_final" />
-                                            <span class="text-red">(DDDºDDDDD)</span>
+                                            <InputLabel class="me-2" value="Longitude final" for="longitude_final" />
+                                            <span class="position-relative top-0 small">(Graus decimais)</span>
                                         </div>
                                         <input v-model="form.longitude_final" type="text" id="longitude_final"
                                             class="form-control" :disabled="!showAction" />
