@@ -13,6 +13,7 @@ import { computed, ref } from "vue";
 import { IconDots } from "@tabler/icons-vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import ModalExportarRegistro from "./ModalExportarRegistro.vue";
 
 const props = defineProps({
     contrato: { type: Object },
@@ -21,6 +22,7 @@ const props = defineProps({
     campanhas: { type: Array },
     licencasVigente: { type: Array },
     ufs: { type: Array },
+    rodovias: { type: Array },
 });
 
 const modalNovoRegistro = ref({});
@@ -28,6 +30,7 @@ const modalEditarRegistro = ref({});
 const modalVisualizarRegistro = ref({});
 const modalExcluirRegistro = ref({});
 const modalImportarRegistroRef = ref({});
+const modalExportarRegistroRef = ref({});
 
 const showActionsModal = ref(true);
 
@@ -43,6 +46,10 @@ const abrirModalVisualizarRegistro = (item) => {
 
 const abrirModalImportarRegistro = () => {
     modalImportarRegistroRef.value.abrirModal();
+}
+
+const abrirModalExportarRegistro = () => {
+    modalExportarRegistroRef.value.abrirModal();
 }
 
 const linkConfirmationRef = ref()
@@ -86,10 +93,11 @@ const urlQueryParams = computed(() => {
             <template #body>
                 <ModelSearchFormAllColumns :columns="[]">
                     <template #action>
-                        <a v-if="data.data?.length" class="btn btn-success me-1"
+                        <!--<a v-if="data.data?.length" class="btn btn-success me-1"
                             :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.export', { servico: servico.id, _query: urlQueryParams })">
                             Exportar Excel
-                        </a>
+                        </a>-->
+                        <NavButton @click="abrirModalExportarRegistro()" type-button="info" title="Exportar Planilha" />
                         <NavButton @click="abrirModalImportarRegistro()" type-button="info" title="Importar Registro" />
                         <NavButton @click="abrirModalNovoRegistro()" type-button="info" title="Novo Registro" />
                     </template>
@@ -138,6 +146,8 @@ const urlQueryParams = computed(() => {
         <ModalEditarRegistro ref="modalEditarRegistro" />
         <ModalExcluirRegistro ref="modalExcluirRegistro" />
         <ModalImportarRegistro :campanhas="campanhas" :servico="servico" ref="modalImportarRegistroRef" />
+        <ModalExportarRegistro :servico="servico" :ufs="ufs" :rodovias="rodovias" :campanhas="campanhas"
+            ref="modalExportarRegistroRef" />
         <LinkConfirmation ref="linkConfirmationRef"
             :options="{ text: 'Você tem certeza que deseja excluir esta foto?' }" />
 

@@ -3,6 +3,7 @@
 namespace App\Domain\Servico\MonAtpFauna\Execucao\Registros\app\Exports;
 
 use App\Domain\Servico\MonAtpFauna\Execucao\Registros\app\Services\RegistrosService;
+use App\Models\AtFaunaExecucaoRegistro;
 use App\Models\Servicos;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
@@ -17,13 +18,21 @@ class RegistroExport implements FromQuery, WithMapping, WithHeadings, WithTitle
         private readonly RegistrosService $registroService,
         private readonly array $searchParams,
         private readonly Servicos $servico,
-    )
-    {
-    }
+    ) {}
 
-    public function query(): Builder
+    public function query()
     {
-        return $this->registroService->index($this->servico, $this->searchParams, false);
+        return AtFaunaExecucaoRegistro::query()
+            ->where('fk_servico', $this->servico->id)
+            ->when(isset($this->searchParams['campanhas']), function (Builder $query) {
+                $query->whereIn('fk_campanha', $this->searchParams['campanhas']);
+            })
+            ->when(isset($this->searchParams['grupo_amostrados']), function (Builder $query) {
+                $query->whereIn('fk_grupo_amostrado', $this->searchParams['grupo_amostrados']);
+            })
+            ->when(isset($this->searchParams['ufs']), function (Builder $query) {
+                $query->whereIn('fk_estado', $this->searchParams['ufs']);
+            });
     }
 
     public function map($row): array
@@ -96,5 +105,4 @@ class RegistroExport implements FromQuery, WithMapping, WithHeadings, WithTitle
     {
         return 'Registros P.F.';
     }
-
 }
