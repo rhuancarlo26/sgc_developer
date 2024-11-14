@@ -11,6 +11,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import { IconTrash } from "@tabler/icons-vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import { computed } from "vue";
 
 defineProps({
     showActionsModal: { type: Boolean }
@@ -50,6 +51,10 @@ const save = () => {
         }
     })
 }
+
+const numTotalIndividuos = computed(() => {
+    return analise.value.atropelados_classe.reduce((acumulador, item) => acumulador + item.n_individuos, 0)
+})
 
 onMounted(() => {
     modalRef.value.$el.addEventListener('hidden.bs.modal', () => {
@@ -153,7 +158,7 @@ defineExpose({ abrirModal });
                                             datasets: [{
                                                 label: 'Atropelamentos por classe',
                                                 backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16'],
-                                                data: analise.atropelados_classe?.map((item) => parseInt(item.n_individuos))
+                                                data: analise.atropelados_classe?.map((item) => parseInt((item.n_individuos / numTotalIndividuos) * 100))
                                             }]
                                         }" :chart_options="{
                                             responsive: true,
@@ -168,6 +173,10 @@ defineExpose({ abrirModal });
                                                     font: {
                                                         weight: 'bold',
                                                     },
+                                                    formatter: (value, context) => {
+                                                        const label = context.chart.data.labels[context.dataIndex];
+                                                        return `${label}: ${value}%`;
+                                                    }
                                                 }
                                             }
                                         }" />
