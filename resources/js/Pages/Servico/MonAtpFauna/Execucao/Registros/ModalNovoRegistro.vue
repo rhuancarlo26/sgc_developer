@@ -252,9 +252,10 @@ defineExpose({ abrirModal });
                                     <div class="col-lg-4">
                                         <InputLabel value="Classe" for="classe" />
                                         <v-select :options="[
-                                            { id: '1', label: 'Avifauna' },
-                                            { id: '2', label: 'Herpetofauna' },
-                                            { id: '3', label: 'Mastofauna' }
+                                            { id: '1', label: 'Aves' },
+                                            { id: '2', label: 'Mamíferos' },
+                                            { id: '3', label: 'Répteis' },
+                                            { id: '4', label: 'Anfíbios' },
                                         ]" v-model="form.classe" :reduce="t => t.id" :disabled="!showAction">
                                             <template #no-options="{}">
                                                 Nenhum registro encontrado.
