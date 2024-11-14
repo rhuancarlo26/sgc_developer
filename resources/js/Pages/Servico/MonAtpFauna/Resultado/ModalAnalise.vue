@@ -152,6 +152,7 @@ defineExpose({ abrirModal });
                             <div :class="[tab === 'frequencia-atropelamentos' ? 'active show' : '']" class="tab-pane"
                                 id="frequencia-atropelamentos">
                                 <div v-if="analise" class="row row-gap-2 justify-content-center">
+                                    <pre>{{ analise.atropelados_classe }}</pre>
                                     <div class="col-4">
                                         <PieChart :chart_data="{
                                             labels: analise.atropelados_classe?.map((item) => item.nome),
