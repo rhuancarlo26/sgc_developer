@@ -70,8 +70,9 @@ class ResultadoCampanhaService extends BaseModelService
             ->join('at_fauna_execucao_campanhas', 'at_fauna_execucao_campanhas.id', '=', 'at_fauna_resultado_campanha.fk_campanha')
             ->join('at_fauna_execucao_registro', 'at_fauna_execucao_registro.fk_campanha', '=', 'at_fauna_execucao_campanhas.id')
             ->where('at_fauna_resultado_campanha.fk_resultado', $resultadoId)
-            ->selectRaw('at_fauna_execucao_registro.especie, COALESCE(SUM(at_fauna_execucao_registro.n_individuos), 0) as n_individuos')
-            ->groupBy('at_fauna_execucao_registro.especie')
+            ->where('n_individuos', '>', 0)
+            ->selectRaw('at_fauna_execucao_registro.classe as nome, COALESCE(SUM(at_fauna_execucao_registro.especie), 0) as n_especies')
+            ->groupBy('at_fauna_execucao_registro.classe')
             ->get();
     }
 
@@ -155,6 +156,4 @@ class ResultadoCampanhaService extends BaseModelService
             ->orderBy('feca.fk_execucao_campanha')
             ->get();
     }
-
-
 }
