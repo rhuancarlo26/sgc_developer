@@ -56,6 +56,10 @@ const numTotalIndividuos = computed(() => {
     return analise.value.atropelados_classe.reduce((acumulador, item) => acumulador + item.n_individuos, 0)
 })
 
+const numTotalespecies = computed(() => {
+    return analise.value.atropelados_especie.reduce((acumulador, item) => acumulador + item.n_especies, 0)
+})
+
 onMounted(() => {
     modalRef.value.$el.addEventListener('hidden.bs.modal', () => {
         form.reset()
@@ -77,35 +81,14 @@ defineExpose({ abrirModal });
                     <div class="card-header">
                         <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
                             <li class="nav-item">
-                                <a href="#tabela-registros-identificados"
-                                    @click="tab = 'tabela-registros-identificados'"
-                                    :class="{ active: tab === 'tabela-registros-identificados' }" class="nav-link"
-                                    data-bs-toggle="tab">Tabela com os registros identificados</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#frequencia-atropelamentos" @click="tab = 'frequencia-atropelamentos'"
-                                    :class="{ active: tab === 'frequencia-atropelamentos' }" class="nav-link"
-                                    data-bs-toggle="tab">Frequência de Atropelamentos por Classe</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#animais-atropelados-campanha" @click="tab = 'animais-atropelados-campanha'"
-                                    :class="{ active: tab === 'animais-atropelados-campanha' }" class="nav-link"
-                                    data-bs-toggle="tab">Número de Animais Atropelados por Campanha</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#animais-atropelados-km" @click="tab = 'animais-atropelados-km'"
-                                    :class="{ active: tab === 'animais-atropelados-km' }" class="nav-link"
-                                    data-bs-toggle="tab">Número de Animais Atropelados por Km</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#animais-atropelados-mes" @click="tab = 'animais-atropelados-mes'"
-                                    :class="{ active: tab === 'animais-atropelados-mes' }" class="nav-link"
-                                    data-bs-toggle="tab">Número de Animais Atropelados por Mês</a>
+                                <a href="#abundancia-classe" @click="tab = 'abundancia-classe'"
+                                    :class="{ active: tab === 'abundancia-classe' }" class="nav-link"
+                                    data-bs-toggle="tab">Abundância de animais atropelados por classe</a>
                             </li>
                             <li class="nav-item">
                                 <a href="#animais-atropelados-especie" @click="tab = 'animais-atropelados-especie'"
                                     :class="{ active: tab === 'animais-atropelados-especie' }" class="nav-link"
-                                    data-bs-toggle="tab">Número de Animais Atropelados por espécie</a>
+                                    data-bs-toggle="tab">Diversidade de animais atropelados por classe</a>
                             </li>
                             <li class="nav-item">
                                 <a href="#outras-analises" @click="tab = 'outras-analises'"
@@ -116,47 +99,14 @@ defineExpose({ abrirModal });
                     </div>
                     <div class="card-body">
                         <div class="tab-content">
-                            <div :class="[tab === 'tabela-registros-identificados' ? 'active show' : '']"
-                                class="tab-pane" id="tabela-registros-identificados">
-                                <div v-if="analise" class="row row-gap-2">
-                                    <div class="col-12">
-                                        <Table
-                                            :columns="['Espécie', 'Nome comum', 'Nº Indivíduos', 'Frequência (%)', 'IUCN', 'Federal']"
-                                            :records="{ data: analise.tabela_registro, links: [] }"
-                                            table-class="table-hover">
-                                            <template #body="{ item, key }">
-                                                <tr>
-                                                    <td>{{ item.especie }}</td>
-                                                    <td>{{ item.nome_comum }}</td>
-                                                    <td>{{ item.n_individuos }}</td>
-                                                    <td>{{ (item.n_individuos * 100 /
-                                                        analise.total_individuos).toFixed(2) }}%</td>
-                                                    <td>{{ item.iucn }}</td>
-                                                    <td>{{ item.federal }}</td>
-                                                </tr>
-                                            </template>
-                                            <template #footer>
-                                                <th colspan="6">Número Total de Indivíduos:
-                                                    <b>{{ analise.total_individuos }}</b>
-                                                </th>
-                                            </template>
-                                        </Table>
-                                    </div>
-                                    <div class="col-12">
-                                        <InputLabel>Análise:</InputLabel>
-                                        <textarea v-model="form.analise_registros_identificados" class="form-control"
-                                            rows="3"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <div :class="[tab === 'frequencia-atropelamentos' ? 'active show' : '']" class="tab-pane"
-                                id="frequencia-atropelamentos">
+                            <div :class="[tab === 'abundancia-classe' ? 'active show' : '']" class="tab-pane"
+                                id="abundancia-classe">
                                 <div v-if="analise" class="row row-gap-2 justify-content-center">
                                     <div class="col-4">
                                         <PieChart :chart_data="{
                                             labels: analise.atropelados_classe?.map((item) => item.nome),
                                             datasets: [{
-                                                label: 'Atropelamentos por classe',
+                                                label: 'Abundância por classe',
                                                 backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16'],
                                                 data: analise.atropelados_classe?.map((item) => parseInt((item.n_individuos / numTotalIndividuos) * 100))
                                             }]
@@ -188,117 +138,18 @@ defineExpose({ abrirModal });
                                     </div>
                                 </div>
                             </div>
-                            <div :class="[tab === 'animais-atropelados-campanha' ? 'active show' : '']" class="tab-pane"
-                                id="animais-atropelados-campanha">
-                                <div v-if="analise" class="row row-gap-2">
-                                    <div class="col-12">
-                                        <BarChart :style="{ height: 300 }" :chart_data="{
-                                            labels: analise.atropelados_campanha?.map((item) => 'Campanha: ' + item.id),
-                                            datasets: [{
-                                                label: 'Atropelamentos por campanha',
-                                                data: analise.atropelados_campanha?.map((item) => parseInt(item.n_individuos))
-                                            }]
-                                        }" :chart_options="{
-                                            responsive: true,
-                                            plugins: {
-                                                tooltip: {
-                                                    enabled: false
-                                                },
-                                                datalabels: {
-                                                    display: true,
-                                                    color: 'white',
-                                                    align: 'top',
-                                                    font: {
-                                                        weight: 'bold',
-                                                    },
-                                                }
-                                            }
-                                        }" />
-                                    </div>
-                                    <div class="col-12">
-                                        <InputLabel>Análise:</InputLabel>
-                                        <textarea v-model="form.analise_animais_atropelados_campanha"
-                                            class="form-control" rows="3"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <div :class="[tab === 'animais-atropelados-km' ? 'active show' : '']" class="tab-pane"
-                                id="animais-atropelados-km">
-                                <div v-if="analise" class="row row-gap-2">
-                                    <div class="col-12">
-                                        <BarChart :style="{ height: 300 }" :chart_data="{
-                                            labels: analise.atropelados_km?.map((item) => item.km),
-                                            datasets: [{
-                                                label: 'Atropelamentos por KM',
-                                                data: analise.atropelados_km?.map((item) => item.n_individuos)
-                                            }]
-                                        }" :chart_options="{
-                                            responsive: true,
-                                            plugins: {
-                                                tooltip: {
-                                                    enabled: false
-                                                },
-                                                datalabels: {
-                                                    display: true,
-                                                    color: 'white',
-                                                    align: 'top',
-                                                    font: {
-                                                        weight: 'bold',
-                                                    },
-                                                }
-                                            }
-                                        }" />
-                                    </div>
-                                    <div class="col-12">
-                                        <InputLabel>Análise:</InputLabel>
-                                        <textarea v-model="form.analise_animais_atropelados_km" class="form-control"
-                                            rows="3"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <div :class="[tab === 'animais-atropelados-mes' ? 'active show' : '']" class="tab-pane"
-                                id="animais-atropelados-mes">
-                                <div v-if="analise" class="row row-gap-2">
-                                    <div class="col-12">
-                                        <BarChart :style="{ height: 300 }" :chart_data="{
-                                            labels: analise.atropelados_mes?.map((item) => item.mes + ' - Campanha: ' + item.campanha),
-                                            datasets: [{
-                                                label: 'Atropelamentos por mês',
-                                                data: analise.atropelados_mes?.map((item) => item.n_individuos)
-                                            }]
-                                        }" :chart_options="{
-                                            responsive: true,
-                                            plugins: {
-                                                tooltip: {
-                                                    enabled: false
-                                                },
-                                                datalabels: {
-                                                    display: true,
-                                                    color: 'white',
-                                                    align: 'top',
-                                                    font: {
-                                                        weight: 'bold',
-                                                    },
-                                                }
-                                            }
-                                        }" />
-                                    </div>
-                                    <div class="col-12">
-                                        <InputLabel>Análise:</InputLabel>
-                                        <textarea v-model="form.analise_animais_atropelados_mes" class="form-control"
-                                            rows="3"></textarea>
-                                    </div>
-                                </div>
-                            </div>
+
                             <div :class="[tab === 'animais-atropelados-especie' ? 'active show' : '']" class="tab-pane"
                                 id="animais-atropelados-especie">
-                                <div v-if="analise" class="row row-gap-2">
-                                    <div class="col-12">
-                                        <BarChart :style="{ height: 300 }" :chart_data="{
-                                            labels: analise.atropelados_especie?.map((item) => item.especie),
+                                <div v-if="analise" class="row row-gap-2 justify-content-center">
+                                    <div class="col-4">
+
+                                        <PieChart :chart_data="{
+                                            labels: analise.atropelados_especie?.map((item) => item.nome),
                                             datasets: [{
-                                                label: 'Atropelamentos por espécie',
-                                                data: analise.atropelados_especie?.map((item) => item.n_individuos)
+                                                label: 'Diversidade por classe',
+                                                backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16'],
+                                                data: analise.atropelados_especie?.map((item) => parseInt((item.n_especies / numTotalespecies) * 100))
                                             }]
                                         }" :chart_options="{
                                             responsive: true,
@@ -313,6 +164,10 @@ defineExpose({ abrirModal });
                                                     font: {
                                                         weight: 'bold',
                                                     },
+                                                    formatter: (value, context) => {
+                                                        const label = context.chart.data.labels[context.dataIndex];
+                                                        return `${label}: ${value}%`;
+                                                    }
                                                 }
                                             }
                                         }" />
@@ -324,6 +179,8 @@ defineExpose({ abrirModal });
                                     </div>
                                 </div>
                             </div>
+
+
                             <div :class="[tab === 'outras-analises' ? 'active show' : '']" class="tab-pane"
                                 id="outras-analises">
                                 <div v-if="analise" class="row row-gap-2">
@@ -342,7 +199,7 @@ defineExpose({ abrirModal });
                                         <textarea v-model="form.analise" class="form-control" rows="3"></textarea>
                                     </div>
                                     <div class="col-12">
-                                        <button class="btn btn-success" @click="" type="button">
+                                        <button class="btn btn-success" type="button">
                                             Incluir Análise
                                         </button>
                                     </div>
