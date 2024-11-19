@@ -91,6 +91,11 @@ defineExpose({ abrirModal });
                                     data-bs-toggle="tab">Diversidade de animais atropelados por classe</a>
                             </li>
                             <li class="nav-item">
+                                <a href="#animais-atropelados-campanha" @click="tab = 'animais-atropelados-campanha'"
+                                    :class="{ active: tab === 'animais-atropelados-campanha' }" class="nav-link"
+                                    data-bs-toggle="tab">Número de Animais Atropelados por Campanha</a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="#outras-analises" @click="tab = 'outras-analises'"
                                     :class="{ active: tab === 'outras-analises' }" class="nav-link"
                                     data-bs-toggle="tab">Outras análises</a>
@@ -180,6 +185,43 @@ defineExpose({ abrirModal });
                                 </div>
                             </div>
 
+                            <div :class="[tab === 'animais-atropelados-campanha' ? 'active show' : '']" class="tab-pane"
+                                id="animais-atropelados-campanha">
+                                <div v-if="analise" class="row row-gap-2">
+                                    <div class="col-12">
+                                        <BarChart :style="{ height: 300 }" :chart_data="{
+                                            labels: [...analise.atropelados_campanha?.map((item) => 'Campanha: ' + item.id), 'Geral'],
+                                            datasets: [{
+                                                label: 'Taxa de atropelamentos (indivíduos/km/dia) por segmento',
+                                                data: [
+                                                    ...analise.atropelados_campanha?.map((item) => parseFloat((item.n_individuos / (item.dif_km * item.total_dias)) * 100).toFixed(2)),
+                                                    parseFloat((analise.atropelados_campanha.reduce((acumulador, item) => acumulador + item.n_individuos, 0) / (analise.atropelados_campanha.reduce((acumulador, item) => acumulador + item.dif_km, 0) * analise.atropelados_campanha.reduce((acumulador, item) => acumulador + item.total_dias, 0))) * 100).toFixed(2)
+                                                ]
+                                            }]
+                                        }" :chart_options="{
+                                            responsive: true,
+                                            plugins: {
+                                                tooltip: {
+                                                    enabled: false
+                                                },
+                                                datalabels: {
+                                                    display: true,
+                                                    color: 'black',
+                                                    align: 'top',
+                                                    font: {
+                                                        weight: 'bold',
+                                                    },
+                                                }
+                                            }
+                                        }" />
+                                    </div>
+                                    <div class="col-12">
+                                        <InputLabel>Análise:</InputLabel>
+                                        <textarea v-model="form.analise_animais_atropelados_campanha"
+                                            class="form-control" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div :class="[tab === 'outras-analises' ? 'active show' : '']" class="tab-pane"
                                 id="outras-analises">
@@ -208,7 +250,7 @@ defineExpose({ abrirModal });
                                             :columns="['Nome', 'Análise dos resultados', 'Visualizar Arquivo', 'Ação']"
                                             :records="{ data: analise.outras_analises, links: [] }"
                                             table-class="table-hover">
-                                            <template #body="{ item, key }">
+                                            <template #body="{ item }">
                                                 <tr>
                                                     <td>{{ item.analise }}</td>
                                                     <td>
