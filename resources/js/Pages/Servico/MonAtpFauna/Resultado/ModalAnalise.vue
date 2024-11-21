@@ -102,6 +102,12 @@ defineExpose({ abrirModal });
                                     data-bs-toggle="tab">Taxa de atropelamentos por tipo de pista</a>
                             </li>
                             <li class="nav-item">
+                                <a href="#animais-atropelados-por-campanha"
+                                    @click="tab = 'animais-atropelados-por-campanha'"
+                                    :class="{ active: tab === 'animais-atropelados-por-campanha' }" class="nav-link"
+                                    data-bs-toggle="tab">Número de animais atropelados por classe por campanha</a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="#outras-analises" @click="tab = 'outras-analises'"
                                     :class="{ active: tab === 'outras-analises' }" class="nav-link"
                                     data-bs-toggle="tab">Outras análises</a>
@@ -196,12 +202,12 @@ defineExpose({ abrirModal });
                                 <div v-if="analise" class="row row-gap-2">
                                     <div class="col-12">
                                         <BarChart :style="{ height: 300 }" :chart_data="{
-                                            labels: [...analise.atropelados_campanha?.map((item) => 'Campanha: ' + item.id), 'Geral'],
+                                            labels: [...analise.atropelados_campanha.campanha?.map((item) => 'Campanha: ' + item.campanha_id), 'Geral'],
                                             datasets: [{
                                                 label: 'Taxa de atropelamentos (indivíduos/km/dia) por segmento',
                                                 data: [
-                                                    ...analise.atropelados_campanha?.map((item) => parseFloat(item.n_individuos / item.dif_km / item.total_dias).toFixed(2)),
-                                                    parseFloat((analise.atropelados_campanha.reduce((acumulador, item) => acumulador + item.n_individuos, 0) / analise.atropelados_campanha.reduce((acumulador, item) => acumulador + item.dif_km, 0) / analise.atropelados_campanha.reduce((acumulador, item) => acumulador + item.total_dias, 0))).toFixed(6)
+                                                    ...analise.atropelados_campanha.campanha?.map((item) => parseFloat(item.total_individuos / item.dif_km / item.total_dias).toFixed(6)),
+                                                    parseFloat((analise.atropelados_campanha.campanha.reduce((acumulador, item) => acumulador + item.total_individuos, 0) / analise.atropelados_campanha.campanha.reduce((acumulador, item) => acumulador + item.dif_km, 0) / analise.atropelados_campanha.campanha.reduce((acumulador, item) => acumulador + item.total_dias, 0))).toFixed(6)
                                                 ]
                                             }]
                                         }" :chart_options="{
@@ -239,6 +245,30 @@ defineExpose({ abrirModal });
                                                 label: 'Taxa de atropelamentos (indivíduos/km/dia) por tipo de pista',
                                                 data: [parseFloat(analise?.atropelados_tipo_pista.pavimentado / analise?.atropelados_tipo_pista.dif_km / analise?.atropelados_tipo_pista.total_dias).toFixed(4), parseFloat(analise?.atropelados_tipo_pista.nao_pavimentado / analise?.atropelados_tipo_pista.dif_km / analise?.atropelados_tipo_pista.total_dias).toFixed(4), parseFloat((analise?.atropelados_tipo_pista.pavimentado + analise?.atropelados_tipo_pista.nao_pavimentado) / analise?.atropelados_tipo_pista.dif_km / analise?.atropelados_tipo_pista.total_dias).toFixed(4)]
                                             }]
+                                        }" :chart_options="{
+                                            responsive: true,
+                                            plugins: {
+                                                tooltip: {
+                                                    enabled: false
+                                                }
+                                            }
+                                        }" />
+                                    </div>
+                                    <div class="col-12">
+                                        <InputLabel>Análise:</InputLabel>
+                                        <textarea v-model="form.analise_animais_atropelados_campanha"
+                                            class="form-control" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div :class="[tab === 'animais-atropelados-por-campanha' ? 'active show' : '']"
+                                class="tab-pane" id="animais-atropelados-por-campanha">
+                                <div v-if="analise" class="row row-gap-2">
+                                    <div class="col-12">
+                                        <BarChart :style="{ height: 300 }" :chart_data="{
+                                            labels: [],
+                                            datasets: analise.atropelados_campanha[0].datasets
                                         }" :chart_options="{
                                             responsive: true,
                                             plugins: {
