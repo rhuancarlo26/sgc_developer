@@ -41,6 +41,22 @@ class ResultadoCampanhaService extends BaseModelService
             ->sum('at_fauna_execucao_registro.n_individuos');
     }
 
+    public function getAtropeladoTipoPista($resultadoId)
+    {
+        return $this->model
+            ->join('at_fauna_execucao_campanhas as c', 'c.id', '=', 'at_fauna_resultado_campanha.fk_campanha')
+            ->join('at_fauna_execucao_registro as r', 'r.fk_campanha', '=', 'c.id')
+            ->where('at_fauna_resultado_campanha.fk_resultado', $resultadoId)
+            ->selectRaw("
+            SUM(CASE WHEN r.pavimentado = 'Sim' THEN r.n_individuos ELSE 0 END) as pavimentado,
+            SUM(CASE WHEN r.pavimentado = 'Não' THEN r.n_individuos ELSE 0 END) as nao_pavimentado,
+            SUM(n_individuos) as total,
+            c.km_final - c.km_inicial as dif_km,
+            DATEDIFF(c.data_final, c.data_inicial) as total_dias
+            ")
+            ->whereNotNull('r.pavimentado')->first();
+    }
+
     public function getAtropeladoCampanha($resultadoId)
     {
         return $this->model
@@ -70,8 +86,8 @@ class ResultadoCampanhaService extends BaseModelService
             ->join('at_fauna_execucao_campanhas', 'at_fauna_execucao_campanhas.id', '=', 'at_fauna_resultado_campanha.fk_campanha')
             ->join('at_fauna_execucao_registro', 'at_fauna_execucao_registro.fk_campanha', '=', 'at_fauna_execucao_campanhas.id')
             ->where('at_fauna_resultado_campanha.fk_resultado', $resultadoId)
-            ->selectRaw('at_fauna_execucao_registro.especie, COALESCE(SUM(at_fauna_execucao_registro.n_individuos), 0) as n_individuos')
-            ->groupBy('at_fauna_execucao_registro.especie')
+            ->selectRaw('at_fauna_execucao_registro.classe as nome, COALESCE(SUM(at_fauna_execucao_registro.especie), 0) as n_especies')
+            ->groupBy('at_fauna_execucao_registro.classe')
             ->get();
     }
 
