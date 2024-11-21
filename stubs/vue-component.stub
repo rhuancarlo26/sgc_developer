@@ -1,0 +1,32 @@
+<script setup>
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import {Head} from "@inertiajs/vue3";
+import Breadcrumb from "@/Components/Breadcrumb.vue";
+import ModelSearchForm from "@/Components/ModelSearchForm.vue";
+
+defineProps({
+    example: {type: Object, default: {}}
+})
+
+</script>
+
+<template>
+
+    <Head title="New Page > Subitem"/>
+
+    <AuthenticatedLayout>
+
+        <template #header>
+            <Breadcrumb :links="[
+                    {route: '#', label: 'New Page'},
+                    {route: '#', label: 'New Page Subitem'},
+                ]"/>
+        </template>
+
+        <div class="card card-body space-y-3">
+            <h1 class="my-2"> New Page </h1>
+        </div>
+
+    </AuthenticatedLayout>
+
+</template>

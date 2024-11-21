@@ -1,0 +1,44 @@
+.dropdown-item:hover {
+    background-color: var(--tblr-active-bg) !important;
+}
+
+.fill-current {
+    fill: currentColor;
+}
+
+.v-select .vs__search::placeholder,
+.v-select .vs__dropdown-toggle,
+.v-select .vs__dropdown-menu {
+    background: var(--tblr-light-bg-subtle);
+    color: var(--tblr-secondary);
+}
+
+
+.v-select .vs__clear,
+.v-select .vs__open-indicator {
+    fill: var(--tblr-secondary);
+}
+
+.v-select .vs__selected {
+    color: var(--tblr-secondary);
+}
+
+/* 
+    Sobreposição para otimizar o espaço dos containers e cards da tela 
+*/
+@media (min-width: 1200px) {
+    .container:not(.container-tight), .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
+        max-width: calc(100% - 40px) !important;
+        margin-left: 20px !important;
+        margin-right: 20px !important;
+    }
+}
+
+@media (min-width: 1400px) {
+    .container:not(.container-tight), .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
+        max-width: calc(100% - 40px) !important;
+        margin-left: 20px !important;
+        margin-right: 20px !important;
+    }
+}
+
