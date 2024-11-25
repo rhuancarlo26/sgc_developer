@@ -33,7 +33,7 @@ function updateRecordsState(records) {
                 </thead>
                 <tbody>
                     <slot v-if="records?.data?.length" v-for="(record, i) in records.data" name="body" :key="i"
-                        :item="record" />
+                        :item="record" :i="i" />
 
                     <tr v-else>
                         <td :colspan="columns.length" class="text-center py-3">
