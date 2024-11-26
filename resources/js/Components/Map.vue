@@ -47,7 +47,7 @@ const renderMapa = () => {
   }
 }
 
-const setDensity = (density_array, radius = 30, cleanPrevious = true) => {
+const setDensity = (density_array, radius = 25, blur = 15, cleanPrevious = true) => {
   if (density_layer && cleanPrevious) {
     map.removeLayer(density_layer);
     density_layer = null;
@@ -55,8 +55,8 @@ const setDensity = (density_array, radius = 30, cleanPrevious = true) => {
 
   var heat = L.heatLayer(density_array, {
     radius: radius,
-    max: 10,
-    blur: 15,
+    max: 1,
+    blur: blur,
     gradient: {
       0.2: 'blue',
       0.4: 'green',
