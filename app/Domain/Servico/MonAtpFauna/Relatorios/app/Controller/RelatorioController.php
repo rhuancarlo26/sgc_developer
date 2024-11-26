@@ -11,9 +11,7 @@ class RelatorioController extends Controller
 {
     public function __construct(
         private readonly AnaliseRelatorioService $analiseRelatorioService,
-    )
-    {
-    }
+    ) {}
 
     public function __invoke(Request $request): JsonResponse
     {
