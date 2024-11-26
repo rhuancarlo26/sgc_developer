@@ -2,6 +2,7 @@
 import { onMounted } from 'vue';
 import { ref, defineExpose } from 'vue';
 import { useToast } from 'vue-toastification';
+import 'leaflet.heat';
 
 const toast = useToast();
 
@@ -20,6 +21,7 @@ let map = null;
 let geojson_layer = null;
 let marker_layer = null;
 let marker_group = null;
+let density_layer = null;
 
 onMounted(() => {
   if (!props.manualRender) {
@@ -44,6 +46,32 @@ const renderMapa = () => {
     }).addTo(map);
   }
 }
+
+const setDensity = (density_array, radius = 25, blur = 15, cleanPrevious = true) => {
+  if (density_layer && cleanPrevious) {
+    map.removeLayer(density_layer);
+    density_layer = null;
+  }
+
+  var heat = L.heatLayer(density_array, {
+    radius: radius,
+    max: 1,
+    blur: blur,
+    gradient: {
+      0.2: 'blue',
+      0.4: 'green',
+      0.6: 'yellow',
+      1.0: 'red'
+    }
+  }).addTo(map);
+
+  density_layer = heat;
+
+  if (density_array.length > 0) {
+    const bounds = L.latLngBounds(density_array.map(coord => [coord[0], coord[1]]));
+    map.fitBounds(bounds);
+  }
+};
 
 // Caso poupupAndEvent seja true. Linestring array vai ter [0] como coordenadas e [1] como texto do popup,
 // e [2] como retorno do evento 'trechoClicado'
@@ -116,7 +144,7 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
 }
 
 const zoomFitBounds = () => {
-  map.fitBounds([marker_group?.getBounds(), geojson_layer.getBounds()]);
+  map.fitBounds([marker_group?.getBounds(), geojson_layer?.getBounds()]);
 }
 
 const zoomToLinestring = (geojson_linestring) => {
@@ -147,7 +175,7 @@ const zoomToLinestring = (geojson_linestring) => {
 
 }
 
-defineExpose({ renderMapa, setLinestrings, zoomToLinestring, zoomFitBounds });
+defineExpose({ renderMapa, setLinestrings, zoomToLinestring, zoomFitBounds, setDensity });
 
 </script>
 

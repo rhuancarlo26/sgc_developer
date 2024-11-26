@@ -7,11 +7,13 @@ use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\DeleteRecur
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\DeleteRecursoResponsavelController;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\DeleteRecursoVeiculoController;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\DeleteRetController;
+use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\DestroyTrechoController;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\GetAbioController;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\GetRelationshipController;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\GetRetCampanhaController;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\GetRetVinculadaController;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\IndexController;
+use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\SaveTrechosController;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\StoreController;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\StoreRecursoEquipamentoController;
 use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Controller\StoreRecursoEquipeController;
@@ -42,3 +44,5 @@ Route::post('delete_responsavel', [DeleteRecursoResponsavelController::class, 'i
 Route::post('delete_equipe', [DeleteRecursoEquipeController::class, 'index'])->name('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete_equipe');
 Route::post('delete_equipamento', [DeleteRecursoEquipamentoController::class, 'index'])->name('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete_equipamento');
 Route::post('delete_veiculo', [DeleteRecursoVeiculoController::class, 'index'])->name('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete_veiculo');
+Route::post('save_trechos', SaveTrechosController::class)->name('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.save_trechos');
+Route::post('destroy_trechos', DestroyTrechoController::class)->name('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.destroy_trechos');
