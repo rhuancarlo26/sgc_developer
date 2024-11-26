@@ -37,28 +37,7 @@ const mapaTrecho = ref(null);
 let coordenadas = ref(null);
 
 const abrirMapa = async () => {
-    var coordinates = [
-        [-15.602000, -47.654000, 0.0],
-        [-15.602053, -47.653684, 0.5],
-        [-15.602105, -47.653368, 1.0],
-        [-15.602158, -47.653053, 1.5],
-        [-15.602211, -47.652737, 2.0],
-        [-15.602263, -47.652421, 2.5],
-        [-15.602316, -47.652105, 3.0],
-        [-15.602368, -47.651789, 3.5],
-        [-15.602421, -47.651474, 4.0],
-        [-15.602474, -47.651158, 4.5],
-        [-15.602526, -47.650842, 5.0],
-        [-15.602579, -47.650526, 5.5],
-        [-15.602632, -47.650211, 6.0],
-        [-15.602684, -47.649895, 6.5],
-        [-15.602737, -47.649579, 7.0],
-        [-15.602789, -47.649263, 7.5],
-        [-15.602842, -47.648947, 8.0],
-        [-15.602895, -47.648632, 8.5],
-        [-15.602947, -47.648316, 9.0],
-        [-15.603000, -47.648000, 10.0]
-    ];
+    var coordinates = analise.value.tabela_registro.map((registro) => [registro.latitude, registro.longitude, 0.5]);
     //   if (!coordenadas.length) {
     //     await getGeoJson();
     //   }
@@ -316,7 +295,12 @@ defineExpose({ abrirModal });
                                             labels: ['Pavimentado', 'Não pavimentado', 'Geral'],
                                             datasets: [{
                                                 label: 'Taxa de atropelamentos (indivíduos/km/dia) por tipo de pista',
-                                                data: [parseFloat(analise?.atropelados_tipo_pista.pavimentado / analise?.atropelados_tipo_pista.dif_km / analise?.atropelados_tipo_pista.total_dias).toFixed(4), parseFloat(analise?.atropelados_tipo_pista.nao_pavimentado / analise?.atropelados_tipo_pista.dif_km / analise?.atropelados_tipo_pista.total_dias).toFixed(4), parseFloat((analise?.atropelados_tipo_pista.pavimentado + analise?.atropelados_tipo_pista.nao_pavimentado) / analise?.atropelados_tipo_pista.dif_km / analise?.atropelados_tipo_pista.total_dias).toFixed(4)]
+                                                data: [
+                                                    parseFloat(analise?.atropelados_tipo_pista.pavimentado / analise?.atropelados_tipo_pista.pavimentado_extensao / analise?.atropelados_tipo_pista.total_dias).toFixed(3),
+                                                    parseFloat(analise?.atropelados_tipo_pista.nao_pavimentado / analise?.atropelados_tipo_pista.nao_pavimentado_extensao / analise?.atropelados_tipo_pista.total_dias).toFixed(3),
+                                                    parseFloat((analise?.atropelados_tipo_pista.pavimentado + analise?.atropelados_tipo_pista.nao_pavimentado) / (analise?.atropelados_tipo_pista.pavimentado_extensao + analise?.atropelados_tipo_pista.nao_pavimentado_extensao) / analise?.atropelados_tipo_pista.total_dias).toFixed(3)
+                                                ],
+                                                backgroundColor: ['#cceaff', '#ffe5cc', '#cffccf']
                                             }]
                                         }" :chart_options="{
                                             responsive: true,

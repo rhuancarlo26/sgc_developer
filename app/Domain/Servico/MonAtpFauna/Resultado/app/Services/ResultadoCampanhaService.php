@@ -23,7 +23,9 @@ class ResultadoCampanhaService extends BaseModelService
                     '(CASE WHEN SUM(fer.n_individuos) IS NOT NULL THEN SUM(fer.n_individuos) ELSE 0 END) AS n_individuos'
                 ),
                 'fer.federal',
-                'fer.iucn'
+                'fer.iucn',
+                'fer.latitude',
+                'fer.longitude'
             ])
             ->join('at_fauna_execucao_campanhas AS fec', 'fec.id', '=', 'at_fauna_resultado_campanha.fk_campanha')
             ->join('at_fauna_execucao_registro AS fer', 'fer.fk_campanha', '=', 'fec.id')
@@ -46,10 +48,13 @@ class ResultadoCampanhaService extends BaseModelService
         return $this->model
             ->join('at_fauna_execucao_campanhas as c', 'c.id', '=', 'at_fauna_resultado_campanha.fk_campanha')
             ->join('at_fauna_execucao_registro as r', 'r.fk_campanha', '=', 'c.id')
+            ->join('at_fauna_execucao_campanhas_trecho_pavimentado as p', 'p.campanha_id', '=', 'c.id')
             ->where('at_fauna_resultado_campanha.fk_resultado', $resultadoId)
             ->selectRaw("
             SUM(CASE WHEN r.pavimentado = 'Sim' THEN r.n_individuos ELSE 0 END) as pavimentado,
+            SUM(CASE WHEN p.pavimentado = 'Sim' THEN p.extensao ELSE 0 END) as pavimentado_extensao,
             SUM(CASE WHEN r.pavimentado = 'Não' THEN r.n_individuos ELSE 0 END) as nao_pavimentado,
+            SUM(CASE WHEN p.pavimentado = 'Não' THEN p.extensao ELSE 0 END) as nao_pavimentado_extensao,
             SUM(n_individuos) as total,
             c.km_final - c.km_inicial as dif_km,
             DATEDIFF(c.data_final, c.data_inicial) as total_dias
