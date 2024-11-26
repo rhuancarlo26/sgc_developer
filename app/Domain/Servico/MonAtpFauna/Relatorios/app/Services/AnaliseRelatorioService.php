@@ -191,6 +191,7 @@ class AnaliseRelatorioService
         $dados['tabela_registro'] = $this->resultadoCampanhaService->getTabelaRegistrosIdentificados($request['fk_resultado']);
         $dados['total_individuos'] = $this->resultadoCampanhaService->getNumeroTotalIndividuos($request['fk_resultado']);
         $dados['atropelados_campanha'] = $this->resultadoCampanhaService->getAtropeladoCampanha($request['fk_resultado']);
+        $dados['atropelados_tipo_pista'] = $this->resultadoCampanhaService->getAtropeladoTipoPista($request['fk_resultado']);
         $dados['atropelados_classe'] = $this->resultadoCampanhaService->getAtropeladoClasse($request['fk_resultado']);
         $dados['atropelados_especie'] = $this->resultadoCampanhaService->getAtropeladoEspecie($request['fk_resultado']);
         $dados['atropelados_mes'] = $this->resultadoCampanhaService->getAtropeladoMes($request['fk_resultado']);
