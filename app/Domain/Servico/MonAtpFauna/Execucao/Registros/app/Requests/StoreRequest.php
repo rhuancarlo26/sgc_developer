@@ -22,6 +22,7 @@ class StoreRequest extends FormRequest
             'longitude' => 'nullable',
             'sentido' => 'nullable',
             'margem' => 'nullable',
+            'pavimentado' => 'nullable',
             'classe' => 'nullable',
             'ordem' => 'nullable',
             'familia' => 'nullable',

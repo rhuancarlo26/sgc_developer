@@ -8,6 +8,7 @@ import axios from "axios";
 import BarChart from "@/Components/BarChart.vue";
 import PieChart from "@/Components/PieChart.vue";
 import FolhaA4 from "./Components/FolhaA4.vue";
+import { computed } from "vue";
 
 const props = defineProps({
     contrato: { type: Object },
@@ -30,6 +31,14 @@ const abrirModal = async (item) => {
     }
     modalRef.value.getBsModal().show();
 }
+
+const numTotalIndividuos = computed(() => {
+    return relatorio.value.atropelados_classe.reduce((acumulador, item) => acumulador + item.n_individuos, 0)
+})
+
+const numTotalespecies = computed(() => {
+    return relatorio.value.atropelados_especie.reduce((acumulador, item) => acumulador + item.n_especies, 0)
+})
 
 watch(
     () => pagina.value,
@@ -348,13 +357,14 @@ defineExpose({ abrirModal });
                     <ul class="lista">
                         <li class="lista_content titulo_lista">12. Resultados</li>
                         <ul class="lista">
-                            <li class="lista_content subtitulo_lista">12.2 Gráfico com o número de animais
-                                atropelados por campanha</li>
-                            <BarChart :style="{ height: 300 }" :chart_data="{
-                                labels: relatorio.atropelados_campanha?.map((item) => 'Campanha: ' + item.id),
+                            <li class="lista_content subtitulo_lista">12.2 Abundância de animais atropelados por classe
+                            </li>
+                            <PieChart :chart_data="{
+                                labels: relatorio.atropelados_classe?.map((item) => item.nome),
                                 datasets: [{
-                                    label: 'Atropelamentos por campanha',
-                                    data: relatorio.atropelados_campanha?.map((item) => parseInt(item.n_individuos))
+                                    label: 'Abundância por classe',
+                                    backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16'],
+                                    data: relatorio.atropelados_classe?.map((item) => parseInt((item.n_individuos / numTotalIndividuos) * 100))
                                 }]
                             }" :chart_options="{
                                 responsive: true,
@@ -369,6 +379,10 @@ defineExpose({ abrirModal });
                                         font: {
                                             weight: 'bold',
                                         },
+                                        formatter: (value, context) => {
+                                            const label = context.chart.data.labels[context.dataIndex];
+                                            return `${label}: ${value}%`;
+                                        }
                                     }
                                 }
                             }" />
@@ -382,13 +396,14 @@ defineExpose({ abrirModal });
                     <ul class="lista">
                         <li class="lista_content titulo_lista">12. Resultados</li>
                         <ul class="lista">
-                            <li class="lista_content subtitulo_lista">12.3 Gráfico com o número de animais
-                                atropelados por km</li>
-                            <BarChart :style="{ height: 300 }" :chart_data="{
-                                labels: relatorio.atropelados_km?.map((item) => 'Km: ' + item.km),
+                            <li class="lista_content subtitulo_lista">12.3 Diversidade de animais atropelados por classe
+                            </li>
+                            <PieChart :chart_data="{
+                                labels: relatorio.atropelados_especie?.map((item) => item.nome),
                                 datasets: [{
-                                    label: 'Atropelamentos por km',
-                                    data: relatorio.atropelados_km?.map((item) => parseInt(item.n_individuos))
+                                    label: 'Diversidade por classe',
+                                    backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16'],
+                                    data: relatorio.atropelados_especie?.map((item) => parseInt((item.n_especies / numTotalespecies) * 100))
                                 }]
                             }" :chart_options="{
                                 responsive: true,
@@ -403,9 +418,42 @@ defineExpose({ abrirModal });
                                         font: {
                                             weight: 'bold',
                                         },
+                                        formatter: (value, context) => {
+                                            const label = context.chart.data.labels[context.dataIndex];
+                                            return `${label}: ${value}%`;
+                                        }
                                     }
                                 }
                             }" />
+                        </ul>
+                        <div class="conclusao">
+                            <span>{{ relatorio.analise?.analise_animais_atropelados_km }}</span>
+                        </div>
+                    </ul>
+                    <ul class="lista">
+                        <li class="lista_content titulo_lista">12. Resultados</li>
+                        <ul class="lista">
+                            <li class="lista_content subtitulo_lista">12.3 Diversidade de animais atropelados por classe
+                            </li>
+                            <BarChart :style="{ height: 300 }" :chart_data="{
+                                labels: [],
+                                datasets: relatorio.atropelados_campanha[0].datasets
+                            }" :chart_options="{
+                                            responsive: true,
+                                            plugins: {
+                                                tooltip: {
+                                                    enabled: false
+                                                },
+                                                datalabels: {
+                                                    display: true,
+                                                    color: 'black',
+                                                    align: 'top',
+                                                    font: {
+                                                        weight: 'bold',
+                                                    },
+                                                }
+                                            }
+                                        }" />
                         </ul>
                         <div class="conclusao">
                             <span>{{ relatorio.analise?.analise_animais_atropelados_km }}</span>
@@ -416,27 +464,23 @@ defineExpose({ abrirModal });
                     <ul class="lista">
                         <li class="lista_content titulo_lista">12. Resultados</li>
                         <ul class="lista">
-                            <li class="lista_content subtitulo_lista">12.5 Gráfico com o número de animais
-                                atropelados por espécies</li>
+                            <li class="lista_content subtitulo_lista">12.5 Taxa de atropelamentos por tipo de pista</li>
                             <BarChart :style="{ height: 300 }" :chart_data="{
-                                labels: relatorio.atropelados_especie?.map((item) => item.especie),
+                                labels: ['Pavimentado', 'Não pavimentado', 'Geral'],
                                 datasets: [{
-                                    label: 'Atropelamentos por espécie',
-                                    data: relatorio.atropelados_especie?.map((item) => parseInt(item.n_individuos))
+                                    label: 'Taxa de atropelamentos (indivíduos/km/dia) por tipo de pista',
+                                    data: [
+                                        parseFloat(relatorio?.atropelados_tipo_pista?.pavimentado / relatorio?.atropelados_tipo_pista?.pavimentado_extensao / relatorio?.atropelados_tipo_pista?.total_dias).toFixed(3),
+                                        parseFloat(relatorio?.atropelados_tipo_pista?.nao_pavimentado / relatorio?.atropelados_tipo_pista?.nao_pavimentado_extensao / relatorio?.atropelados_tipo_pista?.total_dias).toFixed(3),
+                                        parseFloat((relatorio?.atropelados_tipo_pista?.pavimentado + relatorio?.atropelados_tipo_pista?.nao_pavimentado) / (relatorio?.atropelados_tipo_pista?.pavimentado_extensao + relatorio?.atropelados_tipo_pista?.nao_pavimentado_extensao) / relatorio?.atropelados_tipo_pista?.total_dias).toFixed(3)
+                                    ],
+                                    backgroundColor: ['#cceaff', '#ffe5cc', '#cffccf']
                                 }]
                             }" :chart_options="{
                                 responsive: true,
                                 plugins: {
                                     tooltip: {
                                         enabled: false
-                                    },
-                                    datalabels: {
-                                        display: true,
-                                        color: 'white',
-                                        align: 'top',
-                                        font: {
-                                            weight: 'bold',
-                                        },
                                     }
                                 }
                             }" />
@@ -450,14 +494,15 @@ defineExpose({ abrirModal });
                     <ul class="lista">
                         <li class="lista_content titulo_lista">12. Resultados</li>
                         <ul class="lista">
-                            <li class="lista_content subtitulo_lista">
-                                12.6 Gráfico com o número de animais atropelados por mês de campanha (s).
-                            </li>
+                            <li class="lista_content subtitulo_lista">12.6 Taxa de atropelamentos por segmento</li>
                             <BarChart :style="{ height: 300 }" :chart_data="{
-                                labels: relatorio.atropelados_mes?.map((item) => item.mes + ' - Campanha: ' + item.campanha),
+                                labels: [...relatorio?.atropelados_campanha.campanha?.map((item) => 'Campanha: ' + item.campanha_id), 'Geral'],
                                 datasets: [{
-                                    label: '',
-                                    data: relatorio.atropelados_mes?.map((item) => parseInt(item.n_individuos))
+                                    label: 'Taxa de atropelamentos (indivíduos/km/dia) por segmento',
+                                    data: [
+                                        ...relatorio?.atropelados_campanha.campanha?.map((item) => parseFloat(item.total_individuos / item.dif_km / item.total_dias).toFixed(3)),
+                                        parseFloat((relatorio?.atropelados_campanha.campanha.reduce((acumulador, item) => acumulador + item.total_individuos, 0) / relatorio?.atropelados_campanha.campanha.reduce((acumulador, item) => acumulador + item.dif_km, 0) / relatorio?.atropelados_campanha.campanha.reduce((acumulador, item) => acumulador + item.total_dias, 0))).toFixed(3)
+                                    ]
                                 }]
                             }" :chart_options="{
                                 responsive: true,
@@ -467,7 +512,7 @@ defineExpose({ abrirModal });
                                     },
                                     datalabels: {
                                         display: true,
-                                        color: 'white',
+                                        color: 'black',
                                         align: 'top',
                                         font: {
                                             weight: 'bold',

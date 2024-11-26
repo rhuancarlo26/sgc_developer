@@ -69,6 +69,7 @@ class ResultadoService extends BaseModelService
             'analise' => AtFaunaResultadoAnalise::where('fk_resultado', $resultado->id)->first(),
             'tabela_registro' => $this->resultadoCampanhaService->getTabelaRegistrosIdentificados($resultado->id),
             'total_individuos' => $this->resultadoCampanhaService->getNumeroTotalIndividuos($resultado->id),
+            'atropelados_tipo_pista' => $this->resultadoCampanhaService->getAtropeladoTipoPista($resultado->id),
             'atropelados_campanha' => $this->resultadoCampanhaService->getAtropeladoCampanha($resultado->id),
             'atropelados_classe' => $this->resultadoCampanhaService->getAtropeladoClasse($resultado->id),
             'atropelados_especie' => $this->resultadoCampanhaService->getAtropeladoEspecie($resultado->id),
