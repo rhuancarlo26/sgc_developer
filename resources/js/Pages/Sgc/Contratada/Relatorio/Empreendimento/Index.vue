@@ -62,21 +62,9 @@ function formatDate(ts) {
 }
 
 function formatDateFromExcel(serial) {
-  // Recurso: convertia de Serial para o formato data - desativado devido à mudança para date no BD
-  /**
-   *
-   const excelEpoch = new Date(1899, 11, 30); // Excel começa em 30/12/1899
-   const date = new Date(excelEpoch.getTime() + serial * 86400000); // 86400000 = milissegundos por dia
-   return date.toLocaleDateString('pt-BR'); // Formato brasileiro de data (dd/mm/aaaa)
-   */
-//   if (isSerialDate(serial)) {
-//     const excelEpoch = new Date(1899, 11, 30); // Excel começa em 30/12/1899
-//    const date = new Date(excelEpoch.getTime() + serial * 86400000); // 86400000 = milissegundos por dia
-//    return date.toLocaleDateString('pt-BR'); // Formato brasileiro de data (dd/mm/aaaa)
-//   } else {
-      const date = new Date(serial);
-      return date.toLocaleDateString('pt-BR');
-    // }
+    const date = new Date(serial);
+    return date.toLocaleDateString('pt-BR');
+    
 }
 
 const mapaTabDadosContratuais = ref();

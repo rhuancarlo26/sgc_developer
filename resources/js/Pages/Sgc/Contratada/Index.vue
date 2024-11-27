@@ -18,8 +18,6 @@ const props = defineProps({
 console.log(props.subprodutos[0]);
 
 
-
-
 // Configuração do gráfico
 const chartOptions_radio = reactive({
   chart: {
@@ -94,6 +92,8 @@ const empreendimentoTable = (emp) => {
     // ];
   });
 };
+
+
 
 // Controle e dados da tabela
 const tabelaItens = reactive([]);
