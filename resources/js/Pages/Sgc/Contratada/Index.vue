@@ -15,6 +15,11 @@ const props = defineProps({
   subprodutos: Object
 });
 
+console.log(props.subprodutos[0]);
+
+
+
+
 // Configuração do gráfico
 const chartOptions_radio = reactive({
   chart: {
@@ -82,11 +87,11 @@ const empreendimentoTable = (emp) => {
       valor_total = props.contrato.total;
     });
 
-    chartOptions_radio.series[0].data = [
-      { name: 'Valor Medido', y: Number(soma_medidas.toFixed(0)), color: '#8cbbc4' },
-      { name: 'R$ OSE', y: Number(soma_ose.toFixed(0)), color: '#46aabd' },
-      { name: 'Total contrato', y: Number(valor_total.toFixed(0)), color: '#037c91' }
-    ];
+    // chartOptions_radio.series[0].data = [
+    //   { name: 'Valor Medido', y: Number(soma_medidas.toFixed(0)), color: '#8cbbc4' },
+    //   { name: 'R$ OSE', y: Number(soma_ose.toFixed(0)), color: '#46aabd' },
+    //   { name: 'Total contrato', y: Number(valor_total.toFixed(0)), color: '#037c91' }
+    // ];
   });
 };
 
@@ -161,12 +166,10 @@ const updateDisplayedItems = () => {
     <template #header>
       <div class="w-100 d-flex justify-content-between">
         <Breadcrumb class="align-self-center" :links="[ 
-          { route: route('contratos.gestao.listagem', contrato.tipo_id), label: `Gestão de Contratos` },
+          { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
           { route: '#', label: contrato.contratada }
         ]" />
         <div>
-          <!-- <navLink class="btn btn-info me-2 w-500" route-name="sgc.contratada.relatorios.index"
-          :param="contrato.id" title="Relatorio de coordenação" :icon="IconClipboardData" /> -->
           <Link class="btn btn-info me-2 w-500"  :href="route('sgc.contratada.relatorios.index', {contrato: contrato.id})">
             <IconClipboardData class="me-2" /> Relatorio de coordenação
           </Link>
