@@ -6,6 +6,7 @@ use App\Models\AtFaunaExecucaoCampanha;
 use App\Models\AtFaunaExecucaoCampanhaEquipamento;
 use App\Models\AtFaunaExecucaoCampanhaEquipe;
 use App\Models\AtFaunaExecucaoCampanhaResposavel;
+use App\Models\AtFaunaExecucaoCampanhaTrechoPavimentacao;
 use App\Models\AtFaunaExecucaoCampanhaVeiculo;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
@@ -24,6 +25,7 @@ class CampanhasService extends BaseModelService
     protected string $modelClassEquipe = AtFaunaExecucaoCampanhaEquipe::class;
     protected string $modelClassEquipamento = AtFaunaExecucaoCampanhaEquipamento::class;
     protected string $modelClassVeiculo = AtFaunaExecucaoCampanhaVeiculo::class;
+    protected string $modelClassPavimentacao = AtFaunaExecucaoCampanhaTrechoPavimentacao::class;
 
     public function index(Servicos $servico, array $searchParams): LengthAwarePaginator
     {
@@ -108,6 +110,25 @@ class CampanhasService extends BaseModelService
             'at_fauna_execucao_campanha_id' => $post['at_fauna_execucao_campanha_id'],
             'servico_veiculo_id' => $post['veiculo_id']
         ]);
+    }
+
+    public function store_trechos(array $post)
+    {
+        foreach ($post['trechos'] as $value) {
+            $this->dataManagement->create(entity: $this->modelClassPavimentacao, infos: [
+                ...$value,
+                'campanha_id' => $post['campanha_id']
+            ]);
+        }
+
+        return $this->modelClassPavimentacao::where('campanha_id', '=', $post['campanha_id'])->get();
+    }
+
+    public function destroy_trecho(array $post)
+    {
+        $this->dataManagement->delete(entity: $this->modelClassPavimentacao, id: $post['id']);
+
+        return $this->modelClassPavimentacao::where('campanha_id', '=', $post['campanha_id'])->get();
     }
 
     public function delete_responsavel(array $post)

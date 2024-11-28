@@ -18,5 +18,5 @@ Route::post('/store_importar', [StoreImportarController::class, 'index'])->name(
 Route::patch('/update', UpdateController::class)->name('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.update');
 Route::delete('/{registro}', DeleteController::class)->name('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.delete');
 Route::delete('/imagem/{imagem}', DeleteImagemController::class)->name('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.imagens-delete');
-Route::get('/excel/{servico}/exportar',         ExcelExportController::class)->name('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.export');
+Route::get('/excel/{servico}/exportar', [ExcelExportController::class, 'index'])->name('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.export');
 // Route::get('modelo_importar', [DownloadModeloController::class, 'index'])->name('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.modelo_importar');

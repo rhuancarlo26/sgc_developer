@@ -5,13 +5,14 @@ import { Link, router, useForm } from "@inertiajs/vue3";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
-import { IconDots, IconTrash } from "@tabler/icons-vue";
+import { IconDots, IconPlus, IconTrash } from "@tabler/icons-vue";
 import Table from "@/Components/Table.vue";
 import axios from "axios";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import { dateTimeFormat } from "../../../../../Utils/DateTimeUtils.js";
 import NavButton from "@/Components/NavButton.vue";
 import { useToast } from "vue-toastification";
+import { computed } from "vue";
 
 const toast = useToast();
 
@@ -37,6 +38,16 @@ const form = useForm({
     observacao: null,
 });
 
+const form_trecho = useForm({
+    uf_inicial: null,
+    uf_final: null,
+    rodovia: null,
+    km_inicial: null,
+    km_final: null,
+    extensao: null,
+    pavimentado: null
+});
+
 const form_recurso = useForm({
     at_fauna_execucao_campanha_id: null,
     responsavel_id: null,
@@ -44,6 +55,8 @@ const form_recurso = useForm({
     equipamento_id: null,
     veiculo_id: null
 });
+
+const trechos = ref([]);
 
 const save = () => {
     form.transform((data) => ({
@@ -74,6 +87,9 @@ const tab = ref(null)
 const modalRef = ref();
 const abrirModal = (item = null) => {
     form.reset()
+    form_trecho.reset()
+    trechos.value = [];
+
     Object.assign(form, item)
 
     getRelationship();
@@ -208,6 +224,29 @@ const deleteVeiculo = ($responsavel) => {
     }));
 }
 
+const adicionarTrecho = () => {
+    trechos.value.push({
+        ...form_trecho,
+        campanha_id: form.id,
+        extensao: form_trecho.km_final - form_trecho.km_inicial
+    });
+
+    form_trecho.reset()
+}
+
+const saveTrechos = () => {
+    axios.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.save_trechos'), { trechos: trechos.value, campanha_id: form.id }).then((resp) => {
+        trechos.value = [];
+        relationships.value.trechos_pavimentacao = resp.data;
+    })
+}
+
+const excluirTrecho = (item) => {
+    axios.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.destroy_trechos'), item).then((resp) => {
+        relationships.value.trechos_pavimentacao = resp.data;
+    })
+}
+
 onMounted(() => {
     modalRef.value.$el.addEventListener('hidden.bs.modal', () => {
         form.reset()
@@ -232,6 +271,10 @@ defineExpose({ abrirModal });
                             <li class="nav-item">
                                 <a href="#dados" @click="tab = 'campanhas'" :class="{ active: tab === 'campanhas' }"
                                     class="nav-link" data-bs-toggle="tab">CAMPANHAS</a>
+                            </li>
+                            <li v-if="form.id" class="nav-item">
+                                <a href="#trecho" @click="tab = 'trecho'" :class="{ active: tab === 'trecho' }"
+                                    class="nav-link" data-bs-toggle="tab">TRECHO</a>
                             </li>
                             <li v-if="form.id" class="nav-item">
                                 <a href="#recurso" @click="tab = 'recurso'" :class="{ active: tab === 'recurso' }"
@@ -548,6 +591,115 @@ defineExpose({ abrirModal });
                                                 </tr>
                                             </template>
                                         </Table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div :class="[tab === 'trecho' ? 'active show' : '']" class="tab-pane" id="trecho">
+                                <div class="row mb-4">
+                                    <div class="col">
+                                        <InputLabel value="UF inicial" for="uf_inicial" />
+                                        <select name="uf_inicial" id="uf_inicial" class="form-select"
+                                            v-model="form_trecho.uf_inicial">
+                                            <option v-for="uf in licencasVigente" :key="uf.id_estados"
+                                                :value="uf.nome_estado">{{ `${uf.uf} -
+                                                ${uf.nome_estado}` }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <InputLabel value="UF final" for="uf_final" />
+                                        <select name="uf_final" id="uf_final" class="form-select"
+                                            v-model="form_trecho.uf_final">
+                                            <option v-for="uf in licencasVigente" :key="uf.id_estados"
+                                                :value="uf.nome_estado">{{ `${uf.uf} -
+                                                ${uf.nome_estado}` }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <InputLabel value="Rodovia" for="rodovia" />
+                                        <select name="rodovia" id="rodovia" class="form-select"
+                                            v-model="form_trecho.rodovia">
+                                            <option v-for="rodovia in licencasVigente" :key="rodovia.id_estados"
+                                                :value="rodovia.rodovia">{{
+                                                    rodovia.rodovia
+                                                }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <InputLabel value="Km inicial" for="km_inicial" />
+                                        <input type="number" step="any" class="form-control"
+                                            v-model="form_trecho.km_inicial">
+                                    </div>
+                                    <div class="col">
+                                        <InputLabel value="Km final" for="km_final" />
+                                        <input type="number" step="any" class="form-control"
+                                            v-model="form_trecho.km_final">
+                                    </div>
+                                    <div class="col">
+                                        <InputLabel value="Pavimentado?" />
+                                        <div class="row g-2">
+                                            <div class="col">
+                                                <select name="pavimentado" id="pavimentado" class="form-select"
+                                                    v-model="form_trecho.pavimentado">
+                                                    <option value="Sim">Sim</option>
+                                                    <option value="Não">Não</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <NavButton @click="adicionarTrecho" type-button="success"
+                                                    :icon="IconPlus" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row col mb-4">
+                                    <div class="table-responsive mb-4">
+                                        <table class="table table-hover non-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>UF INICIAL</th>
+                                                    <th>UF FINAL</th>
+                                                    <th>RODOVIA</th>
+                                                    <th>KM INICIAL</th>
+                                                    <th>KM FINAL</th>
+                                                    <th>PAVIMENTADO</th>
+                                                    <th>AÇÃO</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="item, i in relationships.trechos_pavimentacao" :key="i">
+                                                    <td>{{ item.uf_inicial }}</td>
+                                                    <td>{{ item.uf_final }}</td>
+                                                    <td>{{ item.rodovia }}</td>
+                                                    <td>{{ item.km_inicial }}</td>
+                                                    <td>{{ item.km_final }}</td>
+                                                    <td>{{ item.pavimentado }}</td>
+                                                    <td class="text-center">
+                                                        <NavButton @click="excluirTrecho(item, i)" type-button="danger"
+                                                            :icon="IconTrash" />
+                                                    </td>
+                                                </tr>
+                                                <tr v-for="item, i in trechos" :key="i">
+                                                    <td>{{ item.uf_inicial }}</td>
+                                                    <td>{{ item.uf_final }}</td>
+                                                    <td>{{ item.rodovia }}</td>
+                                                    <td>{{ item.km_inicial }}</td>
+                                                    <td>{{ item.km_final }}</td>
+                                                    <td>{{ item.pavimentado }}</td>
+                                                    <td class="text-center">
+                                                        <NavButton @click="trechos.splice(i, 1)" type-button="danger"
+                                                            :icon="IconTrash" />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row col">
+                                    <div class="d-flex justify-content-end">
+                                        <NavButton @click="saveTrechos" type-button="success" title="Salvar" />
                                     </div>
                                 </div>
                             </div>

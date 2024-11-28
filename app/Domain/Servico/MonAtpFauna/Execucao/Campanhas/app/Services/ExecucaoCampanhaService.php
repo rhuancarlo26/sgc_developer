@@ -6,6 +6,7 @@ use App\Models\AtFaunaExecucaoCampanhaAbio;
 use App\Models\AtFaunaExecucaoCampanhaEquipamento;
 use App\Models\AtFaunaExecucaoCampanhaEquipe;
 use App\Models\AtFaunaExecucaoCampanhaResposavel;
+use App\Models\AtFaunaExecucaoCampanhaTrechoPavimentacao;
 use App\Models\AtFaunaExecucaoCampanhaVeiculo;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
@@ -50,7 +51,8 @@ class ExecucaoCampanhaService extends BaseModelService
             'recurso_responsaveis' => AtFaunaExecucaoCampanhaResposavel::with('servico_rh.rh')->where('at_fauna_execucao_campanha_id', $campanhaId)->get(),
             'recurso_equipes' => AtFaunaExecucaoCampanhaEquipe::with('servico_rh.rh')->where('at_fauna_execucao_campanha_id', $campanhaId)->get(),
             'recurso_equipamentos' => AtFaunaExecucaoCampanhaEquipamento::with('servico_equipamento.equipamento')->where('at_fauna_execucao_campanha_id', $campanhaId)->get(),
-            'recurso_veiculos' => AtFaunaExecucaoCampanhaVeiculo::with('servico_veiculo.veiculo')->where('at_fauna_execucao_campanha_id', $campanhaId)->get()
+            'recurso_veiculos' => AtFaunaExecucaoCampanhaVeiculo::with('servico_veiculo.veiculo')->where('at_fauna_execucao_campanha_id', $campanhaId)->get(),
+            'trechos_pavimentacao' => AtFaunaExecucaoCampanhaTrechoPavimentacao::where('campanha_id', $campanhaId)->get()
         ];
     }
 
