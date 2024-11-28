@@ -32,6 +32,7 @@ const form = useForm({
     longitude: null,
     sentido: null,
     margem: null,
+    pavimentado: null,
     classe: null,
     ordem: null,
     familia: null,
@@ -236,13 +237,23 @@ defineExpose({ abrirModal });
                                         <input type="radio" value="D" v-model="form.sentido" :disabled="!showAction">
                                         Decrescente
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col-3">
                                         <InputLabel value="Margem" />
                                         <input type="radio" value="E" v-model="form.margem" :disabled="!showAction">
                                         Esquerda
                                         <br />
                                         <input type="radio" value="D" v-model="form.margem" :disabled="!showAction">
                                         Direita
+                                    </div>
+                                    <div class="col-3">
+                                        <InputLabel value="Pavimentado?" />
+                                        <input type="radio" value="Sim" v-model="form.pavimentado"
+                                            :disabled="!showAction">
+                                        Sim
+                                        <br />
+                                        <input type="radio" value="Não" v-model="form.pavimentado"
+                                            :disabled="!showAction">
+                                        Não
                                     </div>
                                 </div>
                             </div>
@@ -252,9 +263,10 @@ defineExpose({ abrirModal });
                                     <div class="col-lg-4">
                                         <InputLabel value="Classe" for="classe" />
                                         <v-select :options="[
-                                            { id: '1', label: 'Avifauna' },
-                                            { id: '2', label: 'Herpetofauna' },
-                                            { id: '3', label: 'Mastofauna' }
+                                            { id: '1', label: 'Aves' },
+                                            { id: '2', label: 'Mamíferos' },
+                                            { id: '3', label: 'Répteis' },
+                                            { id: '4', label: 'Anfíbios' },
                                         ]" v-model="form.classe" :reduce="t => t.id" :disabled="!showAction">
                                             <template #no-options="{}">
                                                 Nenhum registro encontrado.

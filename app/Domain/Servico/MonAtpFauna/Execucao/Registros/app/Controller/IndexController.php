@@ -7,6 +7,7 @@ use App\Domain\Servico\MonAtpFauna\Execucao\Campanhas\app\Services\CampanhasServ
 use App\Domain\Servico\MonAtpFauna\Execucao\Registros\app\Services\RegistrosService;
 use App\Domain\Servico\PMQA\Configuracao\Parametro\Services\ParametroService;
 use App\Models\Contrato;
+use App\Models\Rodovia;
 use App\Models\Servicos;
 use App\Models\Uf;
 use App\Shared\Http\Controllers\Controller;
@@ -31,9 +32,11 @@ class IndexController extends Controller
             'contrato' => $contrato,
             'servico' => $servico->load(['tipo', 'parecer_atropelamento']),
             'ufs' => Cache::rememberForever('ufs', fn() => Uf::all()),
+            'rodovias' => Cache::rememberForever('rodovias', fn() => Rodovia::all()),
             'data' => $this->registrosService->index($servico, $searchParams),
             'campanhas' => $this->campanhasService->getCampanhas(servicoId: $servico->id, searchParams: ['', ''], paginate: false),
             'licencasVigente' => $this->servicoLicencaCondicionanteService->getLicencaMalhaViariaVigente($servico->id),
         ]);
     }
 }
+
