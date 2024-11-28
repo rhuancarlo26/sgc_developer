@@ -44,4 +44,14 @@ class VincularABIOService extends BaseModelService
       'nome' => $nome
     ]);
   }
+
+  public function destroy(object $abio)
+  {
+    return $this->dataManagement->delete(entity: $this->modelClass, id: $abio->id);
+  }
+
+  public function destroy_ret(object $abio_ret)
+  {
+    return $this->dataManagement->delete(entity: $this->modelClassRet, id: $abio_ret->id);
+  }
 }
