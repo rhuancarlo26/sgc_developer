@@ -10,7 +10,9 @@ import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconDots } from "@tabler/icons-vue";
 import ModalVincularABIO from "./ModalVincularABIO.vue";
 import ModalAdicionarRet from "./ModalAdicionarRet.vue";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import { ref } from "vue";
+import { Head, Link, router } from '@inertiajs/vue3';
 
 const props = defineProps({
   contrato: { type: Object },
@@ -21,6 +23,7 @@ const props = defineProps({
 
 const modalVincularABIORef = ref({});
 const modalAdicionarRetRef = ref({});
+const linkConfirmationRef = ref()
 
 const abrirModalVincularABIO = () => {
   modalVincularABIORef.value.abrirModal();
@@ -28,6 +31,12 @@ const abrirModalVincularABIO = () => {
 
 const abrirModalAdicionarRet = (item) => {
   modalAdicionarRetRef.value.abrirModal(item);
+}
+
+const deleteVinculoAbio = (id) => {
+  linkConfirmationRef.value.show(() => {
+    router.delete(route('contratos.contratada.servicos.monitora_fauna.configuracoes.vincular_abio.destroy_abio', { contrato: props.contrato.id, servico: props.servico.id, abio: id }))
+  })
 }
 
 </script>
@@ -90,6 +99,9 @@ const abrirModalAdicionarRet = (item) => {
                   <a @click="abrirModalAdicionarRet(item)" href="javascript:void(0);" class="dropdown-item">
                     Adicionar RET
                   </a>
+                  <a @click="deleteVinculoAbio(item.id)" href="javascript:void(0);" class="dropdown-item">
+                    Excluir registro
+                  </a>
                 </div>
               </td>
             </tr>
@@ -98,6 +110,7 @@ const abrirModalAdicionarRet = (item) => {
       </template>
     </Navbar>
 
+    <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Excluir registro?' }" />
     <ModalVincularABIO :contrato="contrato" :servico="servico" :licencas="licencas" ref="modalVincularABIORef" />
     <ModalAdicionarRet :contrato="contrato" :servico="servico" ref="modalAdicionarRetRef" />
 

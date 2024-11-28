@@ -25,6 +25,13 @@ const abrirModal = (item) => {
     modalAdicionarRetRef.value.getBsModal().show();
 }
 
+const arquivoRetAtual = computed(() => {
+    if (!abio.value.rets?.length) {
+        return [];
+    };
+    return abio.value.rets.shift();
+})
+
 const salvarRet = () => {
     router.post(route('contratos.contratada.servicos.monitora_fauna.configuracoes.vincular_abio.store_ret', {
         contrato: props.contrato.id,
@@ -101,11 +108,11 @@ defineExpose({ abrirModal });
                 </div>
                 <div class="row row-gap-2">
                     <div class="col-6">
-                        <div v-if="abio?.rets?.length" class="row row-gap-2">
+                        <div class="row row-gap-2">
                             <div class="col-12">
                                 <h4>RET vigente</h4>
                                 <Table :columns="['Arquivo', 'Data Inclusão', 'Ação']"
-                                    :records="{ data: [abio?.rets[0]], links: [] }">
+                                    :records="{ data: [arquivoRetAtual], links: [] }">
                                     <template #body="{ item }">
                                         <tr>
                                             <td>{{ item.nome }}</td>
@@ -113,14 +120,10 @@ defineExpose({ abrirModal });
                                             <td class="w-0">
                                                 <LinkConfirmation v-slot="confirmation"
                                                     :options="{ text: 'Excluir registro?' }">
-                                                    <Link :onBefore="(request) => confirmation.show({
-                                                        ...request,
-                                                        onSuccess: () => {
-                                                            modalAdicionarRetRef.getBsModal().hide();
-                                                        }
-                                                    })" :href="route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.delete_ret', item.id)"
-                                                        as="button" method="delete" type="button"
-                                                        class="btn btn-sm btn-icon btn-danger">
+                                                    <Link :onBefore="confirmation.show"
+                                                        :href="route('contratos.contratada.servicos.monitora_fauna.configuracoes.vincular_abio.destroy_abio_ret', { contrato: contrato.id, servico: servico.id, abio_ret: item.id })"
+                                                        method="DELETE" as="button" type="button"
+                                                        class="btn btn-icon btn-danger">
                                                     <IconTrash />
                                                     </Link>
                                                 </LinkConfirmation>
@@ -140,14 +143,10 @@ defineExpose({ abrirModal });
                                             <td class="w-0">
                                                 <LinkConfirmation v-slot="confirmation"
                                                     :options="{ text: 'Excluir registro?' }">
-                                                    <Link :onBefore="(request) => confirmation.show({
-                                                        ...request,
-                                                        onSuccess: () => {
-                                                            modalAdicionarRetRef.getBsModal().hide();
-                                                        }
-                                                    })" :href="route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.delete_ret', item.id)"
-                                                        as="button" method="delete" type="button"
-                                                        class="btn btn-sm btn-icon btn-danger">
+                                                    <Link :onBefore="confirmation.show"
+                                                        :href="route('contratos.contratada.servicos.monitora_fauna.configuracoes.vincular_abio.destroy_abio_ret', { contrato: contrato.id, servico: servico.id, abio_ret: item.id })"
+                                                        method="DELETE" as="button" type="button"
+                                                        class="btn btn-icon btn-danger">
                                                     <IconTrash />
                                                     </Link>
                                                 </LinkConfirmation>
