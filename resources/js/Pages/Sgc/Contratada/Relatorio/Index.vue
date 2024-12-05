@@ -292,7 +292,6 @@ onMounted(() => {
                         <button v-if="item.id_item >= 17" @click="downloadFile(item.id_item)" class="bg-blue-500 text-black px-4 py-2 rounded">Anexo</button>
                         <button v-else @click="abrirDoc(item.id_item)" class="btn btn-success mr-2">Abrir</button>
                       </td>
-                      
                     </tr>
                   </tbody>
                 </table>
