@@ -12,16 +12,14 @@ use Inertia\Response;
 
 class FrenteSupressaoController extends Controller
 {
-    public function __construct(private readonly FrenteSupressaoService $frenteSupressaoService)
-    {
-    }
+    public function __construct(private readonly FrenteSupressaoService $frenteSupressaoService) {}
 
     public function index(Contrato $contrato, Servicos $servico): Response
     {
         $frenteSupressao = $this->frenteSupressaoService->getFrenteSupressao($servico);
         return Inertia::render('Servico/AfugentamentoResgateFauna/Execucao/FrenteSupressao', [
             'contrato'  => $contrato,
-            'servico'   => $servico->load(['tipo']),
+            'servico'   => $servico->load(['tipo', 'parecerAfugentamento']),
             'frenteSupressao' => $frenteSupressao->load(['rodovia', 'ufInicial', 'ufFinal']),
         ]);
     }
