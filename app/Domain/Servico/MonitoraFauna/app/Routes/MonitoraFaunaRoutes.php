@@ -11,4 +11,9 @@ Route::prefix('/monitora_fauna')->group(function () {
       require __DIR__ . '../../../Configuracao/ModuloAmostral/Routes/ModuloAmostralRoutes.php';
     });
   });
+  Route::prefix('/execucao')->group(function () {
+    Route::prefix('/campanha')->group(function () {
+      require __DIR__ . '../../../Execucao/Campanha/Routes/CampanhaRoutes.php';
+    });
+  });
 });
