@@ -1,0 +1,6 @@
+1 - trazer a pasta import para o mesmo nivel da controller
+----------------------------------------------------------------------- feito
+
+2 - criar tabela e adaptar a Model
+3 - criar a controller
+4 - adaptar no Front
