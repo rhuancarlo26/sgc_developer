@@ -12,21 +12,19 @@ use Inertia\Response;
 
 class ResultadoController extends Controller
 {
-    public function __construct(private readonly ResultadoService $resultadoService)
-    {
-    }
+    public function __construct(private readonly ResultadoService $resultadoService) {}
 
     public function index(Contrato $contrato, Servicos $servico): Response
     {
         $resultado = $this->resultadoService->getResultado($servico);
         return Inertia::render('Servico/AfugentamentoResgateFauna/Resultado/Resultado', [
             'contrato'  => $contrato,
-            'servico'   => $servico->load(['tipo']),
+            'servico'   => $servico->load(['tipo', 'parecerAfugentamento']),
             'resultado' => $resultado,
         ]);
     }
 
-    
+
     public function getResultados(Contrato $contrato, Servicos $servico): JsonResponse
     {
         $resultado = $this->resultadoService->getResultado($servico);

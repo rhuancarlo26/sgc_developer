@@ -18,7 +18,7 @@ class RelatorioController extends Controller
         $relatorio = $this->relatorioService->getRelatorio($servico);
         return Inertia::render('Servico/AfugentamentoResgateFauna/Relatorio/Relatorio', [
             'contrato'  => $contrato,
-            'servico'   => $servico->load(['tipo']),
+            'servico'   => $servico->load(['tipo', 'parecerAfugentamento']),
             'relatorio' => $relatorio,
         ]);
     }
