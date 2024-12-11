@@ -35,7 +35,7 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                         title="Gestão Ambiental" />
 
                                     <!-- Estudo Ambiental -->
-                                    <NavDropdownLink route-name="contratos.gestao.listagem" param-name="tipo"
+                                    <NavDropdownLink route-name="sgc.gestao.dashboard.index" param-name="tipo"
                                         route-param="2" active-on-route-prefix="contratos.gestao.*"
                                         title="Estudo Ambiental" />
 
