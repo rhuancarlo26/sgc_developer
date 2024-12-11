@@ -15,5 +15,8 @@ Route::prefix('/monitora_fauna')->group(function () {
     Route::prefix('/campanha')->group(function () {
       require __DIR__ . '../../../Execucao/Campanha/Routes/CampanhaRoutes.php';
     });
+    Route::prefix('/registro')->group(function () {
+      require __DIR__ . '../../../Execucao/Registro/Routes/RegistroRoutes.php';
+    });
   });
 });
