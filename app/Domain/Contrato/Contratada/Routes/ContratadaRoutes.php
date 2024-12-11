@@ -38,7 +38,7 @@ use App\Domain\Servico\app\Controller\EnviaServicoFiscalController;
 Route::prefix('/contratada')->group(function () {
     Route::get('{contrato}/', [ContratoContratadaController::class, 'index'])->name('contratos.contratada.index');
     Route::get('{contrato}/dados_gerais', [DadosGeraisContratadaController::class, 'index'])->name('contratos.contratada.dados_gerais.index');
-    Route::post('/store_introducao', [StoreIntroducaoContratadaController::class, 'index'])->name('contratos.contratada.store_introducao.index');
+    // Route::post('/store_introducao', [StoreIntroducaoContratadaController::class, 'index'])->name('contratos.contratada.store_introducao.index');
     Route::patch('/update_introducao/{introducao}', [UpdateIntroducaoContratadaController::class, 'index'])->name('contratos.contratada.update_introducao.index');
     Route::post('/store_licenciamento', [StoreLicenciamentoContratadaController::class, 'index'])->name('contratos.contratada.store_licenciamento');
     Route::post('/delete_licenciamento/{licenca}', [DeleteLicenciamentoContratadaController::class, 'index'])->name('contratos.contratada.delete_licenciamento');
@@ -99,6 +99,7 @@ Route::prefix('/contratada')->group(function () {
             require __DIR__ . '/../../../Servico/ContOcorrencia/app/Routes/ContOcorrenciaRoutes.php';
             require __DIR__ . '/../../../Servico/SupressaoVegetacao/app/Routes/SupressaoVegetacaoRoutes.php';
             require __DIR__ . '/../../../Servico/PassagemFauna/app/Routes/PassagemFaunaRoutes.php';
+            require __DIR__ . '/../../../Servico/MonitoraFauna/app/Routes/MonitoraFaunaRoutes.php';
         });
     });
 });
