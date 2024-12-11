@@ -209,7 +209,7 @@ onMounted(() => {
             <div class="row mb-3">
               <div class="col-12 text-center">
                 <div class="titulo-relatorio">
-                  14º RELATÓRIO DE COORDENAÇÃO
+                  15º RELATÓRIO DE COORDENAÇÃO
                 </div>
               </div>
             </div>
@@ -292,7 +292,6 @@ onMounted(() => {
                         <button v-if="item.id_item >= 17" @click="downloadFile(item.id_item)" class="bg-blue-500 text-black px-4 py-2 rounded">Anexo</button>
                         <button v-else @click="abrirDoc(item.id_item)" class="btn btn-success mr-2">Abrir</button>
                       </td>
-                      
                     </tr>
                   </tbody>
                 </table>

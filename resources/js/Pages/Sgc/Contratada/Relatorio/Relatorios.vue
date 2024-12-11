@@ -61,9 +61,9 @@ onMounted(() => {
           <div class="container mt-4">
             <div class="row mb-3">
               <div class="col-12 text-center">
-                <div class="titulo-relatorio">
+                <h3 class="titulo-relatorio">
                   RELATÓRIO DE COORDENAÇÃO E EXECUÇÃO DOS SERVIÇOS
-                </div>
+                </h3>
               </div>
             </div>
             

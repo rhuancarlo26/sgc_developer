@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 import { ref } from 'vue';
-import Map from "@/Components/Map.vue";
+import Map from "@/Components/MapSgc.vue";
 import { Chart } from "highcharts-vue";
 
 const props = defineProps({
