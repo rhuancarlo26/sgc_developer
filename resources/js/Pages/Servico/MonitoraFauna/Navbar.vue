@@ -45,6 +45,10 @@ const porps = defineProps({
                           route-name="contratos.contratada.servicos.monitora_fauna.execucao.campanha.index"
                           active-on-route-prefix="contratos.contratada.servicos.monitora_fauna.execucao.campanha*"
                           :route-param="{ contrato: contrato.id, servico: servico.id }" title="Campanhas" />
+                        <NavDropdownLink
+                          route-name="contratos.contratada.servicos.monitora_fauna.execucao.registro.index"
+                          active-on-route-prefix="contratos.contratada.servicos.monitora_fauna.execucao.registro*"
+                          :route-param="{ contrato: contrato.id, servico: servico.id }" title="Registros" />
                       </NavDropdown>
                     </ul>
                   </div>
