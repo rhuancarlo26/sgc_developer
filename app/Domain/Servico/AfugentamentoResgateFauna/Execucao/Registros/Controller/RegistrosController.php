@@ -11,9 +11,7 @@ use Inertia\Response;
 
 class RegistrosController extends Controller
 {
-    public function __construct(private readonly RegistrosService $registrosService)
-    {
-    }
+    public function __construct(private readonly RegistrosService $registrosService) {}
 
     public function index(Contrato $contrato, Servicos $servico): Response
     {
@@ -26,7 +24,7 @@ class RegistrosController extends Controller
         $statusConservacaoIucn = $this->registrosService->getStatusConservacaoIucn();
         return Inertia::render('Servico/AfugentamentoResgateFauna/Execucao/Registros', [
             'contrato'  => $contrato,
-            'servico'   => $servico->load(['tipo']),
+            'servico'   => $servico->load(['tipo', 'parecerAfugentamento']),
             'grupoAmostrado' => $grupoAmostrado,
             'frenteSupressao' => $frenteSupressao,
             'formaRegistro' => $formaRegistro,

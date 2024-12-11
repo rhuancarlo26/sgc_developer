@@ -17,7 +17,7 @@ class PareceresController extends Controller
         $pareceres = $this->pareceresService->getPareceres($servico->id);
         return Inertia::render('Servico/AfugentamentoResgateFauna/Pareceres/Pareceres', [
             'contrato'  => $contrato,
-            'servico'   => $servico->load(['tipo']),
+            'servico'   => $servico->load(['tipo', 'parecerAfugentamento']),
             'pareceres' => $pareceres,
         ]);
     }

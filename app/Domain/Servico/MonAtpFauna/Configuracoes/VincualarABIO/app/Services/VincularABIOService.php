@@ -22,8 +22,7 @@ class VincularABIOService extends BaseModelService
     public function __construct(
         DataManagement                $dataManagement,
         private readonly ArquivoUtils $arquivoUtils,
-    )
-    {
+    ) {
         parent::__construct($dataManagement);
     }
 
