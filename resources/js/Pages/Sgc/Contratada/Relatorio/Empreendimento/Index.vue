@@ -96,7 +96,7 @@ const formatarMoeda = (valor) => {
 	return valorFormatado;
 };
 const exibiremps = () => {
-	mostralista.value = !mostralista.value
+  mostralista.value = !mostralista.value;
 };
 
 const visualizarMapa = () => {
@@ -110,17 +110,21 @@ onMounted(() => {
 // Campo de busca e lista filtrada
 const searchTerm = ref('');
 const filteredPosts = computed(() => {
+  if (!props.posts || !Array.isArray(props.posts)) {
+    return [];
+  }
   return props.posts
     .filter(emp => emp.cod_emp.toLowerCase().includes(searchTerm.value.toLowerCase()))
     .sort((a, b) => a.cod_emp.localeCompare(b.cod_emp, 'pt', { numeric: true }));
 });
 
+
 // Função para gerar a rota e logar a URL
 function getEmpreendimentoRoute(emp) {
-  const routeUrl = route('sgc.gestao.dashboard.empreendimento.index', { tipo: props.tipo.id, empreendimento: emp.id });
-//   console.log('Rota gerada:', routeUrl);
-  return routeUrl;
+  if (!emp || !props.tipo || !emp.id) return '#'; // Garante que sempre haverá uma URL válida
+  return route('sgc.gestao.dashboard.empreendimento.index', { tipo: props.tipo.id, empreendimento: emp.id });
 }
+
 
 </script>
 <template>
@@ -140,34 +144,35 @@ function getEmpreendimentoRoute(emp) {
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
                         <!-- Filtro "Escolher Empreendimento" -->
                         <div class="filters-container">
-                            <div class="p-3 mb-3 border rounded bg-light" style="width: 220px; cursor: pointer;" @click="exibiremps(mostralista)">
+                            <div class="p-3 mb-3 border rounded bg-light" style="width: 220px; cursor: pointer;" @click="exibiremps()">
                                 <label for="select-empreendimentos" class="form-label text-center w-100" style="cursor: pointer;">
                                     Escolher Empreendimento
                                 </label>
                             </div>
                             <div v-show="mostralista" class="dropdown-list" style="position: absolute; z-index: 10000; background-color: white;">
-                                <input type="text" v-model="searchTerm" placeholder="Buscar..." class="search-input" />
-                                <ul style="background: white; padding: 0; list-style: none; border-radius: 4px;">
-                                    <li v-if="filteredPosts.length === 0" style="padding: 10px; text-align: center;">Nenhum empreendimento encontrado.</li>
-                                    <li
-                                        v-for="emp in filteredPosts"
-                                        :key="emp.id"
-                                        style="padding: 10px; text-align: center; transition: background-color 0.2s ease; cursor: pointer; display: flex; justify-content: center; align-items: center;"
-                                        @mouseover="event => event.currentTarget.style.backgroundColor = '#f0f0f0'"
-                                        @mouseout="event => event.currentTarget.style.backgroundColor = ''"
-                                    >
-                                        <Link
-                                            :href="getEmpreendimentoRoute(emp)"
-                                            style="text-decoration: none; color: #333; display: block; width: 100%; text-align: center;"
-                                        >
-                                            {{ emp.cod_emp }}
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </div>
+								<input type="text" v-model="searchTerm" placeholder="Buscar..." class="search-input" />
+								<ul style="background: white; padding: 0; list-style: none; border-radius: 4px;">
+									<li v-if="filteredPosts.length === 0" style="padding: 10px; text-align: center;">
+									Nenhum empreendimento encontrado.
+									</li>
+									<li
+									v-for="emp in filteredPosts"
+									:key="emp.id"
+									style="padding: 10px; text-align: center; transition: background-color 0.2s ease; cursor: pointer; display: flex; justify-content: center; align-items: center;"
+									@mouseover="event => event.currentTarget.style.backgroundColor = '#f0f0f0'"
+									@mouseout="event => event.currentTarget.style.backgroundColor = ''"
+									>
+									<Link
+										:href="getEmpreendimentoRoute(emp)"
+										class="empreendimento-link"
+									>
+										{{ emp.cod_emp }}
+									</Link>
+									</li>
+								</ul>
+							</div>
 
                         </div>
-
 
                     </div>
                     <Timelinex
