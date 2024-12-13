@@ -5,18 +5,8 @@ import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
   contrato: { type: Object },
-  servico: { type: Object }
-});
-
-const form = useForm({
-  id: null,
-  id_servico: null,
-  classe: null,
-  ordem: null,
-  familia: null,
-  genero: null,
-  especie: null,
-  nome_comum: null
+  servico: { type: Object },
+  form: { type: Object }
 });
 </script>
 <template>

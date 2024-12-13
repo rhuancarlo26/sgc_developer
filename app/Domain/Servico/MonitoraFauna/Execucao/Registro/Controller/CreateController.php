@@ -16,7 +16,7 @@ class CreateController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, ServicoMonitoraFaunaExecRegistro $registro): Response
   {
-    $response = $this->registroService->create($registro);
+    $response = $this->registroService->create($servico, $registro);
 
     return Inertia::render('Servico/MonitoraFauna/Execucao/Registro/Form', [
       'contrato' => $contrato,

@@ -1,23 +1,16 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import { useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { computed, watch } from 'vue';
 
 const props = defineProps({
-  contrato: { type: Object },
-  servico: { type: Object }
+  campanhas: { type: Array },
+  modulos: { type: Array },
+  grupo_faunisticos: { type: Array },
+  form: { type: Object }
 });
 
-const form = useForm({
-  id: null,
-  id_servico: null,
-  nome_id: null,
-  id_campanha: null,
-  id_modulo: null,
-  parcela_modulo: null,
-  id_armadilha: null,
-  id_grupo: null
-});
 </script>
 <template>
   <form>
@@ -29,7 +22,7 @@ const form = useForm({
       </div>
       <div class="col">
         <InputLabel value="Selecione a Campanha" for="id_campanha" />
-        <v-select :options="[]" label="id" :reduce="a => a.id" v-model="form.id_campanha">
+        <v-select :options="campanhas" label="id" :reduce="a => a.id" v-model="form.id_campanha">
           <template #no-options="{}">
             Nenhum registro encontrado.
           </template>
@@ -38,7 +31,7 @@ const form = useForm({
       </div>
       <div class="col">
         <InputLabel value="Selecione o Módulo" for="id_modulo" />
-        <v-select :options="[]" label="id" :reduce="a => a.id" v-model="form.id_modulo">
+        <v-select :options="modulos" label="id" v-model="form.id_modulo">
           <template #no-options="{}">
             Nenhum registro encontrado.
           </template>
@@ -49,16 +42,14 @@ const form = useForm({
     <div class="row mb-4">
       <div class="col">
         <InputLabel value="Selecione a Parcela do Módulo Amostral" for="parcela_modulo" />
-        <v-select :options="[]" label="id" :reduce="a => a.id" v-model="form.parcela_modulo">
-          <template #no-options="{}">
-            Nenhum registro encontrado.
-          </template>
-        </v-select>
+        <select class="form-select" name="parcela_modulo" id="parcela_modulo" v-model="form.parcela_modulo">
+          <option v-for="i in form.id_modulo?.tamanho_modulo" :key="i" :value="i">{{ i }}</option>
+        </select>
         <InputError :message="form.errors.parcela_modulo" />
       </div>
       <div class="col">
         <InputLabel value="Selecione o ID da Armadilha" for="id_armadilha" />
-        <v-select :options="[]" label="id" :reduce="a => a.id" v-model="form.id_armadilha">
+        <v-select :options="form.id_modulo?.armadilhas" label="nome_id" v-model="form.id_armadilha">
           <template #no-options="{}">
             Nenhum registro encontrado.
           </template>
@@ -67,7 +58,7 @@ const form = useForm({
       </div>
       <div class="col">
         <InputLabel value="Grupo Amostrado" for="id_grupo" />
-        <v-select :options="[]" label="id" :reduce="a => a.id" v-model="form.id_grupo">
+        <v-select :options="grupo_faunisticos" label="grupo_faunistico" :reduce="a => a.id" v-model="form.id_grupo">
           <template #no-options="{}">
             Nenhum registro encontrado.
           </template>
