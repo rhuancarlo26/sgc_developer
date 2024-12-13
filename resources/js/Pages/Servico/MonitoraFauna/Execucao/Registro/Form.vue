@@ -5,12 +5,68 @@ import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Navbar from "../../Navbar.vue";
 import TabDadosGerais from "./Tabs/TabDadosGerais.vue";
 import TabIdentificacaoEspecime from "./Tabs/TabIdentificacaoEspecime.vue";
+import TabDadosEspecime from "./Tabs/TabDadosEspecime.vue";
+import TabStatusConservacao from "./Tabs/TabStatusConservacao.vue";
+import { useForm } from "@inertiajs/vue3";
+import NavButton from "@/Components/NavButton.vue";
+import TabObservacao from "./Tabs/TabObservacao.vue";
+import { watch } from "vue";
+import { ref } from "vue";
 
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
-  registros: { type: Object },
+  registro: { type: Object },
+  campanhas: { type: Array },
+  modulos: { type: Array },
+  status_conservacao: { type: Array },
+  grupo_faunisticos: { type: Array }
 });
+
+const form = useForm({
+  id: null,
+  id_servico: null,
+  nome_id: null,
+  id_campanha: null,
+  id_modulo: null,
+  parcela_modulo: null,
+  id_armadilha: null,
+  id_grupo: null,
+  id_tipo: 0,
+  classe: null,
+  ordem: null,
+  familia: null,
+  genero: null,
+  especie: null,
+  nome_comum: null,
+  sexo: null,
+  faixa_etaria: null,
+  marcacao: null,
+  num_marcacao: null,
+  data_registro: null,
+  hora_registro: null,
+  coletado: null,
+  num_tombamento: null,
+  dds_bio_anotados: null,
+  num_individuos: null,
+  status_conserv_federal: null,
+  status_conserv_iucn: null,
+  ...props.registro
+});
+
+const form_arquivo = useForm({
+  id: null,
+  registro_id: null,
+  arquivo: null
+});
+
+const save = () => {
+  const url = form.id ? 'update' : 'store';
+
+  form.post(route('contratos.contratada.servicos.monitora_fauna.execucao.registro.' + url, { contrato: props.contrato.id, servico: props.servico.id }), {
+    onSuccess: () => Object.assign(form, props.registro)
+  });
+}
 
 </script>
 <template>
@@ -35,7 +91,7 @@ const props = defineProps({
 
     <Navbar :contrato="contrato" :servico="servico">
       <template #body>
-        <div class="card">
+        <div class="card mb-4">
           <div class="card-header">
             <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
               <li class="nav-item" role="presentation">
@@ -67,25 +123,29 @@ const props = defineProps({
           <div class="card-body">
             <div class="tab-content">
               <div class="tab-pane active show" id="dados_gerais" role="tabpanel">
-                <TabDadosGerais :contrato="contrato" :servico="servico" />
+                <TabDadosGerais :campanhas="campanhas" :modulos="modulos" :grupo_faunisticos="grupo_faunisticos"
+                  :form="form" />
               </div>
               <div class="tab-pane" id="identificacoes_especime" role="tabpanel">
-                <TabIdentificacaoEspecime :contrato="contrato" :servico="servico" />
+                <TabIdentificacaoEspecime :form="form" />
               </div>
               <div class="tab-pane" id="dados_especime" role="tabpanel">
-                3
+                <TabDadosEspecime :form="form" />
               </div>
               <div class="tab-pane" id="status_conservacao" role="tabpanel">
-                4
+                <TabStatusConservacao :status_conservacao="status_conservacao" :form="form" />
               </div>
               <div class="tab-pane" id="registro_fotografico" role="tabpanel">
                 5
               </div>
               <div class="tab-pane" id="observacao" role="tabpanel">
-                6
+                <TabObservacao :form="form" />
               </div>
             </div>
           </div>
+        </div>
+        <div class="d-flex justify-content-end">
+          <NavButton @click="save()" type-button="success" :title="form.id ? 'Alterar' : 'Salvar'" />
         </div>
       </template>
     </Navbar>

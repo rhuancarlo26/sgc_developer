@@ -6,12 +6,23 @@ import Navbar from "../../Navbar.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import { IconDots } from "@tabler/icons-vue";
+import { Head, Link, router } from "@inertiajs/vue3";
+import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import { ref } from "vue";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 
 const props = defineProps({
   contrato: { type: Object },
   servico: { type: Object },
   registros: { type: Object },
 });
+
+const linkConfirmationRef = ref();
+const excluir = (id) => {
+  linkConfirmationRef.value.show(() => {
+    router.delete(route('contratos.contratada.servicos.monitora_fauna.execucao.registro.delete', { contrato: props.contrato.id, servico: props.servico.id, registro: id }))
+  })
+}
 
 </script>
 <template>
@@ -39,7 +50,7 @@ const props = defineProps({
         <ModelSearchFormAllColumns :columns="[]">
           <template #action>
             <Link class="btn btn-primary"
-              :href="route('contratos.contratada.servicos.monitora_fauna.execucao.campanha.create', { contrato: contrato.id, servico: servico.id })">
+              :href="route('contratos.contratada.servicos.monitora_fauna.execucao.registro.create', { contrato: contrato.id, servico: servico.id })">
             Novo Registro
             </Link>
           </template>
@@ -51,14 +62,14 @@ const props = defineProps({
           <template #body="{ item }">
             <tr>
               <td>{{ item.nome_id }}</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
+              <td>{{ item.id_campanha }}</td>
+              <td>{{ item.id_modulo }}</td>
+              <td>{{ item.parcela_modulo }}</td>
+              <td>{{ item.armadilha?.nome_id }}</td>
+              <td>{{ item.grupo_faunistico?.grupo_faunistico }}</td>
               <td>{{ item.especie }}</td>
-              <td></td>
-              <td></td>
+              <td>{{ dateTimeFormat(item.data_registro) }}</td>
+              <td>{{ dateTimeFormat(item.created_at) }}</td>
               <td>
                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
                   data-bs-toggle="dropdown" aria-expanded="false">
@@ -67,7 +78,7 @@ const props = defineProps({
                 <div class="dropdown-menu dropdown-menu-end">
                   <a class="dropdown-item"
                     :href="route('contratos.contratada.servicos.monitora_fauna.execucao.registro.create', { contrato: contrato.id, servico: servico.id, registro: item.id })">Editar</a>
-                  <a class="dropdown-item" href="javascript:void(0)">Excluir</a>
+                  <a @click="excluir(item.id)" class="dropdown-item" href="javascript:void(0)">Excluir</a>
                 </div>
               </td>
             </tr>
@@ -75,6 +86,8 @@ const props = defineProps({
         </Table>
       </template>
     </Navbar>
+
+    <LinkConfirmation ref="linkConfirmationRef" :options="{ text: 'Excluir registro?' }" />
 
   </AuthenticatedLayout>
 </template>
