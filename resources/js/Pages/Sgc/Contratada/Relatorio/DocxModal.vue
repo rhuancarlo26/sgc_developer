@@ -32,7 +32,7 @@ const abrirModal = async (idItem, contratoId, versao) => {
     const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao); 
     loadComments(idItem, contratoId);
     if (caminhoDocumento) {
-        filePath = ` http://127.0.0.1:5173/storage/app/${caminhoDocumento}`;
+        filePath = `http://127.0.0.1:5173/storage/app/${caminhoDocumento}`;
 
         try {
             const response = await fetch(filePath);

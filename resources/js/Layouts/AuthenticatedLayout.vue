@@ -64,6 +64,9 @@ watch(
                 @closeButtonClicked="flash = {}"
             />
 
+            <!-- Meta para o token CSRF -->
+            <meta name="csrf-token" :content="usePage().props.csrf_token" />
+
             <!-- Page Header-->
             <div class="page-header d-print-none" v-if="$slots.header">
                 <div class="container-xl">
