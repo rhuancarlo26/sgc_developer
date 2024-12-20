@@ -15,11 +15,12 @@ import Navbar from '../../../Navbar.vue';
 const props = defineProps({
   contrato: Object,
   ufs: Object,
-  rodovias: Object,
+  base_rodovia: Object,
   empreendimento: Object,
   tipo: Object
 });
 
+const formKey = ref(0);
 const mapaVisualizarTrecho = ref();
 const uf_rodovias = ref([]);
 const showMap = ref(false);
@@ -136,15 +137,32 @@ const storeEmpreendimentos = async () => {
       form_trecho.tipo_trecho = 'B';
       form_trecho.coordenada = '';
 
-      // Se showMap foi ativado, ocultar o mapa novamente
       showMap.value = false;
     }
 
   } catch (e) {
     console.error(e);
-    // Lidar com erros
   }
 };
+
+const limparForm = () => {
+  form_trecho.contrato_est_ambiental = null;
+  form_trecho.cod_emp = null;
+  form_trecho.ose_sei = null;
+  form_trecho.uf = null;
+  form_trecho.rodovia = null;
+  form_trecho.km_inicial = null;
+  form_trecho.km_final = null;
+  form_trecho.tipo_trecho = 'B';
+  form_trecho.coordenada = '';
+
+  formKey.value++;
+
+  coordenadasIniciais = [];
+  contadorGet = 0;
+};
+
+
 
 watch(() => form_trecho.uf, () => {
     if (form_trecho.uf) {
@@ -177,7 +195,7 @@ onMounted(() => {
       <Navbar >
   
         <template #body>
-          <div class="space-y-3 card card-body">
+            <div :key="formKey" class="space-y-3 card card-body">
               <div class="row my-4">
               <!-- Seção do formulário -->
               <div class="col-md-4">
@@ -270,7 +288,7 @@ onMounted(() => {
                   </button>
                 </div>
                 <div class="col-auto w-50">
-                  <button type="button" class="btn btn-icon btn-danger w-100">
+                  <button @click="limparForm" type="button" class="btn btn-icon btn-danger w-100">
                     <IconX />
                   </button>
                 </div>
