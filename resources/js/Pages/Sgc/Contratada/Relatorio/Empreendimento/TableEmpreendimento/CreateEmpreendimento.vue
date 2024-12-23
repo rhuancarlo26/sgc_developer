@@ -20,6 +20,8 @@ const props = defineProps({
   tipo: Object
 });
 
+co
+
 const formKey = ref(0);
 const mapaVisualizarTrecho = ref();
 const uf_rodovias = ref([]);
@@ -166,7 +168,7 @@ const limparForm = () => {
 
 watch(() => form_trecho.uf, () => {
     if (form_trecho.uf) {
-      uf_rodovias.value = props.rodovias.filter((rodovia) => {
+      uf_rodovias.value = props.base_rodovia.filter((rodovia) => {
         return rodovia.uf_id === form_trecho.uf.id;
       });
     } else {
