@@ -11,4 +11,9 @@ class ServicoMonitoraFaunaConfigModuloAmostral extends Model
 
     protected $table = 'fauna_config_modulos_amostrais';
     protected $guarded = ['id'];
+
+    public function armadilhas()
+    {
+        return $this->hasMany(ServicoMonitoraFaunaConfigArmadilhaMetodo::class, 'id_modulo');
+    }
 }
