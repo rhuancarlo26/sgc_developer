@@ -77,6 +77,8 @@ const excluir = (item_id) => {
                   <IconDots />
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
+                  <a class="dropdown-item"
+                    :href="route('contratos.contratada.servicos.monitora_fauna.resultado.resultado', { contrato: contrato.id, servico: servico.id, resultado: item.id })">Visualizar</a>
                   <a @click="abrirModalFormResultado(item)" class="dropdown-item">Editar</a>
                   <a @click="excluir(item.id)" class="dropdown-item" href="javascript:void(0)">Excluir</a>
                 </div>

@@ -21,4 +21,9 @@ class ServicoMonitoraFaunaResultado extends Model
     {
         return $this->belongsToMany(ServicoMonitoraFaunaExecCampanha::class, 'fauna_resultado_campanha', 'id_resultado', 'id_campanha');
     }
+
+    public function armadilha()
+    {
+        return $this->belongsTo(ServicoMonitoraFaunaConfigArmadilhaMetodo::class, 'id_armadilha');
+    }
 }
