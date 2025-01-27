@@ -22,4 +22,9 @@ class ServicoMonitoraFaunaExecCampanha extends Model
     {
         return $this->hasMany(ServicoMonitoraFaunaExecCampanhaProfissGrupo::class, 'id_campanha');
     }
+
+    public function registros()
+    {
+        return $this->hasMany(ServicoMonitoraFaunaExecRegistro::class, 'id_campanha', 'id');
+    }
 }
