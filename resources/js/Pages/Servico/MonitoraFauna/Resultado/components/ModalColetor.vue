@@ -37,7 +37,6 @@ defineExpose({ abrirModal });
     <template #body>
       <div class="card-body">
         <div>
-          <pre>{{ dados_coletor }}</pre>
           <div class="mb-4">
             <h3>Analise da Riqueza por Família</h3>
             <BarChart v-if="dados_coletor.chartData" :chart_data="dados_coletor.chartData"
