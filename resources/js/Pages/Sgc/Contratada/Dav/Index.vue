@@ -5,7 +5,6 @@ import { Head, Link } from '@inertiajs/vue3';
 import Navbar from '../Navbar.vue';
 import { ref, watch, watchEffect } from 'vue';
 import FormDav from './FormDav.vue';
-import DetalheDav from './DetalheDav.vue';
 import FormProfissionais from './FormProfissionais.vue';
 
 const props = defineProps({
@@ -16,6 +15,8 @@ const props = defineProps({
   dav: Object,
   profissionais: Object
 });
+
+console.log(props.contrato)
 
 const reminders = ref([]);
 const attributes = ref([]);

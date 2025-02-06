@@ -16,11 +16,11 @@ class ListagemDavController extends Controller
 {
     public function index(Contrato $contrato): Response
     {
-        $dav = Dav::all();
+        $dav = Dav::where('contrato_id', $contrato->id)->get();
         $subprodutos = SgcvwSubprodutos::all();
         $produtos = SgcProdutos::all();
         $empreendimentos = DashexcelEmpreendimentos::all();
-        $profissionais = SgcDavProfissionais::all();
+        $profissionais = SgcDavProfissionais::where('contrato_id', $contrato->id)->get();
 
         return Inertia::render('Sgc/Contratada/Dav/Index', [
             'dav' => $dav,

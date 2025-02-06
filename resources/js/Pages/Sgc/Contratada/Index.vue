@@ -6,7 +6,7 @@ import Navbar from "./Navbar.vue";
 import { Chart } from "highcharts-vue";
 import { onMounted, reactive, ref, computed } from "vue";
 import PaginationSgc from '@/Components/PaginationSgc.vue';
-import { IconClipboardData } from "@tabler/icons-vue";
+import { IconClipboardData, IconPlane } from "@tabler/icons-vue";
 
 const props = defineProps({
   contrato: Object,

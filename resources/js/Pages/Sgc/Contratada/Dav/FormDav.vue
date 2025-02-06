@@ -19,9 +19,8 @@ const origem = ref([1]);
 const destino = ref([1]);
 const subprodutosFiltrados = ref([]); 
 
-
 const formDav = useForm({
-  contrato: props.contrato.numero_contrato || "",
+  contrato_id: props.contrato.id,
   empreendimento: "",
   coordenador: "",
   finalidade: "",

@@ -17,7 +17,7 @@ class StoreDav extends Controller
 
     try {
       $dados = $request->validate([
-        'contrato'       => 'required|string',
+        'contrato_id'    => 'required|int',
         'empreendimento' => 'required|string',
         'coordenador'    => 'required|string',
         'finalidade'     => 'required|string',
