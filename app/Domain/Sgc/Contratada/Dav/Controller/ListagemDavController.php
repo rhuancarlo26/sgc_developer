@@ -47,5 +47,24 @@ class ListagemDavController extends Controller
             'empreendimentos' => $empreendimentos
         ]);
     }
+
+    public function aprovar($id)
+    {
+        $dav = Dav::findOrFail($id);
+        $dav->status = 'aprovado';
+        $dav->save();
+
+        return redirect()->back()->with('success', 'DAV aprovada com sucesso.');
+    }
+
+    public function reprovar($id)
+    {
+        $dav = Dav::findOrFail($id);
+        $dav->status = 'reprovado';
+        $dav->save();
+
+        return redirect()->back()->with('success', 'DAV reprovada com sucesso.');
+    }
+
     
 }

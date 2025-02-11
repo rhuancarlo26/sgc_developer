@@ -15,6 +15,7 @@ use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StoreUploadRelatorioCont
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\VisualizarDocxController;;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StatusUpdateController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\CreateController;
+use App\Domain\Sgc\Contratada\Dav\Controller\ListagemDavController;
 use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
 
@@ -69,5 +70,10 @@ Route::prefix('/contratada')->group(function () {
 
     // Inserir novo Relatório de Coordenação
     Route::post('/sgc/relatorio/iniciar',                          [CreateController::class,                                 'index'])->name('sgc.contratada.relatorio.iniciar');
+
+    //DAV's
+    Route::put('/sgc/gestao/dav/{id}/aprovar', [ListagemDavController::class, 'aprovar'])->name('sgc.gestao.aprovarDav');
+    Route::put('/sgc/gestao/dav/{id}/reprovar', [ListagemDavController::class, 'reprovar'])->name('sgc.gestao.reprovarDav');
+ 
 
 });

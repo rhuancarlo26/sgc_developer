@@ -119,6 +119,20 @@ const submitForm = () => {
   });
 };
 
+const aprovarDav = () => {
+  formDav.status = "aprovado";
+  formDav.put(route('sgc.gestao.aprovarDav', { id: props.dav.id }), {
+    onSuccess: () => console.log("DAV aprovada com sucesso!")
+  });
+};
+
+const reprovarDav = () => {
+  formDav.status = "reprovado";
+  formDav.put(route('sgc.gestao.reprovarDav', { id: props.dav.id }), {
+    onSuccess: () => console.log("DAV reprovada com sucesso!")
+  });
+};
+
 </script>
 
 <template>
@@ -332,6 +346,25 @@ const submitForm = () => {
                               <option :value="profissional">{{ `${profissional.nome} - ${profissional.formacao}` }}</option>
                             </select>
                           </div>
+                        </div>
+
+                        <div class="col-12 d-flex justify-content-end mt-3">
+                          <button 
+                            type="button" 
+                            class="btn btn-success me-2" 
+                            @click="aprovarDav"
+                            :disabled="formDav.status === 'aprovado'"
+                          >
+                            Aprovar
+                          </button>
+                          <button 
+                            type="button" 
+                            class="btn btn-danger" 
+                            @click="reprovarDav"
+                            :disabled="formDav.status === 'reprovado'"
+                          >
+                            Reprovar
+                          </button>
                         </div>
                     </form>
                 </div>
