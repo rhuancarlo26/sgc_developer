@@ -9,16 +9,16 @@ const props = defineProps({
   empreendimentos: Object,
   contrato: Object,
   profissionais: Object
-})
-
+});
 
 const produtoSelecionado = ref("");
 const modalVisualizarForm = ref(null);
 const profissionais = ref([1]);
 const origem = ref([1]);
 const destino = ref([1]);
-const subprodutosFiltrados = ref([]); 
+const subprodutosFiltrados = ref([]);
 
+// Inicializa o formDav com as novas propriedades
 const formDav = useForm({
   contrato_id: props.contrato.id,
   empreendimento: "",
@@ -32,24 +32,26 @@ const formDav = useForm({
   origem: [],
   destino: [],
   profissionais: [],
-  transporte: [],
+  transporte: [], // Novo campo para transporte
+  aereoValor: null, // Valor para Aéreo
+  terrestreTipo: [], // Armazena Pick-up ou Hatch
+  terrestreValor: null, // Valor para Terrestre
+  aquaticoValor: null, // Valor para Aquático
   status: "pendente"
-})
+});
 
 const opcoesProfissionais = [];
 
 props.profissionais.map(profissional => (
   opcoesProfissionais.push(profissional)
-))
-
-
+));
 
 const adicionarProfissional = () => {
   profissionais.value.push(profissionais.value.length + 1);
 };
 
 const filterProdutos = () => {
-  const produtos = []; 
+  const produtos = [];
 
   const listaExclusao = [
     "2", "9", "10", "11", "12", "14"
@@ -58,7 +60,7 @@ const filterProdutos = () => {
   for (const produto of props.produtos) {
     if (!listaExclusao.includes(produto.produto)) {
       const descricaoCompleta = `${produto.produto}.${produto.descricao_produto}`;
-      produtos.push(descricaoCompleta); 
+      produtos.push(descricaoCompleta);
     }
   }
 
@@ -79,6 +81,28 @@ const abrirModal = () => {
   modalVisualizarForm.value.getBsModal().show();
 };
 
+// Função para lidar com mudanças no transporte
+const handleTransporteChange = () => {
+  if (!formDav.transporte.includes('Aéreo')) {
+    formDav.aereoValor = null;
+  }
+  if (!formDav.transporte.includes('Terrestre')) {
+    formDav.terrestreTipo = [];
+    formDav.terrestreValor = null;
+  }
+  if (!formDav.transporte.includes('Aquático')) {
+    formDav.aquaticoValor = null;
+  }
+};
+
+// Função para lidar com mudanças no tipo terrestre
+const handleTerrestreTipoChange = () => {
+  if (formDav.terrestreTipo.length === 0) {
+    formDav.terrestreValor = null;
+  }
+};
+
+// Monitora mudanças no produto selecionado
 watch(produtoSelecionado, (novoValor) => {
   formDav.produto = novoValor;
   if (!novoValor) {
@@ -89,7 +113,7 @@ watch(produtoSelecionado, (novoValor) => {
   const numeroProduto = novoValor.split(".")[0];
 
   subprodutosFiltrados.value = props.subprodutos
-    .filter(subProduto => subProduto.subproduto.startsWith(numeroProduto+'.'))
+    .filter(subProduto => subProduto.subproduto.startsWith(numeroProduto + '.'))
     .map(subProduto => ({
       value: subProduto.subproduto,
       label: `${subProduto.subproduto} ${subProduto.descricao_revisada}`
@@ -98,11 +122,17 @@ watch(produtoSelecionado, (novoValor) => {
   console.log("Subprodutos filtrados:", subprodutosFiltrados.value);
 });
 
+// Monitora mudanças no transporte
+watch(() => formDav.transporte, handleTransporteChange, { deep: true });
+
+// Monitora mudanças no tipo terrestre
+watch(() => formDav.terrestreTipo, handleTerrestreTipoChange, { deep: true });
+
 const submitForm = () => {
   formDav.dataInicio = new Date(formDav.dataInicio);
   formDav.dataFinal = new Date(formDav.dataFinal);
 
-  console.log("Dados antes do envio:", formDav.data()); 
+  console.log("Dados antes do envio:", formDav.data());
 
   formDav.post(route('sgc.gestao.storeDav'), {
     onSuccess: () => {
@@ -116,7 +146,6 @@ const submitForm = () => {
 };
 
 defineExpose({ abrirModal });
-
 </script>
 
 <template>
@@ -204,29 +233,46 @@ defineExpose({ abrirModal });
         </div>
 
         <div class="col-md-6">
+          <!-- Aéreo -->
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="gridCheckAereo"
-              value="Aéreo" v-model="formDav.transporte">
+            <input class="form-check-input" type="checkbox" id="gridCheckAereo" value="Aéreo" v-model="formDav.transporte" @change="handleTransporteChange">
             <label class="form-check-label" for="gridCheckAereo">Aéreo</label>
+            <input v-if="formDav.transporte.includes('Aéreo')" type="number" v-model="formDav.aereoValor" max="99" min="0" class="ml-2" style="width: 60px;">
           </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="gridCheckTerrestre"
-              value="Terrestre" v-model="formDav.transporte">
-            <label class="form-check-label" for="gridCheckTerrestre">Terrestre</label>
-          </div>
+
+            <!-- Terrestre -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="gridCheckTerrestre" value="Terrestre" v-model="formDav.transporte" @change="handleTransporteChange">
+              <label class="form-check-label" for="gridCheckTerrestre">Terrestre</label>
+              <div v-if="formDav.transporte.includes('Terrestre')" class="ml-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="gridCheckPickup" value="Pick-up" v-model="formDav.terrestreTipo" @change="handleTerrestreTipoChange">
+                    <label class="form-check-label" for="gridCheckPickup">Veículo pick-up</label>
+                    <input v-if="formDav.terrestreTipo.includes('Pick-up')" type="number" v-model="formDav.terrestreValor" max="99" min="0" class="ml-2" style="width: 60px;">
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="gridCheckHatch" value="Hatch" v-model="formDav.terrestreTipo" @change="handleTerrestreTipoChange">
+                    <label class="form-check-label" for="gridCheckHatch">Veículo hatch</label>
+                    <input v-if="formDav.terrestreTipo.includes('Hatch')" type="number" v-model="formDav.terrestreValor" max="99" min="0" class="ml-2" style="width: 60px;">
+                </div>
+              </div>
+            </div>
         </div>
-        <div class="col-md-6">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="gridCheckAquatico"
-              value="Aquático" v-model="formDav.transporte">
-            <label class="form-check-label" for="gridCheckAquatico">Aquático</label>
+
+          <div class="col-md-6">
+              <!-- Aquático -->
+              <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="gridCheckAquatico" value="Aquático" v-model="formDav.transporte" @change="handleTransporteChange">
+                  <label class="form-check-label" for="gridCheckAquatico">Aquático</label>
+                  <input v-if="formDav.transporte.includes('Aquático')" type="number" v-model="formDav.aquaticoValor" max="99" min="0" class="ml-2" style="width: 60px;">
+              </div>
+
+              <!-- Outros -->
+              <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="gridCheckOutros" value="Outros" v-model="formDav.transporte" @change="handleTransporteChange">
+                  <label class="form-check-label" for="gridCheckOutros">Outros</label>
+              </div>
           </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="gridCheckOutros"
-              value="Outros" v-model="formDav.transporte">
-            <label class="form-check-label" for="gridCheckOutros">Outros</label>
-          </div>
-        </div>
 
         <div class="col-12">
           <label for="inputProfissionais" class="form-label">Profissionais</label>
@@ -263,3 +309,12 @@ defineExpose({ abrirModal });
     </template>
   </Modal>
 </template>
+
+<style scoped>
+input[type="number"] {
+  margin-left: 0.5rem;
+  padding: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+</style>

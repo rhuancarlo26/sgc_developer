@@ -16,22 +16,59 @@ const props = defineProps({
   profissionais: Object
 });
 
-console.log(props.contrato)
-
 const reminders = ref([]);
 const attributes = ref([]);
 const modalVisualizarForm = ref();
 const modalVisualizarFormCadFunc = ref();
-
-
 const allDav = ref([]);
 
-const progressValues = ref([
-  { label: 'Diarias', percentage: 45, total: 5000 },
-  { label: 'Carro', percentage: 55, total: 2000 },
-  { label: 'Avião', percentage: 80, total: 600 },
-  { label: 'Barco', percentage: 45, total: 4 }
-]);
+const consumo = {
+    "94/2022": {
+        'Diárias': 552,
+        'Deslocamentos - Veículo Leve Tipo Hatch': 73,
+        'Deslocamentos - Veículo Leve Tipo Pick Up': 26,
+        'Deslocamentos - Barco de Alumínio 6m e Motor de Popa 30 Hp': 0,
+        'Deslocamentos - Passagem Aérea - Lote B': 38,
+    },
+    "93/2022": {
+        'Diárias': 4778,
+        'Deslocamentos - Passagem aérea - Lote A': 730,
+        'Deslocamentos - Veículo leve tipo hatch': 60,
+        'Deslocamentos - Veículo leve tipo Pick up': 1125,
+        'Deslocamentos - Barco de alumínio 6m e motor de popa 30 HP': 334
+    },
+    "95/2022": {
+        'Diárias': 3021,
+        'Deslocamentos - Passagem aérea - Lote C': 556,
+        'Deslocamentos - Veículo leve tipo hatch': 420,
+        'Deslocamentos - Veículo leve tipo Pick up': 174,
+        'Deslocamentos - Barco de alumínio 6m e motor de popa 30 HP': 44
+    }
+};
+
+const progressValues = ref(
+    props.subprodutos
+        .filter(qtd => {
+            const numeroFormatado = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
+
+            return consumo[numeroFormatado] && qtd.produto === '14' && numeroFormatado === qtd.contrato;
+        })
+        .map(qtd => {
+            const numeroFormatado = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
+            const total = parseInt(qtd.qtd_contrato);
+
+            const utilizada = consumo[numeroFormatado]?.[qtd.descricao_revisada] || 0;
+
+            const percentage = total > 0 ? ((utilizada / total) * 100).toFixed(2) : 0;
+
+            return {
+                label: qtd.descricao_revisada,
+                percentage: parseFloat(percentage),
+                total,
+                utilizada
+            };
+        })
+);
 
 const selectedRange = ref({
   start: new Date(),
@@ -40,8 +77,7 @@ const selectedRange = ref({
 
 const getCalendarColor = () => {
   const statuses = reminders.value.map((reminder) => reminder.status);
-  
-  // Prioridade de cores: vermelho > amarelo > verde
+
   if (statuses.includes('reprovado')) {
     return 'red';
   } else if (statuses.includes('pendente')) {
@@ -99,8 +135,8 @@ watch(
 
 
 const adjustDate = (dateStr) => {
-  const date = new Date(dateStr + 'T00:00:00Z');  // Adiciona 'T00:00:00Z' para garantir que a data seja interpretada como UTC
-  date.setHours(24, 0, 0, 0);  // Define a hora para 00:00:00 no fuso horário local
+  const date = new Date(dateStr + 'T00:00:00Z');
+  date.setHours(24, 0, 0, 0);
   return date;
 };
 
@@ -108,11 +144,11 @@ watchEffect(() => {
   allDav.value = props.dav.map(item => (
     {
     id: item.id,
-    icon: '✈️', // Supondo que 'tipo' seja um campo no banco
+    icon: '✈️',
     title: item.empreendimento,
     startDate: adjustDate(item.dataInicio),
     endDate: adjustDate(item.dataFinal),
-    status: item.status // Supondo que 'status' seja um campo no banco
+    status: item.status
   }));
 });
 
@@ -175,8 +211,8 @@ updateReminders();
           ]"
         />
         <div>
-          <button type="button" class="btn btn-primary me-3" @click="abrirVisualizarFormDav('cadFunc')">Cadastrar profissionais</button>
-          <button type="button" class="btn btn-primary" @click="abrirVisualizarFormDav('formDav')">Cadastrar DAV</button>
+          <button type="button" class="btn btn-info me-3" @click="abrirVisualizarFormDav('cadFunc')">Cadastrar profissionais</button>
+          <button type="button" class="btn btn-info" @click="abrirVisualizarFormDav('formDav')">Cadastrar DAV</button>
         </div>
       </div>
     </template>
@@ -208,8 +244,8 @@ updateReminders();
                       <span class="icon">{{ reminder.icon }}</span>
                       <div>
                         <p>{{ reminder.title }}</p>
-                        <small><strong>Início:</strong> {{ reminder.startDate.toLocaleString('pt-BR') }}  </small>
-                        <small><strong> Fim:</strong> {{ reminder.endDate.toLocaleString('pt-BR') }}</small>
+                        <small><strong>Início:</strong> {{ reminder.startDate.toLocaleDateString('pt-BR') }}  </small>
+                        <small><strong> Fim:</strong> {{ reminder.endDate.toLocaleDateString('pt-BR') }}</small>
                       </div>
                       <Link
                         class="btn btn-primary me-2 w-500"
@@ -247,11 +283,11 @@ updateReminders();
                 <h4>{{ value.label }}</h4>
                 <div class="d-flex align-items-center mb-3" style="flex: 1;">
                   <div class="progress w-75 ms-3" role="progressbar" aria-label="Success example" :aria-valuenow="value.percentage" aria-valuemin="0" aria-valuemax="100" style="height: 20px;">
-                    <div 
-                      class="progress-bar" 
+                    <div
+                      class="progress-bar"
                       :class="getProgressBarClass(value.percentage)"
                       :style="{ width: value.percentage + '%' }">
-                      {{ value.percentage }}%
+                      {{ value.utilizada }}
                     </div>
                   </div>
                   <p class="ms-3" style="margin-top: 5px;">Total: {{ value.total }}</p>
@@ -267,8 +303,9 @@ updateReminders();
       :subprodutos="subprodutos"
       :produtos="produtos"
       :empreendimentos="empreendimentos"
-      :profissionais="profissionais"/>
-    <FormProfissionais ref="modalVisualizarFormCadFunc" 
+      :profissionais="profissionais"
+      :consumo="consumo"/>
+    <FormProfissionais ref="modalVisualizarFormCadFunc"
       :contrato="contrato"
       :profissionais="profissionais"/>
   </AuthenticatedLayout>

@@ -31,6 +31,7 @@
         "dotenv": "^16.4.7",
         "highcharts-vue": "^2.0.1",
         "html2canvas": "^1.4.1",
+        "jspdf": "^2.5.2",
         "leaflet": "^1.9.4",
         "maska": "^2.1.11",
         "sweetalert2": "^11.10.1",

@@ -3,6 +3,7 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import Navbar from '../Navbar.vue';
+import { jsPDF } from "jspdf";
 import { onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
@@ -18,7 +19,7 @@ const modalVisualizarForm = ref(null);
 const profissionais = ref([1]);
 const origem = ref([1]);
 const destino = ref([1]);
-const subprodutosFiltrados = ref([]); 
+const subprodutosFiltrados = ref([]);
 
 const formDav = useForm({
   empreendimento: props.dav.empreendimento || "",
@@ -35,8 +36,6 @@ const formDav = useForm({
   transporte: props.dav.transporte || [],
   status: props.dav.status || "pendente"
 });
-
-console.log(formDav.profissionais)
 
 onMounted(() => {
   if (props.dav.produto) {
@@ -68,7 +67,7 @@ const filterProdutos = () => {
   for (const produto of props.produtos) {
     if (!listaExclusao.includes(produto.produto)) {
       const descricaoCompleta = `${produto.produto}.${produto.descricao_produto}`;
-      produtos.push(descricaoCompleta); 
+      produtos.push(descricaoCompleta);
     }
   }
 
@@ -100,8 +99,6 @@ watch(produtoSelecionado, (novoValor) => {
       value: subProduto.subproduto,
       label: `${subProduto.subproduto} ${subProduto.descricao_revisada}`
     }));
-
-  console.log("Subprodutos filtrados:", subprodutosFiltrados.value);
 });
 
 const submitForm = () => {
@@ -132,6 +129,94 @@ const reprovarDav = () => {
     onSuccess: () => console.log("DAV reprovada com sucesso!")
   });
 };
+const formatDate = (date) => {
+    const [year, month, day] = date.split('-');
+    return `${day}/${month}/${year}`;
+}
+
+const formatNome = (nome) => {
+    return nome
+        .toLowerCase() // Converte todo o nome para minúsculas
+        .split(' ') // Divide o nome em partes (separadas por espaço)
+        .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1)) // Capitaliza a primeira letra de cada parte
+        .join(' '); // Junta as partes novamente com espaços
+}
+
+const gerarPDF = () => {
+    const pdf = new jsPDF();
+
+    // Configurações
+    const margemEsquerda = 15;
+    const margemDireita = 15;
+    const larguraUtil = pdf.internal.pageSize.getWidth() - margemEsquerda - margemDireita;
+    const tamanhoFonte = 11;
+    const espacamentoLinhas = 8;
+    pdf.setFontSize(tamanhoFonte);
+
+    const adicionarTexto = (texto, x, y, larguraMaxima) => {
+        const linhas = pdf.splitTextToSize(texto, larguraMaxima);
+        pdf.text(linhas, x, y);
+        return linhas.length * espacamentoLinhas;
+    };
+
+    const imageUrl = '/img/logo/logodnit.png';
+
+    const img = new Image();
+    img.src = imageUrl;
+
+    const logoLargura = 30;
+    const logoAltura = 20;
+
+    const logoX = pdf.internal.pageSize.getWidth() - margemDireita - logoLargura;
+    const logoY = 10;
+
+    pdf.addImage(img, 'PNG', logoX, logoY);
+
+    pdf.setFontSize(17);
+    pdf.text('Documento de Autorização de Viagem', margemEsquerda, logoY + logoAltura / 2 - 4);
+
+    pdf.setFontSize(tamanhoFonte);
+    let y = logoY + logoAltura + 10;
+
+    y += adicionarTexto(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y, larguraUtil / 2);
+
+    adicionarTexto(`Empreendimento: ${formDav.empreendimento}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
+
+    y += adicionarTexto(`Produto: ${formDav.produto}`, margemEsquerda, y, larguraUtil);
+
+    y += adicionarTexto(`Subproduto: ${formDav.subproduto}`, margemEsquerda, y, larguraUtil);
+
+    y += adicionarTexto(`Finalidade: ${formDav.finalidade}`, margemEsquerda, y, larguraUtil / 2);
+
+    adicionarTexto(`Escopo: ${formDav.escopo}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
+
+    y += adicionarTexto(`Data Início: ${formatDate(formDav.dataInicio)}`, margemEsquerda, y, larguraUtil / 2);
+
+    adicionarTexto(`Data Final: ${formatDate(formDav.dataFinal)}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
+
+    y += adicionarTexto(`Origem: ${formDav.origem}`, margemEsquerda, y, larguraUtil / 2);
+
+    adicionarTexto(`Destino: ${formDav.destino}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
+
+    y += adicionarTexto(`Transporte: ${formDav.transporte.join(', ')}`, margemEsquerda, y, larguraUtil);
+
+    y += adicionarTexto('Profissionais:', margemEsquerda, y, larguraUtil);
+    formDav.profissionais.forEach((profissional, index) => {
+        y += adicionarTexto(`${index + 1}. ${profissional.nome} - ${profissional.formacao}`, margemEsquerda + 5, y, larguraUtil - 5);
+    });
+
+    y += 20;
+
+    pdf.setLineWidth(0.5);
+    pdf.line(margemEsquerda, y, margemEsquerda + larguraUtil / 2 - 10, y); // Linha horizontal
+    pdf.text(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y + 10); // Nome do coordenador
+
+    pdf.line(margemEsquerda + larguraUtil / 2 + 10, y, margemEsquerda + larguraUtil, y); // Linha horizontal
+    pdf.text(`Fiscal: ${formatNome(props.contrato.fiscal_contrato)}`, margemEsquerda + larguraUtil / 2 + 10, y + 10); // Campo para o fiscal
+
+    // Salvar o PDF
+    pdf.save('detalhes_dav.pdf');
+};
 
 </script>
 
@@ -151,7 +236,7 @@ const reprovarDav = () => {
           />
         </div>
       </template>
-  
+
       <Navbar :tipo="contrato">
         <template #body>
             <div class="card">
@@ -182,7 +267,7 @@ const reprovarDav = () => {
                             </option>
                         </select>
                         </div>
-            
+
                         <!-- Produto e Subproduto -->
                         <div class="col-12">
                         <label for="inputProduto" class="form-label">Produto</label>
@@ -212,7 +297,7 @@ const reprovarDav = () => {
                             </option>
                         </select>
                         </div>
-            
+
                         <!-- Finalidade e Escopo -->
                         <div class="col-md-6">
                         <label for="inputFinalidade" class="form-label">Finalidade</label>
@@ -234,7 +319,7 @@ const reprovarDav = () => {
                             disabled
                         />
                         </div>
-            
+
                         <!-- Datas (Início e Final) -->
                         <div class="col-md-6">
                         <label for="dataInicio" class="form-label">Data início</label>
@@ -256,7 +341,7 @@ const reprovarDav = () => {
                             disabled
                         />
                         </div>
-            
+
                         <!-- Origem e Destino -->
                         <div class="col-md-6">
                         <label for="inputOrigem" class="form-label">Origem</label>
@@ -282,7 +367,7 @@ const reprovarDav = () => {
                             />
                         </div>
                         </div>
-            
+
                         <!-- Checkboxes organizados em duas colunas -->
                         <div class="col-md-6">
                         <div class="form-check">
@@ -332,7 +417,7 @@ const reprovarDav = () => {
                             <label class="form-check-label" for="gridCheckOutros">Outros</label>
                         </div>
                         </div>
-            
+
                         <!-- Profissionais -->
                         <div class="col-12">
                           <label for="inputProfissionais" class="form-label">Profissionais</label>
@@ -349,22 +434,30 @@ const reprovarDav = () => {
                         </div>
 
                         <div class="col-12 d-flex justify-content-end mt-3">
-                          <button 
-                            type="button" 
-                            class="btn btn-success me-2" 
+                          <button
+                            type="button"
+                            class="btn btn-success me-2"
                             @click="aprovarDav"
                             :disabled="formDav.status === 'aprovado'"
                           >
                             Aprovar
                           </button>
-                          <button 
-                            type="button" 
-                            class="btn btn-danger" 
+                          <button
+                            type="button"
+                            class="btn btn-danger"
                             @click="reprovarDav"
                             :disabled="formDav.status === 'reprovado'"
                           >
                             Reprovar
                           </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary ms-2"
+                            @click="gerarPDF"
+                            :disabled="formDav.status === 'reprovado'"
+                        >
+                            Imprimir
+                        </button>
                         </div>
                     </form>
                 </div>
