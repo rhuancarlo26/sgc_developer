@@ -11,6 +11,7 @@ use App\Models\SgcvwSubprodutos;
 use App\Shared\Http\Controllers\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\HistoricoDav;
 
 class ListagemDavController extends Controller
 {
@@ -38,7 +39,7 @@ class ListagemDavController extends Controller
         $subprodutos = SgcvwSubprodutos::all();
         $produtos = SgcProdutos::all();
         $empreendimentos = DashexcelEmpreendimentos::all();
-        
+
         return Inertia::render('Sgc/Contratada/Dav/DetalheDav', [
             'dav' => $dav,
             'contrato' => $contrato,
@@ -60,11 +61,22 @@ class ListagemDavController extends Controller
     public function reprovar($id)
     {
         $dav = Dav::findOrFail($id);
+        $status_anterior = $dav->status;
+
         $dav->status = 'reprovado';
         $dav->save();
+
+        // Definição do Histórico AQUI
+        HistoricoDav::create([
+            'dav_id' => $dav->id,
+            'status_anterior' => $status_anterior,
+            'status_novo' => 'reprovado',
+            'observacao' => 'DAV reprovada pelo usuário.',
+            'user_id' => auth()->id(),
+        ]);
 
         return redirect()->back()->with('success', 'DAV reprovada com sucesso.');
     }
 
-    
+
 }
