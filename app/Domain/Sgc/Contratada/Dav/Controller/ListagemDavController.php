@@ -48,6 +48,15 @@ class ListagemDavController extends Controller
             'empreendimentos' => $empreendimentos
         ]);
     }
+    public function historicos(Contrato $contrato): Response
+    {
+        $davs = HistoricoDav::all();
+
+        return Inertia::render('Sgc/Contratada/Dav/HistoricoDav', [
+            'contrato' => $contrato,
+            'davs' => $davs
+        ]);
+    }
 
     public function aprovar($id)
     {

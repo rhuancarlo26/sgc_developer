@@ -213,6 +213,7 @@ updateReminders();
         <div>
           <button type="button" class="btn btn-info me-3" @click="abrirVisualizarFormDav('cadFunc')">Cadastrar profissionais</button>
           <button type="button" class="btn btn-info" @click="abrirVisualizarFormDav('formDav')">Cadastrar DAV</button>
+          <a class="btn btn-warning mx-3" :href="'/sgc/gestao/dav/historicos/1'">DAV's Reprovadas</a>
         </div>
       </div>
     </template>

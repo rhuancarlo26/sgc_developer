@@ -35,7 +35,7 @@ Route::prefix('/contratada')->group(function () {
 
         return 'E-mail enviado!';
     })->name('sgc.contratada.send-email');
-    
+
     // Download anexo
     Route::get('/sgc/contratada/download-anexo/{contratoId}/{itemId}/{relatorioNum}', [StoreUploadRelatorioController::class, 'downloadAnexo'])->name('sgc.contratada.download_anexo');
 
@@ -74,6 +74,6 @@ Route::prefix('/contratada')->group(function () {
     //DAV's
     Route::put('/sgc/gestao/dav/{id}/aprovar', [ListagemDavController::class, 'aprovar'])->name('sgc.gestao.aprovarDav');
     Route::put('/sgc/gestao/dav/{id}/reprovar', [ListagemDavController::class, 'reprovar'])->name('sgc.gestao.reprovarDav');
- 
+
 
 });
