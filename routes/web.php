@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Dashboard\PMQA\Controller\IndexDashboardPMQAController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -36,6 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Dashboard (Home page)
         Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
+
+        Route::prefix('dashboard')->group(function () {
+            Route::prefix('pmqa')->group(function () {
+                Route::get('/', [IndexDashboardPMQAController::class, 'index'])->name('dashboard.pmqa');
+            });
+        });
 
         // Ambiente Geo
         Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))->name('ambienteGeo');
