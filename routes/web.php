@@ -1,7 +1,7 @@
 <?php
 
 use App\Domain\Dashboard\MonAtpFauna\Controller\IndexDashboardMonAtpFaunaController;
-use App\Domain\Dashboard\MonAtpFauna\Controller\IndexMonAtpFaunaController;
+use App\Domain\Dashboard\PassagemFauna\Controller\IndexDashboardPassagemFaunaController;
 use App\Domain\Dashboard\PMQA\Controller\IndexDashboardPMQAController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -46,6 +46,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             });
             Route::prefix('mon-atp-fauna')->group(function () {
                 Route::get('/', [IndexDashboardMonAtpFaunaController::class, 'index'])->name('dashboard.mon-atp-fauna');
+            });
+            Route::prefix('passagem-fauna')->group(function () {
+                Route::get('/', [IndexDashboardPassagemFaunaController::class, 'index'])->name('dashboard.passagem-fauna');
             });
         });
 
