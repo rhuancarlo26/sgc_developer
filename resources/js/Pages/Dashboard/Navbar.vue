@@ -12,6 +12,7 @@ import { IconLayoutDashboard } from '@tabler/icons-vue';
             <div class="col">
               <ul class="navbar-nav">
                 <NavLink route-name="dashboard.pmqa" title="PMQA" :icon="IconLayoutDashboard" />
+                <NavLink route-name="dashboard.mon-atp-fauna" title="Mon. Atp. Fauna" :icon="IconLayoutDashboard" />
               </ul>
             </div>
           </div>
