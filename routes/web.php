@@ -1,6 +1,9 @@
 <?php
 
+use App\Domain\Dashboard\AfugentamentoFauna\Controller\IndexDashboardAfugentamentoFaunaController;
 use App\Domain\Dashboard\PMQA\Controller\IndexDashboardPMQAController;
+use App\Domain\Dashboard\SupervisaoAmbiental\Controller\IndexDashboardSupervisaoAmbientalController;
+use App\Domain\Dashboard\SupressaoVegetal\Controller\IndexDashboardSupressaoVegetalController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -41,6 +44,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('dashboard')->group(function () {
             Route::prefix('pmqa')->group(function () {
                 Route::get('/', [IndexDashboardPMQAController::class, 'index'])->name('dashboard.pmqa');
+            });
+            Route::prefix('afugentamentoFauna')->group(function () {
+                Route::get('/', [IndexDashboardAfugentamentoFaunaController::class, 'index'])->name('dashboard.afugentamentoFauna');
+            });
+            Route::prefix('supressaoVegetal')->group(function () {
+                Route::get('/', [IndexDashboardSupressaoVegetalController::class, 'index'])->name('dashboard.supressaoVegetal');
+            });
+            Route::prefix('supervisaoAmbiental')->group(function () {
+                Route::get('/', [IndexDashboardSupervisaoAmbientalController::class, 'index'])->name('dashboard.supervisaoAmbiental');
             });
         });
 

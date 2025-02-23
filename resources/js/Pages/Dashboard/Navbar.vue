@@ -14,6 +14,21 @@ import { IconLayoutDashboard } from '@tabler/icons-vue';
                 <NavLink route-name="dashboard.pmqa" title="PMQA" :icon="IconLayoutDashboard" />
               </ul>
             </div>
+            <div class="col">
+              <ul class="navbar-nav">
+                <NavLink route-name="dashboard.afugentamentoFauna" title="Afugentamento de fauna" :icon="IconLayoutDashboard" />
+              </ul>
+            </div>
+            <div class="col">
+              <ul class="navbar-nav">
+                <NavLink route-name="dashboard.supervisaoAmbiental" title="Supervisao Ambiental" :icon="IconLayoutDashboard" />
+              </ul>
+            </div>
+            <div class="col">
+              <ul class="navbar-nav">
+                <NavLink route-name="dashboard.supressaoVegetal" title="Supressao Vegetal" :icon="IconLayoutDashboard" />
+              </ul>
+            </div>
           </div>
         </div>
       </div>
