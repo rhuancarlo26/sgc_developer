@@ -3,7 +3,10 @@
 use App\Domain\Dashboard\MonAtpFauna\Controller\IndexDashboardMonAtpFaunaController;
 use App\Domain\Dashboard\MonitoraFauna\Controller\IndexDashboardMonitoraFaunaController;
 use App\Domain\Dashboard\PassagemFauna\Controller\IndexDashboardPassagemFaunaController;
+use App\Domain\Dashboard\AfugentamentoFauna\Controller\IndexDashboardAfugentamentoFaunaController;
 use App\Domain\Dashboard\PMQA\Controller\IndexDashboardPMQAController;
+use App\Domain\Dashboard\SupervisaoAmbiental\Controller\IndexDashboardSupervisaoAmbientalController;
+use App\Domain\Dashboard\SupressaoVegetal\Controller\IndexDashboardSupressaoVegetalController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -53,6 +56,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             });
             Route::prefix('monitora-fauna')->group(function () {
                 Route::get('/', [IndexDashboardMonitoraFaunaController::class, 'index'])->name('dashboard.monitora-fauna');
+            });
+            Route::prefix('afugentamentoFauna')->group(function () {
+                Route::get('/', [IndexDashboardAfugentamentoFaunaController::class, 'index'])->name('dashboard.afugentamentoFauna');
+            });
+            Route::prefix('supressaoVegetal')->group(function () {
+                Route::get('/', [IndexDashboardSupressaoVegetalController::class, 'index'])->name('dashboard.supressaoVegetal');
+            });
+            Route::prefix('supervisaoAmbiental')->group(function () {
+                Route::get('/', [IndexDashboardSupervisaoAmbientalController::class, 'index'])->name('dashboard.supervisaoAmbiental');
             });
         });
 
