@@ -37,6 +37,7 @@ const aprovarDav = (id) => {
               <thead>
                 <tr>
                   <th>ID</th>
+                  <th>DAV</th>
                   <th>Usuário</th>
                   <th>Data</th>
                   <th>Status Anterior</th>
@@ -46,6 +47,7 @@ const aprovarDav = (id) => {
               <tbody>
                 <tr v-for="dav in davs" :key="dav.id">
                   <td>{{ dav.id }}</td>
+                  <td><a :href="'/sgc/gestao/dav/'">{{ dav.dav_id }}</a></td>
                   <td>{{ dav.user_id }}</td>
                   <td>{{ new Date(dav.created_at).toLocaleDateString() }}</td>
                   <td>{{ dav.status_anterior }}</td>
