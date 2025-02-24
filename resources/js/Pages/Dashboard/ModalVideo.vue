@@ -27,7 +27,7 @@ defineExpose({ abrirModal });
   <Modal ref="modalRef" title="Video" modal-dialog-class="modal-xl">
     <template #body>
       <div class="d-flex justify-content-center">
-        <video controls width="600" :src="usePage().props.app_url + url" type="video/mp4"></video>
+        <video controls width="600" :src="url" type="video/mp4"></video>
       </div>
     </template>
   </Modal>

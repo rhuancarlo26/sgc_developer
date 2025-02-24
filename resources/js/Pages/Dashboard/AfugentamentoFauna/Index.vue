@@ -8,8 +8,15 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Navbar from '../Navbar.vue';
+import ModalVideo from '../ModalVideo.vue';
+import NavButton from '@/Components/NavButton.vue';
 
+const modalVideoRef = ref({});
 const activeTab = ref('resultados');
+
+const abrirModalVideo = () => {
+    modalVideoRef.value.abrirModal()
+}
 
 const chartData = ref({
     labels: [
@@ -35,7 +42,7 @@ const chartData = ref({
 });
 
 const chartOptions = ref({
-    
+
     responsive: true,
     plugins: {
         legend: { display: false },
@@ -45,7 +52,7 @@ const chartOptions = ref({
         x: {
             grid: { display: false },
             ticks: {
-               
+
                 minRotation: 90,
                 maxRotation: 90,
             },
@@ -115,6 +122,10 @@ const pieChartOptions = ref({
     <AuthenticatedLayout>
         <Navbar />
         <div class="card card-body mb-4">
+            <div class="text-end">
+                <NavButton @click="abrirModalVideo()" :icon="IconPlayerPlay" title="Abrir Video"
+                    type-button="success" />
+            </div>
             <h1 class="text-center mb-4">Programa de Afugentamento e Resgate de Fauna</h1>
             <div class="row">
                 <div class="col-md-4">
@@ -246,56 +257,56 @@ const pieChartOptions = ref({
                     <div class="col mb-3">
                         <div class="card">
                             <div class="card-body">
-                               
+
                                 <div class="row">
                                     <div class="col-12 mb-3">
-                                        <strong>Nome:</strong> 
+                                        <strong>Nome:</strong>
                                     </div>
                                 </div>
-                               
+
                                 <div class="row">
                                     <div class="col-6 mb-3">
-                                        <strong>Latitude:</strong> 
+                                        <strong>Latitude:</strong>
                                     </div>
                                     <div class="col-6 mb-3">
-                                        <strong>Longitude:</strong> 
+                                        <strong>Longitude:</strong>
                                     </div>
                                 </div>
-                              
+
                                 <div class="row">
                                     <div class="col-12 mb-3">
-                                        <strong>Área total:</strong> 
+                                        <strong>Área total:</strong>
                                     </div>
                                 </div>
-                                
+
                                 <div class="row">
                                     <div class="col-6 mb-3">
-                                        <strong>Licença:</strong> 
+                                        <strong>Licença:</strong>
                                     </div>
                                     <div class="col-6 mb-3">
-                                        <strong>Situação da obra:</strong> 
+                                        <strong>Situação da obra:</strong>
                                     </div>
                                 </div>
-                                
+
                                 <div class="row">
                                     <div class="col-6 mb-3">
-                                        <strong>Data início:</strong> 
+                                        <strong>Data início:</strong>
                                     </div>
                                     <div class="col-6 mb-3">
-                                        <strong>Data fim:</strong> 
+                                        <strong>Data fim:</strong>
                                     </div>
                                 </div>
-                                
+
                                 <div class="row">
                                     <div class="col-12 mb-3">
                                         <strong>Responsável pela obra:</strong>
-                                        
+
                                     </div>
                                 </div>
-                              
+
                                 <div class="row">
                                     <div class="col-12">
-                                        <strong>Cobertura Vegetal:</strong> 
+                                        <strong>Cobertura Vegetal:</strong>
                                     </div>
                                 </div>
                             </div>
@@ -305,6 +316,9 @@ const pieChartOptions = ref({
 
             </div>
         </div>
+
+        <ModalVideo ref="modalVideoRef"
+            url="https://drive.google.com/file/d/1fwXRFhU8RWKrNAEC7jgABI2H77fcwoz9/view?usp=sharing" />
 
     </AuthenticatedLayout>
 </template>

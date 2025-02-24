@@ -8,9 +8,17 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Navbar from '../Navbar.vue';
+import ModalVideo from '../ModalVideo.vue';
+import NavButton from '@/Components/NavButton.vue';
+
+const modalVideoRef = ref({});
 
 const activeTab = ref('resultados');
 const activeTabGraph = ref('rnc');
+
+const abrirModalVideo = () => {
+    modalVideoRef.value.abrirModal()
+}
 
 const chartData = ref({
     labels: [
@@ -120,6 +128,10 @@ const lotes = ref(['Lote A', 'Lote B', 'Lote C']); // Exemplo de lotes
     <AuthenticatedLayout>
         <Navbar />
         <div class="card card-body mb-4">
+            <div class="text-end">
+                <NavButton @click="abrirModalVideo()" :icon="IconPlayerPlay" title="Abrir Video"
+                    type-button="success" />
+            </div>
             <h1 class="text-center mb-4">Programa de Supervisao Ambiental</h1>
             <div class="row">
                 <div class="col-md-4">
@@ -285,6 +297,9 @@ const lotes = ref(['Lote A', 'Lote B', 'Lote C']); // Exemplo de lotes
 
             </div>
         </div>
+
+        <ModalVideo ref="modalVideoRef"
+            url="https://drive.google.com/file/d/1fwXRFhU8RWKrNAEC7jgABI2H77fcwoz9/view?usp=sharing" />
 
     </AuthenticatedLayout>
 </template>
