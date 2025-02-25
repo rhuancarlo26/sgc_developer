@@ -1,5 +1,12 @@
 <?php
 
+use App\Domain\Dashboard\MonAtpFauna\Controller\IndexDashboardMonAtpFaunaController;
+use App\Domain\Dashboard\MonitoraFauna\Controller\IndexDashboardMonitoraFaunaController;
+use App\Domain\Dashboard\PassagemFauna\Controller\IndexDashboardPassagemFaunaController;
+use App\Domain\Dashboard\AfugentamentoFauna\Controller\IndexDashboardAfugentamentoFaunaController;
+use App\Domain\Dashboard\PMQA\Controller\IndexDashboardPMQAController;
+use App\Domain\Dashboard\SupervisaoAmbiental\Controller\IndexDashboardSupervisaoAmbientalController;
+use App\Domain\Dashboard\SupressaoVegetal\Controller\IndexDashboardSupressaoVegetalController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -36,6 +43,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Dashboard (Home page)
         Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
+
+        Route::prefix('dashboard')->group(function () {
+            Route::prefix('pmqa')->group(function () {
+                Route::get('/', [IndexDashboardPMQAController::class, 'index'])->name('dashboard.pmqa');
+            });
+            Route::prefix('mon-atp-fauna')->group(function () {
+                Route::get('/', [IndexDashboardMonAtpFaunaController::class, 'index'])->name('dashboard.mon-atp-fauna');
+            });
+            Route::prefix('passagem-fauna')->group(function () {
+                Route::get('/', [IndexDashboardPassagemFaunaController::class, 'index'])->name('dashboard.passagem-fauna');
+            });
+            Route::prefix('monitora-fauna')->group(function () {
+                Route::get('/', [IndexDashboardMonitoraFaunaController::class, 'index'])->name('dashboard.monitora-fauna');
+            });
+            Route::prefix('afugentamentoFauna')->group(function () {
+                Route::get('/', [IndexDashboardAfugentamentoFaunaController::class, 'index'])->name('dashboard.afugentamentoFauna');
+            });
+            Route::prefix('supressaoVegetal')->group(function () {
+                Route::get('/', [IndexDashboardSupressaoVegetalController::class, 'index'])->name('dashboard.supressaoVegetal');
+            });
+            Route::prefix('supervisaoAmbiental')->group(function () {
+                Route::get('/', [IndexDashboardSupervisaoAmbientalController::class, 'index'])->name('dashboard.supervisaoAmbiental');
+            });
+        });
 
         // Ambiente Geo
         Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))->name('ambienteGeo');
