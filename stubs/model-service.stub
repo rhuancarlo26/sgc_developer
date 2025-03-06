@@ -1,0 +1,11 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Shared\Abstract\BaseModelService;
+
+class {{ class }} extends BaseModelService
+{
+    //@todo: Change 'Model::class' for the Model you want to use.  E.g: User::class
+    protected string $modelClass = Model::class;
+}
