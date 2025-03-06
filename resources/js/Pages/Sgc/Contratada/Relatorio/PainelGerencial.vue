@@ -10,7 +10,7 @@ import ListaModal from "./ListaModal.vue";
 import DashboardMap from "@/Components/DashboardMap.vue";
 import NavLink from "@/Components/NavLink.vue";
 import { IconPencil, IconPlus, IconTrash, IconZoomCheck } from "@tabler/icons-vue";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import SgcLinkConfirmation from "@/Components/SgcLinkConfirmation.vue";
 import PaginationSgc from '@/Components/PaginationSgc.vue';
 
 const listaModal = ref();
@@ -249,27 +249,27 @@ const filtrarempreendimentos = () => {
                     <div class="table-responsive mb-4">
                       <table class="table card-table table-bordered table-hover">
                         <thead>
-                          <tr>
-                            <th @click="ordenarTabela('cod_emp')" style="cursor: pointer">Empreendimento</th>
-                            <th @click="ordenarTabela('br_uf')" style="cursor: pointer">BR/UF</th>
-                            <th @click="ordenarTabela('km_ini')" style="cursor: pointer">Km Inicial</th>
-                            <th @click="ordenarTabela('km_fin')" style="cursor: pointer">Km Final</th>
-                            <th @click="ordenarTabela('tipo_de_intervencao')" style="cursor: pointer">Tipo de Intervenção</th>
-                            <th @click="ordenarTabela('lp_avanco')" style="cursor: pointer">LP Avanço</th>
-                            <th @click="ordenarTabela('li_avanco')" style="cursor: pointer">LI Avanço</th>
-                            <th @click="ordenarTabela('criticidade_ibama_oema')" style="cursor: pointer">Criticidade</th>
+                          <tr style="text-align: center;">
+                            <th @click="ordenarTabela('cod_emp')" style="cursor: pointer; vertical-align: middle;">Empreendimento</th>
+                            <th @click="ordenarTabela('br_uf')" style="cursor: pointer; vertical-align: middle;">BR/UF</th>
+                            <th @click="ordenarTabela('km_ini')" style="cursor: pointer; vertical-align: middle;">Km Inicial</th>
+                            <th @click="ordenarTabela('km_fin')" style="cursor: pointer; vertical-align: middle;">Km Final</th>
+                            <th @click="ordenarTabela('tipo_de_intervencao')" style="cursor: pointer; vertical-align: middle;">Tipo de Intervenção</th>
+                            <th @click="ordenarTabela('lp_avanco')" style="cursor: pointer; vertical-align: middle;">LP Avanço</th>
+                            <th @click="ordenarTabela('li_avanco')" style="cursor: pointer; vertical-align: middle;">LI Avanço</th>
+                            <th @click="ordenarTabela('criticidade_ibama_oema')" style="cursor: pointer; vertical-align: middle;">Criticidade</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="trecho in displayedItems" :key="trecho.cod_emp">
-                            <td>{{ trecho.cod_emp }}</td>
-                            <td>{{ trecho.br_uf }}</td>
-                            <td>{{ trecho.km_ini }}</td>
-                            <td>{{ trecho.km_fin }}</td>
-                            <td>{{ trecho.tipo_de_intervencao }}</td>
-                            <td>{{ trecho.lp_avanco != "#DIV/0!" ? (Number(trecho.lp_avanco) * 100).toFixed(0) + ' %' : '' }}</td>
-                            <td>{{ trecho.li_avanco != "#DIV/0!" ? (Number(trecho.li_avanco) * 100).toFixed(0) + ' %' : '' }}</td>
-                            <td>
+                          <tr style="text-align: center;" v-for="trecho in displayedItems" :key="trecho.cod_emp">
+                            <td style="vertical-align: middle;">{{ trecho.cod_emp }}</td>
+                            <td style="vertical-align: middle;">{{ trecho.br_uf }}</td>
+                            <td style="vertical-align: middle;">{{ trecho.km_ini }}</td>
+                            <td style="vertical-align: middle;">{{ trecho.km_fin }}</td>
+                            <td style="vertical-align: middle;">{{ trecho.tipo_de_intervencao }}</td>
+                            <td style="vertical-align: middle;">{{ trecho.lp_avanco != "#DIV/0!" ? (Number(trecho.lp_avanco) * 100).toFixed(0) + ' %' : '' }}</td>
+                            <td style="vertical-align: middle;">{{ trecho.li_avanco != "#DIV/0!" ? (Number(trecho.li_avanco) * 100).toFixed(0) + ' %' : '' }}</td>
+                            <td style="vertical-align: middle;">
                               {{ trecho.criticidade_ibama_oema ? `IBMA/OEMA: ${trecho.criticidade_ibama_oema}` : '' }}
                               <br v-if="trecho.criticidade_ibama_oema" />
                               {{ trecho.criticidade_funai ? `FUNAI: ${trecho.criticidade_funai}` : '' }}
@@ -283,15 +283,21 @@ const filtrarempreendimentos = () => {
                               {{ trecho.criticidade_ms ? `MS: ${trecho.criticidade_ms}` : '' }}
                               <br v-if="trecho.criticidade_ms" />
                             </td>
-                            <td class="d-inline-flex align-items-center gap-2 pe-0 text-center">
+                            <td style="display: flex; align-items: center; justify-content: center; gap: 2rem;" class="p-4 text-center">
                               <span>
-                                <NavLink class="list-unstyled" route-name="sgc.gestao.dashboard.empreendimento.index" :param="{ tipo: props.tipo, empreendimento: trecho.id }" :icon="IconZoomCheck" />
+                                  <NavLink class="list-unstyled" route-name="sgc.gestao.dashboard.empreendimento.index" :param="{ tipo: props.tipo , empreendimento: trecho.id}" :icon="IconZoomCheck" />
                               </span>
-                              <LinkConfirmation v-slot="confirmation" :options="{ text: `Deseja excluir o empreendimento ${trecho.cod_emp}` }">
-                                <Link :onBefore="confirmation.show" :href="route('sgc.gestao.dashboard.empreendimento.delete', trecho.id)" method="DELETE" class="text-danger">
+                              <SgcLinkConfirmation v-slot="confirmation"
+                                :options="{ text: `Deseja excluir o empreendimento ${trecho.cod_emp}` }">
+                                <Link
+                                :onBefore="() => confirmation.show(
+                                      { url: route('sgc.gestao.dashboard.empreendimento.delete', trecho.id), method: 'DELETE' },
+                                      () => window.location.reload()
+                                  )"
+                                  class="text-danger">
                                   <IconTrash />
                                 </Link>
-                              </LinkConfirmation>
+                              </SgcLinkConfirmation>
                               <a class="list-unstyled text-warning" :href="route('sgc.gestao.dashboard.empreendimento.create', [tipo.id, trecho.id])">
                                 <IconPencil />
                               </a>

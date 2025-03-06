@@ -6,23 +6,18 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export default defineConfig({
-    server: {
-        hmr: {
-            host: 'localhost'
-        }
-    },
-    plugins: [
-        laravel({
-            input: 'resources/js/app.js',
-            refresh: true,
-        }),
-        vue({
-            template: {
-                transformAssetUrls: {
-                    base: null,
-                    includeAbsolute: false,
-                },
-            },
-        }),
-    ],
+  plugins: [
+    laravel({
+      input: 'resources/js/app.js',
+      refresh: true,
+    }),
+    vue({
+      template: {
+        transformAssetUrls: {
+          base: null,
+          includeAbsolute: false,
+        },
+      },
+    }),
+  ],
 });

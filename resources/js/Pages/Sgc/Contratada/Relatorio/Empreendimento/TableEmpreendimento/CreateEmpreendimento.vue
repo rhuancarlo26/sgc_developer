@@ -15,7 +15,6 @@ import Navbar from '../../../Navbar.vue';
 const props = defineProps({
   contrato: Object,
   ufs: Object,
-  rodovias: Object,
   empreendimento: Object,
   tipo: Object
 });
@@ -146,14 +145,33 @@ const storeEmpreendimentos = async () => {
   }
 };
 
+const limparForm = () => {
+  form_trecho.contrato_est_ambiental = null;
+  form_trecho.cod_emp = null;
+  form_trecho.ose_sei = null;
+  form_trecho.uf = null;
+  form_trecho.rodovia = null;
+  form_trecho.km_inicial = null;
+  form_trecho.km_final = null;
+  form_trecho.tipo_trecho = 'B';
+  form_trecho.coordenada = '';
+
+  formKey.value++;
+
+  coordenadasIniciais = [];
+  contadorGet = 0;
+};
+
+
+
 watch(() => form_trecho.uf, () => {
-    if (form_trecho.uf) {
-      uf_rodovias.value = props.rodovias.filter((rodovia) => {
-        return rodovia.uf_id === form_trecho.uf.id;
-      });
-    } else {
-      uf_rodovias.value = [{ rodovia: 'Selecione uma UF' }];
-    }
+  if (form_trecho.uf) {
+    uf_rodovias.value = props.base_rodovia.filter((rodovia) => {
+      return rodovia.uf_id === form_trecho.uf.id;
+    });
+  } else {
+    uf_rodovias.value = [{ rodovia: 'Selecione uma UF' }];
+  }
 });
 
 onMounted(() => {
@@ -175,21 +193,21 @@ onMounted(() => {
         </div>
       </template>
       <Navbar >
-  
+
         <template #body>
-          <div class="space-y-3 card card-body">
-              <div class="row my-4">
+          <div :key="formKey" class="space-y-3 card card-body">
+            <div class="row my-4">
               <!-- Seção do formulário -->
               <div class="col-md-4">
                 <InputLabel value="Cód empreedimento" for="cod_emp" />
-                <input 
-                  type="text" 
-                  id="cod_emp" 
-                  name="cod_emp" 
-                  class="form-control" 
-                  v-model="form_trecho.cod_emp" 
-                  readonly
-                  disabled
+                <input
+                    type="text"
+                    id="cod_emp"
+                    name="cod_emp"
+                    class="form-control"
+                    v-model="form_trecho.cod_emp"
+                    readonly
+                    disabled
                 />
                 <InputError />
               </div>
@@ -203,19 +221,19 @@ onMounted(() => {
                 <input type="text" step="any" id="ose_sei" name="ose_sei" class="form-control" v-model="form_trecho.ose_sei"/>
                 <InputError />
               </div>
-          
+
               <div class="col-md-4 my-4">
                 <InputLabel value="Km Inicial" for="km_inicial" />
                 <input type="number" step="any" id="km_inicial" name="km_inicial" class="form-control" v-model="form_trecho.km_inicial"/>
                 <InputError />
               </div>
-          
+
               <div class="col-md-4 my-4">
                 <InputLabel value="Km Final" for="km_final" />
                 <input type="number" step="any" id="km_final" name="km_final" class="form-control"  v-model="form_trecho.km_final"/>
                 <InputError />
               </div>
-          
+
               <div class="col-md-4 my-4">
                 <InputLabel value="Tipo de trecho" for="tipo_trecho" />
                 <select name="trecho_tipo" id="trecho_tipo" class="form-control form-select" @change="form_trecho.tipo_trecho = $event.target.value">
@@ -230,9 +248,9 @@ onMounted(() => {
               <div class="col-md-4">
                 <InputLabel value="UF" for="ufs" />
                 <select name="uf" id="uf" class="form-control form-select" v-model="form_trecho.uf">
-                    <option v-for="uf in props.ufs" :key="uf.id" :value="uf">
-                      {{ uf.uf }}
-                    </option>
+                  <option v-for="uf in props.ufs" :key="uf.id" :value="uf">
+                    {{ uf.uf }}
+                  </option>
                 </select>
               </div>
               <div class="col-md-4">
@@ -240,9 +258,9 @@ onMounted(() => {
                   <div class="col">
                     <InputLabel value="BR" for="ufs" />
                     <select name="brs" id="brs" class="form-control form-select" v-model="form_trecho.rodovia">
-                        <option v-for="br in uf_rodovias" :key="br.id" :value="br">
-                          {{ br.rodovia }}
-                        </option>
+                      <option v-for="br in uf_rodovias" :key="br.id" :value="br">
+                        {{ br.rodovia }}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -270,7 +288,7 @@ onMounted(() => {
                   </button>
                 </div>
                 <div class="col-auto w-50">
-                  <button type="button" class="btn btn-icon btn-danger w-100">
+                  <button @click="limparForm" type="button" class="btn btn-icon btn-danger w-100">
                     <IconX />
                   </button>
                 </div>

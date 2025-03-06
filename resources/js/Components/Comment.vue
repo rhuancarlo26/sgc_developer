@@ -141,8 +141,11 @@ const toggleMinimize = () => {
 
 <style scoped>
 .note {
-    position: absolute;
-    z-index: 2;
+  position: absolute;
+  z-index: 2;
+  width: 300px;
+  min-height: 200px;
+  margin-bottom: 10px;
 }
 
 textarea {
