@@ -17,10 +17,10 @@ class DavService extends BaseModelService
 
   public function salvarDav($dados)
   {
-    
+
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $dados);
 
-    return $response; // Retorne o modelo criado, ou faça outro tipo de resposta
+    return $response;
   }
 
 //   public function update($request)
@@ -34,7 +34,7 @@ class DavService extends BaseModelService
 
   public function salvarDavProfissionais($dados)
   {
-    
+
     $response = $this->dataManagement->create(entity: $this->davProfissionaisModel, infos: $dados);
 
     return $response; // Retorne o modelo criado, ou faça outro tipo de resposta

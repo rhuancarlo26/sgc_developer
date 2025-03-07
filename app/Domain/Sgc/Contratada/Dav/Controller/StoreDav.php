@@ -14,7 +14,6 @@ class StoreDav extends Controller
 
   public function index(Request $request)
   {
-
     try {
       $dados = $request->validate([
         'contrato_id'    => 'required|int',
@@ -32,14 +31,18 @@ class StoreDav extends Controller
         'destino.*'      => 'string',
         'profissionais'  => 'array',
         'transporte'     => 'array',
-        'status'         => 'required|string'
+        'status'         => 'required|string',
+        'aereo_valor'     => 'integer',
+        'terrestre_tipo'  => 'array',
+        'terrestre_valor' => 'integer',
+        'aquatico_valor'  => 'integer'
       ]);
 
       $this->davService->salvarDav($dados);
 
       // Retorna apenas a mensagem de sucesso sem os dados completos
       return back()->with('success', 'Registro cadastrado com sucesso!');
-    
+
     }catch (\Exception $e) {
       return response()->json(['success' => false, 'message' => 'Erro ao cadastrar!', 'error' => $e->getMessage()], 500);
     }

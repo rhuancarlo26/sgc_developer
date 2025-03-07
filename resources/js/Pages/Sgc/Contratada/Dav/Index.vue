@@ -13,7 +13,8 @@ const props = defineProps({
   subprodutos: Object,
   produtos: Object,
   dav: Object,
-  profissionais: Object
+  profissionais: Object,
+  consumos: Object
 });
 
 const reminders = ref([]);
@@ -22,52 +23,52 @@ const modalVisualizarForm = ref();
 const modalVisualizarFormCadFunc = ref();
 const allDav = ref([]);
 
-const consumo = {
-    "94/2022": {
-        'Diárias': 552,
-        'Deslocamentos - Veículo Leve Tipo Hatch': 73,
-        'Deslocamentos - Veículo Leve Tipo Pick Up': 26,
-        'Deslocamentos - Barco de Alumínio 6m e Motor de Popa 30 Hp': 0,
-        'Deslocamentos - Passagem Aérea - Lote B': 38,
-    },
-    "93/2022": {
-        'Diárias': 4778,
-        'Deslocamentos - Passagem aérea - Lote A': 730,
-        'Deslocamentos - Veículo leve tipo hatch': 60,
-        'Deslocamentos - Veículo leve tipo Pick up': 1125,
-        'Deslocamentos - Barco de alumínio 6m e motor de popa 30 HP': 334
-    },
-    "95/2022": {
-        'Diárias': 3021,
-        'Deslocamentos - Passagem aérea - Lote C': 556,
-        'Deslocamentos - Veículo leve tipo hatch': 420,
-        'Deslocamentos - Veículo leve tipo Pick up': 174,
-        'Deslocamentos - Barco de alumínio 6m e motor de popa 30 HP': 44
-    }
-};
+const consumo = ref({
+  "94/2022": {
+    'Diárias': 552,
+    'Deslocamentos - Veículo Leve Tipo Hatch': 73,
+    'Deslocamentos - Veículo Leve Tipo Pick Up': 26,
+    'Deslocamentos - Barco de Alumínio 6m e Motor de Popa 30 Hp': 0,
+    'Deslocamentos - Passagem Aérea - Lote B': 38,
+  },
+  "93/2022": {
+    'Diárias': 4778,
+    'Deslocamentos - Passagem aérea - Lote A': 730,
+    'Deslocamentos - Veículo leve tipo hatch': 60,
+    'Deslocamentos - Veículo leve tipo Pick up': 1125,
+    'Deslocamentos - Barco de alumínio 6m e motor de popa 30 HP': 334
+  },
+  "95/2022": {
+    'Diárias': 3021,
+    'Deslocamentos - Passagem aérea - Lote C': 556,
+    'Deslocamentos - Veículo leve tipo hatch': 420,
+    'Deslocamentos - Veículo leve tipo Pick up': 174,
+    'Deslocamentos - Barco de alumínio 6m e motor de popa 30 HP': 44
+  }
+});
 
 const progressValues = ref(
-    props.subprodutos
-        .filter(qtd => {
-            const numeroFormatado = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
+  props.subprodutos
+    .filter(qtd => {
+      const numeroFormatado = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
 
-            return consumo[numeroFormatado] && qtd.produto === '14' && numeroFormatado === qtd.contrato;
-        })
-        .map(qtd => {
-            const numeroFormatado = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
-            const total = parseInt(qtd.qtd_contrato);
+      return consumo.value[numeroFormatado] && qtd.produto === '14' && numeroFormatado === qtd.contrato;
+    })
+    .map(qtd => {
+      const numeroFormatado = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
+      const total = parseInt(qtd.qtd_contrato);
 
-            const utilizada = consumo[numeroFormatado]?.[qtd.descricao_revisada] || 0;
+      const utilizada = consumo.value[numeroFormatado]?.[qtd.descricao_revisada] || 0;
 
-            const percentage = total > 0 ? ((utilizada / total) * 100).toFixed(2) : 0;
+      const percentage = total > 0 ? ((utilizada / total) * 100).toFixed(2) : 0;
 
-            return {
-                label: qtd.descricao_revisada,
-                percentage: parseFloat(percentage),
-                total,
-                utilizada
-            };
-        })
+      return {
+        label: qtd.descricao_revisada,
+        percentage: parseFloat(percentage),
+        total,
+        utilizada
+      };
+    })
 );
 
 const selectedRange = ref({
@@ -143,13 +144,13 @@ const adjustDate = (dateStr) => {
 watchEffect(() => {
   allDav.value = props.dav.map(item => (
     {
-    id: item.id,
-    icon: '✈️',
-    title: item.empreendimento,
-    startDate: adjustDate(item.dataInicio),
-    endDate: adjustDate(item.dataFinal),
-    status: item.status
-  }));
+      id: item.id,
+      icon: '✈️',
+      title: item.empreendimento,
+      startDate: adjustDate(item.dataInicio),
+      endDate: adjustDate(item.dataFinal),
+      status: item.status
+    }));
 });
 
 // Atualiza as páginas (VDatePicker)
@@ -226,11 +227,11 @@ updateReminders();
             <h3 class="m-3">DAV</h3>
             <div class="custom-vdatepicker p-2">
               <VDatePicker
-                  expanded
-                  @update:pages="updatePages"
-                  :attributes="attributes"
-                  :color="getCalendarColor()"
-                >
+                expanded
+                @update:pages="updatePages"
+                :attributes="attributes"
+                :color="getCalendarColor()"
+              >
                 <template #footer>
                   <div class="reminders">
                     <h3>Dav</h3>
@@ -300,15 +301,15 @@ updateReminders();
       </template>
     </Navbar>
     <FormDav ref="modalVisualizarForm"
-      :contrato="contrato"
-      :subprodutos="subprodutos"
-      :produtos="produtos"
-      :empreendimentos="empreendimentos"
-      :profissionais="profissionais"
-      :consumo="consumo"/>
+             :contrato="contrato"
+             :subprodutos="subprodutos"
+             :produtos="produtos"
+             :empreendimentos="empreendimentos"
+             :profissionais="profissionais"
+             :consumos="consumos"/>
     <FormProfissionais ref="modalVisualizarFormCadFunc"
-      :contrato="contrato"
-      :profissionais="profissionais"/>
+                       :contrato="contrato"
+                       :profissionais="profissionais"/>
   </AuthenticatedLayout>
 </template>
 

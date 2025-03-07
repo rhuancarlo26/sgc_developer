@@ -4,7 +4,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import Navbar from '../Navbar.vue';
 import { jsPDF } from "jspdf";
-import { onMounted, ref, watch } from 'vue';
+import {onMounted, ref, watch} from 'vue';
 
 const props = defineProps({
   contrato: Object,
@@ -12,6 +12,7 @@ const props = defineProps({
   subprodutos: Object,
   produtos: Object,
   empreendimentos: Object,
+  consumos: Object
 });
 
 const produtoSelecionado = ref("");
@@ -47,11 +48,7 @@ onMounted(() => {
         label: `${subProduto.subproduto} ${subProduto.descricao_revisada}`
       }));
   }
-
-
 });
-
-const opcoesProfissionais = ["Profissional 1", "Profissional 2", "Profissional 3"];
 
 const adicionarProfissional = () => {
   profissionais.value.push(profissionais.value.length + 1);
@@ -73,6 +70,8 @@ const filterProdutos = () => {
 
   return produtos;
 };
+
+
 
 const adicionarDestinos = () => {
   if (origem.value.length === destino.value.length) {
@@ -130,339 +129,338 @@ const reprovarDav = () => {
   });
 };
 const formatDate = (date) => {
-    const [year, month, day] = date.split('-');
-    return `${day}/${month}/${year}`;
+  const [year, month, day] = date.split('-');
+  return `${day}/${month}/${year}`;
 }
 
 const formatNome = (nome) => {
-    return nome
-        .toLowerCase() // Converte todo o nome para minúsculas
-        .split(' ') // Divide o nome em partes (separadas por espaço)
-        .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1)) // Capitaliza a primeira letra de cada parte
-        .join(' '); // Junta as partes novamente com espaços
+  return nome
+    .toLowerCase()
+    .split(' ')
+    .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1))
+    .join(' ');
 }
 
 const gerarPDF = () => {
-    const pdf = new jsPDF();
+  const pdf = new jsPDF();
 
-    // Configurações
-    const margemEsquerda = 15;
-    const margemDireita = 15;
-    const larguraUtil = pdf.internal.pageSize.getWidth() - margemEsquerda - margemDireita;
-    const tamanhoFonte = 11;
-    const espacamentoLinhas = 8;
-    pdf.setFontSize(tamanhoFonte);
+  const margemEsquerda = 15;
+  const margemDireita = 15;
+  const larguraUtil = pdf.internal.pageSize.getWidth() - margemEsquerda - margemDireita;
+  const tamanhoFonte = 11;
+  const espacamentoLinhas = 8;
+  pdf.setFontSize(tamanhoFonte);
 
-    const adicionarTexto = (texto, x, y, larguraMaxima) => {
-        const linhas = pdf.splitTextToSize(texto, larguraMaxima);
-        pdf.text(linhas, x, y);
-        return linhas.length * espacamentoLinhas;
-    };
+  const adicionarTexto = (texto, x, y, larguraMaxima) => {
+    const linhas = pdf.splitTextToSize(texto, larguraMaxima);
+    pdf.text(linhas, x, y);
+    return linhas.length * espacamentoLinhas;
+  };
 
-    const imageUrl = '/img/logo/logodnit.png';
+  const imageUrl = '/img/logo/logodnit.png';
 
-    const img = new Image();
-    img.src = imageUrl;
+  const img = new Image();
+  img.src = imageUrl;
 
-    const logoLargura = 30;
-    const logoAltura = 20;
+  const logoLargura = 30;
+  const logoAltura = 20;
 
-    const logoX = pdf.internal.pageSize.getWidth() - margemDireita - logoLargura;
-    const logoY = 10;
+  const logoX = pdf.internal.pageSize.getWidth() - margemDireita - logoLargura;
+  const logoY = 10;
 
-    pdf.addImage(img, 'PNG', logoX, logoY);
+  pdf.addImage(img, 'PNG', logoX, logoY);
 
-    pdf.setFontSize(17);
-    pdf.text('Documento de Autorização de Viagem', margemEsquerda, logoY + logoAltura / 2 - 4);
+  pdf.setFontSize(17);
+  pdf.text('Documento de Autorização de Viagem', margemEsquerda, logoY + logoAltura / 2 - 4);
 
-    pdf.setFontSize(tamanhoFonte);
-    let y = logoY + logoAltura + 10;
+  pdf.setFontSize(tamanhoFonte);
+  let y = logoY + logoAltura + 10;
 
-    y += adicionarTexto(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y, larguraUtil / 2);
+  y += adicionarTexto(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y, larguraUtil / 2);
 
-    adicionarTexto(`Empreendimento: ${formDav.empreendimento}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
+  adicionarTexto(`Empreendimento: ${formDav.empreendimento}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
 
-    y += adicionarTexto(`Produto: ${formDav.produto}`, margemEsquerda, y, larguraUtil);
+  y += adicionarTexto(`Produto: ${formDav.produto}`, margemEsquerda, y, larguraUtil);
 
-    y += adicionarTexto(`Subproduto: ${formDav.subproduto}`, margemEsquerda, y, larguraUtil);
+  y += adicionarTexto(`Subproduto: ${formDav.subproduto}`, margemEsquerda, y, larguraUtil);
 
-    y += adicionarTexto(`Finalidade: ${formDav.finalidade}`, margemEsquerda, y, larguraUtil / 2);
+  y += adicionarTexto(`Finalidade: ${formDav.finalidade}`, margemEsquerda, y, larguraUtil / 2);
 
-    adicionarTexto(`Escopo: ${formDav.escopo}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
+  adicionarTexto(`Escopo: ${formDav.escopo}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
 
-    y += adicionarTexto(`Data Início: ${formatDate(formDav.dataInicio)}`, margemEsquerda, y, larguraUtil / 2);
+  y += adicionarTexto(`Data Início: ${formatDate(formDav.dataInicio)}`, margemEsquerda, y, larguraUtil / 2);
 
-    adicionarTexto(`Data Final: ${formatDate(formDav.dataFinal)}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
+  adicionarTexto(`Data Final: ${formatDate(formDav.dataFinal)}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
 
-    y += adicionarTexto(`Origem: ${formDav.origem}`, margemEsquerda, y, larguraUtil / 2);
+  y += adicionarTexto(`Origem: ${formDav.origem}`, margemEsquerda, y, larguraUtil / 2);
 
-    adicionarTexto(`Destino: ${formDav.destino}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
+  adicionarTexto(`Destino: ${formDav.destino}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
 
-    y += adicionarTexto(`Transporte: ${formDav.transporte.join(', ')}`, margemEsquerda, y, larguraUtil);
+  y += adicionarTexto(`Transporte: ${formDav.transporte.join(', ')}`, margemEsquerda, y, larguraUtil);
 
-    y += adicionarTexto('Profissionais:', margemEsquerda, y, larguraUtil);
-    formDav.profissionais.forEach((profissional, index) => {
-        y += adicionarTexto(`${index + 1}. ${profissional.nome} - ${profissional.formacao}`, margemEsquerda + 5, y, larguraUtil - 5);
-    });
+  y += adicionarTexto('Profissionais:', margemEsquerda, y, larguraUtil);
+  formDav.profissionais.forEach((profissional, index) => {
+    y += adicionarTexto(`${index + 1}. ${profissional.nome} - ${profissional.formacao}`, margemEsquerda + 5, y, larguraUtil - 5);
+  });
 
-    y += 20;
+  y += 20;
 
-    pdf.setLineWidth(0.5);
-    pdf.line(margemEsquerda, y, margemEsquerda + larguraUtil / 2 - 10, y); // Linha horizontal
-    pdf.text(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y + 10); // Nome do coordenador
+  pdf.setLineWidth(0.5);
+  pdf.line(margemEsquerda, y, margemEsquerda + larguraUtil / 2 - 10, y); // Linha horizontal
+  pdf.text(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y + 10); // Nome do coordenador
 
-    pdf.line(margemEsquerda + larguraUtil / 2 + 10, y, margemEsquerda + larguraUtil, y); // Linha horizontal
-    pdf.text(`Fiscal: ${formatNome(props.contrato.fiscal_contrato)}`, margemEsquerda + larguraUtil / 2 + 10, y + 10); // Campo para o fiscal
+  pdf.line(margemEsquerda + larguraUtil / 2 + 10, y, margemEsquerda + larguraUtil, y); // Linha horizontal
+  pdf.text(`Fiscal: ${formatNome(props.contrato.fiscal_contrato)}`, margemEsquerda + larguraUtil / 2 + 10, y + 10); // Campo para o fiscal
 
-    // Salvar o PDF
-    pdf.save('detalhes_dav.pdf');
+  // Salvar o PDF
+  pdf.save('detalhes_dav.pdf');
 };
 
 </script>
 
 <template>
-    <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
-    <AuthenticatedLayout>
-      <template #header>
-        <div class="w-100 d-flex justify-content-between">
-          <Breadcrumb
-            class="align-self-center"
-            :links="[
+  <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
+  <AuthenticatedLayout>
+    <template #header>
+      <div class="w-100 d-flex justify-content-between">
+        <Breadcrumb
+          class="align-self-center"
+          :links="[
               { route: route('sgc.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
               { route: '#', label: contrato.contratada },
               { route: route('sgc.gestao.listagemDav', { id: contrato.id }), label: 'Dav' },
               { route: '#', label: 'Detalhes' },
             ]"
-          />
+        />
+      </div>
+    </template>
+
+    <Navbar :tipo="contrato">
+      <template #body>
+        <div class="card">
+          <div class="m-5">
+            <form class="row g-3">
+              <!-- Coordenador e Empreendimento -->
+              <div class="col-md-6">
+                <label for="inputCoordenador" class="form-label">Coordenador</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputCoordenador"
+                  v-model="formDav.coordenador"
+                  disabled
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="inputEmpreendimento" class="form-label">Empreendimento</label>
+                <select
+                  id="inputEmpreendimento"
+                  class="form-select"
+                  v-model="formDav.empreendimento"
+                  disabled
+                >
+                  <option selected>...</option>
+                  <option v-for="(empreendimento, index) of props.empreendimentos" :key="index">
+                    {{ empreendimento.cod_emp }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Produto e Subproduto -->
+              <div class="col-12">
+                <label for="inputProduto" class="form-label">Produto</label>
+                <select
+                  id="inputProduto"
+                  class="form-select"
+                  v-model="produtoSelecionado"
+                  disabled
+                >
+                  <option selected>...</option>
+                  <option v-for="(produto, index) of filterProdutos()" :key="index">
+                    {{ produto }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label for="inputSubproduto" class="form-label">Subproduto</label>
+                <select
+                  id="inputSubproduto"
+                  class="form-select"
+                  v-model="formDav.subproduto"
+                  disabled
+                >
+                  <option selected>...</option>
+                  <option v-for="(item, index) of subprodutosFiltrados" :key="index">
+                    {{ item.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Finalidade e Escopo -->
+              <div class="col-md-6">
+                <label for="inputFinalidade" class="form-label">Finalidade</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputFinalidade"
+                  v-model="formDav.finalidade"
+                  disabled
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="inputEscopo" class="form-label">Escopo da Atividade</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="inputEscopo"
+                  v-model="formDav.escopo"
+                  disabled
+                />
+              </div>
+
+              <!-- Datas (Início e Final) -->
+              <div class="col-md-6">
+                <label for="dataInicio" class="form-label">Data início</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="dataInicio"
+                  v-model="formDav.dataInicio"
+                  disabled
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="dataFinal" class="form-label">Data final</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="dataFinal"
+                  v-model="formDav.dataFinal"
+                  disabled
+                />
+              </div>
+
+              <!-- Origem e Destino -->
+              <div class="col-md-6">
+                <label for="inputOrigem" class="form-label">Origem</label>
+                <div v-for="(item, index) in origem" :key="index" class="d-flex align-items-center mb-3">
+                  <input
+                    type="text"
+                    class="form-control me-2"
+                    :id="'inputOrigem' + index"
+                    v-model="formDav.origem"
+                    disabled
+                  />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="inputDestino" class="form-label">Destino</label>
+                <div v-for="(item, index) in destino" :key="index" class="d-flex align-items-center mb-3">
+                  <input
+                    type="text"
+                    class="form-control me-2"
+                    :id="'inputDestino' + index"
+                    v-model="formDav.destino"
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <!-- Checkboxes organizados em duas colunas -->
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="gridCheckAereo"
+                    value="Aéreo"
+                    v-model="formDav.transporte"
+                    disabled
+                  />
+                  <label class="form-check-label" for="gridCheckAereo">Aéreo</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="gridCheckTerrestre"
+                    value="Terrestre"
+                    v-model="formDav.transporte"
+                    disabled
+                  />
+                  <label class="form-check-label" for="gridCheckTerrestre">Terrestre</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="gridCheckAquatico"
+                    value="Aquático"
+                    v-model="formDav.transporte"
+                    disabled
+                  />
+                  <label class="form-check-label" for="gridCheckAquatico">Aquático</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="gridCheckOutros"
+                    value="Outros"
+                    v-model="formDav.transporte"
+                    disabled
+                  />
+                  <label class="form-check-label" for="gridCheckOutros">Outros</label>
+                </div>
+              </div>
+
+              <!-- Profissionais -->
+              <div class="col-12">
+                <label for="inputProfissionais" class="form-label">Profissionais</label>
+                <div v-for="(profissional, index) in formDav.profissionais" :key="index" class="mb-3 d-flex align-items-center">
+                  <select
+                    class="form-select me-2"
+                    style="flex: 1;"
+                    v-model="formDav.profissionais[index]"
+                    disabled
+                  >
+                    <option :value="profissional">{{ `${profissional.nome} - ${profissional.formacao}` }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-12 d-flex justify-content-end mt-3">
+                <button
+                  type="button"
+                  class="btn btn-success me-2"
+                  @click="aprovarDav"
+                  :disabled="formDav.status === 'aprovado'"
+                >
+                  Aprovar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  @click="reprovarDav"
+                  :disabled="formDav.status === 'reprovado'"
+                >
+                  Reprovar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary ms-2"
+                  @click="gerarPDF"
+                  :disabled="formDav.status === 'reprovado'"
+                >
+                  Imprimir
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </template>
-
-      <Navbar :tipo="contrato">
-        <template #body>
-            <div class="card">
-                <div class="m-5">
-                    <form class="row g-3">
-                        <!-- Coordenador e Empreendimento -->
-                        <div class="col-md-6">
-                        <label for="inputCoordenador" class="form-label">Coordenador</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="inputCoordenador"
-                            v-model="formDav.coordenador"
-                            disabled
-                        />
-                        </div>
-                        <div class="col-md-6">
-                        <label for="inputEmpreendimento" class="form-label">Empreendimento</label>
-                        <select
-                            id="inputEmpreendimento"
-                            class="form-select"
-                            v-model="formDav.empreendimento"
-                            disabled
-                        >
-                            <option selected>...</option>
-                            <option v-for="(empreendimento, index) of props.empreendimentos" :key="index">
-                            {{ empreendimento.cod_emp }}
-                            </option>
-                        </select>
-                        </div>
-
-                        <!-- Produto e Subproduto -->
-                        <div class="col-12">
-                        <label for="inputProduto" class="form-label">Produto</label>
-                        <select
-                            id="inputProduto"
-                            class="form-select"
-                            v-model="produtoSelecionado"
-                            disabled
-                        >
-                            <option selected>...</option>
-                            <option v-for="(produto, index) of filterProdutos()" :key="index">
-                            {{ produto }}
-                            </option>
-                        </select>
-                        </div>
-                        <div class="col-12">
-                        <label for="inputSubproduto" class="form-label">Subproduto</label>
-                        <select
-                            id="inputSubproduto"
-                            class="form-select"
-                            v-model="formDav.subproduto"
-                            disabled
-                        >
-                            <option selected>...</option>
-                            <option v-for="(item, index) of subprodutosFiltrados" :key="index">
-                            {{ item.label }}
-                            </option>
-                        </select>
-                        </div>
-
-                        <!-- Finalidade e Escopo -->
-                        <div class="col-md-6">
-                        <label for="inputFinalidade" class="form-label">Finalidade</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="inputFinalidade"
-                            v-model="formDav.finalidade"
-                            disabled
-                        />
-                        </div>
-                        <div class="col-md-6">
-                        <label for="inputEscopo" class="form-label">Escopo da Atividade</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="inputEscopo"
-                            v-model="formDav.escopo"
-                            disabled
-                        />
-                        </div>
-
-                        <!-- Datas (Início e Final) -->
-                        <div class="col-md-6">
-                        <label for="dataInicio" class="form-label">Data início</label>
-                        <input
-                            type="date"
-                            class="form-control"
-                            id="dataInicio"
-                            v-model="formDav.dataInicio"
-                            disabled
-                        />
-                        </div>
-                        <div class="col-md-6">
-                        <label for="dataFinal" class="form-label">Data final</label>
-                        <input
-                            type="date"
-                            class="form-control"
-                            id="dataFinal"
-                            v-model="formDav.dataFinal"
-                            disabled
-                        />
-                        </div>
-
-                        <!-- Origem e Destino -->
-                        <div class="col-md-6">
-                        <label for="inputOrigem" class="form-label">Origem</label>
-                        <div v-for="(item, index) in origem" :key="index" class="d-flex align-items-center mb-3">
-                            <input
-                            type="text"
-                            class="form-control me-2"
-                            :id="'inputOrigem' + index"
-                            v-model="formDav.origem"
-                            disabled
-                            />
-                        </div>
-                        </div>
-                        <div class="col-md-6">
-                        <label for="inputDestino" class="form-label">Destino</label>
-                        <div v-for="(item, index) in destino" :key="index" class="d-flex align-items-center mb-3">
-                            <input
-                            type="text"
-                            class="form-control me-2"
-                            :id="'inputDestino' + index"
-                            v-model="formDav.destino"
-                            disabled
-                            />
-                        </div>
-                        </div>
-
-                        <!-- Checkboxes organizados em duas colunas -->
-                        <div class="col-md-6">
-                        <div class="form-check">
-                            <input
-                            class="form-check-input"
-                            type="checkbox"
-                            id="gridCheckAereo"
-                            value="Aéreo"
-                            v-model="formDav.transporte"
-                            disabled
-                            />
-                            <label class="form-check-label" for="gridCheckAereo">Aéreo</label>
-                        </div>
-                        <div class="form-check">
-                            <input
-                            class="form-check-input"
-                            type="checkbox"
-                            id="gridCheckTerrestre"
-                            value="Terrestre"
-                            v-model="formDav.transporte"
-                            disabled
-                            />
-                            <label class="form-check-label" for="gridCheckTerrestre">Terrestre</label>
-                        </div>
-                        </div>
-                        <div class="col-md-6">
-                        <div class="form-check">
-                            <input
-                            class="form-check-input"
-                            type="checkbox"
-                            id="gridCheckAquatico"
-                            value="Aquático"
-                            v-model="formDav.transporte"
-                            disabled
-                            />
-                            <label class="form-check-label" for="gridCheckAquatico">Aquático</label>
-                        </div>
-                        <div class="form-check">
-                            <input
-                            class="form-check-input"
-                            type="checkbox"
-                            id="gridCheckOutros"
-                            value="Outros"
-                            v-model="formDav.transporte"
-                            disabled
-                            />
-                            <label class="form-check-label" for="gridCheckOutros">Outros</label>
-                        </div>
-                        </div>
-
-                        <!-- Profissionais -->
-                        <div class="col-12">
-                          <label for="inputProfissionais" class="form-label">Profissionais</label>
-                          <div v-for="(profissional, index) in formDav.profissionais" :key="index" class="mb-3 d-flex align-items-center">
-                            <select
-                              class="form-select me-2"
-                              style="flex: 1;"
-                              v-model="formDav.profissionais[index]"
-                              disabled
-                            >
-                              <option :value="profissional">{{ `${profissional.nome} - ${profissional.formacao}` }}</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div class="col-12 d-flex justify-content-end mt-3">
-                          <button
-                            type="button"
-                            class="btn btn-success me-2"
-                            @click="aprovarDav"
-                            :disabled="formDav.status === 'aprovado'"
-                          >
-                            Aprovar
-                          </button>
-                          <button
-                            type="button"
-                            class="btn btn-danger"
-                            @click="reprovarDav"
-                            :disabled="formDav.status === 'reprovado'"
-                          >
-                            Reprovar
-                          </button>
-                        <button
-                            type="button"
-                            class="btn btn-primary ms-2"
-                            @click="gerarPDF"
-                            :disabled="formDav.status === 'reprovado'"
-                        >
-                            Imprimir
-                        </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </template>
-      </Navbar>
-    </AuthenticatedLayout>
-  </template>
+    </Navbar>
+  </AuthenticatedLayout>
+</template>

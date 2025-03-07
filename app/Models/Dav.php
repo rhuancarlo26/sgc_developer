@@ -7,33 +7,38 @@ use Illuminate\Database\Eloquent\Model;
 
 class Dav extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $table = 'sgc_dav';
+  protected $table = 'sgc_dav';
 
-    protected $guarded = ['id', 'created_at'];
+  protected $guarded = ['id', 'created_at'];
 
-    protected $fillable = [
-        'contrato', 
-        'empreendimento', 
-        'coordenador', 
-        'finalidade', 
-        'escopo', 
-        'dataInicio', 
-        'dataFinal', 
-        'produto', 
-        'subproduto', 
-        'origem', 
-        'destino', 
-        'profissionais', 
-        'transporte',
-        'status'
-    ];
+  protected $fillable = [
+    'contrato_id',
+    'empreendimento',
+    'coordenador',
+    'finalidade',
+    'escopo',
+    'dataInicio',
+    'dataFinal',
+    'produto',
+    'subproduto',
+    'origem',
+    'destino',
+    'profissionais',
+    'transporte',
+    'status',
+    'aereo_valor',
+    'terrestre_tipo',
+    'terrestre_valor',
+    'aquatico_valor'
+  ];
 
-    protected $casts = [
-        'origem' => 'array',
-        'destino' => 'array',
-        'profissionais' => 'array',
-        'transporte' => 'array',
-    ];
+  protected $casts = [
+    'origem'         => 'array',
+    'destino'        => 'array',
+    'profissionais'  => 'array',
+    'transporte'     => 'array',
+    'terrestre_tipo' => 'array'
+  ];
 }

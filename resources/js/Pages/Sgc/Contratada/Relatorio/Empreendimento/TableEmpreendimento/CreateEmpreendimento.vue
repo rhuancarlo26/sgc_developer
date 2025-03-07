@@ -15,10 +15,12 @@ import Navbar from '../../../Navbar.vue';
 const props = defineProps({
   contrato: Object,
   ufs: Object,
+  base_rodovia: Object,
   empreendimento: Object,
   tipo: Object
 });
 
+const formKey = ref(0);
 const mapaVisualizarTrecho = ref();
 const uf_rodovias = ref([]);
 const showMap = ref(false);
@@ -53,8 +55,8 @@ const visualizarTrecho = async () => {
 
 const getCoordenadas = async () => {
   const parametros = {
-    uf: form_trecho.uf.uf, 
-    rodovia: form_trecho.rodovia.rodovia, 
+    uf: form_trecho.uf.uf,
+    rodovia: form_trecho.rodovia.rodovia,
     km_inicial: form_trecho.km_inicial,
     km_final: form_trecho.km_final,
     trecho_tipo: form_trecho.tipo_trecho
@@ -73,7 +75,7 @@ const getCoordenadas = async () => {
 
       coordenadasIniciais[0].coordinates = coordenadasIniciais[0].coordinates.concat(novoTrecho.coordinates);
       const array = form_trecho.cod_emp.split('-')
-      const uf = form_trecho.uf.uf; 
+      const uf = form_trecho.uf.uf;
 
       array.splice(1, 0, uf);
 
@@ -103,11 +105,11 @@ const storeEmpreendimentos = async () => {
   const parametros = {
     cod_emp: form_trecho.cod_emp  ,
     contrato_est_ambiental: form_trecho.contrato_est_ambiental,
-    uf: form_trecho.uf.uf, 
-    br: form_trecho.rodovia.rodovia, 
+    uf: form_trecho.uf.uf,
+    br: form_trecho.rodovia.rodovia,
     km_ini: form_trecho.km_inicial,
     km_fin: form_trecho.km_final,
-    br_uf: `${form_trecho.rodovia.rodovia}/${form_trecho.uf.uf}`, 
+    br_uf: `${form_trecho.rodovia.rodovia}/${form_trecho.uf.uf}`,
     extensao: form_trecho.km_final - form_trecho.km_inicial,
     ose_sei: form_trecho.ose_sei,
     coordenadas: form_trecho.coordenada
@@ -135,13 +137,11 @@ const storeEmpreendimentos = async () => {
       form_trecho.tipo_trecho = 'B';
       form_trecho.coordenada = '';
 
-      // Se showMap foi ativado, ocultar o mapa novamente
       showMap.value = false;
     }
 
   } catch (e) {
     console.error(e);
-    // Lidar com erros
   }
 };
 
@@ -201,13 +201,13 @@ onMounted(() => {
               <div class="col-md-4">
                 <InputLabel value="Cód empreedimento" for="cod_emp" />
                 <input
-                    type="text"
-                    id="cod_emp"
-                    name="cod_emp"
-                    class="form-control"
-                    v-model="form_trecho.cod_emp"
-                    readonly
-                    disabled
+                  type="text"
+                  id="cod_emp"
+                  name="cod_emp"
+                  class="form-control"
+                  v-model="form_trecho.cod_emp"
+                  readonly
+                  disabled
                 />
                 <InputError />
               </div>

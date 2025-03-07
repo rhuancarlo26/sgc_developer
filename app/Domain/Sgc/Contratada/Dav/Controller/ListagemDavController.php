@@ -5,6 +5,7 @@ namespace App\Domain\Sgc\Contratada\Dav\Controller;
 use App\Models\Contrato;
 use App\Models\DashexcelEmpreendimentos;
 use App\Models\Dav;
+use App\Models\SgcConsumoDav;
 use App\Models\SgcDavProfissionais;
 use App\Models\SgcProdutos;
 use App\Models\SgcvwSubprodutos;
@@ -22,6 +23,7 @@ class ListagemDavController extends Controller
         $produtos = SgcProdutos::all();
         $empreendimentos = DashexcelEmpreendimentos::all();
         $profissionais = SgcDavProfissionais::where('contrato_id', $contrato->id)->get();
+        $consumos = SgcConsumoDav::all();
 
         return Inertia::render('Sgc/Contratada/Dav/Index', [
             'dav' => $dav,
@@ -30,6 +32,7 @@ class ListagemDavController extends Controller
             'produtos' => $produtos,
             'empreendimentos' => $empreendimentos,
             'profissionais' => $profissionais,
+            'consumos' => $consumos,
         ]);
     }
 
@@ -39,13 +42,15 @@ class ListagemDavController extends Controller
         $subprodutos = SgcvwSubprodutos::all();
         $produtos = SgcProdutos::all();
         $empreendimentos = DashexcelEmpreendimentos::all();
+        $consumos = SgcConsumoDav::all();
 
         return Inertia::render('Sgc/Contratada/Dav/DetalheDav', [
             'dav' => $dav,
             'contrato' => $contrato,
             'subprodutos' => $subprodutos,
             'produtos' => $produtos,
-            'empreendimentos' => $empreendimentos
+            'empreendimentos' => $empreendimentos,
+            'consumos' => $consumos,
         ]);
     }
     public function historicos(Contrato $contrato): Response
