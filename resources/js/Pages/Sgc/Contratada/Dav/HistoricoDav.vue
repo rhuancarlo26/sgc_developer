@@ -4,6 +4,9 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { router, Head, useForm } from '@inertiajs/vue3';
 import Navbar from '../Navbar.vue';
+import Swal from 'sweetalert2';
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const props = defineProps({
   davs: Object,
@@ -11,7 +14,20 @@ const props = defineProps({
 });
 
 const aprovarDav = (id) => {
-  router.put(route('sgc.gestao.aprovarDav', { id: id }));
+  Swal.fire({
+        title: "Aprovar",
+        text: "Deseja continuar a aprovação dessa DAV?",
+        icon: "warning",
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+  }).then((r) => {
+      if (r.isConfirmed) {
+        router.put(route('sgc.gestao.aprovarDav', { id: id }))
+        toast.success('Dav reaprovada com sucesso!');
+      }
+  })
+  // router.put(route('sgc.gestao.aprovarDav', { id: id }));
   // 'sgc.gestao.aprovarDav', { id: props.dav.id }
 };
 </script>
