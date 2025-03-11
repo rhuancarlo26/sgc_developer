@@ -13,7 +13,7 @@ class HistoricoDav extends Model
 
     public function dav()
     {
-        return $this->belongsTo(Dav::class);
+        return $this->belongsTo(Dav::class, 'dav_id', 'id');
     }
 
     public function user()

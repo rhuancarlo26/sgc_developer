@@ -57,6 +57,8 @@ const aprovarDav = (id) => {
                   <th>Usuário</th>
                   <th>Data</th>
                   <th>Status Anterior</th>
+                  <th>Status Modificado</th>
+                  <th>Status Atual</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -67,10 +69,13 @@ const aprovarDav = (id) => {
                   <td>{{ dav.user_id }}</td>
                   <td>{{ new Date(dav.created_at).toLocaleDateString() }}</td>
                   <td>{{ dav.status_anterior }}</td>
+                  <td>{{ dav.status_novo }}</td>
+                  <td>{{ dav.dav.status }}</td>
                   <td>
-                    <button v-if="dav.status_novo === 'reprovado'" @click="aprovarDav(dav.dav_id)">
+                    <button v-if="dav.dav.status === 'reprovado'" @click="aprovarDav(dav.dav_id)">
                       Aprovar
                     </button>
+                    <span v-else>Já aprovada</span>
                   </td>
                 </tr>
               </tbody>

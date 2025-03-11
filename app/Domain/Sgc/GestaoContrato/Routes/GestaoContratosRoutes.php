@@ -27,7 +27,7 @@ Route::prefix('gestao')->group(function () {
   Route::post('/dashboard/salvarEmpreendimento',              [UpdateEmpreendimentoController::class,                  'updateEmpreendimento'])->name('sgc.gestao.dashboard.empreendimento.store');
   Route::delete('/dashboard/delete-empreendimento/{id}',      [EmpreendimentosController::class,                       'deleteEmpreendimento'])->name('sgc.gestao.dashboard.empreendimento.delete');
   Route::get('/',                                             [CoordenadasController::class,                           'getGeoJson'])->name('sgc.gestao.dashboard.geojson');
-  Route::get('dav/historicos/{contrato}',                                [ListagemDavController::class,                           'historicos'])->name('sgc.gestao.historicos');
+  Route::get('dav/historicos/{contrato}',                     [ListagemDavController::class,                           'historicos'])->name('sgc.gestao.historicos');
   Route::get('dav/{contrato}',                                [ListagemDavController::class,                           'index'])->name('sgc.gestao.listagemDav');
   Route::post('dav/storeDav',                                 [StoreDav::class,                                        'index'])->name('sgc.gestao.storeDav');
   Route::get('dav/{contrato}/{id}',                           [ListagemDavController::class,                           'details'])->name('sgc.gestao.details');
