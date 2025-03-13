@@ -93,7 +93,7 @@ const toggleContrato = (layer, check = true) => {
     emit(
       'layerSelected',
       layer.layer,
-      getParsedCQLFilter(`tipo_contrato = ${layer.id}`, [], true),
+      getParsedCQLFilter(`tipo_contrato = ${layer.id}`, ['fase_id', 'nr_contrato', 'novo_pac', 'ativo', 'empreendimento_id', 'delegado'], true),
       layer.color,
       [layer.layer]
     );
