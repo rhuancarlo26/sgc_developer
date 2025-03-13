@@ -75,6 +75,12 @@ class Servicos extends Model
         return $this->hasMany(ServicoEquipamento::class, 'id_servico');
     }
 
+    public function pmqaResultados()
+    {
+        return $this->hasMany(ServicoPmqaResultado::class, 'fk_servico');
+    }
+
+
     public function equipamentos(): HasManyThrough
     {
         return $this->hasManyThrough(

@@ -2,21 +2,27 @@
 
 namespace App\Domain\Dashboard\PMQA\Controller;
 
-use App\Domain\Servico\PMQA\app\Utils\ConfigucacaoParecer;
-use App\Domain\Servico\PMQA\Configuracao\Parametro\Services\ParametroService;
+use App\Domain\Servico\ContOcorrencia\Resultado\Services\ResultadoService; // Certifique-se de importar a classe correta
 use App\Models\Contrato;
 use App\Models\Servicos;
 use App\Shared\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class IndexDashboardPMQAController extends Controller
 {
-  public function __construct() {}
+  
 
-  public function index(): Response
+  public function index(Servicos $servicos)
   {
-    return Inertia::render('Dashboard/PMQA/Index');
+    // Carrega os relacionamentos necessários
+    $servicos->load(['contrato', 'pontos', 'pmqaResultados']);
+
+    return Inertia::render('Dashboard/PMQA/Index', [
+      'contrato' => $servicos->contrato,
+      'pontos' => $servicos->pontos,
+      'resultados' => $servicos->pmqaResultados,
+      'servico' => $servicos,
+    ]);
   }
 }

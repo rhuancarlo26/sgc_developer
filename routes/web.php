@@ -46,7 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::prefix('dashboard')->group(function () {
             Route::prefix('pmqa')->group(function () {
-                Route::get('/', [IndexDashboardPMQAController::class, 'index'])->name('dashboard.pmqa');
+                Route::get('/{servicos}', [IndexDashboardPMQAController::class, 'index'])->name('dashboard.pmqa');
             });
             Route::prefix('mon-atp-fauna')->group(function () {
                 Route::get('/', [IndexDashboardMonAtpFaunaController::class, 'index'])->name('dashboard.mon-atp-fauna');
