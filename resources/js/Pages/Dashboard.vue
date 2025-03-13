@@ -5,6 +5,8 @@ import BotoesMapa from './BotoesMapa.vue';
 import ModalFiltro from './ModalFiltro.vue';
 import CoordanadasCentroUFs from "@/Utils/CoordanadasCentroUFs.js";
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import Popups from './Dashboard/MapPopup/Popups';
+import Detalhe from './Detalhe.vue';
 
 const props = defineProps({
     ufs: { type: Array },
@@ -17,6 +19,7 @@ let temporarySections = null;
 
 const layersGroups = {};
 const filterOffcanvas = ref();
+const detalhesOffcanvas = ref();
 const mapContainer = ref(null);
 const zoomLevel = ref(5);
 
@@ -42,6 +45,8 @@ const renderMap = () => {
 
     selectedLayer = L.featureGroup().addTo(map)
     temporarySections = L.featureGroup().addTo(map)
+
+    map.on('click', handleMapClick);
 }
 
 const clearMap = () => {
@@ -114,6 +119,63 @@ const renderWms = (layerGroupName, filter, color = '#0000FF', wmsLayers = []) =>
     layersGroups[layerGroupName].addTo(map);
 }
 
+const handleOwnWmsModal = (layer, wmsParams, groupName, latLng) => {
+    axios.get(layer._url, { params: wmsParams })
+        .then(async ({ data }) => {
+            const props = data.features ? data.features[0]?.properties : null;
+
+            if (!props) return;
+
+            // Caso mais parâmetros sejam passados para a prop env, esse código deverá ser ajustado
+            const [color, weight] = wmsParams.env.split(';').map(i => i.split(':')[1])
+
+            setSelectedLayer(data, { color, weight: Number(weight) * 3, opacity: 0.5 });
+
+            Object.assign(props, { latLng })
+
+            L.popup()
+                .setLatLng(latLng)
+                .setContent(await Popups.getContent(groupName, props, detalhesOffcanvas))
+                .on('remove', () => selectedLayer.clearLayers())
+                .openOn(map)
+                .unbindPopup()
+
+        })
+        .catch(console.log)
+}
+
+const handleMapClick = (clickEvent) => {
+    map.closePopup();
+
+    const { x, y } = map.latLngToContainerPoint(clickEvent.latlng);
+    const { x: width, y: height } = map.getSize();
+
+    for (const groupName in layersGroups) {
+
+        layersGroups[groupName].getLayers().forEach(layer => {
+
+            const params = {
+                ...layer.options,
+                service: 'WMS',
+                request: 'GetFeatureInfo',
+                query_layers: layer.wmsParams.layers,
+                x: Math.round(x),
+                y: Math.round(y),
+                info_format: 'application/json',
+                exceptions: 'application/json',
+                buffer: 5, // Tolerância do click em pixels (Nem sempre funciona),
+                bbox: map.getBounds().toBBoxString(),
+                width, height
+            }
+
+            handleOwnWmsModal(layer, params, groupName, clickEvent.latlng);
+
+        })
+
+    }
+
+}
+
 </script>
 
 <template>
@@ -121,13 +183,14 @@ const renderWms = (layerGroupName, filter, color = '#0000FF', wmsLayers = []) =>
     <Head title="Dashboard" />
 
     <AuthenticatedLayout :mapa-principal="true">
-
         <div class="map" ref="mapContainer"></div>
 
         <BotoesMapa />
 
         <ModalFiltro ref="filterOffcanvas" :ufs="ufs" :rodovias="rodovias" @ufChanged="ufZoom" @filtersReset="clearMap"
             @layerSelected="renderWms" @layerUnselected="removeWms" />
+
+        <Detalhe ref="detalhesOffcanvas" />
 
     </AuthenticatedLayout>
 </template>
