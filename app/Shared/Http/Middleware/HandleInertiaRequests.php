@@ -42,6 +42,10 @@ class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+            'geoserver' => [
+                'url' => config('geoserver.url'),
+                'workspace' => config('geoserver.workspace')
+            ],
             'app_url' => config('app.url'),
             'flash' => [
                 'message' => fn() => $request->session()->get('message')
