@@ -11,6 +11,7 @@ use App\Domain\Contrato\GestaoContrato\Controller\DestroyContratoTrechoControlle
 use App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController;
 use App\Domain\Contrato\GestaoContrato\Controller\GetCoordenadaController;
 use App\Domain\Contrato\GestaoContrato\Controller\GetGeoJsonController;
+use App\Domain\Contrato\GestaoContrato\Controller\GetServicoController;
 use App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController;
 use App\Domain\Contrato\GestaoContrato\Controller\StoreContratoController;
 use App\Domain\Contrato\GestaoContrato\Controller\StoreContratoTrechoController;
@@ -22,10 +23,11 @@ Route::get('excel', [ExcelExportContratoController::class, 'excelExport'])->name
 Route::prefix('gestao')->group(function () {
     Route::get('/{tipo}', [ListagemContratoController::class, 'index'])->name('contratos.gestao.listagem');
     Route::get('/create/{tipo?}/{contrato?}', [CreateContratoController::class, 'create'])->name('contratos.gestao.create');
+    Route::get('/get-servicos/{contrato}', [GetServicoController::class, 'index'])->name('contratos.gestao.get-servicos');
     Route::post('/store', [StoreContratoController::class, 'store'])->name('contratos.gestao.store');
     Route::post('/atualizar', [UpdateContratoController::class, 'update'])->name('contratos.gestao.atualizar');
     Route::get('/delete/{contrato}', [DestroyContratoController::class, 'destroy'])->name('contratos.gestao.delete');
-//    Route::get('excel', [ExcelExportContratoController::class, 'index'])->name('contratos.gestao.excel');
+    //    Route::get('excel', [ExcelExportContratoController::class, 'index'])->name('contratos.gestao.excel');
     Route::post('/get_coordenada', [GetCoordenadaController::class, 'getCoordenada'])->name('contratos.gestao.get_coordenada');
     Route::post('/get_geo_json', [GetGeoJsonController::class, 'getGeoJson'])->name('contratos.gestao.get_geo_json');
     Route::post('/store_trecho', [StoreContratoTrechoController::class, 'storeTrecho'])->name('contratos.gestao.store_trecho');
