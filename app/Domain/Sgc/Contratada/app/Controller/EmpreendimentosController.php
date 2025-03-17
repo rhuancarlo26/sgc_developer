@@ -32,6 +32,13 @@ class EmpreendimentosController extends Controller
         Excel::import(new YourImportClass, $file);
         return redirect()->back()->with('success', 'Arquivo Excel importado com sucesso.');
     }
+    public function editavel(): Response
+    {
+      $empreendimentos = SgcvwEmpreendimentos::all();
+      return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/Edicao', [
+        'empreendimentos' => $empreendimentos,
+      ]);
+    }
     public function index(ContratoTipo $tipo, Request $request, $empreendimento): Response
     {
         $posts = SgcvwEmpreendimentos::all();

@@ -17,6 +17,7 @@ use \App\Domain\Sgc\Contratada\Dav\Controller\DavConsumoController;
 Route::prefix('gestao')->group(function () {
   Route::get('/{tipo}',                                       [ListagemContratoController::class,                      'index'])->name('sgc.gestao.listagem');
   Route::get('{tipo}/dashboard',                              [DashplanController::class,                              'index'])->name('sgc.gestao.dashboard.index');
+  Route::get('{tipo}/edicao',                                 [EmpreendimentosController::class,                       'editavel'])->name('sgc.gestao.edicao');
   Route::post('{tipo}/dashboard-searchempreendimentos',       [DashplanController::class,                              'searchempreendimentos'])->name('sgc.gestao.dashboard.searchempreendimentos');
   Route::post('{tipo}/dashboard-novafase',                    [DashplanController::class,                              'novafase'])->name('sgc.gestao.dashboard.novafase');
   Route::post('{tipo}/dashboard-updatefase',                  [DashplanController::class,                              'updatefase'])->name('sgc.gestao.dashboard.updatefase');
