@@ -1,9 +1,8 @@
-// resources/js/Pages/emp/Index.vue
 <template>
   <div>
     <Head :title="'Empreendimentos: edição'" />
 		<AuthenticatedLayout>
-    <h1 class="text-xl font-bold mb-4">Lista de empes</h1>
+    <h1 class="text-xl font-bold mb-4">Lista de Empreendimentos</h1>
     <table class="table table-bordered table-striped table-hover table-sm">
       <thead class="thead-dark">
         <tr class="bg-gray-200">
@@ -49,7 +48,7 @@ const abrirEdicao = (empreendimento, campo) => {
 };
 
 const salvarEdicao = () => {
-  router.put(`/empreendimentos/${empreendimentoEdit.value.id}`, { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor }, {
+  router.post(`/sgc/gestao/updatecampo/${empreendimentoEdit.value.id}`, { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor }, {
     onSuccess: () => {
       campoEditando.value = { id: null, campo: null };
     },

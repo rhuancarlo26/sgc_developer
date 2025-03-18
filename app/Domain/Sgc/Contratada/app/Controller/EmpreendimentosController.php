@@ -39,6 +39,18 @@ class EmpreendimentosController extends Controller
         'empreendimentos' => $empreendimentos,
       ]);
     }
+    public function updatecampo(Request $request, $id)
+    {
+      $empreendimento = SgcvwEmpreendimentos::findOrFail($id);
+        $request->validate([
+            'cod_emp' => 'sometimes|string|max:255',
+            'tipo_de_intervencao' => 'sometimes|string|max:255',
+        ]);
+
+        $empreendimento->update($request->only(['cod_emp', 'tipo_de_intervencao']));
+
+        return redirect()->back()->with('success', 'Empreendimento atualizado com sucesso!');
+    }
     public function index(ContratoTipo $tipo, Request $request, $empreendimento): Response
     {
         $posts = SgcvwEmpreendimentos::all();
