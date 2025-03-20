@@ -3,15 +3,18 @@ import NavButton from '@/Components/NavButton.vue';
 import BarChart from '@/Components/BarChart.vue';
 import LineChart from '@/Components/LineChart.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import Map from '@/Components/Map.vue';
+import Map from '@/Components/MapPontos.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head,router } from '@inertiajs/vue3';
-import { ref, computed, watch, onMounted } from 'vue';
+import { Head, router } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
 import Navbar from '../Navbar.vue';
 import ModalVideo from '../ModalVideo.vue';
 import { IconPlayerPlay } from '@tabler/icons-vue';
 import DivTabelaMedirIqaVue from '@/Pages/Servico/PMQA/Configuracao/Parametro/DivTabelaMedirIqa.vue';
-
+import DivTabelaParametro from '@/Pages/Servico/PMQA/Configuracao/Parametro/DivTabelaParametro.vue';
+import TabColeta from '@/Pages/Servico/PMQA/Execucao/TabColeta.vue';
+import TabDadosPonto from "@/Pages/Servico/PMQA/Execucao/TabDadosPonto.vue";
+import TabMedicao from "@/Pages/Servico/PMQA/Execucao/TabMedicao.vue";
 
 
 
@@ -25,16 +28,104 @@ const props = defineProps({
   pontos: Object,
   resultados: Object,
   chartDataIqa: Object,
+  parametros: Array,
+  uniqueParametros: Object,
+  campanhas: Object,
+  responses: Array
+
 });
 
 const chartDataIqa = ref(props.chartDataIqa ?? { labels: [], datasets: [] });
+const uniqueParametros = ref({
+  1: {
+    "id": null,
+    "parametro": null,
+    "unidade": null,
+    "sigla": null,
+    "classe_1": null,
+    "classe_2": null,
+    "classe_3": null,
+    "classe_4": null,
+    "limite": null,
+    "condicao_especial": null,
+    "condicao": null,
+    "limite_descricao": null,
+    "datasets": {
+      "labels": [],
+      "datasets": []
+    }
+  }
+});
+
+const selectedParametro = ref(uniqueParametros.value[0]);
+const selectedLineParametro = ref(null);
 
 const selectedResultado = ref(null);
+const selectedPonto = ref(null);
+const selectedCampanha = ref(null);
 
+
+const chartDataLine = computed(() => {
+ 
+  if (!selectedPonto.value || !selectedLineParametro.value) {
+    return null;
+  }
+
+  const labels = props.responses.map(response => response.resultado.nome);
+  const data = props.responses
+  .map(response => {
+    
+    const uniqueParams = Array.isArray(response.uniqueParametros)
+      ? response.uniqueParametros
+      : Object.values(response.uniqueParametros);
+    return uniqueParams.find(param => param.id === selectedLineParametro.value.id);
+  })
+  .filter(parametro => parametro !== undefined);
+
+  const singleValueArray = data.map((campanha) => {
+  const foundDataset = campanha.datasets.datasets.find(ds => ds.id === selectedPonto.value.fk_ponto);
+
+  return foundDataset && foundDataset.data.length > 0 
+    ? foundDataset.data[0] 
+    : null;
+});
+
+ 
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        label: selectedPonto.value.ponto.nome_ponto_coleta,
+        data: singleValueArray,
+        borderColor: "black",
+        backgroundColor: "transparent",
+        pointBorderColor: "black",
+        pointBackgroundColor: "white",
+        pointRadius: 4,
+        borderWidth: 1.5,
+        tension: 0.2, // Suaviza a linha
+      },
+      {
+        label: "Área de Qualidade",
+        data: Array(12).fill(100), // Apenas para criar o fundo
+        backgroundColor: [
+          "rgba(173, 216, 230, 0.5)", // Ótima (Azul)
+          "rgba(144, 238, 144, 0.5)", // Boa (Verde)
+          "rgba(255, 255, 102, 0.5)", // Regular (Amarelo)
+          "rgba(255, 165, 0, 0.5)", // Ruim (Laranja)
+          "rgba(255, 69, 0, 0.5)",  // Péssima (Vermelho)
+        ],
+        borderWidth: 0,
+        fill: "start",
+      }
+    ]
+  };
+});
 
 const buscarResultado = async () => {
   if (!selectedResultado.value) return;
-
+ 
   try {
     const response = await axios.get(
       route('contratos.contratada.servicos.pmqa.resultado.resultado.get', {
@@ -43,23 +134,40 @@ const buscarResultado = async () => {
         resultado: selectedResultado.value
       })
     );
-    console.log('buscarResultado',response.data.chartDataIqa);
+
     // Atualiza os dados do gráfico corretamente
     chartDataIqa.value = response.data.chartDataIqa;
-    
-    console.log('buscarResultado',chartDataIqa.value);
+    uniqueParametros.value = response.data.uniqueParametros;
 
   } catch (error) {
     console.error('Erro ao buscar resultado:', error);
   }
 };
 
+const moverParaPonto = () => {
+ 
+  if (selectedPonto.value.ponto && mapaVisualizarTrecho.value) {
+    const longitude = Number(selectedPonto.value.ponto.long_y);
+    const latitude = Number(selectedPonto.value.ponto.lat_x);
+
+    // Criando GeoJSON do tipo "Point"
+    const geojsonFeature = {
+      coordinates: [[longitude, latitude]]
+    };
+
+    // Chamando a função para dar zoom no ponto
+    mapaVisualizarTrecho.value.zoomToLinestring(JSON.stringify(geojsonFeature));
+
+  } else {
+    console.warn("Ponto não contém geojson_linestring válido!");
+  }
+};
 
 watch(() => props.chartDataIqa, (newData) => {
-  console.log('🟢 Watch acionado:', newData);
+
   if (newData) {
     chartDataIqa.value = newData;
-    console.log('✅ Novo chartDataIqa:', chartDataIqa.value);
+
   }
 }, { deep: true });
 
@@ -146,85 +254,6 @@ const horizontalLine = ref({
   }
 })
 
-const chartDataBar = ref({
-  labels: ["PF05", "PF10", "PF01", "PF09", "PF07", "PF03", "PF08", "PF02", "PF04", "PF06"],
-  datasets: [
-    {
-      label: "Valores",
-      data: [152, 81, 78, 75, 50, 44, 34, 23, 18, 2],
-      backgroundColor: "#007bff",
-      borderRadius: 5,
-    },
-  ],
-});
-
-const chartOptionsBar = ref({
-  responsive: true,
-  plugins: {
-    legend: { display: false },
-    tooltip: { enabled: true },
-  },
-  scales: {
-    x: {
-      grid: { display: false },
-    },
-    y: {
-      beginAtZero: true,
-      grid: { drawBorder: false },
-    },
-  },
-});
-
-const chartDataLine = ref({
-  labels: ["Ago/07", "Set/07", "Out/07", "Nov/07", "Dez/07", "Jan/08", "Fev/08", "Mar/08", "Abr/08", "Mai/08", "Jun/08", "Jul/08"],
-  datasets: [
-    {
-      label: "IQA",
-      data: [80, 75, 78, 72, 70, 65, 80, 60, 75, 85, 70, 65],
-      borderColor: "black",
-      backgroundColor: "transparent",
-      pointBorderColor: "black",
-      pointBackgroundColor: "white",
-      pointRadius: 4,
-      borderWidth: 1.5,
-      tension: 0.2, // Suaviza a linha
-    },
-    {
-      label: "Área de Qualidade",
-      data: Array(12).fill(100), // Apenas para criar o fundo
-      backgroundColor: [
-        "rgba(173, 216, 230, 0.5)", // Ótima (Azul)
-        "rgba(144, 238, 144, 0.5)", // Boa (Verde)
-        "rgba(255, 255, 102, 0.5)", // Regular (Amarelo)
-        "rgba(255, 165, 0, 0.5)", // Ruim (Laranja)
-        "rgba(255, 69, 0, 0.5)", // Péssima (Vermelho)
-      ],
-      borderWidth: 0,
-      fill: "start",
-    }
-  ],
-});
-
-const chartOptionsLine = ref({
-  responsive: true,
-  plugins: {
-    legend: { display: false },
-    tooltip: { enabled: true },
-  },
-  scales: {
-    x: {
-      grid: { display: false },
-    },
-    y: {
-      beginAtZero: true,
-      max: 100,
-      grid: { drawBorder: false },
-    },
-  },
-});
-
-
-
 
 const trechosVisualizacao = computed(() => {
   let geojson = [];
@@ -250,6 +279,23 @@ const trechosVisualizacao = computed(() => {
 });
 
 
+const chartOptionsLine = ref({
+  responsive: true,
+  plugins: {
+    legend: { display: false },
+    tooltip: { enabled: true },
+  },
+  scales: {
+    x: {
+      grid: { display: false },
+    },
+    y: {
+      beginAtZero: true,
+      max: 100,
+      grid: { drawBorder: false },
+    },
+  },
+});
 
 const modalPontoMap = (ponto) => {
   return `
@@ -317,9 +363,9 @@ setTimeout(() => {
         </div>
       </div>
       <div class="">
-        <div class="d-flex">
+        <div class="d-flex ">
           <div class="col-8 card card-body me-4">
-            <Map ref="mapaVisualizarTrecho" height="500px" :manual-render="true" />
+            <Map ref="mapaVisualizarTrecho" height="900px" :manual-render="true" />
           </div>
           <div class="col-4">
             <div class="card card-body mb-4">
@@ -341,6 +387,7 @@ setTimeout(() => {
                   IQA
                 </div>
                 <div class="card-body">
+
                   <div class="mb-3">
                     <InputLabel value="Selecione um Resultado" />
                     <select v-model="selectedResultado" @change="buscarResultado" class="form-select">
@@ -349,71 +396,135 @@ setTimeout(() => {
                       </option>
                     </select>
                   </div>
-                  <BarChart :key="JSON.stringify(chartDataIqa)" id="div-parametro-iqa" :style="{ height: '70px', position: 'relative' }" :chart_data="chartDataIqa" :options="horizontalLine"/>
-                  <div class="card mb-4">
-                                <DivTabelaMedirIqaVue/>
-                            </div>
+
+                  <!-- Gráfico IQA só aparece quando um resultado for selecionado -->
+                  <div v-if="selectedResultado">
+                    <BarChart :key="JSON.stringify(chartDataIqa)" id="div-parametro-iqa"
+                      :style="{ height: '70px', position: 'relative' }" :chart_data="chartDataIqa"
+                      :options="horizontalLine" />
+
+                    <div class="card mb-4">
+                      <DivTabelaMedirIqaVue />
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="card">
+
+              <div class="card" v-if="selectedResultado">
                 <div class="card-header">
-                  Outros Parâmetros (média para o período)
+                  Outros Parâmetros
                 </div>
                 <div class="card-body">
-                  <div class="col mb-4">
-                    <InputLabel value="Parâmetros" />
-                    <select name="" id="" class="form-select">
-                      <option value="teste">teste</option>
+                  <div class="mb-3">
+                    <label for="selectParametro" class="form-label">Selecione um Parâmetro:</label>
+                    <select v-model="selectedParametro" id="selectParametro" class="form-select">
+                      <option v-for="parametro in uniqueParametros" :key="parametro.id" :value="parametro">
+                        {{ parametro.parametro }}
+                      </option>
                     </select>
                   </div>
-                  <BarChart :chart_data="chartDataBar" :chart_options="chartOptionsBar" />
+
+                  <!-- Gráfico de Parâmetro só aparece quando um resultado for selecionado -->
+                  <div v-if="selectedParametro">
+                    <BarChart height="100px" :id="'divs-parametro-' + selectedParametro.id"
+                      :name="'divs-parametro-' + selectedParametro.id" :chart_data="selectedParametro.datasets" />
+
+                    <div class="card mb-4">
+                      <DivTabelaParametro :parametro="selectedParametro" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+
             <div v-else>
               <div class="card card-body mb-4">
-                <h5>PONTO 001</h5>
-                <p><strong>Nome:</strong></p>
-                <p><strong>Nome do recurso hídrico:</strong></p>
-                <div class="row">
-                  <div class="col">
-                    <p><strong>Longitude:</strong></p>
-                  </div>
-                  <div class="col">
-                    <p><strong>Latitude:</strong></p>
-                  </div>
+                <!-- Select para escolher um ponto -->
+                <div class="mb-3">
+                  <InputLabel value="Selecione uma Campanha" />
+                  <select v-model="selectedCampanha" class="form-select">
+                    <option v-for="campanha in campanhas" :key="campanha.id" :value="campanha">
+                      {{ campanha.nome_campanha }}
+                    </option>
+                  </select>
                 </div>
-                <p><strong>UF:</strong></p>
-                <p><strong>Classificação:</strong></p>
-                <div class="row">
-                  <div class="col">
-                    <p><strong>CLasse:</strong></p>
-                  </div>
-                  <div class="col">
-                    <p><strong>Tipo de Ambiente:</strong></p>
-                  </div>
-                </div>
-              </div>
-              <div class="card card-body">
-                <div class="row mb-4">
-                  <div class="col">
-                    <InputLabel value="Parâmetros" />
-                    <select name="" id="" class="form-select">
-                      <option value="teste">teste</option>
-                    </select>
-                  </div>
-                  <div class="col">
-                    <InputLabel value="Campanha" />
-                    <select name="" id="" class="form-select">
-                      <option value="teste">teste</option>
+
+                <div v-if="selectedCampanha">
+
+                  <!-- Select para escolher um ponto -->
+                  <div class="mb-3">
+                    <InputLabel value="Selecione um Ponto" />
+                    <select v-model="selectedPonto" @change="moverParaPonto" class="form-select">
+                      <option v-for="ponto in selectedCampanha.campanha_pontos" :key="ponto.id" :value="ponto">
+                        {{ ponto.ponto.nome_ponto_coleta }}
+                      </option>
                     </select>
                   </div>
                 </div>
-                <LineChart :chart_data="chartDataLine" :chart_options="chartOptionsLine" />
+
+                <!-- Exibe os detalhes do ponto selecionado -->
+                <div v-if="selectedPonto">
+                  <div class="card-body">
+                    <div class="card">
+                      <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
+                          <li class="nav-item" role="presentation">
+                            <a href="#tab-dados-ponto" class="nav-link active" data-bs-toggle="tab" aria-selected="true"
+                              role="tab">Dados ponto</a>
+                          </li>
+                          <li class="nav-item" role="presentation">
+                            <a href="#tab-dados-coleta" class="nav-link" data-bs-toggle="tab" aria-selected="false"
+                              tabindex="-1" role="tab">Dados coleta</a>
+                          </li>
+                          <li class="nav-item" role="presentation">
+                            <a href="#tab-dados-medicao" class="nav-link" data-bs-toggle="tab" aria-selected="false"
+                              tabindex="-1" role="tab">Dados medição</a>
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="card-body">
+                        <div class="tab-content">
+                          <div class="tab-pane active show" id="tab-dados-ponto" role="tabpanel">
+                            <TabDadosPonto :ponto="selectedPonto" />
+                          </div>
+                          <div class="tab-pane" id="tab-dados-coleta" role="tabpanel">
+                            <TabColeta :contrato="contrato" :servico="servico" :campanha="selectedCampanha"
+                              :ponto="selectedPonto" />
+                          </div>
+                          <div class="tab-pane" id="tab-dados-medicao" role="tabpanel">
+                            <TabMedicao :contrato="contrato" :servico="servico" :campanha="selectedCampanha"
+                              :ponto="selectedPonto" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="selectedPonto">
+                  <div class="card card-body">
+                    <div class="row mb-4">
+                      <div class="col">
+                        <div class="mb-3">
+                          <label for="selectParametro" class="form-label">Selecione um Parâmetro:</label>
+                          <select v-model="selectedLineParametro" id="selectParametro" class="form-select">
+                            <option v-for="parametroLine in props.responses[0].uniqueParametros" :key="parametroLine.id"
+                              :value="parametroLine">
+                              {{ parametroLine.parametro }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="selectedLineParametro">
+                      <LineChart  :chart_data="chartDataLine" :chart_options="chartOptionsLine" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
 

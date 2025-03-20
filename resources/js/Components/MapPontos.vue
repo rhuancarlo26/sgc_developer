@@ -92,7 +92,7 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
 
             L.popup()
               .setLatLng(e.latlng)
-              .setContent(e.layer?.feature?.geometry?.properties?.popup)
+              .setContent(e.layer?.feature?.properties?.popup)
               .openOn(map);
           }
         });
@@ -100,12 +100,12 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
 
       // Itera sobre coordenadas e adiciona na layer
       linestring_array.forEach(geojson_linestring => {
-
         if (popupAndEvent) { // Define coordenadas e dados do evento
           let geojson = JSON.parse(geojson_linestring[0]);
           geojson.properties = geojson_linestring[2];
           geojson.properties.popup = geojson_linestring[1];
-
+          
+          console.log("geojson final:",geojson);
           geojson_layer.addData(geojson).setStyle(function (feature) {
 
             let style = {
@@ -160,7 +160,7 @@ const zoomToLinestring = (geojson_linestring) => {
       });
     } else {
       geojson.coordinates.forEach((linha) => {
-        latLngArrat.push(linha.map(coord => [coord[1], coord[0]]))
+        latLngArrat.push([linha[1], linha[0]])
       })
     }
 
@@ -174,6 +174,8 @@ const zoomToLinestring = (geojson_linestring) => {
   }
 
 }
+
+
 
 defineExpose({ renderMapa, setLinestrings, zoomToLinestring, zoomFitBounds, setDensity });
 

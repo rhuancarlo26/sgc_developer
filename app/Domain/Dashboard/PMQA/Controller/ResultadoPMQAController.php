@@ -2,6 +2,7 @@
 
 namespace App\Domain\Dashboard\PMQA\Controller;
 
+
 use App\Domain\Servico\PMQA\Resultado\app\Services\ResultadoService;
 use App\Models\Contrato;
 use App\Models\ServicoPmqaResultado;
@@ -19,13 +20,14 @@ class ResultadoPMQAController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado)
   {
+    
       $response = $this->resultadoService->resultado($resultado);
-
+    
       return response()->json([
           'contrato' => $contrato,
           'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
           ...$response, 
       ]);
   }
-  
+
 }
