@@ -22,7 +22,7 @@ Route::prefix('/resultado')->group(function () {
   Route::patch('{contrato}/{servico}/update',                                             [UpdateController::class, 'index'])->name('contratos.contratada.servicos.pmqa.resultado.update');
   Route::delete('{contrato}/{servico}/delete/{resultado}',                                [DeleteController::class, 'index'])->name('contratos.contratada.servicos.pmqa.resultado.delete');
   Route::get('{contrato}/{servico}/resultado/{resultado}',                                [ResultadoController::class, 'index'])->name('contratos.contratada.servicos.pmqa.resultado.resultado');
-  Route::get('{contrato}/{servico}/resultadoGet/{resultado}',                              [ResultadoPMQAController::class, 'index'])->name('contratos.contratada.servicos.pmqa.resultado.resultado.get');
+  Route::get('{contrato}/{servico}/resultadoGet/{resultado}',                             [ResultadoPMQAController::class, 'index'])->name('contratos.contratada.servicos.pmqa.resultado.resultado.get');
   Route::post('{contrato}/{servico}/{resultado}/store_analise',                           [StoreAnaliseController::class, 'index'])->name('contratos.contratada.servicos.pmqa.resultado.store_analise');
   Route::post('{contrato}/{servico}/{resultado}/store_analise_iqa',                       [StoreAnaliseIqaController::class, 'index'])->name('contratos.contratada.servicos.pmqa.resultado.store_analise_iqa');
   Route::post('{contrato}/{servico}/{resultado}/store_outra_analise',                     [StoreOutraAnaliseController::class, 'index'])->name('contratos.contratada.servicos.pmqa.resultado.store_outra_analise');

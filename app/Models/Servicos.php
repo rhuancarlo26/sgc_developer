@@ -21,6 +21,8 @@ class Servicos extends Model
     //        return $this->belongsTo(ServicoStatus::class, 'status_aprovacao');
     //    }
 
+   
+
     public function contrato(): BelongsTo
     {
         return $this->belongsTo(related: Contrato::class, foreignKey: 'id_contrato');
@@ -119,6 +121,12 @@ class Servicos extends Model
     {
         return $this->hasMany(ServicoPmqaPonto::class, 'fk_servico');
     }
+
+    public function campanhas(): HasMany
+    {
+        return $this->hasMany(ServicoPmqaCampanha::class, 'fk_servico');
+    }
+    
 
     public function parametros(): HasMany
     {
