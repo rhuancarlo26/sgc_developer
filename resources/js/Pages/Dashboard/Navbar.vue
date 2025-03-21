@@ -9,11 +9,11 @@ import { IconLayoutDashboard } from '@tabler/icons-vue';
       <div class="navbar">
         <div class="container-xl">
           <div class="row flex-fill align-items-center">
-            <div class="col">
+            <!-- <div class="col">
               <ul class="navbar-nav">
-                <NavLink route-name="dashboard.pmqa" title="PMQA" :icon="IconLayoutDashboard" />
+                <NavLink route-name="dashboard.pmqa"  :param="2" title="PMQA" :icon="IconLayoutDashboard" />
               </ul>
-            </div>
+            </div> -->
             <div class="col">
               <ul class="navbar-nav">
                 <NavLink route-name="dashboard.mon-atp-fauna" title="Mon. Atp. Fauna" :icon="IconLayoutDashboard" />
