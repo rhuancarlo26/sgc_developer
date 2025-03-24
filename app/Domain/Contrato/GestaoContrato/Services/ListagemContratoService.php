@@ -29,10 +29,12 @@ class ListagemContratoService extends BaseModelService
         ];
     }
 
-    public function getServicos($contrato)
-    {
-        return Servicos::where('id_contrato', '=', $contrato->id)->get();
-    }
+   public function getServicos($contrato)
+{
+    return Servicos::with('tipo')
+                   ->where('id_contrato', $contrato->id)
+                   ->get();
+}
 
     public function create($contrato): array
     {
