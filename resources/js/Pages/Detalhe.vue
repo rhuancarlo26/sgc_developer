@@ -35,7 +35,7 @@ onMounted(() => {
       <h2 class="offcanvas-title" id="offcanvasDetalhesLabel">Detalhes</h2>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
     </div>
-    <div class="offcanvas-body p-3">
+    <div class="offcanvas-body p-2">
       <div class="accordion" id="accordionDetalhes">
 
         <div class="accordion-item" v-if="propsData.id">
@@ -51,7 +51,7 @@ onMounted(() => {
               <table class="table table-bordered table-striped two-col-table">
                 <thead>
                   <tr>
-                    <th class="text-info text-center" colspan="3"> {{
+                    <th class="text-info text-center" colspan="4"> {{
                       propsData.contratada
                     }}
                     </th>
@@ -60,6 +60,7 @@ onMounted(() => {
                 <tbody>
                   <tr v-for="servico in servicos" :key="servico.id">
                     <td>Serviço:</td>
+                    <td>{{ servico.tipo.nome }}</td>
                     <td>{{ servico.especificacao }}</td>
                     <td v-if="webRoute[servico.servico]">
                       <a :href="route(webRoute[servico.servico], { servico: servico.id })">
