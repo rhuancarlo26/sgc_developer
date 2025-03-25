@@ -7,7 +7,7 @@ import Map from '@/Components/MapPontos.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
-import Navbar from '../Navbar.vue';
+
 import ModalVideo from '../ModalVideo.vue';
 import { IconPlayerPlay } from '@tabler/icons-vue';
 import DivTabelaMedirIqaVue from '@/Pages/Servico/PMQA/Configuracao/Parametro/DivTabelaMedirIqa.vue';
@@ -328,38 +328,12 @@ setTimeout(() => {
 
   <Head title="Dashboard" />
   <AuthenticatedLayout>
-    <Navbar />
     <div>
       <div class="card card-body mb-4">
-        <div class="text-end">
-          <NavButton @click="abrirModalVideo()" :icon="IconPlayerPlay" title="Abrir Video" type-button="success" />
-        </div>
         <div class="justify-content-center">
           <h1 class="text-center">
             Programa de Monitoramento da Qualidade da Água
           </h1>
-          <div class=" d-flex justify-content-end">
-            <div class="row w-25">
-              <div class="col">
-                <InputLabel value="UF" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-              <div class="col">
-                <InputLabel value="BR" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-              <div class="col">
-                <InputLabel value="Período" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <div class="">
