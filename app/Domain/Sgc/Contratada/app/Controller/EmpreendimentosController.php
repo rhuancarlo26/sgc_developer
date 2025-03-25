@@ -19,6 +19,9 @@ use App\Models\SgcvwEmpreendimentos;
 use App\Models\SgcvwEstudos;
 use App\Models\Sgcvwempfases;
 
+use Illuminate\Support\Facades\Schema;
+
+
 
 class EmpreendimentosController extends Controller
 {
@@ -41,15 +44,20 @@ class EmpreendimentosController extends Controller
     }
     public function updatecampo(Request $request, $id)
     {
-      $empreendimento = SgcvwEmpreendimentos::findOrFail($id);
-        $request->validate([
-            'cod_emp' => 'sometimes|string|max:255',
-            'tipo_de_intervencao' => 'sometimes|string|max:255',
-        ]);
+        $empreendimento = SgcvwEmpreendimentos::findOrFail($id);
 
-        $empreendimento->update($request->only(['cod_emp', 'tipo_de_intervencao']));
+        // Obtém a chave e o valor da requisição
+        $campo = array_keys($request->all())[0]; // Pega a chave no request
+        $valor = $request->input($campo); // Pega o valor
 
-        return redirect()->back()->with('success', 'Empreendimento atualizado com sucesso!');
+        // Se o campo existe
+        if (Schema::hasColumn('sgcvw_empreendimentos', $campo)) {
+            $empreendimento->update([$campo => $valor]);
+            // return response()->json(['success' => true, 'message' => 'Campo atualizado com sucesso!']);
+            return redirect()->back()->with('success', 'Empreendimento atualizado com sucesso!');
+        }
+
+        return response()->json(['success' => false, 'message' => 'Campo inválido.'], 400);
     }
     public function index(ContratoTipo $tipo, Request $request, $empreendimento): Response
     {
