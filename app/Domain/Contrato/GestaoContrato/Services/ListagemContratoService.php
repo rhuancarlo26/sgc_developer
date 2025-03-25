@@ -33,6 +33,7 @@ class ListagemContratoService extends BaseModelService
 {
     return Servicos::with('tipo')
                    ->where('id_contrato', $contrato->id)
+                   ->where('deleted_at', null)
                    ->get();
 }
 

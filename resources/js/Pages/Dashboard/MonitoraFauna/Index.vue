@@ -7,7 +7,7 @@ import Map from '@/Components/Map.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import Navbar from '../Navbar.vue';
+
 import ModalVideo from '../ModalVideo.vue';
 import { IconPlayerPlay } from '@tabler/icons-vue';
 import NavButton from '@/Components/NavButton.vue';
@@ -178,7 +178,7 @@ const chartOptionsBar2 = ref({
 
   <AuthenticatedLayout>
 
-    <Navbar />
+   
 
     <div>
       <div class="card card-body mb-4">

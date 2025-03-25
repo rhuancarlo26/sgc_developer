@@ -7,7 +7,7 @@ import Map from '@/Components/Map.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import Navbar from '../Navbar.vue';
+
 import ModalVideo from '../ModalVideo.vue';
 import NavButton from '@/Components/NavButton.vue';
 
@@ -126,7 +126,7 @@ const lotes = ref(['Lote A', 'Lote B', 'Lote C']); // Exemplo de lotes
 
     <Head title="Dashboard Ambiente GEO" />
     <AuthenticatedLayout>
-        <Navbar />
+        
         <div class="card card-body mb-4">
             <div class="text-end">
                 <NavButton @click="abrirModalVideo()" :icon="IconPlayerPlay" title="Abrir Video"
