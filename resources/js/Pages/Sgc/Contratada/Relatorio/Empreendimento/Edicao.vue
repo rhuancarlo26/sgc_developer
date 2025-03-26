@@ -142,6 +142,7 @@ const salvarEdicao = () => {
     {
       onSuccess: () => {
         campoEditando.value = { id: null, campo: null };
+        dados.value = [...page.props.empreendimentos];
       },
     }
   );
