@@ -14,6 +14,9 @@ use App\Domain\Sgc\Contratada\Coordenadas\CoordenadasController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StoreUploadRelatorioController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\VisualizarDocxController;;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StatusUpdateController;
+use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\CreateController;
+use App\Domain\Sgc\Contratada\Dav\Controller\ListagemDavController;
+use App\Domain\Sgc\Contratada\Cronograma\Controller\CronogController;
 use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
 
@@ -29,11 +32,11 @@ Route::prefix('/contratada')->group(function () {
     Route::get('/send-email/{contrato}/{status}/{relatorio_num}', function ($contrato, $status, $relatorio_num) {
         $toEmail = 'rhuan.borges@jgpconsultoria.com.br';
 
-        Mail::to($toEmail)->send(new StatusChanged($status, $contrato, $relatorio_num));
+        //Mail::to($toEmail)->send(new StatusChanged($status, $contrato, $relatorio_num));
 
         return 'E-mail enviado!';
     })->name('sgc.contratada.send-email');
-    
+
     // Download anexo
     Route::get('/sgc/contratada/download-anexo/{contratoId}/{itemId}/{relatorioNum}', [StoreUploadRelatorioController::class, 'downloadAnexo'])->name('sgc.contratada.download_anexo');
 
@@ -65,4 +68,23 @@ Route::prefix('/contratada')->group(function () {
     Route::post('/sgc/store_comentarios',                          [StoreSgcComentariosController::class,                   'index'])->name('sgc.contratada.store_comentarios');
     Route::delete('/destroy_comentarios/{comentarios}',            [DestroyComentariosController::class,                    'index'])->name('sgc.contratada.destroy_comentarios');
     Route::delete('/destroy_comentarios/{comentarios}',            [DestroyComentariosController::class,                    'index'])->name('sgc.contratada.destroy_comentarios');
+
+    // Inserir novo Relatório de Coordenação
+    Route::post('/sgc/relatorio/iniciar',                          [CreateController::class,                                 'index'])->name('sgc.contratada.relatorio.iniciar');
+
+    //DAV's
+    Route::put('/sgc/gestao/dav/{id}/aprovar', [ListagemDavController::class, 'aprovar'])->name('sgc.gestao.aprovarDav');
+    Route::put('/sgc/gestao/dav/{id}/reprovar', [ListagemDavController::class, 'reprovar'])->name('sgc.gestao.reprovarDav');
+
+    Route::get('dav/{contrato}',                                [ListagemDavController::class,                           'index'])->name('sgc.gestao.listagemDav');
+    // Route::post('dav/storeDav',                                 [StoreDav::class,                                        'index'])->name('sgc.gestao.storeDav');
+    Route::get('dav/{contrato}/{id}',                           [ListagemDavController::class,                           'details'])->name('sgc.gestao.details');
+
+
+    //Calendário Cronograma     
+     Route::get('{contrato}/cronograma', [CronogController::class, 'index'])->name('sgc.contratada.cronograma.index');
+     Route::get('{contrato}/cronograma/opcoes-evento', [CronogController::class, 'getOpcoesEvento'])->name('sgc.contratada.cronograma.opcoesEvento');
+     Route::post('{contrato}/cronograma/evento-auxiliar', [CronogController::class, 'storeEventoAuxiliar'])->name('sgc.contratada.cronograma.storeEventoAuxiliar');
+
+
 });
