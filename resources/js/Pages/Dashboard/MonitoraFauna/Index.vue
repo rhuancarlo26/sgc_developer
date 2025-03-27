@@ -3,47 +3,31 @@ import BarChart from '@/Components/BarChart.vue';
 import LineChart from '@/Components/LineChart.vue';
 import PieChart from '@/Components/PieChart.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import Map from '@/Components/Map.vue';
+import Map from '@/Components/MapPontos.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
-
+import { ref, computed } from 'vue';
 import ModalVideo from '../ModalVideo.vue';
 import { IconPlayerPlay } from '@tabler/icons-vue';
 import NavButton from '@/Components/NavButton.vue';
+
+const props = defineProps({
+
+  chartDataPieAbundancia: Object,
+  chartDataPieDiversidade: Object,
+  chartDataBar: Object,
+  chartDataBar2: Object,
+  chartDataLine: Object,
+  modulos: Object
+
+});
 
 const total = ref('total');
 const registro = ref('resultado');
 const curva = ref('armadilha');
 const modalVideoRef = ref({});
+const mapaVisualizarTrecho = ref(null);
 
-const abrirModalVideo = () => {
-  modalVideoRef.value.abrirModal()
-}
-
-const chartDataPie = ref({
-  labels: ["Anfíbios", "Répteis", "Aves", "Mamíferos"],
-  datasets: [
-    {
-      data: [5.3, 18, 39.5, 36.8], // Percentuais
-      backgroundColor: ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"], // Cores semelhantes à imagem
-      borderColor: "#ffffff", // Bordas brancas para separar as fatias
-      borderWidth: 2,
-    },
-  ],
-});
-
-const chartDataBar = ref({
-  labels: ["PF05", "PF10", "PF01", "PF09", "PF07", "PF03", "PF08", "PF02", "PF04", "PF06"],
-  datasets: [
-    {
-      label: "Ocorrências",
-      data: [152, 81, 78, 75, 50, 41, 34, 23, 18, 2],
-      backgroundColor: "#007bff",
-      borderRadius: 5,
-    },
-  ],
-});
 
 const chartOptionsPie = ref({
   responsive: true,
@@ -84,22 +68,8 @@ const chartOptionsBar = ref({
   barPercentage: 0.5,
   maxBarThickness: 40,
 });
+const selectedModulo = ref(null);
 
-const chartDataLine = ref({
-  labels: ["02 de Jan", "04 de Jan", "06 de Jan", "08 de Jan"],
-  datasets: [
-    {
-      label: "Ocorrências",
-      data: [10, 17, 31, 43, 54, 60, 68],
-      borderColor: "#007bff",
-      backgroundColor: "rgba(0, 123, 255, 0.3)",
-      fill: true,
-      pointBackgroundColor: "#007bff",
-      pointBorderColor: "#ffffff",
-      pointRadius: 5,
-    },
-  ],
-});
 
 const chartOptionsLine = ref({
   responsive: true,
@@ -124,27 +94,7 @@ const chartOptionsLine = ref({
   },
 });
 
-const chartDataBar2 = ref({
-  labels: [
-    "Pecari tajacu", "Amphisbaena ...", "Didelphis mars...",
-    "Bothrops atrox", "Caluromys sp.", "Coragyps atratus",
-    "Crotophaga ani", "Eunectes muri...", "Hylaeamys me...",
-    "Hypsiboas rani...", "Metachirus nu...",
-    "Nasua nasua", "Oxyrhopus me...",
-    "Podocnemis u...", "Priodontes ma...",
-    "Pseudopaludic...", "Puma concolor",
-    "Ramphastos tu..."
-  ],
-  datasets: [
-    {
-      label: "Ocorrências",
-      data: [3, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      backgroundColor: "rgba(30, 144, 255, 0.8)",
-      borderColor: "rgba(30, 144, 255, 1)",
-      borderWidth: 1,
-    },
-  ],
-});
+
 
 const chartOptionsBar2 = ref({
   indexAxis: "y", // Faz o gráfico ser horizontal
@@ -170,57 +120,83 @@ const chartOptionsBar2 = ref({
   },
 });
 
+const trechosVisualizacao = computed(() => {
+  let geojson = [];
+
+  props.modulos.forEach(modulo => {
+    const longitude = Number(modulo.longitude_final);
+    const latitude = Number(modulo.latitude_inicial);
+
+    geojson.push([
+      JSON.stringify({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [longitude, latitude]
+        }
+      }),
+      modalPontoMap(modulo),
+      modulo
+    ]);
+  });
+
+  return geojson;
+});
+
+const modalPontoMap = (modulo) => {
+  return `
+    <span><strong>Dados do modulo de Coleta</strong></span><br>
+    <span><strong>ID: </strong> ${modulo.id}</span><br>
+    <span><strong>Chave: </strong> ${modulo.chave}</span><br>
+    <span><strong>ID do Serviço: </strong> ${modulo.id_servico}</span><br>
+    <span><strong>Tamanho do Módulo: </strong> ${modulo.tamanho_modulo}</span><br>
+    <span><strong>Data de Cadastro: </strong> ${modulo.data_cadastro}</span><br>
+    <span><strong>UF: </strong> ${modulo.uf}</span><br>
+    <span><strong>Município: </strong> ${modulo.municipio}</span><br>
+    <span><strong>Bioma: </strong> ${modulo.bioma}</span><br>
+    <span><strong>Latitude Inicial: </strong> ${modulo.latitude_inicial}</span><br>
+    <span><strong>Longitude Inicial: </strong> ${modulo.longitude_inicial}</span><br>
+    <span><strong>Zona Inicial: </strong> ${modulo.zona_inicial ? modulo.zona_inicial : 'N/A'}</span><br>
+    <span><strong>Latitude Final: </strong> ${modulo.latitude_final}</span><br>
+    <span><strong>Longitude Final: </strong> ${modulo.longitude_final}</span><br>
+    <span><strong>Zona Final: </strong> ${modulo.zona_final ? modulo.zona_final : 'N/A'}</span><br>
+    <span><strong>Fitofisionomia: </strong> ${modulo.fitofisionomia}</span><br>
+    <span><strong>Nome do Arquivo: </strong> ${modulo.nome_arquivo}</span><br>
+    <span><strong>Observações: </strong> ${modulo.obs && modulo.obs !== '-' ? modulo.obs : 'Nenhuma'}</span><br>
+    <span><strong>Local do Shape: </strong> ${modulo.local_shape}</span><br>
+  `;
+};
+
+
+
+setTimeout(() => {
+  mapaVisualizarTrecho.value.renderMapa()
+  mapaVisualizarTrecho.value.setLinestrings(trechosVisualizacao.value, true);
+}, 500);
+
+
 </script>
 
 <template>
 
   <Head title="Dashboard" />
-
   <AuthenticatedLayout>
-
-   
-
     <div>
       <div class="card card-body mb-4">
-        <div class="text-end">
-          <NavButton @click="abrirModalVideo()" :icon="IconPlayerPlay" title="Abrir Video" type-button="success" />
-        </div>
         <div class="justify-content-center">
           <h1 class="text-center">
             Programa de Monitoramento de Fauna
           </h1>
-          <div class=" d-flex justify-content-end">
-            <div class="row w-25">
-              <div class="col">
-                <InputLabel value="UF" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-              <div class="col">
-                <InputLabel value="BR" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-              <div class="col">
-                <InputLabel value="Período" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <div class="">
         <div class="d-flex">
           <div class="col-8 card card-body me-4">
-            <Map :height="'100vh'" />
+            <Map ref="mapaVisualizarTrecho" height="900px" :manual-render="true" />
           </div>
           <div class="col-4">
             <div class="card card-body mb-4">
-              <div class="">
+              <div>
                 <label class="form-check form-check-inline">
                   <input class="form-check-input" type="radio" name="resultado" value="resultado" v-model="registro">
                   <span class="form-check-label">Resultados</span>
@@ -232,47 +208,65 @@ const chartOptionsBar2 = ref({
               </div>
             </div>
             <div v-if="registro === 'resultado'">
+              <!-- Seção dos gráficos de pizza -->
               <div class="mb-4">
-                <div class="d-flex">
-                  <div class="col card me-4">
-                    <h3>Abundância</h3>
-                    <div class="d-flex justify-content-center" style="height: 200px;">
-                      <PieChart :chart_data="chartDataPie" :chart_options="chartOptionsPie" />
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h3 class="card-title text-center">Abundância</h3>
+                        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                          <PieChart :chart_data="props.chartDataPieAbundancia" :chart_options="chartOptionsPie" />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div class="col card">
-                    <h3>Diversidade</h3>
-                    <div class="d-flex justify-content-center" style="height: 200px;">
-                      <PieChart :chart_data="chartDataPie" :chart_options="chartOptionsPie" />
+                  <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h3 class="card-title text-center">Diversidade</h3>
+                        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                          <PieChart :chart_data="props.chartDataPieDiversidade" :chart_options="chartOptionsPie" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+              <!-- Seção do gráfico de barras/linha com seleção -->
               <div class="card">
-                <div class="mb-4">
-                  <div class="m-1">
+                <div class="card-header">
+                  <div>
                     <label class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" name="curva" value="armadilha" v-model="curva">
-                      <span class="form-check-label">Registros por armadilha</span>
+                      <input class="form-check-input" type="radio" name="armadilha" value="armadilha" v-model="curva"
+                        id="radioArmadilha">
+                      <span class="form-check-label">Registros por modulo</span>
                     </label>
                     <label class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" name="curva" value="curva" v-model="curva">
-                      <span class="form-check-label">Curva do coletor</span>
+                      <input class="form-check-input" type="radio" name="curva" value="curva" v-model="curva"
+                        id="radioCurva" autocomplete="off">
+                      <label for="radioCurva">Curva do coletor</label>
                     </label>
                   </div>
                 </div>
+                <div class="card-body">
+                  <div v-if="curva === 'armadilha'">
+                    <BarChart :chart_data="props.chartDataBar" :chart_options="chartOptionsBar" />
+                  </div>
+                  <div v-else>
+                    <div style="overflow-x: auto; width: 100%;">
+                      <LineChart style="min-width: 500px;" :chart_data="chartDataLine"
+                        :chart_options="chartOptionsLine" />
+                    </div>
+                  </div>
 
-                <div v-if="curva === 'armadilha'">
-                  <BarChart :chart_data="chartDataBar" :chart_options="chartOptionsBar" />
-                </div>
-                <div v-else>
-                  <LineChart :chart_data="chartDataLine" :chart_options="chartOptionsLine" />
                 </div>
               </div>
             </div>
+
             <div v-else>
               <div class="card">
-                <div class="m-1">
+                <div class="m-3">
                   <label class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="total" value="total" v-model="total">
                     <span class="form-check-label">Registros totais</span>
@@ -282,23 +276,34 @@ const chartOptionsBar2 = ref({
                     <span class="form-check-label">Registros por armadilha</span>
                   </label>
                 </div>
+                <div v-if="total === 'total'" class="row">
+                  <BarChart height="2000px" :chart_data="props.chartDataBar2" :chart_options="chartOptionsBar2" />
+
+                </div>
                 <div v-if="total === 'armadilha'" class="row">
-                  <div class="row w-50">
-                    <div class="col">
-                      <InputLabel value="Tipo" />
-                      <select name="" id="" class="form-select">
-                        <option value="teste">teste</option>
+                  <div class="row">
+                    <div class="col-11 m-4">
+                      <InputLabel value="Selecione um Modulo" />
+                      <select v-model="selectedModulo" class="form-select">
+                        <option v-for="modulo in props.modulos" :value="modulo" :key="modulo.id">
+                          {{ modulo.id }}
+                        </option>
                       </select>
                     </div>
-                    <div class="col">
-                      <InputLabel value="Armadilha" />
-                      <select name="" id="" class="form-select">
-                        <option value="teste">teste</option>
-                      </select>
+                    <div v-if="selectedModulo">               
+                      <div class="col-11 m-4">
+                        <InputLabel value="Selecione uma Armadilha" />
+                        <select v-model="selectedArmadilha" class="form-select">
+                          <option v-for="armadilha in selectedModulo.armadilhas" :value="armadilha" :key="armadilha.id">
+                            {{ armadilha.tipo }}
+                          </option>
+                        </select>
+                      </div>
                     </div>
+
                   </div>
                 </div>
-                <BarChart :chart_data="chartDataBar2" :chart_options="chartOptionsBar2" />
+
               </div>
             </div>
           </div>
