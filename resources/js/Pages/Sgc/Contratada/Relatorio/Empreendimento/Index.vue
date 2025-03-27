@@ -19,23 +19,21 @@ import NavLink from "@/Components/NavLink.vue";
 import { IconZoomCheck } from "@tabler/icons-vue";
 import { computed } from 'vue';
 
-
-// Definindo as props que o componente receberá
 const props = defineProps({
-  	contratos: Object,
-    tipo: Object,
+  contratos: Object,
+  tipo: Object,
 	empreendimentos: Object,
-    posts: Object,
+  posts: Object,
 	estudos: Object,
 	subprodutos: Object,
 	empreendimentos2:Object,
 	fases:Object,
 	fm_eia_estudos_empreendimento:Object,
-    fm_pba_estudos_empreendimento:Object,
-    abio_emp_estudos_311:Object,
-    asv_emp_estudos:Object,
-    iphan_emp_estudos_521:Object,
-    iphan_emp_estudos_531:Object,
+  fm_pba_estudos_empreendimento:Object,
+  abio_emp_estudos_311:Object,
+  asv_emp_estudos:Object,
+  iphan_emp_estudos_521:Object,
+  iphan_emp_estudos_531:Object,
 });
 
 console.log(props.contratos.data[0])
@@ -64,7 +62,7 @@ function formatDate(ts) {
 function formatDateFromExcel(serial) {
     const date = new Date(serial);
     return date.toLocaleDateString('pt-BR');
-    
+
 }
 
 const mapaTabDadosContratuais = ref();

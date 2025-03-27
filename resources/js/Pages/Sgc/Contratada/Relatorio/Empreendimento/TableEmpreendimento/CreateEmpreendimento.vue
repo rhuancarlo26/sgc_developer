@@ -5,7 +5,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import { IconPlus, IconX } from "@tabler/icons-vue";
 import { useToast } from "vue-toastification";
-import Map from '@/Components/Map.vue';
+import Map from '@/Components/MapSgc.vue';
 import axios from 'axios';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
@@ -15,7 +15,7 @@ import Navbar from '../../../Navbar.vue';
 const props = defineProps({
   contrato: Object,
   ufs: Object,
-  base_rodovia: Object,
+  rodovias: Object,
   empreendimento: Object,
   tipo: Object
 });
@@ -54,43 +54,37 @@ const visualizarTrecho = async () => {
 };
 
 const getCoordenadas = async () => {
-  const parametros = {
-    uf: form_trecho.uf.uf,
-    rodovia: form_trecho.rodovia.rodovia,
-    km_inicial: form_trecho.km_inicial,
-    km_final: form_trecho.km_final,
-    trecho_tipo: form_trecho.tipo_trecho
-  };
-
   try {
+    console.log(form_trecho);
 
-    const retorno = await axios.get(route("sgc.gestao.dashboard.geojson", parametros));
+    const retorno = await axios.get(route("sgc.gestao.dashboard.geojson"), {
+      params: {
+        uf: form_trecho.uf.uf,
+        rodovia: form_trecho.rodovia.rodovia,
+        km_inicial: form_trecho.km_inicial,
+        km_final: form_trecho.km_final,
+        trecho_tipo: form_trecho.tipo_trecho,
+      },
+    });
+
     const novoTrecho = JSON.parse(retorno.data);
 
     if (contadorGet === 0) {
       coordenadasIniciais.push(novoTrecho);
       form_trecho.cod_emp = `${form_trecho.rodovia.rodovia}/${form_trecho.uf.uf}-${form_trecho.km_inicial}_${form_trecho.km_final}`;
-
     } else {
-
       coordenadasIniciais[0].coordinates = coordenadasIniciais[0].coordinates.concat(novoTrecho.coordinates);
-      const array = form_trecho.cod_emp.split('-')
-      const uf = form_trecho.uf.uf;
-
-      array.splice(1, 0, uf);
-
-      const resultadoFinal = `${array[0]}/${array[1]}-${array[2]}`;
-      form_trecho.cod_emp = resultadoFinal;
+      const array = form_trecho.cod_emp.split('-');
+      array.splice(1, 0, form_trecho.uf.uf);
+      form_trecho.cod_emp = `${array[0]}/${array[1]}-${array[2]}`;
     }
 
     form_trecho.coordenada = JSON.stringify(coordenadasIniciais[0]);
 
     contadorGet++;
-
     showMap.value = true;
 
     await visualizarTrecho();
-
   } catch (e) {
     console.log(e);
     if (typeof toast !== 'undefined') {
@@ -100,6 +94,7 @@ const getCoordenadas = async () => {
     }
   }
 };
+
 
 const storeEmpreendimentos = async () => {
   const parametros = {
@@ -162,12 +157,10 @@ const limparForm = () => {
   contadorGet = 0;
 };
 
-
-
 watch(() => form_trecho.uf, () => {
   if (form_trecho.uf) {
-    uf_rodovias.value = props.base_rodovia.filter((rodovia) => {
-      return rodovia.uf_id === form_trecho.uf.id;
+    uf_rodovias.value = props.rodovias.filter((rodovia) => {
+      return rodovia.estados_id === form_trecho.uf.id;
     });
   } else {
     uf_rodovias.value = [{ rodovia: 'Selecione uma UF' }];

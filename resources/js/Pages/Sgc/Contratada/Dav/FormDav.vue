@@ -2,6 +2,9 @@
 import { ref, watch } from 'vue';
 import Modal from '@/Components/Modal.vue';
 import { useForm } from '@inertiajs/vue3';
+import axios from 'axios';
+import { useToast } from "vue-toastification";
+
 
 const props = defineProps({
   subprodutos: Object,
@@ -12,6 +15,7 @@ const props = defineProps({
   consumos: Object
 });
 
+const toast = useToast();
 const produtoSelecionado = ref("");
 const modalVisualizarForm = ref(null);
 const profissionais = ref([1]);
@@ -77,7 +81,7 @@ const adicionarDestinos = () => {
   }
 };
 
-const calcularConsumo = (diaria, area, terrestreTipo, carro, barco) => {
+const calcularConsumo = (diaria, aerea, terrestreTipo, carro, barco) => {
   const numeroFormatado = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
 
   const consumosFiltrados = props.consumos.filter(consumo => consumo.contrato === numeroFormatado);
@@ -88,7 +92,7 @@ const calcularConsumo = (diaria, area, terrestreTipo, carro, barco) => {
       // Soma os valores padrão
       const novoAcc = {
         diarias: acc.diarias + (consumo.diarias || 0),
-        area: acc.area + (consumo.area || 0),
+        aerea: acc.aerea + (consumo.aerea || 0),
         barco: acc.barco + (consumo.barco || 0),
         pickup: acc.pickup + (consumo.pickup || 0), // Soma de Pick-up
         hatch: acc.hatch + (consumo.hatch || 0), // Soma de Hatch
@@ -105,13 +109,13 @@ const calcularConsumo = (diaria, area, terrestreTipo, carro, barco) => {
 
       return novoAcc;
     },
-    { diarias: 0, area: 0, barco: 0, pickup: 0, hatch: 0 } // Inicializa os valores
+    { diarias: 0, aerea: 0, barco: 0, pickup: 0, hatch: 0 } // Inicializa os valores
   );
 
   // Retorna o resultado subtraindo os valores passados como parâmetros
   return {
     diarias: totalConsumo.diarias - diaria,
-    area: totalConsumo.area - area,
+    aerea: totalConsumo.aerea - aerea,
     barco: totalConsumo.barco - barco,
     pickup: totalConsumo.pickup - (terrestreTipo === 'Pick-up' ? carro : 0), // Subtrai carro se for Pick-up
     hatch: totalConsumo.hatch - (terrestreTipo === 'Hatch' ? carro : 0), // Subtrai carro se for Hatch
@@ -163,22 +167,46 @@ watch(() => formDav.transporte, handleTransporteChange, { deep: true });
 watch(() => formDav.terrestre_tipo, handleTerrestreTipoChange, { deep: true });
 
 const submitForm = () => {
+  const numeroContrato = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
   formDav.dataInicio = new Date(formDav.dataInicio);
   formDav.dataFinal = new Date(formDav.dataFinal);
 
   const diferencaEmMs = formDav.dataFinal - formDav.dataInicio;
-
   const qtdDiarias = Math.floor(diferencaEmMs / (1000 * 60 * 60 * 24)) + 1;
 
-  console.log(calcularConsumo(qtdDiarias, formDav.aereo_valor, formDav.terrestre_tipo, formDav.terrestre_valor, formDav.aquatico_valor))
+  const dadosConsumo = calcularConsumo(
+    qtdDiarias,
+    formDav.aereo_valor,
+    formDav.terrestre_tipo,
+    formDav.terrestre_valor,
+    formDav.aquatico_valor
+  );
+
   formDav.post(route('sgc.gestao.storeDav'), {
     onSuccess: () => {
-      formDav.reset();
-      modalVisualizarForm.value.getBsModal().hide();
+      toast.success("Dav cadastrada com sucesso.")
+      // Após o sucesso do storeDav, enviar apenas os dados calculados para o update
+      axios.post(route('sgc.gestao.update'), {
+        contrato: numeroContrato,
+        diarias: dadosConsumo.diarias,
+        hatch: dadosConsumo.hatch,
+        pickup: dadosConsumo.pickup,
+        barco: dadosConsumo.barco,
+        aerea: dadosConsumo.aerea,
+      })
+        .then((response) => {
+          console.log('Resposta do update:', response.data);
+          formDav.reset();
+          modalVisualizarForm.value.getBsModal().hide();
+          console.log('Dados atualizados com sucesso!');
+        })
+        .catch((error) => {
+          console.error('Erro ao atualizar os dados:', error.response?.data || error.message);
+        });
     },
     onError: (errors) => {
-      console.error('Erro ao enviar o formulário:', errors);
-    }
+      console.error('Erro ao enviar o formulário para storeDav:', errors);
+    },
   });
 };
 

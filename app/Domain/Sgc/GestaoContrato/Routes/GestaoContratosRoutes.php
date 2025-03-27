@@ -26,12 +26,12 @@ Route::prefix('gestao')->group(function () {
   Route::get('/dashboard/createEmpreendimento/{tipo?}/{id?}', [CreateEmpreendimento::class,                            'create'])->name('sgc.gestao.dashboard.empreendimento.create');
   Route::post('/dashboard/salvarEmpreendimento',              [UpdateEmpreendimentoController::class,                  'updateEmpreendimento'])->name('sgc.gestao.dashboard.empreendimento.store');
   Route::delete('/dashboard/delete-empreendimento/{id}',      [EmpreendimentosController::class,                       'deleteEmpreendimento'])->name('sgc.gestao.dashboard.empreendimento.delete');
-  Route::get('/',                                             [CoordenadasController::class,                           'getGeoJson'])->name('sgc.gestao.dashboard.geojson');
-  Route::get('dav/historicos/{contrato}',                                [ListagemDavController::class,                           'historicos'])->name('sgc.gestao.historicos');
+  Route::get('/dashboard/geoJson',                            [CoordenadasController::class,                           'getGeoJson'])->name('sgc.gestao.dashboard.geojson');
+  Route::get('dav/historicos/{contrato}',                     [ListagemDavController::class,                           'historicos'])->name('sgc.gestao.historicos');
   Route::get('dav/{contrato}',                                [ListagemDavController::class,                           'index'])->name('sgc.gestao.listagemDav');
   Route::post('dav/storeDav',                                 [StoreDav::class,                                        'index'])->name('sgc.gestao.storeDav');
   Route::get('dav/{contrato}/{id}',                           [ListagemDavController::class,                           'details'])->name('sgc.gestao.details');
-  Route::post('dav/update/{contrato}',                        [DavConsumoController::class,                            'update'])->name('sgc.gestao.update');
+  Route::post('dav/update',                                   [DavConsumoController::class,                            'update'])->name('sgc.gestao.update');
   Route::post('dav/storeDavProfissionais',                    [StoreDavProfissionais::class,                           'index'])->name('sgc.gestao.storeDavProfissionais');
 
 });
