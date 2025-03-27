@@ -5,6 +5,7 @@ namespace App\Domain\Contrato\GestaoContrato\Services;
 use App\Models\Contrato;
 use App\Models\ContratoTipo;
 use App\Models\Rodovia;
+use App\Models\Servicos;
 use App\Models\Uf;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
@@ -28,11 +29,19 @@ class ListagemContratoService extends BaseModelService
         ];
     }
 
+   public function getServicos($contrato)
+{
+    return Servicos::with('tipo')
+                   ->where('id_contrato', $contrato->id)
+                   ->where('deleted_at', null)
+                   ->get();
+}
+
     public function create($contrato): array
     {
-        $ufs      = Cache::rememberForever('ufs', fn () => Uf::all());
-        $rodovias = Cache::rememberForever('rodovias', fn () => Rodovia::all());
-        $tipos    = Cache::rememberForever('contrato_tipos', fn () => ContratoTipo::all());
+        $ufs      = Cache::rememberForever('ufs', fn() => Uf::all());
+        $rodovias = Cache::rememberForever('rodovias', fn() => Rodovia::all());
+        $tipos    = Cache::rememberForever('contrato_tipos', fn() => ContratoTipo::all());
 
         if ($contrato) {
             $contrato->load([
@@ -61,5 +70,4 @@ class ListagemContratoService extends BaseModelService
     {
         return $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
     }
-
 }

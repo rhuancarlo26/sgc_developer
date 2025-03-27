@@ -4,6 +4,7 @@ use App\Domain\Dashboard\MonAtpFauna\Controller\IndexDashboardMonAtpFaunaControl
 use App\Domain\Dashboard\MonitoraFauna\Controller\IndexDashboardMonitoraFaunaController;
 use App\Domain\Dashboard\PassagemFauna\Controller\IndexDashboardPassagemFaunaController;
 use App\Domain\Dashboard\AfugentamentoFauna\Controller\IndexDashboardAfugentamentoFaunaController;
+use App\Domain\Dashboard\app\controller\IndexController;
 use App\Domain\Dashboard\PMQA\Controller\IndexDashboardPMQAController;
 use App\Domain\Dashboard\SupervisaoAmbiental\Controller\IndexDashboardSupervisaoAmbientalController;
 use App\Domain\Dashboard\SupressaoVegetal\Controller\IndexDashboardSupressaoVegetalController;
@@ -42,11 +43,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         require __DIR__ . '/../app/Domain/Fiscal/app/Routes/FiscalRouter.php';
 
         // Dashboard (Home page)
-        Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
+        Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
 
         Route::prefix('dashboard')->group(function () {
             Route::prefix('pmqa')->group(function () {
-                Route::get('/', [IndexDashboardPMQAController::class, 'index'])->name('dashboard.pmqa');
+                Route::get('/{servicos}', [IndexDashboardPMQAController::class, 'index'])->name('dashboard.pmqa');
             });
             Route::prefix('mon-atp-fauna')->group(function () {
                 Route::get('/', [IndexDashboardMonAtpFaunaController::class, 'index'])->name('dashboard.mon-atp-fauna');

@@ -116,7 +116,7 @@ const salvarAnaliseIqa = () => {
 
 const salvarOutraAnalise = () => {
     if (form_outra_analise.id) {
-        console.log('form', form_outra_analise);
+       
         form_outra_analise.post(route('contratos.contratada.servicos.pmqa.resultado.update_outra_analise', {
             contrato: props.contrato.id,
             servico: props.servico.id,

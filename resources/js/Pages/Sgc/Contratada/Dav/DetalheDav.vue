@@ -15,9 +15,6 @@ const props = defineProps({
   consumos: Object
 });
 
-const numeroContrato = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
-const contratoFiltrado = props.consumos.find(item => item.contrato === numeroContrato);
-
 const produtoSelecionado = ref("");
 const modalVisualizarForm = ref(null);
 const profissionais = ref([1]);
@@ -38,10 +35,6 @@ const formDav = useForm({
   destino: props.dav.destino || [""],
   profissionais: props.dav.profissionais || [""],
   transporte: props.dav.transporte || [],
-  aereo_valor: props.dav.aereo_valor || 0,
-  terrestre_tipo: props.dav.terrestre_tipo || [""],
-  terrestre_valor: props.dav.terrestre_valor || 0,
-  aquatico_valor: props.dav.aquatico_valor || 0,
   status: props.dav.status || "pendente"
 });
 
@@ -77,6 +70,8 @@ const filterProdutos = () => {
 
   return produtos;
 };
+
+
 
 const adicionarDestinos = () => {
   if (origem.value.length === destino.value.length) {
@@ -145,12 +140,10 @@ const formatNome = (nome) => {
     .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1))
     .join(' ');
 }
-console.log(contratoFiltrado)
+
 const gerarPDF = () => {
   const pdf = new jsPDF();
 
-  const diferencaEmMs = new Date(formDav.dataFinal) - new Date(formDav.dataInicio);
-  const qtdDiarias = Math.floor(diferencaEmMs / (1000 * 60 * 60 * 24)) + 1;
   const margemEsquerda = 15;
   const margemDireita = 15;
   const larguraUtil = pdf.internal.pageSize.getWidth() - margemEsquerda - margemDireita;
@@ -165,11 +158,13 @@ const gerarPDF = () => {
   };
 
   const imageUrl = '/img/logo/logodnit.png';
+
   const img = new Image();
   img.src = imageUrl;
 
   const logoLargura = 30;
   const logoAltura = 20;
+
   const logoX = pdf.internal.pageSize.getWidth() - margemDireita - logoLargura;
   const logoY = 10;
 
@@ -182,17 +177,23 @@ const gerarPDF = () => {
   let y = logoY + logoAltura + 10;
 
   y += adicionarTexto(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y, larguraUtil / 2);
+
   adicionarTexto(`Empreendimento: ${formDav.empreendimento}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
 
   y += adicionarTexto(`Produto: ${formDav.produto}`, margemEsquerda, y, larguraUtil);
+
   y += adicionarTexto(`Subproduto: ${formDav.subproduto}`, margemEsquerda, y, larguraUtil);
+
   y += adicionarTexto(`Finalidade: ${formDav.finalidade}`, margemEsquerda, y, larguraUtil / 2);
+
   adicionarTexto(`Escopo: ${formDav.escopo}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
 
   y += adicionarTexto(`Data Início: ${formatDate(formDav.dataInicio)}`, margemEsquerda, y, larguraUtil / 2);
+
   adicionarTexto(`Data Final: ${formatDate(formDav.dataFinal)}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
 
   y += adicionarTexto(`Origem: ${formDav.origem}`, margemEsquerda, y, larguraUtil / 2);
+
   adicionarTexto(`Destino: ${formDav.destino}`, margemEsquerda + larguraUtil / 2, y - espacamentoLinhas, larguraUtil / 2);
 
   y += adicionarTexto(`Transporte: ${formDav.transporte.join(', ')}`, margemEsquerda, y, larguraUtil);
@@ -202,68 +203,16 @@ const gerarPDF = () => {
     y += adicionarTexto(`${index + 1}. ${profissional.nome} - ${profissional.formacao}`, margemEsquerda + 5, y, larguraUtil - 5);
   });
 
-  // Tabela manual com cell
-  y += 10;
-  const cellHeight = 10;
-  const titleCellWidth = 40; // Largura fixa para a coluna "Solicitado" e "Saldo Restante"
-  const terrestreTipos = Array.isArray(formDav.terrestre_tipo) ? formDav.terrestre_tipo : [formDav.terrestre_tipo];
-  const hasHatch = terrestreTipos.includes('Hatch');
-  const hasPickup = terrestreTipos.includes('Pick-up');
+  y += 20;
 
-  const headers = ['Diárias', 'Passagem Aérea', 'Veículo Aquático', 'Veículo Hatch', 'Veículo Pickup'];
-  const dataCellWidth = (larguraUtil - titleCellWidth) / headers.length;
-
-  pdf.setFontSize(9);
-  pdf.setFillColor(22, 160, 133);
-  pdf.cell(margemEsquerda, y, titleCellWidth, cellHeight, '', 1, 'center', true); // Célula vazia no canto superior esquerdo
-  headers.forEach((header, index) => {
-    pdf.cell(margemEsquerda + titleCellWidth + index * dataCellWidth, y, dataCellWidth, cellHeight, header, 1, 'center', true);
-  });
-
-  pdf.setFontSize(tamanhoFonte);
-  pdf.setFillColor(255, 255, 255);
-  y += cellHeight;
-  pdf.cell(margemEsquerda, y, titleCellWidth, cellHeight, 'Solicitado', 2, 'left');
-  pdf.cell(margemEsquerda + titleCellWidth, y, dataCellWidth, cellHeight, (qtdDiarias || 0).toString(), 2, 'center'); // Nova coluna "Diárias"
-  pdf.cell(margemEsquerda + titleCellWidth + dataCellWidth, y, dataCellWidth, cellHeight, (formDav.aereo_valor || 0).toString(), 2, 'center');
-  pdf.cell(margemEsquerda + titleCellWidth + 2 * dataCellWidth, y, dataCellWidth, cellHeight, (formDav.aquatico_valor || 0).toString(), 2, 'center');
-  let colIndex = 3;
-  if (hasHatch) {
-    pdf.cell(margemEsquerda + titleCellWidth + colIndex * dataCellWidth, y, dataCellWidth, cellHeight, (formDav.terrestre_valor || 0).toString(), 2, 'center');
-    colIndex++;
-  }
-  if (hasPickup) {
-    pdf.cell(margemEsquerda + titleCellWidth + colIndex * dataCellWidth, y, dataCellWidth, cellHeight, (formDav.terrestre_valor || 0).toString(), 2, 'center');
-    colIndex++;
-  }
-  if (hasHatch && !hasPickup) {
-    pdf.cell(margemEsquerda + titleCellWidth + colIndex * dataCellWidth, y, dataCellWidth, cellHeight, '0', 2, 'center');
-  }
-  if (hasPickup && !hasHatch) {
-    pdf.cell(margemEsquerda + titleCellWidth + colIndex * dataCellWidth, y, dataCellWidth, cellHeight, '0', 2, 'center');
-  }
-
-  y += cellHeight;
-  pdf.cell(margemEsquerda, y, titleCellWidth, cellHeight, 'Saldo Restante', 3, 'left');
-  pdf.cell(margemEsquerda + titleCellWidth, y, dataCellWidth, cellHeight, (contratoFiltrado.diarias || 0).toString(), 3, 'center'); // Nova coluna "Diárias"
-  pdf.cell(margemEsquerda + titleCellWidth + dataCellWidth, y, dataCellWidth, cellHeight, (contratoFiltrado.aerea || 0).toString(), 3, 'center');
-  pdf.cell(margemEsquerda + titleCellWidth + 2 * dataCellWidth, y, dataCellWidth, cellHeight, (contratoFiltrado.barco || 0).toString(), 3, 'center');
-  pdf.cell(margemEsquerda + titleCellWidth + 3 * dataCellWidth, y, dataCellWidth, cellHeight, (contratoFiltrado.hatch || 0).toString(), 3, 'center');
-  pdf.cell(margemEsquerda + titleCellWidth + 4 * dataCellWidth, y, dataCellWidth, cellHeight, (contratoFiltrado.pickup || 0).toString(), 3, 'center');
-
-  pdf.setLineWidth(0.2);
-  pdf.rect(margemEsquerda, y - 2 * cellHeight, larguraUtil, 3 * cellHeight);
-
-  y += cellHeight + 40;
-
-  // Linhas para assinar
   pdf.setLineWidth(0.5);
-  pdf.line(margemEsquerda, y, margemEsquerda + larguraUtil / 2 - 10, y);
-  pdf.text(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y + 10);
+  pdf.line(margemEsquerda, y, margemEsquerda + larguraUtil / 2 - 10, y); // Linha horizontal
+  pdf.text(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y + 10); // Nome do coordenador
 
-  pdf.line(margemEsquerda + larguraUtil / 2 + 10, y, margemEsquerda + larguraUtil, y);
-  pdf.text(`Fiscal: ${formatNome(props.contrato.fiscal_contrato)}`, margemEsquerda + larguraUtil / 2 + 10, y + 10);
+  pdf.line(margemEsquerda + larguraUtil / 2 + 10, y, margemEsquerda + larguraUtil, y); // Linha horizontal
+  pdf.text(`Fiscal: ${formatNome(props.contrato.fiscal_contrato)}`, margemEsquerda + larguraUtil / 2 + 10, y + 10); // Campo para o fiscal
 
+  // Salvar o PDF
   pdf.save('detalhes_dav.pdf');
 };
 

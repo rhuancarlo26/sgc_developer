@@ -102,4 +102,6 @@ class Contrato extends Model
             }
         );
     }
+
+    
 }

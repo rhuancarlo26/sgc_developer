@@ -23,11 +23,6 @@ const modalVisualizarForm = ref();
 const modalVisualizarFormCadFunc = ref();
 const allDav = ref([]);
 
-const numeroContrato = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
-const contratoFiltrado = props.consumos.find(item => item.contrato === numeroContrato);
-
-console.log(contratoFiltrado)
-
 const consumo = ref({
   "94/2022": {
     'Diárias': 552,
@@ -92,7 +87,7 @@ const getCalendarColor = () => {
     return 'green';
   }
 
-  return 'blue';
+  return 'blue'; // Cor padrão, caso não haja lembretes
 };
 
 const updateAttributes = () => {

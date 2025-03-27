@@ -76,7 +76,12 @@ Route::prefix('/contratada')->group(function () {
     Route::put('/sgc/gestao/dav/{id}/aprovar', [ListagemDavController::class, 'aprovar'])->name('sgc.gestao.aprovarDav');
     Route::put('/sgc/gestao/dav/{id}/reprovar', [ListagemDavController::class, 'reprovar'])->name('sgc.gestao.reprovarDav');
 
-     //Calendário Cronograma     
+    Route::get('dav/{contrato}',                                [ListagemDavController::class,                           'index'])->name('sgc.gestao.listagemDav');
+    // Route::post('dav/storeDav',                                 [StoreDav::class,                                        'index'])->name('sgc.gestao.storeDav');
+    Route::get('dav/{contrato}/{id}',                           [ListagemDavController::class,                           'details'])->name('sgc.gestao.details');
+
+
+    //Calendário Cronograma
      Route::get('{contrato}/cronograma', [CronogController::class, 'index'])->name('sgc.contratada.cronograma.index');
      Route::get('{contrato}/cronograma/opcoes-evento', [CronogController::class, 'getOpcoesEvento'])->name('sgc.contratada.cronograma.opcoesEvento');
      Route::post('{contrato}/cronograma/evento-auxiliar', [CronogController::class, 'storeEventoAuxiliar'])->name('sgc.contratada.cronograma.storeEventoAuxiliar');

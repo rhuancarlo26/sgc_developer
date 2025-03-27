@@ -6,15 +6,16 @@ import PageFooter from "./Partials/PageFooter.vue";
 import Alert from "@/Components/Alert.vue";
 import Menu from "./Partials/Menu.vue";
 import TopBar from "./Partials/TopBar.vue";
-import {usePage} from '@inertiajs/vue3'
-import {ref, watch, nextTick} from "vue";
+import { usePage } from '@inertiajs/vue3'
+import { ref, watch, nextTick } from "vue";
 
 const page = usePage();
 
 const flash = ref({});
 
 defineProps({
-    containerType: {type: String, default: 'container-fluid'}
+    containerType: { type: String, default: 'container-fluid' },
+    mapaPrincipal: { type: Boolean, default: false }
 })
 
 let timeoutId = null;
@@ -43,7 +44,7 @@ watch(
 
 
     },
-    {immediate: true}
+    { immediate: true }
 );
 
 
@@ -53,16 +54,12 @@ watch(
 <template>
     <div class="page">
 
-        <TopBar/>
-        <Menu/>
+        <TopBar />
+        <Menu />
 
         <div class="page-wrapper">
-            <Alert
-                v-if="flash.message"
-                :type="flash.message.type"
-                :content="flash.message.content"
-                @closeButtonClicked="flash = {}"
-            />
+            <Alert v-if="flash.message" :type="flash.message.type" :content="flash.message.content"
+                @closeButtonClicked="flash = {}" />
 
             <!-- Meta para o token CSRF -->
             <meta name="csrf-token" :content="usePage().props.csrf_token" />
@@ -73,7 +70,7 @@ watch(
                     <div class="row g-2 align-items-center">
                         <div class="col">
                             <div class="card card-body">
-                                <slot name="header"/>
+                                <slot name="header" />
                             </div>
                         </div>
                     </div>
@@ -81,9 +78,9 @@ watch(
             </div>
 
             <!-- Page body -->
-            <div class="page-body">
-                <div class="container-xl">
-                    <slot  />
+            <div class="page-body" :class="{ 'mapa-principal': mapaPrincipal }">
+                <div class="container-xl" :class="{ 'mapa-principal': mapaPrincipal }">
+                    <slot />
                 </div>
             </div>
 
@@ -97,4 +94,8 @@ watch(
     min-height: 100vh;
 }
 
+.mapa-principal {
+    padding: 0px;
+    margin: 0px;
+}
 </style>

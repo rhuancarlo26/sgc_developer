@@ -183,7 +183,7 @@ class ResultadoService extends BaseModelService
         }
         return $color;
     }
-
+    
     public function resultado($resultado): array
     {
         $parametros = ServicoPmqaParametro::all();
@@ -246,6 +246,7 @@ class ResultadoService extends BaseModelService
                                         ->toArray();
                                 }
                                 return [
+                                    'id' => $campanhaPonto->ponto->id,
                                     'label' => $campanhaPonto->ponto->nome_ponto_coleta,
                                     'backgroundColor' => '#' . substr(md5($campanhaPonto->ponto->nome_ponto_coleta), 0, 6),
                                     'data' => $medicoes ?? []
