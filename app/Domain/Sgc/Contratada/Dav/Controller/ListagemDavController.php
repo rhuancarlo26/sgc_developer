@@ -55,11 +55,12 @@ class ListagemDavController extends Controller
     }
     public function historicos(Contrato $contrato): Response
     {
-        $davs = HistoricoDav::all();
+        // $davs = HistoricoDav::all();
+        $historicos = HistoricoDav::with('dav:id,status,contrato_id')->get();
 
         return Inertia::render('Sgc/Contratada/Dav/HistoricoDav', [
             'contrato' => $contrato,
-            'davs' => $davs
+            'davs' => $historicos
         ]);
     }
 

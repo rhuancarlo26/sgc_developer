@@ -4,6 +4,9 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { router, Head, useForm } from '@inertiajs/vue3';
 import Navbar from '../Navbar.vue';
+import Swal from 'sweetalert2';
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const props = defineProps({
   davs: Object,
@@ -11,7 +14,20 @@ const props = defineProps({
 });
 
 const aprovarDav = (id) => {
-  router.put(route('sgc.gestao.aprovarDav', { id: id }));
+  Swal.fire({
+        title: "Aprovar",
+        text: "Deseja continuar a aprovação dessa DAV?",
+        icon: "warning",
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+  }).then((r) => {
+      if (r.isConfirmed) {
+        router.put(route('sgc.gestao.aprovarDav', { id: id }))
+        toast.success('Dav reaprovada com sucesso!');
+      }
+  })
+  // router.put(route('sgc.gestao.aprovarDav', { id: id }));
   // 'sgc.gestao.aprovarDav', { id: props.dav.id }
 };
 </script>
@@ -41,20 +57,25 @@ const aprovarDav = (id) => {
                   <th>Usuário</th>
                   <th>Data</th>
                   <th>Status Anterior</th>
+                  <th>Status Modificado</th>
+                  <th>Status Atual</th>
                   <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="dav in davs" :key="dav.id">
                   <td>{{ dav.id }}</td>
-                  <td><a :href="'/sgc/gestao/dav/'">{{ dav.dav_id }}</a></td>
+                  <td><a :href="'/sgc/gestao/dav/'+dav.dav.contrato_id">{{ dav.dav_id }}</a></td>
                   <td>{{ dav.user_id }}</td>
                   <td>{{ new Date(dav.created_at).toLocaleDateString() }}</td>
                   <td>{{ dav.status_anterior }}</td>
+                  <td>{{ dav.status_novo }}</td>
+                  <td>{{ dav.dav.status }}</td>
                   <td>
-                    <button v-if="dav.status_novo === 'reprovado'" @click="aprovarDav(dav.dav_id)">
+                    <button v-if="dav.dav.status === 'reprovado'" @click="aprovarDav(dav.dav_id)">
                       Aprovar
                     </button>
+                    <span v-else>Já aprovada</span>
                   </td>
                 </tr>
               </tbody>

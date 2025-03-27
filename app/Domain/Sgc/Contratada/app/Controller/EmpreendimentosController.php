@@ -19,6 +19,9 @@ use App\Models\SgcvwEmpreendimentos;
 use App\Models\SgcvwEstudos;
 use App\Models\Sgcvwempfases;
 
+use Illuminate\Support\Facades\Schema;
+
+
 
 class EmpreendimentosController extends Controller
 {
@@ -31,6 +34,30 @@ class EmpreendimentosController extends Controller
         $file = $request->file('excel_file');
         Excel::import(new YourImportClass, $file);
         return redirect()->back()->with('success', 'Arquivo Excel importado com sucesso.');
+    }
+    public function editavel(): Response
+    {
+      $empreendimentos = SgcvwEmpreendimentos::all();
+      return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/Edicao', [
+        'empreendimentos' => $empreendimentos,
+      ]);
+    }
+    public function updatecampo(Request $request, $id)
+    {
+        $empreendimento = SgcvwEmpreendimentos::findOrFail($id);
+
+        // Obtém a chave e o valor da requisição
+        $campo = array_keys($request->all())[0]; // Pega a chave no request
+        $valor = $request->input($campo); // Pega o valor
+
+        // Se o campo existe
+        if (Schema::hasColumn('sgcvw_empreendimentos', $campo)) {
+            $empreendimento->update([$campo => $valor]);
+            // return response()->json(['success' => true, 'message' => 'Campo atualizado com sucesso!']);
+            return redirect()->back()->with('success', 'Empreendimento atualizado com sucesso!');
+        }
+
+        return response()->json(['success' => false, 'message' => 'Campo inválido.'], 400);
     }
     public function index(ContratoTipo $tipo, Request $request, $empreendimento): Response
     {
