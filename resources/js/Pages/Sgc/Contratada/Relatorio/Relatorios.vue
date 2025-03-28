@@ -53,6 +53,11 @@ onMounted(() => {
               { route: '#', label: contrato.contratada }
             ]"
           />
+          <div>
+            <button @click="iniciarNovoRelatorio" class="btn btn-info me-2 w-500">
+              <i class="fas fa-file-alt"></i> Gerar Novo Relatório
+            </button>
+          </div>
         </div>
       </template>
 
@@ -121,6 +126,7 @@ onMounted(() => {
 <script>
 export default {
   methods: {
+    // Método para obter a classe do badge de status
     getStatusBadgeClass(status) {
       switch(status) {
         case 'Análise DNIT':
@@ -133,11 +139,26 @@ export default {
           return 'text-bg-secondary';
       }
     },
+    // Método para navegar para uma versão específica do relatório
     goToVersion(contratoId, relatorioNum, versao) {
       if (versao) {
         this.$inertia.get(route('sgc.contratada.relatorio.historico', { contrato: contratoId, relatorio_num: relatorioNum, versao: versao }));
       }
-    }
-  }
-}
+    },
+    // Método para iniciar um novo relatório
+    async iniciarNovoRelatorio() {
+      try {
+        // Pega o contrato da página atual
+        const contrato = this.$page.props.contrato || 1;
+
+        await this.$inertia.post(route('sgc.contratada.relatorio.iniciar'), { contrato });
+        alert('Relatório criado com sucesso!');
+        window.location.reload();
+      } catch (error) {
+        console.error('Erro ao iniciar novo relatório:', error);
+        alert('Erro ao criar o relatório.');
+      }
+    },
+  },
+};
 </script>
