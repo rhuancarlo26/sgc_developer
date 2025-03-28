@@ -18,16 +18,59 @@ const props = defineProps({
   chartDataBar: Object,
   chartDataBar2: Object,
   chartDataLine: Object,
-  modulos: Object
+  modulos: Object,
+  especiesGroup: Object
 
 });
 
 const total = ref('total');
 const registro = ref('resultado');
 const curva = ref('armadilha');
-const modalVideoRef = ref({});
 const mapaVisualizarTrecho = ref(null);
+const selectedModulo = ref(null);
+const selectedArmadilha = ref(null);
 
+
+
+const filteredEspeciesGroup = computed(() => {
+ 
+  if (!selectedModulo.value || !selectedArmadilha.value) {
+    return props.especiesGroup;
+  }
+  const filteredGroup = {};
+  Object.entries(props.especiesGroup).forEach(([especie, registros]) => {
+    // Filtra os registros que possuem o módulo e armadilha desejados
+    const registrosFiltrados = registros.filter(registro => {
+      return registro.modulo.id === selectedModulo.value.id &&
+        registro.armadilha.id === selectedArmadilha.value;
+    });
+    if (registrosFiltrados.length) {
+      filteredGroup[especie] = registrosFiltrados;
+    }
+  });
+
+  return filteredGroup;
+});
+
+// Propriedade computada para criar a estrutura do gráfico (labels e datasets)
+const chartDataBarFiltered = computed(() => {
+  const speciesGroup = filteredEspeciesGroup.value;
+  const labels = Object.keys(speciesGroup);
+  const data = labels.map(especie => speciesGroup[especie].length);
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Ocorrências',
+        data,
+        backgroundColor: "rgba(30, 144, 255, 0.8)",
+        borderColor: "rgba(30, 144, 255, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+});
 
 const chartOptionsPie = ref({
   responsive: true,
@@ -68,7 +111,6 @@ const chartOptionsBar = ref({
   barPercentage: 0.5,
   maxBarThickness: 40,
 });
-const selectedModulo = ref(null);
 
 
 const chartOptionsLine = ref({
@@ -163,7 +205,6 @@ const modalPontoMap = (modulo) => {
     <span><strong>Fitofisionomia: </strong> ${modulo.fitofisionomia}</span><br>
     <span><strong>Nome do Arquivo: </strong> ${modulo.nome_arquivo}</span><br>
     <span><strong>Observações: </strong> ${modulo.obs && modulo.obs !== '-' ? modulo.obs : 'Nenhuma'}</span><br>
-    <span><strong>Local do Shape: </strong> ${modulo.local_shape}</span><br>
   `;
 };
 
@@ -178,7 +219,6 @@ setTimeout(() => {
 </script>
 
 <template>
-
   <Head title="Dashboard" />
   <AuthenticatedLayout>
     <div>
@@ -290,29 +330,29 @@ setTimeout(() => {
                         </option>
                       </select>
                     </div>
-                    <div v-if="selectedModulo">               
+                    <div v-if="selectedModulo">
                       <div class="col-11 m-4">
                         <InputLabel value="Selecione uma Armadilha" />
                         <select v-model="selectedArmadilha" class="form-select">
-                          <option v-for="armadilha in selectedModulo.armadilhas" :value="armadilha" :key="armadilha.id">
-                            {{ armadilha.tipo }}
+                          <option v-for="armadilha in selectedModulo.armadilhas" :value="armadilha.id"
+                            :key="armadilha.id">
+                            {{ armadilha.tipo }} | {{ armadilha.nome_id }}
                           </option>
                         </select>
                       </div>
                     </div>
+                    <div v-if="selectedArmadilha">
+                      <BarChart height="2000px" :chart_data="chartDataBarFiltered" :chart_options="chartOptionsBar2" />
+                    </div>
 
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <ModalVideo ref="modalVideoRef" url="/file/Dashboard/Dashboard_monitora_fauna.mp4" />
-
   </AuthenticatedLayout>
 
 </template>
