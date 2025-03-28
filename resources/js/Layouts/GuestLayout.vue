@@ -1,12 +1,12 @@
 <script setup>
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import {Link} from '@inertiajs/vue3';
+import {Link, usePage} from '@inertiajs/vue3';
 import '@tabler/core/dist/css/tabler.min.css'
 import '@tabler/core/dist/js/tabler.min.js';
 </script>
 
 <template>
-    <div class="d-flex flex-column guest container-auth">
+    <div class="d-flex flex-column guest container-auth" :style="usePage().props.app_url + `/img/background/bg_login.jpg`">
         <div class="page page-center">
             <div class="container container-tight py-4">
                 <div class="text-center">
