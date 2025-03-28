@@ -32,15 +32,22 @@ class RegistroService extends BaseModelService
 
   public function graficos_monitora(Servicos $servico): array
   {
-    $allRegistros = ServicoMonitoraFaunaExecRegistro::with(['grupo_faunistico', 'modulo','armadilha'])
+    $allRegistros = ServicoMonitoraFaunaExecRegistro::with(['grupo_faunistico', 'modulo', 'armadilha'])
       ->where('id_servico', $servico->id)
       ->get();
+
+    $especiesGroup = $allRegistros->filter(function ($registro) {
+      return !empty($registro->especie);
+    })->groupBy('especie');
+
+
     return [
+      'especiesGroup' => $especiesGroup,
       'chartDataPieAbundancia'  => $this->getChartDataPieAbundancia($allRegistros),
       'chartDataPieDiversidade' => $this->getChartDataPieDiversidade($allRegistros),
       'chartDataBar'            => $this->getChartDataBar($allRegistros),
       'chartDataLine'           => $this->getChartDataLine($allRegistros),
-      'chartDataBar2'           => $this->getChartDataBar2($allRegistros),
+      'chartDataBar2'           => $this->getChartDataBar2($especiesGroup),
       'modulos' => ServicoMonitoraFaunaConfigModuloAmostral::with('armadilhas')->where('id_servico', $servico->id)->get(['id', 'tamanho_modulo']),
     ];
   }
@@ -123,18 +130,18 @@ class RegistroService extends BaseModelService
 
   private function getChartDataLine($allRegistros): array
   {
-   
+
     $registrosPorData = $allRegistros->filter(function ($registro) {
       return !empty($registro->data_registro);
     })->groupBy('data_registro');
 
-    
+
     $sortedDates = $registrosPorData->keys()->sort();
 
     $labels = [];
     $cumulativeData = [];
     $cumulativeSum = 0;
-    
+
     $meses = [
       '01' => 'Jan',
       '02' => 'Fev',
@@ -154,7 +161,7 @@ class RegistroService extends BaseModelService
       $count = $registrosPorData->get($date)->count();
       $cumulativeSum += $count;
 
-      
+
       $dt = Carbon::parse($date);
       $day = $dt->format('d');
       $month = $meses[$dt->format('m')];
@@ -179,12 +186,9 @@ class RegistroService extends BaseModelService
     ];
   }
 
-  private function getChartDataBar2($allRegistros): array
+  private function getChartDataBar2($especiesGroup): array
   {
-    $especiesGroup = $allRegistros->filter(function ($registro) {
-      return !empty($registro->especie);
-    })->groupBy('especie');
-
+     
     return [
       'labels' => $especiesGroup->keys()->toArray(),
       'datasets' => [

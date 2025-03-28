@@ -21,6 +21,7 @@ class IndexDashboardMonitoraFaunaController extends Controller
     $charts =  $this->registro_service->graficos_monitora($servicos);
 
     return Inertia::render('Dashboard/MonitoraFauna/Index', [
+      'especiesGroup' => $charts["especiesGroup"],
       'chartDataPieAbundancia' => $charts["chartDataPieAbundancia"],
       'chartDataPieDiversidade' => $charts["chartDataPieDiversidade"],
       'chartDataBar' => $charts["chartDataBar"],
