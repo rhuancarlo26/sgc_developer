@@ -6,7 +6,7 @@ import Navbar from "./Navbar.vue";
 import { Chart } from "highcharts-vue";
 import { onMounted, reactive, ref, computed } from "vue";
 import PaginationSgc from '@/Components/PaginationSgc.vue';
-import { IconClipboardData } from "@tabler/icons-vue";
+import { IconCalendar, IconClipboardData, IconPlane } from "@tabler/icons-vue";
 
 const props = defineProps({
   contrato: Object,
@@ -170,6 +170,14 @@ const updateDisplayedItems = () => {
           { route: '#', label: contrato.contratada }
         ]" />
         <div>
+          <Link class="btn btn-info me-2 w-500"  :href="route('sgc.contratada.cronograma.index', {contrato: contrato.id})">
+            <IconCalendar class="me-2" /> Cronograma Físico
+          </Link>
+
+          <Link class="btn btn-info me-2 w-500"  :href="route('sgc.gestao.listagemDav', {contrato: contrato.id})">
+            <IconPlane class="me-2" /> DAV
+          </Link>
+
           <Link class="btn btn-info me-2 w-500"  :href="route('sgc.contratada.relatorios.index', {contrato: contrato.id})">
             <IconClipboardData class="me-2" /> Relatorio de coordenação
           </Link>
