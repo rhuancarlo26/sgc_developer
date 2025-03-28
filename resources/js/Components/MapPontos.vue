@@ -105,7 +105,6 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
           geojson.properties = geojson_linestring[2];
           geojson.properties.popup = geojson_linestring[1];
           
-          console.log("geojson final:",geojson);
           geojson_layer.addData(geojson).setStyle(function (feature) {
 
             let style = {

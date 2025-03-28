@@ -192,4 +192,11 @@ class Servicos extends Model
     {
         return $this->hasMany(ServicoMonAtpFaunaVincularABIO::class, 'fk_servico');
     }
+
+    public function monitora_fauna_modulos()
+    {
+        return $this->hasMany(ServicoMonitoraFaunaConfigModuloAmostral::class, 'id_servico');
+    }
+
+    
 }
