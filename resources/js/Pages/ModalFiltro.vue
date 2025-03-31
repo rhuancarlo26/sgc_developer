@@ -20,7 +20,7 @@ const contrato_selecionadas = ref([]);
 const filters = ref({
   uf: [],
   rodovia: [],
-  nr_contrato: []
+  numero_contrato: []
 });
 
 const rodovias_ = computed(() => {
@@ -136,7 +136,6 @@ const emit = defineEmits(['layerSelected', 'layerUnselected', 'filtersReset', 'u
     <div class="offcanvas-body p-3">
 
       <div class="d-flex flex-column gap-3">
-
         <div class="form-group">
           <v-select v-model="filters.uf" class="w-100" :options="ufs" label="uf" :reduce="uf => uf.uf" :multiple="true"
             @update:model-value="(ufs_) => emit('ufChanged', ufs_)" placeholder="Selecione uma ou mais UFs">
@@ -154,8 +153,9 @@ const emit = defineEmits(['layerSelected', 'layerUnselected', 'filtersReset', 'u
           </v-select>
         </div>
         <div class="form-group">
-          <v-select v-model="filters.nr_contrato" class="w-100" :options="[]" label="nr_contrato" :multiple="true"
-            :reduce="contratacao => contratacao.nr_contrato" placeholder="Selecione um ou mais Contratos">
+          <v-select v-model="filters.numero_contrato" class="w-100" label="numero_contrato" :options="contratos"
+            :reduce="contrato => contrato.numero_contrato" :multiple="true"
+            placeholder="Selecione um ou mais Contratos">
             <template #no-options="{ }">
               {{ `Nenhuma opção encontrada.` }}
             </template>

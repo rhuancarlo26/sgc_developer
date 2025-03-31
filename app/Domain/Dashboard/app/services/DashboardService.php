@@ -2,6 +2,7 @@
 
 namespace App\Domain\Dashboard\app\services;
 
+use App\Models\Contrato;
 use App\Models\Rodovia;
 use App\Models\ServicoLicencaCondicionante;
 use App\Models\Uf;
@@ -20,10 +21,12 @@ class DashboardService extends BaseModelService
   {
     $ufs = Cache::rememberForever('ufs', fn() => Uf::all());
     $rodovias = Cache::rememberForever('rodovias', fn() => Rodovia::all());
+    $contratos = Contrato::all(['numero_contrato']);
 
     return [
       'ufs' => $ufs,
-      'rodovias' => $rodovias
+      'rodovias' => $rodovias,
+      'contratos' => $contratos
     ];
   }
 }
