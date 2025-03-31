@@ -10,7 +10,8 @@ import Detalhe from './Detalhe.vue';
 
 const props = defineProps({
     ufs: { type: Array },
-    rodovias: { type: Array }
+    rodovias: { type: Array },
+    contratos: { type: Array },
 });
 
 let map = null;
@@ -187,8 +188,8 @@ const handleMapClick = (clickEvent) => {
 
         <BotoesMapa />
 
-        <ModalFiltro ref="filterOffcanvas" :ufs="ufs" :rodovias="rodovias" @ufChanged="ufZoom" @filtersReset="clearMap"
-            @layerSelected="renderWms" @layerUnselected="removeWms" />
+        <ModalFiltro ref="filterOffcanvas" :ufs="ufs" :rodovias="rodovias" :contratos="contratos" @ufChanged="ufZoom"
+            @filtersReset="clearMap" @layerSelected="renderWms" @layerUnselected="removeWms" />
 
         <Detalhe ref="detalhesOffcanvas" />
 
