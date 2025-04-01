@@ -35,10 +35,20 @@ class EmpreendimentosController extends Controller
         Excel::import(new YourImportClass, $file);
         return redirect()->back()->with('success', 'Arquivo Excel importado com sucesso.');
     }
+    /**
+     * Empreendimentos: Sistema de Edição Interativo no Front-End --------------------------------------------------------
+     */
     public function editavel(): Response
     {
       $empreendimentos = SgcvwEmpreendimentos::all();
       return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/Edicao', [
+        'empreendimentos' => $empreendimentos,
+      ]);
+    }
+    public function editavelestudos(): Response
+    {
+      $empreendimentos = SgcvwEstudos::paginate(50);
+      return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
         'empreendimentos' => $empreendimentos,
       ]);
     }
@@ -57,6 +67,18 @@ class EmpreendimentosController extends Controller
             return redirect()->back()->with('success', 'Empreendimento atualizado com sucesso!');
         }
 
+        return response()->json(['success' => false, 'message' => 'Campo inválido.'], 400);
+    }
+    public function updatecampoestudos(Request $request, $id)
+    {
+        $empreendimento = SgcvwEstudos::findOrFail($id);
+        $campo = array_keys($request->all())[0]; // Pega a chave no request
+        $valor = $request->input($campo); // Pega o valor
+        if (Schema::hasColumn('sgcvw_estudos', $campo)) {
+            $empreendimento->update([$campo => $valor]);
+            return redirect()->back()->with('success', 'Empreendimento atualizado com sucesso!');
+            // return response()->json(['success' => true, 'message' => 'Campo válido.'], 400);
+        }
         return response()->json(['success' => false, 'message' => 'Campo inválido.'], 400);
     }
     public function index(ContratoTipo $tipo, Request $request, $empreendimento): Response

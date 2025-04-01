@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Head :title="'Empreendimentos: edição'" />
+    <Head :title="'Empreendimentos - ESTUDOS: edição'" />
     <AuthenticatedLayout>
       <p>
         <a
@@ -84,35 +84,12 @@
           </tr>
         </tbody>
       </table>
-      <!--
-      <h1 class="text-xl font-bold mb-4">Lista de Empreendimentos</h1>
-      <table class="table table-bordered table-striped table-hover table-sm">
-        <thead class="thead-dark">
-          <tr class="bg-gray-200">
-            <th class="border px-4 py-2" scope="row">ID</th>
-            <th class="border px-4 py-2">cod_emp</th>
-            <th class="border px-4 py-2">tipo_de_intervencao</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="emp in empreendimentos" :key="emp.id">
-            <td class="border px-4 py-2 w-min">{{ emp.id }}</td>
-            <td class="border px-4 py-2 relative">
-              <span @click="abrirEdicao(emp, 'cod_emp')" class="cursor-pointer">{{ emp.cod_emp }}</span>
-              <div v-if="campoEditando.id === emp.id && campoEditando.campo === 'cod_emp'" class="absolute bg-white shadow-lg p-2 border rounded">
-                <input v-model="empreendimentoEdit.valor" class="border p-1" @keyup.enter="salvarEdicao" @blur="fecharEdicao" />
-              </div>
-            </td>
-            <td class="border px-4 py-2 relative">
-              <span @click="abrirEdicao(emp, 'tipo_de_intervencao')" class="cursor-pointer">{{ emp.tipo_de_intervencao }}</span>
-              <div v-if="campoEditando.id === emp.id && campoEditando.campo === 'tipo_de_intervencao'" class="absolute bg-white shadow-lg p-2 border rounded">
-                <input v-model="empreendimentoEdit.valor" class="border p-1" @keyup.enter="salvarEdicao" @blur="fecharEdicao" />
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      -->
+      <!-- Paginação -->
+      <div class="pagination">
+        <button class="page-link" v-for="link in links" :key="link.label" :disabled="!link.url" @click="mudarPagina(link.url)">
+          {{link.label}}
+        </button>
+      </div>
     </AuthenticatedLayout>
   </div>
 </template>
@@ -135,29 +112,35 @@ const abrirEdicao = (empreendimento, campo) => {
   campoEditando.value = { id: empreendimento.id, campo };
 };
 
-const salvarEdicao = () => {
-  router.post(
-    `/sgc/gestao/updatecampo/${empreendimentoEdit.value.id}`,
-    { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
-    {
-      onSuccess: () => {
-        campoEditando.value = { id: null, campo: null };
-        dados.value = [...page.props.empreendimentos];
-      },
-    }
-  );
-};
-
 const fecharEdicao = () => {
   campoEditando.value = { id: null, campo: null };
 };
 
 // Vamos trazer todas as colunas
 const page = usePage();
-const dados = ref(page.props.empreendimentos);
-// Pegando todas as chaves do primeiro objeto como colunas
+const dados = ref(page.props.empreendimentos.data);
+const links = ref(page.props.empreendimentos.links); // Links de paginação
 // Pegando todas as chaves do primeiro objeto como colunas
 const todasColunas = Object.keys(dados.value[0] || {});
+const mudarPagina = (url) => {
+    if (url) {
+        router.get(url); // Faz a requisição para a nova página
+    }
+};
+
+
+const salvarEdicao = () => {
+  router.post(
+    `/sgc/gestao/updatecampoestudos/${empreendimentoEdit.value.id}`,
+    { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
+    {
+      onSuccess: () => {
+        campoEditando.value = { id: null, campo: null };
+        dados.value = [...page.props.empreendimentos.data];
+      },
+    }
+  );
+};
 
 // Definir visíveis apenas as 6 primeiras colunas no carregamento
 const colunasVisiveis = ref(todasColunas.slice(0, 15));
