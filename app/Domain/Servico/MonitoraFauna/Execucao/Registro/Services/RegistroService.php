@@ -40,9 +40,13 @@ class RegistroService extends BaseModelService
       return !empty($registro->especie);
     })->groupBy('especie');
 
+    $sortedEspeciesGroup = $especiesGroup->sortByDesc(function ($grupo) {
+      return $grupo->count();
+    });
+
 
     return [
-      'especiesGroup' => $especiesGroup,
+      'especiesGroup' => $sortedEspeciesGroup,
       'chartDataPieAbundancia'  => $this->getChartDataPieAbundancia($allRegistros),
       'chartDataPieDiversidade' => $this->getChartDataPieDiversidade($allRegistros),
       'chartDataBar'            => $this->getChartDataBar($allRegistros),
@@ -110,6 +114,7 @@ class RegistroService extends BaseModelService
     $groupModulo = $allRegistros->groupBy(function ($registro) {
       return $registro->id_modulo;
     });
+
 
     return [
       'labels' => $groupModulo->keys()->map(function ($idModulo) {
@@ -188,13 +193,17 @@ class RegistroService extends BaseModelService
 
   private function getChartDataBar2($especiesGroup): array
   {
-     
+    // Ordena os grupos de acordo com a contagem de ocorrências (do maior para o menor)
+    $sortedGroup = $especiesGroup->sortByDesc(function ($grupo) {
+      return $grupo->count();
+    });
+
     return [
-      'labels' => $especiesGroup->keys()->toArray(),
+      'labels' => $sortedGroup->keys()->toArray(),
       'datasets' => [
         [
           'label' => 'Ocorrências',
-          'data' => $especiesGroup->map(function ($grupo) {
+          'data' => $sortedGroup->map(function ($grupo) {
             return $grupo->count();
           })->values()->toArray(),
           'backgroundColor' => "rgba(30, 144, 255, 0.8)",
@@ -204,6 +213,7 @@ class RegistroService extends BaseModelService
       ],
     ];
   }
+
 
   public function create(object $servico, object $registro)
   {

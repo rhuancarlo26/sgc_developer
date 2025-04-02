@@ -3,35 +3,29 @@ import BarChart from '@/Components/BarChart.vue';
 import LineChart from '@/Components/LineChart.vue';
 import PieChart from '@/Components/PieChart.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import Map from '@/Components/Map.vue';
+import Map from '@/Components/MapPontos.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
-import ModalVideo from '../ModalVideo.vue';
-import { IconPlayerPlay } from '@tabler/icons-vue';
-import NavButton from '@/Components/NavButton.vue';
+const props = defineProps({
+  at_fauna_execucao_registros: Object,
+  chartDataPieAbundancia: Object,
+  chartDataPieDiversidade: Object,
+  chartDataBar2: Object,
+});
 
 const total = ref('total');
 const registro = ref('resultado');
 const curva = ref('armadilha');
 const modalVideoRef = ref({});
+const mapaVisualizarTrecho = ref(null);
+
 
 const abrirModalVideo = () => {
   modalVideoRef.value.abrirModal()
 }
 
-const chartDataPie = ref({
-  labels: ["Anfíbios", "Répteis", "Aves", "Mamíferos"],
-  datasets: [
-    {
-      data: [5.3, 18, 39.5, 36.8], // Percentuais
-      backgroundColor: ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"], // Cores semelhantes à imagem
-      borderColor: "#ffffff", // Bordas brancas para separar as fatias
-      borderWidth: 2,
-    },
-  ],
-});
 
 const chartDataBar = ref({
   labels: ["PF05", "PF10", "PF01", "PF09", "PF07", "PF03", "PF08", "PF02", "PF04", "PF06"],
@@ -49,10 +43,22 @@ const chartOptionsPie = ref({
   responsive: true,
   plugins: {
     legend: {
-      display: false, // Remove a legenda global
+      display: true,
+      position: 'bottom',
     },
     tooltip: {
       enabled: true,
+    },
+    datalabels: {
+      anchor: "end",
+      align: "center",
+      formatter: (value, context) => {
+        const dataArr = context.chart.data.datasets[0].data;
+        const total = dataArr.reduce((sum, val) => sum + val, 0);
+        const percentage = ((value / total) * 100).toFixed(2);
+        return `${value} (${percentage}%)`;
+      },
+      color: 'black',
     },
   },
 });
@@ -159,6 +165,71 @@ const chartOptionsBar3 = {
   }
 };
 
+const trechosVisualizacao = computed(() => {
+  let geojson = [];
+
+  props.at_fauna_execucao_registros.forEach(at_fauna_execucao_registro => {
+    const longitude = Number(at_fauna_execucao_registro.longitude);
+    const latitude = Number(at_fauna_execucao_registro.latitude);
+
+    geojson.push([
+      JSON.stringify({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [longitude, latitude]
+        }
+      }),
+      modalPontoRegistro(at_fauna_execucao_registro),
+      at_fauna_execucao_registro
+    ]);
+  });
+
+  return geojson;
+});
+
+
+const modalPontoRegistro = (registro) => {
+  return `
+    <span><strong>Dados do Registro</strong></span><br>
+    <span><strong>ID: </strong> ${registro.id}</span><br>
+    <span><strong>Nome do Registro: </strong> ${registro.nome_registro}</span><br>
+    <span><strong>ID do Serviço: </strong> ${registro.fk_servico}</span><br>
+    <span><strong>Grupo Amostrado: </strong> ${registro.fk_grupo_amostrado}</span><br>
+    <span><strong>Campanha: </strong> ${registro.fk_campanha}</span><br>
+    <span><strong>Estado: </strong> ${registro.fk_estado}</span><br>
+    <span><strong>Data de Registro: </strong> ${registro.data_registro}</span><br>
+    <span><strong>KM: </strong> ${registro.km}</span><br>
+    <span><strong>Latitude: </strong> ${registro.latitude}</span><br>
+    <span><strong>Longitude: </strong> ${registro.longitude}</span><br>
+    <span><strong>Zona: </strong> ${registro.zona ? registro.zona : 'N/A'}</span><br>
+    <span><strong>Sentido: </strong> ${registro.sentido}</span><br>
+    <span><strong>Margem: </strong> ${registro.margem}</span><br>
+    <span><strong>Classe: </strong> ${registro.classe}</span><br>
+    <span><strong>Ordem: </strong> ${registro.ordem}</span><br>
+    <span><strong>Família: </strong> ${registro.familia}</span><br>
+    <span><strong>Gênero: </strong> ${registro.genero}</span><br>
+    <span><strong>Espécie: </strong> ${registro.especie}</span><br>
+    <span><strong>Nome Comum: </strong> ${registro.nome_comum}</span><br>
+    <span><strong>Redução Biológica: </strong> ${registro.reducao_biologica}</span><br>
+    <span><strong>Sexo: </strong> ${registro.sexo}</span><br>
+    <span><strong>Coletado: </strong> ${registro.coletado}</span><br>
+    <span><strong>Faixa Etária: </strong> ${registro.faixa_etaria}</span><br>
+    <span><strong>Nº Registro Tombamento: </strong> ${registro.n_registro_tombamento ? registro.n_registro_tombamento : 'N/A'}</span><br>
+    <span><strong>Avaliação Estadual: </strong> ${registro.estadual}</span><br>
+    <span><strong>Avaliação Federal: </strong> ${registro.federal}</span><br>
+    <span><strong>IUCN: </strong> ${registro.iucn}</span><br>
+    <span><strong>Nº de Indivíduos: </strong> ${registro.n_individuos}</span><br>
+    <span><strong>Carcaça Removida: </strong> ${registro.carcaca_removida}</span><br>
+    <span><strong>Hora de Registro: </strong> ${registro.hora_registro}</span><br>
+  `;
+};
+
+setTimeout(() => {
+  mapaVisualizarTrecho.value.renderMapa()
+  mapaVisualizarTrecho.value.setLinestrings(trechosVisualizacao.value, true);
+}, 500);
+
 </script>
 
 <template>
@@ -166,48 +237,20 @@ const chartOptionsBar3 = {
   <Head title="Dashboard" />
 
   <AuthenticatedLayout>
-
-    
-
     <div>
       <div class="card card-body mb-4">
-        <div class="text-end">
-          <NavButton @click="abrirModalVideo()" :icon="IconPlayerPlay" title="Abrir Video" type-button="success" />
-        </div>
         <div class="justify-content-center">
           <h1 class="text-center">
             Programa de Monitoramento do Atropelamento de Fauna
           </h1>
-          <div class=" d-flex justify-content-end">
-            <div class="row w-25">
-              <div class="col">
-                <InputLabel value="UF" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-              <div class="col">
-                <InputLabel value="BR" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-              <div class="col">
-                <InputLabel value="Período" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <div class="">
         <div class="d-flex">
-          <div class="col-8 card card-body me-4">
-            <Map :height="'100vh'" />
+          <div class="col-7 card card-body me-4">
+            <Map ref="mapaVisualizarTrecho" height="900px" :manual-render="true" />
           </div>
-          <div class="col-4">
+          <div class="col-5">
             <div class="card card-body mb-4">
               <div class="">
                 <label class="form-check form-check-inline">
@@ -221,82 +264,91 @@ const chartOptionsBar3 = {
               </div>
             </div>
             <div v-if="registro === 'resultado'">
+              <!-- Seção dos gráficos de pizza -->
               <div class="mb-4">
-                <div class="d-flex">
-                  <div class="col card me-4">
-                    <h3>Abundância</h3>
-                    <div class="d-flex justify-content-center" style="height: 200px;">
-                      <PieChart :chart_data="chartDataPie" :chart_options="chartOptionsPie" />
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h3 class="card-title text-center">Abundância</h3>
+                        <div class="d-flex justify-content-center align-items-center"
+                          style="height:255px; width:255px;">
+                          <PieChart :chart_data="props.chartDataPieAbundancia" :chart_options="chartOptionsPie" />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div class="col card">
-                    <h3>Diversidade</h3>
-                    <div class="d-flex justify-content-center" style="height: 200px;">
-                      <PieChart :chart_data="chartDataPie" :chart_options="chartOptionsPie" />
+                  <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h3 class="card-title text-center">Riqueza</h3>
+                        <div class="d-flex justify-content-center align-items-center"
+                          style="height:255px; width:255px;">
+                          <PieChart :chart_data="props.chartDataPieDiversidade" :chart_options="chartOptionsPie" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="card">
-                <div class="mb-4">
-                  <div class="m-1">
-                    <label class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" name="curva" value="armadilha" v-model="curva">
-                      <span class="form-check-label">Taxa de atropelamento (km)</span>
-                    </label>
-                    <label class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" name="curva" value="curva" v-model="curva">
-                      <span class="form-check-label">Total de registros (Período)</span>
-                    </label>
+              <div class="card h-100">
+                <div class="card-body">
+                  <h3 class="card-title text-center">Taxa de atropelamento (km)</h3>
+                  <div class="d-flex justify-content-center align-items-center">
+                    <BarChart :chart_data="chartDataBar" :chart_options="chartOptionsBar" />
                   </div>
-                </div>
-
-                <div v-if="curva === 'armadilha'">
-                  <BarChart :chart_data="chartDataBar" :chart_options="chartOptionsBar" />
-                </div>
-                <div v-else>
-                  <BarChart :chart_data="chartDataBar3" :chart_options="chartOptionsBar3" />
                 </div>
               </div>
             </div>
             <div v-else>
               <div class="card">
-                <div class="m-1">
+                <div class="m-3">
                   <label class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="total" value="total" v-model="total">
                     <span class="form-check-label">Registros totais</span>
                   </label>
                   <label class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="total" value="armadilha" v-model="total">
-                    <span class="form-check-label">Registros por armadilha</span>
+                    <span class="form-check-label">Registros por</span>
                   </label>
                 </div>
-                <div v-if="total === 'armadilha'" class="row">
-                  <div class="row w-50">
-                    <div class="col">
-                      <InputLabel value="Tipo" />
-                      <select name="" id="" class="form-select">
-                        <option value="teste">teste</option>
-                      </select>
-                    </div>
-                    <div class="col">
-                      <InputLabel value="Armadilha" />
-                      <select name="" id="" class="form-select">
-                        <option value="teste">teste</option>
-                      </select>
-                    </div>
-                  </div>
+                <div v-if="total === 'total'" class="row">
+                  <BarChart height="2000px" :chart_data="props.chartDataBar2" :chart_options="chartOptionsBar2" />
+
                 </div>
-                <BarChart :chart_data="chartDataBar2" :chart_options="chartOptionsBar2" />
+                <!-- <div v-if="total === 'armadilha'" class="row">
+                  <div class="row">
+                    <div class="col-11 m-4">
+                      <InputLabel value="Selecione um Modulo" />
+                      <select v-model="selectedModulo" class="form-select">
+                        <option v-for="modulo in props.modulos" :value="modulo" :key="modulo.id">
+                          {{ modulo.id }}
+                        </option>
+                      </select>
+                    </div>
+                    <div v-if="selectedModulo">
+                      <div class="col-11 m-4">
+                        <InputLabel value="Selecione uma Armadilha" />
+                        <select v-model="selectedArmadilha" class="form-select">
+                          <option v-for="armadilha in selectedModulo.armadilhas" :value="armadilha.id"
+                            :key="armadilha.id">
+                            {{ armadilha.tipo }} | {{ armadilha.nome_id }}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                    <div v-if="selectedArmadilha">
+                      <BarChart height="2000px" :chart_data="chartDataBarFiltered" :chart_options="chartOptionsBar2" />
+                    </div>
+
+                  </div>
+                </div> -->
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <ModalVideo ref="modalVideoRef" url="/file/Dashboard/Dashboard_monitora_fauna.mp4" />
-
   </AuthenticatedLayout>
 
 </template>
