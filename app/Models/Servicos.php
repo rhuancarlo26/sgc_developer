@@ -198,5 +198,8 @@ class Servicos extends Model
         return $this->hasMany(ServicoMonitoraFaunaConfigModuloAmostral::class, 'id_servico');
     }
 
-    
+     public function monitora_atp_fauna()
+    {
+        return $this->hasMany(AtFaunaExecucaoRegistro::class, 'fk_servico');
+    }
 }
