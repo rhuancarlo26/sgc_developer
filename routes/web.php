@@ -50,7 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::get('/{servicos}', [IndexDashboardPMQAController::class, 'index'])->name('dashboard.pmqa');
             });
             Route::prefix('mon-atp-fauna')->group(function () {
-                Route::get('/', [IndexDashboardMonAtpFaunaController::class, 'index'])->name('dashboard.mon-atp-fauna');
+                Route::get('/{servicos}', [IndexDashboardMonAtpFaunaController::class, 'index'])->name('dashboard.mon-atp-fauna');
             });
             Route::prefix('passagem-fauna')->group(function () {
                 Route::get('/', [IndexDashboardPassagemFaunaController::class, 'index'])->name('dashboard.passagem-fauna');
