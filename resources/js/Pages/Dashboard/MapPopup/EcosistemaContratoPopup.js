@@ -24,9 +24,6 @@ export default async (props, detalhesOffcanvas) => {
     let html = `
         <h5>Licença</h5>
         <hr class="my-2" />
-        <strong>ID: </strong><a href="${route("dashboard.pmqa", props.id)}">${
-        props.id
-    }</a><br>
         <strong>Unidade Gestora: </strong>${props.unidade_gestora}<br>
         <strong>N° do Contrato: </strong>${props.numero_contrato}<br>
         <strong>Contratada: </strong>${props.contratada}<br>
@@ -51,6 +48,7 @@ export default async (props, detalhesOffcanvas) => {
         detalhesOffcanvas.value.propsData = props;
         detalhesOffcanvas.value.servicos = servicos.value;
     };
+
 
     html += `
         <hr class="my-2"/>
