@@ -38,7 +38,7 @@ onMounted(() => {
     <div class="offcanvas-body p-2">
       <div class="accordion" id="accordionDetalhes">
 
-        <div class="accordion-item" v-if="propsData.id">
+        <div class="accordion-item" v-if="propsData?.id">
           <h2 class="accordion-header" id="headingServicos">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseServicos"
               aria-expanded="true" aria-controls="collapseServicos">
@@ -53,21 +53,21 @@ onMounted(() => {
                   <tr>
                     <th class="text-info text-center" colspan="4"> {{
                       propsData.contratada
-                    }}
+                      }}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="servico in servicos" :key="servico.id">
                     <td>Serviço:</td>
-                    <td>{{ servico.tipo.nome }}</td>
+                    <td>{{ servico.tipo?.nome }}</td>
                     <td>{{ servico.especificacao }}</td>
                     <td v-if="webRoute[servico.servico]">
-                      <a :href="route(webRoute[servico.servico], { servico: servico.id })">
+                      <a :href="route(webRoute[servico.servico], { servicos: servico.id })">
                         <NavButton type-button="success" title="Dashboard" />
                       </a>
                     </td>
-                  </tr>
+                  </tr> 
                 </tbody>
               </table>
             </div>
@@ -86,7 +86,8 @@ onMounted(() => {
 <style scoped>
 table tr th,
 table tr td {
-  text-wrap: wrap;
+  word-wrap: break-word; 
+ 
 }
 
 th {
@@ -99,6 +100,7 @@ th {
 
 .accordion-body {
   padding: .2em 1em;
+  overflow-x: auto; 
 }
 
 .accordion-button:disabled {
@@ -110,3 +112,4 @@ th {
   content: none;
 }
 </style>
+
