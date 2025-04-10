@@ -5,7 +5,7 @@ namespace App\Domain\Sgc\Contratada\Coordenadas;
 use App\Shared\Http\Controllers\Controller;
 use App\Models\Rodovia;
 use App\Models\UF;
-use App\Models\SvnSegGeoV2;
+use App\Models\SgcSvnSegGeoV2;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
@@ -21,16 +21,18 @@ public function getGeoJson(Request $request): JsonResponse
         'rodovia' => 'required|numeric',
         'km_inicial' => 'required|numeric',
         'km_final' => 'required|numeric|gte:km_inicial',
-        'trecho_tipo' => 'string'
+        'trecho_tipo' => 'string',
+        'cd_tipo' => 'numeric',
         ]);
 
 
-    $geojson = SvnSegGeoV2::getGeoJsonFromApi(
+    $geojson = SgcSvnSegGeoV2::getGeoJsonFromApi(
         $request->uf,
         $request->rodovia,
         $request->km_inicial,
         $request->km_final,
         $request->trecho_tipo,
+        $request->cd_tipo,
     );
 
     return response()->json($geojson);
@@ -45,7 +47,7 @@ public function getLatitude(Request $request): JsonResponse
         'km' => 'required|numeric',
     ]);
 
-    $coordenadas = SvnSegGeoV2::getLatLng(
+    $coordenadas = SgcSvnSegGeoV2::getLatLng(
         UF::find($request->uf_id)->uf,
         Rodovia::find($request->rodovia_id)->br,
         $request->km,
@@ -102,7 +104,7 @@ public function fetchGeoJson(Request $request): JsonResponse
                 //     'tipo_trecho' => $properties['sg_tp_trecho'],
                 // ]);
                 // Salvando no banco de dados
-                SvnSegGeoV2::create([
+                SgcSvnSegGeoV2::create([
                     'uf' => $properties['uf'],
                     'br' => $properties['br'],
                     'tipo_trecho' => $properties['sg_tp_trecho'],
