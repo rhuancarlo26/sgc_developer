@@ -25,7 +25,7 @@ public function getGeoJson(Request $request): JsonResponse
         ]);
 
 
-    $geojson = SvnSegGeoV2::getGeoJson(
+    $geojson = SvnSegGeoV2::getGeoJsonFromApi(
         $request->uf,
         $request->rodovia,
         $request->km_inicial,
