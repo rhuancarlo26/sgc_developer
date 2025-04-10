@@ -77,17 +77,17 @@ const selectedRange = ref({
 });
 
 const getCalendarColor = () => {
-  const statuses = reminders.value.map((reminder) => reminder.status);
+  const status = reminders.value.map((reminder) => reminder.status);
 
-  if (statuses.includes('reprovado')) {
+  if (status.includes('reprovado')) {
     return 'red';
-  } else if (statuses.includes('pendente')) {
+  } else if (status.includes('pendente')) {
     return 'yellow';
-  } else if (statuses.includes('aprovado')) {
+  } else if (status.includes('aprovado')) {
     return 'green';
   }
 
-  return 'blue'; // Cor padrão, caso não haja lembretes
+  return 'blue';
 };
 
 const updateAttributes = () => {

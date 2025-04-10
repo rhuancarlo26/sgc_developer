@@ -24,6 +24,9 @@ import "leaflet/dist/leaflet.css";
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 
+import { setupCalendar, Calendar, DatePicker } from "v-calendar";
+import "v-calendar/style.css";
+
 createInertiaApp({
     title: (title) => `${title}`,
     resolve: (name) =>
@@ -33,14 +36,17 @@ createInertiaApp({
         ),
     setup({ el, App, props, plugin }) {
         return createApp({ render: () => h(App, props) })
-            .use(plugin)
-            .use(Toast)
-            .directive("maska", vMaska)
-            .component("v-select", vSelect)
-            .use(ZiggyVue)
-            .mixin({ data: () => ({ L: leaflet }) })
-            .mixin({ methods: { can, hasRole, canSeePrefix } })
-            .mount(el);
+        .use(plugin)
+        .use(Toast)
+        .use(setupCalendar, {}) // Configurar o v-calendar
+        .directive("maska", vMaska)
+        .component("v-select", vSelect)
+        .component("VCalendar", Calendar) // Registrar o componente Calendar
+        .component("VDatePicker", DatePicker) // Registrar o componente DatePicker
+        .use(ZiggyVue)
+        .mixin({ data: () => ({ L: leaflet }) })
+        .mixin({ methods: { can, hasRole, canSeePrefix } })
+        .mount(el);
     },
     progress: {
         color: "#4B5563",

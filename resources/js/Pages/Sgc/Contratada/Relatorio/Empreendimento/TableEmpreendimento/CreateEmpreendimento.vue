@@ -5,17 +5,18 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import { IconPlus, IconX } from "@tabler/icons-vue";
 import { useToast } from "vue-toastification";
-import Map from '@/Components/Map.vue';
+import Map from '@/Components/MapSgc.vue';
 import axios from 'axios';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Navbar from '../../../Navbar.vue';
+import { router } from '@inertiajs/vue3';
 
 
 const props = defineProps({
   contrato: Object,
   ufs: Object,
-  base_rodovia: Object,
+  rodovias: Object,
   empreendimento: Object,
   tipo: Object
 });
@@ -166,8 +167,8 @@ const limparForm = () => {
 
 watch(() => form_trecho.uf, () => {
   if (form_trecho.uf) {
-    uf_rodovias.value = props.base_rodovia.filter((rodovia) => {
-      return rodovia.uf_id === form_trecho.uf.id;
+    uf_rodovias.value = props.rodovias.filter((rodovia) => {
+      return rodovia.estados_id === form_trecho.uf.id;
     });
   } else {
     uf_rodovias.value = [{ rodovia: 'Selecione uma UF' }];
