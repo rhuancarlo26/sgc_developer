@@ -34,6 +34,9 @@ class EmpreendimentosController extends Controller
         Excel::import(new YourImportClass, $file);
         return redirect()->back()->with('success', 'Arquivo Excel importado com sucesso.');
     }
+    /**
+     * Empreendimentos: Sistema de Edição Interativo no Front-End --------------------------------------------------------
+     */
     public function editavel(): Response
     {
       $empreendimentos = SgcvwEmpreendimentos::all();
@@ -41,24 +44,60 @@ class EmpreendimentosController extends Controller
         'empreendimentos' => $empreendimentos,
       ]);
     }
+    public function editavelestudos(): Response
+    {
+      $empreendimentos = SgcvwEstudos::paginate(50);
+      return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
+        'empreendimentos' => $empreendimentos,
+      ]);
+    }
+    public function editavelprodutos(): Response
+    {
+      $empreendimentos = SgcvwSubprodutos::paginate(50);
+      return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
+        'empreendimentos' => $empreendimentos,
+      ]);
+    }
     public function updatecampo(Request $request, $id)
     {
         $empreendimento = SgcvwEmpreendimentos::findOrFail($id);
-    
-        $campo = array_keys($request->all())[0];
-        $valor = $request->input($campo);
-    
+
+        // Obtém a chave e o valor da requisição
+        $campo = array_keys($request->all())[0]; // Pega a chave no request
+        $valor = $request->input($campo); // Pega o valor
+
+        // Se o campo existe
         if (Schema::hasColumn('sgcvw_empreendimentos', $campo)) {
             $empreendimento->update([$campo => $valor]);
-            
-            return redirect()->route('sgc.gestao.dashboard.empreendimento.index', [
-                'tipo' => '2',
-                'empreendimento' => $id
-            ]);
+            // return response()->json(['success' => true, 'message' => 'Campo atualizado com sucesso!']);
+            return redirect()->back()->with('success', 'Empreendimento atualizado com sucesso!');
         }
-    
-        // Em caso de erro, retorna para a mesma página com um erro (sem JSON)
-        return redirect()->back()->withErrors(['message' => 'Campo inválido.']);
+
+        return response()->json(['success' => false, 'message' => 'Campo inválido.'], 400);
+    }
+    public function updatecampoestudos(Request $request, $id)
+    {
+        $empreendimento = SgcvwEstudos::findOrFail($id);
+        $campo = array_keys($request->all())[0]; // Pega a chave no request
+        $valor = $request->input($campo); // Pega o valor
+        if (Schema::hasColumn('sgcvw_estudos', $campo)) {
+            $empreendimento->update([$campo => $valor]);
+            return redirect()->back()->with('success', 'Estudo atualizado com sucesso!');
+            // return response()->json(['success' => true, 'message' => 'Campo válido.'], 400);
+        }
+        return response()->json(['success' => false, 'message' => 'Campo inválido.'], 400);
+    }
+    public function updatecampoprodutos(Request $request, $id)
+    {
+        $empreendimento = SgcvwSubprodutos::findOrFail($id);
+        $campo = array_keys($request->all())[0]; // Pega a chave no request
+        $valor = $request->input($campo); // Pega o valor
+        if (Schema::hasColumn('sgcvw_subprodutos', $campo)) {
+            $empreendimento->update([$campo => $valor]);
+            return redirect()->back()->with('success', 'Produto atualizado com sucesso!');
+            // return response()->json(['success' => true, 'message' => 'Campo válido.'], 400);
+        }
+        return response()->json(['success' => false, 'message' => 'Campo inválido.'], 400);
     }
     public function index(ContratoTipo $tipo, Request $request, $empreendimento): Response
     {

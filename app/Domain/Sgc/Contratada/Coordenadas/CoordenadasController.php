@@ -24,7 +24,8 @@ public function getGeoJson(Request $request): JsonResponse
         'trecho_tipo' => 'string'
         ]);
 
-    $geojson = SvnSegGeoV2::getGeoJson(
+
+    $geojson = SvnSegGeoV2::getGeoJsonFromApi(
         $request->uf,
         $request->rodovia,
         $request->km_inicial,
@@ -120,6 +121,6 @@ public function fetchGeoJson(Request $request): JsonResponse
     return response()->json(['message' => 'Failed to fetch or parse data from API'], 500);
     }
 }
-    
+
 
 
