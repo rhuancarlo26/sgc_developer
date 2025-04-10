@@ -31,11 +31,14 @@ class StoreUploadRelatorioController extends Controller
             ->where('num_relatorio', $relatorioNum)
             ->firstOrFail();
 
-        if (!Storage::exists($arquivo->caminho)) {
+        // Ajustar o caminho para storage/app/public/
+        $caminhoCorrigido = 'public/' . str_replace('\\', '/', $arquivo->caminho);
+        
+        if (!Storage::exists($caminhoCorrigido)) {
             abort(404, 'Arquivo não encontrado.');
         }
 
-        $filePath = storage_path('app/' . $arquivo->caminho);
+        $filePath = storage_path('app/' . $caminhoCorrigido);
         $fileName = basename($filePath);
         $fileMimeType = mime_content_type($filePath);
 
