@@ -40,6 +40,7 @@
         "leaflet.heat": "^0.2.0",
         "maska": "^2.1.11",
         "sweetalert2": "^11.10.1",
+        "v-calendar": "^3.1.2",
         "v-mask": "^2.3.0",
         "vue-chartjs": "^5.3.1",
         "vue-select": "^4.0.0-beta.6",

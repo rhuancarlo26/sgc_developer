@@ -15,6 +15,9 @@ const props = defineProps({
   consumos: Object
 });
 
+
+const numeroContrato = props.contrato.numero_contrato.replace(/^0+\s*|(?<=\s)0+/g, '');
+const contratoFiltrado = props.consumos.find(item => item.contrato === numeroContrato);
 const produtoSelecionado = ref("");
 const modalVisualizarForm = ref(null);
 const profissionais = ref([1]);
@@ -35,6 +38,10 @@ const formDav = useForm({
   destino: props.dav.destino || [""],
   profissionais: props.dav.profissionais || [""],
   transporte: props.dav.transporte || [],
+  aereo_valor: props.dav.aereo_valor || 0,
+  terrestre_tipo: props.dav.terrestre_tipo || [""],
+  terrestre_valor: props.dav.terrestre_valor || 0,
+  aquatico_valor: props.dav.aquatico_valor || 0,
   status: props.dav.status || "pendente"
 });
 
@@ -70,8 +77,6 @@ const filterProdutos = () => {
 
   return produtos;
 };
-
-
 
 const adicionarDestinos = () => {
   if (origem.value.length === destino.value.length) {
@@ -144,6 +149,8 @@ const formatNome = (nome) => {
 const gerarPDF = () => {
   const pdf = new jsPDF();
 
+  const diferencaEmMs = new Date(formDav.dataFinal) - new Date(formDav.dataInicio);
+  const qtdDiarias = Math.floor(diferencaEmMs / (1000 * 60 * 60 * 24)) + 1;
   const margemEsquerda = 15;
   const margemDireita = 15;
   const larguraUtil = pdf.internal.pageSize.getWidth() - margemEsquerda - margemDireita;
@@ -205,12 +212,75 @@ const gerarPDF = () => {
 
   y += 20;
 
-  pdf.setLineWidth(0.5);
-  pdf.line(margemEsquerda, y, margemEsquerda + larguraUtil / 2 - 10, y); // Linha horizontal
-  pdf.text(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y + 10); // Nome do coordenador
+  y += 10;
 
-  pdf.line(margemEsquerda + larguraUtil / 2 + 10, y, margemEsquerda + larguraUtil, y); // Linha horizontal
-  pdf.text(`Fiscal: ${formatNome(props.contrato.fiscal_contrato)}`, margemEsquerda + larguraUtil / 2 + 10, y + 10); // Campo para o fiscal
+  const cellHeight = 15;
+  const titleCellWidth = 40;
+  const terrestreTipos = Array.isArray(formDav.terrestre_tipo) ? formDav.terrestre_tipo : [formDav.terrestre_tipo];
+  const hasHatch = terrestreTipos.includes('Hatch');
+  const hasPickup = terrestreTipos.includes('Pick-up');
+  const headers = ['14.1.1 Diárias', '14.1.4 Passagem Aérea', '14.1.7 Veículo Aquático', '14.1.5 Veículo Hatch', '14.1.6 Veículo Pickup'];
+  const dataCellWidth = (larguraUtil - titleCellWidth) / headers.length;
+
+  pdf.setFontSize(9);
+  pdf.setFillColor(22, 160, 133);
+  pdf.cell(margemEsquerda, y, titleCellWidth, cellHeight, '', 1, 'center', true);
+
+  headers.forEach((header, index) => {
+    pdf.cell(margemEsquerda + titleCellWidth + index * dataCellWidth, y, dataCellWidth, cellHeight, header, 1, 'center', true);
+  });
+
+  pdf.setFontSize(tamanhoFonte);
+  pdf.setFillColor(255, 255, 255);
+
+  y += cellHeight;
+
+  pdf.cell(margemEsquerda, y, titleCellWidth, cellHeight, 'Solicitado', 2, 'left');
+  pdf.cell(margemEsquerda + titleCellWidth, y, dataCellWidth, cellHeight, (qtdDiarias || 0).toString(), 2, 'center');
+  pdf.cell(margemEsquerda + titleCellWidth + dataCellWidth, y, dataCellWidth, cellHeight, (formDav.aereo_valor || 0).toString(), 2, 'center');
+  pdf.cell(margemEsquerda + titleCellWidth + 2 * dataCellWidth, y, dataCellWidth, cellHeight, (formDav.aquatico_valor || 0).toString(), 2, 'center');
+
+  let colIndex = 3;
+
+  if (hasHatch) {
+    pdf.cell(margemEsquerda + titleCellWidth + colIndex * dataCellWidth, y, dataCellWidth, cellHeight, (formDav.terrestre_valor || 0).toString(), 2, 'center');
+    colIndex++;
+  }
+
+  if (hasPickup) {
+    pdf.cell(margemEsquerda + titleCellWidth + colIndex * dataCellWidth, y, dataCellWidth, cellHeight, (formDav.terrestre_valor || 0).toString(), 2, 'center');
+    colIndex++;
+  }
+
+  if (hasHatch && !hasPickup) {
+    pdf.cell(margemEsquerda + titleCellWidth + colIndex * dataCellWidth, y, dataCellWidth, cellHeight, '0', 2, 'center');
+  }
+
+  if (hasPickup && !hasHatch) {
+    pdf.cell(margemEsquerda + titleCellWidth + colIndex * dataCellWidth, y, dataCellWidth, cellHeight, '0', 2, 'center');
+  }
+
+  y += cellHeight;
+
+  pdf.cell(margemEsquerda, y, titleCellWidth, cellHeight, 'Saldo Restante', 3, 'left');
+  pdf.cell(margemEsquerda + titleCellWidth, y, dataCellWidth, cellHeight, (contratoFiltrado.diarias || 0).toString(), 3, 'center'); // Nova coluna "Diárias"
+  pdf.cell(margemEsquerda + titleCellWidth + dataCellWidth, y, dataCellWidth, cellHeight, (contratoFiltrado.aerea || 0).toString(), 3, 'center');
+  pdf.cell(margemEsquerda + titleCellWidth + 2 * dataCellWidth, y, dataCellWidth, cellHeight, (contratoFiltrado.barco || 0).toString(), 3, 'center');
+  pdf.cell(margemEsquerda + titleCellWidth + 3 * dataCellWidth, y, dataCellWidth, cellHeight, (contratoFiltrado.hatch || 0).toString(), 3, 'center');
+  pdf.cell(margemEsquerda + titleCellWidth + 4 * dataCellWidth, y, dataCellWidth, cellHeight, (contratoFiltrado.pickup || 0).toString(), 3, 'center');
+  pdf.setLineWidth(0.2);
+
+  pdf.rect(margemEsquerda, y - 2 * cellHeight, larguraUtil, 3 * cellHeight);
+
+  y += cellHeight + 40;
+
+  pdf.setLineWidth(0.5);
+
+  pdf.line(margemEsquerda, y, margemEsquerda + larguraUtil / 2 - 10, y);
+  pdf.text(`Coordenador: ${formDav.coordenador}`, margemEsquerda, y + 10);
+
+  pdf.line(margemEsquerda + larguraUtil / 2 + 10, y, margemEsquerda + larguraUtil, y);
+  pdf.text(`Fiscal: ${formatNome(props.contrato.fiscal_contrato)}`, margemEsquerda + larguraUtil / 2 + 10, y + 10);
 
   // Salvar o PDF
   pdf.save('detalhes_dav.pdf');
@@ -444,7 +514,7 @@ const gerarPDF = () => {
                   type="button"
                   class="btn btn-danger"
                   @click="reprovarDav"
-                  :disabled="formDav.status === 'reprovado'"
+                  :disabled="formDav.status === 'pendente'"
                 >
                   Reprovar
                 </button>
@@ -452,7 +522,7 @@ const gerarPDF = () => {
                   type="button"
                   class="btn btn-primary ms-2"
                   @click="gerarPDF"
-                  :disabled="formDav.status === 'reprovado'"
+                  :disabled="formDav.status === 'pendente'"
                 >
                   Imprimir
                 </button>

@@ -6,6 +6,9 @@ import { createInertiaApp } from "@inertiajs/vue3";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { ZiggyVue } from "../../vendor/tightenco/ziggy/dist/vue.m";
 
+import VCalendar from 'v-calendar';
+import 'v-calendar/style.css';
+
 import { can, hasRole, canSeePrefix } from "./Utils/PermissionUtils.js";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
@@ -35,6 +38,7 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(Toast)
+            .use(VCalendar, {}) // <- AQUI
             .directive("maska", vMaska)
             .component("v-select", vSelect)
             .use(ZiggyVue)
