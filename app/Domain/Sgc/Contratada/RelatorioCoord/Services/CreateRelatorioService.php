@@ -51,7 +51,7 @@ class CreateRelatorioService
                     'id_item' => $item['id_item'],
                     'nome_topico' => $item['nome_topico'],
                     'status' => 'Em Elaboração',
-                    'aprovado' => 0,
+                    'aprovado' => 2,
                     'periodo' => '01/01/2000 a 01/01/2000',
                     'contrato_id' => $contratoId,
                     'versao' => 0,
