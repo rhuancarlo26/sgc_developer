@@ -1,6 +1,5 @@
 <script setup>
 import BarChart from '@/Components/BarChart.vue';
-import LineChart from '@/Components/LineChart.vue';
 import PieChart from '@/Components/PieChart.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import Map from '@/Components/MapPontos.vue';
@@ -13,30 +12,57 @@ const props = defineProps({
   chartDataPieAbundancia: Object,
   chartDataPieDiversidade: Object,
   chartDataBar2: Object,
+  getChartDataBarCampanhas: Object,
+  campanhas: Object,
+  especiesGroup: Object
 });
 
 const total = ref('total');
 const registro = ref('resultado');
-const curva = ref('armadilha');
-const modalVideoRef = ref({});
 const mapaVisualizarTrecho = ref(null);
+const selectedCampanha = ref(null);
 
 
-const abrirModalVideo = () => {
-  modalVideoRef.value.abrirModal()
-}
+
+const filteredEspeciesGroupByCampanha = computed(() => {
+
+  if (!selectedCampanha.value) {
+    return props.especiesGroup;
+  }
+
+  const filteredGroup = {};
+
+  Object.entries(props.especiesGroup).forEach(([especie, registros]) => {
+    const registrosFiltrados = registros.filter(registro => {
+      return registro.campanhas && registro.campanhas.id === selectedCampanha.value;
+    });
+
+    if (registrosFiltrados.length) {
+      filteredGroup[especie] = registrosFiltrados;
+    }
+  });
+
+  return filteredGroup;
+});
 
 
-const chartDataBar = ref({
-  labels: ["PF05", "PF10", "PF01", "PF09", "PF07", "PF03", "PF08", "PF02", "PF04", "PF06"],
-  datasets: [
-    {
-      label: "Ocorrências",
-      data: [152, 81, 78, 75, 50, 41, 34, 23, 18, 2],
-      backgroundColor: "#007bff",
-      borderRadius: 5,
-    },
-  ],
+const chartDataBarFilteredByCampanha = computed(() => {
+  const speciesGroup = filteredEspeciesGroupByCampanha.value;
+  const labels = Object.keys(speciesGroup);
+  const data = labels.map(especie => speciesGroup[especie].length);
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Ocorrências',
+        data,
+        backgroundColor: "rgba(30, 144, 255, 0.8)",
+        borderColor: "rgba(30, 144, 255, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
 });
 
 const chartOptionsPie = ref({
@@ -91,27 +117,7 @@ const chartOptionsBar = ref({
   maxBarThickness: 40,
 });
 
-const chartDataBar2 = ref({
-  labels: [
-    "Pecari tajacu", "Amphisbaena ...", "Didelphis mars...",
-    "Bothrops atrox", "Caluromys sp.", "Coragyps atratus",
-    "Crotophaga ani", "Eunectes muri...", "Hylaeamys me...",
-    "Hypsiboas rani...", "Metachirus nu...",
-    "Nasua nasua", "Oxyrhopus me...",
-    "Podocnemis u...", "Priodontes ma...",
-    "Pseudopaludic...", "Puma concolor",
-    "Ramphastos tu..."
-  ],
-  datasets: [
-    {
-      label: "Ocorrências",
-      data: [3, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      backgroundColor: "rgba(30, 144, 255, 0.8)",
-      borderColor: "rgba(30, 144, 255, 1)",
-      borderWidth: 1,
-    },
-  ],
-});
+
 
 const chartOptionsBar2 = ref({
   indexAxis: "y", // Faz o gráfico ser horizontal
@@ -137,33 +143,7 @@ const chartOptionsBar2 = ref({
   },
 });
 
-const chartDataBar3 = {
-  labels: [
-    'trecho 1', 'trecho 3', 'trecho 5', 'trecho 7', 'trecho 9', 'trecho 11',
-    'trecho 13', 'trecho 15', 'trecho 17', 'trecho 19', 'trecho 21', 'trecho 23',
-    'trecho 25', 'trecho 27', 'trecho 29', 'trecho 31', 'trecho 33', 'trecho 35', 'trecho 37'
-  ],
-  datasets: [
-    {
-      label: 'Valores',
-      data: [100, 120, 150, 90, 130, 40, 110, 125, 95, 135, 140, 160, 115, 130, 170, 80, 145, 190, 100],
-      backgroundColor: 'gray'
-    }
-  ]
-};
 
-const chartOptionsBar3 = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false }, // Oculta a legenda
-    tooltip: { enabled: true } // Ativa tooltips ao passar o mouse
-  },
-  scales: {
-    x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 45 } }, // Inclina os rótulos do eixo X
-    y: { beginAtZero: true }
-  }
-};
 
 const trechosVisualizacao = computed(() => {
   let geojson = [];
@@ -235,7 +215,6 @@ setTimeout(() => {
 <template>
 
   <Head title="Dashboard" />
-
   <AuthenticatedLayout>
     <div>
       <div class="card card-body mb-4">
@@ -293,9 +272,10 @@ setTimeout(() => {
               </div>
               <div class="card h-100">
                 <div class="card-body">
-                  <h3 class="card-title text-center">Taxa de atropelamento (km)</h3>
+                  <h3 class="card-title text-center">Registro por campanha
+                  </h3>
                   <div class="d-flex justify-content-center align-items-center">
-                    <BarChart :chart_data="chartDataBar" :chart_options="chartOptionsBar" />
+                    <BarChart :chart_data="getChartDataBarCampanhas" :chart_options="chartOptionsBar" />
                   </div>
                 </div>
               </div>
@@ -308,41 +288,29 @@ setTimeout(() => {
                     <span class="form-check-label">Registros totais</span>
                   </label>
                   <label class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="total" value="armadilha" v-model="total">
-                    <span class="form-check-label">Registros por</span>
+                    <input class="form-check-input" type="radio" name="total" value="campanha" v-model="total">
+                    <span class="form-check-label">Registros por campanha</span>
                   </label>
                 </div>
                 <div v-if="total === 'total'" class="row">
                   <BarChart height="2000px" :chart_data="props.chartDataBar2" :chart_options="chartOptionsBar2" />
 
                 </div>
-                <!-- <div v-if="total === 'armadilha'" class="row">
-                  <div class="row">
-                    <div class="col-11 m-4">
-                      <InputLabel value="Selecione um Modulo" />
-                      <select v-model="selectedModulo" class="form-select">
-                        <option v-for="modulo in props.modulos" :value="modulo" :key="modulo.id">
-                          {{ modulo.id }}
-                        </option>
-                      </select>
-                    </div>
-                    <div v-if="selectedModulo">
-                      <div class="col-11 m-4">
-                        <InputLabel value="Selecione uma Armadilha" />
-                        <select v-model="selectedArmadilha" class="form-select">
-                          <option v-for="armadilha in selectedModulo.armadilhas" :value="armadilha.id"
-                            :key="armadilha.id">
-                            {{ armadilha.tipo }} | {{ armadilha.nome_id }}
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-                    <div v-if="selectedArmadilha">
-                      <BarChart height="2000px" :chart_data="chartDataBarFiltered" :chart_options="chartOptionsBar2" />
-                    </div>
-
+                <div v-if="total === 'campanha'" class="row">
+                  <div class="col-11 m-4">
+                    <InputLabel value="Selecione uma campanha" />
+                    <select v-model="selectedCampanha" class="form-select">
+                      <option value="" disabled>Selecione</option>
+                      <option v-for="campanha in props.campanhas" :value="campanha.id" :key="campanha.id">
+                        {{ campanha.id }}
+                      </option>
+                    </select>
                   </div>
-                </div> -->
+                  <div v-if="selectedCampanha" class="row">
+                    <BarChart height="2000px" :chart_data="chartDataBarFilteredByCampanha"
+                      :chart_options="chartOptionsBar2" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

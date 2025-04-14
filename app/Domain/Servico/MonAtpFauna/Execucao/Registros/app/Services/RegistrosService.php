@@ -141,7 +141,7 @@ class RegistrosService extends BaseModelService
 
     public function graficos_monitora_atp(Servicos $servico): array
     {
-        $allRegistros = AtFaunaExecucaoRegistro::with('grupo_faunistico')->where('fk_servico', $servico->id)
+        $allRegistros = AtFaunaExecucaoRegistro::with(['grupo_faunistico', 'campanhas'])->where('fk_servico', $servico->id)
             ->get();
 
         $especiesGroup = $allRegistros->filter(function ($registro) {
@@ -152,15 +152,36 @@ class RegistrosService extends BaseModelService
             return $grupo->count();
         });
 
-
         return [
             'especiesGroup' => $sortedEspeciesGroup,
             'chartDataPieAbundancia'  => $this->getChartDataPieAbundancia($allRegistros),
             'chartDataPieDiversidade' => $this->getChartDataPieDiversidade($allRegistros),
-            //   'chartDataBar'            => $this->getChartDataBar($allRegistros),
-            //   'chartDataLine'           => $this->getChartDataLine($allRegistros),
+            'getChartDataBarCampanhas'            => $this->getChartDataBarCampanhas($allRegistros),
             'chartDataBar2'           => $this->getChartDataBar2($especiesGroup)
             //   'modulos' => ServicoMonitoraFaunaConfigModuloAmostral::with('armadilhas')->where('fk_servico', $servico->id)->get(['id', 'tamanho_modulo']),
+        ];
+    }
+
+    private function getChartDataBarCampanhas($allRegistros): array
+    {
+        $groupCampanhas = $allRegistros->groupBy(function ($registro) {
+            return $registro->campanhas
+                ? $registro->campanhas->id
+                : 'Sem Campanha';
+        });
+
+        return [
+            'labels'   => $groupCampanhas->keys()->toArray(),
+            'datasets' => [
+                [
+                    'label'           => 'Ocorrências',
+                    'data'            => $groupCampanhas->map(function ($grupo) {
+                        return $grupo->count();
+                    })->values()->toArray(),
+                    'backgroundColor' => "#007bff",
+                    'borderRadius'    => 5,
+                ],
+            ],
         ];
     }
 
