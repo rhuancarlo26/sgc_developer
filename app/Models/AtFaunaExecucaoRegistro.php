@@ -18,6 +18,11 @@ class AtFaunaExecucaoRegistro extends Model
         return $this->belongsTo(AtFaunaGrupoAmostradoModel::class, 'fk_grupo_amostrado');
     }
 
+    public function campanhas()
+    {
+        return $this->belongsTo(AtFaunaExecucaoCampanha::class, 'fk_campanha');
+    }
+
     protected static function booted(): void
     {
         static::created(function (AtFaunaExecucaoRegistro $registro) {
