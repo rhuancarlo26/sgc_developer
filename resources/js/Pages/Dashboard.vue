@@ -117,6 +117,7 @@ const renderWms = (layerGroupName, filter, color = '#0000FF', wmsLayers = []) =>
         ).addTo(layersGroups[layerGroupName]);
     })
 
+    console.log(layerGroupName);
     layersGroups[layerGroupName].addTo(map);
 }
 

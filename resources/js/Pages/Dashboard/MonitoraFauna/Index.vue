@@ -124,7 +124,7 @@ const chartOptionsBar = ref({
 
 const chartOptionsLine = ref({
   responsive: true,
-  maintainAspectRatio: false, // Permite um container com dimensões customizadas
+  maintainAspectRatio: false, 
   plugins: {
     legend: { display: false },
     tooltip: { enabled: true },
@@ -139,9 +139,9 @@ const chartOptionsLine = ref({
     x: {
       grid: { display: false },
       ticks: {
-        autoSkip: true,         // Pula automaticamente alguns labels se necessário
-        maxTicksLimit: 10,       // Limita o número de rótulos exibidos
-        maxRotation: 45,         // Rotaciona até 45° se necessário
+        autoSkip: true,         
+        maxTicksLimit: 10,       
+        maxRotation: 45,         
         minRotation: 45,
       },
     },
@@ -150,18 +150,18 @@ const chartOptionsLine = ref({
       grid: { drawBorder: false },
       ticks: {
         autoSkip: true,
-        maxTicksLimit: 6,       // Reduz a quantidade de rótulos no eixo Y
+        maxTicksLimit: 6,      
       },
     },
   },
   decimation: {
     enabled: true,
-    algorithm: 'lttb', // 'lttb' (Largest Triangle Three Buckets) ajuda na redução dos pontos
+    algorithm: 'lttb',
   },
 });
 
 const chartOptionsBar2 = ref({
-  indexAxis: "y", // Faz o gráfico ser horizontal
+  indexAxis: "y",
   responsive: true,
   plugins: {
     legend: { display: false },

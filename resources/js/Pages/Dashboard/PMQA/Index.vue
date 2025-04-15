@@ -104,17 +104,17 @@ const chartDataLine = computed(() => {
         pointBackgroundColor: "white",
         pointRadius: 4,
         borderWidth: 1.5,
-        tension: 0.2, // Suaviza a linha
+        tension: 0.2, 
       },
       {
         label: "Área de Qualidade",
-        data: Array(12).fill(100), // Apenas para criar o fundo
+        data: Array(12).fill(100), 
         backgroundColor: [
-          "rgba(173, 216, 230, 0.5)", // Ótima (Azul)
-          "rgba(144, 238, 144, 0.5)", // Boa (Verde)
-          "rgba(255, 255, 102, 0.5)", // Regular (Amarelo)
-          "rgba(255, 165, 0, 0.5)", // Ruim (Laranja)
-          "rgba(255, 69, 0, 0.5)",  // Péssima (Vermelho)
+          "rgba(173, 216, 230, 0.5)",
+          "rgba(144, 238, 144, 0.5)", 
+          "rgba(255, 255, 102, 0.5)", 
+          "rgba(255, 165, 0, 0.5)", 
+          "rgba(255, 69, 0, 0.5)",  
         ],
         borderWidth: 0,
         fill: "start",

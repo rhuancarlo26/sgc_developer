@@ -202,4 +202,9 @@ class Servicos extends Model
     {
         return $this->hasMany(AtFaunaExecucaoRegistro::class, 'fk_servico');
     }
+
+    public function monitora_afugentamento_fauna()
+    {
+        return $this->hasMany(AfugentFaunaExecRegistroModel::class, 'id_servico');
+    }
 }
