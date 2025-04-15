@@ -11,6 +11,17 @@
 
   const hoje = new Date();
 
+    // Função para formatar data para o formato brasileiro (dd/mm/aaaa)
+    function formatarDataBrasileira(dataStr) {
+    if (!dataStr) return 'Data não encontrada';
+    const data = new Date(dataStr);
+    if (isNaN(data)) return 'Data inválida';
+    const dia = String(data.getDate()).padStart(2, '0');
+    const mes = String(data.getMonth() + 1).padStart(2, '0'); // Mês começa em 0
+    const ano = data.getFullYear();
+    return `${dia}-${mes}-${ano}`;
+  }
+
   function calcularDias(dataInicio, dataFinal) {
     const diffTime = dataFinal - dataInicio;
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
@@ -84,10 +95,10 @@
     return 'Dados insuficientes';
   });
 
-  // Data OSE
+  // Data OSE formatada
   const oseData = computed(() => {
     const empreendimento = props.empreendimentos2;
-    return empreendimento && empreendimento.ose_data ? empreendimento.ose_data : 'Data não encontrada';
+    return empreendimento && empreendimento.ose_data ? formatarDataBrasileira(empreendimento.ose_data) : 'Data não encontrada';
   });
 
   // Dividir os contratos do projeto de engenharia
@@ -111,21 +122,8 @@
       <div class="card">
         <h3 class="card-title">ESTUDOS AMBIENTAIS</h3>
         <ul class="list-group">
-          
-          <!-- Bloco 1: Informações sobre Saldo e Dias -->
-          <ul class="list-group" style="border: 1px solid #ddd; border-radius: 5px; padding: 10px; flex: 1; margin: 5px;">
-            <li class="list-group-item" style="border: none; padding: 5px 0;">
-              <strong>Saldo em Dias do Contrato:</strong> {{ saldoEmDiasContrato }}
-            </li>
-            <li class="list-group-item" style="border: none; padding: 5px 0;">
-              <strong>Dias Decorridos desde OSE:</strong> {{ diasDecorridos }}
-            </li>
-            <li class="list-group-item" style="border: none; padding: 5px 0;">
-              <strong>Dias Previstos p/ Estudo Ambiental:</strong>
-            </li>
-          </ul>
-          
-          <!-- Bloco 2: Informações sobre Competência e Contrato -->
+                    
+          <!-- Bloco 1: Informações sobre Competência e Contrato -->
           <ul class="list-group" style="border: 1px solid #ddd; border-radius: 5px; padding: 10px; flex: 1; margin: 5px;">
             <li class="list-group-item" style="border: none; padding: 5px 0;">
               <strong>Competência do Licenciamento:</strong> {{ empreendimentos2.competencia }}
@@ -140,20 +138,20 @@
               <strong>Contrato/Empresa Estudos Ambientais:</strong> {{ empreendimentos2.contrato_est_ambiental }}
             </li>
             <li class="list-group-item" style="border: none; padding: 5px 0;" title="Nº SEI - FCA">
-              <strong>FCA:</strong> {{ empreendimentos2.fca_sei }} / {{ empreendimentos2.fca_data }}
+              <strong>FCA:</strong> SEI DNIT {{ empreendimentos2.fca_sei }} / {{ formatarDataBrasileira(empreendimentos2.fca_data) }}
             </li>
             <li class="list-group-item" style="border: none; padding: 5px 0;" title="Nº SEI - TRE">
-              <strong>TRE:</strong> {{ empreendimentos2.tre_sei_dnit }} / {{ empreendimentos2.tre_data }}
+              <strong>TRE:</strong> SEI DNIT {{ empreendimentos2.tre_sei_dnit }} / {{ formatarDataBrasileira(empreendimentos2.tre_data) }}
             </li>
             <li class="list-group-item" style="border: none; padding: 5px 0;">
               <strong>Plano de Trabalho:</strong> SEI + Data
             </li>
             <li class="list-group-item" style="border: none; padding: 5px 0;">
-              <strong>OSE:</strong> {{ empreendimentos2.ose_sei }} / {{ oseData }}
+              <strong>OSE:</strong>  SEI DNIT {{ empreendimentos2.ose_sei }} / {{ oseData }}
             </li>
           </ul>
           
-          <!-- Bloco 3: Informações sobre Origem da Demanda -->
+          <!-- Bloco 2: Informações sobre Origem da Demanda -->
           <ul class="list-group" style="border: 1px solid #ddd; border-radius: 5px; padding: 10px; flex: 1; margin: 5px;">
             <li class="list-group-item" style="border: none; padding: 5px 0;">
               <strong>Origem da Demanda:</strong> {{ empreendimentos2.origem }}
@@ -162,7 +160,7 @@
               <strong>Origem da Demanda SEI:</strong> {{ empreendimentos2.origem_sei }}
             </li>
             <li class="list-group-item" style="border: none; padding: 5px 0;">
-              <strong>Origem da Demanda DATA:</strong> {{ empreendimentos2.origem_data }}
+              <strong>Origem da Demanda DATA:</strong> {{ formatarDataBrasileira(empreendimentos2.origem_data) }}
             </li>
           </ul>
         </ul>  
