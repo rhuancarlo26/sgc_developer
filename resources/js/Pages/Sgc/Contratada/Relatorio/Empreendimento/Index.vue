@@ -274,6 +274,7 @@ function getEmpreendimentoRoute(emp) {
 										:contrato="contratos.data[0]"
 										:empreendimentos="empreendimentos"
 										:estudos="estudos"
+										:subprodutos
 										ref="mapaTabDadosContratuais" />
 									</div>
 									<div class="tab-pane" id="dadosgerais" role="tabpanel">
