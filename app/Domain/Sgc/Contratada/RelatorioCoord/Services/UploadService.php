@@ -59,18 +59,34 @@ class UploadService extends BaseModelService
       ];
   }
 
+//   public function storageAnexo($arquivo)
+//   {
+//     $nome = $arquivo->getClientOriginalName();
+//     $tipo = $arquivo->extension();
+//     $caminho = $arquivo->storeAs('Relatorio' . DIRECTORY_SEPARATOR . 'Sgc' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+
+//     return [
+//       'nome' => $nome,
+//       'tipo' => $tipo,
+//       'caminho' => $caminho
+//     ];
+//   }
+
   public function storageAnexo($arquivo)
-  {
+{
     $nome = $arquivo->getClientOriginalName();
     $tipo = $arquivo->extension();
-    $caminho = $arquivo->storeAs('Relatorio' . DIRECTORY_SEPARATOR . 'Sgc' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+    $caminho = $arquivo->storeAs('public/Relatorio/Sgc', uniqid() . '_' . $nome);
+
+    // Remove o prefixo 'public/' do caminho salvo no banco para facilitar o uso no frontend
+    $caminhoRelativo = str_replace('public/', '', $caminho);
 
     return [
-      'nome' => $nome,
-      'tipo' => $tipo,
-      'caminho' => $caminho
+        'nome' => $nome,
+        'tipo' => $tipo,
+        'caminho' => $caminhoRelativo
     ];
-  }
+}
 
   public function obterCaminhoAnexo($idItem, $contratoId, $relatorioNum)
   {

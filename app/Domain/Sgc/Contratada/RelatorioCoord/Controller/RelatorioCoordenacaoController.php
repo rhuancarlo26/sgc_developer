@@ -73,16 +73,16 @@ class RelatorioCoordenacaoController extends Controller
             ->where('contrato_id', $request->input('contrato_id'))
             ->where('relatorio_num', $request->input('relatorio_num'))
             ->first();
-
+    
         if ($item) {
             $item->aprovado = $request->input('aprovado');
             $item->save();
-
             return response()->json(['success' => true, 'aprovado' => $item->aprovado]);
         }
-
+    
         return response()->json(['success' => false, 'message' => 'Item não encontrado'], 404);
     }
+    
 
 
 }
