@@ -12,27 +12,21 @@ class DavConsumoService
 
   protected string $modelClass = SgcConsumoDav::class;
 
-  public function updateConsumo($dados)
+  public function updateConsumo(array $dados) // Forçar que $dados seja array
   {
-    // Verifica se o ID do registro a ser atualizado está presente nos dados
     if (!isset($dados['contrato'])) {
-      throw new \InvalidArgumentException('O ID do registro a ser atualizado é obrigatório.');
+      throw new \InvalidArgumentException('O número do contrato é obrigatório.');
     }
 
-    // Obtém o ID do registro
     $contrato = $dados['contrato'];
-
-    // Remove o ID dos dados para evitar tentativas de atualização do próprio ID
     unset($dados['contrato']);
 
-    // Encontra o registro pelo ID
-    $registro = $this->modelClass::find($contrato);
+    $registro = $this->modelClass::where('contrato', $contrato)->first();
 
     if (!$registro) {
-      throw new \Exception('Registro não encontrado.');
+      throw new \Exception('Registro não encontrado para o contrato: ' . $contrato);
     }
 
-    // Atualiza os dados do registro
     $registro->fill($dados);
     $registro->save();
 

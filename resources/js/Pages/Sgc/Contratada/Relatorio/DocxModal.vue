@@ -32,7 +32,8 @@ const abrirModal = async (idItem, contratoId, versao) => {
     const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao); 
     loadComments(idItem, contratoId);
     if (caminhoDocumento) {
-        filePath = ` http://127.0.0.1:5173/storage/app/${caminhoDocumento}`;
+        filePath = `http://localhost/storage/${caminhoDocumento}`;
+        
 
         try {
             const response = await fetch(filePath);
@@ -141,13 +142,15 @@ defineExpose({ abrirModal });
                             <div>
                                 <IconMessageDots
                                     class="position-fixed z-3"
+                                    :class="{ 'active-comment': isCounting }"
                                     @click="enableCounter"
                                     style="cursor: pointer;" />
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-body" ref="docModal" :key="modalKey" @mousemove="addNote" />
+                <!-- <div class="card-body" ref="docModal" :key="modalKey" @mousemove="addNote" /> -->
+                <div class="card-body" ref="docModal" :key="modalKey" @mousemove="addNote" :class="{ 'comment-enabled': isCounting }" />
                 <Comment v-for="(note, index) in notes"
                     :note="note"
                     :index="index"
@@ -159,9 +162,22 @@ defineExpose({ abrirModal });
         </template>
     </Modal>
 </template>
-
 <style>
 .docx-wrapper {
   background-color: rgb(255, 255, 255) !important;
 }
+
+.active-comment {
+    color: #1a06ce; /* Azul claro para destacar */
+    border: 2px solid #17a2b8; /* Borda ao redor do ícone */
+    border-radius: 50%; /* Forma circular */
+    padding: 2px; /* Espaço interno */
+}
+
+.comment-enabled {
+    cursor: crosshair; /* Cursor em cruz para indicar clicável */
+    background-color: rgba(23, 162, 184, 0.1); /* Fundo leve para destacar */
+}
 </style>
+
+

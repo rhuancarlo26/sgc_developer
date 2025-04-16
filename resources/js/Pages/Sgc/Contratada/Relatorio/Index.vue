@@ -9,9 +9,10 @@ import NavLinkSgc from "@/Components/NavLinkSgc.vue";
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { defineProps } from 'vue';
 import { computed } from 'vue';
-import { IconCheck } from "@tabler/icons-vue";
+import { IconCheck, IconMessageDots, IconX, IconCircle } from "@tabler/icons-vue";
 import { atualizarStatus, revisaoStatus, aprovadoStatus } from './AtualizarStatus/statusUpdate.js';
 import { toggleAprovado } from './AtualizarStatus/aprovarItem.js';
+
 
 const user = usePage().props.auth.user;
 const itens = ref([]);
@@ -161,9 +162,9 @@ const isDisabledAprovarRelatorio = () => {
 
 const downloadFile = (itemId) => {
   const url = route('sgc.contratada.download_anexo', {
-    itemId,
-    contratoId:  props.contrato.id,
-    relatorioNum: form.relatorio_num
+      contratoId: props.contrato.id,
+      itemId: itemId, // Corrigir nome do parâmetro
+      relatorioNum: form.relatorio_num
   });
   window.location.href = url;
 };
@@ -179,6 +180,22 @@ const filtrarRelatorios = () => {
     seen.add(relatorio.relatorio_num);
     return true;
   });
+};
+
+const temComentarios = (itemId) => {
+    return props.comentarios.some(comentario => comentario.item_id === itemId);
+};
+
+const aprovarItem = async (item, contratoId, relatorioNum) => {
+    if (item.aprovado !== 1) {
+        await toggleAprovado(item, contratoId, relatorioNum, 1); 
+    }
+};
+
+const reprovarItem = async (item, contratoId, relatorioNum) => {
+    if (item.aprovado !== 0) {
+        await toggleAprovado(item, contratoId, relatorioNum, 0); 
+    }
 };
 
 onMounted(() => {
@@ -265,15 +282,19 @@ onMounted(() => {
                   <tbody>
                     <tr v-for="item in dadosrelat" :key="item.id">
                       <td>
-                        <template v-if="user.roles.some(role => role.name === 'Fiscal')">
-                          <input type="checkbox" :checked="item.aprovado" @change="() => toggleAprovado(item, props.contrato.id, form.relatorio_num)" 
-                            :disabled="item.status !== 'Análise DNIT'"
-                          />
-                        </template>
-                        <template v-else>
-                          <span v-if="item.aprovado"><IconCheck /></span>
-                        </template>
-                        {{ item.nome_topico }}
+                          <span v-if="item.aprovado === 1" class="text-success">
+                              <IconCheck size="16" />
+                          </span>
+                          <span v-else-if="item.aprovado === 0" class="text-danger">
+                              <IconX size="16" />
+                          </span>
+                          <span v-else-if="item.aprovado === 2" class="text-info">
+                              <IconCircle size="16" />
+                          </span>
+                          {{ item.nome_topico }}
+                          <span v-if="temComentarios(item.id_item)" class="ms-2">
+                              <IconMessageDots size="21" />
+                          </span>
                       </td>
 
                       <td>{{ getUpdatedAt(item.id_item) }}</td>
@@ -292,6 +313,22 @@ onMounted(() => {
                         <button v-if="item.id_item >= 17" @click="downloadFile(item.id_item)" class="bg-blue-500 text-black px-4 py-2 rounded">Anexo</button>
                         <button v-else @click="abrirDoc(item.id_item)" class="btn btn-success mr-2">Abrir</button>
                       </td>
+
+                      <td class="align-middle">
+                        <template v-if="user.roles.some(role => role.name === 'Fiscal') && item.status === 'Análise DNIT'">
+                            <button @click="aprovarItem(item, props.contrato.id, form.relatorio_num)" 
+                                    class="btn btn-sm btn-success me-1" 
+                                    :disabled="item.aprovado === 1">
+                                Aprovar
+                            </button>
+                            <button @click="reprovarItem(item, props.contrato.id, form.relatorio_num)" 
+                                    class="btn btn-sm btn-danger" 
+                                    :disabled="item.aprovado === 0">
+                                Reprovar
+                            </button>
+                        </template>
+                      </td>
+
                     </tr>
                   </tbody>
                 </table>
@@ -328,6 +365,11 @@ onMounted(() => {
   border: 1px solid #f1f1f1;
   border-radius: 9px;
   font-size: 1.0em;
+}
+
+.ms-2 {
+    margin-left: 8px;
+    color: #2808b9;
 }
 </style>
 

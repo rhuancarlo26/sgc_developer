@@ -19,7 +19,7 @@ class DavConsumoController extends Controller
   {
     try {
       $dados = $request->validate([
-        'contrato' => 'required|integer',
+        'contrato' => 'required|string', // Ajustado para string, já que "93/2022" é string
         'diarias' => 'nullable|integer',
         'hatch' => 'nullable|integer',
         'pickup' => 'nullable|integer',
@@ -39,13 +39,13 @@ class DavConsumoController extends Controller
       return response()->json([
         'success' => false,
         'message' => $e->getMessage(),
-      ], 400); // 400 Bad Request
+      ], 400);
 
     } catch (\Exception $e) {
       return response()->json([
         'success' => false,
         'message' => $e->getMessage(),
-      ], 500); // 500 Internal Server Error
+      ], 500);
     }
   }
 }

@@ -116,7 +116,7 @@ const toggleMinimize = () => {
                 <div v-if="props.note.load" v-for="mensagem in note.comentario" :key="mensagem.id" class="chat-message mb-2"
                      :class="mensagem.tipo_perfil !== perfilUser ? 'text-start' : 'text-end'">
                     <div :class="['message', 'container-xl', 'border', 'rounded',
-                        mensagem.tipo_perfil  !== perfilUser ? 'bg-primary text-white' : 'bg-success text-white ms-auto', 'm-0']">
+                        mensagem.tipo_perfil !== perfilUser ? 'bg-primary text-white' : 'bg-success text-white ms-auto', 'm-0']">
                         <div class="d-flex justify-content-between p-2">
                             <p class="message-text mb-0 p-2">{{ mensagem.comentario }}</p>
                             <IconTrash class="mt-1" @click="excluirComentarios(mensagem.id)"/>
@@ -129,7 +129,7 @@ const toggleMinimize = () => {
                 </div>
             </div>
             <div class="card-footer d-flex">
-                <textarea v-model="form.comentario" class="form-control me-2" placeholder="Enviar comentário..."></textarea>
+                <textarea v-model="form.comentario" class="form-control me-2 textarea-responsive" placeholder="Enviar comentário..."></textarea>
                 <button class="btn btn-primary" @click="enviarComentario">Enviar</button>
             </div>
         </div>
@@ -141,17 +141,25 @@ const toggleMinimize = () => {
 
 <style scoped>
 .note {
-    position: absolute;
-    z-index: 2;
+  position: absolute;
+  z-index: 2;
+  width: 300px;
+  min-height: 200px;
+  margin-bottom: 10px;
 }
 
-textarea {
+.textarea-responsive {
     width: 100%;
     height: 50px;
+    position: relative;
+    z-index: 3; /* Fica acima do modal */
+    min-width: 200px; /* Tamanho mínimo para digitação */
+    resize: horizontal; /* Permite expandir horizontalmente */
+    max-width: none; /* Remove limite de largura */
 }
 
 .minimized-note {
-    background-color: rgba(127, 160, 221, 0.192);
+    background-color: rgb(243, 7, 7);
     cursor: pointer;
     padding: 5px;
     border-radius: 5px;
