@@ -38,7 +38,6 @@ class SgcSvnSegGeoV2 extends Model
     ): string {
         $data = $data ?? (new DateTime())->format('Y-m-d');
 
-
         if ($tipo_trecho == 'B') {
             $cd_tipo = 'null';
         }

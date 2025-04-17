@@ -236,29 +236,31 @@ onMounted(() => {
               </div>
 
               <div class="col-md-4 my-4">
-                <InputLabel value="Km Inicial" for="km_inicial" />
-                <input
-                  type="number"
-                  step="any"
-                  id="km_inicial"
-                  name="km_inicial"
-                  class="form-control"
-                  v-model="form_trecho.km_inicial"
-                />
-                <InputError />
+                <InputLabel value="UF" for="ufs" />
+                <select
+                  name="uf"
+                  id="uf"
+                  class="form-control form-select"
+                  v-model="form_trecho.uf"
+                >
+                  <option v-for="uf in props.ufs" :key="uf.id" :value="uf">
+                    {{ uf.uf }}
+                  </option>
+                </select>
               </div>
 
               <div class="col-md-4 my-4">
-                <InputLabel value="Km Final" for="km_final" />
-                <input
-                  type="number"
-                  step="any"
-                  id="km_final"
-                  name="km_final"
-                  class="form-control"
-                  v-model="form_trecho.km_final"
-                />
-                <InputError />
+                <InputLabel value="BR" for="ufs" />
+                <select
+                  name="brs"
+                  id="brs"
+                  class="form-control form-select"
+                  v-model="form_trecho.rodovia"
+                >
+                  <option v-for="br in uf_rodovias" :key="br.id" :value="br">
+                    {{ br.rodovia }}
+                  </option>
+                </select>
               </div>
 
               <div class="col-md-4 my-4">
@@ -292,31 +294,29 @@ onMounted(() => {
               </div>
 
               <div class="col-md-4 my-4">
-                <InputLabel value="UF" for="ufs" />
-                <select
-                  name="uf"
-                  id="uf"
-                  class="form-control form-select"
-                  v-model="form_trecho.uf"
-                >
-                  <option v-for="uf in props.ufs" :key="uf.id" :value="uf">
-                    {{ uf.uf }}
-                  </option>
-                </select>
+                <InputLabel value="Km Inicial" for="km_inicial" />
+                <input
+                  type="number"
+                  step="any"
+                  id="km_inicial"
+                  name="km_inicial"
+                  class="form-control"
+                  v-model="form_trecho.km_inicial"
+                />
+                <InputError />
               </div>
 
               <div class="col-md-4 my-4">
-                <InputLabel value="BR" for="ufs" />
-                <select
-                  name="brs"
-                  id="brs"
-                  class="form-control form-select"
-                  v-model="form_trecho.rodovia"
-                >
-                  <option v-for="br in uf_rodovias" :key="br.id" :value="br">
-                    {{ br.rodovia }}
-                  </option>
-                </select>
+                <InputLabel value="Km Final" for="km_final" />
+                <input
+                  type="number"
+                  step="any"
+                  id="km_final"
+                  name="km_final"
+                  class="form-control"
+                  v-model="form_trecho.km_final"
+                />
+                <InputError />
               </div>
 
               <div class="col-md-4 my-4 d-flex flex-column justify-content-end align-items-start">
