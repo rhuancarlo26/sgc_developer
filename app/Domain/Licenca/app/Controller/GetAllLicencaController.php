@@ -19,7 +19,8 @@ class GetAllLicencaController extends Controller
         $licencas = Licenca::with([
             'segmentos',
             'segmentos.uf_inicial_rel',
-            'segmentos.uf_final_rel'
+            'segmentos.uf_final_rel',
+            'segmentos.rodovias',
         ])->get();
 
         return response()->json($licencas);

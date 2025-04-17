@@ -23,4 +23,9 @@ class LicencaSegmento extends Model
     {
         return $this->belongsTo(Uf::class, 'uf_final');
     }
+
+    public function rodovias(): BelongsTo
+    {
+        return $this->belongsTo(Rodovia::class, 'rodovia');
+    }
 }
