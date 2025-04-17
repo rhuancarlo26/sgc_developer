@@ -30,7 +30,8 @@ class CreateController extends Controller
                 'tipo',
                 'cont_ocorr_parecer_configuracao',
                 'licencas_condicionantes.licenca.segmentos.uf_inicial_rel',
-                'licencas_condicionantes.licenca.segmentos.uf_final_rel'
+                'licencas_condicionantes.licenca.segmentos.uf_final_rel',
+                'licencas_condicionantes.licenca.segmentos.rodovias',
             ]),
             'ocorrencia' => $ocorrencia->load(['lote', 'rodovia.uf', 'registros']),
             ...$response

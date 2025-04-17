@@ -339,7 +339,7 @@ defineExpose({ abaTrecho })
                         <th>Km Inicial</th>
                         <th>Km Final</th>
                         <th>Tipo</th>
-                        <th></th>
+                        <th>Ação</th>
                     </tr>
                 </thead>
                 <tbody>
