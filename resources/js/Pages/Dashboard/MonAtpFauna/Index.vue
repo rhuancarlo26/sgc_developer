@@ -299,10 +299,11 @@ setTimeout(() => {
                 <div v-if="total === 'campanha'" class="row">
                   <div class="col-11 m-4">
                     <InputLabel value="Selecione uma campanha" />
-                    <select v-model="selectedCampanha" class="form-select">
-                      <option value="" disabled>Selecione</option>
-                      <option v-for="campanha in props.campanhas" :value="campanha.id" :key="campanha.id">
-                        {{ campanha.id }}
+                    <select v-model.number="selectedCampanha" class="form-select">
+                      <option disabled value="">Selecione</option>
+                      <!-- se props.campanhas for null, iteramos sobre [] -->
+                      <option v-for="campanha in props.campanhas || []" :key="campanha?.id" :value="campanha?.id">
+                        {{ campanha?.id }}
                       </option>
                     </select>
                   </div>
