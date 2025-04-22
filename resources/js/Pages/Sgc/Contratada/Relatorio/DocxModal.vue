@@ -32,7 +32,7 @@ const abrirModal = async (idItem, contratoId, versao) => {
     const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao); 
     loadComments(idItem, contratoId);
     if (caminhoDocumento) {
-        filePath = `http://localhost/storage/${caminhoDocumento}`;
+        filePath = `https://rcdeveloper.online/storage/${caminhoDocumento}`;
         
 
         try {
