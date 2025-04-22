@@ -4,7 +4,7 @@ use App\Domain\Sgc\Contratada\app\Controller\CreateEmpreendimento;
 use App\Domain\Sgc\Contratada\app\Controller\DashplanController;
 use App\Domain\Sgc\Contratada\app\Controller\EmpreendimentosController;
 use App\Domain\Sgc\Contratada\app\Controller\UpdateEmpreendimentoController;
-use App\Domain\Sgc\Contratada\Coordenadas\CoordenadasController;
+use App\Domain\Sgc\Contratada\Coordenadas\Controller\CoordenadasController;
 use App\Domain\Sgc\Contratada\Dav\Controller\ListagemDavController;
 use App\Domain\Sgc\Contratada\Dav\Controller\StoreDav;
 use App\Domain\Sgc\Contratada\Dav\Controller\StoreDavProfissionais;

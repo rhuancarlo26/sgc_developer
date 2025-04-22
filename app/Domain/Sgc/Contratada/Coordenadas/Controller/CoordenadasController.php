@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Domain\Sgc\Contratada\Coordenadas;
+namespace App\Domain\Sgc\Contratada\Coordenadas\Controller;
 
+use App\Domain\Sgc\Contratada\Coordenadas\Services\CoordenadasServices;
 use App\Shared\Http\Controllers\Controller;
 use App\Models\Rodovia;
 use App\Models\UF;
@@ -12,30 +13,45 @@ use Illuminate\Support\Facades\Http;
 
 class CoordenadasController extends Controller
 {
-
+    public function __construct(private readonly CoordenadasServices $coordenadasServices)
+    {
+    }
 // Retorna o GeoJson com os trechos segmentados segundo a uf, br, km_inicial, km_final
+// Controller ajustado
 public function getGeoJson(Request $request): JsonResponse
 {
-    $request->validate([
-        'uf' => 'required|string',
+    $validated = $request->validate([
+        'uf' => 'required|string|size:2',
         'rodovia' => 'required|numeric',
-        'km_inicial' => 'required|numeric',
+        'km_inicial' => 'required|numeric|min:0',
         'km_final' => 'required|numeric|gte:km_inicial',
-        'trecho_tipo' => 'string',
-        'cd_tipo' => 'numeric',
-        ]);
+        'trecho_tipo' => 'nullable|string',
+        'cd_tipo' => 'nullable|numeric',
+        'concatenar' => 'nullable|boolean' // Novo parâmetro para controle
+    ]);
 
+    try {
+        $geojson = SgcSvnSegGeoV2::getGeoJsonFromApi(
+            $validated['uf'],
+            $validated['rodovia'],
+            $validated['km_inicial'],
+            $validated['km_final'],
+            $validated['trecho_tipo'] ?? null,
+            $validated['cd_tipo'] ?? null
+        );
 
-    $geojson = SgcSvnSegGeoV2::getGeoJsonFromApi(
-        $request->uf,
-        $request->rodovia,
-        $request->km_inicial,
-        $request->km_final,
-        $request->trecho_tipo,
-        $request->cd_tipo,
-    );
+        $geojsonTratado = $validated['concatenar'] ?? false 
+            ? $this->coordenadasServices->processarGeoJson($geojson)
+            : $geojson;
 
-    return response()->json($geojson);
+        return response()->json($geojsonTratado);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Erro ao processar geojson',
+            'message' => $e->getMessage()
+        ], 500);
+    }
 }
 
 // Retorna as latitudes e longetudes apartir da uf, br e kilometro

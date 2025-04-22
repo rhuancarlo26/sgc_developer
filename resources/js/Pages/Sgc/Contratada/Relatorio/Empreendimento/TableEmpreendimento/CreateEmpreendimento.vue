@@ -26,8 +26,8 @@ const mapaVisualizarTrecho = ref();
 const uf_rodovias = ref([]);
 const showMap = ref(false);
 const toast = useToast();
-let coordenadasIniciais = []; // Mantém as coordenadas acumuladas
-let contadorGet = 0; // Contador persistente entre chamadas
+const trechosAcumulados = ref([]);
+const ufsProcessadas = ref(new Set());
 
 const form_trecho = useForm({
   contrato_est_ambiental: props.empreendimento?.contrato_est_ambiental ?? null,
@@ -56,51 +56,40 @@ const visualizarTrecho = async () => {
 };
 
 const getCoordenadas = async () => {
-  const parametros = {
+  const params = {
     uf: form_trecho.uf.uf,
     rodovia: form_trecho.rodovia.rodovia,
     km_inicial: form_trecho.km_inicial,
     km_final: form_trecho.km_final,
     trecho_tipo: form_trecho.tipo_trecho,
     cd_tipo: form_trecho.cd_tipo,
+    concatenar: trechosAcumulados.value.length > 0
   };
 
   try {
-
-    const retorno = await axios.get(route("sgc.gestao.dashboard.geojson", parametros));
-    const novoTrecho = JSON.parse(retorno.data);
-
-    if (contadorGet === 0) {
-      coordenadasIniciais.push(novoTrecho);
-      form_trecho.cod_emp = `${form_trecho.rodovia.rodovia}/${form_trecho.uf.uf}-${form_trecho.km_inicial}_${form_trecho.km_final}`;
-
-    } else {
-
-      coordenadasIniciais[0].coordinates = coordenadasIniciais[0].coordinates.concat(novoTrecho.coordinates);
-      const array = form_trecho.cod_emp.split('-')
-      const uf = form_trecho.uf.uf;
-
-      array.splice(1, 0, uf);
-
-      const resultadoFinal = `${array[0]}/${array[1]}-${array[2]}`;
-      form_trecho.cod_emp = resultadoFinal;
+    const {data} = await axios.get(route("sgc.gestao.dashboard.geojson", params));
+    
+    // Atualiza estado
+    ufsProcessadas.value.add(form_trecho.uf.uf);
+    trechosAcumulados.value.push(data);
+    
+    // Atualiza código apenas (única responsabilidade do frontend)
+    form_trecho.cod_emp = `${form_trecho.rodovia.rodovia}/${
+      Array.from(ufsProcessadas.value).join('+')
+    }-${form_trecho.km_inicial}_${form_trecho.km_final}`;
+    
+    // Envia o GeoJSON já tratado pelo backend para visualização
+    if (trechosAcumulados.value.length > 0) {
+      form_trecho.coordenada = JSON.stringify(data);
+      console.log(form_trecho.coordenada)
     }
-
-    form_trecho.coordenada = JSON.stringify(coordenadasIniciais[0]);
-
-    contadorGet++;
-
+    form_trecho.coordenada = data;
     showMap.value = true;
-
     await visualizarTrecho();
 
-  } catch (e) {
-    console.log(e);
-    if (typeof toast !== 'undefined') {
-      toast.error('Erro ao buscar as coordenadas');
-    } else {
-      console.error('Toast não definido. Verifique a implementação.');
-    }
+  } catch (error) {
+    console.error("Erro ao buscar coordenadas:", error);
+    toast.error(error.response?.data?.message || 'Erro ao processar trecho');
   }
 };
 
