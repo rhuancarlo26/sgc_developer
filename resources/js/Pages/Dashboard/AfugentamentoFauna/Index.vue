@@ -205,8 +205,14 @@ setTimeout(() => {
                             <div class="card-body">
                                 <div class="row fw-bold text-center">
                                     <!-- Coluna para Total de Registros -->
-                                    <div class="col-md-6 border-end py-2">
-                                        Total de Registros: <strong>{{ totalRegistros }}</strong>
+                                    <div class="col-md-6  py-2"> 
+                                        <h3>Total de Registros</h3>
+                                        <ul class="list-group">
+                                            <li  class="list-group-item d-flex justify-content-between align-items-center">
+                                                Total
+                                                <span class="badge rounded-pill">{{ totalRegistros }}</span>
+                                            </li>
+                                        </ul>
                                     </div>
 
                                     <!-- Coluna para Taxa de Mortalidade e lista -->

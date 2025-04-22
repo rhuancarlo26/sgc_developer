@@ -184,21 +184,31 @@ class RegistrosService
 
     private function getChartDataPieFormaRegistro($allRegistros): array
     {
-        $chartData = $allRegistros->groupBy(function ($registro) {
-            return $registro->formaRegistro
-                ? $registro->formaRegistro->nome
-                : 'Sem Forma';
-        })->map(function ($grupoRegistros, $formaNome) {
-            return [
-                // Retorna o id da forma de registro do primeiro item do grupo (todos deverão ter o mesmo)
-                'id'    => $grupoRegistros->first()->formaRegistro->id ?? null,
-                'nome'  => $formaNome,
-                'total' => $grupoRegistros->count(),
-            ];
-        })->sortBy('nome')->values()->all();
+        
+        $idForma = 3;
 
-        return $chartData;
+       
+        $totalRegistros = $allRegistros->count();
+
+        $remocaoGroup = $allRegistros
+            ->filter(fn($registro) => optional($registro->formaRegistro)->id === $idForma);
+
+        $remocaoCount = $remocaoGroup->count();
+
+        $remocaoNome = $remocaoGroup->first()->formaRegistro->nome
+            ?? 'Remoção';
+
+        $percentage = $totalRegistros > 0
+            ? ($remocaoCount * 100) / $totalRegistros
+            : 0;
+
+        return [[
+            'id'    => $idForma,
+            'nome'  => $remocaoNome,
+            'total' => round($percentage, 2),
+        ]];
     }
+
 
 
     private function getChartDataPieAbundancia($allRegistros): array
@@ -241,13 +251,13 @@ class RegistrosService
                     return rtrim($especie, '. ');
                 })
                 ->unique();
-               
+
             return [
                 'grupo_faunistico' => $grupoNome,
                 'total'            => $uniqueSpecies->count(),
             ];
         })->values();
-        
+
 
         return [
             'labels' => $diversidade->pluck('grupo_faunistico')->toArray(),
