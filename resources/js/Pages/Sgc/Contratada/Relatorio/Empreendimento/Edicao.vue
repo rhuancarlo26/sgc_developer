@@ -36,6 +36,7 @@
               class="form-check form-switch col-md-2"
               v-for="coluna in todasColunas"
               :key="coluna"
+              v-show="!camposocultos.includes(coluna)"
             >
               <div class="">
                 <label class="form-check-label">
@@ -53,6 +54,8 @@
         </div>
       </div>
       <div class="my-3"><hr></div>
+      <!-- {{ dadosFiltrados }} -->
+      <!-- <div class="my-3"><hr></div> -->
       <table
         class="table table-striped table-hover table-light"
       >
@@ -61,7 +64,7 @@
             <th class="fw-bolder fs-5"
               v-for="coluna in todasColunas"
               :key="coluna"
-              v-show="colunasVisiveis.includes(coluna)"
+              v-show="colunasVisiveis.includes(coluna) && !camposocultos.includes(coluna)"
             >
               {{ coluna }}
             </th>
@@ -72,9 +75,11 @@
             <td
               v-for="coluna in todasColunas"
               :key="coluna"
-              v-show="colunasVisiveis.includes(coluna)"
+              v-show="colunasVisiveis.includes(coluna) && !camposocultos.includes(coluna)"
             >
               <!-- {{ linha[coluna] }} -->
+              <exp v-if="coluna === linha['change_field']" class="text-info btn-link" style="float: right">[editado]</exp>
+              <br v-if="coluna === linha['change_field']"/>
               <span  @click="abrirEdicao(linha, coluna)" :class="'cursor-pointer ' + (linha[coluna] ? '':'text-info')">{{ linha[coluna] ?? 's/info' }}</span>
               <!--
                 valor id: {{ linha.id }}
@@ -141,6 +146,20 @@ const props = defineProps({ empreendimentos: Array });
 const campoEditando = ref({ id: null, campo: null });
 const empreendimentoEdit = ref({ id: null, campo: "", valor: "" });
 
+const camposocultos = [
+  "change_field",
+  "old_value",
+  "new_value",
+  "user_id",
+  "change_user_id",
+  "change_date",
+  "change_field",
+  //"id",
+  "contrato_id",
+  "created_at",
+  "updated_at",
+];
+
 const abrirEdicao = (empreendimento, campo) => {
   empreendimentoEdit.value = {
     id: empreendimento.id,
@@ -175,7 +194,7 @@ const dados = ref(page.props.empreendimentos);
 const todasColunas = Object.keys(dados.value[0] || {});
 
 // Definir visíveis apenas as 6 primeiras colunas no carregamento
-const colunasVisiveis = ref(todasColunas.slice(0, 15));
+const colunasVisiveis = ref(todasColunas.slice(0, 21));
 
 const dadosFiltrados = computed(() => {
   return dados.value.map((item) => {

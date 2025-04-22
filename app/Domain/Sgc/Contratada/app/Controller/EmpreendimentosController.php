@@ -41,7 +41,24 @@ class EmpreendimentosController extends Controller
      */
     public function editavel(): Response
     {
-      $empreendimentos = SgcvwEmpreendimentos::all();
+    //   $empreendimentos = SgcvwEmpreendimentos::all();
+    $latestChanges = Changelog::select('id', 'record_id', 'field', 'old_value', 'new_value', 'user_id', 'created_at')
+    ->where('table_name', 'sgcvw_empreendimentos')
+    ->orderByDesc('created_at');
+
+    $empreendimentos = SgcvwEmpreendimentos::query()
+    ->leftJoinSub($latestChanges, 'last_changes', function ($join) {
+        $join->on('sgcvw_empreendimentos.id', '=', 'last_changes.record_id');
+    })
+    ->select(
+             'last_changes.field as change_field',
+             'last_changes.old_value',
+             'last_changes.new_value',
+             'last_changes.user_id as change_user_id',
+             'last_changes.created_at as change_date',
+             'sgcvw_empreendimentos.*')
+    ->groupBy('sgcvw_empreendimentos.id')
+    ->get();
       return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/Edicao', [
         'empreendimentos' => $empreendimentos,
       ]);
