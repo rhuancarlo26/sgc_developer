@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
+import { ref, watch, computed } from "vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import TabDadosBasicos from "./TabDadosBasicos.vue";
 import TabSegmento from "./TabSegmento.vue";
@@ -21,6 +22,12 @@ const props = defineProps({
         type: Object
     }
 });
+
+const mapContainer = ref();
+
+const abaSegmento = () => {
+    mapContainer.value.abaSegmento();
+}
 
 </script>
 <template>
@@ -48,8 +55,8 @@ const props = defineProps({
                     </li>
                     <!-- TAB - SEGMENTO -->
                     <li v-if="licenca.id" class="nav-item" role="presentation">
-                        <a href="#tab-segmento" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab">
-                            Segmento
+                        <a @click="abaSegmento()"  href="#tab-segmento" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab">
+                            Segmentos
                         </a>
                     </li>
                     <!-- TAB - ARQUIVOS -->
@@ -71,7 +78,7 @@ const props = defineProps({
 
                     <!-- TAB - SEGMENTO -->
                     <div id="tab-segmento" class="tab-pane" role="tabpanel">
-                        <TabSegmento :licenca="licenca" :ufs="ufs" :rodovias="rodovias" />
+                        <TabSegmento ref="mapContainer" :licenca="licenca" :ufs="ufs" :rodovias="rodovias" />
                     </div>
 
                     <!-- TAB - ARQUIVOS -->

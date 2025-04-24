@@ -10,6 +10,7 @@ use App\Models\Uf;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Support\Facades\DB;
 
 class LicencaSegmentoService extends BaseModelService
 {
@@ -20,8 +21,9 @@ class LicencaSegmentoService extends BaseModelService
     public function get(object $licenca)
     {
         return $this->modelClass::with([
-            'uf_inicial',
-            'uf_final'
+            'uf_inicial_rel',
+            'uf_final_rel',
+            'rodovias',
         ])
             ->where('licenca_id', $licenca->id)
             ->paginate(10);
@@ -29,7 +31,14 @@ class LicencaSegmentoService extends BaseModelService
 
     public function create(array $post): array
     {
-        // $post['coordenada'] = $this->getCoordenada(post: $post);
+        $geometry = null;
+        $coordenada = $post['coordenada'] ?? null;
+
+        if ($coordenada) {
+          $geometry = DB::raw("ST_GeomFromGeoJSON(?)", [$coordenada]);
+        }
+
+        $post['geometry'] = $geometry ?? null;
 
         $licencaSegmento = $this->dataManagement->create(entity: $this->modelClass, infos: $post);
 
@@ -40,7 +49,14 @@ class LicencaSegmentoService extends BaseModelService
 
     public function update(array $post): array
     {
-        // $request['coordenada'] = $this->getCoordenada(re$request: $request);
+        $geometry = null;
+        $coordenada = $post['coordenada'] ?? null;
+
+        if ($coordenada) {
+          $geometry = DB::raw("ST_GeomFromGeoJSON(?)", [$coordenada]);
+        }
+
+        $post['geometry'] = $geometry ?? null;
 
         $licencaSegmento = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['idlicenca_br']);
 

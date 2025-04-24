@@ -17,12 +17,12 @@ class CreateLicencaController extends Controller
     public function index(Licenca $licenca): Response
     {
         $licenca?->load([
-            'segmentos',
+            'segmentos.rodovias',
             'tipo_rel'
         ]);
 
         $response = $this->licencaService->create();
-        
+
         return Inertia::render(component: 'Licenca/Form', props: [
             'licenca' => $licenca,
             ...$response
