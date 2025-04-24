@@ -20,7 +20,7 @@ class DeleteLicencaSegmentoController extends Controller
     ) {
     }
 
-    public function index(LicencaSegmento $segmento): RedirectResponse
+    public function destroy(LicencaSegmento $segmento): RedirectResponse
     {
         $response = $this->listagemLicencaSegmento->delete(post: $segmento);
 
