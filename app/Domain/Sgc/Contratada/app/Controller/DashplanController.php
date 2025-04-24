@@ -80,11 +80,10 @@ class DashplanController extends Controller
 
         return response()->json($posts);
     }
-    // searchempreendimentos
     public function searchempreendimentos(Request $request)
     {
         $query = SgcvwEmpreendimentos::query();
-
+    
         if ($request->has('cod_emp')) {
             $query->where('cod_emp', 'like', '%' . $request->input('cod_emp') . '%');
         }
@@ -92,22 +91,19 @@ class DashplanController extends Controller
             $campo = $request->input('criticidade');
             $query->where($campo, 'like', '%' . $request->input('prioridade') . '%');
         }
-
+        if ($request->has('prioridade') && !empty($request->input('prioridade')) && $request->input('prioridade') !== 'Normal') {
+            $query->where('prioridade', $request->input('prioridade'));
+        }
+        if ($request->has('ose_sei') && !empty($request->input('ose_sei'))) {
+            $query->where('ose_sei', 'like', '%' . $request->input('ose_sei') . '%');
+        }
+    
         $posts = $query->get();
-        // dd($posts);
-
         return response()->json($posts);
     }
-
+    
     public function novafase(Request $request)
     {
-        // Validação dos campos
-        // $request->validate([
-        //     'fase' => 'required|string|max:255',
-        //     'status' => 'required|in:ativo,em espera,nativo',
-        //     'periodo' => 'required|string|max:255',
-        // ]);
-
         // Cria o registro na tabela
         Sgcvwempfases::create([
             'fase' => $request->fase,
@@ -120,13 +116,6 @@ class DashplanController extends Controller
     }
     public function updatefase(Request $request)
     {
-        // Validação dos campos
-        // $request->validate([
-        //     'fase' => 'required|string|max:255',
-        //     'status' => 'required|in:ativo,em espera,nativo',
-        //     'periodo' => 'required|string|max:255',
-        // ]);
-
         // Cria o registro na tabela
         $Fase = Sgcvwempfases::findOrFail($request->id);
         $Fase->update([

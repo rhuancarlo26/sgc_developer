@@ -111,17 +111,6 @@ const evolucaoComStatusAjustado = computed(() =>
       <div class="col-md-12 my-2">
         <hr>
         <h2 class="font-weight-bold">{{ licenciamento }}</h2>
-
-        <!-- <p class="text-muted">
-            <button
-                type="button"
-                class="btn btn-default text-bolder"
-                data-bs-toggle="modal"
-                data-bs-target="#projetoModal"
-                >
-                <strong>Cadastrar nova fase:</strong>
-            </button>
-        </p> -->
       </div>
     </div>
 
@@ -146,11 +135,6 @@ const evolucaoComStatusAjustado = computed(() =>
             </div>
             <div class="modal-body">
               <!-- <h1>Criar Fase</h1> -->
-
-              <!-- <div v-if="flash.message" class="alert alert-success">
-                {{ flash.message }}
-                </div> -->
-
               <form @submit.prevent="submit">
                 <div class="row">
                   <div class="col-md-12 my-3">
@@ -162,7 +146,6 @@ const evolucaoComStatusAjustado = computed(() =>
                       id="fase"
                       required
                     />
-                    <!-- <span v-if="errors.fase">{{ errors.fase }}</span> -->
                   </div>
 
                   <div class="col-md-6">
@@ -175,9 +158,7 @@ const evolucaoComStatusAjustado = computed(() =>
                     >
                       <option value="1">Ativo</option>
                       <option value="0">Inativo</option>
-                      <!-- <option value="em espera">Em espera</option> -->
                     </select>
-                    <!-- <span v-if="errors.status">{{ errors.status }}</span> -->
                   </div>
 
                   <div class="col-md-6">
@@ -189,7 +170,6 @@ const evolucaoComStatusAjustado = computed(() =>
                       id="periodo"
                       required
                     />
-                    <!-- <span v-if="errors.periodo">{{ errors.periodo }}</span> -->
                   </div>
                   <div class="col-md-12 my-4">
                     <button type="submit" class="btn btn-success">
@@ -212,13 +192,9 @@ const evolucaoComStatusAjustado = computed(() =>
             :class="'timeline-content'"
           >
             <p class="h3 mb-0" style="position: absolute; bottom: 100px">
-
               {{ item.fase }}
             </p>
-            <div
-              class="my-5"
-              style="position: absolute; bottom: 110px; font-size: 40px;"
-            >
+            <div class="my-5" style="position: absolute; bottom: 110px; font-size: 40px;">
               🗠
             </div>
             <div
@@ -227,13 +203,15 @@ const evolucaoComStatusAjustado = computed(() =>
               style="
                 font-weight: bolder;
                 position: absolute;
-                bottom: 6px;
+                bottom: -8px;
                 font-size: 20px;
                 color: white;
               "
             >
               🗸
-              <sup class="badge bg-lightgreen fs-6 text-gray" style="position: absolute;margin-top:-15px;z-index:1">Concluído</sup>
+              <sup class="badge bg-lightgreen fs-6 text-gray" style="position: absolute; margin-top: -15px; z-index: 1">
+                Concluído
+              </sup>
             </div>
             <div
               v-if="item.status == 2"
@@ -241,13 +219,15 @@ const evolucaoComStatusAjustado = computed(() =>
               style="
                 font-weight: bolder;
                 position: absolute;
-                bottom: 6px;
+                bottom: -5px;
                 font-size: 20px;
                 color: white;
               "
             >
               ©
-              <sup class="badge bg-lightblue fs-6 text-gray" style="position: absolute;margin-top:-15px;z-index:1">Em andamento</sup>
+              <sup class="badge bg-lightblue fs-6 text-gray" style="position: absolute; margin-top: -15px; z-index: 1">
+                Em andamento
+              </sup>
             </div>
             <div
               v-if="item.status == 0"
@@ -255,13 +235,15 @@ const evolucaoComStatusAjustado = computed(() =>
               style="
                 font-weight: bolder;
                 position: absolute;
-                bottom: 6px;
+                bottom: -4px;
                 font-size: 20px;
                 color: white;
               "
             >
               •
-              <sup class="badge bg-lightgray fs-6 text-gray" style="position: absolute;margin-top:-15px;z-index:1">Não iniciado</sup>
+              <sup class="badge bg-lightgray fs-6 text-gray" style="position: absolute; margin-top: -15px; z-index: 1">
+                Não iniciado
+              </sup>
             </div>
             <div
               :class="'timeline-content'"
@@ -272,22 +254,15 @@ const evolucaoComStatusAjustado = computed(() =>
               data-content="Tudo certo"
               data-original-title="2024"
             >
-                <div :class="'inner-circle ' + (item.status == 0 ? 'bg-gray' : '') + (item.status == 2 ? ' bg-blue' : '')" >
-                </div>
-                <!-- @click="openDialog(index)" -->
-              <p class="h5 text-muted mb-0 mt-2 mb-lg-0">{{ item.periodo }}</p>
-            </div>
-            <!-- <div
-              :class="[
-                'timeline-content',
-                { 'inner-circle': true, 'bg-gray': item.status == 0 },
-              ]"
-              @click="openDialog(index)"
-            >
               <div
-                :class="'inner-circle ' + (item.status == 0 ? 'bg-gray' : '')"
+                :class="'inner-circle ' + (item.status == 0 ? 'bg-gray' : '') + (item.status == 2 ? ' bg-blue' : '')"
               ></div>
-            </div> -->
+              <p class="h5 text-muted mb-0 mt-2 mb-lg-0">{{ item.periodo }}</p>
+              <!-- Exibir número SEI quando concluído -->
+              <p v-if="item.status == 'ativo' || item.status == 1" class="sei-number">
+                {{ item.numero_sei ? `SEI: ${item.numero_sei}` : "" }}
+              </p>
+            </div>
           </div>
           <!-- Modal para mudar o status -->
           <div class="modal fade" id="changeStatusModal" tabindex="-1">
@@ -371,6 +346,7 @@ const evolucaoComStatusAjustado = computed(() =>
 .timeline-steps .timeline-content {
   width: 10rem;
   text-align: center;
+  position: relative; /* Necessário para posicionar o sei-number absolutamente */
 }
 
 .timeline-steps .timeline-content .inner-circle {
@@ -381,18 +357,23 @@ const evolucaoComStatusAjustado = computed(() =>
   align-items: center;
   justify-content: center;
   background-color: lime;
+  position: relative; /* Para garantir que os símbolos sejam posicionados em relação a este elemento */
+  z-index: 0; /* Garante que o inner-circle fique abaixo dos símbolos */
 }
+
 .bg-lightgreen {
-    background-color: lightgreen !important;
-    box-shadow: 2px 2px 2px 2px rgba(0,0,0,.2);
+  background-color: lightgreen !important;
+  box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.2);
 }
+
 .bg-lightgray {
-    background-color: lightgray !important;
-    box-shadow: 2px 2px 2px 2px rgba(0,0,0,.2);
+  background-color: lightgray !important;
+  box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.2);
 }
+
 .bg-lightblue {
-    background-color: lightcyan !important;
-    box-shadow: 2px 2px 2px 2px rgba(0,0,0,.2);
+  background-color: lightcyan !important;
+  box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.2);
 }
 
 .timeline-steps .timeline-content .inner-circle:before {
@@ -404,15 +385,38 @@ const evolucaoComStatusAjustado = computed(() =>
   min-width: 3rem;
   border-radius: 6.25rem;
   opacity: 0.3;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1; /* Garante que o círculo externo fique atrás dos símbolos */
 }
 
 .bg-gray {
   background-color: gray !important;
 }
+
 .bg-blue {
   background-color: cyan !important;
 }
+
 .timeline-step:hover {
   cursor: pointer;
+}
+
+/* Estilo para os símbolos (🗸, ©, •) */
+.my-5 {
+  z-index: 2; 
+}
+
+/* Estilo para o número SEI */
+.sei-number {
+  position: absolute;
+  bottom: -40px; /* Posiciona abaixo do container timeline-content, ajustado para ficar abaixo da data */
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.2;
 }
 </style>
