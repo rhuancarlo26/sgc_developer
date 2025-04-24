@@ -94,8 +94,16 @@ class DashplanController extends Controller
         if ($request->has('prioridade') && !empty($request->input('prioridade')) && $request->input('prioridade') !== 'Normal') {
             $query->where('prioridade', $request->input('prioridade'));
         }
+        // Filtro por ose_sei (Com OSE ou Sem OSE)
         if ($request->has('ose_sei') && !empty($request->input('ose_sei'))) {
-            $query->where('ose_sei', 'like', '%' . $request->input('ose_sei') . '%');
+            $oseSeiFiltro = $request->input('ose_sei');
+            if ($oseSeiFiltro === 'com_ose') {
+                $query->whereNotNull('ose_sei')->where('ose_sei', '!=', '');
+            } elseif ($oseSeiFiltro === 'sem_ose') {
+                $query->where(function ($q) {
+                    $q->whereNull('ose_sei')->orWhere('ose_sei', '');
+                });
+            }
         }
     
         $posts = $query->get();

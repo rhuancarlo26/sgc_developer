@@ -45,7 +45,7 @@ let currentFilter = ref(null);
 const listaEmp = ref([]);
 const mostraTable = ref(true);
 
-// Redireciona ao clicar na linha ou na lupa
+// Redireciona ao clicar na linha
 const acessarEmpreendimento = (trecho) => {
   window.location.href = route('sgc.gestao.dashboard.empreendimento.index', {
     tipo: props.tipo,
@@ -55,12 +55,12 @@ const acessarEmpreendimento = (trecho) => {
 
 // Contagem de Estudos em Andamento 
 const estudosEmAndamento = computed(() => {
-  return props.empreendimentos.filter(emp => emp.ose_sei && emp.ose_sei.trim() !== '').length;
+  return empreendimentosFiltrados.value.filter(emp => emp.ose_sei && emp.ose_sei.trim() !== '').length;
 });
 
 // Contagem de Estudos no Total 
 const estudosTotal = computed(() => {
-  return props.empreendimentos.filter(emp => emp.contrato_est_ambiental && emp.contrato_est_ambiental.trim() !== '').length;
+  return empreendimentosFiltrados.value.filter(emp => emp.contrato_est_ambiental && emp.contrato_est_ambiental.trim() !== '').length;
 });
 
 const formatarData = (data) => {
@@ -222,6 +222,30 @@ const filtrarempreendimentos = () => {
       console.error(error);
     });
 };
+
+const empreendimentosFiltrados = computed(() => {
+  let filtrados = props.empreendimentos;
+
+  // Aplica o filtro de contrato_est_ambiental, se um valor estiver selecionado
+  if (contratoEstAmbientalSelecionado.value) {
+    filtrados = filtrados.filter(
+      trecho => trecho.contrato_est_ambiental === contratoEstAmbientalSelecionado.value
+    );
+  }
+
+  // Aplica os outros filtros (OSE e Não tem OSE), se ativos
+  if (currentFilter.value === 'ose') {
+    filtrados = filtrados.filter(
+      trecho => trecho.ose_sei && trecho.ose_sei.trim() !== ''
+    );
+  } else if (currentFilter.value === 's/ose') {
+    filtrados = filtrados.filter(
+      trecho => !trecho.ose_sei || trecho.ose_sei.trim() === ''
+    );
+  }
+
+  return filtrados;
+});
 </script>
 
 <template>
@@ -277,7 +301,7 @@ const filtrarempreendimentos = () => {
                         <!-- Dropdown para filtro de contrato_est_ambiental -->
                         <div style="text-align: center; margin-top: 20px;">
                           <select v-model="contratoEstAmbientalSelecionado" @change="atualizarFiltroContratoEstAmbiental" class="form-control" style="width: 200px; margin: 0 auto;">
-                            <option :value="null" >CT de Estudos Ambientais</option>
+                            <option :value="null">Selecionar Contrato</option>
                             <option
                               v-for="valor in valoresContratoEstAmbiental"
                               :key="valor"
@@ -287,11 +311,6 @@ const filtrarempreendimentos = () => {
                             </option>
                           </select>
                         </div>
-
-                        <!-- <div style="text-align: center; margin-top: 20px;">
-                          <h3><strong>Número de Estudos em Andamento:</strong> {{ estudosEmAndamento }}</h3>
-                          <h3><strong>Número de Estudos no Total:</strong> {{ estudosTotal }}</h3>
-                        </div> -->
 
                         <div style="text-align: center; margin-top: 50px;">
                           <div class="card text-black bg-light mb-3" style="max-width: 18rem; margin: 0 auto;">
@@ -343,8 +362,12 @@ const filtrarempreendimentos = () => {
                           </select>
                         </div>
                         <div class="mx-3 col">
-                          <label class="form-label">OSE SEI</label>
-                          <input class="form-control" v-model="filtersEmp.ose_sei" placeholder="" />
+                          <label class="form-label">OSE</label>
+                          <select class="form-control form-select" v-model="filtersEmp.ose_sei">
+                            <option value="">Todos</option>
+                            <option value="com_ose">Possui OSE</option>
+                            <option value="sem_ose">Não tem OSE</option>
+                          </select>
                         </div>
                         <div class="mx-3 col-12">
                           <button class="btn btn-secondary" type="submit">Pesquisar</button>
