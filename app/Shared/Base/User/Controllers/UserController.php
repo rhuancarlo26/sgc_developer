@@ -10,6 +10,10 @@ use App\Shared\Base\User\Services\UserService;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,8 +22,7 @@ class UserController extends Controller
     public function __construct(
         private readonly UserService $userService,
         private readonly RoleService $roleService
-    ) {
-    }
+    ) {}
 
     /**
      * @param Request $request
@@ -33,7 +36,7 @@ class UserController extends Controller
             'users' => $this->userService
                 ->search(...$searchParams)
                 ->with(['roles'])
-                ->paginate()
+                ->paginate(20)
                 ->appends($searchParams)
         ]);
     }
@@ -56,10 +59,19 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
-        $user = $this->userService->createAndSyncRoles(
-            userData: $request->only(['name', 'email']),
-            rolesIds: $request->validated('roles')
-        );
+        $user = DB::transaction(function () use ($request) {
+            // Gerar uma senha automática
+            $password = Str::random(8);
+
+            $user = $this->userService->createAndSyncRoles(
+                userData: array_merge($request->only(['name', 'email']), ['password' => Hash::make($password)]),
+                rolesIds: $request->validated('roles')
+            );
+            return $user;
+        });
+
+        // Enviar e-mail de verificação
+        Password::sendResetLink(['email' => $user->email]);
 
         return to_route('cadastros.usuarios.formulario', $user->id)->with('message', [
             'type' => 'success',
@@ -95,7 +107,8 @@ class UserController extends Controller
         $this->userService->delete($user);
 
         return to_route('cadastros.usuarios.listagem')->with('message', [
-            'type' => 'info', 'content' => "Usuário deletado com sucesso"
+            'type' => 'info',
+            'content' => "Usuário deletado com sucesso"
         ]);
     }
 }

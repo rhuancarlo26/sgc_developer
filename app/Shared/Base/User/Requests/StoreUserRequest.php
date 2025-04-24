@@ -18,7 +18,7 @@ class StoreUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'roles.required' => 'É necessário selecionar ao menos um perfil',
+            'roles.required' => 'O campo perfil é obrigatório',
             'roles.min' => 'É necessário selecionar ao menos um perfil',
             'name.required' => 'O campo nome é obrigatório',
         ];
