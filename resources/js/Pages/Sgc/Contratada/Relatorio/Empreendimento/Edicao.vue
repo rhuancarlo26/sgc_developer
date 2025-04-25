@@ -56,6 +56,59 @@
       <div class="my-3"><hr></div>
       <!-- {{ dadosFiltrados }} -->
       <!-- <div class="my-3"><hr></div> -->
+      <div class="modal fade" id="detalhesModal" tabindex="-1" aria-labelledby="detalhesModalLabel" aria-hidden="true" ref="modalRef">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 v-if="registroSelecionado" class="modal-title" id="detalhesModalLabel">Alteração em <b class="text-uppercase">{{ registroSelecionado.nome }}</b></h5>
+            <h5 v-else class="modal-title" id="detalhesModalLabel">Alteração no Empreendimento</h5>
+            <button type="button" class="btn-close" @click="fecharModal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- MODAL BODY -->
+            <div class="modal-body">
+              <div v-if="registroSelecionado">
+                <p><strong>Nome:</strong> {{ registroSelecionado.nome }}</p>
+                <p><strong>Descrição:</strong> {{ registroSelecionado.descricao }}</p>
+
+                <!-- TIMELINE -->
+                <div class="mt-4">
+                  <h6 class="fw-bold mb-3">Histórico de alterações:</h6>
+                  <ul class="timeline">
+                    <li v-for="(log, index) in registroSelecionado.changelogs" :key="index" class="mb-4">
+                      <div class="d-flex">
+                        <div class="me-3">
+                          <span class="badge bg-primary rounded-pill text-white">
+                            <!-- {{ log.user?.name || 'Usuário desconhecido' }} -->
+                            {{ new Date(log.created_at).toLocaleDateString() }}
+                          </span>
+                        </div>
+                        <div>
+                          <p class="mb-1">
+                            <strong>{{ log.user?.name || 'Usuário desconhecido' }}</strong>
+                            alterou <strong>{{ log.field }}</strong>
+                          </p>
+                          <p class="mb-0">
+                            <span class="text-muted">De:</span> {{ log.old_value }} <br>
+                            <span class="text-muted">Para:</span> {{ log.new_value }}
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+                <div v-else>
+                    cerregando...
+                </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="fecharModal">Fechar</button>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
       <table
         class="table table-striped table-hover table-light"
       >
@@ -78,8 +131,27 @@
               v-show="colunasVisiveis.includes(coluna) && !camposocultos.includes(coluna)"
             >
               <!-- {{ linha[coluna] }} -->
-              <exp v-if="coluna === linha['change_field']" class="text-info btn-link" style="float: right">[editado]</exp>
-              <br v-if="coluna === linha['change_field']"/>
+              <!-- <exp class="text-info btn-link" @click="abrirModal({
+                nome: linha['cod_emp'],
+                changelogs: linha['changelogs']
+              })">[editado]</exp> -->
+
+              <span
+                v-if="campoFoiEditado(linha, coluna)"
+                class="badge bg-warning text-white rounded-pill small float-right"
+                role="button"
+                style="float: right;"
+                @click="abrirModal({
+                  nome: linha['cod_emp'],
+                  changelogs: linha['changelogs'].filter(
+                    (log) => log.field === coluna
+                  ),
+                  coluna: coluna
+                })"
+              >
+                editado
+              </span>
+              <br v-if="campoFoiEditado(linha, coluna)"/>
               <span  @click="abrirEdicao(linha, coluna)" :class="'cursor-pointer ' + (linha[coluna] ? '':'text-info')">{{ linha[coluna] ?? 's/info' }}</span>
               <!--
                 valor id: {{ linha.id }}
@@ -104,40 +176,11 @@
           </tr>
         </tbody>
       </table>
-      <!--
-      <h1 class="text-xl font-bold mb-4">Lista de Empreendimentos</h1>
-      <table class="table table-bordered table-striped table-hover table-sm">
-        <thead class="thead-dark">
-          <tr class="bg-gray-200">
-            <th class="border px-4 py-2" scope="row">ID</th>
-            <th class="border px-4 py-2">cod_emp</th>
-            <th class="border px-4 py-2">tipo_de_intervencao</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="emp in empreendimentos" :key="emp.id">
-            <td class="border px-4 py-2 w-min">{{ emp.id }}</td>
-            <td class="border px-4 py-2 relative">
-              <span @click="abrirEdicao(emp, 'cod_emp')" class="cursor-pointer">{{ emp.cod_emp }}</span>
-              <div v-if="campoEditando.id === emp.id && campoEditando.campo === 'cod_emp'" class="absolute bg-white shadow-lg p-2 border rounded">
-                <input v-model="empreendimentoEdit.valor" class="border p-1" @keyup.enter="salvarEdicao" @blur="fecharEdicao" />
-              </div>
-            </td>
-            <td class="border px-4 py-2 relative">
-              <span @click="abrirEdicao(emp, 'tipo_de_intervencao')" class="cursor-pointer">{{ emp.tipo_de_intervencao }}</span>
-              <div v-if="campoEditando.id === emp.id && campoEditando.campo === 'tipo_de_intervencao'" class="absolute bg-white shadow-lg p-2 border rounded">
-                <input v-model="empreendimentoEdit.valor" class="border p-1" @keyup.enter="salvarEdicao" @blur="fecharEdicao" />
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      -->
     </AuthenticatedLayout>
   </div>
 </template>
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
@@ -158,6 +201,7 @@ const camposocultos = [
   "contrato_id",
   "created_at",
   "updated_at",
+  "changelogs",
 ];
 
 const abrirEdicao = (empreendimento, campo) => {
@@ -195,6 +239,7 @@ const todasColunas = Object.keys(dados.value[0] || {});
 
 // Definir visíveis apenas as 6 primeiras colunas no carregamento
 const colunasVisiveis = ref(todasColunas.slice(0, 21));
+colunasVisiveis.value.push(todasColunas[todasColunas.length - 1]);
 
 const dadosFiltrados = computed(() => {
   return dados.value.map((item) => {
@@ -209,9 +254,73 @@ const dadosFiltrados = computed(() => {
     return filtrado;
   });
 });
+
+// Campo doi editado
+function campoFoiEditado(linha, campo) {
+  return linha.changelogs?.some(change => change.field === campo)
+}
+
+//Modal de histórico
+// Bootstrap Modal (garante que Bootstrap JS esteja incluído)
+let modalInstance = null
+const modalRef = ref(null)
+
+const registroSelecionado = ref(null)
+
+function abrirModal(item) {
+  registroSelecionado.value = item
+  if (modalInstance) modalInstance.show()
+}
+
+function fecharModal() {
+  if (modalInstance) modalInstance.hide()
+}
+
+onMounted(() => {
+  const modalEl = modalRef.value
+  if (modalEl) {
+    // Bootstrap Modal instance
+    modalInstance = new bootstrap.Modal(modalEl)
+  }
+})
 </script>
-<style>
+<style scoped>
 .cursor-pointer {
   cursor: pointer;
+}
+.timeline {
+  list-style: none;
+  padding-left: 0;
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #dee2e6;
+}
+
+.timeline li {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline li::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  background-color: #0d6efd;
+  border-radius: 50%;
+  z-index: 1;
+}
+float-right {
+  float: right !important;
 }
 </style>
