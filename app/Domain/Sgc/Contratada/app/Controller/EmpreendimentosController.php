@@ -27,11 +27,13 @@ use Illuminate\Support\Facades\Schema;
 class EmpreendimentosController extends Controller
 {
     public function __construct(
-        private readonly EmpreendimentosService $empreendimentoService, private readonly ContratosService $contratosService)
-    {
+        private readonly EmpreendimentosService $empreendimentoService,
+        private readonly ContratosService $contratosService
+    ) {
     }
     //
-    public function import(Request $request, $empreendimento) {
+    public function import(Request $request, $empreendimento)
+    {
         $file = $request->file('excel_file');
         Excel::import(new YourImportClass, $file);
         return redirect()->back()->with('success', 'Arquivo Excel importado com sucesso.');
@@ -41,41 +43,45 @@ class EmpreendimentosController extends Controller
      */
     public function editavel(): Response
     {
-    //   $empreendimentos = SgcvwEmpreendimentos::all();
-    $latestChanges = Changelog::select('id', 'record_id', 'field', 'old_value', 'new_value', 'user_id', 'created_at')
-    ->where('table_name', 'sgcvw_empreendimentos')
-    ->orderByDesc('created_at');
+        //   $empreendimentos = SgcvwEmpreendimentos::all();
+        // $latestChanges = Changelog::select('id', 'record_id', 'field', 'old_value', 'new_value', 'user_id', 'created_at')
+        //     ->where('table_name', 'sgcvw_empreendimentos')
+        //     ->orderByDesc('created_at');
 
-    $empreendimentos = SgcvwEmpreendimentos::query()
-    ->leftJoinSub($latestChanges, 'last_changes', function ($join) {
-        $join->on('sgcvw_empreendimentos.id', '=', 'last_changes.record_id');
-    })
-    ->select(
-             'last_changes.field as change_field',
-             'last_changes.old_value',
-             'last_changes.new_value',
-             'last_changes.user_id as change_user_id',
-             'last_changes.created_at as change_date',
-             'sgcvw_empreendimentos.*')
-    ->groupBy('sgcvw_empreendimentos.id')
-    ->get();
-      return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/Edicao', [
-        'empreendimentos' => $empreendimentos,
-      ]);
+        // $empreendimentos = SgcvwEmpreendimentos::query()
+        //     ->leftJoinSub($latestChanges, 'last_changes', function ($join) {
+        //         $join->on('sgcvw_empreendimentos.id', '=', 'last_changes.record_id');
+        //     })
+        //     ->leftJoin('users', 'users.id', '=', 'last_changes.user_id')
+        //     ->select(
+        //         'last_changes.field as change_field',
+        //         'last_changes.old_value',
+        //         'last_changes.new_value',
+        //         'last_changes.user_id as change_user_id',
+        //         'last_changes.created_at as change_date',
+        //         'users.name as change_user_name',
+        //         'sgcvw_empreendimentos.*'
+        //     )
+        //     ->groupBy('sgcvw_empreendimentos.id')
+        //     ->get();
+        $empreendimentos = SgcvwEmpreendimentos::with(['changelogs'])->get();
+        return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/Edicao', [
+            'empreendimentos' => $empreendimentos,
+        ]);
     }
     public function editavelestudos(): Response
     {
-      $empreendimentos = SgcvwEstudos::paginate(50);
-      return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
-        'empreendimentos' => $empreendimentos,
-      ]);
+        $empreendimentos = SgcvwEstudos::paginate(50);
+        return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
+            'empreendimentos' => $empreendimentos,
+        ]);
     }
     public function editavelprodutos(): Response
     {
-      $empreendimentos = SgcvwSubprodutos::paginate(50);
-      return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
-        'empreendimentos' => $empreendimentos,
-      ]);
+        $empreendimentos = SgcvwSubprodutos::paginate(50);
+        return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
+            'empreendimentos' => $empreendimentos,
+        ]);
     }
     public function updatecampo(Request $request, $id)
     {
@@ -90,15 +96,15 @@ class EmpreendimentosController extends Controller
             $old_value = $empreendimento->getOriginal($campo);
             $empreendimento->update([$campo => $valor]);
             // if ($oldValue != $newValue) {
-                ChangeLog::create([
-                    'user_id'    => auth()->id(),
-                    'table_name' => 'sgcvw_empreendimentos',
-                    'record_id'  => $id,
-                    'field'      => $campo,
-                    'old_value'  => $old_value,
-                    'new_value'  => $valor,
-                    'status'     => 'updated',
-                ]);
+            ChangeLog::create([
+                'user_id' => auth()->id(),
+                'table_name' => 'sgcvw_empreendimentos',
+                'record_id' => $id,
+                'field' => $campo,
+                'old_value' => $old_value,
+                'new_value' => $valor,
+                'status' => 'updated',
+            ]);
             // }
             // return response()->json(['success' => true, 'message' => 'Campo atualizado com sucesso!']);
             return redirect()->back()->with('success', 'Empreendimento atualizado com sucesso!');
@@ -115,13 +121,13 @@ class EmpreendimentosController extends Controller
             $old_value = $empreendimento->getOriginal($campo);
             $empreendimento->update([$campo => $valor]);
             ChangeLog::create([
-                'user_id'    => auth()->id(),
+                'user_id' => auth()->id(),
                 'table_name' => 'sgcvw_estudos',
-                'record_id'  => $id,
-                'field'      => $campo,
-                'old_value'  => $old_value,
-                'new_value'  => $valor,
-                'status'     => 'updated',
+                'record_id' => $id,
+                'field' => $campo,
+                'old_value' => $old_value,
+                'new_value' => $valor,
+                'status' => 'updated',
             ]);
             return redirect()->back()->with('success', 'Estudo atualizado com sucesso!');
             // return response()->json(['success' => true, 'message' => 'Campo válido.'], 400);
@@ -137,13 +143,13 @@ class EmpreendimentosController extends Controller
             $old_value = $empreendimento->getOriginal($campo);
             $empreendimento->update([$campo => $valor]);
             ChangeLog::create([
-                'user_id'    => auth()->id(),
+                'user_id' => auth()->id(),
                 'table_name' => 'sgcvw_subprodutos',
-                'record_id'  => $id,
-                'field'      => $campo,
-                'old_value'  => $old_value,
-                'new_value'  => $valor,
-                'status'     => 'updated',
+                'record_id' => $id,
+                'field' => $campo,
+                'old_value' => $old_value,
+                'new_value' => $valor,
+                'status' => 'updated',
             ]);
             return redirect()->back()->with('success', 'Produto atualizado com sucesso!');
             // return response()->json(['success' => true, 'message' => 'Campo válido.'], 400);
@@ -217,7 +223,7 @@ class EmpreendimentosController extends Controller
             'empreendimentos' => $subprodutos_por_empreendimento,
             'estudos' => $estudos,
             'subprodutos' => $subprodutos,
-            'empreendimentos2' =>$empreendimentos2,
+            'empreendimentos2' => $empreendimentos2,
             'fases' => $fases,
             // EIA
             'fm_eia_estudos_empreendimento' => $fm_eia_estudos_empreendimento,
