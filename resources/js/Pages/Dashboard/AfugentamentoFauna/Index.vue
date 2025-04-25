@@ -21,6 +21,7 @@ const props = defineProps({
     getChartDataPieFormaRegistro: Object,
     getChartDataPieFormaRegistroGrafico: Object,
     chartDataBar2: Object,
+    contrato: Object
 });
 
 const trechosVisualizacao = computed(() => {
@@ -139,10 +140,16 @@ setTimeout(() => {
 
     <Head title="Dashboard Afugentamento Fauna" />
     <AuthenticatedLayout>
+
         <div class="card card-body mb-4">
-
-            <h1 class="text-center mb-4">Programa de Afugentamento e Resgate de Fauna</h1>
-
+            <div class="row justify-content-center">
+                <div class="card-body text-center">
+                    <h1 class="card-title mb-3">Programa de Afugentamento e Resgate de Fauna</h1>
+                    <p class="mb-2"><strong>Contratada:</strong> {{ contrato?.contratada }}</p>
+                    <p class="mb-2"><strong>Número do Contrato:</strong> {{ contrato?.numero_contrato }}</p>
+                    <p class="mb-0"><strong>UFs / BRs:</strong> {{ contrato?.ufs }} / {{ contrato?.brs }}</p>
+                </div>
+            </div>
         </div>
         <div class="row">
             <div class="col-lg-8 mb-4">

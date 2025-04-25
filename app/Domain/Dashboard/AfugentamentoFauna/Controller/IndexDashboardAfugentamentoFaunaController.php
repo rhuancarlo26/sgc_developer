@@ -19,12 +19,13 @@ class IndexDashboardAfugentamentoFaunaController extends Controller
   public function index(Servicos $servicos): Response
   {
 
-    $servicos->load(['monitora_afugentamento_fauna']);
+    $servicos->load(['monitora_afugentamento_fauna','contrato']);
 
     $charts =  $this->registros_service->graficos_monitora_afugentamento($servicos);
     
     return Inertia::render('Dashboard/AfugentamentoFauna/Index',
     [
+      'contrato' => $servicos->contrato,
       'totalRegistros' => $charts["totalRegistros"],
       'monitora_afugentamento_faunas' => $servicos->monitora_afugentamento_fauna,
       'chartDataPieAbundancia' => $charts["chartDataPieAbundancia"],

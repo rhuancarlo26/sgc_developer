@@ -14,7 +14,8 @@ const props = defineProps({
   chartDataBar2: Object,
   getChartDataBarCampanhas: Object,
   campanhas: Object,
-  especiesGroup: Object
+  especiesGroup: Object,
+  contrato: Object
 });
 
 const total = ref('total');
@@ -218,12 +219,15 @@ setTimeout(() => {
   <AuthenticatedLayout>
     <div>
       <div class="card card-body mb-4">
-        <div class="justify-content-center">
-          <h1 class="text-center">
-            Programa de Monitoramento do Atropelamento de Fauna
-          </h1>
+            <div class="row justify-content-center">
+                <div class="card-body text-center">
+                    <h1 class="card-title mb-3">Programa de Monitoramento do Atropelamento de Fauna</h1>
+                    <p class="mb-2"><strong>Contratada:</strong> {{ contrato?.contratada }}</p>
+                    <p class="mb-2"><strong>Número do Contrato:</strong> {{ contrato?.numero_contrato }}</p>
+                    <p class="mb-0"><strong>UFs / BRs:</strong> {{ contrato?.ufs }} / {{ contrato?.brs }}</p>
+                </div>
+            </div>
         </div>
-      </div>
       <div class="">
         <div class="d-flex">
           <div class="col-7 card card-body me-4">
