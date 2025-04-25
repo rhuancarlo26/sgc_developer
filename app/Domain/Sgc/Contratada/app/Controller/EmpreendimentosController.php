@@ -18,6 +18,7 @@ use App\Models\DashexcelEmpreendimentos;
 use App\Models\SgcvwEmpreendimentos;
 use App\Models\SgcvwEstudos;
 use App\Models\Sgcvwempfases;
+use App\Models\ChangeLog;
 
 use Illuminate\Support\Facades\Schema;
 
@@ -69,7 +70,19 @@ class EmpreendimentosController extends Controller
 
         // Se o campo existe
         if (Schema::hasColumn('sgcvw_empreendimentos', $campo)) {
+            $old_value = $empreendimento->getOriginal($campo);
             $empreendimento->update([$campo => $valor]);
+            // if ($oldValue != $newValue) {
+                ChangeLog::create([
+                    'user_id'    => auth()->id(),
+                    'table_name' => 'sgcvw_empreendimentos',
+                    'record_id'  => $id,
+                    'field'      => $campo,
+                    'old_value'  => $old_value,
+                    'new_value'  => $valor,
+                    'status'     => 'updated',
+                ]);
+            // }
             // return response()->json(['success' => true, 'message' => 'Campo atualizado com sucesso!']);
             return redirect()->back()->with('success', 'Empreendimento atualizado com sucesso!');
         }
@@ -82,7 +95,17 @@ class EmpreendimentosController extends Controller
         $campo = array_keys($request->all())[0]; // Pega a chave no request
         $valor = $request->input($campo); // Pega o valor
         if (Schema::hasColumn('sgcvw_estudos', $campo)) {
+            $old_value = $empreendimento->getOriginal($campo);
             $empreendimento->update([$campo => $valor]);
+            ChangeLog::create([
+                'user_id'    => auth()->id(),
+                'table_name' => 'sgcvw_estudos',
+                'record_id'  => $id,
+                'field'      => $campo,
+                'old_value'  => $old_value,
+                'new_value'  => $valor,
+                'status'     => 'updated',
+            ]);
             return redirect()->back()->with('success', 'Estudo atualizado com sucesso!');
             // return response()->json(['success' => true, 'message' => 'Campo válido.'], 400);
         }
@@ -94,7 +117,17 @@ class EmpreendimentosController extends Controller
         $campo = array_keys($request->all())[0]; // Pega a chave no request
         $valor = $request->input($campo); // Pega o valor
         if (Schema::hasColumn('sgcvw_subprodutos', $campo)) {
+            $old_value = $empreendimento->getOriginal($campo);
             $empreendimento->update([$campo => $valor]);
+            ChangeLog::create([
+                'user_id'    => auth()->id(),
+                'table_name' => 'sgcvw_subprodutos',
+                'record_id'  => $id,
+                'field'      => $campo,
+                'old_value'  => $old_value,
+                'new_value'  => $valor,
+                'status'     => 'updated',
+            ]);
             return redirect()->back()->with('success', 'Produto atualizado com sucesso!');
             // return response()->json(['success' => true, 'message' => 'Campo válido.'], 400);
         }

@@ -144,7 +144,7 @@
               <strong>TRE:</strong> SEI DNIT {{ empreendimentos2.tre_sei_dnit }} / {{ formatarDataBrasileira(empreendimentos2.tre_data) }}
             </li>
             <li class="list-group-item" style="border: none; padding: 5px 0;">
-              <strong>Plano de Trabalho:</strong> SEI + Data
+              <strong>Plano de Trabalho:</strong> SEI DNIT {{ empreendimentos2.plano_de_trabalho_entregue }} / {{ formatarDataBrasileira(empreendimentos2.plano_de_trabalho_aprovado) }}
             </li>
             <li class="list-group-item" style="border: none; padding: 5px 0;">
               <strong>OSE:</strong>  SEI DNIT {{ empreendimentos2.ose_sei }} / {{ oseData }}
