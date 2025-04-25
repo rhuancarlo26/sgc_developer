@@ -7,6 +7,7 @@ import CoordanadasCentroUFs from "@/Utils/CoordanadasCentroUFs.js";
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import Popups from './Dashboard/MapPopup/Popups';
 import Detalhe from './Detalhe.vue';
+import { Offcanvas } from 'bootstrap'
 
 const props = defineProps({
     ufs: { type: Array },
@@ -19,10 +20,11 @@ let selectedLayer = null;
 let temporarySections = null;
 
 const layersGroups = {};
-const filterOffcanvas = ref();
 const detalhesOffcanvas = ref();
 const mapContainer = ref(null);
 const zoomLevel = ref(5);
+
+
 
 onBeforeUnmount(() => {
     map?.remove();
@@ -178,6 +180,11 @@ const handleMapClick = (clickEvent) => {
 
 }
 
+function toggleFilter() {
+    const el = document.getElementById('filterOffCanvas')
+    const bs = Offcanvas.getOrCreateInstance(el)
+    bs.toggle()
+}
 </script>
 
 <template>
@@ -185,20 +192,26 @@ const handleMapClick = (clickEvent) => {
     <Head title="Dashboard" />
 
     <AuthenticatedLayout :mapa-principal="true">
-        <div class="map" ref="mapContainer"></div>
+        <div class="d-flex dashboard-wrapper">
+            <ModalFiltro :ufs="ufs" :rodovias="rodovias" :contratos="contratos" @ufChanged="ufZoom"
+                @filtersReset="clearMap" @layerSelected="renderWms" @layerUnselected="removeWms" />
+            <div class="map flex-fill" ref="mapContainer"></div>
+        </div>
 
-        <BotoesMapa />
+        <BotoesMapa @toggle-filter="toggleFilter" />
 
-        <ModalFiltro ref="filterOffcanvas" :ufs="ufs" :rodovias="rodovias" :contratos="contratos" @ufChanged="ufZoom"
-            @filtersReset="clearMap" @layerSelected="renderWms" @layerUnselected="removeWms" />
 
         <Detalhe ref="detalhesOffcanvas" />
 
     </AuthenticatedLayout>
 </template>
-<style>
-.map {
+<style scoped>
+.dashboard-wrapper {
+    display: flex;
     height: calc(100svh - 9.4em);
-    width: 100%;
+    overflow: hidden;
+    align-items: stretch;
 }
+
+
 </style>

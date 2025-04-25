@@ -26,11 +26,14 @@ onMounted(() => {
 
 const zoomExpanded = ref(false);
 
+
 const props = defineProps({ zoomLevel: Number, default: 5 })
 
 const btnMeasure = ref(false);
 
-const emit = defineEmits(['filter', 'openBaseMaps', 'clearMap', 'expandMap', 'zoomLevelChanged']);
+
+
+const emit = defineEmits(['filter', 'toggle-filter', 'openBaseMaps', 'clearMap', 'expandMap', 'zoomLevelChanged']);
 
 const openBaseMaps = () => emit('openBaseMaps')
 
@@ -64,12 +67,14 @@ const measure = () => {
   startButton.click();
 }
 
+function onFilterClick() {
+  emit('toggle-filter')
+}
 </script>
 
 <template>
   <div class="btn-mapa">
-    <button data-bs-target="#filterOffCanvas" class="btn-list" data-bs-toggle="offcanvas" title="Filtrar Dados"
-      data-bs-title="Filtrar Dados">
+    <button class="btn-list" title="Filtrar Dados" @click="onFilterClick">
       <IconFilter />
     </button>
   </div>

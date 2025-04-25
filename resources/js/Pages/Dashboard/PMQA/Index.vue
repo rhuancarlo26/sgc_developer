@@ -66,31 +66,31 @@ const selectedCampanha = ref(null);
 
 
 const chartDataLine = computed(() => {
- 
+
   if (!selectedPonto.value || !selectedLineParametro.value) {
     return null;
   }
 
   const labels = props.responses.map(response => response.resultado.nome);
   const data = props.responses
-  .map(response => {
-    
-    const uniqueParams = Array.isArray(response.uniqueParametros)
-      ? response.uniqueParametros
-      : Object.values(response.uniqueParametros);
-    return uniqueParams.find(param => param.id === selectedLineParametro.value.id);
-  })
-  .filter(parametro => parametro !== undefined);
+    .map(response => {
+
+      const uniqueParams = Array.isArray(response.uniqueParametros)
+        ? response.uniqueParametros
+        : Object.values(response.uniqueParametros);
+      return uniqueParams.find(param => param.id === selectedLineParametro.value.id);
+    })
+    .filter(parametro => parametro !== undefined);
 
   const singleValueArray = data.map((campanha) => {
-  const foundDataset = campanha.datasets.datasets.find(ds => ds.id === selectedPonto.value.fk_ponto);
+    const foundDataset = campanha.datasets.datasets.find(ds => ds.id === selectedPonto.value.fk_ponto);
 
-  return foundDataset && foundDataset.data.length > 0 
-    ? foundDataset.data[0] 
-    : null;
-});
+    return foundDataset && foundDataset.data.length > 0
+      ? foundDataset.data[0]
+      : null;
+  });
 
- 
+
 
   return {
     labels: labels,
@@ -104,17 +104,17 @@ const chartDataLine = computed(() => {
         pointBackgroundColor: "white",
         pointRadius: 4,
         borderWidth: 1.5,
-        tension: 0.2, 
+        tension: 0.2,
       },
       {
         label: "Área de Qualidade",
-        data: Array(12).fill(100), 
+        data: Array(12).fill(100),
         backgroundColor: [
           "rgba(173, 216, 230, 0.5)",
-          "rgba(144, 238, 144, 0.5)", 
-          "rgba(255, 255, 102, 0.5)", 
-          "rgba(255, 165, 0, 0.5)", 
-          "rgba(255, 69, 0, 0.5)",  
+          "rgba(144, 238, 144, 0.5)",
+          "rgba(255, 255, 102, 0.5)",
+          "rgba(255, 165, 0, 0.5)",
+          "rgba(255, 69, 0, 0.5)",
         ],
         borderWidth: 0,
         fill: "start",
@@ -125,7 +125,7 @@ const chartDataLine = computed(() => {
 
 const buscarResultado = async () => {
   if (!selectedResultado.value) return;
- 
+
   try {
     const response = await axios.get(
       route('contratos.contratada.servicos.pmqa.resultado.resultado.get', {
@@ -145,7 +145,7 @@ const buscarResultado = async () => {
 };
 
 const moverParaPonto = () => {
- 
+
   if (selectedPonto.value.ponto && mapaVisualizarTrecho.value) {
     const longitude = Number(selectedPonto.value.ponto.long_y);
     const latitude = Number(selectedPonto.value.ponto.lat_x);
@@ -170,10 +170,6 @@ watch(() => props.chartDataIqa, (newData) => {
 
   }
 }, { deep: true });
-
-const abrirModalVideo = () => {
-  modalVideoRef.value.abrirModal()
-}
 
 const horizontalLine = ref({
   plugins: {
@@ -330,10 +326,13 @@ setTimeout(() => {
   <AuthenticatedLayout>
     <div>
       <div class="card card-body mb-4">
-        <div class="justify-content-center">
-          <h1 class="text-center">
-            Programa de Monitoramento da Qualidade da Água
-          </h1>
+        <div class="row justify-content-center">
+          <div class="card-body text-center">
+            <h2 class="card-title mb-3">Programa de Monitoramento da Qualidade da Água</h2>
+            <p class="mb-2"><strong>Contratada:</strong> {{ contrato?.contratada }}</p>
+            <p class="mb-2"><strong>Número do Contrato:</strong> {{ contrato?.numero_contrato }}</p>
+            <p class="mb-0"><strong>UFs / BRs:</strong> {{ contrato?.ufs }} / {{ contrato?.brs }}</p>
+          </div>
         </div>
       </div>
       <div class="">
@@ -490,7 +489,7 @@ setTimeout(() => {
                       </div>
                     </div>
                     <div v-if="selectedLineParametro">
-                      <LineChart  :chart_data="chartDataLine" :chart_options="chartOptionsLine" />
+                      <LineChart :chart_data="chartDataLine" :chart_options="chartOptionsLine" />
                     </div>
                   </div>
                 </div>
