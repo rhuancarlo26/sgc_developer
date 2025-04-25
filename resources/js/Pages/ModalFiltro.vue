@@ -1,7 +1,8 @@
 <script setup>
 import { IconFilterOff } from '@tabler/icons-vue';
 import { computed, watch } from 'vue';
-import { ref } from 'vue';
+import { ref,onMounted  } from 'vue';
+import Offcanvas from 'bootstrap/js/dist/offcanvas'
 
 const props = defineProps({
   ufs: { type: Array },
@@ -125,9 +126,27 @@ watch(() => filters, updateFilters, { deep: true })
 
 const emit = defineEmits(['layerSelected', 'layerUnselected', 'filtersReset', 'ufChanged']);
 
+
+onMounted(() => {
+  const el = document.getElementById('filterOffCanvas')
+  const bs = Offcanvas.getOrCreateInstance(el, {
+    backdrop: false,  // sem backdrop escuro
+    scroll: true      // permite rolar o conteúdo
+  })
+  bs.show()
+
+  // quando abrir/fechar, avisamos o mapa pra reajustar
+  el.addEventListener('shown.bs.offcanvas', () => {
+    document.querySelector('.map').classList.add('with-sidebar')
+  })
+  el.addEventListener('hidden.bs.offcanvas', () => {
+    document.querySelector('.map').classList.remove('with-sidebar')
+  })
+})
 </script>
 <template>
-  <div class="offcanvas offcanvas-start" id="filterOffCanvas" aria-labelledby="offcanvasStartLabel" aria-modal="true"
+  <div class="offcanvas offcanvas-start" id="filterOffCanvas" data-bs-backdrop="false"
+  data-bs-scroll="true" aria-labelledby="offcanvasStartLabel" aria-modal="true"
     role="dialog">
     <div class="offcanvas-header p-3">
       <h2 class="offcanvas-title" id="filterOffCanvasLabel">Filtro de Camadas</h2>
@@ -203,9 +222,24 @@ const emit = defineEmits(['layerSelected', 'layerUnselected', 'filtersReset', 'u
       </button>
     </div>
   </div>
-</template>
-<style>
-.offcanvas {
-  min-width: 23vw;
+</template>  
+<style scoped>
+
+.offcanvas#filterOffCanvas {
+  position: relative;
+  /* largura fixa e sem borda */
+  width: 23vw;
+  flex: 0 0 23vw;
+  border: none;           /* remove a borda cinza */
+  overflow: hidden;
+  transition: flex 0.3s ease, width 0.3s ease, visibility 0.3s;
+}
+
+/* quando o BS tirar a classe show, recua pra fora */
+.offcanvas#filterOffCanvas:not(.show) {
+  visibility: hidden !important;
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  padding: 0 !important;
 }
 </style>

@@ -15,7 +15,7 @@ class IndexDashboardMonAtpFaunaController extends Controller
 
   public function index(Servicos $servicos): Response
   {
-    $servicos->load(['monitora_atp_fauna','monitora_atp_fauna.campanhas']);
+    $servicos->load(['monitora_atp_fauna','monitora_atp_fauna.campanhas','contrato']);
 
     $campanhas = $servicos->monitora_atp_fauna
     ->pluck('campanhas')   
@@ -27,6 +27,7 @@ class IndexDashboardMonAtpFaunaController extends Controller
     $charts =  $this->registro_service->graficos_monitora_atp($servicos);
 
     return Inertia::render('Dashboard/MonAtpFauna/Index', [
+      'contrato' => $servicos->contrato,
       'at_fauna_execucao_registros' => $servicos->monitora_atp_fauna,
       'campanhas' => $campanhas,
       'chartDataPieAbundancia' => $charts["chartDataPieAbundancia"],
