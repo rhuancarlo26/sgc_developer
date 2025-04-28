@@ -18,7 +18,7 @@ class StoreLicencaController extends Controller
             ...$request->all(),
             'tipo' => $request->tipo_rel['id'],
             'status' => $request->status ?? 'Nova',
-            'usuario_id' => Auth::user()->id
+            'usuarios_id' => Auth::user()->id
         ];
 
         if ($post['tipo'] !== 3) {
