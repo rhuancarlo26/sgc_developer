@@ -10,7 +10,6 @@ const props = defineProps({
 });
 
 const form = useForm({
-    id: null,
     licenca_id: props.licenca.id,
     tipo_rel: null,
     status: null,
