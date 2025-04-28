@@ -23,7 +23,7 @@ class DataManagement
             $content = 'Falha ao cadastrar!';
             $error   = $e->getMessage();
         }
-dd($error);
+
         return [
             'model'   => $model,
             'request' => [
