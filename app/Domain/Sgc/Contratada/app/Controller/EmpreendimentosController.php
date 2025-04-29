@@ -71,14 +71,14 @@ class EmpreendimentosController extends Controller
     }
     public function editavelestudos(): Response
     {
-        $empreendimentos = SgcvwEstudos::paginate(50);
+        $empreendimentos = SgcvwEstudos::with(['changelogs'])->paginate(50);
         return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
             'empreendimentos' => $empreendimentos,
         ]);
     }
     public function editavelprodutos(): Response
     {
-        $empreendimentos = SgcvwSubprodutos::paginate(50);
+        $empreendimentos = SgcvwSubprodutos::with(['changelogs'])->paginate(50);
         return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
             'empreendimentos' => $empreendimentos,
         ]);

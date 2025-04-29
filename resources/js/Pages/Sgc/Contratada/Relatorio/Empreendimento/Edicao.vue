@@ -237,8 +237,8 @@ const dados = ref(page.props.empreendimentos);
 // Pegando todas as chaves do primeiro objeto como colunas
 const todasColunas = Object.keys(dados.value[0] || {});
 
-// Definir visíveis apenas as 6 primeiras colunas no carregamento
-const colunasVisiveis = ref(todasColunas.slice(0, 21));
+// Definir visíveis apenas as 15 primeiras colunas no carregamento
+const colunasVisiveis = ref(todasColunas.slice(0, 15));
 colunasVisiveis.value.push(todasColunas[todasColunas.length - 1]);
 
 const dadosFiltrados = computed(() => {
@@ -255,7 +255,7 @@ const dadosFiltrados = computed(() => {
   });
 });
 
-// Campo doi editado
+// Campo foi editado
 function campoFoiEditado(linha, campo) {
   return linha.changelogs?.some(change => change.field === campo)
 }

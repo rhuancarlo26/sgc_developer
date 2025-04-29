@@ -36,6 +36,7 @@
               class="form-check form-switch col-md-2"
               v-for="coluna in todasColunas"
               :key="coluna"
+              v-show="!camposocultos.includes(coluna)"
             >
               <div class="">
                 <label class="form-check-label">
@@ -53,6 +54,59 @@
         </div>
       </div>
       <div class="my-3"><hr></div>
+      <div class="modal fade" id="detalhesModal" tabindex="-1" aria-labelledby="detalhesModalLabel" aria-hidden="true" ref="modalRef">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 v-if="registroSelecionado" class="modal-title" id="detalhesModalLabel">Alteração em <b class="text-uppercase">{{ registroSelecionado.nome }}</b></h5>
+            <h5 v-else class="modal-title" id="detalhesModalLabel">Alteração no Empreendimento</h5>
+            <button type="button" class="btn-close" @click="fecharModal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- MODAL BODY -->
+            <div class="modal-body">
+              <div v-if="registroSelecionado">
+                <p><strong>Nome:</strong> {{ registroSelecionado.nome }}</p>
+                <p><strong>Descrição:</strong> {{ registroSelecionado.descricao }}</p>
+
+                <!-- TIMELINE -->
+                <div class="mt-4">
+                  <h6 class="fw-bold mb-3">Histórico de alterações:</h6>
+                  <ul class="timeline">
+                    <li v-for="(log, index) in registroSelecionado.changelogs" :key="index" class="mb-4">
+                      <div class="d-flex">
+                        <div class="me-3">
+                          <span class="badge bg-primary rounded-pill text-white">
+                            <!-- {{ log.user?.name || 'Usuário desconhecido' }} -->
+                            {{ new Date(log.created_at).toLocaleDateString() }}
+                          </span>
+                        </div>
+                        <div>
+                          <p class="mb-1">
+                            <strong>{{ log.user?.name || 'Usuário desconhecido' }}</strong>
+                            alterou <strong>{{ log.field }}</strong>
+                          </p>
+                          <p class="mb-0">
+                            <span class="text-muted">De:</span> {{ log.old_value }} <br>
+                            <span class="text-muted">Para:</span> {{ log.new_value }}
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+                <div v-else>
+                    cerregando...
+                </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="fecharModal">Fechar</button>
+          </div>
+        </div>
+      </div>
+      </div>
+      </div>
       <table
         class="table table-striped table-hover table-light"
       >
@@ -61,7 +115,7 @@
             <th class="fw-bolder fs-5"
               v-for="coluna in todasColunas"
               :key="coluna"
-              v-show="colunasVisiveis.includes(coluna)"
+              v-show="colunasVisiveis.includes(coluna) && !camposocultos.includes(coluna)"
             >
               {{ coluna }}
             </th>
@@ -72,9 +126,25 @@
             <td
               v-for="coluna in todasColunas"
               :key="coluna"
-              v-show="colunasVisiveis.includes(coluna)"
+              v-show="colunasVisiveis.includes(coluna) && !camposocultos.includes(coluna)"
             >
               <!-- {{ linha[coluna] }} -->
+              <span
+                v-if="campoFoiEditado(linha, coluna)"
+                class="badge bg-warning text-white rounded-pill small float-right"
+                role="button"
+                style="float: right;"
+                @click="abrirModal({
+                  nome: linha['cod_emp'],
+                  changelogs: linha['changelogs'].filter(
+                    (log) => log.field === coluna
+                  ),
+                  coluna: coluna
+                })"
+              >
+                editado
+              </span>
+              <br v-if="campoFoiEditado(linha, coluna)"/>
               <span  @click="abrirEdicao(linha, coluna)" :class="'cursor-pointer ' + (linha[coluna] ? '':'text-info')">{{ linha[coluna] ?? 's/info' }}</span>
               <!--
                 valor id: {{ linha.id }}
@@ -109,10 +179,17 @@
   </div>
 </template>
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+
+const camposocultos = [
+  "contrato_id",
+  "created_at",
+  "updated_at",
+  "changelogs",
+];
 
 const props = defineProps({ empreendimentos: Array });
 const campoEditando = ref({ id: null, campo: null });
@@ -157,8 +234,9 @@ const salvarEdicao = () => {
   );
 };
 
-// Definir visíveis apenas as 6 primeiras colunas no carregamento
-const colunasVisiveis = ref(todasColunas.slice(0, 15));
+// Definir visíveis apenas as 15 primeiras colunas no carregamento
+const colunasVisiveis = ref(todasColunas.slice(0, 10));
+colunasVisiveis.value.push(todasColunas[todasColunas.length - 1]);
 
 const dadosFiltrados = computed(() => {
   return dados.value.map((item) => {
@@ -173,6 +251,35 @@ const dadosFiltrados = computed(() => {
     return filtrado;
   });
 });
+//-------------------------------------------------------------------- 29/09/2023
+// Campo foi editado
+function campoFoiEditado(linha, campo) {
+  return linha.changelogs?.some(change => change.field === campo)
+}
+
+//Modal de histórico
+// Bootstrap Modal (garante que Bootstrap JS esteja incluído)
+let modalInstance = null
+const modalRef = ref(null)
+
+const registroSelecionado = ref(null)
+
+function abrirModal(item) {
+  registroSelecionado.value = item
+  if (modalInstance) modalInstance.show()
+}
+
+function fecharModal() {
+  if (modalInstance) modalInstance.hide()
+}
+
+onMounted(() => {
+  const modalEl = modalRef.value
+  if (modalEl) {
+    // Bootstrap Modal instance
+    modalInstance = new bootstrap.Modal(modalEl)
+  }
+})
 </script>
 <style>
 .cursor-pointer {
