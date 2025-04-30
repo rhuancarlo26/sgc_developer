@@ -2,7 +2,6 @@
 
 namespace App\Domain\Sgc\Contratada\Coordenadas\Controller;
 
-use App\Domain\Sgc\Contratada\Coordenadas\Services\CoordenadasServices;
 use App\Shared\Http\Controllers\Controller;
 use App\Models\Rodovia;
 use App\Models\UF;
@@ -13,9 +12,6 @@ use Illuminate\Support\Facades\Http;
 
 class CoordenadasController extends Controller
 {
-    public function __construct(private readonly CoordenadasServices $coordenadasServices)
-    {
-    }
 // Retorna o GeoJson com os trechos segmentados segundo a uf, br, km_inicial, km_final
 // Controller ajustado
 public function getGeoJson(Request $request): JsonResponse
@@ -40,11 +36,7 @@ public function getGeoJson(Request $request): JsonResponse
             $validated['cd_tipo'] ?? null
         );
 
-        $geojsonTratado = $validated['concatenar'] ?? false 
-            ? $this->coordenadasServices->processarGeoJson($geojson)
-            : $geojson;
-
-        return response()->json($geojsonTratado);
+        return response()->json($geojson);
 
     } catch (\Exception $e) {
         return response()->json([

@@ -55,6 +55,99 @@ const visualizarTrecho = async () => {
   }
 };
 
+const removerDuplicados = (coordenadas) => {
+  if (coordenadas.length <= 1) return coordenadas;
+
+  // Passo 1: Remove duplicatas em qualquer posição
+  const coordenadasVistas = new Set();
+  const coordenadasUnicas = [];
+
+  for (let i = 0; i < coordenadas.length; i++) {
+    const coordStr = JSON.stringify(coordenadas[i]);
+    if (!coordenadasVistas.has(coordStr)) {
+      coordenadasVistas.add(coordStr);
+      coordenadasUnicas.push(coordenadas[i]);
+    }
+  }
+
+  // Passo 2: Verifica novamente se o primeiro e o último ponto são iguais
+  if (coordenadasUnicas.length > 1) {
+    const primeiroPonto = coordenadasUnicas[0];
+    const ultimoPonto = coordenadasUnicas[coordenadasUnicas.length - 1];
+    if (JSON.stringify(primeiroPonto) === JSON.stringify(ultimoPonto)) {
+      coordenadasUnicas.pop(); // Remove o último ponto para evitar loop
+    }
+  }
+
+  return coordenadasUnicas;
+};
+// Função para concatenar dois GeoJSONs (LineString)
+const concatenarGeoJson = (trechoAnterior, novoTrecho) => {
+  if (!trechoAnterior || !novoTrecho) {
+    return novoTrecho || trechoAnterior || { type: 'LineString', coordinates: [] };
+  }
+
+  let trechoAnteriorObj = trechoAnterior;
+  if (typeof trechoAnterior[0] === 'string') {
+    try {
+      trechoAnteriorObj = JSON.parse(trechoAnterior[0]);
+    } catch (e) {
+      console.error('Erro ao parsear trecho anterior:', e);
+      throw new Error('Formato inválido para trecho anterior');
+    }
+  }
+
+  const novoTrechoObj = typeof novoTrecho === 'string' ? JSON.parse(novoTrecho) : novoTrecho;
+
+  if (trechoAnteriorObj.type !== 'LineString' || novoTrechoObj.type !== 'LineString') {
+    console.error('Ambos os trechos devem ser LineString:', { trechoAnteriorObj, novoTrechoObj });
+    throw new Error('Ambos os trechos devem ser LineString');
+  }
+
+  const coordsAnterior = trechoAnteriorObj.coordinates;
+  const coordsNovo = novoTrechoObj.coordinates;
+
+  const primeiroAnterior = coordsAnterior[0];
+  const ultimoAnterior = coordsAnterior[coordsAnterior.length - 1];
+  const primeiroNovo = coordsNovo[0];
+  const ultimoNovo = coordsNovo[coordsNovo.length - 1];
+
+  // Decide se novoTrecho deve vir antes ou depois com base na distância
+  const dist1 = getDistancia(ultimoAnterior, primeiroNovo); // concat normal
+  const dist2 = getDistancia(ultimoNovo, primeiroAnterior); // concat invertido
+
+  let coordsConcatenadas;
+  if (dist1 <= dist2) {
+    // concat: anterior + novo
+    const mesmoPonto = JSON.stringify(ultimoAnterior) === JSON.stringify(primeiroNovo);
+    coordsConcatenadas = [
+      ...coordsAnterior,
+      ...(mesmoPonto ? coordsNovo.slice(1) : coordsNovo)
+    ];
+  } else {
+    // concat: novo + anterior
+    const mesmoPonto = JSON.stringify(ultimoNovo) === JSON.stringify(primeiroAnterior);
+    coordsConcatenadas = [
+      ...coordsNovo,
+      ...(mesmoPonto ? coordsAnterior.slice(1) : coordsAnterior)
+    ];
+  }
+
+  return {
+    type: 'LineString',
+    coordinates: removerDuplicados(coordsConcatenadas)
+  };
+};
+
+// Função auxiliar para distância Euclidiana simples (pode trocar por Haversine se quiser mais precisão)
+const getDistancia = (p1, p2) => {
+  const dx = p1[0] - p2[0];
+  const dy = p1[1] - p2[1];
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+
+
 const getCoordenadas = async () => {
   const params = {
     uf: form_trecho.uf.uf,
@@ -68,22 +161,23 @@ const getCoordenadas = async () => {
 
   try {
     const {data} = await axios.get(route("sgc.gestao.dashboard.geojson", params));
-    
-    // Atualiza estado
+    console.log(data)
     ufsProcessadas.value.add(form_trecho.uf.uf);
-    trechosAcumulados.value.push(data);
-    
-    // Atualiza código apenas (única responsabilidade do frontend)
+
+    if (params.concatenar) {
+      const geojsonConcatenado = concatenarGeoJson(trechosAcumulados.value, data);
+
+      trechosAcumulados.value = [geojsonConcatenado]; 
+      form_trecho.coordenada = JSON.stringify(geojsonConcatenado);
+    } else {
+      trechosAcumulados.value.push(data);
+      form_trecho.coordenada = data;
+    }
+
     form_trecho.cod_emp = `${form_trecho.rodovia.rodovia}/${
       Array.from(ufsProcessadas.value).join('+')
     }-${form_trecho.km_inicial}_${form_trecho.km_final}`;
     
-    // Envia o GeoJSON já tratado pelo backend para visualização
-    if (trechosAcumulados.value.length > 0) {
-      form_trecho.coordenada = JSON.stringify(data);
-      console.log(form_trecho.coordenada)
-    }
-    form_trecho.coordenada = data;
     showMap.value = true;
     await visualizarTrecho();
 
@@ -92,6 +186,8 @@ const getCoordenadas = async () => {
     toast.error(error.response?.data?.message || 'Erro ao processar trecho');
   }
 };
+
+
 
 const storeEmpreendimentos = async () => {
   const parametros = {
