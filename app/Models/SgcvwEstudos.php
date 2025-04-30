@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class SgcvwEstudos extends Model
 {
+
     use HasFactory;
+
     protected $fillable = [
         'contrato_id',
         'cod_emp',
@@ -106,4 +108,5 @@ class SgcvwEstudos extends Model
             ->with('user')
             ->orderBy('created_at', 'desc');
     }
+
 }

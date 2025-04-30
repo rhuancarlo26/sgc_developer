@@ -6,28 +6,30 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreLicencaSegmentoRequest extends FormRequest
 {
-  public function rules(): array
-  {
-    return [
-      'licenca_id'  => 'required',
-      'rodovia'     => 'required',
-      'uf_inicial'  => 'required',
-      'uf_final'    => 'required',
-      'km_inicio'   => 'required',
-      'km_fim'      => 'required',
-      'extensao_br' => 'required',
-      'trecho_tipo' => 'nullable',
-      'coordenada'  => 'nullable',
-    ];
-  }
+    public function rules(): array
+    {
+        return [
+            'licenca_id'  => 'required',
+            'rodovia_id'     => 'required',
+            'uf_id'  => 'required',
+            'km_inicial'   => 'required',
+            'km_final'      => 'required',
+            'extensao' => 'required',
+            'tipo_trecho' => 'required',
+            'cod_tipo_trecho' => 'nullable',
+            'versao_snv' => 'nullable',
+            'coordenada' => 'required',
+            'uf_final'    => 'nullable',
+        ];
+    }
 
-  public function messages(): array
-  {
-    return [];
-  }
+    public function messages(): array
+    {
+        return [];
+    }
 
-  public function authorize(): bool
-  {
-    return true;
-  }
+    public function authorize(): bool
+    {
+        return true;
+    }
 }
