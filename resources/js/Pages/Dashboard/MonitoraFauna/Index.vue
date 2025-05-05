@@ -7,9 +7,6 @@ import Map from '@/Components/MapPontos.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import ModalVideo from '../ModalVideo.vue';
-import { IconPlayerPlay } from '@tabler/icons-vue';
-import NavButton from '@/Components/NavButton.vue';
 
 const props = defineProps({
 
@@ -76,13 +73,25 @@ const chartOptionsPie = ref({
   responsive: true,
   plugins: {
     legend: {
-      display: false, // Remove a legenda global
+      display: true,
+      position: 'bottom', 
     },
     tooltip: {
       enabled: true,
     },
+    datalabels: {
+      
+      formatter: (value, context) => {
+        const dataArr = context.chart.data.datasets[0].data;
+        const total = dataArr.reduce((sum, val) => sum + val, 0);
+        const percentage = ((value / total) * 100).toFixed(2);
+        return `${value} (${percentage}%)`;
+      },
+      color: 'black',
+    },
   },
 });
+
 
 const chartOptionsBar = ref({
   responsive: true,
@@ -115,6 +124,7 @@ const chartOptionsBar = ref({
 
 const chartOptionsLine = ref({
   responsive: true,
+  maintainAspectRatio: false, 
   plugins: {
     legend: { display: false },
     tooltip: { enabled: true },
@@ -122,24 +132,36 @@ const chartOptionsLine = ref({
       anchor: "end",
       align: "top",
       color: "#333",
-      font: { weight: "bold", size: 12 },
-    },
+      font: { weight: "bold", size: 8 },
+    }
   },
   scales: {
     x: {
       grid: { display: false },
+      ticks: {
+        autoSkip: true,         
+        maxTicksLimit: 10,       
+        maxRotation: 45,         
+        minRotation: 45,
+      },
     },
     y: {
       beginAtZero: true,
       grid: { drawBorder: false },
+      ticks: {
+        autoSkip: true,
+        maxTicksLimit: 6,      
+      },
     },
+  },
+  decimation: {
+    enabled: true,
+    algorithm: 'lttb',
   },
 });
 
-
-
 const chartOptionsBar2 = ref({
-  indexAxis: "y", // Faz o gráfico ser horizontal
+  indexAxis: "y",
   responsive: true,
   plugins: {
     legend: { display: false },
@@ -231,10 +253,10 @@ setTimeout(() => {
       </div>
       <div class="">
         <div class="d-flex">
-          <div class="col-8 card card-body me-4">
+          <div class="col-7 card card-body me-4">
             <Map ref="mapaVisualizarTrecho" height="900px" :manual-render="true" />
           </div>
-          <div class="col-4">
+          <div class="col-5">
             <div class="card card-body mb-4">
               <div>
                 <label class="form-check form-check-inline">
@@ -255,7 +277,8 @@ setTimeout(() => {
                     <div class="card h-100">
                       <div class="card-body">
                         <h3 class="card-title text-center">Abundância</h3>
-                        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                        <div class="d-flex justify-content-center align-items-center"
+                          style="height:255px; width:255px;">
                           <PieChart :chart_data="props.chartDataPieAbundancia" :chart_options="chartOptionsPie" />
                         </div>
                       </div>
@@ -264,8 +287,9 @@ setTimeout(() => {
                   <div class="col-md-6 mb-3">
                     <div class="card h-100">
                       <div class="card-body">
-                        <h3 class="card-title text-center">Diversidade</h3>
-                        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                        <h3 class="card-title text-center">Riqueza</h3>
+                        <div class="d-flex justify-content-center align-items-center"
+                          style="height:255px; width:255px;">
                           <PieChart :chart_data="props.chartDataPieDiversidade" :chart_options="chartOptionsPie" />
                         </div>
                       </div>

@@ -9,6 +9,8 @@ use App\Models\AfugentFaunaFormaRegistroModel;
 use App\Models\AtFaunaGrupoAmostradoModel;
 use App\Models\Uf;
 use Illuminate\Support\Facades\DB;
+use App\Models\Servicos;
+
 
 class RegistrosService
 {
@@ -151,5 +153,197 @@ class RegistrosService
     public function destroyRegistroFotografico($fotografia)
     {
         return $fotografia->delete();
+    }
+
+    public function graficos_monitora_afugentamento(Servicos $servico): array
+    {
+        $allRegistros = AfugentFaunaExecRegistroModel::with(['grupo_faunistico', 'formaRegistro', 'tipoRegistro', 'destinacaoRegistro'])
+            ->where('id_servico', $servico->id)
+            ->get();
+
+
+        $especiesGroup = $allRegistros->filter(function ($registro) {
+            return !empty($registro->especie);
+        })->groupBy('especie');
+
+        $sortedEspeciesGroup = $especiesGroup->sortByDesc(function ($grupo) {
+            return $grupo->count();
+        });
+
+        return [
+            'totalRegistros' => $allRegistros->count(),
+            'especiesGroup' => $sortedEspeciesGroup,
+            'chartDataPieAbundancia'  => $this->getChartDataPieAbundancia($allRegistros),
+            'chartDataPieDiversidade' => $this->getChartDataPieDiversidade($allRegistros),
+            'getChartDataPieTipoRegistro' => $this->getChartDataPieTipoRegistro($allRegistros),
+            'getChartDataPieFormaRegistro' => $this->getChartDataPieFormaRegistro($allRegistros),
+            'getChartDataPieFormaRegistroGrafico' => $this->getChartDataPieFormaRegistroGrafico($allRegistros),
+            'chartDataBar2'           => $this->getChartDataBar2($especiesGroup)
+        ];
+    }
+
+    private function getChartDataPieFormaRegistro($allRegistros): array
+    {
+        
+        $idForma = 3;
+
+       
+        $totalRegistros = $allRegistros->count();
+
+        $remocaoGroup = $allRegistros
+            ->filter(fn($registro) => optional($registro->formaRegistro)->id === $idForma);
+
+        $remocaoCount = $remocaoGroup->count();
+
+        $remocaoNome = $remocaoGroup->first()->formaRegistro->nome
+            ?? 'Remoção';
+
+        $percentage = $totalRegistros > 0
+            ? ($remocaoCount * 100) / $totalRegistros
+            : 0;
+
+        return [[
+            'id'    => $idForma,
+            'nome'  => $remocaoNome,
+            'total' => round($percentage, 2),
+        ]];
+    }
+
+
+
+    private function getChartDataPieAbundancia($allRegistros): array
+    {
+        $abundancia = $allRegistros->groupBy(function ($registro) {
+
+            return $registro->grupo_faunistico
+                ? $registro->grupo_faunistico->nome
+                : 'Sem Grupo';
+        })->map(function ($grupoRegistros, $grupoNome) {
+            return [
+                'grupo_faunistico' => $grupoNome,
+                'total' => $grupoRegistros->count(),
+            ];
+        })->values();
+
+        return [
+            'labels' => $abundancia->pluck('grupo_faunistico')->toArray(),
+            'datasets' => [
+                [
+                    'data' => $abundancia->pluck('total')->toArray(),
+                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'borderColor' => "#ffffff",
+                    'borderWidth' => 2,
+                ],
+            ],
+        ];
+    }
+
+    private function getChartDataPieDiversidade($allRegistros): array
+    {
+        $diversidade = $allRegistros->groupBy(function ($registro) {
+            return $registro->grupo_faunistico
+                ? $registro->grupo_faunistico->nome
+                : 'Sem Grupo';
+        })->map(function ($grupoRegistros, $grupoNome) {
+            $uniqueSpecies = $grupoRegistros->pluck('especie')
+                ->map(function ($especie) {
+                    // Remove somente os caracteres "." e espaço que estejam no final da string
+                    return rtrim($especie, '. ');
+                })
+                ->unique();
+
+            return [
+                'grupo_faunistico' => $grupoNome,
+                'total'            => $uniqueSpecies->count(),
+            ];
+        })->values();
+
+
+        return [
+            'labels' => $diversidade->pluck('grupo_faunistico')->toArray(),
+            'datasets' => [
+                [
+                    'data' => $diversidade->pluck('total')->toArray(),
+                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'borderColor' => "#ffffff",
+                    'borderWidth' => 2,
+                ],
+            ],
+        ];
+    }
+
+    private function getChartDataPieTipoRegistro($allRegistros): array
+    {
+        $tipoRegistro = $allRegistros->groupBy(function ($registro) {
+            return $registro->tipoRegistro
+                ? $registro->tipoRegistro->nome
+                : 'Sem Tipo';
+        })->map(function ($grupoRegistros, $tipoNome) {
+            return [
+                'tipo_registro' => $tipoNome,
+                'total'         => $grupoRegistros->count(),
+            ];
+        })->values();
+
+        return [
+            'labels'   => $tipoRegistro->pluck('tipo_registro')->toArray(),
+            'datasets' => [
+                [
+                    'data'            => $tipoRegistro->pluck('total')->toArray(),
+                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'borderColor'     => "#ffffff",
+                    'borderWidth'     => 2,
+                ],
+            ],
+        ];
+    }
+
+    private function getChartDataPieFormaRegistroGrafico($allRegistros): array
+    {
+        $formaRegistro = $allRegistros->groupBy(function ($registro) {
+            return $registro->formaRegistro
+                ? $registro->formaRegistro->nome
+                : 'Sem Forma';
+        })->map(function ($grupoRegistros, $formaNome) {
+            return [
+                'forma_registro' => $formaNome,
+                'total'          => $grupoRegistros->count(),
+            ];
+        })->values();
+
+        return [
+            'labels'   => $formaRegistro->pluck('forma_registro')->toArray(),
+            'datasets' => [
+                [
+                    'data'            => $formaRegistro->pluck('total')->toArray(),
+                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'borderColor'     => "#ffffff",
+                    'borderWidth'     => 2,
+                ],
+            ],
+        ];
+    }
+
+    private function getChartDataBar2($especiesGroup): array
+    {
+        // Ordena os grupos de acordo com a contagem de ocorrências (do maior para o menor)
+        $sortedGroup = $especiesGroup->sortByDesc(function ($grupo) {
+            return $grupo->count();
+        });
+
+        return [
+            'labels' => $sortedGroup->keys()->toArray(),
+            'datasets' => [
+                [
+                    'label' => 'Ocorrências',
+                    'data' => $sortedGroup->map(function ($grupo) {
+                        return $grupo->count();
+                    })->values()->toArray(),
+                    'backgroundColor' => "rgba(30, 144, 255, 0.8)",
+                    'borderColor' => "rgba(30, 144, 255, 1)",
+                    'borderWidth' => 1,
+                ],
+            ],
+        ];
     }
 }

@@ -36,8 +36,6 @@ const props = defineProps({
   iphan_emp_estudos_531:Object,
 });
 
-console.log(props.contratos.data[0])
-
 const datahoje = new Date();
 function isSerialDate(data) {
   // Verifica se é um número e se está no intervalo possível de datas em série
@@ -272,6 +270,7 @@ function getEmpreendimentoRoute(emp) {
 										:contrato="contratos.data[0]"
 										:empreendimentos="empreendimentos"
 										:estudos="estudos"
+										:subprodutos
 										ref="mapaTabDadosContratuais" />
 									</div>
 									<div class="tab-pane" id="dadosgerais" role="tabpanel">

@@ -13,6 +13,16 @@ class AtFaunaExecucaoRegistro extends Model
 
     protected $guarded = ['id'];
 
+    public function grupo_faunistico()
+    {
+        return $this->belongsTo(AtFaunaGrupoAmostradoModel::class, 'fk_grupo_amostrado');
+    }
+
+    public function campanhas()
+    {
+        return $this->belongsTo(AtFaunaExecucaoCampanha::class, 'fk_campanha');
+    }
+
     protected static function booted(): void
     {
         static::created(function (AtFaunaExecucaoRegistro $registro) {

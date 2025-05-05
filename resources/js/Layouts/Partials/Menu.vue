@@ -27,7 +27,7 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                 <NavLink route-name="dashboard" title="Dashboard" :icon="IconLayoutDashboard" />
 
                                 <!-- Contratos -->
-                                <NavDropdown prefix="contratos.*" title="Contratos" :icon="IconLayoutDashboard">
+                                <NavDropdown prefix="contratos.*" title="Fases de licenciamento" :icon="IconLayoutDashboard">
 
                                     <!-- Gestão Ambiental -->
                                     <NavDropdownLink route-name="contratos.gestao.listagem" param-name="tipo"

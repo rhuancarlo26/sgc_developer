@@ -14,6 +14,11 @@ class AfugentFaunaExecRegistroModel extends Model
 
     protected $guarded = ['id', 'created_at'];
 
+    public function grupo_faunistico()
+    {
+        return $this->belongsTo(AtFaunaGrupoAmostradoModel::class, 'id_grupo_amostrado');
+    }
+
     public function formaRegistro()
     {
         return $this->belongsTo(AfugentFaunaFormaRegistroModel::class, 'id_forma_registro');

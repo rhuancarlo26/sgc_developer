@@ -163,32 +163,36 @@ const fases_lp = reactive([
     fase: "FCA",
     status: props.empreendimentos2.fca_sei !== null ? 1 : 0,
     periodo: formatDateFromExcel(props.empreendimentos2.fca_data),
+    numero_sei: props.empreendimentos2.fca_sei !== null ? props.empreendimentos2.fca_sei : "", // Adiciona o número SEI
   },
   {
     id: 2,
     fase: "TR de Estudos",
     status: props.empreendimentos2.tre_sei_dnit !== null ? 1 : 0,
+    sei: (props.empreendimentos2.tre_sei_dnit),
     periodo: formatDateFromExcel(props.empreendimentos2.tre_data),
+    numero_sei: props.empreendimentos2.tre_sei_dnit !== null ? props.empreendimentos2.tre_sei_dnit : "", // Adiciona o número SEI
   },
   {
     id: 3,
     fase: "Plano de Trabalho",
     status: status_lp_pt,
-    periodo: formatDateFromExcel(
-      props.empreendimentos2.plano_de_trabalho_aprovado
-    ),
+    periodo: formatDateFromExcel(props.empreendimentos2.plano_de_trabalho_aprovado),
+    numero_sei: props.empreendimentos2.plano_de_trabalho_entregue !== null ? props.empreendimentos2.plano_de_trabalho_entregue : "", // Adiciona o número SEI
   },
   {
     id: 4,
     fase: "OSE",
     status: status_lp_ose,
     periodo: formatDateFromExcel(props.empreendimentos2.ose_data),
+    numero_sei: props.empreendimentos2.ose_sei !== null ? props.empreendimentos2.ose_sei : "", // Adiciona o número SEI
   },
   {
     id: 5,
     fase: "Estudo Ambiental",
     status: status_estudos,
     periodo: lp_estudos_periodo,
+    
   },
   {
     id: 6,
@@ -285,7 +289,12 @@ if (props.fm_pba_estudos_empreendimento.length > 0) {
 }
 
 const fases_li = reactive([
-  { id: 1, fase: "PBA", status: li_status_estudos, periodo: li_data_estudos },
+  { id: 1, 
+    fase: "PBA", 
+    status: li_status_estudos, 
+    periodo: li_data_estudos,
+    numero_sei: props.fm_pba_estudos_empreendimento.versao_aceita_sei !== null ? props.fm_pba_estudos_empreendimento.versao_aceita_sei : "", // Adiciona o número SEI 
+  },
   {
     id: 2,
     fase: "Requerimento Externo",
@@ -803,12 +812,14 @@ const fases_iphan = reactive([
     fase: "TR de Estudos",
     status: tre_iphan_status,
     periodo: tre_iphan_data,
+    numero_sei: props.empreendimentos2.tre_sei_dnit !== null ? props.empreendimentos2.tre_sei_dnit : "", // Adiciona o número SEI
   },
   {
     id: 3,
     fase: "PAIPA",
     status: paipa_iphan_status,
     periodo: paipa_iphan_data,
+    
   },
   {
     id: 4,

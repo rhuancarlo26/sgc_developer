@@ -10,7 +10,6 @@ import axios from 'axios';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Navbar from '../../../Navbar.vue';
-import { router } from '@inertiajs/vue3';
 
 
 const props = defineProps({
@@ -175,7 +174,7 @@ const getCoordenadas = async () => {
     }
 
     form_trecho.cod_emp = `${form_trecho.rodovia.rodovia}/${
-      Array.from(ufsProcessadas.value).join('+')
+      Array.from(ufsProcessadas.value).join('/')
     }-${form_trecho.km_inicial}_${form_trecho.km_final}`;
     
     showMap.value = true;

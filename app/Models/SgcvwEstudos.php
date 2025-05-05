@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class SgcvwEstudos extends Model
 {
+
     use HasFactory;
+
     protected $fillable = [
         'contrato_id',
         'cod_emp',
@@ -99,4 +101,12 @@ class SgcvwEstudos extends Model
         'aut_ext_sei', //CI
         'aut_ext_data', //CJ
     ];
+    public function changelogs()
+    {
+        return $this->hasMany(ChangeLog::class, 'record_id')
+            ->where('table_name', 'sgcvw_estudos')
+            ->with('user')
+            ->orderBy('created_at', 'desc');
+    }
+
 }

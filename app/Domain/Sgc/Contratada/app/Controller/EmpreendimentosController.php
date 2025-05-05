@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Domain\Sgc\Contratada\app\Services\RelatorioService;
 use Inertia\Inertia;
 use Inertia\Response;
+// use App\Imports\YourImportClass;
 use App\Domain\Sgc\Contratada\app\Imports\YourImportClass;
 use App\Domain\Sgc\Contratada\app\Services\ContratosService;
 use App\Domain\Sgc\Contratada\app\Services\EmpreendimentosService;
@@ -17,6 +18,7 @@ use App\Models\DashexcelEmpreendimentos;
 use App\Models\SgcvwEmpreendimentos;
 use App\Models\SgcvwEstudos;
 use App\Models\Sgcvwempfases;
+use App\Models\ChangeLog;
 
 use Illuminate\Support\Facades\Schema;
 
@@ -25,11 +27,13 @@ use Illuminate\Support\Facades\Schema;
 class EmpreendimentosController extends Controller
 {
     public function __construct(
-        private readonly EmpreendimentosService $empreendimentoService, private readonly ContratosService $contratosService)
-    {
+        private readonly EmpreendimentosService $empreendimentoService,
+        private readonly ContratosService $contratosService
+    ) {
     }
     //
-    public function import(Request $request, $empreendimento) {
+    public function import(Request $request, $empreendimento)
+    {
         $file = $request->file('excel_file');
         Excel::import(new YourImportClass, $file);
         return redirect()->back()->with('success', 'Arquivo Excel importado com sucesso.');
@@ -37,12 +41,36 @@ class EmpreendimentosController extends Controller
     /**
      * Empreendimentos: Sistema de Edição Interativo no Front-End --------------------------------------------------------
      */
+    /**
+     * Empreendimentos: Sistema de Edição Interativo no Front-End --------------------------------------------------------
+     */
     public function editavel(): Response
     {
-      $empreendimentos = SgcvwEmpreendimentos::all();
-      return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/Edicao', [
-        'empreendimentos' => $empreendimentos,
-      ]);
+        //   $empreendimentos = SgcvwEmpreendimentos::all();
+        // $latestChanges = Changelog::select('id', 'record_id', 'field', 'old_value', 'new_value', 'user_id', 'created_at')
+        //     ->where('table_name', 'sgcvw_empreendimentos')
+        //     ->orderByDesc('created_at');
+
+        // $empreendimentos = SgcvwEmpreendimentos::query()
+        //     ->leftJoinSub($latestChanges, 'last_changes', function ($join) {
+        //         $join->on('sgcvw_empreendimentos.id', '=', 'last_changes.record_id');
+        //     })
+        //     ->leftJoin('users', 'users.id', '=', 'last_changes.user_id')
+        //     ->select(
+        //         'last_changes.field as change_field',
+        //         'last_changes.old_value',
+        //         'last_changes.new_value',
+        //         'last_changes.user_id as change_user_id',
+        //         'last_changes.created_at as change_date',
+        //         'users.name as change_user_name',
+        //         'sgcvw_empreendimentos.*'
+        //     )
+        //     ->groupBy('sgcvw_empreendimentos.id')
+        //     ->get();
+        $empreendimentos = SgcvwEmpreendimentos::with(['changelogs'])->get();
+        return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/Edicao', [
+            'empreendimentos' => $empreendimentos,
+        ]);
     }
     public function editavelestudos(): Response
     {
@@ -68,6 +96,7 @@ class EmpreendimentosController extends Controller
 
         // Se o campo existe
         if (Schema::hasColumn('sgcvw_empreendimentos', $campo)) {
+            $old_value = $empreendimento->getOriginal($campo);
             $empreendimento->update([$campo => $valor]);
             // return response()->json(['success' => true, 'message' => 'Campo atualizado com sucesso!']);
             return redirect()->back()->with('success', 'Empreendimento atualizado com sucesso!');
@@ -111,17 +140,22 @@ class EmpreendimentosController extends Controller
         $searchParams = $request->all('columns', 'value');
 
         $contratos = $this->contratosService->Contratos($tipo, $searchParams);
-        
+        #############################################################################################################
         // filtros em estudos para a timeline - Família EIA
         $where_familia_eia = [
             'cod_emp' => $empreendimentos2->cod_emp,
             'familia' => 'EIA'
         ];
-        
+        #############################################################################################################
         // filtros em estudos para a timeline - Família EIA
         $fm_eia_estudos_empreendimento = SgcvwEstudos::where($where_familia_eia)->get();
-        
-        
+        // $fm_eia_estudos_familia_status = SgcvwEstudos::where($where_familia_eia)->whereNull('familia')->doesntExist();
+        // $fm_eia_estudos_familia_va_sei = SgcvwEstudos::where($where_familia_eia)->whereNull('versao_aceita_sei')->doesntExist();
+        // $fm_eia_estudos_familia_rq_ext = SgcvwEstudos::where($where_familia_eia)->whereNull('req_ext_sei')->doesntExist();
+        // $fm_eia_estudos_fa_aut_ext_sei = SgcvwEstudos::where($where_familia_eia)->whereNull('aut_ext_sei')->doesntExist();
+        // $fm_eia_estudos_f_data_req_ext = SgcvwEstudos::where($where_familia_eia)->max('req_ext_data');
+        // $fm_eia_estudos_fa_aut_ext_dta = SgcvwEstudos::where($where_familia_eia)->max('aut_ext_data');
+        #############################################################################################################
         // filtros em estudos para a timeline - Família PBA
         $where_familia_pba = [
             'cod_emp' => $empreendimentos2->cod_emp,
@@ -129,21 +163,27 @@ class EmpreendimentosController extends Controller
         ];
         // Família PBA ESTUDOS
         $fm_pba_estudos_empreendimento = SgcvwEstudos::where($where_familia_pba)->get();
-                
+        // $fm_pba_estudos_familia_status = SgcvwEstudos::where($where_familia_pba)->whereNull('familia')->doesntExist();
+        // $fm_pba_estudos_familia_va_sei = SgcvwEstudos::where($where_familia_pba)->whereNull('versao_aceita_sei')->doesntExist();
+        // $fm_pba_estudos_familia_rq_ext = SgcvwEstudos::where($where_familia_pba)->whereNull('req_ext_sei')->doesntExist();
+        // $fm_pba_estudos_fa_aut_ext_sei = SgcvwEstudos::where($where_familia_pba)->whereNull('aut_ext_sei')->doesntExist();
+        // $fm_pba_estudos_f_data_req_ext = SgcvwEstudos::where($where_familia_pba)->max('req_ext_data');
+        // $fm_pba_estudos_fa_aut_ext_dta = SgcvwEstudos::where($where_familia_pba)->max('aut_ext_data');
+        #############################################################################################################
         // filtros em estudos para a timeline - Item Edital 3.1.1
         $where_itemedital_311 = [
             'cod_emp' => $empreendimentos2->cod_emp,
             'item_edital' => '3.1.1'
         ];
         $abio_emp_estudos_311 = SgcvwEstudos::where($where_itemedital_311)->get();
-        
+        #############################################################################################################
         // filtros em estudos para a timeline - Familia ASV
         $where_familia_asv = [
             'cod_emp' => $empreendimentos2->cod_emp,
             'familia' => 'ASV'
         ];
         $asv_emp_estudos = SgcvwEstudos::where($where_familia_asv)->get();
-        
+        #############################################################################################################
         // filtros em estudos para a timeline - Item Edital 5.3.1
         $iphan_emp_estudos_521 = SgcvwEstudos::where(['cod_emp' => $empreendimentos2->cod_emp])->where('item_edital', 'like', '%5.2.1%')->get();
         $iphan_emp_estudos_531 = SgcvwEstudos::where(['cod_emp' => $empreendimentos2->cod_emp])->where('item_edital', 'like', '%5.3.1%')->get();
@@ -155,7 +195,7 @@ class EmpreendimentosController extends Controller
             'empreendimentos' => $subprodutos_por_empreendimento,
             'estudos' => $estudos,
             'subprodutos' => $subprodutos,
-            'empreendimentos2' =>$empreendimentos2,
+            'empreendimentos2' => $empreendimentos2,
             'fases' => $fases,
             // EIA
             'fm_eia_estudos_empreendimento' => $fm_eia_estudos_empreendimento,

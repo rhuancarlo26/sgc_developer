@@ -137,4 +137,129 @@ class RegistrosService extends BaseModelService
             return $date->format('Y-m-d');
         }
     }
+
+
+    public function graficos_monitora_atp(Servicos $servico): array
+    {
+        $allRegistros = AtFaunaExecucaoRegistro::with(['grupo_faunistico', 'campanhas'])->where('fk_servico', $servico->id)
+            ->get();
+
+        $especiesGroup = $allRegistros->filter(function ($registro) {
+            return !empty($registro->especie);
+        })->groupBy('especie');
+
+        $sortedEspeciesGroup = $especiesGroup->sortByDesc(function ($grupo) {
+            return $grupo->count();
+        });
+
+        return [
+            'especiesGroup' => $sortedEspeciesGroup,
+            'chartDataPieAbundancia'  => $this->getChartDataPieAbundancia($allRegistros),
+            'chartDataPieDiversidade' => $this->getChartDataPieDiversidade($allRegistros),
+            'getChartDataBarCampanhas'            => $this->getChartDataBarCampanhas($allRegistros),
+            'chartDataBar2'           => $this->getChartDataBar2($especiesGroup)
+            //   'modulos' => ServicoMonitoraFaunaConfigModuloAmostral::with('armadilhas')->where('fk_servico', $servico->id)->get(['id', 'tamanho_modulo']),
+        ];
+    }
+
+    private function getChartDataBarCampanhas($allRegistros): array
+    {
+        $groupCampanhas = $allRegistros->groupBy(function ($registro) {
+            return $registro->campanhas
+                ? $registro->campanhas->id
+                : 'Sem Campanha';
+        });
+
+        return [
+            'labels'   => $groupCampanhas->keys()->toArray(),
+            'datasets' => [
+                [
+                    'label'           => 'Ocorrências',
+                    'data'            => $groupCampanhas->map(function ($grupo) {
+                        return $grupo->count();
+                    })->values()->toArray(),
+                    'backgroundColor' => "#007bff",
+                    'borderRadius'    => 5,
+                ],
+            ],
+        ];
+    }
+
+
+    private function getChartDataPieAbundancia($allRegistros): array
+    {
+        $abundancia = $allRegistros->groupBy(function ($registro) {
+
+            return $registro->grupo_faunistico
+                ? $registro->grupo_faunistico->nome
+                : 'Sem Grupo';
+        })->map(function ($grupoRegistros, $grupoNome) {
+            return [
+                'grupo_faunistico' => $grupoNome,
+                'total' => $grupoRegistros->count(),
+            ];
+        })->values();
+
+        return [
+            'labels' => $abundancia->pluck('grupo_faunistico')->toArray(),
+            'datasets' => [
+                [
+                    'data' => $abundancia->pluck('total')->toArray(),
+                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'borderColor' => "#ffffff",
+                    'borderWidth' => 2,
+                ],
+            ],
+        ];
+    }
+
+    private function getChartDataPieDiversidade($allRegistros): array
+    {
+        $diversidade = $allRegistros->groupBy(function ($registro) {
+            return $registro->grupo_faunistico
+                ? $registro->grupo_faunistico->nome
+                : 'Sem Grupo';
+        })->map(function ($grupoRegistros, $grupoNome) {
+            $uniqueSpecies = $grupoRegistros->pluck('especie')->unique();
+            return [
+                'grupo_faunistico' => $grupoNome,
+                'total' => $uniqueSpecies->count(),
+            ];
+        })->values();
+
+        return [
+            'labels' => $diversidade->pluck('grupo_faunistico')->toArray(),
+            'datasets' => [
+                [
+                    'data' => $diversidade->pluck('total')->toArray(),
+                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'borderColor' => "#ffffff",
+                    'borderWidth' => 2,
+                ],
+            ],
+        ];
+    }
+
+    private function getChartDataBar2($especiesGroup): array
+    {
+        // Ordena os grupos de acordo com a contagem de ocorrências (do maior para o menor)
+        $sortedGroup = $especiesGroup->sortByDesc(function ($grupo) {
+            return $grupo->count();
+        });
+
+        return [
+            'labels' => $sortedGroup->keys()->toArray(),
+            'datasets' => [
+                [
+                    'label' => 'Ocorrências',
+                    'data' => $sortedGroup->map(function ($grupo) {
+                        return $grupo->count();
+                    })->values()->toArray(),
+                    'backgroundColor' => "rgba(30, 144, 255, 0.8)",
+                    'borderColor' => "rgba(30, 144, 255, 1)",
+                    'borderWidth' => 1,
+                ],
+            ],
+        ];
+    }
 }

@@ -36,6 +36,7 @@ const filtersEmp = reactive({
   empreendimento: "",
   criticidade: "",
   prioridade: "",
+  ose_sei: "",
 });
 
 let contagemDeItens = ref(0);
@@ -43,6 +44,34 @@ let lista = ref([]);
 let currentFilter = ref(null);
 const listaEmp = ref([]);
 const mostraTable = ref(true);
+
+// Redireciona ao clicar na linha
+const acessarEmpreendimento = (trecho) => {
+  window.location.href = route('sgc.gestao.dashboard.empreendimento.index', {
+    tipo: props.tipo,
+    empreendimento: trecho.id,
+  });
+};
+
+// Contagem de Estudos em Andamento 
+const estudosEmAndamento = computed(() => {
+  return empreendimentosFiltrados.value.filter(emp => emp.ose_sei && emp.ose_sei.trim() !== '').length;
+});
+
+// Contagem de Estudos no Total 
+const estudosTotal = computed(() => {
+  return empreendimentosFiltrados.value.filter(emp => emp.contrato_est_ambiental && emp.contrato_est_ambiental.trim() !== '').length;
+});
+
+const formatarData = (data) => {
+  if (!data) return ''; 
+  const dataObj = new Date(data);
+  if (isNaN(dataObj)) return data; 
+  const dia = String(dataObj.getDate()).padStart(2, '0');
+  const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+  const ano = dataObj.getFullYear();
+  return `${dia}/${mes}/${ano}`;
+};
 
 // Função para ordenar a tabela
 const ordenarTabela = (coluna) => {
@@ -100,13 +129,43 @@ const submitForm = () => {
     });
 };
 
+// Valores únicos de contrato_est_ambiental para o dropdown
+const valoresContratoEstAmbiental = computed(() => {
+  const valores = props.empreendimentos
+    .map(emp => emp.contrato_est_ambiental)
+    .filter(val => val && val.trim() !== ''); 
+  return [...new Set(valores)];
+});
+
+const contratoEstAmbientalSelecionado = ref(null);
+
+const atualizarFiltroContratoEstAmbiental = () => {
+  setTimeout(() => {
+    let empreendimentosFiltrados = props.empreendimentos.filter(trecho => trecho.coordenadas);
+
+    if (contratoEstAmbientalSelecionado.value) {
+      empreendimentosFiltrados = empreendimentosFiltrados.filter(
+        trecho => trecho.contrato_est_ambiental === contratoEstAmbientalSelecionado.value
+      );
+    }
+
+    if (currentFilter.value === 'ose') {
+      empreendimentosFiltrados = empreendimentosFiltrados.filter(
+        trecho => trecho.ose_sei && trecho.ose_sei.trim() !== ''
+      );
+    } else if (currentFilter.value === 's/ose') {
+      empreendimentosFiltrados = empreendimentosFiltrados.filter(
+        trecho => !trecho.ose_sei || trecho.ose_sei.trim() === ''
+      );
+    }
+
+    mapaVisualizarTrecho.value.setGeoJson(empreendimentosFiltrados, 6);
+  }, 500);
+};
+
 const toggleFilter = (filter) => {
   currentFilter.value = currentFilter.value === filter ? null : filter;
-
-  setTimeout(() => {
-    const empreendimentos = props.empreendimentos.filter(trecho => trecho.coordenadas);
-    mapaVisualizarTrecho.value.setGeoJson(empreendimentos, 6, currentFilter.value);
-  }, 500);
+  atualizarFiltroContratoEstAmbiental();
 };
 
 onMounted(() => {
@@ -148,6 +207,7 @@ const filtrarempreendimentos = () => {
   formData.append("cod_emp", filtersEmp.empreendimento);
   formData.append("criticidade", filtersEmp.criticidade);
   formData.append("prioridade", filtersEmp.prioridade);
+  formData.append("ose_sei", filtersEmp.ose_sei);
 
   axios.post(route('sgc.gestao.dashboard.searchempreendimentos', { tipo: props.tipo }), formData, {
     headers: {
@@ -162,6 +222,30 @@ const filtrarempreendimentos = () => {
       console.error(error);
     });
 };
+
+const empreendimentosFiltrados = computed(() => {
+  let filtrados = props.empreendimentos;
+
+  // Aplica o filtro de contrato_est_ambiental, se um valor estiver selecionado
+  if (contratoEstAmbientalSelecionado.value) {
+    filtrados = filtrados.filter(
+      trecho => trecho.contrato_est_ambiental === contratoEstAmbientalSelecionado.value
+    );
+  }
+
+  // Aplica os outros filtros (OSE e Não tem OSE), se ativos
+  if (currentFilter.value === 'ose') {
+    filtrados = filtrados.filter(
+      trecho => trecho.ose_sei && trecho.ose_sei.trim() !== ''
+    );
+  } else if (currentFilter.value === 's/ose') {
+    filtrados = filtrados.filter(
+      trecho => !trecho.ose_sei || trecho.ose_sei.trim() === ''
+    );
+  }
+
+  return filtrados;
+});
 </script>
 
 <template>
@@ -173,11 +257,6 @@ const filtrarempreendimentos = () => {
           <Breadcrumb class="align-self-center" :links="[
             { route: '#', label: `Gestão de Contratos - ${props.tipo.nome}` }
           ]" />
-          <div>
-            <Link class="btn btn-info me-2 w-500" :href="route('sgc.gestao.dashboard.empreendimento.create', { tipo: props.tipo.id })">
-              Inserir empreendimento <IconPlus />
-            </Link>
-          </div>
         </div>
       </template>
       <Navbar :tipo="tipo">
@@ -201,22 +280,64 @@ const filtrarempreendimentos = () => {
               </template>
               <template #tab2>
                 <div class="row my-5">
-                  <div class="col-md-12 mb-3">
-                    <h2>Layers</h2>
-                    <div class="col-md-6 mb-3">
-                      <button type="button" class="btn strong btn-outline-success col-4 mb-2 me-3" :class="{ 'ose-active': currentFilter === 'ose' }" @click="toggleFilter('ose')">
-                        OSE
-                      </button>
-                      <button type="button" class="btn strong btn-outline-danger col-4 mb-2" :class="{ 'nao-ose-active': currentFilter === 's/ose' }" @click="toggleFilter('s/ose')">
-                        Não tem OSE
-                      </button>
+
+                  <div class="col-md-12 mb-3" v-show="mostraTable">
+                    <div class="d-flex">
+                      <div>
+                        <DashboardMap ref="mapaVisualizarTrecho" height="600px" width="1300px" :manual-render="true" />
+                      </div>
+                      <div class="ms-3" style="flex: 1;">
+                        <div class="col-md-12 mb-3" style="text-align: center;">
+                          <h2>Layers</h2>
+                        </div>
+                        <div style="text-align: center;">
+                          <button type="button" class="btn strong btn-outline-success col-4 mb-2 me-3" :class="{ 'ose-active': currentFilter === 'ose' }" @click="toggleFilter('ose')">
+                            OSE
+                          </button>
+                          <button type="button" class="btn strong btn-outline-danger col-4 mb-2" :class="{ 'nao-ose-active': currentFilter === 's/ose' }" @click="toggleFilter('s/ose')">
+                            Não tem OSE
+                          </button>
+                        </div>
+                        <!-- Dropdown para filtro de contrato_est_ambiental -->
+                        <div style="text-align: center; margin-top: 20px;">
+                          <select v-model="contratoEstAmbientalSelecionado" @change="atualizarFiltroContratoEstAmbiental" class="form-control" style="width: 200px; margin: 0 auto;">
+                            <option :value="null">Selecionar Contrato</option>
+                            <option
+                              v-for="valor in valoresContratoEstAmbiental"
+                              :key="valor"
+                              :value="valor"
+                            >
+                              {{ valor }}
+                            </option>
+                          </select>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 50px;">
+                          <div class="card text-black bg-light mb-3" style="max-width: 18rem; margin: 0 auto;">
+                            <div class="card-header">Número de Estudos em Andamento</div>
+                            <div class="card-body">
+                              <h3 class="card-text">{{ estudosEmAndamento }}</h3>
+                            </div>
+                          </div>
+                          <div class="card text-gray bg-light mb-3" style="max-width: 18rem; margin: 0 auto;">
+                            <div class="card-header">Número de Estudos no Total</div>
+                            <div class="card-body">
+                              <h3 class="card-text">{{ estudosTotal }}</h3>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
                     </div>
                   </div>
-                  <div class="col-md-12 mb-3" v-show="mostraTable">
-                    <DashboardMap ref="mapaVisualizarTrecho" height="600px" :manual-render="true" />
-                  </div>
+
                   <div class="col-md-12"><hr /></div>
                   <div class="col-md-12" v-show="mostraTable">
+                    <div>
+                    <Link class="btn btn-info me-2 w-500" :href="route('sgc.gestao.dashboard.empreendimento.create', { tipo: props.tipo.id })">
+                      Inserir empreendimento <IconPlus />
+                    </Link>
+                  </div>
                     <div class="my-4 bg-light row">
                       <form @submit.prevent="filtrarempreendimentos" class="row g-3">
                         <div class="mx-3 col">
@@ -240,6 +361,14 @@ const filtrarempreendimentos = () => {
                             <option class="form-option" value="Alta">Alta</option>
                           </select>
                         </div>
+                        <div class="mx-3 col">
+                          <label class="form-label">OSE</label>
+                          <select class="form-control form-select" v-model="filtersEmp.ose_sei">
+                            <option value="">Todos</option>
+                            <option value="com_ose">Possui OSE</option>
+                            <option value="sem_ose">Não tem OSE</option>
+                          </select>
+                        </div>
                         <div class="mx-3 col-12">
                           <button class="btn btn-secondary" type="submit">Pesquisar</button>
                         </div>
@@ -247,7 +376,7 @@ const filtrarempreendimentos = () => {
                       <div class="clearfix"><br /></div>
                     </div>
                     <div class="table-responsive mb-4">
-                      <table class="table card-table table-bordered table-hover">
+                      <table class="table card-table table-bordered">
                         <thead>
                           <tr style="text-align: center;">
                             <th @click="ordenarTabela('cod_emp')" style="cursor: pointer; vertical-align: middle;">Empreendimento</th>
@@ -338,4 +467,9 @@ const filtrarempreendimentos = () => {
   background-color: #dc3545;
   color: white;
 }
+
+tbody tr:hover td:not(.acao) {
+  background-color: #f5f5f5; 
+}
+
 </style>

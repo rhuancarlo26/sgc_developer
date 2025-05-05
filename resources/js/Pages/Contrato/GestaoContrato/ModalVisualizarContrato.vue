@@ -198,7 +198,7 @@ defineExpose({ abrirModal });
                           <td>{{ trecho.rodovia?.rodovia }}</td>
                           <td>{{ trecho.km_inicial }}</td>
                           <td>{{ trecho.km_final }}</td>
-                          <td>{{ trecho.trecho_tipo }}</td>
+                          <td>{{ trecho.tipo_trecho }}</td>
                         </tr>
                       </tbody>
                     </table>
