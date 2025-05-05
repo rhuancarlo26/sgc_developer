@@ -10,7 +10,6 @@ import axios from 'axios';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Navbar from '../../../Navbar.vue';
-import { router } from '@inertiajs/vue3';
 
 
 const props = defineProps({
@@ -26,8 +25,8 @@ const mapaVisualizarTrecho = ref();
 const uf_rodovias = ref([]);
 const showMap = ref(false);
 const toast = useToast();
-let coordenadasIniciais = []; // Mantém as coordenadas acumuladas
-let contadorGet = 0; // Contador persistente entre chamadas
+const trechosAcumulados = ref([]);
+const ufsProcessadas = ref(new Set());
 
 const form_trecho = useForm({
   contrato_est_ambiental: props.empreendimento?.contrato_est_ambiental ?? null,
@@ -55,54 +54,139 @@ const visualizarTrecho = async () => {
   }
 };
 
+const removerDuplicados = (coordenadas) => {
+  if (coordenadas.length <= 1) return coordenadas;
+
+  // Passo 1: Remove duplicatas em qualquer posição
+  const coordenadasVistas = new Set();
+  const coordenadasUnicas = [];
+
+  for (let i = 0; i < coordenadas.length; i++) {
+    const coordStr = JSON.stringify(coordenadas[i]);
+    if (!coordenadasVistas.has(coordStr)) {
+      coordenadasVistas.add(coordStr);
+      coordenadasUnicas.push(coordenadas[i]);
+    }
+  }
+
+  // Passo 2: Verifica novamente se o primeiro e o último ponto são iguais
+  if (coordenadasUnicas.length > 1) {
+    const primeiroPonto = coordenadasUnicas[0];
+    const ultimoPonto = coordenadasUnicas[coordenadasUnicas.length - 1];
+    if (JSON.stringify(primeiroPonto) === JSON.stringify(ultimoPonto)) {
+      coordenadasUnicas.pop(); // Remove o último ponto para evitar loop
+    }
+  }
+
+  return coordenadasUnicas;
+};
+// Função para concatenar dois GeoJSONs (LineString)
+const concatenarGeoJson = (trechoAnterior, novoTrecho) => {
+  if (!trechoAnterior || !novoTrecho) {
+    return novoTrecho || trechoAnterior || { type: 'LineString', coordinates: [] };
+  }
+
+  let trechoAnteriorObj = trechoAnterior;
+  if (typeof trechoAnterior[0] === 'string') {
+    try {
+      trechoAnteriorObj = JSON.parse(trechoAnterior[0]);
+    } catch (e) {
+      console.error('Erro ao parsear trecho anterior:', e);
+      throw new Error('Formato inválido para trecho anterior');
+    }
+  }
+
+  const novoTrechoObj = typeof novoTrecho === 'string' ? JSON.parse(novoTrecho) : novoTrecho;
+
+  if (trechoAnteriorObj.type !== 'LineString' || novoTrechoObj.type !== 'LineString') {
+    console.error('Ambos os trechos devem ser LineString:', { trechoAnteriorObj, novoTrechoObj });
+    throw new Error('Ambos os trechos devem ser LineString');
+  }
+
+  const coordsAnterior = trechoAnteriorObj.coordinates;
+  const coordsNovo = novoTrechoObj.coordinates;
+
+  const primeiroAnterior = coordsAnterior[0];
+  const ultimoAnterior = coordsAnterior[coordsAnterior.length - 1];
+  const primeiroNovo = coordsNovo[0];
+  const ultimoNovo = coordsNovo[coordsNovo.length - 1];
+
+  // Decide se novoTrecho deve vir antes ou depois com base na distância
+  const dist1 = getDistancia(ultimoAnterior, primeiroNovo); // concat normal
+  const dist2 = getDistancia(ultimoNovo, primeiroAnterior); // concat invertido
+
+  let coordsConcatenadas;
+  if (dist1 <= dist2) {
+    // concat: anterior + novo
+    const mesmoPonto = JSON.stringify(ultimoAnterior) === JSON.stringify(primeiroNovo);
+    coordsConcatenadas = [
+      ...coordsAnterior,
+      ...(mesmoPonto ? coordsNovo.slice(1) : coordsNovo)
+    ];
+  } else {
+    // concat: novo + anterior
+    const mesmoPonto = JSON.stringify(ultimoNovo) === JSON.stringify(primeiroAnterior);
+    coordsConcatenadas = [
+      ...coordsNovo,
+      ...(mesmoPonto ? coordsAnterior.slice(1) : coordsAnterior)
+    ];
+  }
+
+  return {
+    type: 'LineString',
+    coordinates: removerDuplicados(coordsConcatenadas)
+  };
+};
+
+// Função auxiliar para distância Euclidiana simples (pode trocar por Haversine se quiser mais precisão)
+const getDistancia = (p1, p2) => {
+  const dx = p1[0] - p2[0];
+  const dy = p1[1] - p2[1];
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+
+
 const getCoordenadas = async () => {
-  const parametros = {
+  const params = {
     uf: form_trecho.uf.uf,
     rodovia: form_trecho.rodovia.rodovia,
     km_inicial: form_trecho.km_inicial,
     km_final: form_trecho.km_final,
     trecho_tipo: form_trecho.tipo_trecho,
     cd_tipo: form_trecho.cd_tipo,
+    concatenar: trechosAcumulados.value.length > 0
   };
 
   try {
+    const {data} = await axios.get(route("sgc.gestao.dashboard.geojson", params));
+    console.log(data)
+    ufsProcessadas.value.add(form_trecho.uf.uf);
 
-    const retorno = await axios.get(route("sgc.gestao.dashboard.geojson", parametros));
-    const novoTrecho = JSON.parse(retorno.data);
+    if (params.concatenar) {
+      const geojsonConcatenado = concatenarGeoJson(trechosAcumulados.value, data);
 
-    if (contadorGet === 0) {
-      coordenadasIniciais.push(novoTrecho);
-      form_trecho.cod_emp = `${form_trecho.rodovia.rodovia}/${form_trecho.uf.uf}-${form_trecho.km_inicial}_${form_trecho.km_final}`;
-
+      trechosAcumulados.value = [geojsonConcatenado]; 
+      form_trecho.coordenada = JSON.stringify(geojsonConcatenado);
     } else {
-
-      coordenadasIniciais[0].coordinates = coordenadasIniciais[0].coordinates.concat(novoTrecho.coordinates);
-      const array = form_trecho.cod_emp.split('-')
-      const uf = form_trecho.uf.uf;
-
-      array.splice(1, 0, uf);
-
-      const resultadoFinal = `${array[0]}/${array[1]}-${array[2]}`;
-      form_trecho.cod_emp = resultadoFinal;
+      trechosAcumulados.value.push(data);
+      form_trecho.coordenada = data;
     }
 
-    form_trecho.coordenada = JSON.stringify(coordenadasIniciais[0]);
-
-    contadorGet++;
-
+    form_trecho.cod_emp = `${form_trecho.rodovia.rodovia}/${
+      Array.from(ufsProcessadas.value).join('/')
+    }-${form_trecho.km_inicial}_${form_trecho.km_final}`;
+    
     showMap.value = true;
-
     await visualizarTrecho();
 
-  } catch (e) {
-    console.log(e);
-    if (typeof toast !== 'undefined') {
-      toast.error('Erro ao buscar as coordenadas');
-    } else {
-      console.error('Toast não definido. Verifique a implementação.');
-    }
+  } catch (error) {
+    console.error("Erro ao buscar coordenadas:", error);
+    toast.error(error.response?.data?.message || 'Erro ao processar trecho');
   }
 };
+
+
 
 const storeEmpreendimentos = async () => {
   const parametros = {
@@ -236,29 +320,31 @@ onMounted(() => {
               </div>
 
               <div class="col-md-4 my-4">
-                <InputLabel value="Km Inicial" for="km_inicial" />
-                <input
-                  type="number"
-                  step="any"
-                  id="km_inicial"
-                  name="km_inicial"
-                  class="form-control"
-                  v-model="form_trecho.km_inicial"
-                />
-                <InputError />
+                <InputLabel value="UF" for="ufs" />
+                <select
+                  name="uf"
+                  id="uf"
+                  class="form-control form-select"
+                  v-model="form_trecho.uf"
+                >
+                  <option v-for="uf in props.ufs" :key="uf.id" :value="uf">
+                    {{ uf.uf }}
+                  </option>
+                </select>
               </div>
 
               <div class="col-md-4 my-4">
-                <InputLabel value="Km Final" for="km_final" />
-                <input
-                  type="number"
-                  step="any"
-                  id="km_final"
-                  name="km_final"
-                  class="form-control"
-                  v-model="form_trecho.km_final"
-                />
-                <InputError />
+                <InputLabel value="BR" for="ufs" />
+                <select
+                  name="brs"
+                  id="brs"
+                  class="form-control form-select"
+                  v-model="form_trecho.rodovia"
+                >
+                  <option v-for="br in uf_rodovias" :key="br.id" :value="br">
+                    {{ br.rodovia }}
+                  </option>
+                </select>
               </div>
 
               <div class="col-md-4 my-4">
@@ -292,31 +378,29 @@ onMounted(() => {
               </div>
 
               <div class="col-md-4 my-4">
-                <InputLabel value="UF" for="ufs" />
-                <select
-                  name="uf"
-                  id="uf"
-                  class="form-control form-select"
-                  v-model="form_trecho.uf"
-                >
-                  <option v-for="uf in props.ufs" :key="uf.id" :value="uf">
-                    {{ uf.uf }}
-                  </option>
-                </select>
+                <InputLabel value="Km Inicial" for="km_inicial" />
+                <input
+                  type="number"
+                  step="any"
+                  id="km_inicial"
+                  name="km_inicial"
+                  class="form-control"
+                  v-model="form_trecho.km_inicial"
+                />
+                <InputError />
               </div>
 
               <div class="col-md-4 my-4">
-                <InputLabel value="BR" for="ufs" />
-                <select
-                  name="brs"
-                  id="brs"
-                  class="form-control form-select"
-                  v-model="form_trecho.rodovia"
-                >
-                  <option v-for="br in uf_rodovias" :key="br.id" :value="br">
-                    {{ br.rodovia }}
-                  </option>
-                </select>
+                <InputLabel value="Km Final" for="km_final" />
+                <input
+                  type="number"
+                  step="any"
+                  id="km_final"
+                  name="km_final"
+                  class="form-control"
+                  v-model="form_trecho.km_final"
+                />
+                <InputError />
               </div>
 
               <div class="col-md-4 my-4 d-flex flex-column justify-content-end align-items-start">
