@@ -23,7 +23,8 @@ class CronogController extends Controller
         $eventos = $this->cronogramaService->obterCronograma($contrato);
         return Inertia::render('Sgc/Contratada/Cronograma/Cronograma', [
             'eventos' => $eventos,
-            'contrato' => $contrato->id,
+            'contratoId' => $contrato->id, // Adiciona contratoId para consistência
+            'contrato' => ['id' => $contrato->id], // Passa o contrato como objeto com id
         ]);
     }
 
@@ -51,5 +52,4 @@ class CronogController extends Controller
         return redirect()->route('sgc.contratada.cronograma.index', $contrato->id)
             ->with('success', 'Evento auxiliar criado com sucesso!');
     }
-
 }

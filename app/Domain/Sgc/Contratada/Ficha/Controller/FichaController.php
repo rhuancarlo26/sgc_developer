@@ -37,6 +37,7 @@ class FichaController extends Controller
         return Inertia::render('Sgc/Contratada/Ficha Contratual/Index', [
             'fichaData' => $fichaData,
             'contratoId' => $contrato,
+            'contrato' => ['id' => $contratoObj->id], 
         ]);
     }
 }
