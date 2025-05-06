@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import Navbar from "./Navbar.vue";
+import NavbarContrato from "./NavbarContrato.vue";
 import { Chart } from "highcharts-vue";
 import { onMounted, reactive, ref, computed } from "vue";
 import PaginationSgc from '@/Components/PaginationSgc.vue';
@@ -85,15 +85,8 @@ const empreendimentoTable = (emp) => {
       valor_total = props.contrato.total;
     });
 
-    // chartOptions_radio.series[0].data = [
-    //   { name: 'Valor Medido', y: Number(soma_medidas.toFixed(0)), color: '#8cbbc4' },
-    //   { name: 'R$ OSE', y: Number(soma_ose.toFixed(0)), color: '#46aabd' },
-    //   { name: 'Total contrato', y: Number(valor_total.toFixed(0)), color: '#037c91' }
-    // ];
   });
 };
-
-
 
 // Controle e dados da tabela
 const tabelaItens = reactive([]);
@@ -179,13 +172,13 @@ const updateDisplayedItems = () => {
           </Link>
 
           <Link class="btn btn-info me-2 w-500"  :href="route('sgc.contratada.relatorios.index', {contrato: contrato.id})">
-            <IconClipboardData class="me-2" /> Relatorio de coordenação
+            <IconClipboardData class="me-2" /> Relatorio de Coordenação
           </Link>
         </div>
       </div>
     </template>
 
-    <Navbar :tipo="contrato">
+    <NavbarContrato :tipo="contrato">
 
       <template #body>        
         <div class="card">
@@ -256,7 +249,7 @@ const updateDisplayedItems = () => {
           </div>
         </div>
       </template>
-    </Navbar>
+    </NavbarContrato>
   </AuthenticatedLayout>
 </template>
 

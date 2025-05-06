@@ -2,7 +2,6 @@
 
 use App\Domain\Contrato\Contratada\DadosGerais\Empreendimento\Controller\StoreContratadaEmpreendimentoTrechoController;
 use Illuminate\Support\Facades\Route;
-
 use App\Domain\Sgc\Contratada\app\Controller\ContratoSgcController;
 use App\Domain\Sgc\Contratada\app\Controller\DashplanController;
 use App\Domain\Sgc\Contratada\app\Controller\EmpreendimentosController;
@@ -17,6 +16,9 @@ use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StatusUpdateController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\CreateController;
 use App\Domain\Sgc\Contratada\Dav\Controller\ListagemDavController;
 use App\Domain\Sgc\Contratada\Cronograma\Controller\CronogController;
+use App\Domain\Sgc\Contratada\Ficha\Controller\FichaController;
+use App\Domain\Sgc\Contratada\Quantitativos\Controller\QuantitativosController;
+
 use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
 
@@ -83,5 +85,14 @@ Route::prefix('/contratada')->group(function () {
 
     // Update Fóruns
     Route::post('/sgc/empreendimento/{id}/updatecampo', [EmpreendimentosController::class, 'updatecampo'])->name('sgc.contratada.empreendimento.updatecampo');
+
+    // Ficha Contratual
+    Route::get('{contrato}/ficha', [FichaController::class, 'index'])->name('sgc.contratada.ficha.index');
+
+    // Quantitativos
+    Route::get('{contrato}/quantitativos', [QuantitativosController::class, 'index'])->name('sgc.contratada.quantitativos.index');
+    
+
+   
 
 });

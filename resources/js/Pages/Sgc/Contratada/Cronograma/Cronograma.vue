@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Calendar from "@/Components/FullCalendar.vue";
-import Navbar from "../Navbar.vue";
+import NavbarContrato from "../NavbarContrato.vue";
 import axios from 'axios';
 
 const page = usePage();
@@ -152,7 +152,7 @@ const saveNewEvent = async () => {
 
 <template>
   <AuthenticatedLayout>
-    <Navbar>
+    <NavbarContrato>
       <template #body>
         <div class="container mt-4">
           <h3 class="title-cronograma">CRONOGRAMA FÍSICO</h3>
@@ -248,7 +248,7 @@ const saveNewEvent = async () => {
           </div>
         </div>
       </template>
-    </Navbar>
+    </NavbarContrato>
   </AuthenticatedLayout>
 </template>
 

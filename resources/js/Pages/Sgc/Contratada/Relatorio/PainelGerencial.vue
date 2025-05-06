@@ -233,17 +233,6 @@ const empreendimentosFiltrados = computed(() => {
     );
   }
 
-  // Aplica os outros filtros (OSE e Não tem OSE), se ativos
-  if (currentFilter.value === 'ose') {
-    filtrados = filtrados.filter(
-      trecho => trecho.ose_sei && trecho.ose_sei.trim() !== ''
-    );
-  } else if (currentFilter.value === 's/ose') {
-    filtrados = filtrados.filter(
-      trecho => !trecho.ose_sei || trecho.ose_sei.trim() === ''
-    );
-  }
-
   return filtrados;
 });
 </script>
