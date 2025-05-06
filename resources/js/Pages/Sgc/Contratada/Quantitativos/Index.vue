@@ -96,120 +96,122 @@
     onMounted(() => {
         console.log('Dados dos quantitativos:', data.value);
         console.log('Totais calculados:', totais.value);
+        console.log('Contrato no Quantitativos:', props.contrato);
     });
-    </script>
+
+</script>
     
-    <template>
-        <AuthenticatedLayout>
-            <Head :title="`Quantitativos - Contrato ${contratoId}`" />
-    
-            <template #header>
-                <div class="w-100 d-flex justify-content-between">
-                    <h2>Quantitativos - Contrato {{ contratoId }}</h2>
-                </div>
-            </template>
-    
-            <NavbarContrato :tipo="contrato">
-                <template #body>
-                    <div class="card">
-                        <div class="card-body">
-                            <label for="filtro-familia" class="me-2">Filtrar por Família:</label>
-                            <div class="filter-container mb-3">
-                                <select id="filtro-familia" v-model="filtroFamilia" class="form-select">
-                                    <option value="">Todas</option>
-                                    <option v-for="familia in familiasUnicas" :key="familia" :value="familia">
-                                        {{ familia }}
-                                    </option>
-                                </select>
+<template>
+    <AuthenticatedLayout>
+        <Head :title="`Quantitativos - Contrato ${contratoId}`" />
+
+        <template #header>
+            <div class="w-100 d-flex justify-content-between">
+                <!-- <h2>Quantitativos - Contrato {{ contratoId }}</h2> -->
+            </div>
+        </template>
+
+        <NavbarContrato :tipo="contrato">
+            <template #body>
+                <div class="card">
+                    <div class="card-body">
+                        <label for="filtro-familia" class="me-2">Filtrar por Família:</label>
+                        <div class="filter-container mb-3">
+                            <select id="filtro-familia" v-model="filtroFamilia" class="form-select">
+                                <option value="">Todas</option>
+                                <option v-for="familia in familiasUnicas" :key="familia" :value="familia">
+                                    {{ familia }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="w-100 d-flex justify-content-center align-items-center mb-3">
+                            <h3 class="subprodutos-title">QUANTITATIVOS - SUBPRODUTOS</h3>
+                        </div>
+                        <div v-if="data.error" class="alert alert-danger">
+                            {{ data.error }}
+                        </div>
+                        <div v-else-if="dataFiltrada.length > 0">
+                            <div class="chart-container">
+                                <h4></h4>
+                                <Doughnut :data="chartData" :options="chartOptions" />
                             </div>
-                            <div class="w-100 d-flex justify-content-center align-items-center mb-3">
-                                <h3 class="subprodutos-title">QUANTITATIVOS - SUBPRODUTOS</h3>
-                            </div>
-                            <div v-if="data.error" class="alert alert-danger">
-                                {{ data.error }}
-                            </div>
-                            <div v-else-if="dataFiltrada.length > 0">
-                                <div class="chart-container">
-                                    <h4></h4>
-                                    <Doughnut :data="chartData" :options="chartOptions" />
-                                </div>
-    
-                                <div class="table-responsive mt-4">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Cod. SIAC</th>
-                                                <th>Produto</th>
-                                                <th>Subproduto</th>
-                                                <th>Família</th>
-                                                <th>Descrição SIAC</th>
-                                                <th>Descrição Revisada</th>
-                                                <th>Und</th>
-                                                <th>Etapa</th>
-                                                <th>Contrato</th>
-                                                <th>Req. Ext.</th>
-                                                <th>Prazo de Elaboração</th>
-                                                <th>Qtd Contrato</th>
-                                                <th>Qtd 1ª TA</th>
-                                                <th>Qtd 2º TA</th>
-                                                <th>Qtd OSE</th>
-                                                <th>Qtd Saldo OSE</th>
-                                                <th>Qtd Medido</th>
-                                                <th>Qtd Saldo Medido</th>
-                                                <th>Preço Unitário</th>
-                                                <th>Total Contrato</th>
-                                                <th>R$ 1º TA</th>
-                                                <th>R$ 2º TA</th>
-                                                <th>OSE</th>
-                                                <th>Saldo OSE</th>
-                                                <th>Medido</th>
-                                                <th>Saldo a Medir</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="(item, index) in dataFiltrada" :key="index">
-                                                <td>{{ item.cod_siac }}</td>
-                                                <td>{{ item.produto }}</td>
-                                                <td>{{ item.subproduto }}</td>
-                                                <td>{{ item.familia }}</td>
-                                                <td>{{ item.descricao_siac }}</td>
-                                                <td>{{ item.descricao_revisada }}</td>
-                                                <td>{{ item.und }}</td>
-                                                <td>{{ item.etapa }}</td>
-                                                <td>{{ item.contrato }}</td>
-                                                <td>{{ item.req_ext }}</td>
-                                                <td>{{ item.prazo_de_elaboracao }}</td>
-                                                <td>{{ item.qtd_contrato }}</td>
-                                                <td>{{ item.qtd_1_ta }}</td>
-                                                <td>{{ item.qtd_2_ta }}</td>
-                                                <td>{{ item.qtd_ose }}</td>
-                                                <td>{{ item.qtd_saldo_ose }}</td>
-                                                <td>{{ item.qtd_medido }}</td>
-                                                <td>{{ item.qtd_saldo_medido }}</td>
-                                                <td>{{ formatarMoeda(item.r_preco_unitario) }}</td>
-                                                <td>{{ formatarMoeda(item.r_total_contrato) }}</td>
-                                                <td>{{ formatarMoeda(item.r_1_ta) }}</td>
-                                                <td>{{ formatarMoeda(item.r_2_ta) }}</td>
-                                                <td>{{ formatarMoeda(item.r_ose) }}</td>
-                                                <td>{{ formatarMoeda(item.r_saldo_ose) }}</td>
-                                                <td>{{ formatarMoeda(item.r_medido) }}</td>
-                                                <td>{{ formatarMoeda(item.r_saldo_a_medir) }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div v-else>
-                                <p class="text-muted">Nenhum dado encontrado</p>
+
+                            <div class="table-responsive mt-4">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Cod. SIAC</th>
+                                            <th>Produto</th>
+                                            <th>Subproduto</th>
+                                            <th>Família</th>
+                                            <th>Descrição SIAC</th>
+                                            <th>Descrição Revisada</th>
+                                            <th>Und</th>
+                                            <th>Etapa</th>
+                                            <th>Contrato</th>
+                                            <th>Req. Ext.</th>
+                                            <th>Prazo de Elaboração</th>
+                                            <th>Qtd Contrato</th>
+                                            <th>Qtd 1ª TA</th>
+                                            <th>Qtd 2º TA</th>
+                                            <th>Qtd OSE</th>
+                                            <th>Qtd Saldo OSE</th>
+                                            <th>Qtd Medido</th>
+                                            <th>Qtd Saldo Medido</th>
+                                            <th>Preço Unitário</th>
+                                            <th>Total Contrato</th>
+                                            <th>R$ 1º TA</th>
+                                            <th>R$ 2º TA</th>
+                                            <th>OSE</th>
+                                            <th>Saldo OSE</th>
+                                            <th>Medido</th>
+                                            <th>Saldo a Medir</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(item, index) in dataFiltrada" :key="index">
+                                            <td>{{ item.cod_siac }}</td>
+                                            <td>{{ item.produto }}</td>
+                                            <td>{{ item.subproduto }}</td>
+                                            <td>{{ item.familia }}</td>
+                                            <td>{{ item.descricao_siac }}</td>
+                                            <td>{{ item.descricao_revisada }}</td>
+                                            <td>{{ item.und }}</td>
+                                            <td>{{ item.etapa }}</td>
+                                            <td>{{ item.contrato }}</td>
+                                            <td>{{ item.req_ext }}</td>
+                                            <td>{{ item.prazo_de_elaboracao }}</td>
+                                            <td>{{ item.qtd_contrato }}</td>
+                                            <td>{{ item.qtd_1_ta }}</td>
+                                            <td>{{ item.qtd_2_ta }}</td>
+                                            <td>{{ item.qtd_ose }}</td>
+                                            <td>{{ item.qtd_saldo_ose }}</td>
+                                            <td>{{ item.qtd_medido }}</td>
+                                            <td>{{ item.qtd_saldo_medido }}</td>
+                                            <td>{{ formatarMoeda(item.r_preco_unitario) }}</td>
+                                            <td>{{ formatarMoeda(item.r_total_contrato) }}</td>
+                                            <td>{{ formatarMoeda(item.r_1_ta) }}</td>
+                                            <td>{{ formatarMoeda(item.r_2_ta) }}</td>
+                                            <td>{{ formatarMoeda(item.r_ose) }}</td>
+                                            <td>{{ formatarMoeda(item.r_saldo_ose) }}</td>
+                                            <td>{{ formatarMoeda(item.r_medido) }}</td>
+                                            <td>{{ formatarMoeda(item.r_saldo_a_medir) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
+                        <div v-else>
+                            <p class="text-muted">Nenhum dado encontrado</p>
+                        </div>
                     </div>
-                </template>
-            </NavbarContrato>
-        </AuthenticatedLayout>
-    </template>
+                </div>
+            </template>
+        </NavbarContrato>
+    </AuthenticatedLayout>
+</template>
     
-    <style scoped>
+<style scoped>
     .card {
         margin-top: 20px;
     }
@@ -264,4 +266,4 @@
         width: 200px;
         display: inline-block;
     }
-    </style>
+</style>

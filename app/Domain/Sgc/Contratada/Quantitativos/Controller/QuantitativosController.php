@@ -30,14 +30,12 @@ class QuantitativosController extends Controller
             ]);
         }
 
-        // Buscar dados da tabela sgcvw_subprodutos filtrando pelo contrato_id
         $quantitativosData = SgcvwSubprodutos::where('contrato_id', $contrato)->get();
 
         return Inertia::render('Sgc/Contratada/Quantitativos/Index', [
             'quantitativosData' => $quantitativosData,
             'contratoId' => $contrato,
+            'contrato' => ['id' => $contratoObj->id], 
         ]);
     }
 }
-
-

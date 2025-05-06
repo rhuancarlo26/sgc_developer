@@ -163,17 +163,11 @@ const updateDisplayedItems = () => {
           { route: '#', label: contrato.contratada }
         ]" />
         <div>
-          <Link class="btn btn-info me-2 w-500"  :href="route('sgc.contratada.cronograma.index', {contrato: contrato.id})">
-            <IconCalendar class="me-2" /> Cronograma Físico
-          </Link>
 
           <Link class="btn btn-info me-2 w-500"  :href="route('sgc.gestao.listagemDav', {contrato: contrato.id})">
             <IconPlane class="me-2" /> DAV
           </Link>
 
-          <Link class="btn btn-info me-2 w-500"  :href="route('sgc.contratada.relatorios.index', {contrato: contrato.id})">
-            <IconClipboardData class="me-2" /> Relatorio de Coordenação
-          </Link>
         </div>
       </div>
     </template>
