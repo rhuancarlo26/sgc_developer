@@ -1,6 +1,6 @@
 <script setup>
-import {Head, Link, useForm} from "@inertiajs/vue3";
-import {IconEye, IconFile, IconTrash} from "@tabler/icons-vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import { IconEye, IconFile, IconTrash } from "@tabler/icons-vue";
 import Table from "@/Components/Table.vue";
 import Navbar from "../../Components/Navbar.vue";
 import NavButton from "@/Components/NavButton.vue";
@@ -8,16 +8,16 @@ import Breadcrumb from "@/Components/Breadcrumb.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import ModalVisualizarASV from "./Components/ModalVisualizarASV.vue";
-import {ref, watch} from "vue";
-import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
-import {useToast} from "vue-toastification";
+import { ref, watch } from "vue";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils.js";
+import { useToast } from "vue-toastification";
 
 const props = defineProps({
-    data: {type: Object},
-    contrato: {type: Object},
-    servico: {type: Object},
-    licencas: {type: Object},
-    aprovacao: {type: Object}
+    data: { type: Object },
+    contrato: { type: Object },
+    servico: { type: Object },
+    licencas: { type: Object },
+    aprovacao: { type: Object }
 });
 
 const form = useForm({
@@ -48,17 +48,18 @@ const abrirModalVisualizar = (item) => {
 }
 
 const ap = (ap) => {
-    if (!ap?.fk_status) {
+    if (ap == null || ap.fk_status == null) {
         return true;
     }
-    return ap?.fk_status === 2;
+
+    return ap.fk_status === 2;
 }
 
 </script>
 
 <template>
 
-    <Head title="Vincular ASV"/>
+    <Head title="Vincular ASV" />
 
     <AuthenticatedLayout>
 
@@ -67,10 +68,10 @@ const ap = (ap) => {
                 <Breadcrumb class="align-self-center" :links="[
                     { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
                     { route: '#', label: contrato.contratada }
-                ]"/>
+                ]" />
                 <Link class="btn btn-dark"
-                      :href="route('contratos.contratada.servicos.index', { contrato: contrato.id })">
-                    Voltar
+                    :href="route('contratos.contratada.servicos.index', { contrato: contrato.id })">
+                Voltar
                 </Link>
             </div>
         </template>
@@ -81,11 +82,11 @@ const ap = (ap) => {
                 <div class="row justify-content-between align-items-center" v-if="ap(aprovacao)">
                     <div class="col-5 mb-2">
                         <v-select :options="licencas" label="numero_licenca" v-model="form.licenca_id"
-                                  :reduce="r => r.id">
+                            :reduce="r => r.id">
                             <template v-slot:option="option">
                                 {{ option.numero_licenca }} - {{ option.emissor }} - {{ option.tipo.sigla }}
                             </template>
-                            <template #no-options="{}">
+                            <template #no-options="{ }">
                                 Nenhum registro encontrado.
                             </template>
                         </v-select>
@@ -99,8 +100,8 @@ const ap = (ap) => {
                         <tr>
                             <td class="text-center">{{ item.numero_licenca ?? '-' }}</td>
                             <td class="text-center">{{
-                                    item.data_emissao ? dateTimeFormat(item.data_emissao) : '-'
-                                }}
+                                item.data_emissao ? dateTimeFormat(item.data_emissao) : '-'
+                            }}
                             </td>
                             <td class="text-center">{{ item.vencimento ? dateTimeFormat(item.vencimento) : '-' }}</td>
                             <td class="text-center">{{ item.volume ?? '-' }}</td>
@@ -110,18 +111,18 @@ const ap = (ap) => {
                             <td>
                                 <div class="d-flex justify-content-center">
                                     <NavButton @click="abrirModalVisualizar(item)" type-button="info" class="btn-icon"
-                                               :icon="IconEye"/>
+                                        :icon="IconEye" />
                                     <NavButton v-if="item.documento === null" type-button="primary" class="btn-icon"
-                                               :icon="IconFile" disabled/>
+                                        :icon="IconFile" disabled />
                                     <a v-else class="btn btn-primary btn-icon me-1" :href="item.documento?.caminho">
-                                        <IconFile/>
+                                        <IconFile />
                                     </a>
                                     <LinkConfirmation v-if="ap(aprovacao)" v-slot="confirmation"
-                                                      :options="{ text: 'Você deseja remover o vínculo?' }">
+                                        :options="{ text: 'Você deseja remover o vínculo?' }">
                                         <Link :onBefore="confirmation.show"
-                                              :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.delete', { contrato: contrato.id, servico: servico.id, licenca: item.id })"
-                                              as="button" method="delete" type="button" class="btn btn-icon btn-danger">
-                                            <IconTrash/>
+                                            :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.delete', { contrato: contrato.id, servico: servico.id, licenca: item.id })"
+                                            as="button" method="delete" type="button" class="btn btn-icon btn-danger">
+                                        <IconTrash />
                                         </Link>
                                     </LinkConfirmation>
                                 </div>
@@ -131,7 +132,7 @@ const ap = (ap) => {
                 </Table>
             </template>
         </Navbar>
-        <ModalVisualizarASV ref="modalVisualizarASVRef"/>
+        <ModalVisualizarASV ref="modalVisualizarASVRef" />
     </AuthenticatedLayout>
 
 </template>
