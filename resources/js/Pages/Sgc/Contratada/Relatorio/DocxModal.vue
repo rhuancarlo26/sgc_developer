@@ -29,11 +29,11 @@ const isCounting = ref(false);
 const abrirModal = async (idItem, contratoId, versao) => {
    modalKey.value += 1;
     modalDetalhes.value.getBsModal().show();
-    const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao); 
+    const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao);
     loadComments(idItem, contratoId);
     if (caminhoDocumento) {
         filePath = `https://rcdeveloper.online/storage/${caminhoDocumento}`;
-        
+
 
         try {
             const response = await fetch(filePath);
@@ -157,6 +157,7 @@ defineExpose({ abrirModal });
                     :item-id="itemId"
                     :comentarios="comentarios"
                     :contrato="contrato"
+                    @removeNote="notes.splice($event, 1)"
                     />
             </div>
         </template>

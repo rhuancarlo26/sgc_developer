@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Domain\Sgc\Contratada\app\Controller\ContratoSgcController;
 use App\Domain\Sgc\Contratada\app\Controller\DashplanController;
 use App\Domain\Sgc\Contratada\app\Controller\EmpreendimentosController;
+use App\Domain\Sgc\Contratada\Comentario\Controller\DestroyComentarioController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\RelatorioCoordenacaoController;
 use App\Domain\Sgc\Contratada\Comentario\Controller\DestroyComentariosController;
 use App\Domain\Sgc\Contratada\Comentario\Controller\StoreSgcComentarioController;
@@ -67,7 +68,7 @@ Route::prefix('/contratada')->group(function () {
     Route::post('/sgc/store_comentario',                           [StoreSgcComentarioController::class,                    'index'])->name('sgc.contratada.store_comentario');
     Route::post('/sgc/store_comentarios',                          [StoreSgcComentariosController::class,                   'index'])->name('sgc.contratada.store_comentarios');
     Route::delete('/destroy_comentarios/{comentarios}',            [DestroyComentariosController::class,                    'index'])->name('sgc.contratada.destroy_comentarios');
-    Route::delete('/destroy_comentarios/{comentarios}',            [DestroyComentariosController::class,                    'index'])->name('sgc.contratada.destroy_comentarios');
+    Route::delete('/destroy_comentario/{comentario}',              [DestroyComentarioController::class,                     'destroy'])->name('sgc.contratada.destroy_comentario');
 
     // Inserir novo Relatório de Coordenação
     Route::post('/sgc/relatorio/iniciar',                          [CreateController::class,                                 'index'])->name('sgc.contratada.relatorio.iniciar');

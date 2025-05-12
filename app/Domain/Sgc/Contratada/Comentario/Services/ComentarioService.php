@@ -31,5 +31,11 @@ class ComentarioService extends BaseModelService
     ];
   }
 
+    public function excluirComentario(int $id): array
+    {
+        return $this->dataManagement->delete(entity: $this->modelClass, id: $id);
+    }
+
+
 
 }

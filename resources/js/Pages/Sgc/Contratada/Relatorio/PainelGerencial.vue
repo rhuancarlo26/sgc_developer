@@ -10,7 +10,7 @@ import ListaModal from "./ListaModal.vue";
 import DashboardMap from "@/Components/DashboardMap.vue";
 import NavLink from "@/Components/NavLink.vue";
 import { IconPencil, IconPlus, IconTrash, IconZoomCheck } from "@tabler/icons-vue";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import SgcLinkConfirmation from "@/Components/SgcLinkConfirmation.vue";
 import PaginationSgc from '@/Components/PaginationSgc.vue';
 
 const listaModal = ref();
@@ -431,17 +431,17 @@ const empreendimentosFiltrados = computed(() => {
                                   :icon="IconZoomCheck"
                                 />
                               </span>
-                              <LinkConfirmation v-slot="confirmation" :options="{ text: `Deseja excluir o empreendimento ${trecho.cod_emp}` }">
+                              <SgcLinkConfirmation v-slot="confirmation"
+                                :options="{ text: `Deseja excluir o empreendimento ${trecho.cod_emp}` }">
                                 <Link
-                                  :onBefore="confirmation.show"
-                                  :href="route('sgc.gestao.dashboard.empreendimento.delete', trecho.id)"
-                                  method="DELETE"
-                                  class="text-danger"
-                                  @click.stop
-                                >
+                                :onBefore="() => confirmation.show(
+                                      { url: route('sgc.gestao.dashboard.empreendimento.delete', trecho.id), method: 'DELETE' },
+                                      () => window.location.reload()
+                                  )"
+                                  class="text-danger">
                                   <IconTrash />
                                 </Link>
-                              </LinkConfirmation>
+                              </SgcLinkConfirmation>
                               <a
                                 class="list-unstyled text-warning"
                                 :href="route('sgc.gestao.dashboard.empreendimento.create', [tipo.id, trecho.id])"
