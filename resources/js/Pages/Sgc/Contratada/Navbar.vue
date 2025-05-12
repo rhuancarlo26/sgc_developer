@@ -20,15 +20,18 @@ const props = defineProps({
       <div class="col-1">
         <ul class="navbar-nav">
 
+          <navLink route-name="sgc.gestao.dashboard.index" :param="2" title="Painel Gerencial"
+          :icon="IconClipboardData" />
+
           <!-- Contratos -->
           <navLink route-name="sgc.gestao.listagem"
           :param="2" title="Contratos" :icon="IconClipboardList" />
 
+
+
           <!-- <navLink route-name="sgc.contratada.relatorios.index"
           :param="tipo.id" title="Relatorio de coordenação" /> -->
-            
-          <navLink route-name="sgc.gestao.dashboard.index" :param="2" title="Painel Gerencial"
-            :icon="IconTimeline" />
+
         </ul>
       </div>
       <div class="col-11">

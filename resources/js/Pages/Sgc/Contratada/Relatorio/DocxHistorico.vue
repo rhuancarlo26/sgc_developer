@@ -4,6 +4,7 @@ import { renderAsync } from 'docx-preview';
 import { onMounted, ref } from "vue";
 import Comment from '@/Components/Comment.vue';
 import { IconMessageDots } from "@tabler/icons-vue";
+import { usePage } from '@inertiajs/vue3'; 
 
 const modalDetalhes = ref(null);
 const wordDocument = ref(null);
@@ -20,19 +21,24 @@ const props = defineProps({
 
 const docModal = ref(null);
 const notes = ref([]);
-const modalKey = ref(0);
+const modalKey = ref(0); 
 const counter = ref(0);
 const isAddNote = ref(false);
 const isCounting = ref(false);
 
 
+const page = usePage();
+const appUrl = page.props.app_url; 
+
 const abrirModal = async (idItem, contratoId, versao) => {
+    modalKey.value += 1; 
     modalDetalhes.value.getBsModal().show();
     const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao);
     
     if (caminhoDocumento) {
-        filePath = `http://127.0.0.1:5173/storage/app/${caminhoDocumento}`;
 
+        filePath = `${appUrl}/storage/${caminhoDocumento.replace('app/', '')}`;
+        
         try {
             const response = await fetch(filePath);
             if (!response.ok) {
@@ -51,7 +57,6 @@ const abrirModal = async (idItem, contratoId, versao) => {
         console.log('Documento não encontrado para o item:', idItem);
     }
 };
-
 
 const fetchDocumentos = async (itemId, contratoId, versao) => {
     try {
@@ -79,7 +84,6 @@ const fetchDocumentos = async (itemId, contratoId, versao) => {
         return null;
     }
 };
-
 
 const enableCounter = (event) => {
     if (event) {
