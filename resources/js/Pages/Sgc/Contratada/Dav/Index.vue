@@ -2,7 +2,7 @@
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import Navbar from '../Navbar.vue';
+import NavbarContrato from '../NavbarContrato.vue';
 import { ref, watch, watchEffect } from 'vue';
 import FormDav from './FormDav.vue';
 import FormProfissionais from './FormProfissionais.vue';
@@ -219,7 +219,7 @@ updateReminders();
       </div>
     </template>
 
-    <Navbar :tipo="contrato">
+    <NavbarContrato :tipo="contrato">
       <template #body>
         <div class="d-flex align-items-stretch">
           <!-- Quadro de DAV (50%) -->
@@ -299,7 +299,7 @@ updateReminders();
           </div>
         </div>
       </template>
-    </Navbar>
+    </NavbarContrato>
     <FormDav ref="modalVisualizarForm"
              :contrato="contrato"
              :subprodutos="subprodutos"

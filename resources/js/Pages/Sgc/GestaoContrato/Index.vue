@@ -111,7 +111,7 @@ const formatarCnpj = (cnpj) => {
                                 <IconDots />
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" :href="route('sgc.contratada.index', item.id)">
+                                <a class="dropdown-item" :href="route('sgc.contratada.quantitativos.index', item.id)">
                                     Entrar
                                 </a>
                                 <a @click="abrirVisualizarContrato(item)" class="dropdown-item"
