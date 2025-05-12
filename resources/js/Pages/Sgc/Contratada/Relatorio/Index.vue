@@ -3,7 +3,7 @@ import { Head } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import Navbar from "../Navbar.vue";
+import NavbarContrato from "../NavbarContrato.vue";
 import DocxModal from "./DocxModal.vue";
 import NavLinkSgc from "@/Components/NavLinkSgc.vue";
 import { Link, useForm, usePage } from '@inertiajs/vue3';
@@ -104,7 +104,7 @@ const enviarParaDnit = async () => {
 
   // Enviar e-mail
   try {
-    await axios.get(`/sgc/contratada/send-email/${contratoId}/Em%20An%C3%A1lise/${form.relatorio_num}`);
+    const status = 'Em Análise';
   } catch (error) {
     console.error('Erro ao enviar e-mail:', error);
   }
@@ -220,7 +220,7 @@ onMounted(() => {
         </div>
       </template>
 
-      <Navbar :contrato="contrato">
+      <NavbarContrato :tipo="contrato">
         <template #body>
           <div class="container mt-4">
             <div class="row mb-3">
@@ -336,7 +336,7 @@ onMounted(() => {
             </div>
           </div>
         </template>
-      </Navbar>
+      </NavbarContrato>
       <DocxModal ref="docxModal"
         href="javascript:void(0)"
         :itemId="selectedItemId"

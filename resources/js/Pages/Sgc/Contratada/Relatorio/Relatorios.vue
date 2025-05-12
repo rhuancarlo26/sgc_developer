@@ -3,7 +3,7 @@ import { Head } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import Navbar from "../Navbar.vue";
+import NavbarContrato from "../NavbarContrato.vue";
 import NavLink from '@/Components/NavLink.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { defineProps } from 'vue';
@@ -61,7 +61,7 @@ onMounted(() => {
         </div>
       </template>
 
-      <Navbar :contrato="contrato">
+      <NavbarContrato :tipo="contrato">
         <template #body>
           <div class="container mt-4">
             <div class="row mb-3">
@@ -81,8 +81,8 @@ onMounted(() => {
                       <th scope="col">PERÍODO</th>
                       <th scope="col">RELATÓRIO</th>
                       <th scope="col">STATUS</th>
+                      <th scope="col">VERSÕES</th>
                       <th scope="col">ACESSAR</th>
-                      <th scope="col">REVISÕES</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -95,6 +95,14 @@ onMounted(() => {
                           {{ relatorio.status }}
                         </span>
                       </td>
+                      <td>
+                        <select @change="goToVersion(contrato.id, relatorio.relatorio_num, $event.target.value)">
+                          <option value="" disabled selected>VER 0</option>
+                          <option v-if="relatorio.historicos.length" :value="relatorio.historicos[0].versao">
+                            REV {{ relatorio.historicos[0].versao }}
+                          </option>
+                        </select>
+                      </td>
                       <td class="list-unstyled">
                         <NavLink 
                           :route-name="'sgc.contratada.relatorio.detalhes'"
@@ -103,14 +111,6 @@ onMounted(() => {
                           :icon="IconDoorEnter"
                         />
                       </td>
-                      <td>
-                        <select @change="goToVersion(contrato.id, relatorio.relatorio_num, $event.target.value)">
-                          <option value="" disabled selected>REV</option>
-                          <option v-if="relatorio.historicos.length" :value="relatorio.historicos[0].versao">
-                            REV {{ relatorio.historicos[0].versao }}
-                          </option>
-                        </select>
-                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -118,7 +118,7 @@ onMounted(() => {
             </div>
           </div>
         </template>
-      </Navbar>
+      </NavbarContrato>
     </AuthenticatedLayout>
   </div>
 </template>
