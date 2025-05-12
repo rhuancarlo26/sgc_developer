@@ -7,7 +7,9 @@ import {
   IconClipboardData,
   IconClipboardList,
   IconCalendar,
-  IconPlane,
+  IconNotes,
+  IconDeviceAnalytics,
+  IconPlane
 } from "@tabler/icons-vue";
 import { computed, watch, onMounted } from 'vue';
 
@@ -64,7 +66,16 @@ const handleClick = (routeName) => {
             :route-name="'sgc.contratada.quantitativos.index'"
             :param="contratoId"
             title="Quantitativos"
-            :icon="IconCalendar"
+            :icon="IconDeviceAnalytics"
+          />
+
+          <!-- Dav -->
+          <NavLink
+            @click="handleClick('DAV')"
+            :route-name="'sgc.gestao.listagemDav'"
+            :param="contratoId"
+            title="DAV"
+            :icon="IconPlane"
           />
 
           <!-- Ficha Contratual -->
@@ -73,7 +84,7 @@ const handleClick = (routeName) => {
             :route-name="'sgc.contratada.ficha.index'"
             :param="contratoId"
             title="Ficha Contratual"
-            :icon="IconCalendar"
+            :icon="IconNotes"
           />
         </ul>
       </div>
