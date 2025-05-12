@@ -23,6 +23,7 @@ const existeComentario = props.note.comentario.length;
 const user = usePage().props.auth.user;
 const [perfil] = user.roles.map(tipo => tipo.name);
 const perfilUser = `${user.name} ${perfil}`
+const emit = defineEmits(['removeNote']);
 
 const form = useForm({
     comentario: null,
@@ -88,6 +89,13 @@ const excluirComentarios = (comentarios_id) => {
     router.delete(route('sgc.contratada.destroy_comentarios', comentarios_id), {
         onSuccess: () => {
             props.note.comentario = props.note.comentario.filter(comentario => comentario.id !== comentarios_id);
+
+            if (props.note.comentario.length === 0) {
+                router.delete(route('sgc.contratada.destroy_comentario', props.note.id), {
+                    onSuccess: () => emit('removeNote', props.index),
+                    onError: (error) => console.error('Erro ao excluir comentário pai', error)
+                });
+            }
         },
         onError: (error) => {
             console.error('Erro ao excluir comentário', error);
