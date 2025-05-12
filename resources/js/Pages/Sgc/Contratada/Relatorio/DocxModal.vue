@@ -4,6 +4,7 @@ import { renderAsync } from 'docx-preview';
 import { onMounted, ref } from "vue";
 import Comment from '@/Components/Comment.vue';
 import { IconMessageDots } from "@tabler/icons-vue";
+import { usePage } from '@inertiajs/vue3'; 
 
 const modalDetalhes = ref(null);
 const wordDocument = ref(null);
@@ -25,27 +26,26 @@ const counter = ref(0);
 const isAddNote = ref(false);
 const isCounting = ref(false);
 
-//
+const page = usePage();
+const appUrl = page.props.app_url; 
+
 const abrirModal = async (idItem, contratoId, versao) => {
-   modalKey.value += 1;
+    modalKey.value += 1;
     modalDetalhes.value.getBsModal().show();
     const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao); 
     loadComments(idItem, contratoId);
     if (caminhoDocumento) {
-        filePath = `https://rcdeveloper.online/storage/${caminhoDocumento}`;
-        
 
+        filePath = `${appUrl}/storage/${caminhoDocumento}`;
+        
         try {
             const response = await fetch(filePath);
             if (!response.ok) {
-                throw new Error('Erro ao carregar o documento do Word');
+                throw new Error('Erro ao carregar o documento do Word: ' + response.statusText);
             }
             const wordBlob = await response.blob({ type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-
             wordDocument.value = wordBlob;
-
             renderAsync(wordDocument.value, docModal.value);
-
         } catch (error) {
             console.error('Erro ao carregar o documento do Word:', error);
         }
@@ -53,7 +53,6 @@ const abrirModal = async (idItem, contratoId, versao) => {
         console.log('Documento não encontrado para o item:', idItem);
     }
 };
-
 
 const fetchDocumentos = async (itemId, contratoId, versao) => {
     try {
@@ -75,8 +74,6 @@ const fetchDocumentos = async (itemId, contratoId, versao) => {
         return null;
     }
 };
-
-
 
 const enableCounter = (event) => {
     if (event) {
@@ -127,7 +124,6 @@ const loadComments = (itemId, contrato_id) => {
     });
 };
 
-
 defineExpose({ abrirModal });
 </script>
 
@@ -146,10 +142,9 @@ defineExpose({ abrirModal });
                                     @click="enableCounter"
                                     style="cursor: pointer;" />
                             </div>
-                        </div>
+                        </div>  
                     </div>
                 </div>
-                <!-- <div class="card-body" ref="docModal" :key="modalKey" @mousemove="addNote" /> -->
                 <div class="card-body" ref="docModal" :key="modalKey" @mousemove="addNote" :class="{ 'comment-enabled': isCounting }" />
                 <Comment v-for="(note, index) in notes"
                     :note="note"
@@ -162,6 +157,7 @@ defineExpose({ abrirModal });
         </template>
     </Modal>
 </template>
+
 <style>
 .docx-wrapper {
   background-color: rgb(255, 255, 255) !important;
@@ -179,5 +175,3 @@ defineExpose({ abrirModal });
     background-color: rgba(23, 162, 184, 0.1); /* Fundo leve para destacar */
 }
 </style>
-
-

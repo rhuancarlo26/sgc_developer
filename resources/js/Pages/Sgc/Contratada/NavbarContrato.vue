@@ -58,15 +58,6 @@ const handleClick = (routeName) => {
             :icon="IconCalendar"
           />
 
-          <!-- Produtos -->
-          <!-- <NavLink
-            @click="handleClick('Produtos')"
-            :route-name="'sgc.gestao.dashboard.index'"
-            :param="contratoId"
-            title="Produtos"
-            :icon="IconClipboardData"
-          /> -->
-
           <!-- Quantitativos -->
           <NavLink
             @click="handleClick('Quantitativos')"

@@ -81,8 +81,8 @@ onMounted(() => {
                       <th scope="col">PERÍODO</th>
                       <th scope="col">RELATÓRIO</th>
                       <th scope="col">STATUS</th>
+                      <th scope="col">VERSÕES</th>
                       <th scope="col">ACESSAR</th>
-                      <th scope="col">REVISÕES</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -95,6 +95,14 @@ onMounted(() => {
                           {{ relatorio.status }}
                         </span>
                       </td>
+                      <td>
+                        <select @change="goToVersion(contrato.id, relatorio.relatorio_num, $event.target.value)">
+                          <option value="" disabled selected>VER 0</option>
+                          <option v-if="relatorio.historicos.length" :value="relatorio.historicos[0].versao">
+                            REV {{ relatorio.historicos[0].versao }}
+                          </option>
+                        </select>
+                      </td>
                       <td class="list-unstyled">
                         <NavLink 
                           :route-name="'sgc.contratada.relatorio.detalhes'"
@@ -102,14 +110,6 @@ onMounted(() => {
                           title="Acessar Relatório"
                           :icon="IconDoorEnter"
                         />
-                      </td>
-                      <td>
-                        <select @change="goToVersion(contrato.id, relatorio.relatorio_num, $event.target.value)">
-                          <option value="" disabled selected>REV</option>
-                          <option v-if="relatorio.historicos.length" :value="relatorio.historicos[0].versao">
-                            REV {{ relatorio.historicos[0].versao }}
-                          </option>
-                        </select>
                       </td>
                     </tr>
                   </tbody>
