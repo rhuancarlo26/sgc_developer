@@ -8,7 +8,8 @@ const props = defineProps({
     note: Object,
     index: Number,
     itemId: Number,
-    contrato: Object
+    contrato: Object,
+    comentarios: Object
 });
 
 
@@ -85,16 +86,20 @@ const enviarComentario = () => {
     }
 };
 
+
+
 const excluirComentarios = (comentarios_id) => {
     router.delete(route('sgc.contratada.destroy_comentarios', comentarios_id), {
         onSuccess: () => {
             props.note.comentario = props.note.comentario.filter(comentario => comentario.id !== comentarios_id);
 
             if (props.note.comentario.length === 0) {
-                router.delete(route('sgc.contratada.destroy_comentario', props.note.id), {
-                    onSuccess: () => emit('removeNote', props.index),
-                    onError: (error) => console.error('Erro ao excluir comentário pai', error)
-                });
+                props.comentarios.map(id => {
+                    router.delete(route('sgc.contratada.destroy_comentario', id.id), {
+                        onSuccess: () => emit('removeNote', props.index),
+                        onError: (error) => console.error('Erro ao excluir comentário pai', error)
+                    });
+                })
             }
         },
         onError: (error) => {
