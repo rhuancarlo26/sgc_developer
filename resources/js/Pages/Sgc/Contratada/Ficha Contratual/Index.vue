@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import NavbarContrato from "../NavbarContrato.vue";
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 const props = defineProps({
     fichaData: Object,
@@ -18,6 +18,51 @@ const formatarData = (dataStr) => {
     return dataFormatada.toLocaleDateString('pt-BR');
 };
 
+const formatarMoeda = (valor) => {
+    if (valor === null || valor === undefined) return 'R$ 0,00';
+    return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+};
+
+const piVigente = computed(() => {
+    if (!data.value.data?.[0]) return 0;
+    const valorInicial = Number(data.value.data[0]?.VALOR_INICIAL) || 0;
+    const valorAditivos = Number(data.value.data[0]?.VALOR_TOTAL_DE_ADITIVOS) || 0;
+    return valorInicial + valorAditivos;
+});
+
+const totalPIR = computed(() => {
+    if (!data.value.data?.[0]) return 0;
+    const piVigenteValue = piVigente.value;
+    const reajuste = Number(data.value.data[0]?.VALOR_TOTAL_DE_REAJUSTE) || 0;
+    return piVigenteValue + reajuste;
+});
+
+const totalMedidoPIR = computed(() => {
+    if (!data.value.data?.[0]) return 0;
+    const piMedicao = Number(data.value.data[0]?.VALOR_PI_MEDICAO) || 0;
+    const reajusteMedicao = Number(data.value.data[0]?.VALOR_REAJUSTE_MEDICAO) || 0;
+    return piMedicao + reajusteMedicao;
+});
+
+const saldoPI = computed(() => {
+    if (!data.value.data?.[0]) return 0;
+    const valorInicial = Number(data.value.data[0]?.VALOR_INICIAL) || 0;
+    const piMedicao = Number(data.value.data[0]?.VALOR_PI_MEDICAO) || 0;
+    return valorInicial - piMedicao;
+});
+
+const saldoReajuste = computed(() => {
+    if (!data.value.data?.[0]) return 0;
+    const valorTotalReajuste = Number(data.value.data[0]?.VALOR_TOTAL_DE_REAJUSTE) || 0;
+    const reajusteMedicao = Number(data.value.data[0]?.VALOR_REAJUSTE_MEDICAO) || 0;
+    return valorTotalReajuste - reajusteMedicao;
+});
+
+const saldoTotalPIR = computed(() => {
+    if (!data.value.data?.[0]) return 0;
+    return saldoPI.value + saldoReajuste.value;
+});
+
 onMounted(() => {
     console.log('Dados da ficha:', data.value);
     console.log('Primeiro item do array:', data.value.data?.[0]);
@@ -29,7 +74,6 @@ onMounted(() => {
         <Head :title="`Ficha Contratual - Contrato ${contratoId}`" />
 
         <template #header>
-
         </template>
 
         <NavbarContrato :tipo="contrato">
@@ -41,57 +85,67 @@ onMounted(() => {
                         </div>
                         <div v-else-if="data.data && data.data.length > 0" class="row">
                             <!-- Dados Gerais -->
-                            <div class="col-md-4">
-                              <h4>Dados Gerais</h4>
-                              <p v-if="data.data[0].NU_CON_FORMATADO"><strong>Número do Contrato:</strong> {{ data.data[0].NU_CON_FORMATADO }}</p>
-                              <p v-if="data.data[0].NO_EMPRESA"><strong>Empresa Executora:</strong> {{ data.data[0].NO_EMPRESA }}</p>
+                            <div class="col-md-4 mb-4">
+                                <div class="block-card">
+                                    <h4 class="text-center">DADOS GERAIS</h4>
+                                    <p v-if="data.data[0].NU_CON_FORMATADO"><strong>Número do Contrato:</strong> {{ data.data[0].NU_CON_FORMATADO }}</p>
+                                    <p v-if="data.data[0].NO_EMPRESA"><strong>Empresa Executora:</strong> {{ data.data[0].NO_EMPRESA }}</p>
+                                </div>
                             </div>
 
                             <!-- Unidades Responsáveis -->
-                            <div class="col-md-4">
-                              <h4>Unidades Responsáveis</h4>
-                              <p v-if="data.data[0].NM_UND_FISCAL"><strong>Fiscalização:</strong> {{ data.data[0].NM_UND_FISCAL }}</p>
-                              <p v-if="data.data[0].NM_UND_GESTORA"><strong>Gestora:</strong> {{ data.data[0].NM_UND_GESTORA }}</p>
-                              <p v-if="data.data[0].NM_FISCAL"><strong>Fiscal:</strong> {{ data.data[0].NM_FISCAL }}</p>
-                              <p><strong>Substitutos:</strong> Sem dados</p>
+                            <div class="col-md-4 mb-4">
+                                <div class="block-card">
+                                    <h4 class="text-center">UNIDADES RESPONSÁVEIS</h4>
+                                    <p v-if="data.data[0].NM_UND_FISCAL"><strong>Fiscalização:</strong> {{ data.data[0].NM_UND_FISCAL }}</p>
+                                    <p v-if="data.data[0].NM_UND_GESTORA"><strong>Gestora:</strong> {{ data.data[0].NM_UND_GESTORA }}</p>
+                                    <p v-if="data.data[0].NM_FISCAL"><strong>Fiscal:</strong> {{ data.data[0].NM_FISCAL }}</p>
+                                    <p><strong>Substitutos:</strong> Sem dados</p>
+                                </div>
                             </div>
 
                             <!-- Dados Básicos -->
-                            <div class="col-md-4">
-                              <h4>Dados Básicos</h4>
-                              <p v-if="data.data[0].DS_FAS_CONTRATO"><strong>Situação:</strong> {{ data.data[0].DS_FAS_CONTRATO }}</p>
-                              <p v-if="data.data[0].DT_INICIO"><strong>Início:</strong> {{ formatarData(data.data[0].DT_INICIO) }}</p>
-                              <p v-if="data.data[0].DT_TERMINO_VIGENCIA"><strong>Término:</strong> {{ formatarData(data.data[0].DT_TERMINO_VIGENCIA) }}</p>
-                              <p v-if="data.data[0].NU_PROCESSO"><strong>Processo:</strong> {{ data.data[0].NU_PROCESSO }}</p>
-                              <p v-if="data.data[0].NU_EDITAL"><strong>Edital:</strong> {{ data.data[0].NU_EDITAL }}</p>
+                            <div class="col-md-4 mb-4">
+                                <div class="block-card">
+                                    <h4 class="text-center">DADOS BÁSICOS</h4>
+                                    <p v-if="data.data[0].DS_FAS_CONTRATO"><strong>Situação:</strong> {{ data.data[0].DS_FAS_CONTRATO }}</p>
+                                    <p v-if="data.data[0].DT_DIA"><strong>Início:</strong> {{ formatarData(data.data[0].DT_DIA) }}</p>
+                                    <p v-if="data.data[0].DT_TER_ATZ"><strong>Término:</strong> {{ formatarData(data.data[0].DT_TER_ATZ) }}</p>
+                                    <p v-if="data.data[0].NU_PROCESSO"><strong>Processo:</strong> {{ data.data[0].NU_PROCESSO }}</p>
+                                    <p v-if="data.data[0].NU_EDITAL"><strong>Edital:</strong> {{ data.data[0].NU_EDITAL }}</p>
+                                </div>
                             </div>
 
                             <!-- Valores Contratados -->
-                            <div class="col-md-4">
-                              <h4>Valores Contratados</h4>
-                              <p v-if="data.data[0].VALOR_PI_MEDICAO"><strong>Valor PI:</strong> {{ data.data[0].VALOR_PI_MEDICAO }}</p>
-                              <p v-if="data.data[0].VALOR_TOTAL_DE_ADITIVOS"><strong>Aditivos:</strong> {{ data.data[0].VALOR_TOTAL_DE_ADITIVOS }}</p>
-                              <p v-if="data.data[0].VALOR_MEDICAO_PI_R"><strong>PI Vigente:</strong> {{ data.data[0].VALOR_MEDICAO_PI_R }}</p>
-                              <p v-if="data.data[0].VALOR_TOTAL_DE_REAJUSTE"><strong>Reajuste:</strong> {{ data.data[0].VALOR_TOTAL_DE_REAJUSTE }}</p>
-                              <p v-if="data.data[0].Valor_Medicao_PI_R_Ajuste_Acumulado"><strong>Total (PI+R):</strong> {{ data.data[0].Valor_Medicao_PI_R_Ajuste_Acumulado }}</p>
+                            <div class="col-md-4 mb-4">
+                                <div class="block-card">
+                                    <h4 class="text-center">VALORES CONTRATADOS</h4>
+                                    <p v-if="data.data[0].VALOR_INICIAL"><strong>Valor PI:</strong> {{ formatarMoeda(data.data[0].VALOR_INICIAL) }}</p>
+                                    <p v-if="data.data[0].VALOR_TOTAL_DE_ADITIVOS"><strong>Aditivos:</strong> {{ formatarMoeda(data.data[0].VALOR_TOTAL_DE_ADITIVOS) }}</p>
+                                    <p v-if="piVigente"><strong>PI Vigente:</strong> {{ formatarMoeda(piVigente) }}</p>
+                                    <p v-if="data.data[0].VALOR_TOTAL_DE_REAJUSTE"><strong>Reajuste:</strong> {{ formatarMoeda(data.data[0].VALOR_TOTAL_DE_REAJUSTE) }}</p>
+                                    <p v-if="totalPIR"><strong>Total (PI+R):</strong> {{ formatarMoeda(totalPIR) }}</p>
+                                </div>
                             </div>
 
                             <!-- Valores Medidos -->
-                            <div class="col-md-4">
-                              <h4>Valores Medidos</h4>
-                              <p><strong>Medição Atual:</strong> Sem dados</p>
-                              <p v-if="data.data[0].VALOR_MEDICAO_PI_R"><strong>PI:</strong> {{ data.data[0].VALOR_MEDICAO_PI_R }}</p>
-                              <p v-if="data.data[0].VALOR_TOTAL_DE_REAJUSTE"><strong>Reajuste:</strong> {{ data.data[0].VALOR_TOTAL_DE_REAJUSTE }}</p>
-                              <p v-if="data.data[0].Valor_Medicao_PI_R_Ajuste_Acumulado"><strong>Total (PI+R):</strong> {{ data.data[0].Valor_Medicao_PI_R_Ajuste_Acumulado }}</p>
+                            <div class="col-md-4 mb-4">
+                                <div class="block-card">
+                                    <h4 class="text-center">VALORES MEDIDOS</h4>
+                                    <p v-if="data.data[0].VALOR_PI_MEDICAO"><strong>PI:</strong> {{ formatarMoeda(data.data[0].VALOR_PI_MEDICAO) }}</p>
+                                    <p v-if="data.data[0].VALOR_REAJUSTE_MEDICAO"><strong>Reajuste:</strong> {{ formatarMoeda(data.data[0].VALOR_REAJUSTE_MEDICAO) }}</p>
+                                    <p v-if="totalMedidoPIR"><strong>Total (PI+R):</strong> {{ formatarMoeda(totalMedidoPIR) }}</p>
+                                </div>
                             </div>
 
                             <!-- Saldo Contratual -->
-                            <div class="col-md-4">
-                              <h4>Saldo Contratual</h4>
-                              <p><strong>Realizado:</strong> Sem dados</p>
-                              <p v-if="data.data[0].VALOR_MEDICAO_PI_R"><strong>PI:</strong> {{ data.data[0].VALOR_MEDICAO_PI_R }}</p>
-                              <p v-if="data.data[0].VALOR_TOTAL_DE_REAJUSTE"><strong>Reajuste:</strong> {{ data.data[0].VALOR_TOTAL_DE_REAJUSTE }}</p>
-                              <p v-if="data.data[0].Valor_Medicao_PI_R_Ajuste_Acumulado"><strong>Total (PI+R):</strong> {{ data.data[0].Valor_Medicao_PI_R_Ajuste_Acumulado }}</p>
+                            <div class="col-md-4 mb-4">
+                                <div class="block-card">
+                                    <h4 class="text-center">SALDO CONTRATUAL</h4>
+                                    <p v-if="saldoPI !== 0"><strong>PI:</strong> {{ formatarMoeda(saldoPI) }}</p>
+                                    <p v-if="saldoReajuste !== 0"><strong>Reajuste:</strong> {{ formatarMoeda(saldoReajuste) }}</p>
+                                    <p v-if="saldoTotalPIR !== 0"><strong>Total (PI+R):</strong> {{ formatarMoeda(saldoTotalPIR) }}</p>
+                                </div>
                             </div>
                         </div>
                         <div v-else>
@@ -106,7 +160,7 @@ onMounted(() => {
 
 <style scoped>
 .card {
-    margin-top: 20px;
+    margin-top: px;
 }
 
 h2 {
@@ -116,7 +170,16 @@ h2 {
 
 h4 {
     font-size: 1.1rem;
-    margin-bottom: 10px;
+    margin-bottom: 30px;
+    text-align: center; 
+}
+
+.block-card {
+    background-color: #fdfdfd; /* Fundo leve para destacar os blocos */
+    border: 1px solid #ecebeb; /* Borda sutil */
+    border-radius: 5px; /* Cantos arredondados */
+    padding: 15px; /* Espaçamento interno */
+    min-height: 230px; /* Altura mínima para uniformidade */
 }
 
 p {
@@ -131,5 +194,13 @@ strong {
 
 .text-muted {
     text-align: center;
+}
+
+.col-md-4 {
+    margin-bottom: 20px; 
+}
+
+.row {
+    justify-content: space-between; 
 }
 </style>
