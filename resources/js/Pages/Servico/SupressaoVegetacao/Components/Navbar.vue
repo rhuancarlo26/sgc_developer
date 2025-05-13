@@ -58,7 +58,7 @@ const getAprovacao = () => {
                       </NavDropdown>
 
                         <NavDropdown prefix="contratos.contratada.servicos.supressao-vegetacao.execucao*" title="Execução"
-                                     :icon="IconLayoutDashboard" v-if="aprovacao.fk_status === 3">
+                                     :icon="IconLayoutDashboard" v-if="aprovacao?.fk_status === 3">
 
                             <NavDropdownLink route-name="contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.index"
                               active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.execucao.supressao*"
@@ -77,12 +77,12 @@ const getAprovacao = () => {
                       <NavLink route-name="contratos.contratada.servicos.supressao-vegetacao.resultado.index"
                         active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.resultado*"
                         :param="{ contrato: contrato.id, servico: servico.id }" title="Resultado"
-                        :icon="IconLayoutDashboard" v-if="aprovacao.fk_status === 3"/>
+                        :icon="IconLayoutDashboard" v-if="aprovacao?.fk_status === 3"/>
 
                       <NavLink route-name="contratos.contratada.servicos.supressao-vegetacao.relatorio.index"
                         active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.relatorio.*"
                         :param="{ contrato: contrato.id, servico: servico.id }" title="Relatórios"
-                        :icon="IconLayoutDashboard" v-if="aprovacao.fk_status === 3"/>
+                        :icon="IconLayoutDashboard" v-if="aprovacao?.fk_status === 3"/>
 
                       <NavLink route-name="contratos.contratada.servicos.supressao-vegetacao.pareceres.index"
                         active-on-route-prefix="contratos.contratada.servicos.supressao-vegetacao.pareceres.*"

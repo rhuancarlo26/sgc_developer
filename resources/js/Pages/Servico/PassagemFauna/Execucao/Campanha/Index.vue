@@ -55,7 +55,7 @@ const abrirModalVisualizarCampanha = (item) => {
                     </template>
                 </ModelSearchFormAllColumns>
                 <Table
-                    :columns="['ID campanha', 'N° ABIO', 'Período', 'Data início', 'Data final', 'Observações', 'Ação']"
+                    :columns="['ID campanha', 'N° Campanha', 'Período', 'Data início', 'Data final', 'Observações', 'Ação']"
                     :records="campanhas" table-class="table-hover">
                     <template #body="{ item }">
                         <tr>
