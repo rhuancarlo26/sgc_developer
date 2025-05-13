@@ -1,272 +1,269 @@
 <script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link } from "@inertiajs/vue3";
-import Breadcrumb from "@/Components/Breadcrumb.vue";
-import Navbar from "./Navbar.vue";
-import { Chart } from "highcharts-vue";
-import { onMounted, reactive, ref, computed } from "vue";
-import PaginationSgc from '@/Components/PaginationSgc.vue';
-import { IconCalendar, IconClipboardData, IconPlane } from "@tabler/icons-vue";
-
-const props = defineProps({
-  contrato: Object,
-  empreendimentos: Object,
-  estudos: Object,
-  subprodutos: Object
-});
-
-console.log(props.subprodutos[0]);
-
-
-// Configuração do gráfico
-const chartOptions_radio = reactive({
-  chart: {
-    type: "bar",
-    backgroundColor: "transparent",
-    height: 500,
-  },
-  title: {
-    text: "Contrato x R$-OSE x Medido",
-    align: "left",
-    margin: 40,
-  },
-  xAxis: {
-    categories: ["R$-OSE", "Medido", "Contrato"], 
-  },
-  yAxis: {
-    min: 0,
-    title: {
-      text: "Valores",
-    },
-    labels: {
-      formatter: function () {
-        return 'R$ ' + this.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-      }
-    },
-  },
-  plotOptions: {
-    series: {
-      allowPointSelect: true,
-      cursor: "pointer",
-      dataLabels: {
-        enabled: true,
-        formatter: function () {
-          return 'R$ ' + this.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-        },
-        style: {
-          fontFamily: 'Arial, sans-serif',
-          fontSize: '12px',
-          color: '#000',
+    import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+    import { Head } from '@inertiajs/vue3';
+    import NavbarContrato from "./NavbarContrato.vue";
+    import { ref, onMounted, computed } from 'vue';
+    import { Doughnut } from 'vue-chartjs';
+    import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+    
+    ChartJS.register(Title, Tooltip, Legend, ArcElement);
+    
+    const props = defineProps({
+        quantitativosData: Object,
+        contratoId: Number,
+        contrato: Object,
+    });
+    
+    const data = ref(props.quantitativosData || {});
+    const filtroFamilia = ref(''); 
+    
+    const familiasUnicas = computed(() => {
+        const familias = new Set(data.value.map(item => item.familia));
+        return ['Todas', ...Array.from(familias).filter(f => f)];
+    });
+    
+    const dataFiltrada = computed(() => {
+        if (!filtroFamilia.value || filtroFamilia.value === 'Todas') {
+            return data.value;
         }
-      }
-    },
-  },
-  series: [
-    {
-      name: 'Valores',
-      data: [
-        { y: 6737143.32, color: '#679eaa' },
-        { y: 0, color: '#45818e' } 
-      ],
-    },
-  ]
-});
-
-// Função de tabela para o gráfico
-const empreendimentoTable = (emp) => {
-  emp.forEach(element => {
-    let soma_ose = 0;
-    let soma_medidas = 0;
-    let valor_total = 0;
-
-    props.estudos.forEach((value) => {
-      soma_ose += Number(value.r_ose);
-      soma_medidas += (Number(value.medicao_40_qtd) + Number(value.medicao_60_qtd)) * Number(value.qtd_ose);
-      valor_total = props.contrato.total;
+        return data.value.filter(item => item.familia === filtroFamilia.value);
+    });
+    
+    const totais = computed(() => {
+        if (!dataFiltrada.value || dataFiltrada.value.length === 0) {
+            return {
+                r_total_contrato: 0,
+                r_ose: 0,
+                r_medido: 0,
+            };
+        }
+    
+        return {
+            r_total_contrato: dataFiltrada.value.reduce((sum, item) => sum + (parseFloat(item.r_total_contrato) || 0), 0),
+            r_ose: dataFiltrada.value.reduce((sum, item) => sum + (parseFloat(item.r_ose) || 0), 0),
+            r_medido: dataFiltrada.value.reduce((sum, item) => sum + (parseFloat(item.r_medido) || 0), 0),
+        };
+    });
+    
+    const formatarMoeda = (valor) => {
+        if (!valor && valor !== 0) return 'R$ 0,00';
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+    };
+    
+    const chartData = computed(() => ({
+        labels: ['Total Contrato', 'OSE', 'Medido'],
+        datasets: [{
+            data: [totais.value.r_total_contrato, totais.value.r_ose, totais.value.r_medido],
+            backgroundColor: ['#444d71', '#36A2EB', '#2d8407'],
+            hoverBackgroundColor: ['#444d71', '#36A2EB', '#2d8407'],
+            borderWidth: 1,
+        }],
+    }));
+    
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: {
+                    generateLabels: (chart) => {
+                        const { data } = chart;
+                        return data.labels.map((label, index) => ({
+                            text: `${label}: ${formatarMoeda(data.datasets[0].data[index])}`,
+                            fillStyle: data.datasets[0].backgroundColor[index],
+                            strokeStyle: data.datasets[0].backgroundColor[index],
+                            hidden: isNaN(data.datasets[0].data[index]) || data.datasets[0].data[index] === 0,
+                            index,
+                        }));
+                    },
+                },
+            },
+            tooltip: {
+                enabled: true,
+                callbacks: {
+                    label: (context) => {
+                        const label = context.label || '';
+                        const value = context.raw || 0;
+                        return `${label}: ${formatarMoeda(value)}`;
+                    },
+                },
+            },
+        },
+        cutout: '75%',
+    };
+    
+    onMounted(() => {
+        console.log('Dados dos quantitativos:', data.value);
+        console.log('Totais calculados:', totais.value);
+        console.log('Contrato no Quantitativos:', props.contrato);
     });
 
-    // chartOptions_radio.series[0].data = [
-    //   { name: 'Valor Medido', y: Number(soma_medidas.toFixed(0)), color: '#8cbbc4' },
-    //   { name: 'R$ OSE', y: Number(soma_ose.toFixed(0)), color: '#46aabd' },
-    //   { name: 'Total contrato', y: Number(valor_total.toFixed(0)), color: '#037c91' }
-    // ];
-  });
-};
-
-
-
-// Controle e dados da tabela
-const tabelaItens = reactive([]);
-const displayedItems = ref([]);
-const currentPage = ref(1);
-const itemsPerPage = ref(15);
-
-const totalPages = computed(() => Math.ceil(tabelaItens.length / itemsPerPage.value));
-
-// Sincronização da rolagem
-const scrollbarTop = ref(null);
-const tableWrapper = ref(null);
-const syncScroll = (source, target) => {
-  target.scrollLeft = source.scrollLeft;
-};
-
-const verificarScroll = () => {
-  const tabela = tableWrapper.value;
-  return tabela && tabela.scrollWidth > tabela.clientWidth;
-};
-
-// Funções de criação e atualização da tabela
-onMounted(() => {
-  empreendimentoTable(props.empreendimentos);
-  criarTabelaItens();
-  
-  scrollbarTop.value.addEventListener('scroll', () => syncScroll(scrollbarTop.value, tableWrapper.value));
-  tableWrapper.value.addEventListener('scroll', () => syncScroll(tableWrapper.value, scrollbarTop.value));
-});
-
-const criarTabelaItens = () => {
-  props.subprodutos.forEach(subproduto => {
-    const {
-      cod_siac, contrato, descricao_revisada, descricao_siac, etapa, familia, prazo_de_elaboracao,
-      produto, qtd_contrato, qtd_medido, qtd_ose, qtd_saldo_medido, qtd_saldo_ose, r_medido, r_ose
-    } = subproduto;
-
-    tabelaItens.push({
-      cod_siac, contrato, descricao_revisada, descricao_siac, etapa, familia, prazo_de_elaboracao,
-      produto, qtd_contrato, qtd_medido, qtd_ose, qtd_saldo_medido, qtd_saldo_ose, r_medido, r_ose
-    });
-  });
-
-  updateDisplayedItems();
-};
-
-// Paginação
-const handlePageChange = (newPage) => {
-  currentPage.value = newPage;
-  updateDisplayedItems();
-};
-
-const handleItemsPerPageChange = (newItemsPerPage) => {
-  itemsPerPage.value = newItemsPerPage;
-  currentPage.value = 1;
-  updateDisplayedItems();
-};
-
-const updateDisplayedItems = () => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  displayedItems.value = tabelaItens.slice(start, end);
-};
 </script>
-
+    
 <template>
-  <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
+    <AuthenticatedLayout>
+        <Head :title="`Quantitativos - Contrato ${contratoId}`" />
 
-  <AuthenticatedLayout>
-    <template #header>
-      <div class="w-100 d-flex justify-content-between">
-        <Breadcrumb class="align-self-center" :links="[ 
-          { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
-          { route: '#', label: contrato.contratada }
-        ]" />
-        <div>
-          <Link class="btn btn-info me-2 w-500"  :href="route('sgc.contratada.cronograma.index', {contrato: contrato.id})">
-            <IconCalendar class="me-2" /> Cronograma Físico
-          </Link>
-
-          <Link class="btn btn-info me-2 w-500"  :href="route('sgc.gestao.listagemDav', {contrato: contrato.id})">
-            <IconPlane class="me-2" /> DAV
-          </Link>
-
-          <Link class="btn btn-info me-2 w-500"  :href="route('sgc.contratada.relatorios.index', {contrato: contrato.id})">
-            <IconClipboardData class="me-2" /> Relatorio de coordenação
-          </Link>
-        </div>
-      </div>
-    </template>
-
-    <Navbar :tipo="contrato">
-
-      <template #body>        
-        <div class="card">
-          <div class="card-body p-0">
-            <Chart :options="chartOptions_radio"></Chart>
-          </div>
-        </div>
-
-        <!-- Tabela e Paginação -->
-        <div class="card mt-4">
-          <div class="col-md-12">
-            <!-- Barra de rolagem superior -->
-            <div class="scrollbar-top" ref="scrollbarTop" style="overflow-x: auto; height: 15px; position: sticky; top: 0; background-color: white; z-index: 1000;">
-              <div style="width: 2800px; height: 1px;"></div>
+        <template #header>
+            <div class="w-100 d-flex justify-content-between">
+                <!-- <h2>Quantitativos - Contrato {{ contratoId }}</h2> -->
             </div>
+        </template>
 
-            <!-- Tabela com rolagem horizontal -->
-            <div class="table-responsive" ref="tableWrapper" style="overflow-x: auto; background-color: white;">
-              <table class="table table-bordered" style="min-width: 1240px;"> 
-                <thead class="text-center">
-                  <tr>
-                    <th class="text-center" style="font-size: 12px;">Cod SIAC</th>
-                    <th class="text-center" style="font-size: 12px;">Contrato</th>
-                    <th class="text-center" style="font-size: 12px;">Descrição Siac</th>
-                    <th class="text-center" style="font-size: 12px;">Descrição revisada</th>
-                    <th class="text-center" style="font-size: 12px;">produto</th>
-                    <th class="text-center" style="font-size: 12px;">Etapa</th>
-                    <th class="text-center" style="font-size: 12px;">familia</th>
-                    <th class="text-center" style="font-size: 12px;">Prazo de elaboração</th>
-                    <th class="text-center" style="font-size: 12px;">qtd contrato</th>
-                    <th class="text-center" style="font-size: 12px;">qtd medido</th>
-                    <th class="text-center" style="font-size: 12px;">qtd ose</th>
-                    <th class="text-center" style="font-size: 12px;">saldo medido</th>
-                    <th class="text-center" style="font-size: 12px;">saldo ose</th>
-                    <th class="text-center" style="font-size: 12px;">medido</th>
-                    <th class="text-center" style="font-size: 12px;">ose</th>
-                  </tr>
-                </thead>
-                <tbody class="text-center">
-                  <tr v-for="(item, index) in displayedItems" :key="index">
-                    <td class="align-content-center">{{ item.cod_siac }}</td>
-                    <td class="align-content-center">{{ item.contrato }}</td>
-                    <td class="align-content-center format-col" :title="item.descricao_siac">{{ item.descricao_siac }}</td>
-                    <td class="align-content-center format-col" :title="item.descricao_revisada">{{ item.descricao_revisada }}</td>
-                    <td class="align-content-center">{{ item.produto }}</td>
-                    <td class="align-content-center">{{ item.etapa }}</td>
-                    <td class="align-content-center">{{ item.familia }}</td>
-                    <td class="align-content-center">{{ item.prazo_de_elaboracao }}</td>
-                    <td class="align-content-center">{{ item.qtd_contrato }}</td>
-                    <td class="align-content-center">{{ item.qtd_medido }}</td>
-                    <td class="align-content-center">{{ item.qtd_ose }}</td>
-                    <td class="align-content-center">{{ item.qtd_saldo_medido }}</td>
-                    <td class="align-content-center">{{ item.qtd_saldo_ose }}</td>
-                    <td class="align-content-center">{{ new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.r_medido) }}</td>
-                    <td class="align-content-center">{{ new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.r_ose) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+        <NavbarContrato :tipo="contrato">
+            <template #body>
+                <div class="card">
+                    <div class="card-body">
+                        <label for="filtro-familia" class="me-2">Filtrar por Família:</label>
+                        <div class="filter-container mb-3">
+                            <select id="filtro-familia" v-model="filtroFamilia" class="form-select">
+                                <option value="">Todas</option>
+                                <option v-for="familia in familiasUnicas" :key="familia" :value="familia">
+                                    {{ familia }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="w-100 d-flex justify-content-center align-items-center mb-3">
+                            <h3 class="subprodutos-title">QUANTITATIVOS - SUBPRODUTOS</h3>
+                        </div>
+                        <div v-if="data.error" class="alert alert-danger">
+                            {{ data.error }}
+                        </div>
+                        <div v-else-if="dataFiltrada.length > 0">
+                            <div class="chart-container">
+                                <h4></h4>
+                                <Doughnut :data="chartData" :options="chartOptions" />
+                            </div>
 
-            <!-- Paginação -->
-            <PaginationSgc
-              :totalItems="tabelaItens.length"
-              :itemsPerPageOptions="[15, 20, 50]"
-              @pageChanged="handlePageChange"
-              @itemsPerPageChanged="handleItemsPerPageChange"
-            />
-          </div>
-        </div>
-      </template>
-    </Navbar>
-  </AuthenticatedLayout>
+                            <div class="table-responsive mt-4">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Cod. SIAC</th>
+                                            <th>Produto</th>
+                                            <th>Subproduto</th>
+                                            <th>Família</th>
+                                            <th>Descrição SIAC</th>
+                                            <th>Descrição Revisada</th>
+                                            <th>Und</th>
+                                            <th>Etapa</th>
+                                            <th>Contrato</th>
+                                            <th>Req. Ext.</th>
+                                            <th>Prazo de Elaboração</th>
+                                            <th>Qtd Contrato</th>
+                                            <th>Qtd 1ª TA</th>
+                                            <th>Qtd 2º TA</th>
+                                            <th>Qtd OSE</th>
+                                            <th>Qtd Saldo OSE</th>
+                                            <th>Qtd Medido</th>
+                                            <th>Qtd Saldo Medido</th>
+                                            <th>Preço Unitário</th>
+                                            <th>Total Contrato</th>
+                                            <th>R$ 1º TA</th>
+                                            <th>R$ 2º TA</th>
+                                            <th>OSE</th>
+                                            <th>Saldo OSE</th>
+                                            <th>Medido</th>
+                                            <th>Saldo a Medir</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(item, index) in dataFiltrada" :key="index">
+                                            <td>{{ item.cod_siac }}</td>
+                                            <td>{{ item.produto }}</td>
+                                            <td>{{ item.subproduto }}</td>
+                                            <td>{{ item.familia }}</td>
+                                            <td>{{ item.descricao_siac }}</td>
+                                            <td>{{ item.descricao_revisada }}</td>
+                                            <td>{{ item.und }}</td>
+                                            <td>{{ item.etapa }}</td>
+                                            <td>{{ item.contrato }}</td>
+                                            <td>{{ item.req_ext }}</td>
+                                            <td>{{ item.prazo_de_elaboracao }}</td>
+                                            <td>{{ item.qtd_contrato }}</td>
+                                            <td>{{ item.qtd_1_ta }}</td>
+                                            <td>{{ item.qtd_2_ta }}</td>
+                                            <td>{{ item.qtd_ose }}</td>
+                                            <td>{{ item.qtd_saldo_ose }}</td>
+                                            <td>{{ item.qtd_medido }}</td>
+                                            <td>{{ item.qtd_saldo_medido }}</td>
+                                            <td>{{ formatarMoeda(item.r_preco_unitario) }}</td>
+                                            <td>{{ formatarMoeda(item.r_total_contrato) }}</td>
+                                            <td>{{ formatarMoeda(item.r_1_ta) }}</td>
+                                            <td>{{ formatarMoeda(item.r_2_ta) }}</td>
+                                            <td>{{ formatarMoeda(item.r_ose) }}</td>
+                                            <td>{{ formatarMoeda(item.r_saldo_ose) }}</td>
+                                            <td>{{ formatarMoeda(item.r_medido) }}</td>
+                                            <td>{{ formatarMoeda(item.r_saldo_a_medir) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <p class="text-muted">Nenhum dado encontrado</p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </NavbarContrato>
+    </AuthenticatedLayout>
 </template>
-
+    
 <style scoped>
-  .format-col {
-    width: 315px;
-    max-width: 315px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-  }
+    .card {
+        margin-top: 20px;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+    
+    h4 {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .text-muted {
+        text-align: center;
+    }
+    
+    .chart-container {
+        position: relative;
+        max-width: 600px;
+        height: 300px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .mt-4 {
+        margin-top: 1.5rem;
+    }
+    
+    .subprodutos-title {
+        font-size: 1.7rem;
+        margin: -5rem 0 2rem 0;
+        color: #333;
+    }
+    
+    /* Estilo para o container do filtro */
+    .filter-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    /* Estilo para o select */
+    .form-select {
+        width: 200px;
+        display: inline-block;
+    }
 </style>

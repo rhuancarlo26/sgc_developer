@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Calendar from "@/Components/FullCalendar.vue";
-import Navbar from "../Navbar.vue";
+import NavbarContrato from "../NavbarContrato.vue";
 import axios from 'axios';
 
 const page = usePage();
@@ -23,12 +23,19 @@ const newEvent = ref({
 });
 const opcoesEvento = ref({ empreendimentos: [], subprodutos: [] });
 
+// Definir os props recebidos
+defineProps({
+  eventos: Array,
+  contratoId: Number,
+  contrato: Object,
+});
+
 onMounted(async () => {
   eventos.value = page.props.eventos || [];
   console.log("Eventos carregados:", eventos.value);
 
   try {
-    const url = `/sgc/contratada/${page.props.contrato}/cronograma/opcoes-evento`;
+    const url = `/sgc/contratada/${page.props.contratoId}/cronograma/opcoes-evento`;
     console.log("URL da requisição:", window.location.origin + url);
     const response = await axios.get(url);
     opcoesEvento.value = response.data;
@@ -53,7 +60,7 @@ const ufsUnicas = computed(() => {
 const eventosFiltrados = computed(() => {
   let filtered = eventos.value.map(evento => ({
     ...evento,
-    backgroundColor: evento.source === 'auxiliar' ? '#28a745' : '#3788d8', // Forçar verde para auxiliar, azul para principal
+    backgroundColor: evento.source === 'auxiliar' ? '#28a745' : '#3788d8', 
   }));
 
   const hoje = new Date();
@@ -131,7 +138,7 @@ const closeCreateModal = () => {
 
 const saveNewEvent = async () => {
   try {
-    const url = `/sgc/contratada/${page.props.contrato}/cronograma/evento-auxiliar`;
+    const url = `/sgc/contratada/${page.props.contratoId}/cronograma/evento-auxiliar`;
     console.log("Salvando evento com dados:", newEvent.value);
     await axios.post(url, newEvent.value);
     eventos.value.push({
@@ -152,7 +159,7 @@ const saveNewEvent = async () => {
 
 <template>
   <AuthenticatedLayout>
-    <Navbar>
+    <NavbarContrato :tipo="contrato"> 
       <template #body>
         <div class="container mt-4">
           <h3 class="title-cronograma">CRONOGRAMA FÍSICO</h3>
@@ -184,7 +191,6 @@ const saveNewEvent = async () => {
             <div class="filter-item">
               <button class="btn btn-outline-info" @click="openCreateModal">+ Novo Evento</button>
             </div>
-
           </div>
           <div class="custom-calendar p-2">
             <Calendar :events="eventosFiltrados" @event-click="handleEventClick" locale="pt-br" />
@@ -248,7 +254,7 @@ const saveNewEvent = async () => {
           </div>
         </div>
       </template>
-    </Navbar>
+    </NavbarContrato>
   </AuthenticatedLayout>
 </template>
 
@@ -281,6 +287,4 @@ const saveNewEvent = async () => {
   display: flex;
   align-items: flex-end;
 }
-
-
 </style>
