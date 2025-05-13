@@ -11,7 +11,7 @@ const props = defineProps({
   width: { type: String, default: "100%" },
   coordinates: Array,
   manualRender: { type: Boolean, default: false },
-  id: String
+  id: String,
 });
 
 const mapContainer = ref();
@@ -20,7 +20,6 @@ let featureGroup = null;
 let map = null;
 let geojson_layers = []; 
 let geojson_layer = null;
-let marker_layer = null;
 let marker_group = null;
 
 onMounted(() => {
@@ -112,10 +111,11 @@ const setGeoJson = async (geojson_linestring, weight, filterOSE = null) => {
       let dnitButton = '';
       let ibamaButton = '';
       let incraButton = '';
+
       if (coordenada.situacao_processo_licenciamento_dnit !== null) {
         dnitButton = `<a tabindex="0" role="button" class="text-white btn btn-success p-2 mt-2 btn-custon" 
           data-bs-toggle="popover" 
-          data-bs-trigger="focus"
+          data-bs-trigger="manual"
           data-bs-title="Situação Dnit" 
           data-bs-content="${coordenada.situacao_processo_licenciamento_dnit}">
           Dnit
@@ -125,7 +125,7 @@ const setGeoJson = async (geojson_linestring, weight, filterOSE = null) => {
       if (coordenada.situacao_ibama_oema !== null) {
         ibamaButton = `<a tabindex="0" role="button" class="text-white btn btn-warning p-2 mt-2 btn-custon" 
           data-bs-toggle="popover" 
-          data-bs-trigger="focus" 
+          data-bs-trigger="manual" 
           data-bs-title="Situação Ibama" 
           data-bs-content="${coordenada.situacao_ibama_oema}">
           Ibama
@@ -135,12 +135,14 @@ const setGeoJson = async (geojson_linestring, weight, filterOSE = null) => {
       if (coordenada.situacao_incra !== null) {
         incraButton = `<a tabindex="0" role="button" class="text-white btn btn-danger p-2 mt-2 btn-custon" 
           data-bs-toggle="popover" 
-          data-bs-trigger="focus" 
+          data-bs-trigger="manual" 
           data-bs-title="Situação Incra" 
           data-bs-content="${coordenada.situacao_incra}">
           Incra
         </a>`;
       }
+      // <NavLink class="list-unstyled" route-name="sgc.gestao.dashboard.empreendimento.index" :param="{ tipo: props.tipo , empreendimento: trecho.id}" :icon="IconZoomCheck" />
+
 
       const info = `
               <strong>BR:</strong> ${coordenada.br || 'N/A'}<br>
@@ -155,6 +157,9 @@ const setGeoJson = async (geojson_linestring, weight, filterOSE = null) => {
               ${dnitButton}
               ${ibamaButton}
               ${incraButton}
+              <a tabindex="0" role="button" class="text-white btn btn-primary p-2 mt-2 btn-custon" href="dashboard/${coordenada.id}">
+                Abrir
+              </a>
             `;
 
       const layerName = coordenada.ose_sei ? 'ose' : 's/ose';
@@ -182,9 +187,40 @@ const setGeoJson = async (geojson_linestring, weight, filterOSE = null) => {
         const popoverTriggerList = geojson_layer.getPopup().getElement().querySelectorAll('[data-bs-toggle="popover"]');
 
         // Inicializa o popover
-        popoverTriggerList.forEach(popoverTriggerEl => {
-          new bootstrap.Popover(popoverTriggerEl);
+        // Inicializa o popover (MODIFICADO)
+        popoverTriggerList.forEach((popoverTriggerEl) => {
+          const popover = new bootstrap.Popover(popoverTriggerEl, {
+            trigger: 'manual',
+            html: true,
+          });
+
+          const togglePopover = (event) => {
+            event.stopPropagation();
+
+            document.querySelectorAll('.popover').forEach(p => p.remove());
+
+            popover.show();
+
+            const handleClickOutside = (e) => {
+              const popoverEl = document.querySelector('.popover');
+              if (
+                popoverEl &&
+                !popoverEl.contains(e.target) &&
+                !popoverTriggerEl.contains(e.target)
+              ) {
+                popover.hide();
+                document.removeEventListener('click', handleClickOutside);
+              }
+            };
+
+            setTimeout(() => {
+              document.addEventListener('click', handleClickOutside);
+            }, 0);
+          };
+
+          popoverTriggerEl.addEventListener('click', togglePopover);
         });
+
       });
 
       if (featureGroup.getLayers().length > 0) {
