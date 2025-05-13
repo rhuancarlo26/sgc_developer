@@ -98,8 +98,8 @@ const vincularRet = () => {
                         <select name="id_ret" id="id_ret" class="form-select"
                                 v-model="form_ret.id_ret">
                             <option v-for="ret in servico.passagem_fauna_abios"
-                                    :key="ret.abio_ret.id" :value="ret.abio_ret.id">
-                                {{ ret.abio_ret.nome }} - {{ ret.licenca.numero_licenca }}
+                                    :key="ret?.abio_ret?.id" :value="ret?.abio_ret?.id">
+                                {{ ret?.abio_ret?.nome }} - {{ ret?.licenca?.numero_licenca }}
                             </option>
                         </select>
                     </div>
