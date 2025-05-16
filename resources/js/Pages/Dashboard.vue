@@ -1,4 +1,5 @@
 <script setup>
+import Offcanvas from 'bootstrap/js/dist/offcanvas'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import BotoesMapa from './BotoesMapa.vue';
@@ -7,7 +8,6 @@ import CoordanadasCentroUFs from "@/Utils/CoordanadasCentroUFs.js";
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import Popups from './Dashboard/MapPopup/Popups';
 import Detalhe from './Detalhe.vue';
-import { Offcanvas } from 'bootstrap'
 
 const props = defineProps({
     ufs: { type: Array },
@@ -212,6 +212,4 @@ function toggleFilter() {
     overflow: hidden;
     align-items: stretch;
 }
-
-
 </style>
