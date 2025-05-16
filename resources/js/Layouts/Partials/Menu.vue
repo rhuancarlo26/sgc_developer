@@ -1,5 +1,5 @@
 <script setup>
-import 'bootstrap/js/dist/dropdown';
+
 
 import {
     IconClipboardList,
