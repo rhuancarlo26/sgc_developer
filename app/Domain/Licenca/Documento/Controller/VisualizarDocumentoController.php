@@ -13,4 +13,9 @@ class VisualizarDocumentoController extends Controller
     {
         return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . $licenca->arquivo_licenca);
     }
+
+    public function termo(Licenca $licenca)
+    {
+        return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . $licenca->arquivo_termo);
+    }
 }

@@ -11,6 +11,7 @@ const props = defineProps({
 const form = useForm({
   licenca_id: props.licenca.id,
   documento: null,
+  documentoTermo: null,
   shapefile: null
 })
 
@@ -20,8 +21,19 @@ const salvarDocumento = () => {
   form.post(route('licenca.documento.store'));
 }
 
+const salvarDocumentoTermo = () => {
+  form.licenca_id = props.licenca.id;
+
+  form.post(route('licenca.documento.termo.store'));
+}
+
+
 const deleteDocumento = () => {
   form.delete(route('licenca.documento.delete', props.licenca.id));
+}
+
+const deleteDocumentoTermo = () => {
+  form.delete(route('licenca.documento.termo.delete', props.licenca.id));
 }
 
 const salvarShapefile = () => {
@@ -38,8 +50,56 @@ const deleteShapefile = () => {
 <template>
   <div class="row">
     <div class="col">
+      <div v-if="!licenca.arquivo_termo" class="mb-4">
+        <InputLabel value="Termo de referência" for="documentoTermo" />
+        <div class="row g-2">
+          <div class="col">
+            <input @input="form.documentoTermo = $event.target.files[0]" type="file" class="form-control">
+          </div>
+          <div class="col-auto">
+            <a @click="salvarDocumentoTermo()" href="#" class="btn btn-success" aria-label="Button"
+              :disabled="form.processing">
+              Enviar
+            </a>
+          </div>
+        </div>
+        <!-- </form> -->
+        <InputError :message="form.errors.documentoTermo" />
+      </div>
+      <div v-else>
+        <InputLabel value="Termo de referência" for="documentoTermo" />
+        <div class="card">
+          <div class="table-responsive">
+
+            <table class="table card-table table-bordered">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{ licenca.arquivo_termo.split('__')[1] }}</td>
+                  <td>
+                    <a :href="`/storage/${licenca.arquivo_termo}`" target="_blank" class="btn btn-primary m-1">
+                      Ver Termo
+                    </a>
+                    <a @click="deleteDocumentoTermo()" class="btn  btn-danger m-1" title="Excluir"
+                      href="javascript:void(0)">
+                      <IconTrash />
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
       <div v-if="!licenca.arquivo_licenca" class="mb-4">
-        <InputLabel value="Termo de referência" for="documento" />
+        <InputLabel value="Licença" for="documento" />
         <div class="row g-2">
           <div class="col">
             <input @input="form.documento = $event.target.files[0]" type="file" class="form-control">
@@ -55,6 +115,7 @@ const deleteShapefile = () => {
         <InputError :message="form.errors.documento" />
       </div>
       <div v-else>
+        <InputLabel value="Licença" for="documento" />
         <div class="card">
           <div class="table-responsive">
             <table class="table card-table table-bordered">
@@ -68,7 +129,11 @@ const deleteShapefile = () => {
                 <tr>
                   <td>{{ licenca.arquivo_licenca.split('__')[1] }}</td>
                   <td>
-                    <a @click="deleteDocumento()" class="btn align-text-top btn-danger m-1" title="Excluir"
+                    <a :href="`/storage/${licenca.arquivo_licenca}`" target="_blank" class="btn btn-primary m-1">
+                      Ver Licenca
+                    </a>
+                 
+                    <a @click="deleteDocumento()" class="btn  btn-danger m-1" title="Excluir"
                       href="javascript:void(0)">
                       <IconTrash />
                     </a>
