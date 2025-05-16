@@ -12,6 +12,8 @@ use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use Illuminate\Support\Facades\Cache;
 
+
+
 class LicencaService extends BaseModelService
 {
     use Searchable, Deletable;
@@ -62,13 +64,47 @@ class LicencaService extends BaseModelService
     public function storeDocumento($documento, $licenca_id): array
     {
         try {
-            if ($documento->isvalid()) {
+            if ($documento->isValid()) {
                 $nome = $documento->getClientOriginalName();
                 // $tipo = $documento->extension();
-                $caminho = $documento->storeAs('Licenca' . DIRECTORY_SEPARATOR . 'Documento' . DIRECTORY_SEPARATOR . uniqid() . '__' . $nome);
+                $caminho = $documento->storeAs(
+                    'Licenca/Documento',                
+                    uniqid() . '__' . $nome,               
+                    'public'                            
+                );
 
                 $this->dataManagement->update(entity: $this->modelClass, infos: [
                     'arquivo_licenca' => $caminho
+                ], id: $licenca_id);
+
+                // $this->modelClass::create([
+                //   'licenca_id' => $licenca_id,
+                //   'nome' => $nome,
+                //   'tipo' => $tipo,
+                //   'caminho' => $caminho
+                // ]);
+            }
+
+            return ['type' => 'success', 'content' => 'Documento cadastrados com sucesso!'];
+        } catch (\Exception $th) {
+            return ['type' => 'error', 'content' => $th->getMessage()];
+        }
+    }
+
+    public function storeDocumentoTermo($documento, $licenca_id): array
+    {
+        try {
+            if ($documento->isValid()) {
+                $nome = $documento->getClientOriginalName();
+                // $tipo = $documento->extension();
+                $caminho = $documento->storeAs(
+                    'Termo/Documento',                
+                    uniqid() . '__' . $nome,               
+                    'public'                            
+                );
+
+                $this->dataManagement->update(entity: $this->modelClass, infos: [
+                    'arquivo_termo' => $caminho
                 ], id: $licenca_id);
 
                 // $this->modelClass::create([
