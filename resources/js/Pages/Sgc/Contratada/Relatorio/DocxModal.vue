@@ -110,7 +110,9 @@ const addNote = (event) => {
 const loadComments = (itemId, contrato_id) => {
     notes.value = [];
     props.comentarios.forEach((comentario) => {
-        if (comentario.item_id === itemId && comentario.contrato_id === contrato_id) {
+        if (comentario.item_id === itemId && 
+            comentario.contrato_id === contrato_id && 
+            comentario.comment.some(c => c.relatorio_num === props.numRelatorio)) {
             const note = {
                 title: 'Comentário',
                 comentario: comentario.comment,
@@ -152,6 +154,7 @@ defineExpose({ abrirModal });
                     :item-id="itemId"
                     :comentarios="comentarios"
                     :contrato="contrato"
+                    :numRelatorio="numRelatorio"
                     @removeNote="notes.splice($event, 1)"
                     />
             </div>

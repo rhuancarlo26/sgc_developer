@@ -22,7 +22,12 @@ class RelatorioCoordenacaoController extends Controller
   
     public function index(Contrato $contrato, $relatorioNum): Response
     {
-        $comentarios = SgcComentario::with('comment')->get();
+        $comentarios = SgcComentario::with(['comment' => function ($query) use ($relatorioNum) {
+            $query->where('relatorio_num', $relatorioNum);
+        }])
+        ->where('contrato_id', $contrato->id)
+        ->get();
+
         $dadosrelat = SgcRelatorioCoordenacao::where('contrato_id', $contrato->id)
             ->where('relatorio_num', $relatorioNum)
             ->get();
@@ -30,12 +35,13 @@ class RelatorioCoordenacaoController extends Controller
         $update_anexo = SgcRelatorioUpload::where('contrato_id', $contrato->id)
             ->where('num_relatorio', $relatorioNum)
             ->get()->keyBy('item_id'); 
-    
+
         return Inertia::render('Sgc/Contratada/Relatorio/Index', [
             'contrato' => $contrato,
             'dadosrelat' => $dadosrelat,
             'update_anexo' => $update_anexo,
-            'comentarios' => $comentarios
+            'comentarios' => $comentarios,
+            'relatorioNum' => (int) $relatorioNum 
         ]);
     }
 
@@ -57,7 +63,7 @@ class RelatorioCoordenacaoController extends Controller
     {
         $historico = SgcHistoricoRelatorio::where('relatorio_num', $relatorio_num)
             ->where('versao', $versao)
-            ->get(); // Buscar todos os itens relacionados à versão
+            ->get(); 
 
         $contrato = Contrato::findOrFail($contrato_id);
 
