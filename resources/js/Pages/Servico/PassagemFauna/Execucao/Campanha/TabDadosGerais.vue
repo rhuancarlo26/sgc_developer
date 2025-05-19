@@ -12,13 +12,19 @@ const props = defineProps({
     campanha: {type: Object}
 })
 
+const formatDate = (date) => {
+    if (!date) return null;
+    return date.split(" ")[0];
+};
+
 const form = useForm({
-    id: null,
-    periodo: null,
-    data_inicial: null,
-    data_final: null,
-    ...props.campanha
+    ...props.campanha,
+    id: props.campanha?.id || null,
+    periodo: props.campanha?.periodo || null,
+    data_inicial: formatDate(props.campanha?.data_inicial),
+    data_final: formatDate(props.campanha?.data_final)
 });
+
 
 const salvarDadosGerais = () => {
     form.post(route('contratos.contratada.servicos.passagem_fauna.execucao.campanha.store', {
@@ -34,7 +40,7 @@ const salvarDadosGerais = () => {
     <div class="row mb-4">
         <div class="col">
             <InputLabel value="ID campanha" for="id"/>
-            <input type="text" name="id" id="id" class="form-control" disabled>
+            <input type="text" name="id" id="id" class="form-control" v-model="form.id" disabled>
             <InputError :message="form.errors.id"/>
         </div>
         <div class="col">
@@ -66,12 +72,12 @@ const salvarDadosGerais = () => {
             <InputError :message="form.errors.data_final"/>
         </div>
     </div>
-    <div class="row">
+    <!-- <div class="row">
         <div class="col d-flex justify-content-end">
             <NavButton @click="salvarDadosGerais()" type-button="success" :icon="IconDeviceFloppy"
                        :title="form.id ? 'Alterar' : 'Salvar'"/>
         </div>
-    </div>
+    </div> -->
 </template>
 
 <style scoped>
