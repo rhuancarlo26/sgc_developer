@@ -85,7 +85,7 @@ defineExpose({abrirModal});
 
                 <div class="row">
                     <span class="col"><strong>Imagens do espécime: </strong></span>
-                    <img class="mb-2" :src="usePage().props.app_url + '/storage/' + registro.imagem?.caminho_imagem"
+                    <img class="mb-2" :src="usePage().props.app_url + '/storage/' + registro.imagem?.caminho_imagem.replace('public/', '')"
                          alt="Gráfico">
                 </div>
             </div>
