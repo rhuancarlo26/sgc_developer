@@ -35,7 +35,7 @@ class UpdateStatusService
                 ->where('contrato_id', $contrato_id)
                 ->max('versao');
             
-            $novaVersao = is_null($ultimaVersaoHistorico) ? 0 : $ultimaVersaoHistorico + 1;
+            $novaVersao = is_null($ultimaVersaoHistorico) ? 1 : $ultimaVersaoHistorico + 1;
 
             foreach ($relatorios as $relatorio) {
 
