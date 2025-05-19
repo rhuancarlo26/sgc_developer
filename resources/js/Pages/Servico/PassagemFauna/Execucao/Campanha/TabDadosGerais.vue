@@ -21,8 +21,8 @@ const form = useForm({
     ...props.campanha,
     id: props.campanha?.id || null,
     periodo: props.campanha?.periodo || null,
-    data_inicial: formatDate(props.campanha?.data_inicial),
-    data_final: formatDate(props.campanha?.data_final)
+    data_inicial: formatDate(props.campanha?.data_inicial) || null,
+    data_final: formatDate(props.campanha?.data_final) || null
 });
 
 
