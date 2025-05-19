@@ -12,6 +12,7 @@ use App\Shared\Http\Controllers\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 
 class RelatorioCoordenacaoController extends Controller
@@ -89,6 +90,56 @@ class RelatorioCoordenacaoController extends Controller
         return response()->json(['success' => false, 'message' => 'Item não encontrado'], 404);
     }
     
+    // public function getDocx($itemId, $contratoId, $versao)
+    // {
+    //     $documento = SgcRelatorioUpload::where('item_id', $itemId)
+    //         ->where('contrato_id', $contratoId)
+    //         ->where('versao', $versao)
+    //         ->first();
+
+    //     if ($documento && Storage::exists($documento->caminho)) {
+    //         $filePath = Storage::path($documento->caminho);
+    //         return response()->file($filePath, [
+    //             'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    //         ]);
+    //     }
+
+    //     return response()->json(['error' => 'Arquivo não encontrado'], 404);
+    // }
+
+    public function getDocx($itemId, $contratoId, $versao)
+    {
+        $documento = SgcRelatorioUpload::where('item_id', $itemId)
+            ->where('contrato_id', $contratoId)
+            ->where('versao', $versao)
+            ->firstOrFail();
+
+        // Ajustar o caminho para storage/app/public/
+        $caminhoCorrigido = 'public/' . str_replace('\\', '/', $documento->caminho);
+
+        if (!Storage::exists($caminhoCorrigido)) {
+            abort(404, 'Arquivo não encontrado.');
+        }
+
+        $filePath = storage_path('app/' . $caminhoCorrigido);
+        $fileName = basename($filePath);
+        $fileMimeType = mime_content_type($filePath);
+
+        return response()->streamDownload(function() use ($filePath) {
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
+            readfile($filePath);
+        }, $fileName, [
+            'Content-Type' => $fileMimeType,
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Content-Length' => filesize($filePath),
+            'Pragma' => 'public',
+            'Expires' => 0,
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Content-Transfer-Encoding' => 'binary'
+        ]);
+    }
 
 
 }

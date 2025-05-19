@@ -5,11 +5,11 @@ import { onMounted, ref } from "vue";
 import Comment from '@/Components/Comment.vue';
 import { IconMessageDots } from "@tabler/icons-vue";
 import { usePage } from '@inertiajs/vue3'; 
+import { route } from 'ziggy-js'; // Corrigido para importar de ziggy-js
 
 const modalDetalhes = ref(null);
 const wordDocument = ref(null);
 const documento = ref(null);
-let caminho = null;
 let filePath = null;
 
 const props = defineProps({
@@ -35,9 +35,13 @@ const abrirModal = async (idItem, contratoId, versao) => {
     const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao);
     loadComments(idItem, contratoId);
     if (caminhoDocumento) {
-
-        filePath = `${appUrl}/storage/${caminhoDocumento}`;
         
+        filePath = route('sgc.contratada.get_docx', {
+            itemId: idItem,
+            contratoId: contratoId,
+            versao: versao
+        });
+        console.log('URL gerada:', filePath); 
         try {
             const response = await fetch(filePath);
             if (!response.ok) {

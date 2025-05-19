@@ -21,6 +21,7 @@ use App\Domain\Sgc\Contratada\Ficha\Controller\FichaController;
 use App\Domain\Sgc\Contratada\Quantitativos\Controller\QuantitativosController;
 use App\Domain\Sgc\Contratada\Produtos\Controller\ProdutosController;
 
+
 use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
 
@@ -88,6 +89,11 @@ Route::prefix('/contratada')->group(function () {
     
     // Produtos
     Route::get('/sgc/contratada/{contrato}/produtos/{produto}', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
+    
+
+
+    
+    Route::get('/sgc/contratada/get-docx/{itemId}/{contratoId}/{versao}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
    
 
 });
