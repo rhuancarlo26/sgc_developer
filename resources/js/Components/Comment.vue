@@ -1,6 +1,6 @@
 <script setup>
-import { defineProps, ref } from 'vue';
-import { IconNote, IconX, IconTrash } from '@tabler/icons-vue'
+import { defineProps, ref, watch } from 'vue';
+import { IconNote, IconX, IconTrash } from '@tabler/icons-vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { dateTimeFormat } from '@/Utils/DateTimeUtils';
 
@@ -9,9 +9,9 @@ const props = defineProps({
     index: Number,
     itemId: Number,
     contrato: Object,
-    comentarios: Object
+    comentarios: Object,
+    numRelatorio: [Number, String]
 });
-
 
 let isMinimized;
 
@@ -23,7 +23,7 @@ if (props.note.load) {
 const existeComentario = props.note.comentario.length;
 const user = usePage().props.auth.user;
 const [perfil] = user.roles.map(tipo => tipo.name);
-const perfilUser = `${user.name} ${perfil}`
+const perfilUser = `${user.name} ${perfil}`;
 const emit = defineEmits(['removeNote']);
 
 const form = useForm({
@@ -31,8 +31,15 @@ const form = useForm({
     comentario_id: props.note.id,
     tipo_perfil: perfilUser,
     item_id: props.itemId,
-    relatorio_num: 1
+    relatorio_num: props.numRelatorio || 0
 });
+
+watch(() => props.numRelatorio, (newValue) => {
+    console.log('props.numRelatorio atualizado:', newValue);
+    form.relatorio_num = newValue || 0; // Atualiza o form dinamicamente
+});
+
+console.log('Valor inicial de props.numRelatorio:', props.numRelatorio);
 
 const formComentario = useForm({
     item_id: props.itemId,
@@ -41,34 +48,33 @@ const formComentario = useForm({
     posicao_y: props.note.y
 });
 
-
 const enviarComentario = () => {
-    if (!existeComentario) {
 
+    console.log('Enviando comentário com relatorio_num:', form.relatorio_num);
+    if (!existeComentario) {
         formComentario.post(route('sgc.contratada.store_comentario'), {
             onSuccess: (response) => {
-                const ultimo = response.props.comentarios.length - 1;;
+                const ultimo = response.props.comentarios.length - 1;
                 const comentarioId = response.props.comentarios[ultimo].id;
-
                 form.comentario_id = comentarioId;
                 form.post(route('sgc.contratada.store_comentarios'), {
-                onSuccess: () => {
-                    props.note.comentario.push({
-                        id: form.comentario_id,
-                        comentario: form.comentario,
-                        tipo_perfil: perfilUser,
-                        created_at: new Date().toISOString()
-                    });
-                    props.note.load = true;
-                    form.comentario = null;
-                },
-                onError: (error) => {
-                    console.error('Erro ao enviar comentário', error);
-                }
+                    onSuccess: () => {
+                        props.note.comentario.push({
+                            id: form.comentario_id,
+                            comentario: form.comentario,
+                            tipo_perfil: perfilUser,
+                            created_at: new Date().toISOString()
+                        });
+                        props.note.load = true;
+                        form.comentario = null;
+                    },
+                    onError: (error) => {
+                        console.error('Erro ao enviar comentário', error);
+                    }
+                });
+            }
         });
-            }});
     } else {
-
         form.post(route('sgc.contratada.store_comentarios'), {
             onSuccess: () => {
                 props.note.comentario.push({
@@ -85,8 +91,6 @@ const enviarComentario = () => {
         });
     }
 };
-
-
 
 const excluirComentarios = (comentarios_id) => {
     router.delete(route('sgc.contratada.destroy_comentarios', comentarios_id), {
