@@ -19,26 +19,25 @@ const itens = ref([]);
 const docxModal = ref();
 const selectedItemId = ref(null);
 
-
-
 const props = defineProps({
-  contrato: Object,
-  dadosrelat: { type: Array },
-  update_anexo: Object,
-  comentarios: Object
+    contrato: Object,
+    dadosrelat: { type: Array },
+    update_anexo: Object,
+    comentarios: Object,
+    relatorioNum: [Number, String]
 });
 
 const form = useForm({
-  id: null,
-  contrato_id: props.contrato.id,
-  caminho: null,
-  arquivo: null,
-  versao: null,
-  item_id: null,
-  name: user.name,
-  email: user.email,
-  update_anexo: props.updated_at,
-  relatorio_num: props.dadosrelat.length > 0 ? props.dadosrelat[0].relatorio_num : null 
+    id: null,
+    contrato_id: props.contrato.id,
+    caminho: null,
+    arquivo: null,
+    versao: null,
+    item_id: null,
+    name: user.name,
+    email: user.email,
+    update_anexo: props.updated_at,
+    relatorio_num: props.relatorioNum
 });
 
 const showDiv = computed(() => {
@@ -51,9 +50,9 @@ const selecionarItem = (idItem) => {
 
 const abrirDoc = (idItem) => {
   const contratoId = form.contrato_id;
-  const itemVersion = props.update_anexo[idItem]?.versao; // Adicionar versão aqui
+  const itemVersion = props.update_anexo[idItem]?.versao; 
   selectedItemId.value = idItem;
-  docxModal.value.abrirModal(idItem, contratoId, itemVersion); // Passar a versão
+  docxModal.value.abrirModal(idItem, contratoId, itemVersion); 
 };
 
 
@@ -102,12 +101,6 @@ const enviarParaDnit = async () => {
   await atualizarStatus(contratoId, itemId, relatorioNum, itens.value);
   window.location.reload();
 
-  // Enviar e-mail
-  try {
-    const status = 'Em Análise';
-  } catch (error) {
-    console.error('Erro ao enviar e-mail:', error);
-  }
 };
 
 const enviarParaRevisao = async () => {
@@ -117,12 +110,6 @@ const enviarParaRevisao = async () => {
   await revisaoStatus(contratoId, itemId, relatorioNum, itens.value); 
   window.location.reload();
 
-  // Enviar e-mail
-  try {
-    await axios.get(`/sgc/contratada/send-email/${contratoId}/Em%20Revis%C3%A3o/${form.relatorio_num}`);
-  } catch (error) {
-    console.error('Erro ao enviar e-mail:', error);
-  }
 };
 
 const aprovarRelatorio = async () => {
@@ -132,12 +119,6 @@ const aprovarRelatorio = async () => {
   await aprovadoStatus(contratoId, itemId, relatorioNum, itens.value); 
   window.location.reload();
   
-  // Enviar e-mail
-  try {
-    await axios.get(`/sgc/contratada/send-email/${contratoId}/Em%20Revis%C3%A3o/${form.relatorio_num}`);
-  } catch (error) {
-    console.error('Erro ao enviar e-mail:', error);
-  }
 };
 
 const obterStatusRelatorio = (itemId, relatorioNum) => {
@@ -183,7 +164,11 @@ const filtrarRelatorios = () => {
 };
 
 const temComentarios = (itemId) => {
-    return props.comentarios.some(comentario => comentario.item_id === itemId);
+    return props.comentarios.some(comentario => 
+        comentario.item_id === itemId && 
+        comentario.contrato_id === props.contrato.id && 
+        comentario.comment.length > 0 
+    );
 };
 
 const aprovarItem = async (item, contratoId, relatorioNum) => {

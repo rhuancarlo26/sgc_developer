@@ -1,15 +1,13 @@
 <script setup>
-import NavDropdown from '@/Components/NavDropdown.vue';
-import NavDropdownLink from '@/Components/NavDropdownLink.vue';
+import NavExpandable from '@/Components/NavExpandable.vue';
 import NavLink from '@/Components/NavLink.vue';
 import {
-  IconTimeline,
-  IconClipboardData,
   IconClipboardList,
   IconCalendar,
   IconNotes,
   IconDeviceAnalytics,
-  IconPlane
+  IconPlane,
+  IconLayoutDashboard
 } from "@tabler/icons-vue";
 import { computed, watch, onMounted } from 'vue';
 
@@ -42,7 +40,6 @@ const handleClick = (routeName) => {
     <div class="d-flex">
       <div class="col-1">
         <ul class="navbar-nav">
-          <!-- Relatório de Coordenação -->
           <NavLink
             @click="handleClick('Relatórios')"
             :route-name="'sgc.contratada.relatorios.index'"
@@ -51,7 +48,17 @@ const handleClick = (routeName) => {
             :icon="IconClipboardList"
           />
 
-          <!-- Cronograma Físico -->
+          <NavExpandable title="Produtos" :icon="IconLayoutDashboard">
+            <li v-for="(item, index) in produtos" :key="index">
+              <NavLink
+                @click="handleClick(item.title)"
+                :route-name="'sgc.contratada.produtos.index'"
+                :param="[contratoId, item.routeParam]"
+                :title="`- ${item.title}`"
+              />
+            </li>
+          </NavExpandable>
+
           <NavLink
             @click="handleClick('Cronograma')"
             :route-name="'sgc.contratada.cronograma.index'"
@@ -60,7 +67,6 @@ const handleClick = (routeName) => {
             :icon="IconCalendar"
           />
 
-          <!-- Quantitativos -->
           <NavLink
             @click="handleClick('Quantitativos')"
             :route-name="'sgc.contratada.quantitativos.index'"
@@ -69,7 +75,6 @@ const handleClick = (routeName) => {
             :icon="IconDeviceAnalytics"
           />
 
-          <!-- Dav -->
           <NavLink
             @click="handleClick('DAV')"
             :route-name="'sgc.gestao.listagemDav'"
@@ -78,7 +83,6 @@ const handleClick = (routeName) => {
             :icon="IconPlane"
           />
 
-          <!-- Ficha Contratual -->
           <NavLink
             @click="handleClick('Ficha')"
             :route-name="'sgc.contratada.ficha.index'"
@@ -94,3 +98,50 @@ const handleClick = (routeName) => {
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      produtos: [
+        { title: "Fauna", routeParam: "fauna" },
+        { title: "Espeleologia", routeParam: "espeleologia" },
+        { title: "Patrimônio", routeParam: "patrimonio" },
+        { title: "Indígena", routeParam: "indigena" },
+        { title: "Quilombola", routeParam: "quilombola" },
+        { title: "Malarígeno", routeParam: "malarigeno" },
+        { title: "Eia", routeParam: "eia" },
+        { title: "Rima", routeParam: "rima" },
+        { title: "Audiência", routeParam: "audiencia" },
+        { title: "PBA", routeParam: "pba" },
+        { title: "ASV", routeParam: "asv" },
+        { title: "Viagens", routeParam: "viagens" },
+      ],
+    };
+  },
+};
+</script>
+
+<style scoped>
+.navbar-nav {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.nav-item {
+  width: 100%;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  color: #182433;
+  padding: 0.5rem 0rem;
+  cursor: pointer;
+}
+
+.nav-sublist .nav-link {
+  padding-left: 2rem;
+}
+</style>
