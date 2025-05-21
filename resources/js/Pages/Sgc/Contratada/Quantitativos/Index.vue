@@ -63,6 +63,8 @@
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
+        rotation: 130, 
+        circumference: 360,
         plugins: {
             legend: {
                 position: 'right',
@@ -98,7 +100,6 @@
         console.log('Totais calculados:', totais.value);
         console.log('Contrato no Quantitativos:', props.contrato);
     });
-
 </script>
     
 <template>
@@ -254,14 +255,12 @@
         color: #333;
     }
     
-    /* Estilo para o container do filtro */
     .filter-container {
         display: flex;
         align-items: center;
         margin-bottom: 1rem;
     }
     
-    /* Estilo para o select */
     .form-select {
         width: 200px;
         display: inline-block;

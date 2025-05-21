@@ -7,12 +7,11 @@ import NavbarContrato from "../NavbarContrato.vue";
 import DocxModal from "./DocxModal.vue";
 import NavLinkSgc from "@/Components/NavLinkSgc.vue";
 import { Link, useForm, usePage } from '@inertiajs/vue3';
-import { defineProps } from 'vue';
 import { computed } from 'vue';
 import { IconCheck, IconMessageDots, IconX, IconCircle } from "@tabler/icons-vue";
+import { route } from 'ziggy-js';
 import { atualizarStatus, revisaoStatus, aprovadoStatus } from './AtualizarStatus/statusUpdate.js';
 import { toggleAprovado } from './AtualizarStatus/aprovarItem.js';
-
 
 const user = usePage().props.auth.user;
 const itens = ref([]);
@@ -41,126 +40,131 @@ const form = useForm({
 });
 
 const showDiv = computed(() => {
-  return !user.roles.some(role => role.name === 'Fiscal');
+    return !user.roles.some(role => role.name === 'Fiscal');
 });
 
 const selecionarItem = (idItem) => {
-  form.item_id = idItem;
+    form.item_id = idItem;
 };
 
 const abrirDoc = (idItem) => {
-  const contratoId = form.contrato_id;
-  const itemVersion = props.update_anexo[idItem]?.versao; 
-  selectedItemId.value = idItem;
-  docxModal.value.abrirModal(idItem, contratoId, itemVersion); 
+    const contratoId = form.contrato_id;
+    const itemVersion = props.update_anexo[idItem]?.versao; 
+    selectedItemId.value = idItem;
+    docxModal.value.abrirModal(idItem, contratoId, itemVersion); 
 };
 
-
 const getUpdatedAt = (idItem) => {
-  return props.update_anexo[idItem]?.updated_at || 'Não Inserido';
+    return props.update_anexo[idItem]?.updated_at || 'Não Inserido';
 };
 
 const obterItens = async () => {
-  try {
-    const response = await fetch(route('sgc.relatorio_coordenacao.index'));
-    const data = await response.json();
+    try {
+        const response = await fetch(route('sgc.relatorio_coordenacao.index'));
+        const data = await response.json();
 
-    if (data.length > 0) {
-      form.item_id = data[0].id_item;
+        if (data.length > 0) {
+            form.item_id = data[0].id_item;
+        }
+
+        itens.value = data;
+    } catch (error) {
+        console.error('Erro ao obter os itens:', error);
     }
-
-    itens.value = data;
-  } catch (error) {
-    console.error('Erro ao obter os itens:', error);
-  }
 };
 obterItens();
 
 const salvarAnexo = () => {
-  if (form.contrato_id) {
-    form.post(route('sgc.contratada.store_anexo'), {
-      onSuccess: () => {
-        form.reset();
-        document.getElementById('inputfile').value = null;
-      }
-    });
-  } else {
-    form.post(route('sgc.contratada.store_anexo'), {
-      onSuccess: () => {
-        form.reset();
-        document.getElementById('inputfile').value = null;
-      }
-    });
-  }
+    if (form.contrato_id) {
+        form.post(route('sgc.contratada.store_anexo'), {
+            onSuccess: () => {
+                form.reset();
+                document.getElementById('inputfile').value = null;
+            }
+        });
+    } else {
+        form.post(route('sgc.contratada.store_anexo'), {
+            onSuccess: () => {
+                form.reset();
+                document.getElementById('inputfile').value = null;
+            }
+        });
+    }
 };
 
 const enviarParaDnit = async () => {
-  const contratoId = form.contrato_id;
-  const itemId = form.item_id;
-  const relatorioNum = form.relatorio_num;
-  await atualizarStatus(contratoId, itemId, relatorioNum, itens.value);
-  window.location.reload();
-
+    const contratoId = form.contrato_id;
+    const itemId = form.item_id;
+    const relatorioNum = form.relatorio_num;
+    await atualizarStatus(contratoId, itemId, relatorioNum, itens.value);
+    window.location.reload();
 };
 
 const enviarParaRevisao = async () => {
-  const contratoId = form.contrato_id;
-  const itemId = form.item_id;
-  const relatorioNum = form.relatorio_num;
-  await revisaoStatus(contratoId, itemId, relatorioNum, itens.value); 
-  window.location.reload();
-
+    const contratoId = form.contrato_id;
+    const itemId = form.item_id;
+    const relatorioNum = form.relatorio_num;
+    await revisaoStatus(contratoId, itemId, relatorioNum, itens.value); 
+    window.location.reload();
 };
 
 const aprovarRelatorio = async () => {
-  const contratoId = form.contrato_id;
-  const itemId = form.item_id;
-  const relatorioNum = form.relatorio_num;
-  await aprovadoStatus(contratoId, itemId, relatorioNum, itens.value); 
-  window.location.reload();
-  
+    const contratoId = form.contrato_id;
+    const itemId = form.item_id;
+    const relatorioNum = form.relatorio_num;
+    await aprovadoStatus(contratoId, itemId, relatorioNum, itens.value); 
+    window.location.reload();
 };
 
 const obterStatusRelatorio = (itemId, relatorioNum) => {
-  const item = props.dadosrelat.find(i => i.id_item === itemId && i.relatorio_num === relatorioNum);
-  return item ? item.status : 'Status Desconhecido';
+    const item = props.dadosrelat.find(i => i.id_item === itemId && i.relatorio_num === relatorioNum);
+    return item ? item.status : 'Status Desconhecido';
 };
 
 const isDisabledEnviarParaDnit = () => {
-  const status = obterStatusRelatorio(form.item_id, form.relatorio_num);
-  return status === 'Análise DNIT' || status === 'Relatório Aprovado';
+    const status = obterStatusRelatorio(form.item_id, form.relatorio_num);
+    return status === 'Análise DNIT' || status === 'Relatório Aprovado';
 };
 
 const isDisabledEnviarParaRevisao = () => {
-  const status = obterStatusRelatorio(form.item_id, form.relatorio_num);
-  return status === 'Revisão Contratada' || status === 'Relatório Aprovado' || status === 'Em Elaboração';
+    const status = obterStatusRelatorio(form.item_id, form.relatorio_num);
+    return status === 'Revisão Contratada' || status === 'Relatório Aprovado' || status === 'Em Elaboração';
 };
 
 const isDisabledAprovarRelatorio = () => {
-  const status = obterStatusRelatorio(form.item_id, form.relatorio_num);
-  return status === 'Revisão Contratada' || status === 'Relatório Aprovado' || status === 'Em Elaboração';
+    const status = obterStatusRelatorio(form.item_id, form.relatorio_num);
+    return status === 'Revisão Contratada' || status === 'Relatório Aprovado' || status === 'Em Elaboração';
 };
 
 const downloadFile = (itemId) => {
-  const url = route('sgc.contratada.download_anexo', {
-      contratoId: props.contrato.id,
-      itemId: itemId, // Corrigir nome do parâmetro
-      relatorioNum: form.relatorio_num
-  });
-  window.location.href = url;
+    const url = route('sgc.contratada.download_anexo', {
+        contratoId: props.contrato.id,
+        itemId: itemId,
+        relatorioNum: form.relatorio_num
+    });
+    window.location.href = url;
+};
+
+const downloadPdfConsolidado = () => {
+    const url = route('sgc.contratada.download_pdf_consolidado', {
+        contratoId: props.contrato.id,
+        relatorioNum: form.relatorio_num
+    });
+    console.log('URL PDF Consolidado:', url); // Depuração
+    window.location.href = url;
 };
 
 const filteredRelatorios = ref([]);
 
 const filtrarRelatorios = () => {
-  const seen = new Set();
-  filteredRelatorios.value = props.dadosrelat.filter(relatorio => {
-    if (seen.has(relatorio.relatorio_num)) {
-      return false;
-    }
-    seen.add(relatorio.relatorio_num);
-    return true;
-  });
+    const seen = new Set();
+    filteredRelatorios.value = props.dadosrelat.filter(relatorio => {
+        if (seen.has(relatorio.relatorio_num)) {
+            return false;
+        }
+        seen.add(relatorio.relatorio_num);
+        return true;
+    });
 };
 
 const temComentarios = (itemId) => {
@@ -184,9 +188,8 @@ const reprovarItem = async (item, contratoId, relatorioNum) => {
 };
 
 onMounted(() => {
-  filtrarRelatorios();
+    filtrarRelatorios();
 });
-
 </script>
 
 <template>
@@ -251,6 +254,12 @@ onMounted(() => {
                     :disabled="isDisabledAprovarRelatorio()"
                   />
                 </div>
+                <!-- Botão para Download de PDF Consolidado -->
+                <div class="button-wrapper">
+                  <button @click="downloadPdfConsolidado" class="btn btn-outline-info" :disabled="props.dadosrelat.length === 0">
+                    Download PDF Consolidado
+                  </button>
+                </div>
               </div>
             </div>
             <div class="row">
@@ -262,28 +271,27 @@ onMounted(() => {
                       <th scope="col">Última Atualização</th>
                       <th v-if="showDiv" scope="col">Inserir Arquivo</th>
                       <th scope="col">Ações</th>
+                      <th v-if="user.roles.some(role => role.name === 'Fiscal') && showDiv" scope="col">Aprovação</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="item in dadosrelat" :key="item.id">
                       <td>
-                          <span v-if="item.aprovado === 1" class="text-success">
-                              <IconCheck size="16" />
-                          </span>
-                          <span v-else-if="item.aprovado === 0" class="text-danger">
-                              <IconX size="16" />
-                          </span>
-                          <span v-else-if="item.aprovado === 2" class="text-info">
-                              <IconCircle size="16" />
-                          </span>
-                          {{ item.nome_topico }}
-                          <span v-if="temComentarios(item.id_item)" class="ms-2">
-                              <IconMessageDots size="21" />
-                          </span>
+                        <span v-if="item.aprovado === 1" class="text-success">
+                          <IconCheck size="16" />
+                        </span>
+                        <span v-else-if="item.aprovado === 0" class="text-danger">
+                          <IconX size="16" />
+                        </span>
+                        <span v-else-if="item.aprovado === 2" class="text-info">
+                          <IconCircle size="16" />
+                        </span>
+                        {{ item.nome_topico }}
+                        <span v-if="temComentarios(item.id_item)" class="ms-2">
+                          <IconMessageDots size="21" />
+                        </span>
                       </td>
-
                       <td>{{ getUpdatedAt(item.id_item) }}</td>
-
                       <td v-if="showDiv" class="d-flex align-items-center mt-2">
                         <div class="input-wrapper">
                           <input @input="form.arquivo = $event.target.files[0]" id="inputfile" type="file" class="form-control mr-2" style="width: auto;" :disabled="item.status === 'Análise DNIT' || item.status === 'Relatório Aprovado' || item.aprovado === 1"/>
@@ -298,22 +306,20 @@ onMounted(() => {
                         <button v-if="item.id_item >= 17" @click="downloadFile(item.id_item)" class="bg-blue-500 text-black px-4 py-2 rounded">Anexo</button>
                         <button v-else @click="abrirDoc(item.id_item)" class="btn btn-success mr-2">Abrir</button>
                       </td>
-
-                      <td class="align-middle">
-                        <template v-if="user.roles.some(role => role.name === 'Fiscal') && item.status === 'Análise DNIT'">
-                            <button @click="aprovarItem(item, props.contrato.id, form.relatorio_num)" 
-                                    class="btn btn-sm btn-success me-1" 
-                                    :disabled="item.aprovado === 1">
-                                Aprovar
-                            </button>
-                            <button @click="reprovarItem(item, props.contrato.id, form.relatorio_num)" 
-                                    class="btn btn-sm btn-danger" 
-                                    :disabled="item.aprovado === 0">
-                                Reprovar
-                            </button>
+                      <td v-if="user.roles.some(role => role.name === 'Fiscal') && showDiv" class="align-middle">
+                        <template v-if="item.status === 'Análise DNIT'">
+                          <button @click="aprovarItem(item, props.contrato.id, form.relatorio_num)" 
+                                  class="btn btn-sm btn-success me-1" 
+                                  :disabled="item.aprovado === 1">
+                            Aprovar
+                          </button>
+                          <button @click="reprovarItem(item, props.contrato.id, form.relatorio_num)" 
+                                  class="btn btn-sm btn-danger" 
+                                  :disabled="item.aprovado === 0">
+                            Reprovar
+                          </button>
                         </template>
                       </td>
-
                     </tr>
                   </tbody>
                 </table>
@@ -356,5 +362,12 @@ onMounted(() => {
     margin-left: 8px;
     color: #2808b9;
 }
-</style>
 
+.button-wrapper {
+  margin-left: 5px;
+}
+
+.input-wrapper {
+  margin-right: 5px;
+}
+</style>
