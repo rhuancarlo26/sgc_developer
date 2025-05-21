@@ -14,7 +14,7 @@ const props = defineProps({
 const form = useForm({
     id: null,
     chave: null,
-    licenca_id: 434,
+    licenca_id: null,
     tipo_patio_id: null,
     observacao: null,
     fotos: [],
@@ -101,7 +101,7 @@ defineExpose({ abrirModal });
                         <input v-model="form.chave" id="nome" class="form-control" disabled />
                         <InputError :message="form.errors.chave" />
                     </div>
-                    <!-- <div class="col-lg-4">
+                    <div class="col-lg-4">
                         <InputLabel value="Numero da ASV" for="dt_inicial" />
                         <v-select v-model="form.licenca_id" :options="licencas"
                             :get-option-label='licenca => `${licenca.licenca.numero_licenca} - ${licenca.licenca.emissor} - ${licenca.licenca.tipo.sigla}`'
@@ -111,7 +111,7 @@ defineExpose({ abrirModal });
                             </template>
                         </v-select>
                         <InputError :message="form.errors.licenca_id" />
-                    </div> -->
+                    </div>
                     <div class="col-lg-4">
                         <InputLabel value="Tipo de pátio" for="tipo_patio_id" />
                         <v-select :options="tipos" v-model="form.tipo_patio_id" label="nome" :reduce="t => t.id">
