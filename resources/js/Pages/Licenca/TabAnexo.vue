@@ -3,6 +3,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { useForm } from '@inertiajs/vue3';
 import { IconDots, IconTrash } from '@tabler/icons-vue';
+import {usePage} from "@inertiajs/vue3";
 
 const props = defineProps({
   licenca: { type: Object }
@@ -49,6 +50,7 @@ const deleteShapefile = () => {
 </script>
 <template>
   <div class="row">
+    <!-- Termo de Referência -->
     <div class="col">
       <div v-if="!licenca.arquivo_termo" class="mb-4">
         <InputLabel value="Termo de referência" for="documentoTermo" />
@@ -82,7 +84,7 @@ const deleteShapefile = () => {
                 <tr>
                   <td>{{ licenca.arquivo_termo.split('__')[1] }}</td>
                   <td>
-                    <a :href="`/storage/${licenca.arquivo_termo}`" target="_blank" class="btn btn-primary m-1">
+                    <a :href="`${usePage().props.app_url}/storage/${licenca.arquivo_termo}`" target="_blank" class="btn btn-primary m-1">
                       Ver Termo
                     </a>
                     <a @click="deleteDocumentoTermo()" class="btn  btn-danger m-1" title="Excluir"
@@ -97,6 +99,8 @@ const deleteShapefile = () => {
         </div>
       </div>
     </div>
+
+    <!-- Licença -->
     <div class="col">
       <div v-if="!licenca.arquivo_licenca" class="mb-4">
         <InputLabel value="Licença" for="documento" />
@@ -129,10 +133,10 @@ const deleteShapefile = () => {
                 <tr>
                   <td>{{ licenca.arquivo_licenca.split('__')[1] }}</td>
                   <td>
-                    <a :href="`/storage/${licenca.arquivo_licenca}`" target="_blank" class="btn btn-primary m-1">
+                    <a :href="`${usePage().props.app_url}/storage/${licenca.arquivo_licenca}`" target="_blank" class="btn btn-primary m-1">
                       Ver Licenca
                     </a>
-                 
+
                     <a @click="deleteDocumento()" class="btn  btn-danger m-1" title="Excluir"
                       href="javascript:void(0)">
                       <IconTrash />
@@ -145,6 +149,8 @@ const deleteShapefile = () => {
         </div>
       </div>
     </div>
+
+    <!-- Shapefile -->
     <div class="col">
       <div v-if="!licenca.shapefile?.id" class="mb-4">
         <InputLabel value="Shapefile" for="shapefile" />
