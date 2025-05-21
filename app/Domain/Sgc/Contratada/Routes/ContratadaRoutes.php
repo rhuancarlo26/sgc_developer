@@ -19,6 +19,8 @@ use App\Domain\Sgc\Contratada\Dav\Controller\ListagemDavController;
 use App\Domain\Sgc\Contratada\Cronograma\Controller\CronogController;
 use App\Domain\Sgc\Contratada\Ficha\Controller\FichaController;
 use App\Domain\Sgc\Contratada\Quantitativos\Controller\QuantitativosController;
+use App\Domain\Sgc\Contratada\Produtos\Controller\ProdutosController;
+
 
 use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
@@ -31,14 +33,6 @@ Route::prefix('/contratada')->group(function () {
     Route::get('{contrato}/relatorios',                                   [RelatorioCoordenacaoController::class,                  'relatorios'])->name('sgc.contratada.relatorios.index');
     Route::get('{contrato}/relatorio/{relatorio_num}',                    [RelatorioCoordenacaoController::class,                  'index'])->name('sgc.contratada.relatorio.detalhes');
     Route::get('{contrato}/relatorio/{relatorio_num}/historico/{versao}', [RelatorioCoordenacaoController::class,                  'showHistorico'])->name('sgc.contratada.relatorio.historico');
-
-    Route::get('/send-email/{contrato}/{status}/{relatorio_num}', function ($contrato, $status, $relatorio_num) {
-        $toEmail = 'rhuan.borges@jgpconsultoria.com.br';
-
-        //Mail::to($toEmail)->send(new StatusChanged($status, $contrato, $relatorio_num));
-
-        return 'E-mail enviado!';
-    })->name('sgc.contratada.send-email');
 
     // Download anexo
     Route::get('/sgc/contratada/download-anexo/{contratoId}/{itemId}/{relatorioNum}', [StoreUploadRelatorioController::class, 'downloadAnexo'])->name('sgc.contratada.download_anexo');
@@ -93,7 +87,13 @@ Route::prefix('/contratada')->group(function () {
     // Quantitativos
     Route::get('{contrato}/quantitativos', [QuantitativosController::class, 'index'])->name('sgc.contratada.quantitativos.index');
     
+    // Produtos
+    Route::get('/sgc/contratada/{contrato}/produtos/{produto}', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
+    
 
+
+    
+    Route::get('/sgc/contratada/get-docx/{itemId}/{contratoId}/{versao}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
    
 
 });
