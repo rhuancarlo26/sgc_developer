@@ -5,11 +5,11 @@ import { onMounted, ref } from "vue";
 import Comment from '@/Components/Comment.vue';
 import { IconMessageDots } from "@tabler/icons-vue";
 import { usePage } from '@inertiajs/vue3'; 
+import { route } from 'ziggy-js'; // Corrigido para importar de ziggy-js
 
 const modalDetalhes = ref(null);
 const wordDocument = ref(null);
 const documento = ref(null);
-let caminho = null;
 let filePath = null;
 
 const props = defineProps({
@@ -35,9 +35,13 @@ const abrirModal = async (idItem, contratoId, versao) => {
     const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao);
     loadComments(idItem, contratoId);
     if (caminhoDocumento) {
-
-        filePath = `${appUrl}/storage/${caminhoDocumento}`;
         
+        filePath = route('sgc.contratada.get_docx', {
+            itemId: idItem,
+            contratoId: contratoId,
+            versao: versao
+        });
+        console.log('URL gerada:', filePath); 
         try {
             const response = await fetch(filePath);
             if (!response.ok) {
@@ -110,7 +114,9 @@ const addNote = (event) => {
 const loadComments = (itemId, contrato_id) => {
     notes.value = [];
     props.comentarios.forEach((comentario) => {
-        if (comentario.item_id === itemId && comentario.contrato_id === contrato_id) {
+        if (comentario.item_id === itemId && 
+            comentario.contrato_id === contrato_id && 
+            comentario.comment.some(c => c.relatorio_num === props.numRelatorio)) {
             const note = {
                 title: 'Comentário',
                 comentario: comentario.comment,
@@ -152,6 +158,7 @@ defineExpose({ abrirModal });
                     :item-id="itemId"
                     :comentarios="comentarios"
                     :contrato="contrato"
+                    :numRelatorio="numRelatorio"
                     @removeNote="notes.splice($event, 1)"
                     />
             </div>
