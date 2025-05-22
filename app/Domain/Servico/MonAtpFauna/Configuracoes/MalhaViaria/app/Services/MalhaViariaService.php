@@ -21,10 +21,10 @@ class MalhaViariaService extends BaseModelService
     {
         return $this->searchAllColumns(...$searchParams)
             ->select([
-                'amvs.id',
-                'servico_licenca_condicionante.id AS fk_servico_licenca',
+                'amvs.id as id_shapefile',
                 'amvs.shapefile',
                 'amvs.local_shape',
+                'servico_licenca_condicionante.id AS fk_servico_licenca',
                 'tipo_licencas.sigla',
                 'tipo_licencas.nome as nome_licenca',
                 'licencas.id as id_licenca',
@@ -38,13 +38,13 @@ class MalhaViariaService extends BaseModelService
                 'licencas.local_shape AS local_shape_licenca',
                 'servico_licenca_condicionante.vigente',
                 'br.rodovia',
-                'estados.nome as nome_estado',
+                // 'estados.nome as nome_estado',
             ])
             ->join('licencas', 'licencas.id', '=', 'servico_licenca_condicionante.id_licenca')
             ->join('tipo_licencas', 'licencas.tipo', '=', 'tipo_licencas.id')
             ->leftJoin('at_malha_viaria_shapefile AS amvs', 'amvs.fk_servico_licenca', '=', 'servico_licenca_condicionante.id')
             ->leftJoin('licencas_br', 'licencas_br.licenca_id', '=', 'licencas.id')
-            ->join('base_rodovia AS br', 'br.rodovia', '=', 'licencas_br.rodovia')
+            ->join('base_rodovia AS br', 'br.id', '=', 'licencas_br.rodovia')
             ->join('estados', 'estados.id', '=', 'licencas_br.uf_inicial')
             ->where('id_servico', $servico->id)
             ->whereRaw('br.estados_id = licencas_br.uf_inicial')
