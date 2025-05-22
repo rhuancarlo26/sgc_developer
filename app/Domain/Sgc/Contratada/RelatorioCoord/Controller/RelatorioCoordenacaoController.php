@@ -100,7 +100,6 @@ class RelatorioCoordenacaoController extends Controller
             ->where('versao', $versao)
             ->firstOrFail();
 
-        // Ajustar o caminho para storage/app/public/
         $caminhoCorrigido = 'public/' . str_replace('\\', '/', $documento->caminho);
 
         if (!Storage::exists($caminhoCorrigido)) {
