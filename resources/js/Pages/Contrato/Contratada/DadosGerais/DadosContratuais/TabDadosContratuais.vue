@@ -60,26 +60,20 @@ defineExpose({ visualizarTrecho });
         <span class="col"><strong>Empresa: </strong>{{ contrato.contratada }}</span>
         <span class="col"><strong>CNPJ: </strong>{{ contrato.cnpj }}</span>
         <span class="col"><strong>Número do Contrato: </strong>{{ contrato.numero_contrato
-          }}</span>
+        }}</span>
       </div>
       <div class="row mb-4">
         <span class="col"><strong>Objeto do Contrato: </strong>{{ contrato.objeto }}</span>
       </div>
       <div class="row mb-4">
         <span class="col"><strong>Número do Processo (DNIT): </strong>{{ contrato.processo_sei
-          }}</span>
+        }}</span>
         <span class="col"><strong>Início da Vigência: </strong>{{
-          dateTimeFormat(contrato.data_inicio ?? null, {
-            dateStyle: 'short',
-            timeStyle: 'short'
-          })
-        }}</span>
-        <span class="col"><strong>Término da Vigência: </strong>{{
-          dateTimeFormat(contrato.data_termino ?? null, {
-            dateStyle: 'short',
-            timeStyle: 'short'
-          })
-        }}</span>
+         contrato.data_inicio
+          }}</span>
+
+        <span class="col"><strong>Término da Vigência: </strong>{{contrato.data_termino}}</span>
+
         <span class="col"><strong>Situação: </strong>{{ contrato.situacao }}</span>
       </div>
     </div>
@@ -91,7 +85,7 @@ defineExpose({ visualizarTrecho });
       <div class="row">
         <span class="col"><strong>Edital: </strong>{{ contrato.edital }}</span>
         <span class="col"><strong>Tipo de Licitação: </strong>{{ contrato.tipo_licitacao
-          }}</span>
+        }}</span>
         <span class="col"><strong>Modalidade: </strong>{{ contrato.modalidade }}</span>
       </div>
     </div>
@@ -103,7 +97,7 @@ defineExpose({ visualizarTrecho });
       <div class="row">
         <span class="col"><strong>Unidade Gestora: </strong>{{ contrato.unidade_gestora }}</span>
         <span class="col"><strong>Fiscal do Contrato: </strong>{{ contrato.fiscal_contrato
-          }}</span>
+        }}</span>
       </div>
     </div>
 

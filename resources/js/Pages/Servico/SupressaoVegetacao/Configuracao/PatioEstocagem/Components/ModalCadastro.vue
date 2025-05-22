@@ -1,14 +1,14 @@
 <script setup>
-import {computed, ref} from "vue";
+import { computed, ref } from "vue";
 import Modal from "@/Components/Modal.vue";
-import {router, useForm} from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 
 const props = defineProps({
-    servico: {type: Object},
-    tipos: {type: Array},
-    licencas: {type: Array},
+    servico: { type: Object },
+    tipos: { type: Array },
+    licencas: { type: Array },
 })
 
 const form = useForm({
@@ -16,9 +16,10 @@ const form = useForm({
     chave: null,
     licenca_id: null,
     tipo_patio_id: null,
-    shapefile: null,
     observacao: null,
     fotos: [],
+    latitude: null,
+    longitude: null,
 })
 
 const modalRef = ref();
@@ -41,7 +42,7 @@ const save = () => {
         form.reset();
     }
 
-    if(form.id !== null) {
+    if (form.id !== null) {
         router.post(route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.update', form.id), {
             _method: 'patch',
             ...form.data(),
@@ -60,7 +61,7 @@ const save = () => {
 }
 
 const images = computed(() => {
-    return (form.fotos).map((foto, index) =>  ({
+    return (form.fotos).map((foto, index) => ({
         id: foto?.id ?? null,
         index,
         path: foto?.caminho ?? URL.createObjectURL(foto)
@@ -75,7 +76,7 @@ const onChangeFotos = (event) => {
 
 const destroyPhoto = (photoId, index) => {
     if (photoId !== null) {
-        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.fotos.delete', {arquivo: photoId, patio: form.id}), {
+        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.configuracao.patio-estocagem.fotos.delete', { arquivo: photoId, patio: form.id }), {
             preserveState: true,
             onSuccess() {
                 modalRef.value.getBsModal().hide();
@@ -87,7 +88,7 @@ const destroyPhoto = (photoId, index) => {
     form.fotos.splice(index, 1)
 }
 
-defineExpose({abrirModal});
+defineExpose({ abrirModal });
 </script>
 
 <template>
@@ -96,54 +97,62 @@ defineExpose({abrirModal});
             <template #body>
                 <div class="row row-gap-2">
                     <div class="col-lg-4">
-                        <InputLabel value="Código" for="codigo"/>
-                        <input v-model="form.chave" id="nome" class="form-control" disabled/>
-                        <InputError :message="form.errors.chave"/>
+                        <InputLabel value="Código" for="codigo" />
+                        <input v-model="form.chave" id="nome" class="form-control" disabled />
+                        <InputError :message="form.errors.chave" />
                     </div>
                     <div class="col-lg-4">
-                        <InputLabel value="Numero da ASV" for="dt_inicial"/>
+                        <InputLabel value="Numero da ASV" for="dt_inicial" />
                         <v-select v-model="form.licenca_id" :options="licencas"
-                                  :get-option-label='licenca => `${licenca.licenca.numero_licenca} - ${licenca.licenca.emissor} - ${licenca.licenca.tipo.sigla}`'
-                                  :reduce="l => l.licenca.id"
-                        >
-                            <template #no-options="{}">
+                            :get-option-label='licenca => `${licenca.licenca.numero_licenca} - ${licenca.licenca.emissor} - ${licenca.licenca.tipo.sigla}`'
+                            :reduce="l => l.licenca.id">
+                            <template #no-options="{ }">
                                 Nenhum registro encontrado.
                             </template>
                         </v-select>
-                        <InputError :message="form.errors.licenca_id"/>
+                        <InputError :message="form.errors.licenca_id" />
                     </div>
                     <div class="col-lg-4">
-                        <InputLabel value="Tipo de pátio" for="tipo_patio_id"/>
+                        <InputLabel value="Tipo de pátio" for="tipo_patio_id" />
                         <v-select :options="tipos" v-model="form.tipo_patio_id" label="nome" :reduce="t => t.id">
-                            <template #no-options="{}">
+                            <template #no-options="{ }">
                                 Nenhum registro encontrado.
                             </template>
                         </v-select>
-                        <InputError :message="form.errors.tipo_patio_id"/>
+                        <InputError :message="form.errors.tipo_patio_id" />
                     </div>
                     <div class="col-12">
-                        <InputLabel value="Shapefile" for="local_shape_em_app"/>
-                        <input @input="form.shapefile = $event.target.files[0]" id="shapefile"
-                               type="file" class="form-control" accept=".zip">
-                        <InputError :message="form.errors.shapefile"/>
-                    </div>
-                    <div class="col-12">
-                        <InputLabel value="Observações" for="area_fora_app"/>
+                        <InputLabel value="Observações" for="area_fora_app" />
                         <textarea v-model="form.observacao" id="observacao" class="form-control"></textarea>
-                        <InputError :message="form.errors.observacao"/>
+                        <InputError :message="form.errors.observacao" />
                     </div>
                     <div class="col-12">
-                        <InputLabel value="Anexar fotos" for="local_shape_fora_app"/>
-                        <input ref="fileRef" @input="onChangeFotos" id="fotos" type="file" class="form-control" accept=".jpg, .jpeg, .png" multiple>
-                        <InputError :message="form.errors.fotos"/>
+                        <InputLabel value="Anexar fotos" for="local_shape_fora_app" />
+                        <input ref="fileRef" @input="onChangeFotos" id="fotos" type="file" class="form-control"
+                            accept=".jpg, .jpeg, .png" multiple>
+                        <InputError :message="form.errors.fotos" />
                         <ul class="list-unstyled d-flex gap-2 flex-wrap mt-3">
                             <li v-for="img in images" class="d-flex flex-column">
                                 <span class="avatar avatar-xl">
                                     <img :src="img.path" alt />
                                 </span>
-                                <button @click="destroyPhoto(img.id, img.index)" type="button" class="btn btn-sm btn-danger">Remover</button>
+                                <button @click="destroyPhoto(img.id, img.index)" type="button"
+                                    class="btn btn-sm btn-danger">Remover</button>
                             </li>
                         </ul>
+                    </div>
+                    <div class="col-lg-6">
+                        <InputLabel value="Latitude" for="latitude" />
+                        <input v-model="form.latitude" id="latitude" class="form-control" type="number" step="any"
+                            placeholder="Ex: -15.827037" />
+                        <InputError :message="form.errors.latitude" />
+                    </div>
+
+                    <div class="col-lg-6">
+                        <InputLabel value="Longitude" for="longitude" />
+                        <input v-model="form.longitude" id="longitude" class="form-control" type="number" step="any"
+                            placeholder="Ex: -47.929202" />
+                        <InputError :message="form.errors.longitude" />
                     </div>
                 </div>
             </template>
