@@ -1,7 +1,7 @@
 <script setup>
 import { Link } from "@inertiajs/vue3";
 import { onMounted, reactive } from "vue";
-// import Timeline from "@/Components/Timeline.vue";
+import { usePage } from '@inertiajs/vue3';
 import Timelinex from "@/Components/Timelinex.vue";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
@@ -19,8 +19,8 @@ import NavLink from "@/Components/NavLink.vue";
 import { IconZoomCheck } from "@tabler/icons-vue";
 import { computed } from 'vue';
 
+const user = usePage().props.auth.user;
 
-// Definindo as props que o componente receberá
 const props = defineProps({
   	contratos: Object,
     tipo: Object,
@@ -36,6 +36,10 @@ const props = defineProps({
     asv_emp_estudos:Object,
     iphan_emp_estudos_521:Object,
     iphan_emp_estudos_531:Object,
+});
+
+const showAnalisesTab = computed(() => {
+    return !user.roles.some(role => role.name === 'Consultor');
 });
 
 console.log(props.contratos.data[0])
@@ -237,14 +241,11 @@ function getEmpreendimentoRoute(emp) {
 											<IconCircleX class="text-danger"/>
 										</a>
 									</li>
-									<li class="nav-item" role="presentation">
-										<a href="#analises" class="nav-link d-flex justify-content-between" data-bs-toggle="tab" aria-selected="false"
-										tabindex="-1" role="tab">
-										<span>
-											Analises/Revisões
-										</span>
-										<IconCircleCheck class="text-success"/>
-										<IconCircleX class="text-danger"/>
+									<li v-if="showAnalisesTab" class="nav-item" role="presentation">
+										<a href="#analises" class="nav-link d-flex justify-content-between" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">
+											<span>Análises/Revisões</span>
+											<IconCircleCheck class="text-success"/>
+											<IconCircleX class="text-danger"/>
 										</a>
 									</li>
 									<li class="nav-item" role="presentation">
