@@ -2,24 +2,42 @@
   <div>
     <Head :title="'Empreendimentos: edição'" />
     <AuthenticatedLayout>
-      <div style="display: block; float: right;">
-        <ul class="nav">
+      <!-- <div style="display: block; float: right;" class="mb-3"> -->
+        <H3>Módulo de EDIÇÃO</H3>
+        <ul class="nav nav-tabs">
           <li class="nav-item">
-            <a class="nav-link disabled" aria-current="page" href="#">Empreendimentos</a>
+            <a class="nav-link active" aria-current="page" href="#"><b>Empreendimentos</b></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/sgc/gestao/2/edicao-estudos"> >> Estudos</a>
+            <a class="nav-link" href="/sgc/gestao/2/edicao-estudos">Estudos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/sgc/gestao/2/edicao-produtos"> >> Subprodutos</a>
+            <a class="nav-link" href="/sgc/gestao/2/edicao-produtos">Subprodutos</a>
           </li>
         </ul>
+        <br>
+        <br>
+        <p>
+        <a
+          class="btn btn-defaut w-full fw-bold fs-underline"
+          data-bs-toggle="collapse"
+          href="#collapseNovoEmp"
+          role="button"
+          aria-expanded="false"
+          aria-controls="collapseExample"
+        >
+          Cadastrar Novo Empreendimento
+        </a>
+      </p>
+      <div class="collapse bg-white" id="collapseNovoEmp">
+        <CadastroModal :empreendimentos="camposfixos" @salvar="handleSalvar" />
       </div>
-      <h3><strong>Empreendimentos</strong></h3>
-      <H4>[EDIÇÃO]</H4>
+
+      <!-- </div> -->
+      <!-- <h4><strong>Empreendimentos</strong></h4> -->
       <p>
         <a
-          class="btn btn-primary"
+          class="btn btn-defaut w-full fw-bold fs-underline"
           data-bs-toggle="collapse"
           href="#collapseExample"
           role="button"
@@ -184,6 +202,9 @@ import { ref, computed, onMounted } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import CadastroModal from './CadastroModal.vue';
+
+const mostrarModal = ref(false);
 
 const props = defineProps({ empreendimentos: Array });
 const campoEditando = ref({ id: null, campo: null });
@@ -203,6 +224,30 @@ const camposocultos = [
   "updated_at",
   "changelogs",
 ];
+const camposocultos2 = [
+  "change_field",
+  "old_value",
+  "new_value",
+  "user_id",
+  "change_user_id",
+  "change_date",
+  "change_field",
+  "id",
+  "contrato_id",
+  "created_at",
+  "updated_at",
+  "changelogs",
+];
+
+const camposfixos = computed(() => {
+  return props.empreendimentos.map(item => {
+    return Object.fromEntries(
+      Object.entries(item).filter(
+        ([chave]) => !camposocultos2.includes(chave)
+      )
+    );
+  });
+});
 
 const abrirEdicao = (empreendimento, campo) => {
   empreendimentoEdit.value = {
@@ -275,7 +320,12 @@ function abrirModal(item) {
 function fecharModal() {
   if (modalInstance) modalInstance.hide()
 }
-
+// ------------------------------------------------------------------------- Salvar
+function handleSalvar(dados) {
+  console.log('Dados recebidos no pai:', dados);
+  // Aqui você pode fazer Inertia.post('/cadastrar', dados), etc.
+}
+// ------------------------------------------------------------------------- Salvar
 onMounted(() => {
   const modalEl = modalRef.value
   if (modalEl) {
@@ -322,5 +372,8 @@ onMounted(() => {
 }
 float-right {
   float: right !important;
+}
+li .active {
+    border-bottom: 2px solid #f6f8fb !important;
 }
 </style>

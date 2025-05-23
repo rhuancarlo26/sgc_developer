@@ -2,21 +2,20 @@
   <div>
     <Head :title="'Empreendimentos - ESTUDOS: edição'" />
     <AuthenticatedLayout>
-      <div style="display: block; float: right;">
-        <ul class="nav">
+      <H3>Módulo de EDIÇÃO</H3>
+      <ul class="nav nav-tabs">
           <li class="nav-item">
-            <a class="nav-link" href="/sgc/gestao/2/edicao">Empreendimentos</a>
+          <a class="nav-link" href="/sgc/gestao/2/edicao">Empreendimentos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link disabled" aria-current="page" href="/sgc/gestao/2/edicao-estudos"> >> Estudos</a>
+          <a class="nav-link active" aria-current="page" href="#"><b>Estudos</b></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/sgc/gestao/2/edicao-produtos"> >> Subprodutos</a>
+          <a class="nav-link" href="/sgc/gestao/2/edicao-produtos">Subprodutos</a>
           </li>
-        </ul>
-      </div>
-      <h3><strong>Empreendimentos - ESTUDOS</strong></h3>
-      <H4>[EDIÇÃO]</H4>
+      </ul>
+      <br>
+      <br>
       <p>
         <a
           class="btn btn-primary"
@@ -284,5 +283,8 @@ onMounted(() => {
 <style>
 .cursor-pointer {
   cursor: pointer;
+}
+li .active {
+    border-bottom: 2px solid #f6f8fb !important;
 }
 </style>
