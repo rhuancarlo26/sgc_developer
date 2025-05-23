@@ -13,9 +13,7 @@ use Illuminate\Http\RedirectResponse;
 
 class UpdateController extends Controller
 {
-    public function __construct(private readonly MedicaoService $medicaoService)
-    {
-    }
+    public function __construct(private readonly MedicaoService $medicaoService) {}
 
     public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPonto $ponto, UpdateRequest $request): RedirectResponse
     {
