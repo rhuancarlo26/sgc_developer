@@ -23,9 +23,9 @@ class StoreController extends Controller
 
         $post['fk_campanha_ponto'] = $request->validated('fk_campanha_ponto');
         $post['dt_coleta'] = $request->validated('dt_coleta');
-        $post['sem_coleta'] = $request->validated('sem_coleta');
+        $post['coleta'] = $request->validated('coleta');
 
-        if ($request->validated('sem_coleta') === true) {
+        if ($request->validated('coleta') === true) {
             $post['numero_amostra'] = '';
             $post['preservacao_amostra'] = '';
             $post['acondicionamento_amostra'] = '';
