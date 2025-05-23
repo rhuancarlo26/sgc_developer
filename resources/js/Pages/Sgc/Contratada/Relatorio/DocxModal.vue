@@ -59,30 +59,8 @@ const abrirModal = async (idItem, contratoId, versao) => {
     }
 };
 
-// const fetchDocumentos = async (itemId, contratoId, versao) => {
-//     try {
-//         const response = await fetch(route('sgc.relatorio_coordenacao_upload.index'));
-//         const data = await response.json();
-//         console.log('Dados localizados:', data);
-
-//         // Encontre o documento com a versão específica
-//         const docModal = data.find(doc => doc.item_id === itemId && doc.contrato_id === contratoId && doc.num_relatorio === props.numRelatorio && doc.versao === versao);
-//         console.log('Documento', docModal);
-
-//         if (docModal) {
-//             return docModal.caminho;
-//         } else {
-//             return null;
-//         }
-//     } catch (error) {
-//         console.error('Erro ao buscar documentos:', error);
-//         return null;
-//     }
-// };
-
 const fetchDocumentos = async (itemId, contratoId, versao) => {
     try {
-        // Busca os documentos usando a rota correta e passando os parâmetros necessários
         const response = await fetch(route('sgc.relatorio_coordenacao_upload.index'), {
             method: 'GET',
             headers: {
@@ -92,7 +70,6 @@ const fetchDocumentos = async (itemId, contratoId, versao) => {
         const data = await response.json();
         console.log('Dados localizados:', data);
 
-        // Filtra o documento com base no item_id, contrato_id, num_relatorio e versao
         const docModal = data.find(doc => 
             doc.item_id === itemId && 
             doc.contrato_id === contratoId && 
