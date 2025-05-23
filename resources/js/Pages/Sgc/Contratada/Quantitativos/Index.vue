@@ -63,6 +63,8 @@
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
+        rotation: 130, 
+        circumference: 360,
         plugins: {
             legend: {
                 position: 'right',
