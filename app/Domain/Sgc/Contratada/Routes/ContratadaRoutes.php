@@ -90,10 +90,9 @@ Route::prefix('/contratada')->group(function () {
     // Produtos
     Route::get('/sgc/contratada/{contrato}/produtos/{produto}', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
     
+    // DocxModal - Novo método    
+    Route::get('/sgc/contratada/get_docx/{itemId}/{contratoId}/{versao}/{numRelatorio}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
 
-
-    
-    Route::get('/sgc/contratada/get-docx/{itemId}/{contratoId}/{versao}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
-   
+    // Route::get('/sgc/contratada/get-docx/{itemId}/{contratoId}/{versao}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
 
 });
