@@ -90,31 +90,14 @@ class RelatorioCoordenacaoController extends Controller
         return response()->json(['success' => false, 'message' => 'Item não encontrado'], 404);
     }
     
-    // public function getDocx($itemId, $contratoId, $versao)
-    // {
-    //     $documento = SgcRelatorioUpload::where('item_id', $itemId)
-    //         ->where('contrato_id', $contratoId)
-    //         ->where('versao', $versao)
-    //         ->first();
-
-    //     if ($documento && Storage::exists($documento->caminho)) {
-    //         $filePath = Storage::path($documento->caminho);
-    //         return response()->file($filePath, [
-    //             'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    //         ]);
-    //     }
-
-    //     return response()->json(['error' => 'Arquivo não encontrado'], 404);
-    // }
-
-    public function getDocx($itemId, $contratoId, $versao)
+    public function getDocx($itemId, $contratoId, $versao, $numRelatorio)
     {
         $documento = SgcRelatorioUpload::where('item_id', $itemId)
             ->where('contrato_id', $contratoId)
             ->where('versao', $versao)
+            ->where('num_relatorio', $numRelatorio)
             ->firstOrFail();
 
-        // Ajustar o caminho para storage/app/public/
         $caminhoCorrigido = 'public/' . str_replace('\\', '/', $documento->caminho);
 
         if (!Storage::exists($caminhoCorrigido)) {
@@ -141,5 +124,5 @@ class RelatorioCoordenacaoController extends Controller
         ]);
     }
 
-
+   
 }

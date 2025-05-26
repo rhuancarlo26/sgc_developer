@@ -39,7 +39,8 @@ const abrirModal = async (idItem, contratoId, versao) => {
         filePath = route('sgc.contratada.get_docx', {
             itemId: idItem,
             contratoId: contratoId,
-            versao: versao
+            versao: versao,
+            numRelatorio: props.numRelatorio
         });
         console.log('URL gerada:', filePath); 
         try {
@@ -60,17 +61,27 @@ const abrirModal = async (idItem, contratoId, versao) => {
 
 const fetchDocumentos = async (itemId, contratoId, versao) => {
     try {
-        const response = await fetch(route('sgc.relatorio_coordenacao_upload.index'));
+        const response = await fetch(route('sgc.relatorio_coordenacao_upload.index'), {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
         const data = await response.json();
         console.log('Dados localizados:', data);
 
-        // Encontre o documento com a versão específica
-        const docModal = data.find(doc => doc.item_id === itemId && doc.contrato_id === contratoId && doc.num_relatorio === props.numRelatorio && doc.versao === versao);
-        console.log('Documento', docModal);
+        const docModal = data.find(doc => 
+            doc.item_id === itemId && 
+            doc.contrato_id === contratoId && 
+            doc.num_relatorio === props.numRelatorio && 
+            doc.versao === versao
+        );
+        console.log('Documento encontrado:', docModal);
 
         if (docModal) {
             return docModal.caminho;
         } else {
+            console.log('Documento não encontrado para:', { itemId, contratoId, numRelatorio: props.numRelatorio, versao });
             return null;
         }
     } catch (error) {
