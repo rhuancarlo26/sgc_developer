@@ -29,7 +29,7 @@ const props = defineProps({
 
           <!-- Atualizar Base -->
           <navLink route-name="sgc.contratada.edicao"
-          :param="2" title="Atualizar Base" :icon="IconDatabaseEdit" />
+          title="Atualizar Base" :icon="IconDatabaseEdit" />
 
         </ul>
       </div>
