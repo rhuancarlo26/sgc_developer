@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import Modal from "@/Components/Modal.vue";
 import { Link, router, useForm } from "@inertiajs/vue3";
 import InputLabel from "@/Components/InputLabel.vue";
@@ -19,15 +19,16 @@ const props = defineProps({
 })
 
 
-const limitAndSum = (field) => {
-  const val = form[field];
-  if (val !== null && val !== undefined && !isNaN(val)) {
- 
-    form[field] = parseFloat(val.toFixed(4));
-  }
-  
-  somaTotalApp();
+const limitaesoma = (field) => {
+    const val = form[field];
+    if (val !== null && val !== undefined && !isNaN(val)) {
+
+        form[field] = parseFloat(val.toFixed(4));
+    }
+
+    somaTotalApp();
 };
+
 
 
 const form = useForm({
@@ -42,8 +43,11 @@ const form = useForm({
     area_fora_app: null,
     area_total: 0,
     shapefile: null,
-    licenca_id: null,
+    licenca_id: 8,
     observacao: null,
+    latitude: null,
+    longitude: null,
+    geometry: null,
 
     corte_especie: false,
     corte_especies: [],
@@ -62,7 +66,20 @@ const abrirModal = (item) => {
     }
     modalRef.value.getBsModal().show();
 }
+const geometry = () => {
 
+    let lat = parseFloat(form.latitude)
+    let lng = parseFloat(form.longitude)
+
+    if (!isNaN(lat) && !isNaN(lng)) {
+        form.geometry = JSON.stringify({
+            type: 'Point',
+            coordinates: [lng, lat],
+        })
+    } else {
+        form.geometry = null
+    }
+}
 const save = () => {
     form.transform((data) => ({
         ...data,
@@ -93,11 +110,10 @@ const save = () => {
 }
 
 const somaTotalApp = () => {
-  const a = form.area_em_app || 0;
-  const b = form.area_fora_app || 0;
-  form.area_total = parseFloat((a + b).toFixed(4));
+    const a = form.area_em_app || 0;
+    const b = form.area_fora_app || 0;
+    form.area_total = parseFloat((a + b).toFixed(4));
 };
-
 
 const formCientifica = ref({
     nome: null,
@@ -156,6 +172,14 @@ const destroyPhoto = (photoId, index) => {
     form.fotos.splice(index, 1)
 }
 
+const decimallimite = (field) => {
+    const val = form[field]
+    if (val !== null && val !== undefined && !isNaN(val)) {
+        
+        form[field] = parseFloat(val.toFixed(6))
+    }
+    geometry()
+}
 defineExpose({ abrirModal });
 </script>
 
@@ -226,7 +250,7 @@ defineExpose({ abrirModal });
                                     <div class="col-lg-4">
                                         <InputLabel value="Área em APP:" for="area_em_app" />
                                         <input id="area_em_app" type="number" step="0.0001"
-                                            v-model.number="form.area_em_app" @input="limitAndSum('area_em_app')"
+                                            v-model.number="form.area_em_app" @blur="limitaesoma('area_em_app')"
                                             class="form-control" />
                                         <InputError :message="form.errors.area_em_app" />
                                     </div>
@@ -234,7 +258,7 @@ defineExpose({ abrirModal });
                                     <div class="col-lg-4">
                                         <InputLabel value="Área Fora APP:" for="area_fora_app" />
                                         <input id="area_fora_app" type="number" step="0.0001"
-                                            v-model.number="form.area_fora_app" @input="limitAndSum('area_fora_app')"
+                                            v-model.number="form.area_fora_app" @blur="limitaesoma('area_fora_app')"
                                             class="form-control" />
                                         <InputError :message="form.errors.area_fora_app" />
                                     </div>
@@ -242,8 +266,22 @@ defineExpose({ abrirModal });
                                     <div class="col-lg-4">
                                         <InputLabel value="Área total:" for="area_fora_app" />
                                         <input v-model="form.area_total" type="number" step="0.0001" id="area_total"
-                                            class="form-control" readonly/>
+                                            class="form-control" readonly />
                                         <InputError :message="form.errors.area_total" />
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <InputLabel value="Latitude" for="latitude" />
+                                        <input @input="geometry()" @blur="decimallimite('latitude')"
+                                            v-model="form.latitude" id="latitude" type="number" step="0.000001"
+                                            class="form-control" placeholder="–90.000000 a 90.000000" />
+                                        <InputError :message="form.errors.latitude" />
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <InputLabel value="Longitude" for="Longitude" />
+                                        <input @input="geometry()" @blur="decimallimite('longitude')"
+                                            v-model="form.longitude" id="longitude" type="number" step="0.000001"
+                                            class="form-control" placeholder="–180.000000 a 180.000000" />
+                                        <InputError :message="form.errors.longitude" />
                                     </div>
                                     <div class="col-lg-6">
                                         <InputLabel value="Shapefile" for="local_shape_em_app" />
@@ -251,7 +289,7 @@ defineExpose({ abrirModal });
                                             type="file" class="form-control" accept=".zip">
                                         <InputError :message="form.errors.shapefile" />
                                     </div>
-                                    <div class="col-lg-6">
+                                    <!-- <div class="col-lg-6">
                                         <InputLabel value="Numero da ASV" for="licenca_id" />
                                         <v-select v-model="form.licenca_id" :options="licencas"
                                             :get-option-label='licenca => `${licenca.licenca.numero_licenca} - ${licenca.licenca.emissor} - ${licenca.licenca.tipo.sigla}`'
@@ -261,7 +299,7 @@ defineExpose({ abrirModal });
                                             </template>
                                         </v-select>
                                         <InputError :message="form.errors.licenca_id" />
-                                    </div>
+                                    </div> -->
                                     <div class="col-12">
                                         <InputLabel value="Observações" for="observacao" />
                                         <textarea v-model="form.observacao" rows="2" id="observacao"
