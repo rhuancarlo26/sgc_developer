@@ -1,55 +1,53 @@
 <script setup>
 import Modal from '@/Components/Modal.vue';
 import { renderAsync } from 'docx-preview';
-import { onMounted, ref } from "vue";
+import { ref } from 'vue';
 import Comment from '@/Components/Comment.vue';
-import { IconMessageDots } from "@tabler/icons-vue";
-import { usePage } from '@inertiajs/vue3'; 
+import { IconMessageDots } from '@tabler/icons-vue';
+import { usePage } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
 
 const modalDetalhes = ref(null);
 const wordDocument = ref(null);
-const documento = ref(null);
-let caminho = null;
-let filePath = null;
+const docModal = ref(null);
+const notes = ref([]);
+const modalKey = ref(0);
+const counter = ref(0);
+const isAddNote = ref(false);
+const isCounting = ref(false);
 
 const props = defineProps({
     itemId: Number,
     comentarios: Object,
     contrato: Object,
-    numRelatorio: Number
+    numRelatorio: Number,
 });
 
-const docModal = ref(null);
-const notes = ref([]);
-const modalKey = ref(0); 
-const counter = ref(0);
-const isAddNote = ref(false);
-const isCounting = ref(false);
-
-
 const page = usePage();
-const appUrl = page.props.app_url; 
 
-const abrirModal = async (idItem, contratoId, versao) => {
-    modalKey.value += 1; 
+const abrirModal = async (idItem, contratoId, ) => {
+    modalKey.value += 1;
     modalDetalhes.value.getBsModal().show();
-    const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao);
+    const caminhoDocumento = await fetchDocumentos(idItem, contratoId, );
+    console.log('Parâmetros recebidos:', { idItem, contratoId,  });
     
     if (caminhoDocumento) {
-
-        filePath = `${appUrl}/storage/${caminhoDocumento.replace('app/', '')}`;
+        const filePath = route('sgc.contratada.get_docx', {
+            itemId: idItem, 
+            contratoId,
+            versao: 0,
+            numRelatorio: props.numRelatorio,
+        });
+        console.log('URL gerada:', filePath);
         
         try {
             const response = await fetch(filePath);
             if (!response.ok) {
-                throw new Error('Erro ao carregar o documento do Word');
+                throw new Error('Erro ao carregar o documento do Word: ' + response.statusText);
             }
-            const wordBlob = await response.blob();
-
+            const wordBlob = await response.blob({ type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
             wordDocument.value = wordBlob;
-
             renderAsync(wordDocument.value, docModal.value);
-
         } catch (error) {
             console.error('Erro ao carregar o documento do Word:', error);
         }
@@ -58,7 +56,7 @@ const abrirModal = async (idItem, contratoId, versao) => {
     }
 };
 
-const fetchDocumentos = async (itemId, contratoId, versao) => {
+const fetchDocumentos = async (itemId, contratoId,) => {
     try {
         const response = await fetch(route('sgc.relatorio_coordenacao_upload.index'));
         const data = await response.json();
@@ -67,8 +65,8 @@ const fetchDocumentos = async (itemId, contratoId, versao) => {
         const documentoEncontrado = data.find(doc => 
             doc.item_id === itemId &&
             doc.contrato_id === contratoId &&
-            doc.num_relatorio === props.numRelatorio && 
-            doc.versao === versao
+            doc.num_relatorio === props.numRelatorio &&
+            doc.versao === 0
         );
 
         console.log('Documento encontrado:', documentoEncontrado);
@@ -76,7 +74,7 @@ const fetchDocumentos = async (itemId, contratoId, versao) => {
         if (documentoEncontrado) {
             return documentoEncontrado.caminho;
         } else {
-            console.error('Nenhum documento encontrado com a versão especificada.');
+            console.error('Nenhum documento encontrado com a versão especificada:', { itemId, contratoId, numRelatorio: props.numRelatorio, versao });
             return null;
         }
     } catch (error) {
@@ -86,16 +84,12 @@ const fetchDocumentos = async (itemId, contratoId, versao) => {
 };
 
 const enableCounter = (event) => {
-    if (event) {
-        isCounting.value = true;
-    }
+    if (event) isCounting.value = true;
 };
 
 const increment = () => {
     if (!isCounting.value) return;
-
     counter.value += 1;
-
     if (counter.value > 1) {
         counter.value = 0;
         isAddNote.value = true;
@@ -106,13 +100,12 @@ const increment = () => {
 const addNote = (event) => {
     if (isAddNote.value) {
         const rect = docModal.value.getBoundingClientRect();
-        const newNote = {
+        notes.value.push({
             title: 'Nova nota',
             comentario: [],
             x: event.clientX - rect.left + docModal.value.scrollLeft,
             y: event.clientY - rect.top + docModal.value.scrollTop,
-        };
-        notes.value.push(newNote);
+        });
         isAddNote.value = false;
     }
 };
@@ -131,20 +124,23 @@ defineExpose({ abrirModal });
                             <div>
                                 <IconMessageDots
                                     class="position-fixed z-3"
+                                    :class="{ 'active-comment': isCounting }"
                                     @click="enableCounter"
-                                    style="cursor: pointer;" />
+                                    style="cursor: pointer;"
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-body" ref="docModal" :key="modalKey" @mousemove="addNote" />
-                <Comment v-for="(note, index) in notes"
+                <div class="card-body" ref="docModal" :key="modalKey" @mousemove="addNote" :class="{ 'comment-enabled': isCounting }" />
+                <Comment
+                    v-for="(note, index) in notes"
                     :note="note"
                     :index="index"
                     :item-id="itemId"
                     :comentarios="comentarios"
                     :contrato="contrato"
-                    />
+                />
             </div>
         </template>
     </Modal>
@@ -152,6 +148,16 @@ defineExpose({ abrirModal });
 
 <style>
 .docx-wrapper {
-  background-color: rgb(255, 255, 255) !important;
+    background-color: rgb(255, 255, 255) !important;
+}
+.active-comment {
+    color: #1a06ce;
+    border: 2px solid #17a2b8;
+    border-radius: 50%;
+    padding: 2px;
+}
+.comment-enabled {
+    cursor: crosshair;
+    background-color: rgba(23, 162, 184, 0.1);
 }
 </style>

@@ -77,14 +77,11 @@ const fecharModal = () => {
   modalContent.value = '';
 };
 
-// const abrirDocxModal = (itemId) => {
-//   selectedItemId.value = itemId;
-//   docxModal.value.abrirModal(itemId, props.contrato.id); // Use o método do DocxModal
-// };
 const abrirDocxModal = (itemId, versao) => {
   selectedItemId.value = itemId;
   docxModal.value.abrirModal(itemId, props.contrato.id, versao); // Passando a versão
 };
+
 
 </script>
 

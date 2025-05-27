@@ -93,9 +93,11 @@ Route::prefix('/contratada')->group(function () {
     // DocxModal - Novo método    
     Route::get('/sgc/contratada/get_docx/{itemId}/{contratoId}/{versao}/{numRelatorio}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
 
-    // Route::get('/sgc/contratada/get-docx/{itemId}/{contratoId}/{versao}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
-
     // PDF Consolidado
     Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');
+
+    //Edicao
+    Route::get('{tipo}/edicao',                                 [EmpreendimentosController::class,                       'editavel'])->name('sgc.contratada.edicao');
+
 
 });
