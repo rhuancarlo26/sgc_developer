@@ -5,13 +5,13 @@
       <div style="display: block; float: right;">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="/sgc/gestao/2/edicao">Empreendimentos</a>
+            <a class="nav-link" href="/sgc/contratada/sgc/edicao">Empreendimentos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link disabled" aria-current="page" href="/sgc/gestao/2/edicao-estudos"> >> Estudos</a>
+            <a class="nav-link disabled" aria-current="page" href="/sgc/contratada/sgc/edicao-estudos"> >> Estudos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/sgc/gestao/2/edicao-produtos"> >> Subprodutos</a>
+            <a class="nav-link" href="/sgc/contratada/sgc/edicao-produtos"> >> Subprodutos</a>
           </li>
         </ul>
       </div>
@@ -223,7 +223,7 @@ const mudarPagina = (url) => {
 
 const salvarEdicao = () => {
   router.post(
-    `/sgc/gestao/updatecampoestudos/${empreendimentoEdit.value.id}`,
+    `/sgc/contratada/updatecampoestudos/${empreendimentoEdit.value.id}`,
     { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
     {
       onSuccess: () => {
