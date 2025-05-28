@@ -121,6 +121,7 @@ defineExpose({ abrirModal });
                     <div class="container mt-5">
                         <div class="d-flex justify-content-between">
                             <h3 class="my-0">RELATÓRIO DE COORDENAÇÃO</h3>
+
                         </div>
                     </div>
                 </div>

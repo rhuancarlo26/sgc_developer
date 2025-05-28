@@ -5,30 +5,31 @@
     import { ref, onMounted, computed } from 'vue';
     import { Doughnut } from 'vue-chartjs';
     import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
-    
+
     ChartJS.register(Title, Tooltip, Legend, ArcElement);
-    
+
     const props = defineProps({
         quantitativosData: Object,
         contratoId: Number,
         contrato: Object,
+        contratos: Object
     });
-    
+
     const data = ref(props.quantitativosData || {});
-    const filtroFamilia = ref(''); 
-    
+    const filtroFamilia = ref('');
+
     const familiasUnicas = computed(() => {
         const familias = new Set(data.value.map(item => item.familia));
         return ['Todas', ...Array.from(familias).filter(f => f)];
     });
-    
+
     const dataFiltrada = computed(() => {
         if (!filtroFamilia.value || filtroFamilia.value === 'Todas') {
             return data.value;
         }
         return data.value.filter(item => item.familia === filtroFamilia.value);
     });
-    
+
     const totais = computed(() => {
         if (!dataFiltrada.value || dataFiltrada.value.length === 0) {
             return {
@@ -37,19 +38,19 @@
                 r_medido: 0,
             };
         }
-    
+
         return {
             r_total_contrato: dataFiltrada.value.reduce((sum, item) => sum + (parseFloat(item.r_total_contrato) || 0), 0),
             r_ose: dataFiltrada.value.reduce((sum, item) => sum + (parseFloat(item.r_ose) || 0), 0),
             r_medido: dataFiltrada.value.reduce((sum, item) => sum + (parseFloat(item.r_medido) || 0), 0),
         };
     });
-    
+
     const formatarMoeda = (valor) => {
         if (!valor && valor !== 0) return 'R$ 0,00';
         return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
     };
-    
+
     const chartData = computed(() => ({
         labels: ['Total Contrato', 'OSE', 'Medido'],
         datasets: [{
@@ -59,7 +60,7 @@
             borderWidth: 1,
         }],
     }));
-    
+
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -92,7 +93,7 @@
         },
         cutout: '75%',
     };
-    
+
     onMounted(() => {
         console.log('Dados dos quantitativos:', data.value);
         console.log('Totais calculados:', totais.value);
@@ -100,14 +101,20 @@
     });
 
 </script>
-    
+
 <template>
     <AuthenticatedLayout>
         <Head :title="`Quantitativos - Contrato ${contratoId}`" />
 
         <template #header>
             <div class="w-100 d-flex justify-content-between">
-                <!-- <h2>Quantitativos - Contrato {{ contratoId }}</h2> -->
+                <Breadcrumb
+                    class="align-self-center"
+                    :links="[
+                        { route: route('sgc.gestao.listagem', contratos.tipo_contrato), label: `Gestão de Contratos` },
+                        { route: '#', label: contratos.contratada }
+                    ]"
+                />
             </div>
         </template>
 
@@ -210,30 +217,30 @@
         </NavbarContrato>
     </AuthenticatedLayout>
 </template>
-    
+
 <style scoped>
     .card {
         margin-top: 20px;
     }
-    
+
     h2 {
         font-size: 1.5rem;
         margin: 0;
     }
-    
+
     h4 {
         font-size: 1.1rem;
         margin-bottom: 10px;
     }
-    
+
     .table {
         font-size: 0.9rem;
     }
-    
+
     .text-muted {
         text-align: center;
     }
-    
+
     .chart-container {
         position: relative;
         max-width: 600px;
@@ -243,24 +250,24 @@
         justify-content: center;
         align-items: center;
     }
-    
+
     .mt-4 {
         margin-top: 1.5rem;
     }
-    
+
     .subprodutos-title {
         font-size: 1.7rem;
         margin: -5rem 0 2rem 0;
         color: #333;
     }
-    
+
     /* Estilo para o container do filtro */
     .filter-container {
         display: flex;
         align-items: center;
         margin-bottom: 1rem;
     }
-    
+
     /* Estilo para o select */
     .form-select {
         width: 200px;
