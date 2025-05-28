@@ -53,7 +53,7 @@ class RelatorioCoordenacaoController extends Controller
     {
         $dadosrelat = SgcRelatorioCoordenacao::where('contrato_id', $contrato->id)
             ->with(['historicos' => function($query) {
-                $query->select('relatorio_num', 'versao');
+                $query->select('relatorio_num', 'versao', 'contrato_id');
             }])
             ->get();
 

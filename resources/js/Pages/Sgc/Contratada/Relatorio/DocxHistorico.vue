@@ -121,14 +121,7 @@ defineExpose({ abrirModal });
                     <div class="container mt-5">
                         <div class="d-flex justify-content-between">
                             <h3 class="my-0">RELATÓRIO DE COORDENAÇÃO</h3>
-                            <div>
-                                <IconMessageDots
-                                    class="position-fixed z-3"
-                                    :class="{ 'active-comment': isCounting }"
-                                    @click="enableCounter"
-                                    style="cursor: pointer;"
-                                />
-                            </div>
+
                         </div>
                     </div>
                 </div>

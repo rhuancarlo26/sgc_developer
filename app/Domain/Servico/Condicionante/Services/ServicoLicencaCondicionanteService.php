@@ -64,7 +64,7 @@ class ServicoLicencaCondicionanteService extends BaseModelService
             ])
             ->join('licencas', 'licencas.id', '=', 'servico_licenca_condicionante.id_licenca')
             ->leftJoin('licencas_br', 'licencas_br.licenca_id', '=', 'licencas.id')
-            ->join('base_rodovia AS br', 'br.rodovia', '=', 'licencas_br.rodovia')
+            ->join('base_rodovia AS br', 'br.id', '=', 'licencas_br.rodovia')
             ->join('estados', 'estados.id', '=', 'licencas_br.uf_inicial')
             ->where('servico_licenca_condicionante.vigente', 1)
             ->where('id_servico', $servicoId)
