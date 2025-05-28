@@ -3,11 +3,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import NavbarContrato from "../NavbarContrato.vue";
 import { ref, computed, onMounted } from 'vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
 
 const props = defineProps({
     fichaData: Object,
     contratoId: Number,
-    contrato: Object, 
+    contrato: Object,
+    contratos: Object
 });
 
 const data = ref(props.fichaData || {});
@@ -74,6 +76,15 @@ onMounted(() => {
         <Head :title="`Ficha Contratual - Contrato ${contratoId}`" />
 
         <template #header>
+            <div class="w-100 d-flex justify-content-between">
+                <Breadcrumb
+                    class="align-self-center"
+                    :links="[
+                        { route: route('sgc.gestao.listagem', contratos.tipo_contrato), label: `Gestão de Contratos` },
+                        { route: '#', label: contratos.contratada }
+                    ]"
+                />
+            </div>
         </template>
 
         <NavbarContrato :tipo="contrato">
@@ -171,7 +182,7 @@ h2 {
 h4 {
     font-size: 1.1rem;
     margin-bottom: 30px;
-    text-align: center; 
+    text-align: center;
 }
 
 .block-card {
@@ -197,10 +208,10 @@ strong {
 }
 
 .col-md-4 {
-    margin-bottom: 20px; 
+    margin-bottom: 20px;
 }
 
 .row {
-    justify-content: space-between; 
+    justify-content: space-between;
 }
 </style>
