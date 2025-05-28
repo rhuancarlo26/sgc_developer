@@ -27,6 +27,9 @@ import "leaflet/dist/leaflet.css";
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 
+import Multiselect from "vue-multiselect";
+import "vue-multiselect/dist/vue-multiselect.min.css";
+
 createInertiaApp({
     title: (title) => `${title}`,
     resolve: (name) =>
@@ -38,7 +41,8 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(Toast)
-            .use(VCalendar, {}) // <- AQUI
+            .use(VCalendar, {})
+            .component('Multiselect', Multiselect)
             .directive("maska", vMaska)
             .component("v-select", vSelect)
             .use(ZiggyVue)
