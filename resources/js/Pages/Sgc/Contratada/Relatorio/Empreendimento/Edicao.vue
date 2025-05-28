@@ -8,10 +8,10 @@
             <a class="nav-link disabled" aria-current="page" href="#">Empreendimentos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/sgc/gestao/2/edicao-estudos"> >> Estudos</a>
+            <a class="nav-link" href="/sgc/contratada/sgc/edicao-estudos"> >> Estudos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/sgc/gestao/2/edicao-produtos"> >> Subprodutos</a>
+            <a class="nav-link" href="/sgc/contratada/sgc/edicao-produtos"> >> Subprodutos</a>
           </li>
         </ul>
       </div>
@@ -184,6 +184,7 @@ import { ref, computed, onMounted } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import NavLink from '@/Components/NavLink.vue';
 
 const props = defineProps({ empreendimentos: Array });
 const campoEditando = ref({ id: null, campo: null });
@@ -215,7 +216,7 @@ const abrirEdicao = (empreendimento, campo) => {
 
 const salvarEdicao = () => {
   router.post(
-    `/sgc/gestao/updatecampo/${empreendimentoEdit.value.id}`,
+    `/sgc/contratada/updatecampo/${empreendimentoEdit.value.id}`,
     { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
     {
       onSuccess: () => {

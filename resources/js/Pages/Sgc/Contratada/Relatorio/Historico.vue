@@ -12,7 +12,7 @@
       </template>
 
       <div class="container mt-4">
-        <h1>Relatório {{ historico[0].relatorio_num }} - Revisão {{ historico[0].versao }}</h1>
+        <h1>Relatório {{ historico[0].relatorio_num }} - Versão {{ historico[0].versao }}</h1>
         
         <table class="table table-striped">
           <thead>
@@ -28,7 +28,7 @@
               <td>{{ item.nome_topico }}</td>
               <td>{{ item.periodo }}</td>
               <td>{{ item.status }}</td>
-              <td>
+              <td>  
                 <button @click="abrirDocxModal(item.id_item, item.versao)" class="btn btn-success">Abrir</button> 
               </td>
             </tr>
@@ -77,14 +77,10 @@ const fecharModal = () => {
   modalContent.value = '';
 };
 
-// const abrirDocxModal = (itemId) => {
-//   selectedItemId.value = itemId;
-//   docxModal.value.abrirModal(itemId, props.contrato.id); // Use o método do DocxModal
-// };
 const abrirDocxModal = (itemId, versao) => {
   selectedItemId.value = itemId;
   docxModal.value.abrirModal(itemId, props.contrato.id, versao); // Passando a versão
 };
 
-</script>
 
+</script>
