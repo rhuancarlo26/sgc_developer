@@ -5,13 +5,13 @@
       <div style="display: block; float: right;">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="/sgc/contratada/sgc/edicao">Empreendimentos</a>
+            <Link class="nav-link" :href="route('sgc.contratada.edicao')">Empreendimentos</Link>
           </li>
           <li class="nav-item">
-            <a class="nav-link disabled" aria-current="page" href="/sgc/contratada/sgc/edicao-estudos"> >> Estudos</a>
+            <a class="nav-link disabled" aria-current="page" href="#"> >> Estudos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/sgc/contratada/sgc/edicao-produtos"> >> Subprodutos</a>
+            <Link class="nav-link" :href="route('sgc.contratada.edicaoprodutos')"> >> Subprodutos</Link>
           </li>
         </ul>
       </div>
@@ -180,7 +180,7 @@
 </template>
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { router, usePage } from "@inertiajs/vue3";
+import { router, usePage, Link } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
@@ -223,7 +223,7 @@ const mudarPagina = (url) => {
 
 const salvarEdicao = () => {
   router.post(
-    `/sgc/contratada/updatecampoestudos/${empreendimentoEdit.value.id}`,
+    route('sgc.contratada.updatecampoestudos', empreendimentoEdit.value.id),
     { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
     {
       onSuccess: () => {
