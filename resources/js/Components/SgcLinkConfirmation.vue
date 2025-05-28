@@ -34,6 +34,7 @@ const show = (request, onConfirmCallback = null) => {
     confirmButton.value.addEventListener(
         'click',
         (e) => {
+            e.stopPropagation();
             // Aguarde o modal fechar antes de prosseguir
             modal._element.addEventListener(
                 'hidden.bs.modal',
@@ -55,7 +56,14 @@ const show = (request, onConfirmCallback = null) => {
     );
 
     // On Cancel
-    cancelButton.value.addEventListener('click', () => modal.hide(), {once: true});
+    cancelButton.value.addEventListener(
+        'click',
+        (e) => {
+            e.stopPropagation();
+            modal.hide();
+        },
+        {once: true}
+    );
 
     return false;
 };
