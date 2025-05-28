@@ -22,5 +22,7 @@ class SgcRelatorioCoordenacao extends Model
         return $this->hasMany(SgcHistoricoRelatorio::class, 'relatorio_num', 'relatorio_num');
     }
 
+    
+
 }
 

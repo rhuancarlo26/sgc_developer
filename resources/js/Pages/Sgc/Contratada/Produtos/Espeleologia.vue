@@ -8,6 +8,7 @@ const props = defineProps({
     subprodutos: Array,
     contrato: [Number, String],
     produto: String,
+    contratos: Object
 });
 
 const selectedSubproduto = ref('');
@@ -25,7 +26,7 @@ const handleAction = (action) => {
 };
 
 const filteredSubprodutos = computed(() => {
-    if (!selectedSubproduto.value) return props.subprodutos; 
+    if (!selectedSubproduto.value) return props.subprodutos;
     return props.subprodutos.filter(sub => sub.descricao_revisada === selectedSubproduto.value);
 });
 </script>
@@ -35,7 +36,15 @@ const filteredSubprodutos = computed(() => {
         <Head :title="`${produto} - Contrato ${contrato}`" />
 
         <template #header>
-            <!-- Breadcrumb -->
+            <div class="w-100 d-flex justify-content-between">
+                <Breadcrumb
+                    class="align-self-center"
+                    :links="[
+                        { route: route('sgc.gestao.listagem', contratos.tipo_contrato), label: `Gestão de Contratos` },
+                        { route: '#', label: contratos.contratada }
+                    ]"
+                />
+            </div>
         </template>
 
         <NavbarContrato :tipo="{ id: contrato }">
