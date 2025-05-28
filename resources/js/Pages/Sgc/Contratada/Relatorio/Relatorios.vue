@@ -22,9 +22,40 @@ const form = ref({
   item_id: null
 });
 
+// Método para verificar se há históricos para o contrato atual
+const hasHistoricosForContrato = (relatorio) => {
+  console.log('Verificando históricos para contrato:', props.contrato.id, 'Relatório:', relatorio.relatorio_num, 'Históricos:', relatorio.historicos);
+  const hasHistoricos = relatorio.historicos && relatorio.historicos.length > 0 && relatorio.historicos.some(h => h.contrato_id == props.contrato.id);
+  console.log('Tem históricos para o contrato?', hasHistoricos);
+  return hasHistoricos;
+};
+
+// Método para obter a primeira versão de um histórico válido
+const getFirstVersionForContrato = (relatorio) => {
+  console.log('Obtendo primeira versão para contrato:', props.contrato.id, 'Relatório:', relatorio.relatorio_num, 'Históricos:', relatorio.historicos);
+  const historico = relatorio.historicos.find(h => h.contrato_id == props.contrato.id);
+  console.log('Primeiro histórico encontrado:', historico);
+  return historico ? historico.versao : 0; // Retorna 0 se não houver históricos
+};
+
+// Método para obter a versão mais recente
+const getLatestVersion = (relatorio) => {
+  console.log('Calculando versão mais recente para contrato:', props.contrato.id, 'Relatório:', relatorio.relatorio_num, 'Históricos:', relatorio.historicos);
+  if (relatorio.historicos && relatorio.historicos.length > 0) {
+    const filteredHistoricos = relatorio.historicos.filter(h => h.contrato_id == props.contrato.id);
+    console.log('Históricos filtrados:', filteredHistoricos);
+    if (filteredHistoricos.length > 0) {
+      return Math.max(...filteredHistoricos.map(h => h.versao)) + 1;
+    }
+  }
+  console.log('Sem históricos válidos, retornando 0');
+  return 0;
+};
+
 const filteredRelatorios = ref([]);
 
 const filtrarRelatorios = () => {
+  console.log('Filtrando relatórios para contrato:', props.contrato.id, 'Dados recebidos:', props.dadosrelat);
   const seen = new Set();
   filteredRelatorios.value = props.dadosrelat.filter(relatorio => {
     if (seen.has(relatorio.relatorio_num)) {
@@ -36,6 +67,7 @@ const filtrarRelatorios = () => {
 };
 
 onMounted(() => {
+  console.log('Contrato ID (onMounted):', props.contrato.id);
   filtrarRelatorios();
 });
 </script>
@@ -79,7 +111,6 @@ onMounted(() => {
                     <tr style="background-color: #237D9E; text-align: left;">
                       <th scope="col">RELATÓRIO Nº</th>
                       <th scope="col">PERÍODO</th>
-                      <th scope="col">RELATÓRIO</th>
                       <th scope="col">STATUS</th>
                       <th scope="col">VERSÕES</th>
                       <th scope="col">ACESSAR</th>
@@ -89,17 +120,23 @@ onMounted(() => {
                     <tr v-for="relatorio in filteredRelatorios" :key="relatorio.id">
                       <td>{{ relatorio.relatorio_num }}</td>
                       <td>{{ relatorio.periodo }}</td>
-                      <td>{{ relatorio.nome_relatorio }}</td>
                       <td>
                         <span :class="['badge', getStatusBadgeClass(relatorio.status)]">
                           {{ relatorio.status }}
                         </span>
                       </td>
                       <td>
-                        <select @change="goToVersion(contrato.id, relatorio.relatorio_num, $event.target.value)">
-                          <option value="" disabled selected>VER 0</option>
-                          <option v-if="relatorio.historicos.length" :value="relatorio.historicos[0].versao">
-                            REV {{ relatorio.historicos[0].versao }}
+                        <!-- Caso sem históricos: apenas "VER 0" -->
+                        <select v-if="!hasHistoricosForContrato(relatorio)" @change="goToVersion(contrato.id, relatorio.relatorio_num, $event.target.value)">
+                          <option value="" selected>VER 0</option>
+                        </select>
+                        <!-- Caso com históricos: "REV" com versão mais recente e "VER 0" -->
+                        <select v-else @change="goToVersion(contrato.id, relatorio.relatorio_num, $event.target.value)">
+                          <option :value="''" selected>
+                            REV {{ getLatestVersion(relatorio) }}
+                          </option>
+                          <option :value="getFirstVersionForContrato(relatorio)">
+                            VER 0
                           </option>
                         </select>
                       </td>
