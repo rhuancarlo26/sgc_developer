@@ -18,7 +18,7 @@ const mapContainer = ref();
 let featureGroup = null;
 
 let map = null;
-let geojson_layers = []; 
+let geojson_layers = [];
 let geojson_layer = null;
 let marker_group = null;
 
@@ -94,7 +94,7 @@ const getColorItem = (item) =>  {
   } else {
     color = '#dc3545';
   }
-  
+
   return color
 }
 
@@ -112,31 +112,40 @@ const setGeoJson = async (geojson_linestring, weight, filterOSE = null) => {
       let ibamaButton = '';
       let incraButton = '';
 
+        const iconZoomCheckSVG = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler m-0 icon-tabler-zoom-check" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="white" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display: block;"> {/* Alterado aqui */}
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+            <path d="M21 21l-6 -6"></path>
+            <path d="M7 10l2 2l4 -4"></path>
+        </svg>
+        `;
+
       if (coordenada.situacao_processo_licenciamento_dnit !== null) {
-        dnitButton = `<a tabindex="0" role="button" class="text-white btn btn-success p-2 mt-2 btn-custon" 
-          data-bs-toggle="popover" 
+        dnitButton = `<a tabindex="0" role="button" class="text-white btn btn-success p-2 mt-2 btn-custon"
+          data-bs-toggle="popover"
           data-bs-trigger="manual"
-          data-bs-title="Situação Dnit" 
+          data-bs-title="Situação Dnit"
           data-bs-content="${coordenada.situacao_processo_licenciamento_dnit}">
           Dnit
         </a>`;
       }
 
       if (coordenada.situacao_ibama_oema !== null) {
-        ibamaButton = `<a tabindex="0" role="button" class="text-white btn btn-warning p-2 mt-2 btn-custon" 
-          data-bs-toggle="popover" 
-          data-bs-trigger="manual" 
-          data-bs-title="Situação Ibama" 
+        ibamaButton = `<a tabindex="0" role="button" class="text-white btn btn-warning p-2 mt-2 btn-custon"
+          data-bs-toggle="popover"
+          data-bs-trigger="manual"
+          data-bs-title="Situação Ibama"
           data-bs-content="${coordenada.situacao_ibama_oema}">
           Ibama
         </a>`;
       }
 
       if (coordenada.situacao_incra !== null) {
-        incraButton = `<a tabindex="0" role="button" class="text-white btn btn-danger p-2 mt-2 btn-custon" 
-          data-bs-toggle="popover" 
-          data-bs-trigger="manual" 
-          data-bs-title="Situação Incra" 
+        incraButton = `<a tabindex="0" role="button" class="text-white btn btn-danger p-2 mt-2 btn-custon"
+          data-bs-toggle="popover"
+          data-bs-trigger="manual"
+          data-bs-title="Situação Incra"
           data-bs-content="${coordenada.situacao_incra}">
           Incra
         </a>`;
@@ -158,7 +167,9 @@ const setGeoJson = async (geojson_linestring, weight, filterOSE = null) => {
               ${ibamaButton}
               ${incraButton}
               <a tabindex="0" role="button" class="text-white btn btn-primary p-2 mt-2 btn-custon" href="dashboard/${coordenada.id}">
-                Abrir
+                <div class="d-flex align-items-center justify-content-center">
+                    <span>${iconZoomCheckSVG}</span>
+                </div>
               </a>
             `;
 
