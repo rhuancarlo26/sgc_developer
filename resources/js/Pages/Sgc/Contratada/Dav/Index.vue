@@ -194,7 +194,6 @@ const abrirVisualizarFormDav = (tipo) => {
     console.error("O modal especificado não está inicializado.");
   }
 };
-
 updateReminders();
 </script>
 

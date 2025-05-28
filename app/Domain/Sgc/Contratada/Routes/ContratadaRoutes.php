@@ -93,6 +93,7 @@ Route::prefix('/contratada')->group(function () {
     // DocxModal - Novo método    
     Route::get('/sgc/contratada/get_docx/{itemId}/{contratoId}/{versao}/{numRelatorio}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
 
+
     // Módulo de edição
     Route::get('sgc/edicao',                                 [EmpreendimentosController::class,                       'editavel'])->name('sgc.contratada.edicao');
     Route::get('sgc/edicao-estudos',                         [EmpreendimentosController::class,                       'editavelestudos'])->name('sgc.contratada.edicaoestudos');
@@ -101,5 +102,10 @@ Route::prefix('/contratada')->group(function () {
     Route::post('/updatecampo/{corretor}',                      [EmpreendimentosController::class,                       'updatecampo'])->name('sgc.contratada.updatecampo');
     Route::post('/updatecampoestudos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoestudos'])->name('sgc.contratada.updatecampoestudos');
     Route::post('/updatecampoprodutos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoprodutos'])->name('sgc.contratada.updatecampoprodutos');
+
+    // PDF Consolidado
+    Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');
+
+
 
 });

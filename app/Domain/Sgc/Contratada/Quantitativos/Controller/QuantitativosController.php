@@ -35,7 +35,8 @@ class QuantitativosController extends Controller
         return Inertia::render('Sgc/Contratada/Quantitativos/Index', [
             'quantitativosData' => $quantitativosData,
             'contratoId' => $contrato,
-            'contrato' => ['id' => $contratoObj->id], 
+            'contrato' => ['id' => $contratoObj->id],
+            'contratos' => $contratoObj
         ]);
     }
 }

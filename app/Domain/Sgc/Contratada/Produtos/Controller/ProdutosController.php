@@ -22,11 +22,14 @@ class ProdutosController extends Controller
 
     public function index(Request $request, $contrato, $produto)
     {
+        $contratoObj = Contrato::find($contrato);
+
         $subprodutos = $this->produtosService->getSubprodutosByContrato($contrato, $produto);
         return inertia('Sgc/Contratada/Produtos/Fauna', [
             'subprodutos' => $subprodutos,
             'contrato' => $contrato,
             'produto' => ucfirst($produto),
+            'contratos' => $contratoObj
         ]);
     }
 }
