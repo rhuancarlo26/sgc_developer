@@ -10,6 +10,7 @@ import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { defineProps } from 'vue';
 import { computed } from 'vue';
 import { IconCheck, IconMessageDots, IconX, IconCircle } from "@tabler/icons-vue";
+import { route } from 'ziggy-js';
 import { atualizarStatus, revisaoStatus, aprovadoStatus } from './AtualizarStatus/statusUpdate.js';
 import { toggleAprovado } from './AtualizarStatus/aprovarItem.js';
 
@@ -150,6 +151,15 @@ const downloadFile = (itemId) => {
   window.location.href = url;
 };
 
+const downloadPdfConsolidado = () => {
+    const url = route('sgc.contratada.download_pdf_consolidado', {
+        contratoId: props.contrato.id,
+        relatorioNum: form.relatorio_num
+    });
+    console.log('URL PDF Consolidado:', url); // Depuração
+    window.location.href = url;
+};
+
 const filteredRelatorios = ref([]);
 
 const filtrarRelatorios = () => {
@@ -250,6 +260,12 @@ onMounted(() => {
                     @click="aprovarRelatorio"
                     :disabled="isDisabledAprovarRelatorio()"
                   />
+                </div>
+                <!-- Botão para Download de PDF Consolidado -->
+                <div class="button-wrapper">
+                  <button @click="downloadPdfConsolidado" class="btn btn-outline-info" :disabled="props.dadosrelat.length === 0">
+                    Download PDF Consolidado
+                  </button>
                 </div>
               </div>
             </div>
