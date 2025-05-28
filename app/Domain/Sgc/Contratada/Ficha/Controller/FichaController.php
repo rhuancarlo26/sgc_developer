@@ -29,15 +29,16 @@ class FichaController extends Controller
             ]);
         }
 
-        $numeroContrato = $contratoObj->numero_contrato; 
-        $numeroContratoFormatado = preg_replace('/[^0-9]/', '', $numeroContrato); 
+        $numeroContrato = $contratoObj->numero_contrato;
+        $numeroContratoFormatado = preg_replace('/[^0-9]/', '', $numeroContrato);
 
         $fichaData = $this->fichaService->getFichaData($numeroContratoFormatado);
 
         return Inertia::render('Sgc/Contratada/Ficha Contratual/Index', [
             'fichaData' => $fichaData,
             'contratoId' => $contrato,
-            'contrato' => ['id' => $contratoObj->id], 
+            'contrato' => ['id' => $contratoObj->id],
+            'contratos' => $contratoObj
         ]);
     }
 }

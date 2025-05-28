@@ -67,7 +67,7 @@ onMounted(() => {
                         <NavButton type-button="success" title="Dashboard" />
                       </a>
                     </td>
-                  </tr> 
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -86,8 +86,8 @@ onMounted(() => {
 <style scoped>
 table tr th,
 table tr td {
-  word-wrap: break-word; 
- 
+  word-wrap: break-word;
+
 }
 
 th {
@@ -100,7 +100,7 @@ th {
 
 .accordion-body {
   padding: .2em 1em;
-  overflow-x: auto; 
+  overflow-x: auto;
 }
 
 .accordion-button:disabled {
