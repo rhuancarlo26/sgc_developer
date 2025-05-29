@@ -31,7 +31,7 @@ class RegistrosService extends BaseModelService
         return $this->searchAllColumns(...$searchParams)
             ->select([
                 'at_fauna_execucao_registro.*',
-                'licencas_br.rodovia',
+                'base_rodovia.rodovia',
                 'estados.nome AS nome_estado',
                 DB::raw('DATE_FORMAT(at_fauna_execucao_registro.data_registro, "%d/%m/%Y") as data_registroF'),
                 'fga.nome AS nome_grupo_amostrado',
@@ -42,6 +42,7 @@ class RegistrosService extends BaseModelService
             ->join('servico_licenca_condicionante AS slc', 'slc.id', '=', 'fec.fk_servico_licenca')
             ->join('licencas', 'licencas.id', '=', 'slc.id_licenca')
             ->leftJoin('licencas_br', 'licencas_br.licenca_id', '=', 'licencas.id')
+            ->leftJoin('base_rodovia', 'base_rodovia.id', '=', 'licencas_br.rodovia')
             ->leftJoin('estados', 'estados.id', '=', 'at_fauna_execucao_registro.fk_estado')
             ->join('at_fauna_grupo_amostrado AS fga', 'fga.id', '=', 'at_fauna_execucao_registro.fk_grupo_amostrado')
             ->where('at_fauna_execucao_registro.fk_servico', $servico->id)
