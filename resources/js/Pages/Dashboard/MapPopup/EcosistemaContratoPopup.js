@@ -38,16 +38,20 @@ export default async (props, detalhesOffcanvas) => {
     html += `<br>`;
     html += `<h5>Licença</h5>`;
     licenca.value.forEach(lic => {
-        html += `
-      <hr class="my-2" />  
-    <div class="licenca-item">
-      <strong>Tipo da Licença:</strong> ${lic.tipo_rel.nome || '—'}<br>
-      <strong>Número:</strong> ${lic.numero_licenca || '—'}<br>
-      <strong>Status:</strong> ${lic.status || '—'}<br>
-      <strong>Vencimento:</strong> ${lic.vencimento || '—'}<br>
-    </div>
-    
-  `;
+    const venc = lic.vencimento
+        ? lic.vencimento.split('-').reverse().join('/')
+        : '—';
+
+    html += `
+         <hr class="my-2" />  
+        <div class="licenca-item">
+        <strong>Tipo da Licença:</strong> ${lic.tipo_rel.nome || '—'}<br>
+        <strong>Número:</strong> ${lic.numero_licenca || '—'}<br>
+        <strong>Status:</strong> ${lic.status || '—'}<br>
+        <strong>Vencimento:</strong> ${venc}<br>
+        </div>
+       
+    `;
     });
 
 
