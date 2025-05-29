@@ -24,7 +24,11 @@ class ArquivoUtils
         }
 
         $nomeArquivo = $prefixo . rand() . '.' . $arquivo->clientExtension();
-        $arquivo->storeAs($diretorio, $nomeArquivo);
+        $diretorio = $arquivo->storeAs(
+            $diretorio,
+            $nomeArquivo,
+            'public'
+        );
 
 
         /** @var Arquivo */
@@ -36,7 +40,7 @@ class ArquivoUtils
             'nome_arquivo' => $arquivo->getClientOriginalName(),
         ]);
 
-        if($createModel) {
+        if ($createModel) {
             $model->save();
         }
 
