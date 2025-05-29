@@ -1,22 +1,35 @@
 <script setup>
-import {computed, ref} from "vue";
+import { computed, ref, watch } from "vue";
 import Modal from "@/Components/Modal.vue";
-import {Link, router, useForm} from "@inertiajs/vue3";
+import { Link, router, useForm } from "@inertiajs/vue3";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
-import {IconEye, IconLineDashed, IconMap, IconPencil, IconTrash} from "@tabler/icons-vue";
-import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
+import { IconEye, IconLineDashed, IconMap, IconPencil, IconTrash } from "@tabler/icons-vue";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils.js";
 import Table from "@/Components/Table.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import NavButton from "@/Components/NavButton.vue";
 
 const props = defineProps({
-    servico: {type: Object},
-    tipos: {type: Array},
-    licencas: {type: Array},
-    estagios: {type: Array},
-    biomas: {type: Array},
+    servico: { type: Object },
+    tipos: { type: Array },
+    licencas: { type: Array },
+    estagios: { type: Array },
+    biomas: { type: Array },
 })
+
+
+const limitaesoma = (field) => {
+    const val = form[field];
+    if (val !== null && val !== undefined && !isNaN(val)) {
+
+        form[field] = parseFloat(val.toFixed(4));
+    }
+
+    somaTotalApp();
+};
+
+
 
 const form = useForm({
     id: null,
@@ -30,8 +43,11 @@ const form = useForm({
     area_fora_app: null,
     area_total: 0,
     shapefile: null,
-    licenca_id: null,
+    licenca_id: 8,
     observacao: null,
+    latitude: null,
+    longitude: null,
+    geometry: null,
 
     corte_especie: false,
     corte_especies: [],
@@ -50,7 +66,20 @@ const abrirModal = (item) => {
     }
     modalRef.value.getBsModal().show();
 }
+const geometry = () => {
 
+    let lat = parseFloat(form.latitude)
+    let lng = parseFloat(form.longitude)
+
+    if (!isNaN(lat) && !isNaN(lng)) {
+        form.geometry = JSON.stringify({
+            type: 'Point',
+            coordinates: [lng, lat],
+        })
+    } else {
+        form.geometry = null
+    }
+}
 const save = () => {
     form.transform((data) => ({
         ...data,
@@ -81,8 +110,10 @@ const save = () => {
 }
 
 const somaTotalApp = () => {
-    form.area_total = parseInt(form.area_em_app) + parseInt(form.area_fora_app);
-}
+    const a = form.area_em_app || 0;
+    const b = form.area_fora_app || 0;
+    form.area_total = parseFloat((a + b).toFixed(4));
+};
 
 const formCientifica = ref({
     nome: null,
@@ -97,14 +128,14 @@ const salvarEspecie = () => {
         // alerta('info', 'Atenção aos campos vazios');
         return;
     }
-    const value = {...formCientifica.value};
+    const value = { ...formCientifica.value };
     editFormCientifica.value !== null ? form.corte_especies[editFormCientifica.value] = value : form.corte_especies.push(value);
     Object.keys(formCientifica.value).forEach((i) => formCientifica.value[i] = null);
     editFormCientifica.value = null
 }
 
 const removerEspecie = (item, index) => {
-    if(item?.id !== null) {
+    if (item?.id !== null) {
         router.delete(route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.corete-especies.delete', item.id), {
             preserveState: true,
         });
@@ -113,13 +144,13 @@ const removerEspecie = (item, index) => {
 }
 
 const editarEspecie = (item, index) => {
-    formCientifica.value = {...form.corte_especies[index]};
+    formCientifica.value = { ...form.corte_especies[index] };
     editFormCientifica.value = index;
 }
 
 
 const images = computed(() => {
-    return (form.fotos).map((foto, index) =>  ({
+    return (form.fotos).map((foto, index) => ({
         id: foto?.id ?? null,
         index,
         path: foto?.caminho ?? URL.createObjectURL(foto)
@@ -134,14 +165,22 @@ const onChangeFotos = (event) => {
 
 const destroyPhoto = (photoId, index) => {
     if (photoId !== null) {
-        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.fotos.delete', {arquivo: photoId, area: form.id}), {
+        router.delete(route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.fotos.delete', { arquivo: photoId, area: form.id }), {
             preserveState: true,
         })
     }
     form.fotos.splice(index, 1)
 }
 
-defineExpose({abrirModal});
+const decimallimite = (field) => {
+    const val = form[field]
+    if (val !== null && val !== undefined && !isNaN(val)) {
+        
+        form[field] = parseFloat(val.toFixed(6))
+    }
+    geometry()
+}
+defineExpose({ abrirModal });
 </script>
 
 <template>
@@ -167,88 +206,105 @@ defineExpose({abrirModal});
                             <div class="tab-pane active show" id="dados">
                                 <div class="row row-gap-2">
                                     <div class="col-lg-4">
-                                        <InputLabel value="Código" for="codigo"/>
-                                        <input v-model="form.chave" id="nome" class="form-control" disabled/>
-                                        <InputError :message="form.errors.chave"/>
+                                        <InputLabel value="Código" for="codigo" />
+                                        <input v-model="form.chave" id="nome" class="form-control" disabled />
+                                        <InputError :message="form.errors.chave" />
                                     </div>
                                     <div class="col-lg-4">
-                                        <InputLabel value="Data Início" for="dt_inicial"/>
+                                        <InputLabel value="Data Início" for="dt_inicial" />
                                         <input v-model="form.dt_inicial" type="date" id="dt_inicial"
-                                               class="form-control"/>
-                                        <InputError :message="form.errors.dt_inicial"/>
+                                            class="form-control" />
+                                        <InputError :message="form.errors.dt_inicial" />
                                     </div>
                                     <div class="col-lg-4">
-                                        <InputLabel value="Data Final" for="dt_final"/>
-                                        <input v-model="form.dt_final" type="date" id="dt_final" class="form-control"/>
-                                        <InputError :message="form.errors.dt_final"/>
+                                        <InputLabel value="Data Final" for="dt_final" />
+                                        <input v-model="form.dt_final" type="date" id="dt_final" class="form-control" />
+                                        <InputError :message="form.errors.dt_final" />
                                     </div>
                                     <div class="col-lg-6">
-                                        <InputLabel value="Bioma" for="tipo_bioma_id"/>
+                                        <InputLabel value="Bioma" for="tipo_bioma_id" />
                                         <v-select :options="biomas" v-model="form.tipo_bioma_id" label="nome"
-                                                  :reduce="t => t.id">
-                                            <template #no-options="{}">
+                                            :reduce="t => t.id">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
-                                        <InputError :message="form.errors.tipo_bioma_id"/>
+                                        <InputError :message="form.errors.tipo_bioma_id" />
                                     </div>
                                     <div class="col-lg-6">
-                                        <InputLabel value="Estágio Sucessional" for="estagio_sucessional_id"/>
+                                        <InputLabel value="Estágio Sucessional" for="estagio_sucessional_id" />
                                         <v-select :options="estagios" v-model="form.estagio_sucessional_id" label="nome"
-                                                  :reduce="t => t.id">
-                                            <template #no-options="{}">
+                                            :reduce="t => t.id">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
-                                        <InputError :message="form.errors.estagio_sucessional_id"/>
+                                        <InputError :message="form.errors.estagio_sucessional_id" />
                                     </div>
                                     <div class="col-12">
-                                        <InputLabel value="Fitofisionomia" for="fitofisionomia"/>
+                                        <InputLabel value="Fitofisionomia" for="fitofisionomia" />
                                         <textarea v-model="form.fitofisionomia" class="form-control" id="fitofisionomia"
-                                                  rows="2" maxlength="250"></textarea>
-                                        <InputError :message="form.errors.fitofisionomia"/>
+                                            rows="2" maxlength="250"></textarea>
+                                        <InputError :message="form.errors.fitofisionomia" />
                                     </div>
                                     <div class="col-lg-4">
-                                        <InputLabel value="Área em APP:" for="area_em_app"/>
-                                        <input v-model="form.area_em_app" type="number" @input="somaTotalApp"
-                                               id="area_em_app" class="form-control"/>
-                                        <InputError :message="form.errors.area_em_app"/>
+                                        <InputLabel value="Área em APP:" for="area_em_app" />
+                                        <input id="area_em_app" type="number" step="0.0001"
+                                            v-model.number="form.area_em_app" @blur="limitaesoma('area_em_app')"
+                                            class="form-control" />
+                                        <InputError :message="form.errors.area_em_app" />
                                     </div>
+
                                     <div class="col-lg-4">
-                                        <InputLabel value="Área Fora APP:" for="area_fora_app"/>
-                                        <input v-model="form.area_fora_app" type="number" @input="somaTotalApp"
-                                               id="area_fora_app" class="form-control"/>
-                                        <InputError :message="form.errors.area_fora_app"/>
+                                        <InputLabel value="Área Fora APP:" for="area_fora_app" />
+                                        <input id="area_fora_app" type="number" step="0.0001"
+                                            v-model.number="form.area_fora_app" @blur="limitaesoma('area_fora_app')"
+                                            class="form-control" />
+                                        <InputError :message="form.errors.area_fora_app" />
                                     </div>
+
                                     <div class="col-lg-4">
-                                        <InputLabel value="Área total:" for="area_fora_app"/>
-                                        <input v-model="form.area_total" type="number" id="area_total"
-                                               class="form-control"/>
-                                        <InputError :message="form.errors.area_total"/>
+                                        <InputLabel value="Área total:" for="area_fora_app" />
+                                        <input v-model="form.area_total" type="number" step="0.0001" id="area_total"
+                                            class="form-control" readonly />
+                                        <InputError :message="form.errors.area_total" />
                                     </div>
                                     <div class="col-lg-6">
-                                        <InputLabel value="Shapefile" for="local_shape_em_app"/>
+                                        <InputLabel value="Latitude" for="latitude" />
+                                        <input @input="geometry()" @blur="decimallimite('latitude')"
+                                            v-model="form.latitude" id="latitude" type="number" step="0.000001"
+                                            class="form-control" placeholder="–90.000000 a 90.000000" />
+                                        <InputError :message="form.errors.latitude" />
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <InputLabel value="Longitude" for="Longitude" />
+                                        <input @input="geometry()" @blur="decimallimite('longitude')"
+                                            v-model="form.longitude" id="longitude" type="number" step="0.000001"
+                                            class="form-control" placeholder="–180.000000 a 180.000000" />
+                                        <InputError :message="form.errors.longitude" />
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <InputLabel value="Shapefile" for="local_shape_em_app" />
                                         <input @input="form.shapefile = $event.target.files[0]" id="shapefile"
-                                               type="file" class="form-control" accept=".zip">
-                                        <InputError :message="form.errors.shapefile"/>
+                                            type="file" class="form-control" accept=".zip">
+                                        <InputError :message="form.errors.shapefile" />
                                     </div>
-                                    <div class="col-lg-6">
-                                        <InputLabel value="Numero da ASV" for="licenca_id"/>
+                                    <!-- <div class="col-lg-6">
+                                        <InputLabel value="Numero da ASV" for="licenca_id" />
                                         <v-select v-model="form.licenca_id" :options="licencas"
-                                                  :get-option-label='licenca => `${licenca.licenca.numero_licenca} - ${licenca.licenca.emissor} - ${licenca.licenca.tipo.sigla}`'
-                                                  :reduce="l => l.licenca.id"
-                                        >
-                                            <template #no-options="{}">
+                                            :get-option-label='licenca => `${licenca.licenca.numero_licenca} - ${licenca.licenca.emissor} - ${licenca.licenca.tipo.sigla}`'
+                                            :reduce="l => l.licenca.id">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
-                                        <InputError :message="form.errors.licenca_id"/>
-                                    </div>
+                                        <InputError :message="form.errors.licenca_id" />
+                                    </div> -->
                                     <div class="col-12">
-                                        <InputLabel value="Observações" for="observacao"/>
+                                        <InputLabel value="Observações" for="observacao" />
                                         <textarea v-model="form.observacao" rows="2" id="observacao"
-                                                  class="form-control"></textarea>
-                                        <InputError :message="form.errors.observacao"/>
+                                            class="form-control"></textarea>
+                                        <InputError :message="form.errors.observacao" />
                                     </div>
                                 </div>
                             </div>
@@ -257,40 +313,40 @@ defineExpose({abrirModal});
                                     <div class="form-label">Corte de espécies Ameaçada/Protegida</div>
                                     <div>
                                         <label class="form-check form-check-inline">
-                                            <input v-model="form.corte_especie" id="one" :value="true" class="form-check-input"
-                                                   type="radio" name="radios-inline">
+                                            <input v-model="form.corte_especie" id="one" :value="true"
+                                                class="form-check-input" type="radio" name="radios-inline">
                                             <label class="form-check-label" for="one">Sim</label>
                                         </label>
                                         <label class="form-check form-check-inline">
-                                            <input v-model="form.corte_especie" id="two" :value="false" class="form-check-input"
-                                                   type="radio" name="radios-inline">
+                                            <input v-model="form.corte_especie" id="two" :value="false"
+                                                class="form-check-input" type="radio" name="radios-inline">
                                             <label class="form-check-label" for="two">Não</label>
                                         </label>
                                     </div>
                                     <div class="row row-gap-2" id="form-cientifica" v-if="form.corte_especie">
                                         <div class="form-group-sm col-3">
                                             <input v-model="formCientifica.nome" id="nome_cientifico" type="text"
-                                                   class="form-control" placeholder="Nome científica">
+                                                class="form-control" placeholder="Nome científica">
                                         </div>
                                         <div class="form-group-sm col-3">
                                             <input v-model="formCientifica.nome_popular" type="text"
-                                                   class="form-control" placeholder="Nome Popular">
+                                                class="form-control" placeholder="Nome Popular">
                                         </div>
                                         <div class="form-group-sm col-3">
                                             <input v-model="formCientifica.qtd_corte" type="text" class="form-control"
-                                                   placeholder="N° de Indivíduos">
+                                                placeholder="N° de Indivíduos">
                                         </div>
                                         <div class="form-group-sm col-3">
                                             <input v-model="formCientifica.compensacao" type="number"
-                                                   class="form-control" placeholder="Compensação">
+                                                class="form-control" placeholder="Compensação">
                                         </div>
                                         <div class="form-group-sm col-12 mt-2">
                                             <input v-model="formCientifica.legislacao" type="text" class="form-control"
-                                                   placeholder="Legislação">
+                                                placeholder="Legislação">
                                         </div>
                                         <div class="form-group-sm col-3 mt-2">
                                             <button type="button" class="btn btn-success mb-2 mr-2"
-                                                    @click="salvarEspecie">
+                                                @click="salvarEspecie">
                                                 Incluir
                                             </button>
                                         </div>
@@ -307,8 +363,12 @@ defineExpose({abrirModal});
                                                     <td>{{ item.legislacao }}</td>
                                                     <td>
                                                         <div class="d-flex justify-content-center">
-                                                            <NavButton @click="editarEspecie(item, key)" type-button="warning" class="btn-icon btn-sm" :icon="IconPencil" />
-                                                            <NavButton @click="removerEspecie(item, key)" type-button="danger" class="btn-icon btn-sm" :icon="IconTrash" />
+                                                            <NavButton @click="editarEspecie(item, key)"
+                                                                type-button="warning" class="btn-icon btn-sm"
+                                                                :icon="IconPencil" />
+                                                            <NavButton @click="removerEspecie(item, key)"
+                                                                type-button="danger" class="btn-icon btn-sm"
+                                                                :icon="IconTrash" />
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -318,15 +378,17 @@ defineExpose({abrirModal});
                                 </div>
                             </div>
                             <div class="tab-pane" id="registros">
-                                <InputLabel value="Anexar fotos" for="fotos"/>
-                                <input ref="fileRef" @input="onChangeFotos" id="fotos" type="file" class="form-control" accept=".jpg, .jpeg, .png" multiple>
-                                <InputError :message="form.errors.fotos"/>
+                                <InputLabel value="Anexar fotos" for="fotos" />
+                                <input ref="fileRef" @input="onChangeFotos" id="fotos" type="file" class="form-control"
+                                    accept=".jpg, .jpeg, .png" multiple>
+                                <InputError :message="form.errors.fotos" />
                                 <ul class="list-unstyled d-flex gap-2 flex-wrap mt-3">
                                     <li v-for="img in images" class="d-flex flex-column">
                                         <span class="avatar avatar-xl">
                                             <img :src="img.path" alt />
                                         </span>
-                                        <button @click="destroyPhoto(img.id, img.index)" type="button" class="btn btn-sm btn-danger">Remover</button>
+                                        <button @click="destroyPhoto(img.id, img.index)" type="button"
+                                            class="btn btn-sm btn-danger">Remover</button>
                                     </li>
                                 </ul>
                             </div>
