@@ -6,31 +6,50 @@ export default async (props, detalhesOffcanvas) => {
     const { lat, lng } = props.latLng;
     const popupContent = document.createElement("div");
     let servicos = ref([]);
+    let licenca = ref([]);
+
+
 
     await Promise.all([
-        axios.get(
-            route("contratos.gestao.get-servicos", {
-                contrato: props.id,
-            })
-        ),
+        axios.get(route("contratos.gestao.get-servicos", { contrato: props.id })),
+        axios.get(route("contratos.gestao.get-licenca", { contrato: props.id })),
     ])
-        .then((r) => {
-            servicos.value = r[0].data;
+        .then(([servicoRes, licencaRes]) => {
+            servicos.value = servicoRes.data;
+            licenca.value = licencaRes.data;
         })
-        .catch((e) => {
-            console.log(e);
+        .catch(e => {
+            console.error(e);
         });
 
+
     let html = `
-        <h5>Licença</h5>
-        <hr class="my-2" />
-        <strong>Unidade Gestora: </strong>${props.unidade_gestora}<br>
-        <strong>N° do Contrato: </strong>${props.numero_contrato}<br>
-        <strong>Contratada: </strong>${props.contratada}<br>
-        <strong>Edital: </strong>${props.edital}<br>
-        <strong>UF/BR: </strong>${props.uf}/${props.rodovia}<br>
-        <strong>Situação: </strong>${props.situacao}<br>
+    <h5>Contrato</h5>
+    <hr class="my-2" />
+    <strong>Unidade Gestora: </strong>${props.unidade_gestora}<br>
+    <strong>N° do Contrato: </strong>${props.numero_contrato}<br>
+    <strong>Contratada: </strong>${props.contratada}<br>
+    <strong>Edital: </strong>${props.edital}<br>
+    <strong>UF/BR: </strong>${props.uf}/${props.rodovia}<br>
+    <strong>Situação: </strong>${props.situacao}<br>
+     <hr class="my-2" />  
     `;
+
+    html += `<br>`;
+    html += `<h5>Licença</h5>`;
+    licenca.value.forEach(lic => {
+        html += `
+      <hr class="my-2" />  
+    <div class="licenca-item">
+      <strong>Tipo da Licença:</strong> ${lic.tipo_rel.nome || '—'}<br>
+      <strong>Número:</strong> ${lic.numero_licenca || '—'}<br>
+      <strong>Status:</strong> ${lic.status || '—'}<br>
+      <strong>Vencimento:</strong> ${lic.vencimento || '—'}<br>
+    </div>
+    
+  `;
+    });
+
 
     const btnDetail = document.createElement("button");
     btnDetail.classList.add(
