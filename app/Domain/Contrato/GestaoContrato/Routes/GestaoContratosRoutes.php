@@ -12,6 +12,7 @@ use App\Domain\Contrato\GestaoContrato\Controller\EspacializarLinhaContratoTrech
 use App\Domain\Contrato\GestaoContrato\Controller\ExcelExportContratoController;
 use App\Domain\Contrato\GestaoContrato\Controller\GetCoordenadaController;
 use App\Domain\Contrato\GestaoContrato\Controller\GetGeoJsonController;
+use App\Domain\Contrato\GestaoContrato\Controller\GetLicencaController;
 use App\Domain\Contrato\GestaoContrato\Controller\GetServicoController;
 use App\Domain\Contrato\GestaoContrato\Controller\GetTipoPorUfBrContratoTrechoController;
 use App\Domain\Contrato\GestaoContrato\Controller\ListagemContratoController;
@@ -26,6 +27,7 @@ Route::prefix('gestao')->group(function () {
     Route::get('/{tipo}', [ListagemContratoController::class, 'index'])->name('contratos.gestao.listagem');
     Route::get('/create/{tipo?}/{contrato?}', [CreateContratoController::class, 'create'])->name('contratos.gestao.create');
     Route::get('/get-servicos/{contrato}', [GetServicoController::class, 'index'])->name('contratos.gestao.get-servicos');
+    Route::get('/get-licenca/{contrato}', [GetLicencaController::class, 'index'])->name('contratos.gestao.get-licenca');
     Route::post('/store', [StoreContratoController::class, 'store'])->name('contratos.gestao.store');
     Route::post('/atualizar', [UpdateContratoController::class, 'update'])->name('contratos.gestao.atualizar');
     Route::get('/delete/{contrato}', [DestroyContratoController::class, 'destroy'])->name('contratos.gestao.delete');
