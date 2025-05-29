@@ -132,6 +132,7 @@ const deleteShapefile = () => {
               <tbody>
                 <tr>
                   <td>{{ licenca.arquivo_licenca.split('__')[1] }}</td>
+                  {{ licenca.arquivo_licenca }}
                   <td>
                     <a :href="`${usePage().props.app_url}/storage/${licenca.arquivo_licenca}`" target="_blank" class="btn btn-primary m-1">
                       Ver Licenca

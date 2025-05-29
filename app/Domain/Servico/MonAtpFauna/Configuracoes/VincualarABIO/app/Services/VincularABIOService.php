@@ -53,7 +53,7 @@ class VincularABIOService extends BaseModelService
         );
 
         ServicoMonAtpFaunaVincularRetABIO::create([
-            'caminho_arquivo' => $arquivo->diretorio . '/' . $arquivo->arquivo,
+            'caminho_arquivo' => $arquivo->diretorio,
             'nome_arquivo' => $arquivo->nome_arquivo,
             'fk_at_config_vinculacao' => $request['fk_at_config_vinculacao'],
         ]);
