@@ -16,7 +16,7 @@ defineExpose({abrirModal});
 </script>
 
 <template>
-    <Modal ref="modalVisualizarPonto" :title="'Nome: ' + ponto.nomepontocoleta" modal-dialog-class="modal-xl">
+    <Modal ref="modalVisualizarPonto" :title="'Nome: ' + ponto.nome_ponto_coleta" modal-dialog-class="modal-xl">
         <template #body>
             <div class="row mb-4">
                 <span class="col"><strong>Nome: </strong>{{ ponto.nome_ponto_coleta }}</span>
