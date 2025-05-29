@@ -13,13 +13,11 @@ const props = defineProps({
   <div v-if="ponto.coleta">
     <div class="row mb-4">
       <div class="col">
-        <span><strong>Data da coleta: </strong>{{ dateTimeFormat(ponto.coleta?.dt_coleta) }}</span>
-      </div>
-      <div class="col">
-        <span><strong>Realizado a coleta?: </strong>{{ ponto.coleta?.sem_coleta ? 'Não' : 'Sim' }}</span>
+        <span><strong>Data da coleta: </strong>{{ dateTimeFormat(ponto.coleta?.dt_coleta) }}</span><br><br>
+        <span><strong>Realizado a coleta: </strong>{{ ponto.coleta?.coleta ? 'Não' : 'Sim'}}</span>
       </div>
     </div>
-    <div v-if="!ponto.coleta?.sem_coleta">
+    <div v-if="!ponto.coleta?.coleta">
       <div class="row mb-4">
         <div class="col">
           <span><strong>Número da amostra: </strong>{{ ponto.coleta?.numero_amostra }}</span>
@@ -64,7 +62,7 @@ const props = defineProps({
     <div v-else>
       <div class="row mb-4">
         <div class="col">
-          <span><strong>Justificativa: </strong>{{ ponto.coleta?.justificativa }}</span>
+          <span><strong>Justificativa: </strong>{{ ponto.coleta?.observacao }}</span>
         </div>
       </div>
     </div>

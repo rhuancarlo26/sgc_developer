@@ -13,6 +13,7 @@ import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconDots } from "@tabler/icons-vue";
 import { Head, Link, router } from '@inertiajs/vue3';
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import { usePage } from "@inertiajs/vue3";
 
 
 const props = defineProps({
@@ -90,18 +91,18 @@ const deleteVinculoAbio = (id) => {
               <td>{{ item.licenca?.fiscal }}</td>
               <td>{{ item.licenca?.processo_dnit }}</td>
               <td>
+                {{ item.rets[0].caminho_arquivo }}
                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   <IconDots />
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
-                  <a v-if="item.licenca.arquivo_licenca" @click="openArquivoLicenca(item)" href="javascript:void(0);"
-                    class="dropdown-item">
+                  <a v-if="item.licenca.arquivo_licenca" target="_blank"
+                    :href="`${usePage().props.app_url}/storage/${item.licenca.arquivo_licenca}`" class="dropdown-item">
                     Visualizar ABIO
                   </a>
                   <a v-if="item.rets?.length" target="_blank"
-                    :href="route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.visualizar_ret', item.rets[0].id)"
-                    class="dropdown-item">
+                    :href="`${usePage().props.app_url}/storage/${item.rets[0].caminho_arquivo}`" class="dropdown-item">
                     Visualizar RET
                   </a>
                   <template
