@@ -117,7 +117,7 @@ function tipoInput(campo) {
   return "text";
 }
 
-const camposObrigatorios = todasColunas.slice(0, 10); // ajuste conforme sua regra
+const camposObrigatorios = todasColunas.slice(0, 1); // ajuste conforme sua regra
 
 function validar() {
   erros.value = {};

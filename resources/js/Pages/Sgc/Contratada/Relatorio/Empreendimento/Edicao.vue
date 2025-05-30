@@ -3,6 +3,9 @@
     <Head :title="'Empreendimentos: edição'" />
     <AuthenticatedLayout>
       <!-- <div style="display: block; float: right;" class="mb-3"> -->
+        <!-- <div v-if="page.props.flash?.message" class="alert alert-success">
+          {{ page.props.flash.message }}
+        </div> -->
         <H3>Módulo de EDIÇÃO</H3>
         <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -306,7 +309,6 @@ function campoFoiEditado(linha, campo) {
 }
 
 //Modal de histórico
-// Bootstrap Modal (garante que Bootstrap JS esteja incluído)
 let modalInstance = null
 const modalRef = ref(null)
 
@@ -322,8 +324,7 @@ function fecharModal() {
 }
 // ------------------------------------------------------------------------- Salvar
 function handleSalvar(dados) {
-  console.log('Dados recebidos no pai:', dados);
-  // Aqui você pode fazer Inertia.post('/cadastrar', dados), etc.
+    router.post(route('sgc.gestao.cadastrarempreendimento', { id: 2 }), dados);
 }
 // ------------------------------------------------------------------------- Salvar
 onMounted(() => {

@@ -301,4 +301,67 @@ class EmpreendimentosController extends Controller
             return redirect()->back()->with('error', 'Erro ao deletar empreendimento: ' . $e->getMessage());
         }
     }
+
+    public function cadastrarempreendimento(Request $request)
+    {
+        // $data = $request->validate([
+        //     'cod_emp' => 'required|string|max:255',
+        //     'br_uf' => 'required|string|max:255',
+        //     // Adicione outras validações conforme necessário
+        // ]);
+
+        $data = $request->all();
+
+
+        try {
+            $empreendimento = SgcvwEmpreendimentos::create($data);
+            if ($empreendimento) {
+                return redirect()->back()->with('message',  [
+                    'type' => 'success',
+                    'content' => 'Empreendimento cadastrado com sucesso!'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('message', [
+                'type' => 'error',
+                'content' => 'Erro ao cadastrar Empreendimento'
+            ]);
+        }
+    }
+    public function cadastrarestudo(Request $request)
+    {
+        $data = $request->all();
+        try {
+            $empreendimento = SgcvwEstudos::create($data);
+            if ($empreendimento) {
+                return redirect()->back()->with('message',  [
+                    'type' => 'success',
+                    'content' => 'Estudo cadastrado com sucesso!'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('message', [
+                'type' => 'error',
+                'content' => 'Erro ao cadastrar Estudo'
+            ]);
+        }
+    }
+    public function cadastrarsubproduto(Request $request)
+    {
+        $data = $request->all();
+        try {
+            $empreendimento = SgcvwSubprodutos::create($data);
+            if ($empreendimento) {
+                return redirect()->back()->with('message',  [
+                    'type' => 'success',
+                    'content' => 'Subproduto cadastrado com sucesso!'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('message', [
+                'type' => 'error',
+                'content' => 'Erro ao cadastrar Subproduto'
+            ]);
+        }
+    }
 }
