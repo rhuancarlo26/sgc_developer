@@ -15,10 +15,25 @@
           </li>
       </ul>
       <br>
+      <p>
+        <a
+          class="btn btn-defaut w-full fw-bold fs-underline"
+          data-bs-toggle="collapse"
+          href="#collapseNovoEmp"
+          role="button"
+          aria-expanded="false"
+          aria-controls="collapseExample"
+        >
+          Cadastrar Novo Estudo
+        </a>
+      </p>
+      <div class="collapse bg-white" id="collapseNovoEmp">
+        <CadastroModal :empreendimentos="camposfixos" @salvar="handleSalvar" />
+      </div>
       <br>
       <p>
         <a
-          class="btn btn-primary"
+          class="btn btn-defaut w-full fw-bold fs-underline"
           data-bs-toggle="collapse"
           href="#collapseExample"
           role="button"
@@ -182,6 +197,7 @@ import { ref, computed, onMounted } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import CadastroModal from './CadastroModal.vue';
 
 const camposocultos = [
   "contrato_id",
@@ -218,6 +234,31 @@ const mudarPagina = (url) => {
         router.get(url); // Faz a requisição para a nova página
     }
 };
+
+const camposocultos2 = [
+  "change_field",
+  "old_value",
+  "new_value",
+  "user_id",
+  "change_user_id",
+  "change_date",
+  "change_field",
+  "id",
+  "contrato_id",
+  "created_at",
+  "updated_at",
+  "changelogs",
+];
+
+const camposfixos = computed(() => {
+  return props.empreendimentos.data.map(item => {
+    return Object.fromEntries(
+      Object.entries(item).filter(
+        ([chave]) => !camposocultos2.includes(chave)
+      )
+    );
+  });
+});
 
 
 const salvarEdicao = () => {
@@ -271,7 +312,9 @@ function abrirModal(item) {
 function fecharModal() {
   if (modalInstance) modalInstance.hide()
 }
-
+function handleSalvar(dados) {
+    router.post(route('sgc.gestao.cadastrarestudo', { id: 2 }), dados);
+}
 onMounted(() => {
   const modalEl = modalRef.value
   if (modalEl) {
