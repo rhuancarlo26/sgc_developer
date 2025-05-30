@@ -157,10 +157,13 @@ class RegistrosService
 
     public function graficos_monitora_afugentamento(Servicos $servico): array
     {
-        $allRegistros = AfugentFaunaExecRegistroModel::with(['grupo_faunistico', 'formaRegistro', 'tipoRegistro', 'destinacaoRegistro'])
-            ->where('id_servico', $servico->id)
+        $allRegistros = AfugentFaunaExecRegistroModel::with([
+            'grupo_faunistico',
+            'formaRegistro',
+            'tipoRegistro',
+            'destinacaoRegistro'
+        ])->where('id_servico', $servico->id)
             ->get();
-
 
         $especiesGroup = $allRegistros->filter(function ($registro) {
             return !empty($registro->especie);
@@ -170,8 +173,12 @@ class RegistrosService
             return $grupo->count();
         });
 
+        $total_intividuos = 0;
+        foreach ($allRegistros as $item) {
+            $total_intividuos += $item->n_individuos;
+        }
         return [
-            'totalRegistros' => $allRegistros->count(),
+            'totalRegistros' => $total_intividuos,
             'especiesGroup' => $sortedEspeciesGroup,
             'chartDataPieAbundancia'  => $this->getChartDataPieAbundancia($allRegistros),
             'chartDataPieDiversidade' => $this->getChartDataPieDiversidade($allRegistros),
@@ -184,10 +191,9 @@ class RegistrosService
 
     private function getChartDataPieFormaRegistro($allRegistros): array
     {
-        
+
         $idForma = 3;
 
-       
         $totalRegistros = $allRegistros->count();
 
         $remocaoGroup = $allRegistros
@@ -209,19 +215,22 @@ class RegistrosService
         ]];
     }
 
-
-
     private function getChartDataPieAbundancia($allRegistros): array
     {
+
         $abundancia = $allRegistros->groupBy(function ($registro) {
 
             return $registro->grupo_faunistico
                 ? $registro->grupo_faunistico->nome
                 : 'Sem Grupo';
         })->map(function ($grupoRegistros, $grupoNome) {
+            $total = 0;
+            foreach ($grupoRegistros as $g) {
+                $total += $g->n_individuos;
+            }
             return [
                 'grupo_faunistico' => $grupoNome,
-                'total' => $grupoRegistros->count(),
+                'total' => $total,
             ];
         })->values();
 
@@ -230,7 +239,14 @@ class RegistrosService
             'datasets' => [
                 [
                     'data' => $abundancia->pluck('total')->toArray(),
-                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'backgroundColor' => [
+                        "#E07A5F",
+                        "#92A8D1",
+                        "#F2E394",
+                        "#6CA0DC",
+                        "#F7CAC9",
+                        "#9D85C1"
+                    ],
                     'borderColor' => "#ffffff",
                     'borderWidth' => 2,
                 ],
@@ -264,7 +280,14 @@ class RegistrosService
             'datasets' => [
                 [
                     'data' => $diversidade->pluck('total')->toArray(),
-                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'backgroundColor' => [
+                        "#E07A5F",
+                        "#92A8D1",
+                        "#F2E394",
+                        "#6CA0DC",
+                        "#F7CAC9",
+                        "#9D85C1"
+                    ],
                     'borderColor' => "#ffffff",
                     'borderWidth' => 2,
                 ],
@@ -279,9 +302,13 @@ class RegistrosService
                 ? $registro->tipoRegistro->nome
                 : 'Sem Tipo';
         })->map(function ($grupoRegistros, $tipoNome) {
+            $total = 0;
+            foreach ($grupoRegistros as $g) {
+                $total += $g->n_individuos;
+            }
             return [
                 'tipo_registro' => $tipoNome,
-                'total'         => $grupoRegistros->count(),
+                'total'         => $total,
             ];
         })->values();
 
@@ -290,7 +317,14 @@ class RegistrosService
             'datasets' => [
                 [
                     'data'            => $tipoRegistro->pluck('total')->toArray(),
-                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'backgroundColor' => [
+                        "#E07A5F",
+                        "#92A8D1",
+                        "#F2E394",
+                        "#6CA0DC",
+                        "#F7CAC9",
+                        "#9D85C1"
+                    ],
                     'borderColor'     => "#ffffff",
                     'borderWidth'     => 2,
                 ],
@@ -305,9 +339,13 @@ class RegistrosService
                 ? $registro->formaRegistro->nome
                 : 'Sem Forma';
         })->map(function ($grupoRegistros, $formaNome) {
+            $total = 0;
+            foreach ($grupoRegistros as $g) {
+                $total += $g->n_individuos;
+            }
             return [
                 'forma_registro' => $formaNome,
-                'total'          => $grupoRegistros->count(),
+                'total'          => $total,
             ];
         })->values();
 
@@ -316,7 +354,14 @@ class RegistrosService
             'datasets' => [
                 [
                     'data'            => $formaRegistro->pluck('total')->toArray(),
-                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'backgroundColor' => [
+                        "#E07A5F",
+                        "#92A8D1",
+                        "#F2E394",
+                        "#6CA0DC",
+                        "#F7CAC9",
+                        "#9D85C1"
+                    ],
                     'borderColor'     => "#ffffff",
                     'borderWidth'     => 2,
                 ],
