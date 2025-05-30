@@ -16,7 +16,6 @@ watch(() => props.ponto,
 	() => {
 		medicaoParametro.value = [];
 		if (props.ponto.medicao?.parametros.length) {
-			console.log('pontos', props.ponto.medicao?.parametros)
 			props.ponto.medicao?.parametros.forEach(parametro => {
 				medicaoParametro.value[parametro.fk_parametro] = parametro.medicao;
 			});
