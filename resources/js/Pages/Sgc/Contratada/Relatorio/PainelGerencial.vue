@@ -445,6 +445,7 @@ const addTag = (newTag) => {
                               <SgcLinkConfirmation v-slot="confirmation"
                                 :options="{ text: `Deseja excluir o empreendimento ${trecho.cod_emp}` }">
                                 <Link
+                                @click.stop
                                 :href="route('sgc.gestao.dashboard.empreendimento.delete', trecho.id)"
                                 :onBefore="() => confirmation.show(
                                       { url: route('sgc.gestao.dashboard.empreendimento.delete', trecho.id), method: 'DELETE' },
