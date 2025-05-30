@@ -13,5 +13,5 @@ ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale,
 </script>
 
 <template>
-  <Line id="my-line-chart-id" :options="chart_options" :data="chart_data" />
+  <Line id="my-line-chart-id" :options="chart_options" :data="chart_data" class="pt-3" />
 </template>

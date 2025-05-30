@@ -15,13 +15,19 @@ class IndexDashboardMonAtpFaunaController extends Controller
 
   public function index(Servicos $servicos): Response
   {
-    $servicos->load(['monitora_atp_fauna','monitora_atp_fauna.campanhas','contrato']);
+    $servicos->load([
+      'monitora_atp_fauna', 
+      'monitora_atp_fauna.campanhas',
+      'monitora_atp_fauna.grupo_faunistico', 
+      'monitora_atp_fauna.estado', 
+      'contrato'
+    ]);
 
     $campanhas = $servicos->monitora_atp_fauna
-    ->pluck('campanhas')   
-    ->flatten()             
-    ->unique('id')          
-    ->values();
+      ->pluck('campanhas')
+      ->flatten()
+      ->unique('id')
+      ->values();
 
 
     $charts =  $this->registro_service->graficos_monitora_atp($servicos);
