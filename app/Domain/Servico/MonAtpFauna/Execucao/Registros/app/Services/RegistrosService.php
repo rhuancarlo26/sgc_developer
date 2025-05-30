@@ -206,7 +206,14 @@ class RegistrosService extends BaseModelService
             'datasets' => [
                 [
                     'data' => $abundancia->pluck('total')->toArray(),
-                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'backgroundColor' => [
+                        "#E07A5F",
+                        "#92A8D1",
+                        "#F2E394",
+                        "#6CA0DC",
+                        "#F7CAC9",
+                        "#9D85C1"
+                    ],
                     'borderColor' => "#ffffff",
                     'borderWidth' => 2,
                 ],
@@ -233,7 +240,14 @@ class RegistrosService extends BaseModelService
             'datasets' => [
                 [
                     'data' => $diversidade->pluck('total')->toArray(),
-                    'backgroundColor' => ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"],
+                    'backgroundColor' => [
+                        "#E07A5F",
+                        "#92A8D1",
+                        "#F2E394",
+                        "#6CA0DC",
+                        "#F7CAC9",
+                        "#9D85C1"
+                    ],
                     'borderColor' => "#ffffff",
                     'borderWidth' => 2,
                 ],
