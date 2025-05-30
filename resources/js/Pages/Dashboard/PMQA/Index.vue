@@ -1,26 +1,22 @@
 <script setup>
-import NavButton from '@/Components/NavButton.vue';
 import BarChart from '@/Components/BarChart.vue';
 import LineChart from '@/Components/LineChart.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import Map from '@/Components/MapPontos.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 
-import ModalVideo from '../ModalVideo.vue';
-import { IconPlayerPlay } from '@tabler/icons-vue';
 import DivTabelaMedirIqaVue from '@/Pages/Servico/PMQA/Configuracao/Parametro/DivTabelaMedirIqa.vue';
 import DivTabelaParametro from '@/Pages/Servico/PMQA/Configuracao/Parametro/DivTabelaParametro.vue';
 import TabColeta from '@/Pages/Servico/PMQA/Execucao/TabColeta.vue';
 import TabDadosPonto from "@/Pages/Servico/PMQA/Execucao/TabDadosPonto.vue";
 import TabMedicao from "@/Pages/Servico/PMQA/Execucao/TabMedicao.vue";
+import { controllers } from 'chart.js';
 
-
-
-const modalVideoRef = ref({});
 const registro = ref('resultado');
 const mapaVisualizarTrecho = ref(null);
+const coleta_realizada = ref([]);
 
 const props = defineProps({
   contrato: Object,
@@ -90,38 +86,32 @@ const chartDataLine = computed(() => {
       : null;
   });
 
-
-
   return {
     labels: labels,
-    datasets: [
-      {
-        label: selectedPonto.value.ponto.nome_ponto_coleta,
-        data: singleValueArray,
-        borderColor: "black",
-        backgroundColor: "transparent",
-        pointBorderColor: "black",
-        pointBackgroundColor: "white",
-        pointRadius: 4,
-        borderWidth: 1.5,
-        tension: 0.2,
-      },
-      {
-        label: "Área de Qualidade",
-        data: Array(12).fill(100),
-        backgroundColor: [
-          "rgba(173, 216, 230, 0.5)",
-          "rgba(144, 238, 144, 0.5)",
-          "rgba(255, 255, 102, 0.5)",
-          "rgba(255, 165, 0, 0.5)",
-          "rgba(255, 69, 0, 0.5)",
-        ],
-        borderWidth: 0,
-        fill: "start",
+    responsive: true,
+    scales: {
+      y: {
+        min: 0,
+        max: 50,
+        ticks: { stepSize: 10 }
       }
-    ]
+    },
+    datasets: [{
+      label: selectedPonto.value.ponto.nome_ponto_coleta,
+      data: singleValueArray,
+      borderColor: '#0054a6',
+      backgroundColor: "transparent",
+      pointBorderColor: "black",
+      pointBackgroundColor: "white",
+      pointRadius: 4,
+      borderWidth: 2,
+      datalabels: {
+        display: false,
+      }
+    }]
   };
 });
+
 
 const buscarResultado = async () => {
   if (!selectedResultado.value) return;
@@ -135,9 +125,10 @@ const buscarResultado = async () => {
       })
     );
 
-    // Atualiza os dados do gráfico corretamente
     chartDataIqa.value = response.data.chartDataIqa;
     uniqueParametros.value = response.data.uniqueParametros;
+
+    coleta_realizada.value = response.data.medicao;
 
   } catch (error) {
     console.error('Erro ao buscar resultado:', error);
@@ -250,7 +241,6 @@ const horizontalLine = ref({
   }
 })
 
-
 const trechosVisualizacao = computed(() => {
   let geojson = [];
 
@@ -263,7 +253,7 @@ const trechosVisualizacao = computed(() => {
         type: "Feature",
         geometry: {
           type: "Point",
-          coordinates: [longitude, latitude]
+          coordinates: [longitude, latitude],
         }
       }),
       modalPontoMap(ponto),
@@ -274,7 +264,6 @@ const trechosVisualizacao = computed(() => {
   return geojson;
 });
 
-
 const chartOptionsLine = ref({
   responsive: true,
   plugins: {
@@ -282,18 +271,36 @@ const chartOptionsLine = ref({
     tooltip: { enabled: true },
   },
   scales: {
-    x: {
-      grid: { display: false },
-    },
     y: {
       beginAtZero: true,
-      max: 100,
       grid: { drawBorder: false },
     },
   },
 });
 
 const modalPontoMap = (ponto) => {
+  return `
+    <div class="popup-point">
+      <h4>Dados do Ponto de Coleta</h4>
+      <dl>
+        <dt>Nome do Ponto:</dt><dd>${ponto.nome_ponto_coleta}</dd>
+        <dt>Classificação:</dt><dd>${ponto.classificacao}</dd>
+        <dt>Classe:</dt><dd>${ponto.classe}</dd>
+        <dt>Tipo de Ambiente:</dt><dd>${ponto.tipo_ambiente}</dd>
+        <dt>Latitude:</dt><dd>${ponto.lat_x}</dd>
+        <dt>Longitude:</dt><dd>${ponto.long_y}</dd>
+        <dt>UF:</dt><dd>${ponto.UF}</dd>
+        <dt>Município:</dt><dd>${ponto.municipio !== '-' ? ponto.municipio : 'N/A'}</dd>
+        <dt>Bacia Hidrográfica:</dt><dd>${ponto.bacia_hidrografica}</dd>
+        <dt>Km da Rodovia:</dt><dd>${ponto.km_rodovia}</dd>
+        <dt>Estaca:</dt><dd>${ponto.estaca !== '-' ? ponto.estaca : 'N/A'}</dd>
+        <dt>Observações:</dt><dd>${ponto.observacoes || 'Nenhuma'}</dd>
+      </dl>
+    </div>
+  `;
+};
+
+const modalPontoMap1 = (ponto) => {
   return `
     <span><strong>Dados do Ponto de Coleta</span></strong><br>
     <span><strong>Nome do Ponto: </strong> ${ponto.nome_ponto_coleta}</span><br>
@@ -311,49 +318,78 @@ const modalPontoMap = (ponto) => {
     `;
 };
 
-
 setTimeout(() => {
   mapaVisualizarTrecho.value.renderMapa()
   mapaVisualizarTrecho.value.setLinestrings(trechosVisualizacao.value, true);
 }, 500);
-
-
 </script>
 
 <template>
 
-  <Head title="Dashboard" />
+  <Head title="Dashboard PMQA" />
   <AuthenticatedLayout>
-    <div>
-      <div class="card card-body mb-4">
-        <div class="row justify-content-center">
-          <div class="card-body text-center">
-            <h2 class="card-title mb-3">Programa de Monitoramento da Qualidade da Água</h2>
-            <p class="mb-2"><strong>Contratada:</strong> {{ contrato?.contratada }}</p>
-            <p class="mb-2"><strong>Número do Contrato:</strong> {{ contrato?.numero_contrato }}</p>
-            <p class="mb-0"><strong>UFs / BRs:</strong> {{ contrato?.ufs }} / {{ contrato?.brs }}</p>
-          </div>
-        </div>
+    <section aria-label="Cabeçalho" class="card mb-4 p-4 shadow-sm section-header">
+      <h1 class="h4 fw-bold mb-2 section-title">Programa de Monitoramento da Qualidade da Água</h1>
+      <div class="header-info d-flex justify-content-center gap-4 flex-wrap">
+        <p class="info-item"><strong>Contratada:</strong> {{ contrato.contratada }}</p>
+        <p class="info-item"><strong>Contrato:</strong> {{ contrato.numero_contrato }}</p>
+        <p class="info-item"><strong>UFs/BRs:</strong> {{ contrato.ufs }} / {{ contrato.brs }}</p>
       </div>
+    </section>
+    <div>
       <div class="">
         <div class="d-flex ">
-          <div class="col-8 card card-body me-4">
-            <Map ref="mapaVisualizarTrecho" height="900px" :manual-render="true" />
-          </div>
-          <div class="col-4">
-            <div class="card card-body mb-4">
-              <div class="">
-                <label class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="radios-inline" value="resultado"
-                    v-model="registro">
-                  <span class="form-check-label">Resultados</span>
-                </label>
-                <label class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="radios-inline" value="registro" v-model="registro">
-                  <span class="form-check-label">Registro</span>
-                </label>
+          <div class="col-7 card card-body me-4">
+            <Map ref="mapaVisualizarTrecho" height="55vh" :manual-render="true" />
+            <div v-if="selectedPonto">
+              <div class="card-body">
+                <div class="card">
+                  <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
+                      <li class="nav-item" role="presentation">
+                        <a href="#tab-dados-ponto" class="nav-link active" data-bs-toggle="tab" aria-selected="true"
+                          role="tab">Dados ponto</a>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <a href="#tab-dados-coleta" class="nav-link" data-bs-toggle="tab" aria-selected="false"
+                          tabindex="-1" role="tab">Dados coleta</a>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <a href="#tab-dados-medicao" class="nav-link" data-bs-toggle="tab" aria-selected="false"
+                          tabindex="-1" role="tab">Dados medição</a>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="card-body">
+                    <div class="tab-content">
+                      <div class="tab-pane active show" id="tab-dados-ponto" role="tabpanel">
+                        <TabDadosPonto :ponto="selectedPonto" />
+                      </div>
+                      <div class="tab-pane" id="tab-dados-coleta" role="tabpanel">
+                        <TabColeta :contrato="contrato" :servico="servico" :campanha="selectedCampanha"
+                          :ponto="selectedPonto" />
+                      </div>
+                      <div class="tab-pane" id="tab-dados-medicao" role="tabpanel">
+                        <TabMedicao :contrato="contrato" :servico="servico" :campanha="selectedCampanha"
+                          :ponto="selectedPonto" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+          <div class="col-5">
+            <aside class="card p-3 shadow-sm w-100" style="width: 300px; max-height: 80vh;">
+              <div class="btn-group w-100 mb-4" role="group" aria-label="Modo de exibição">
+                <button type="button" class="btn"
+                  :class="registro === 'resultado' ? 'btn-primary' : 'btn-outline-secondary'"
+                  @click="registro = 'resultado'">Resultados</button>
+                <button type="button" class="btn"
+                  :class="registro === 'registro' ? 'btn-primary' : 'btn-outline-secondary'"
+                  @click="registro = 'registro'">Registro</button>
+              </div>
+            </aside>
             <div v-if="registro === 'resultado'">
               <div class="card mb-4">
                 <div class="card-header">
@@ -370,8 +406,7 @@ setTimeout(() => {
                     </select>
                   </div>
 
-                  <!-- Gráfico IQA só aparece quando um resultado for selecionado -->
-                  <div v-if="selectedResultado">
+                  <div v-if="selectedResultado && coleta_realizada.medido">
                     <BarChart :key="JSON.stringify(chartDataIqa)" id="div-parametro-iqa"
                       :style="{ height: '70px', position: 'relative' }" :chart_data="chartDataIqa"
                       :options="horizontalLine" />
@@ -380,10 +415,23 @@ setTimeout(() => {
                       <DivTabelaMedirIqaVue />
                     </div>
                   </div>
+                  <div v-if="selectedResultado && coleta_realizada.medido == false"
+                    class="alert alert-info d-flex align-items-start" role="alert">
+                    <span class="me-3 fs-3 text-warning">
+                      <i class="bi bi-exclamation-triangle-fill"></i>
+                    </span>
+                    <div>
+                      <h5 class="alert-heading mb-1">Coleta não realizada</h5>
+                      <p class="mb-2">Não foi possível realizar a coleta.</p>
+                      <p class="mb-0">
+                        <strong>Justificativa:</strong>
+                        {{ coleta_realizada.justificativa || 'Não informada' }}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div class="card" v-if="selectedResultado">
+              <div class="card" v-if="selectedResultado && coleta_realizada.medido">
                 <div class="card-header">
                   Outros Parâmetros
                 </div>
@@ -397,7 +445,6 @@ setTimeout(() => {
                     </select>
                   </div>
 
-                  <!-- Gráfico de Parâmetro só aparece quando um resultado for selecionado -->
                   <div v-if="selectedParametro">
                     <BarChart height="100px" :id="'divs-parametro-' + selectedParametro.id"
                       :name="'divs-parametro-' + selectedParametro.id" :chart_data="selectedParametro.datasets" />
@@ -409,10 +456,8 @@ setTimeout(() => {
                 </div>
               </div>
             </div>
-
             <div v-else>
               <div class="card card-body mb-4">
-                <!-- Select para escolher um ponto -->
                 <div class="mb-3">
                   <InputLabel value="Selecione uma Campanha" />
                   <select v-model="selectedCampanha" class="form-select">
@@ -423,8 +468,6 @@ setTimeout(() => {
                 </div>
 
                 <div v-if="selectedCampanha">
-
-                  <!-- Select para escolher um ponto -->
                   <div class="mb-3">
                     <InputLabel value="Selecione um Ponto" />
                     <select v-model="selectedPonto" @change="moverParaPonto" class="form-select">
@@ -435,44 +478,6 @@ setTimeout(() => {
                   </div>
                 </div>
 
-                <!-- Exibe os detalhes do ponto selecionado -->
-                <div v-if="selectedPonto">
-                  <div class="card-body">
-                    <div class="card">
-                      <div class="card-header">
-                        <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
-                          <li class="nav-item" role="presentation">
-                            <a href="#tab-dados-ponto" class="nav-link active" data-bs-toggle="tab" aria-selected="true"
-                              role="tab">Dados ponto</a>
-                          </li>
-                          <li class="nav-item" role="presentation">
-                            <a href="#tab-dados-coleta" class="nav-link" data-bs-toggle="tab" aria-selected="false"
-                              tabindex="-1" role="tab">Dados coleta</a>
-                          </li>
-                          <li class="nav-item" role="presentation">
-                            <a href="#tab-dados-medicao" class="nav-link" data-bs-toggle="tab" aria-selected="false"
-                              tabindex="-1" role="tab">Dados medição</a>
-                          </li>
-                        </ul>
-                      </div>
-                      <div class="card-body">
-                        <div class="tab-content">
-                          <div class="tab-pane active show" id="tab-dados-ponto" role="tabpanel">
-                            <TabDadosPonto :ponto="selectedPonto" />
-                          </div>
-                          <div class="tab-pane" id="tab-dados-coleta" role="tabpanel">
-                            <TabColeta :contrato="contrato" :servico="servico" :campanha="selectedCampanha"
-                              :ponto="selectedPonto" />
-                          </div>
-                          <div class="tab-pane" id="tab-dados-medicao" role="tabpanel">
-                            <TabMedicao :contrato="contrato" :servico="servico" :campanha="selectedCampanha"
-                              :ponto="selectedPonto" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 <div v-if="selectedPonto">
                   <div class="card card-body">
                     <div class="row mb-4">
@@ -488,7 +493,7 @@ setTimeout(() => {
                         </div>
                       </div>
                     </div>
-                    <div v-if="selectedLineParametro">
+                    <div  v-if="selectedLineParametro">
                       <LineChart :chart_data="chartDataLine" :chart_options="chartOptionsLine" />
                     </div>
                   </div>
@@ -497,12 +502,105 @@ setTimeout(() => {
             </div>
           </div>
         </div>
-
       </div>
     </div>
-
-    <ModalVideo ref="modalVideoRef" url="/file/Dashboard/Dashboard_monitora_fauna.mp4" />
-
   </AuthenticatedLayout>
-
 </template>
+
+
+<style>
+.section-header {
+  background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+  border-left: 4px solid #0054a6;
+  border-radius: 0.5rem;
+  padding: 1.5rem 2rem;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  color: #0054a6;
+  letter-spacing: 0.03rem;
+  margin-bottom: 0.5rem;
+}
+
+.header-info {
+  color: #333;
+}
+
+.info-item {
+  font-size: 1rem;
+}
+
+.info-item strong {
+  color: #0054a6;
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    padding: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .header-info {
+    gap: 1rem !important;
+  }
+}
+
+/* Container do popup */
+.leaflet-popup-custom .leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 12px 16px;
+}
+
+/* A seta abaixo do popup */
+.leaflet-popup-custom .leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* Botão de fechar */
+.leaflet-popup-custom .leaflet-popup-close-button {
+  color: #555;
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+.leaflet-popup-custom .leaflet-popup-close-button:hover {
+  opacity: 1;
+}
+
+/* Título do popup */
+.popup-point h4 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  /* color: #0054a6; */
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 4px;
+}
+
+/* Lista de detalhes */
+.popup-point dl {
+  display: grid;
+  grid-template-columns: max-content auto;
+  row-gap: 4px;
+  column-gap: 8px;
+  font-size: 0.875rem;
+  color: #333;
+}
+
+.popup-point dt {
+  font-weight: 600;
+  /* color: #0054a6; */
+  text-align: right;
+}
+
+.popup-point dd {
+  margin: 0;
+  color: #555;
+}
+</style>

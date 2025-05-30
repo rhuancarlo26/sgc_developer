@@ -183,14 +183,15 @@ class ResultadoService extends BaseModelService
         }
         return $color;
     }
-    
+
     public function resultado($resultado): array
     {
         $parametros = ServicoPmqaParametro::all();
         $resultado->load([
             'analises',
             'analise_iqa',
-            'outras_analises'
+            'outras_analises',
+            'campanhas'
         ]);
 
         $chartDataIqa = [
@@ -198,11 +199,17 @@ class ResultadoService extends BaseModelService
             'datasets' => []
         ];
 
+        $medicao       = true;
+        $justificativa = '';
         foreach ($resultado->campanhas as $campanha) {
             $iqas = [];
 
             foreach ($campanha->campanha_pontos as $campanhaPonto) {
                 $chartDataIqa['labels'][] = $campanhaPonto->ponto->nome_ponto_coleta;
+                if ($campanhaPonto->medicao->medido) {
+                    $medicao = false;
+                    $justificativa = $campanhaPonto->medicao->observacao;
+                }
 
                 if (isset($campanhaPonto->medicao)) {
                     $id = $campanhaPonto->medicao->id;
@@ -215,7 +222,6 @@ class ResultadoService extends BaseModelService
                     }
                 }
             }
-
             $chartDataIqa['datasets'][] = [
                 'label' => $campanha->nome_campanha,
                 'backgroundColor' => '#' . substr(md5($campanha->nome_campanha), 0, 6),
@@ -273,12 +279,15 @@ class ResultadoService extends BaseModelService
             }
             return false;
         })->keyBy('id')->toArray();
-
         return [
             'parametros' => $parametros,
             'resultado' => $resultado,
             'uniqueParametros' => $uniqueParametros,
-            'chartDataIqa' => $chartDataIqa
+            'chartDataIqa' => $chartDataIqa,
+            'medicao' => [
+                'medido' => $medicao,
+                'justificativa' => $justificativa
+            ]
         ];
     }
 }
