@@ -15,17 +15,23 @@ const abrirModal = (itemServico) => {
 
 const updateModal = (itemFrente) => {
     form.id = itemFrente.id;
-    form.rodovia = itemFrente.rodovia;
-    form.uf_inicial = itemFrente.uf_inicial;
+    form.rodovia = itemFrente.rodovia?.id || "";
+    form.uf_inicial = itemFrente.uf_inicial?.id;
     form.km_inicial = itemFrente.km_inicial;
     form.latitude_inicial = itemFrente.latitude_inicial;
     form.longitude_inicial = itemFrente.longitude_inicial;
-    form.uf_final = itemFrente.uf_final;
+    form.uf_final = itemFrente.uf_final?.id;
     form.km_final = itemFrente.km_final;
     form.latitude_final = itemFrente.latitude_final;
     form.longitude_final = itemFrente.longitude_final;
-    form.data_inicial = itemFrente.data_inicial;
-    form.data_final = itemFrente.data_final;
+    // converte para "YYYY-MM-DD" cortando tudo depois do espaço
+    form.data_inicial = itemFrente.data_inicial
+        ? itemFrente.data_inicial.split(' ')[0]
+        : null;
+    form.data_final = itemFrente.data_final
+        ? itemFrente.data_final.split(' ')[0]
+        : null;
+
     modalDetalhes.value.getBsModal().show();
 }
 
@@ -51,7 +57,6 @@ const form = useForm({
 });
 
 const salvar = () => {
-    console.log(form);
 
     if (form.id) {
         form.patch(route('contratos.contratada.servicos.afugentamento.resgate.fauna.execucao.frente.supressao.update', form.id), {
