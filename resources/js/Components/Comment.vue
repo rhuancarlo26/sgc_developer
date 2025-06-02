@@ -13,13 +13,8 @@ const props = defineProps({
     numRelatorio: [Number, String]
 });
 
-let isMinimized;
+let isMinimized = props.note.load ? ref(true) : ref(false);
 
-if (props.note.load) {
-    isMinimized = ref(true);
-} else {
-    isMinimized = ref(false);
-}
 const existeComentario = props.note.comentario.length;
 const user = usePage().props.auth.user;
 const [perfil] = user.roles.map(tipo => tipo.name);
@@ -28,18 +23,15 @@ const emit = defineEmits(['removeNote']);
 
 const form = useForm({
     comentario: null,
-    comentario_id: props.note.id,
+    comentario_id: props.note.id || null,
     tipo_perfil: perfilUser,
     item_id: props.itemId,
     relatorio_num: props.numRelatorio || 0
 });
 
 watch(() => props.numRelatorio, (newValue) => {
-    console.log('props.numRelatorio atualizado:', newValue);
-    form.relatorio_num = newValue || 0; // Atualiza o form dinamicamente
+    form.relatorio_num = newValue || 0;
 });
-
-console.log('Valor inicial de props.numRelatorio:', props.numRelatorio);
 
 const formComentario = useForm({
     item_id: props.itemId,
@@ -49,73 +41,59 @@ const formComentario = useForm({
 });
 
 const enviarComentario = () => {
-
-    console.log('Enviando comentário com relatorio_num:', form.relatorio_num);
-    if (!existeComentario) {
+    if (!form.comentario_id) {
         formComentario.post(route('sgc.contratada.store_comentario'), {
             onSuccess: (response) => {
                 const ultimo = response.props.comentarios.length - 1;
-                const comentarioId = response.props.comentarios[ultimo].id;
-                form.comentario_id = comentarioId;
-                form.post(route('sgc.contratada.store_comentarios'), {
-                    onSuccess: () => {
-                        props.note.comentario.push({
-                            id: form.comentario_id,
-                            comentario: form.comentario,
-                            tipo_perfil: perfilUser,
-                            created_at: new Date().toISOString()
-                        });
-                        props.note.load = true;
-                        form.comentario = null;
-                    },
-                    onError: (error) => {
-                        console.error('Erro ao enviar comentário', error);
-                    }
-                });
-            }
+                form.comentario_id = response.props.comentarios[ultimo].id;
+                props.note.id = form.comentario_id;
+                saveComentario();
+            },
+            onError: (error) => console.error('Erro ao criar comentário pai', error)
         });
     } else {
-        form.post(route('sgc.contratada.store_comentarios'), {
-            onSuccess: () => {
-                props.note.comentario.push({
-                    id: form.comentario_id,
-                    comentario: form.comentario,
-                    tipo_perfil: perfilUser,
-                    created_at: new Date().toISOString()
-                });
-                form.comentario = null;
-            },
-            onError: (error) => {
-                console.error('Erro ao enviar comentário', error);
-            }
-        });
+        saveComentario();
     }
+};
+
+const saveComentario = () => {
+    form.post(route('sgc.contratada.store_comentarios'), {
+        onSuccess: (response) => {
+            const newComment = {
+                id: response.props.comentarios[response.props.comentarios.length - 1].id, // Usa o id retornado pelo backend
+                comentario: form.comentario,
+                tipo_perfil: perfilUser,
+                created_at: new Date().toISOString()
+            };
+            props.note.comentario.push(newComment);
+            props.note.load = true;
+            form.comentario = null;
+            // Recarrega apenas se necessário, mas a exclusão já pode funcionar com o id correto
+            router.reload({ only: ['comentarios'] });
+        },
+        onError: (error) => console.error('Erro ao enviar comentário', error)
+    });
 };
 
 const excluirComentarios = (comentarios_id) => {
     router.delete(route('sgc.contratada.destroy_comentarios', comentarios_id), {
         onSuccess: () => {
             props.note.comentario = props.note.comentario.filter(comentario => comentario.id !== comentarios_id);
-
-            if (props.note.comentario.length === 0) {
-                props.comentarios.map(id => {
-                    router.delete(route('sgc.contratada.destroy_comentario', id.id), {
-                        onSuccess: () => emit('removeNote', props.index),
-                        onError: (error) => console.error('Erro ao excluir comentário pai', error)
-                    });
-                })
+            if (props.note.comentario.length === 0 && props.note.id) {
+                router.delete(route('sgc.contratada.destroy_comentario', props.note.id), {
+                    onSuccess: () => emit('removeNote', props.index),
+                    onError: (error) => console.error('Erro ao excluir comentário pai', error)
+                });
             }
+            router.reload({ only: ['comentarios'] });
         },
-        onError: (error) => {
-            console.error('Erro ao excluir comentário', error);
-        }
+        onError: (error) => console.error('Erro ao excluir comentário', error)
     });
 };
 
 const toggleMinimize = () => {
     isMinimized.value = !isMinimized.value;
 };
-
 </script>
 
 <template>
@@ -136,7 +114,7 @@ const toggleMinimize = () => {
                         mensagem.tipo_perfil !== perfilUser ? 'bg-primary text-white' : 'bg-success text-white ms-auto', 'm-0']">
                         <div class="d-flex justify-content-between p-2">
                             <p class="message-text mb-0 p-2">{{ mensagem.comentario }}</p>
-                            <IconTrash class="mt-1" @click="excluirComentarios(mensagem.id)"/>
+                            <IconTrash v-if="mensagem.tipo_perfil === perfilUser" class="mt-1" @click="excluirComentarios(mensagem.id)"/>
                         </div>
                     </div>
                     <small :class="['text-secondary-emphasis', 'd-block', 'mt-1',
