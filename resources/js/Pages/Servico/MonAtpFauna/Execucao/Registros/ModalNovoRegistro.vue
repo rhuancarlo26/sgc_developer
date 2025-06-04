@@ -51,6 +51,12 @@ const form = useForm({
     iucn: null,
 });
 
+const gruposAmostrados = [
+    { id: '1', label: 'Avifauna' },
+    { id: '2', label: 'Herpetofauna' },
+    { id: '3', label: 'Mastofauna' }
+];
+
 const save = () => {
     form.transform((data) => ({
         ...data,
@@ -81,6 +87,14 @@ const modalRef = ref();
 const abrirModal = (item = null) => {
     form.reset()
     Object.assign(form, item)
+
+    if (item?.fk_grupo_amostrado) {
+        const grupo = gruposAmostrados.find(g => g.id == item.fk_grupo_amostrado);
+        if (grupo) {
+            form.fk_grupo_amostrado = grupo.id;
+        }
+    }
+
     modalRef.value.getBsModal().show();
     tab.value = 'registro_local';
 }
@@ -162,7 +176,7 @@ defineExpose({ abrirModal });
                                         <InputLabel value="Selecionar campanha" for="fk_campanha" />
                                         <v-select :options="campanhas" v-model="form.fk_campanha" :reduce="t => t.id"
                                             :disabled="!showAction" label="id">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -170,13 +184,9 @@ defineExpose({ abrirModal });
                                     </div>
                                     <div class="col-lg-4">
                                         <InputLabel value="Grupo amostrado" for="fk_campanha" />
-                                        <v-select :options="[
-                                            { id: '1', label: 'Avifauna' },
-                                            { id: '2', label: 'Herpetofauna' },
-                                            { id: '3', label: 'Mastofauna' }
-                                        ]" v-model="form.fk_grupo_amostrado" :reduce="t => t.id"
-                                            :disabled="!showAction">
-                                            <template #no-options="{}">
+                                        <v-select :options="gruposAmostrados" v-model="form.fk_grupo_amostrado"
+                                            :reduce="t => t.id" label="label" :disabled="!showAction">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -195,7 +205,7 @@ defineExpose({ abrirModal });
                                         <v-select :options="licencasVigente" v-model="form.fk_estado"
                                             :get-option-label="(item) => `${item.uf} - ${item.nome_estado}`"
                                             :reduce="t => t.id_estados" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -268,7 +278,7 @@ defineExpose({ abrirModal });
                                             { id: '3', label: 'Répteis' },
                                             { id: '4', label: 'Anfíbios' },
                                         ]" v-model="form.classe" :reduce="t => t.id" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -316,7 +326,7 @@ defineExpose({ abrirModal });
                                             { id: 'femea', label: 'Fêmea' },
                                             { id: 'sem_indentificacao', label: 'Sem indentificação' }
                                         ]" v-model="form.sexo" :reduce="t => t.id" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -329,7 +339,7 @@ defineExpose({ abrirModal });
                                             { id: 'Adulto', label: 'Adulto' },
                                             { id: 'Indeterminado', label: 'Indeterminado' }
                                         ]" v-model="form.faixa_etaria" :reduce="t => t.id" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -341,7 +351,7 @@ defineExpose({ abrirModal });
                                             { id: 'sim', label: 'Sim' },
                                             { id: 'nao', label: 'Não' },
                                         ]" v-model="form.coletado" :reduce="t => t.id" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -360,7 +370,7 @@ defineExpose({ abrirModal });
                                             { id: 'sim', label: 'Sim' },
                                             { id: 'nao', label: 'Não' },
                                         ]" v-model="form.carcaca_removida" :reduce="t => t.id" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -373,7 +383,7 @@ defineExpose({ abrirModal });
                                             { id: 'nao', label: 'Não' },
                                         ]" v-model="form.reducao_biologica" :reduce="t => t.id"
                                             :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -400,7 +410,7 @@ defineExpose({ abrirModal });
                                             { id: 'DD – Dados Insuficientes', label: 'DD – Dados Insuficientes' },
                                             { id: 'NE – Não Avaliado', label: 'NE – Não Avaliado' }
                                         ]" v-model="form.estadual" :reduce="t => t.id" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -414,7 +424,7 @@ defineExpose({ abrirModal });
                                             { id: 'DD – Dados Insuficientes', label: 'DD – Dados Insuficientes' },
                                             { id: 'NE – Não Avaliado', label: 'NE – Não Avaliado' }
                                         ]" v-model="form.federal" :reduce="t => t.id" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -433,7 +443,7 @@ defineExpose({ abrirModal });
                                             { id: 'DD – Dados Insuficientes', label: 'DD – Dados Insuficientes' },
                                             { id: 'NE – Não Avaliado', label: 'NE – Não Avaliado' }
                                         ]" v-model="form.iucn" :reduce="t => t.id" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
