@@ -3,87 +3,54 @@ import BarChart from '@/Components/BarChart.vue';
 import LineChart from '@/Components/LineChart.vue';
 import PieChart from '@/Components/PieChart.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import Map from '@/Components/Map.vue';
+import Map from '@/Components/MapPontos.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
-import ModalVideo from '../ModalVideo.vue';
-import { IconPlayerPlay } from '@tabler/icons-vue';
-import NavButton from '@/Components/NavButton.vue';
 
 const total = ref('total');
 const registro = ref('resultado');
 const curva = ref('armadilha');
-const modalVideoRef = ref({});
+const mapaVisualizarTrecho = ref(null);
 
-const abrirModalVideo = () => {
-  modalVideoRef.value.abrirModal()
-}
 
-const chartDataPie = ref({
-  labels: ["Anfíbios", "Répteis", "Aves", "Mamíferos"],
-  datasets: [
-    {
-      data: [5.3, 18, 39.5, 36.8], // Percentuais
-      backgroundColor: ["#a6c48a", "#7d9c6d", "#b3c99c", "#d5dfb3"], // Cores semelhantes à imagem
-      borderColor: "#ffffff", // Bordas brancas para separar as fatias
-      borderWidth: 2,
-    },
-  ],
-});
+const props = defineProps({
 
-const chartDataBar = ref({
-  labels: ["PF05", "PF10", "PF01", "PF09", "PF07", "PF03", "PF08", "PF02", "PF04", "PF06"],
-  datasets: [
-    {
-      label: "Ocorrências",
-      data: [152, 81, 78, 75, 50, 41, 34, 23, 18, 2],
-      backgroundColor: "#007bff",
-      borderRadius: 5,
-    },
-  ],
+  chartDataPieAbundancia: Object,
+  chartDataPieDiversidade: Object,
+  chartDataBar: Object,
+  chartDataBar2: Object,
+  chartDataLine: Object,
+  modulos: Object,
+  especiesGroup: Object,
+  contrato: Object,
+
 });
 
 const chartOptionsPie = ref({
   responsive: true,
   plugins: {
     legend: {
-      display: false, // Remove a legenda global
+      display: true,
+      position: 'bottom',
     },
     tooltip: {
       enabled: true,
     },
+    datalabels: {
+
+      formatter: (value, context) => {
+        const dataArr = context.chart.data.datasets[0].data;
+        const total = dataArr.reduce((sum, val) => sum + val, 0);
+        const percentage = ((value / total) * 100).toFixed(2);
+        return `${value} (${percentage}%)`;
+      },
+      color: 'black',
+    },
   },
 });
 
-const chartOptionsBar = ref({
-  responsive: true,
-  plugins: {
-    legend: { display: false },
-    tooltip: { enabled: true },
-    datalabels: {
-      anchor: "end",
-      align: "top",
-      color: "#ffffff",
-      backgroundColor: "#666",
-      borderRadius: 4,
-      padding: 4,
-      font: { weight: "bold", size: 12 },
-    },
-  },
-  scales: {
-    x: {
-      grid: { display: false },
-    },
-    y: {
-      beginAtZero: true,
-      grid: { drawBorder: false },
-    },
-  },
-  barPercentage: 0.5,
-  maxBarThickness: 40,
-});
 
 const chartDataBar2 = ref({
   labels: [
@@ -131,18 +98,6 @@ const chartOptionsBar2 = ref({
   },
 });
 
-const chartDataBar3 = ref({
-  labels: ["PF05", "PF10", "PF01", "PF09", "PF07", "PF03", "PF08", "PF02", "PF04", "PF06"],
-  datasets: [
-    {
-      label: "Ocorrências",
-      data: [152, 81, 78, 75, 50, 41, 34, 23, 18, 2],
-      backgroundColor: "#007bff",
-      borderRadius: 5,
-    },
-  ],
-});
-
 const chartOptionsBar3 = ref({
   responsive: true,
   plugins: {
@@ -171,6 +126,65 @@ const chartOptionsBar3 = ref({
   maxBarThickness: 40,
 });
 
+const trechosVisualizacao = computed(() => {
+  let geojson = [];
+
+  props.modulos.forEach(modulo => {
+    const longitude = Number(modulo.longitude);
+    const latitude = Number(modulo.latitude);
+
+    geojson.push([
+      JSON.stringify({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [longitude, latitude]
+        }
+      }),
+      modalRegistroMap(modulo),
+      modulo
+    ]);
+  });
+
+  return geojson;
+});
+
+const modalRegistroMap = (registro) => {
+  return `
+    <span><strong>Dados do Registro</strong></span><br>
+    <span><strong>Forma: </strong> ${registro.forma}</span><br>
+    <span><strong>Tipo: </strong> ${registro.tipo}</span><br>
+    <span><strong>Nº por Serviço: </strong> ${registro.num_por_servico}</span><br>
+    <span><strong>Nome ID: </strong> ${registro.nome_id}</span><br>
+    <span><strong>KM: </strong> ${registro.km}</span><br>
+    <span><strong>Latitude: </strong> ${registro.latitude}</span><br>
+    <span><strong>Longitude: </strong> ${registro.longitude}</span><br>
+    <span><strong>Zona: </strong> ${registro.zona}</span><br>
+    <span><strong>Classe: </strong> ${registro.classe}</span><br>
+    <span><strong>Ordem: </strong> ${registro.ordem}</span><br>
+    <span><strong>Família: </strong> ${registro.familia}</span><br>
+    <span><strong>Gênero: </strong> ${registro.genero}</span><br>
+    <span><strong>Espécie: </strong> ${registro.especie}</span><br>
+    <span><strong>Nome Comum: </strong> ${registro.nome_comum}</span><br>
+    <span><strong>Sexo: </strong> ${registro.sexo}</span><br>
+    <span><strong>Faixa Etária: </strong> ${registro.faixa_etaria}</span><br>
+    <span><strong>Nº de Indivíduos: </strong> ${registro.n_individuos}</span><br>
+    <span><strong>Data de Registro: </strong> ${registro.data_registro}</span><br>
+    <span><strong>Hora de Registro: </strong> ${registro.hora_registro}</span><br>
+    <span><strong>Status Conservação Federal: </strong> ${registro.id_status_conservacao_federal}</span><br>
+    <span><strong>Status Conservação IUCN: </strong> ${registro.id_status_conservacao_iucn}</span><br>
+    <span><strong>Observações: </strong> ${registro.obs && registro.obs !== '-' ? registro.obs : 'Nenhuma'}</span><br>
+  `;
+};
+
+
+
+setTimeout(() => {
+  mapaVisualizarTrecho.value.renderMapa()
+  mapaVisualizarTrecho.value.setLinestrings(trechosVisualizacao.value, true);
+}, 500);
+
+
 </script>
 
 <template>
@@ -178,46 +192,21 @@ const chartOptionsBar3 = ref({
   <Head title="Dashboard" />
 
   <AuthenticatedLayout>
-
-    
-
     <div>
       <div class="card card-body mb-4">
-        <div class="text-end">
-          <NavButton @click="abrirModalVideo()" :icon="IconPlayerPlay" title="Abrir Video" type-button="success" />
-        </div>
-        <div class="justify-content-center">
-          <h1 class="text-center">
-            Programa de Monitoramento de Passagem de Fauna
-          </h1>
-          <div class=" d-flex justify-content-end">
-            <div class="row w-25">
-              <div class="col">
-                <InputLabel value="UF" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-              <div class="col">
-                <InputLabel value="BR" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-              <div class="col">
-                <InputLabel value="Período" />
-                <select name="" id="" class="form-select">
-                  <option value="teste">teste</option>
-                </select>
-              </div>
-            </div>
+        <div class="row justify-content-center">
+          <div class="card-body text-center">
+            <h1 class="card-title mb-3"> Programa de Monitoramento de Passagem de Fauna</h1>
+            <p class="mb-2"><strong>Contratada:</strong> {{ contrato?.contratada }}</p>
+            <p class="mb-2"><strong>Número do Contrato:</strong> {{ contrato?.numero_contrato }}</p>
+            <p class="mb-0"><strong>UFs / BRs:</strong> {{ contrato?.ufs }} / {{ contrato?.brs }}</p>
           </div>
         </div>
       </div>
       <div class="">
         <div class="d-flex">
           <div class="col-8 card card-body me-4">
-            <Map :height="'100vh'" />
+            <Map ref="mapaVisualizarTrecho" height="900px" :manual-render="true" />
           </div>
           <div class="col-4">
             <div class="card card-body mb-4">
@@ -233,18 +222,29 @@ const chartOptionsBar3 = ref({
               </div>
             </div>
             <div v-if="registro === 'resultado'">
+              <!-- Seção dos gráficos de pizza -->
               <div class="mb-4">
-                <div class="d-flex">
-                  <div class="col card me-4">
-                    <h3>Abundância</h3>
-                    <div class="d-flex justify-content-center" style="height: 200px;">
-                      <PieChart :chart_data="chartDataPie" :chart_options="chartOptionsPie" />
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h3 class="card-title text-center">Abundância</h3>
+                        <div class="d-flex justify-content-center align-items-center"
+                          style="height:255px; width:255px;">
+                          <PieChart :chart_data="props.chartDataPieAbundancia" :chart_options="chartOptionsPie" />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div class="col card">
-                    <h3>Diversidade</h3>
-                    <div class="d-flex justify-content-center" style="height: 200px;">
-                      <PieChart :chart_data="chartDataPie" :chart_options="chartOptionsPie" />
+                  <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h3 class="card-title text-center">Riqueza</h3>
+                        <div class="d-flex justify-content-center align-items-center"
+                          style="height:255px; width:255px;">
+                          <PieChart :chart_data="props.chartDataPieDiversidade" :chart_options="chartOptionsPie" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -258,16 +258,16 @@ const chartOptionsBar3 = ref({
                     </label>
                     <label class="form-check form-check-inline">
                       <input class="form-check-input" type="radio" name="curva" value="curva" v-model="curva">
-                      <span class="form-check-label">Total de registros (Período)</span>
+                      <span class="form-check-label">Total de registros (Campanha)</span>
                     </label>
                   </div>
                 </div>
 
                 <div v-if="curva === 'armadilha'">
-                  <BarChart :chart_data="chartDataBar3" :chart_options="chartOptionsBar3" />
+                  <BarChart :chart_data="props.chartDataBar" :chart_options="chartOptionsBar3" />
                 </div>
                 <div v-else>
-                  <BarChart :chart_data="chartDataBar3" :chart_options="chartOptionsBar3" />
+                  <BarChart :chart_data="props.chartDataBar2" :chart_options="chartOptionsBar3" />
                 </div>
               </div>
             </div>
