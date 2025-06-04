@@ -130,6 +130,13 @@
       </div>
       </div>
     </div>
+        <button
+            @click="exportExcel"
+            class="px-4 py-2 btn btn-success text-white rounded float-end mb-3 mb-5"
+        >
+            Exportar Excel <i class="bi bi-file-earmark-excel"></i>
+        </button>
+
       <table
         class="table table-striped table-hover table-light"
       >
@@ -302,6 +309,12 @@ const dadosFiltrados = computed(() => {
     return filtrado;
   });
 });
+
+// Exportar para Excel
+function exportExcel() {
+    console.log('Exportando para Excel, vai na fé...');
+  window.location.href = 'empreendimentos-export'
+}
 
 // Campo foi editado
 function campoFoiEditado(linha, campo) {

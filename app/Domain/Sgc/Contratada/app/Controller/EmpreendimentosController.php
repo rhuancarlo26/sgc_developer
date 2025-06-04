@@ -22,6 +22,9 @@ use App\Models\ChangeLog;
 
 use Illuminate\Support\Facades\Schema;
 
+use App\Exports\EmpreendimentoExport;
+// use Maatwebsite\Excel\Facades\Excel;
+
 
 
 class EmpreendimentosController extends Controller
@@ -364,4 +367,9 @@ class EmpreendimentosController extends Controller
             ]);
         }
     }
+    public function export()
+    {
+        return Excel::download(new EmpreendimentoExport, 'empreendimentos.xlsx');
+    }
+
 }

@@ -20,12 +20,13 @@ Route::prefix('gestao')->group(function () {
   Route::get('{tipo}/edicao',                                 [EmpreendimentosController::class,                       'editavel'])->name('sgc.gestao.edicao');
   Route::get('{tipo}/edicao-estudos',                         [EmpreendimentosController::class,                       'editavelestudos'])->name('sgc.gestao.edicaoestudos');
   Route::get('{tipo}/edicao-produtos',                        [EmpreendimentosController::class,                       'editavelprodutos'])->name('sgc.gestao.edicaoprodutos');
+  Route::get('{tipo}/empreendimentos-export',                 [EmpreendimentosController::class,                       'export'])->name('sgc.gestao.empreendimentos.export');
   Route::post('/updatecampo/{corretor}',                      [EmpreendimentosController::class,                       'updatecampo'])->name('sgc.gestao.updatecampo');
   Route::post('/updatecampoestudos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoestudos'])->name('sgc.gestao.updatecampoestudos');
   Route::post('/updatecampoprodutos/{corretor}',              [EmpreendimentosController::class,                       'updatecampoprodutos'])->name('sgc.gestao.updatecampoprodutos');
   Route::post('/cadastrarempreendimento/{corretor}',          [EmpreendimentosController::class,                       'cadastrarempreendimento'])->name('sgc.gestao.cadastrarempreendimento');
   Route::post('/cadastrarestudo/{corretor}',                  [EmpreendimentosController::class,                       'cadastrarestudo'])->name('sgc.gestao.cadastrarestudo');
-  Route::post('/cadastrarsubproduto/{corretor}',                  [EmpreendimentosController::class,                       'cadastrarsubproduto'])->name('sgc.gestao.cadastrarsubproduto');
+  Route::post('/cadastrarsubproduto/{corretor}',              [EmpreendimentosController::class,                       'cadastrarsubproduto'])->name('sgc.gestao.cadastrarsubproduto');
   Route::post('{tipo}/dashboard-searchempreendimentos',       [DashplanController::class,                              'searchempreendimentos'])->name('sgc.gestao.dashboard.searchempreendimentos');
   Route::post('{tipo}/dashboard-novafase',                    [DashplanController::class,                              'novafase'])->name('sgc.gestao.dashboard.novafase');
   Route::post('{tipo}/dashboard-updatefase',                  [DashplanController::class,                              'updatefase'])->name('sgc.gestao.dashboard.updatefase');
