@@ -53,6 +53,18 @@
       <div class="collapse" id="collapseExample">
         <div class="card card-body">
           <div class="row">
+            <div class="form-check form-switch col-12 mb-2">
+            <label class="form-check-label">
+                <input
+                class="form-check-input"
+                type="checkbox"
+                :checked="todosSelecionados"
+                @change="toggleSelecionarTodos"
+                />
+                Selecionar / Deselecionar Todos
+            </label>
+            </div>
+            <hr>
             <div
               class="form-check form-switch col-md-2"
               v-for="coluna in todasColunas"
@@ -130,6 +142,17 @@
       </div>
       </div>
     </div>
+        <!-- <button class="btn btn-primary mb-3" @click="mostrarAlteradosNoTopo = !mostrarAlteradosNoTopo">
+            🔝 {{ mostrarAlteradosNoTopo ? 'Voltar à Ordem Normal' : 'Alterados Recentemente' }}
+        </button> -->
+        <button @click="ordenacao = ''" class="btn" :class="{ 'btn-primary': ordenacao === '', 'btn-outline-primary': ordenacao !== '' }">
+            🔝 Ordem Padrão
+        </button>
+
+        <button @click="ordenacao = 'created_at'" class="btn mx-2" :class="{ 'btn-primary': ordenacao === 'created_at', 'btn-outline-primary': ordenacao !== 'created_at' }">
+            🔝 Mais Recentes Primeiro
+        </button>
+
         <button
             @click="exportExcel"
             class="px-4 py-2 btn btn-success text-white rounded float-end mb-3 mb-5"
@@ -289,31 +312,68 @@ const fecharEdicao = () => {
 const page = usePage();
 const dados = ref(page.props.empreendimentos);
 // Pegando todas as chaves do primeiro objeto como colunas
-// Pegando todas as chaves do primeiro objeto como colunas
 const todasColunas = Object.keys(dados.value[0] || {});
 
 // Definir visíveis apenas as 15 primeiras colunas no carregamento
 const colunasVisiveis = ref(todasColunas.slice(0, 15));
 colunasVisiveis.value.push(todasColunas[todasColunas.length - 1]);
 
+// Flag para mostrar os alterados no topo
+const mostrarAlteradosNoTopo = ref(false)
+const ordenacao = ref('');
+
 const dadosFiltrados = computed(() => {
-  return dados.value.map((item) => {
+  const lista = [...dados.value];
+
+  if (ordenacao.value === 'alterados_cima') {
+    lista.sort((a, b) => {
+      const aTem = temAlteracao(a.changelogs);
+      const bTem = temAlteracao(b.changelogs);
+
+      if (aTem && !bTem) return -1;
+      if (!aTem && bTem) return 1;
+      return 0;
+    });
+  }
+
+  if (ordenacao.value === 'created_at') {
+    lista.sort((a, b) => {
+      const dataA = extrairDataAlteracao(a.changelogs);
+      const dataB = extrairDataAlteracao(b.changelogs);
+
+      if (dataA && dataB) return new Date(dataB) - new Date(dataA);
+      if (dataA) return -1;
+      if (dataB) return 1;
+      return 0;
+    });
+  }
+
+  // Faz o filtro das colunas
+  return lista.map((item) => {
     let filtrado = {};
     todasColunas.forEach((coluna) => {
       if (colunasVisiveis.value.includes(coluna)) {
         filtrado[coluna] = item[coluna];
       } else {
-        filtrado[coluna] = null; // Mantém a posição original da coluna
+        filtrado[coluna] = null;
       }
     });
     return filtrado;
   });
 });
 
+
 // Exportar para Excel
 function exportExcel() {
-    console.log('Exportando para Excel, vai na fé...');
-  window.location.href = 'empreendimentos-export'
+    const camposvalidos = colunasVisiveis.value.filter(coluna => !camposocultos.includes(coluna));
+    const params = new URLSearchParams({
+    campos: camposvalidos.join(','),
+    // status: 'ativo',
+    // cidade: 'Caxias'
+  })
+
+  const url = `empreendimentos-export?${params.toString()}`
+  window.location.href = url
 }
 
 // Campo foi editado
@@ -335,6 +395,67 @@ function abrirModal(item) {
 function fecharModal() {
   if (modalInstance) modalInstance.hide()
 }
+// ------------------------------------------------------------------------- Selecionar Todos
+
+const colunaTravada = 'changelogs'
+
+// 🔍 Computando
+const todosSelecionados = computed(() => {
+  const colunasFiltradas = todasColunas.filter(
+    c => !camposocultos.includes(c) && c !== colunaTravada
+  )
+  return colunasFiltradas.every(c => colunasVisiveis.value.includes(c))
+})
+
+// 🔘 Selecionar
+function toggleSelecionarTodos(event) {
+  const checked = event.target.checked
+  const colunasFiltradas = todasColunas.filter(
+    c => !camposocultos.includes(c) && c !== colunaTravada
+  )
+
+  const atuais = colunasVisiveis.value.includes(colunaTravada)
+    ? ['changelogs']
+    : []
+
+  if (checked) {
+    colunasVisiveis.value = [...colunasFiltradas, ...atuais]
+  } else {
+    colunasVisiveis.value = [...atuais]
+  }
+}
+// ------------------------------------------------------------------------- Ordenar Changelogs na frente
+function temAlteracao(changelogs) {
+  if (!changelogs) return false;
+
+  if (Array.isArray(changelogs)) return changelogs.length > 0;
+  if (typeof changelogs === 'object') return Object.keys(changelogs).length > 0;
+  if (typeof changelogs === 'string') return changelogs.trim() !== '';
+
+  return false;
+}
+function extrairDataAlteracao(changelogs) {
+  if (!changelogs) return null;
+
+  if (Array.isArray(changelogs)) {
+    const datas = changelogs
+      .map(c => c.created_at)
+      .filter(d => !!d)
+      .map(d => new Date(d));
+
+    if (datas.length === 0) return null;
+
+    return new Date(Math.max(...datas.map(d => d.getTime()))); // Mais recente
+  }
+
+  if (typeof changelogs === 'object') {
+    return changelogs.created_at ? new Date(changelogs.created_at) : null;
+  }
+
+  return null;
+}
+
+
 // ------------------------------------------------------------------------- Salvar
 function handleSalvar(dados) {
     router.post(route('sgc.gestao.cadastrarempreendimento', { id: 2 }), dados);
