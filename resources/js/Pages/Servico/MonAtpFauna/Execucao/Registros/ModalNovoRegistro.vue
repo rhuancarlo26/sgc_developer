@@ -51,6 +51,12 @@ const form = useForm({
     iucn: null,
 });
 
+const gruposAmostrados = [
+    { id: '1', label: 'Avifauna' },
+    { id: '2', label: 'Herpetofauna' },
+    { id: '3', label: 'Mastofauna' }
+];
+
 const save = () => {
     form.transform((data) => ({
         ...data,
@@ -86,6 +92,14 @@ const modalRef = ref();
 const abrirModal = (item = null) => {
     form.reset()
     Object.assign(form, item)
+
+    if (item?.fk_grupo_amostrado) {
+        const grupo = gruposAmostrados.find(g => g.id == item.fk_grupo_amostrado);
+        if (grupo) {
+            form.fk_grupo_amostrado = grupo.id;
+        }
+    }
+
     modalRef.value.getBsModal().show();
     tab.value = 'registro_local';
 }
@@ -175,12 +189,8 @@ defineExpose({ abrirModal });
                                     </div>
                                     <div class="col-lg-4">
                                         <InputLabel value="Grupo amostrado" for="fk_campanha" />
-                                        <v-select :options="[
-                                            { id: '1', label: 'Avifauna' },
-                                            { id: '2', label: 'Herpetofauna' },
-                                            { id: '3', label: 'Mastofauna' }
-                                        ]" v-model="form.fk_grupo_amostrado" :reduce="t => t.id"
-                                            :disabled="!showAction">
+                                        <v-select :options="gruposAmostrados" v-model="form.fk_grupo_amostrado"
+                                            :reduce="t => t.id" label="label" :disabled="!showAction">
                                             <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
