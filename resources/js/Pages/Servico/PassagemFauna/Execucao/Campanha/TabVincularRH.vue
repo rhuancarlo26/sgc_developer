@@ -69,11 +69,11 @@ const vincularRet = () => {
         <div class="row">
             <div class="col">
                 <Table :columns="['Equipe técnica', 'Ação']" :records="{data: campanha.rhs, links: []}"
-                       table-class="table-hover">
+                       table-class="table-hover align-middle">
                     <template #body="{ item }">
-                        <tr>
+                        <tr class="text-center">
                             <td>{{ item.servico_rh?.rh?.nome }}</td>
-                            <td>
+                            <td class="w-1">
                                 <LinkConfirmation v-slot="confirmation"
                                                   :options="{ text: 'A remoção da ABIO será permanente.' }">
                                     <Link :onBefore="confirmation.show"
@@ -113,9 +113,9 @@ const vincularRet = () => {
         <div class="row">
             <div class="col">
                 <Table :columns="['Número Abio', 'RET', 'Ação']" :records="{data: campanha.rets, links: []}"
-                       table-class="table-hover">
+                       table-class="table-hover align-middle">
                     <template #body="{ item }">
-                        <tr>
+                        <tr class="text-center">
                             <td>{{ item.ret?.abio?.licenca?.numero_licenca }}</td>
                             <td>{{ item.ret?.nome }}</td>
                             <td>
