@@ -63,21 +63,26 @@ const save = () => {
         fk_servico: props.servico.id,
     }));
 
+    console.log('Form data:', form);
+
     const onSuccess = () => {
         modalRef.value.getBsModal().hide();
         form.reset();
     }
 
     if (form.id !== null) {
-        form.patch(route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.update'), {
+        form.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.update'), {
             preserveState: true,
-            onSuccess
+            forceFormData: true,
+            onSuccess,
+            method: 'patch'
         })
         return
     }
 
     form.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.store'), {
         preserveState: true,
+        forceFormData: true,
         onSuccess
     })
 }
@@ -456,18 +461,28 @@ defineExpose({ abrirModal });
                                 <div class="row row-gap-2 mb-2">
                                     <div class="col-lg-6">
                                         <InputLabel value="Buscar Arquivo (.jpg/png)" for="n_registro_tombamento" />
-                                        <input @input="form.arquivo = $event.target.files[0]" type="file"
+                                        <input @change="form.arquivo = $event.target.files[0]" type="file"
                                             accept="image/png, image/jpeg" class="form-control">
                                         <InputError :message="form.errors.arquivo" />
                                     </div>
                                     <div class="col-lg-6">
                                         <InputLabel value="Imagens do Espécime:" for="anexo_foto" />
-                                        <Table :columns="['Arquivo', ...[showAction ? 'Ação' : null]]"
+                                        <Table :columns="['Arquivo', 'Ação']"
                                             :records="{ data: imagensRegistro, links: [] }" table-class="table-hover">
                                             <template #body="{ item }">
                                                 <tr>
-                                                    <td>{{ item.nome }}</td>
-                                                    <td v-if="showAction">
+                                                    <td class="text-center">
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <a :href="`/storage/${item.caminho_imagem}`"
+                                                                target="_blank">
+                                                                <img :src="`/storage/${item.caminho_imagem}`"
+                                                                    alt="Imagem do espécime"
+                                                                    style="height: 50px; width: auto; border-radius: 4px;">
+                                                            </a>
+                                                            <span>{{ item.nome }}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">
                                                         <LinkConfirmation v-slot="confirmation"
                                                             :options="{ text: 'Excluir registro?' }">
                                                             <Link :onBefore="(request) => confirmation.show({

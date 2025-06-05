@@ -9,9 +9,7 @@ use Illuminate\Http\RedirectResponse;
 
 class StoreController extends Controller
 {
-    public function __construct(private readonly RegistrosService $registrosService)
-    {
-    }
+    public function __construct(private readonly RegistrosService $registrosService) {}
 
     public function __invoke(StoreRequest $request): RedirectResponse
     {
