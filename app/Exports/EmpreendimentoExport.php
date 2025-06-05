@@ -7,22 +7,21 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class EmpreendimentoExport implements FromCollection, WithHeadings
 {
+    protected $campos;
+
+    public function __construct(array $campos)
+    {
+        $this->campos = $campos;
+    }
+
     public function collection()
     {
-        return SgcvwEmpreendimentos::all([
-            'id',
-            'created_at',
-            'updated_at'
-        ]);
+        return SgcvwEmpreendimentos::select($this->campos)->get();
     }
 
     public function headings(): array
     {
-        return [
-            'ID',
-            'Criado em',
-            'Atualizado em'
-        ];
+        return array_map('ucfirst', $this->campos);
     }
 }
 

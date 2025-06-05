@@ -367,9 +367,9 @@ class EmpreendimentosController extends Controller
             ]);
         }
     }
-    public function export()
-    {
-        return Excel::download(new EmpreendimentoExport, 'empreendimentos.xlsx');
+    public function export(Request $request){
+        $campos = explode(',', $request->input('campos', 'id,nome'));
+        return Excel::download(new EmpreendimentoExport($campos), 'empreendimentos.xlsx');
     }
 
 }
