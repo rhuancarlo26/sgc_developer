@@ -17,7 +17,8 @@ Route::prefix('/mon_atp_fauna')->group(function () {
             require __DIR__ . '../../../Execucao/Campanhas/app/Routes/CampanhasRoutes.php';
         });
 
-        Route::get('modelo_importar', [DownloadModeloController::class, 'index'])->name('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.modelo_importar');
+        // Route::get('modelo_importar', [DownloadModeloController::class, 'index'])->name('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.modelo_importar');
+        Route::get('importar-modelo', [DownloadModeloController::class, 'importarModelo'])->name('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.importar-modelo');
 
         Route::prefix('/registros')->group(function () {
             require __DIR__ . '../../../Execucao/Registros/app/Routes/RegistrosRoutes.php';
