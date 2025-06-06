@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
@@ -85,58 +85,113 @@ class RegistrosService extends BaseModelService
             'id_registro' => $idRegistro
         ]);
     }
-
     public function store_importar(array $post)
     {
         $response = [
             'model' => null,
             'request' => [
-                'type' => 'error',
-                'content' => 'Falha ao cadastrar!',
+                'type' => 'success',
+                'content' => 'Importação concluída com sucesso!',
                 'error' => ''
             ]
         ];
 
         $passagemFaunaImport = new RegistroImport();
-
         $registros = Excel::toCollection($passagemFaunaImport, $post['arquivo'])->first();
 
-        foreach ($registros as $registro) {
-            $uf = Uf::where('nome', '=', $registro['estado'])->orWhere('uf', '=', $registro['estado'])->first();
-            $classe = ['Avifauna', 'Herpetofauna', 'Mastofauna'];
+        $erros = [];
 
-            $response = $this->dataManagement->create(entity: $this->modelClass, infos: [
-                ...$registro,
-                'fk_estado' => $uf->id ?? null,
-                'fk_campanha' => $post['campanha_id'],
-                'fk_servico' => $post['servico_id'],
-                'sentido' => strtoupper($registro['sentido'][0] ?? ''),
-                'margem' => strtoupper($registro['margem'][0] ?? ''),
-                'data_registro' => $this->getDateYMD($registro['data_registro'])
-            ]);
+        foreach ($registros as $i => $registro) {
+            try {
+                if (!isset($registro['data_registro']) || $this->getDateYMD($registro['data_registro']) === null) {
+                    throw new \Exception("Campo 'data_registro' ausente ou não pôde ser convertido");
+                }
+                $uf = Uf::where('nome', $registro['estado'])->orWhere('uf', $registro['estado'])->first();
+
+                $response = $this->dataManagement->create(entity: $this->modelClass, infos: [
+                    ...$registro,
+                    'fk_estado' => $uf->id ?? null,
+                    'fk_campanha' => $post['campanha_id'],
+                    'fk_servico' => $post['servico_id'],
+                    'sentido' => strtoupper($registro['sentido'][0] ?? ''),
+                    'margem' => strtoupper($registro['margem'][0] ?? ''),
+                    'data_registro' => $this->getDateYMD($registro['data_registro'] ?? null),
+                    'hora_registro' => $this->getHoraHM($registro['hora_registro'] ?? null),
+                ]);
+            } catch (\Throwable $e) {
+                Log::error("Erro na linha " . ($i + 2) . " da importação de registros de fauna: ", [
+                    'registro' => $registro,
+                    'erro' => $e->getMessage()
+                ]);
+            }
+        }
+
+        if (count($erros)) {
+            return [
+                'model' => null,
+                'request' => [
+                    'type' => 'error',
+                    'content' => 'Falha ao importar os seguintes registros:',
+                    'error' => implode("\n", $erros)
+                ]
+            ];
         }
 
         return $response;
     }
 
-    private function getDateYMD(string|int $date): string
+
+    private function getDateYMD(string|int|float|null $date): ?string
     {
+        if (is_null($date)) return null;
 
-        if (is_string($date) && str_contains($date, '/')) {
-            return Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d');
+        try {
+            if (is_string($date)) {
+                if (str_contains($date, '/')) {
+                    return Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d');
+                }
+
+                if (str_contains($date, '-')) {
+                    return Carbon::parse($date)->format('Y-m-d');
+                }
+            }
+
+            if (is_numeric($date)) {
+                return Date::excelToDateTimeObject($date)->format('Y-m-d');
+            }
+
+            if ($date instanceof Carbon) {
+                return $date->format('Y-m-d');
+            }
+        } catch (\Throwable $e) {
+            Log::error("Erro ao converter data: " . json_encode($date) . ' => ' . $e->getMessage());
         }
 
-        if (is_string($date) && str_contains($date, '-')) {
-            return Carbon::parse($date)->format('Y-m-d');
+        return null;
+    }
+
+
+    private function getHoraHM(string|float|int|null $hora): ?string
+    {
+        if (is_null($hora)) return null;
+
+        if (is_string($hora) && str_contains($hora, ':')) {
+            try {
+                return Carbon::createFromFormat('H:i:s', $hora)->format('H:i:s');
+            } catch (\Exception $e) {
+                return null;
+            }
         }
 
-        if (is_int($date)) {
-            return Date::excelToDateTimeObject($date)->format('Y-m-d');
+        if (is_numeric($hora)) {
+            try {
+                return Date::excelToDateTimeObject($hora)->format('H:i:s');
+            } catch (\Exception $e) {
+                return null;
+            }
         }
 
-        if ($date instanceof Carbon) {
-            return $date->format('Y-m-d');
-        }
+        return null;
     }
 
 

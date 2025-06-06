@@ -198,7 +198,7 @@ defineExpose({ abrirModal });
                                         <InputError :message="form.errors.fk_grupo_amostrado" />
                                     </div>
                                     <div class="col-lg-3">
-                                        <InputLabel value="Hora Registro" for="data_registro" />
+                                        <InputLabel value="Data do Registro" for="data_registro" />
                                         <input v-model="form.data_registro" type="date" id="data_registro"
                                             class="form-control" :disabled="!showAction" />
                                         <InputError :message="form.errors.data_registro" />
