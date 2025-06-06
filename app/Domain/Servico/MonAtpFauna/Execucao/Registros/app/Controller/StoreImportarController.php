@@ -13,9 +13,6 @@ class StoreImportarController extends Controller
 
   public function index(Request $request): RedirectResponse
   {
-
-    // dd($request->all());
-
     $response = $this->registrosService->store_importar(post: $request->all());
 
     return redirect()->back()->with('message', $response['request']);

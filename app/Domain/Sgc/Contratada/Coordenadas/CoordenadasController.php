@@ -84,7 +84,6 @@ public function fetchGeoJson(Request $request): JsonResponse
 
     // Inspecionando a resposta
     $responseData = $response->json();
-    // dd($responseData);
     if ($response->successful() && isset($responseData['type']) && $responseData['type'] === 'Feature') {
         $properties = $responseData['properties'];
         $coordinates = $responseData['geometry']['coordinates'];
@@ -94,16 +93,7 @@ public function fetchGeoJson(Request $request): JsonResponse
             foreach ($lineString as $point) {
                 $longitude = $point[1];
                 $latitude = $point[0];
-                // dd([
-                //     'uf' => $properties['uf'],
-                //     'br' => $properties['br'],
-                //     'km_inicial' => $properties['kmi'],
-                //     'km_final' => $properties['kmf'],
-                //     'latitude' => $latitude,
-                //     'longitude' => $longitude,
-                //     'tipo_trecho' => $properties['sg_tp_trecho'],
-                // ]);
-                // Salvando no banco de dados
+
                 SgcSvnSegGeoV2::create([
                     'uf' => $properties['uf'],
                     'br' => $properties['br'],
