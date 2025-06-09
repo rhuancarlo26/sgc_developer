@@ -53,17 +53,17 @@ const vincularAbio = () => {
     <div class="row">
         <div class="col">
             <Table :columns="['Abio\'s vigentes', 'Ação']" :records="{data: campanha.abios, links: []}"
-                   table-class="table-hover">
+                   table-class="table-hover text-center align-middle">
                 <template #body="{ item }">
                     <tr>
                         <td>{{ item.abio?.licenca?.numero_licenca }}</td>
-                        <td>
+                        <td class="w-1">
                             <LinkConfirmation v-slot="confirmation"
                                               :options="{ text: 'A remoção da ABIO será permanente.' }">
                                 <Link :onBefore="confirmation.show"
                                       :href="route('contratos.contratada.servicos.passagem_fauna.execucao.campanha.delete_abio', { contrato: contrato.id, servico: servico.id, campanha_abio: item.id })"
                                       as="button" method="delete" type="button" class="btn btn-icon btn-danger">
-                                    <IconTrash/>
+                                    <IconTrash />
                                 </Link>
                             </LinkConfirmation>
                         </td>
