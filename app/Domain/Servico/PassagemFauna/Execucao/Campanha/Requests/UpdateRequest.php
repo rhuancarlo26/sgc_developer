@@ -10,8 +10,10 @@ class UpdateRequest extends FormRequest
     {
         return [
             'id' => ['required'],
-            'id_campanha' => ['required'],
-            'obs' => ['required']
+            'obs' => ['nullable'],
+            'periodo' => ['nullable'],
+            'data_inicial' => ['nullable'],
+            'data_final' => ['nullable'],
         ];
     }
 

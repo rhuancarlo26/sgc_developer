@@ -16,7 +16,7 @@ use App\Domain\Servico\PassagemFauna\Execucao\Campanha\Controller\DeleteControll
 Route::get('{contrato}/{servico}/', [IndexController::class, 'index'])->name('contratos.contratada.servicos.passagem_fauna.execucao.campanha.index');
 Route::get('{contrato}/{servico}/create/{campanha?}', [CreateController::class, 'index'])->name('contratos.contratada.servicos.passagem_fauna.execucao.campanha.create');
 Route::post('{contrato}/{servico}/store', [StoreController::class, 'index'])->name('contratos.contratada.servicos.passagem_fauna.execucao.campanha.store');
-Route::post('{contrato}/{servico}/update', [UpdateController::class, 'index'])->name('contratos.contratada.servicos.passagem_fauna.execucao.campanha.update');
+Route::patch('{contrato}/{servico}/update/{campanha}', [UpdateController::class, 'index'])->name('contratos.contratada.servicos.passagem_fauna.execucao.campanha.update');
 Route::post('{contrato}/{servico}/store_abio', [StoreAbioController::class, 'index'])->name('contratos.contratada.servicos.passagem_fauna.execucao.campanha.store_abio');
 Route::post('{contrato}/{servico}/store_rh', [StoreRhController::class, 'index'])->name('contratos.contratada.servicos.passagem_fauna.execucao.campanha.store_rh');
 Route::post('{contrato}/{servico}/store_ret', [StoreRetController::class, 'index'])->name('contratos.contratada.servicos.passagem_fauna.execucao.campanha.store_ret');

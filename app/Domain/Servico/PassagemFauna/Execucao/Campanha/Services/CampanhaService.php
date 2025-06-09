@@ -73,6 +73,12 @@ class CampanhaService extends BaseModelService
 
     public function destroy(object $campanha)
     {
+        $this->modelClassAbio::where('id_campanha', $campanha->id)->delete();
+
+        $this->modelClassRh::where('id_campanha', $campanha->id)->delete();
+
+        $this->modelClassRet::where('id_campanha', $campanha->id)->delete();
+
         return $this->dataManagement->delete(entity: $this->modelClass, id: $campanha->id);
     }
 
