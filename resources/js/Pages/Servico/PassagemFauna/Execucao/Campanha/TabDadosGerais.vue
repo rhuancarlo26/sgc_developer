@@ -61,7 +61,7 @@ const salvarDadosGerais = () => {
 <template>
     <div class="row mb-4">
         <div class="col">
-            <InputLabel value="ID campanha" for="id" />
+            <InputLabel value=" N° campanha" for="id" />
             <input type="text" name="id" id="id" class="form-control" v-model="form.id" disabled>
             <InputError :message="form.errors.id" />
         </div>
