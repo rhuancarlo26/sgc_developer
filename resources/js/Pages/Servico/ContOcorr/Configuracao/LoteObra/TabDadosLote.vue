@@ -109,9 +109,6 @@ const brs = computed(() => {
 
 </script>
 <template>
-	<pre>
-		{{ props.servico.licencas_condicionantes[0].licenca.segmentos[0].rodovias.rodovia }}
-	</pre>
 	<div class="row mb-4">
 		<div class="col">
 			<InputLabel value="Tem contrato de obra?" for="temContrato" />
