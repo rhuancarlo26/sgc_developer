@@ -1,131 +1,126 @@
 <template>
 
-    <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
+	<Head :title="`${contrato.contratada.slice(0, 10)}...`" />
 
-    <AuthenticatedLayout>
+	<AuthenticatedLayout>
 
-        <template #header>
-            <div class="w-100 d-flex justify-content-between">
-                <Breadcrumb class="align-self-center" :links="[
-                    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
-                    { route: '#', label: contrato.contratada }
-                ]
-                    " />
-                <div class="container-buttons">
-                    <Link class="btn btn-info me-2" :href="route('contratos.contratada.servicos.create', contrato.id)">
-                    Cadastrar serviço
-                    </Link>
-                </div>
-            </div>
-        </template>
+		<template #header>
+			<div class="w-100 d-flex justify-content-between">
+				<Breadcrumb class="align-self-center" :links="[
+					{ route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
+					{ route: '#', label: contrato.contratada }
+				]
+					" />
+				<div class="container-buttons">
+					<Link class="btn btn-info me-2" :href="route('contratos.contratada.servicos.create', contrato.id)">
+					Cadastrar serviço
+					</Link>
+				</div>
+			</div>
+		</template>
 
-        <Navbar :contrato="contrato">
-            <template #body>
+		<Navbar :contrato="contrato">
+			<template #body>
 
 
-                <!-- Pesquisa-->
-                <ModelSearchForm :search-columns="{}" />
+				<!-- Pesquisa-->
+				<ModelSearchForm :search-columns="{}" />
 
-                <!-- Listagem-->
-                <Table :columns="['', 'Tema', 'Serviço', 'Especificação', 'Licença', 'Status', 'Ação']"
-                    :records="servicos" table-class="table-hover">
-                    <template #body="{ item }">
-                        <tr>
-                            <td>{{ item.id }}</td>
-                            <td>{{ item.tema?.nome_tema }}</td>
-                            <td>{{ item.tipo?.nome }}</td>
-                            <td>{{ item.especificacao }}</td>
-                            <td>
-                                <span @click="abrirModalLicenca(item)" v-if="item.condicionantes.length">
-                                    {{
-                                        `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''}`
-                                    }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <span v-if="item.status_aprovacao === 1" class="badge bg-azure-lt">
-                                    Em confecção
-                                </span>
-                                <span v-else-if="item.status_aprovacao === 2" class="badge bg-yellow-lt">
-                                    Em análise
-                                </span>
-                                <span v-else-if="item.status_aprovacao === 3" class="badge bg-blue-lt">
-                                    Aprovado
-                                </span>
-                                <span v-else-if="item.status_aprovacao === 4" class="badge bg-red-lt">
-                                    Pendente
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
-                                    data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <IconDots />
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <a @click="abrirModalServico(item)" class="dropdown-item" href="javascript:void(0)">
-                                        Visualizar
-                                    </a>
-                                    <a v-if="item.servico === 1 && item.status_aprovacao === 3" class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
-                                        Gerenciar
-                                    </a>
-                                    <a v-else-if="item.servico === 3 && item.status_aprovacao === 3"
-                                        class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.index', { contrato: contrato.id, servico: item.id })">
-                                        Gerenciar
-                                    </a>
-                                    <a v-else-if="item.servico === 2 && item.status_aprovacao === 3"
-                                        class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv.index', { contrato: contrato.id, servico: item.id })">
-                                        Gerenciar
-                                    </a>
-                                    <a v-else-if="item.servico === 4 && item.status_aprovacao === 3"
-                                        class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.monitora_fauna.configuracoes.vincular_abio.index', { contrato: contrato.id, servico: item.id })">
-                                        Gerenciar
-                                    </a>
-                                    <a v-if="item.servico === 5 && item.status_aprovacao === 3" class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.passagem_fauna.configuracao.vincular_abio.index', { contrato: contrato.id, servico: item.id })">
-                                        Gerenciar
-                                    </a>
-                                    <a v-if="item.servico === 6 && item.status_aprovacao === 3" class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index', { contrato: contrato.id, servico: item.id })">
-                                        Gerenciar
-                                    </a>
-                                    <a v-else-if="item.servico === 7 && item.status_aprovacao === 3"
-                                        class="dropdown-item"
-                                        :href="route('contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index', { contrato: contrato.id, servico: item.id })">
-                                        Gerenciar
-                                    </a>
-                                    <a class="dropdown-item"
-                                        v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4"
-                                        :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
-                                        Editar
-                                    </a>
-                                    <a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)"
-                                        v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4">
-                                        Excluir
-                                    </a>
-                                    <a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
-                                        v-if="item.status_aprovacao === 4">
-                                        Parecer
-                                    </a>
-                                    <a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
-                                        v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4">
-                                        Enviar para o fiscal
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    </template>
-                </Table>
-            </template>
-        </Navbar>
+				<!-- Listagem-->
+				<Table :columns="['', 'Tema', 'Serviço', 'Especificação', 'Licença', 'Status', 'Ação']" :records="servicos"
+					table-class="table-hover">
+					<template #body="{ item }">
+						<tr>
+							<td>{{ item.id }}</td>
+							<td>{{ item.tema?.nome_tema }}</td>
+							<td>{{ item.tipo?.nome }}</td>
+							<td>{{ item.especificacao }}</td>
+							<td>
+								<span @click="abrirModalLicenca(item)" v-if="item.condicionantes.length">
+									{{
+										`${item.condicionantes[0]?.licenca?.numero_licenca ?? ''}`
+									}}
+								</span>
+							</td>
+							<td class="text-center">
+								<span v-if="item.status_aprovacao === 1" class="badge bg-azure-lt">
+									Em confecção
+								</span>
+								<span v-else-if="item.status_aprovacao === 2" class="badge bg-yellow-lt">
+									Em análise
+								</span>
+								<span v-else-if="item.status_aprovacao === 3" class="badge bg-blue-lt">
+									Aprovado
+								</span>
+								<span v-else-if="item.status_aprovacao === 4" class="badge bg-red-lt">
+									Pendente
+								</span>
+							</td>
+							<td class="text-center">
+								<button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
+									data-bs-toggle="dropdown" aria-expanded="false">
+									<IconDots />
+								</button>
+								<div class="dropdown-menu dropdown-menu-end">
+									<a @click="abrirModalServico(item)" class="dropdown-item" href="javascript:void(0)">
+										Visualizar
+									</a>
+									<a v-if="item.servico === 1 && item.status_aprovacao === 3" class="dropdown-item"
+										:href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', { contrato: contrato.id, servico: item.id })">
+										Gerenciar
+									</a>
+									<a v-else-if="item.servico === 3 && item.status_aprovacao === 3" class="dropdown-item"
+										:href="route('contratos.contratada.servicos.mon_atp_fauna.configuracoes.vincular_abio.index', { contrato: contrato.id, servico: item.id })">
+										Gerenciar
+									</a>
+									<a v-else-if="item.servico === 2 && item.status_aprovacao === 3" class="dropdown-item"
+										:href="route('contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao.vincular.asv.index', { contrato: contrato.id, servico: item.id })">
+										Gerenciar
+									</a>
+									<a v-else-if="item.servico === 4 && item.status_aprovacao === 3" class="dropdown-item"
+										:href="route('contratos.contratada.servicos.monitora_fauna.configuracoes.vincular_abio.index', { contrato: contrato.id, servico: item.id })">
+										Gerenciar
+									</a>
+									<a v-if="item.servico === 5 && item.status_aprovacao === 3" class="dropdown-item"
+										:href="route('contratos.contratada.servicos.passagem_fauna.configuracao.vincular_abio.index', { contrato: contrato.id, servico: item.id })">
+										Gerenciar
+									</a>
+									<a v-if="item.servico === 6 && item.status_aprovacao === 3" class="dropdown-item"
+										:href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.index', { contrato: contrato.id, servico: item.id })">
+										Gerenciar
+									</a>
+									<a v-else-if="item.servico === 7 && item.status_aprovacao === 3" class="dropdown-item"
+										:href="route('contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index', { contrato: contrato.id, servico: item.id })">
+										Gerenciar
+									</a>
+									<a class="dropdown-item" v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4"
+										:href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
+										Editar
+									</a>
+									<a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)"
+										v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4">
+										Excluir
+									</a>
+									<a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
+										v-if="item.status_aprovacao === 4">
+										Parecer
+									</a>
+									<a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
+										v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4">
+										Enviar para o fiscal
+									</a>
+								</div>
+							</td>
+						</tr>
+					</template>
+				</Table>
+			</template>
+		</Navbar>
 
-        <ModalVisualizarLicenca ref="modalVisualizarLicenca" />
-        <ModalVisualizarServico ref="modalVisualizarServico" />
+		<ModalVisualizarLicenca ref="modalVisualizarLicenca" />
+		<ModalVisualizarServico ref="modalVisualizarServico" />
 
-    </AuthenticatedLayout>
+	</AuthenticatedLayout>
 </template>
 
 <script setup>
@@ -141,26 +136,26 @@ import ModalVisualizarServico from "./ModalVisualizarServico.vue";
 import { ref } from "vue";
 
 defineProps({
-    contrato: Object,
-    servicos: Object
+	contrato: Object,
+	servicos: Object
 });
 
 const modalVisualizarLicenca = ref();
 const modalVisualizarServico = ref();
 
 const abrirModalLicenca = (servico) => {
-    modalVisualizarLicenca.value.abrirModal(servico);
+	modalVisualizarLicenca.value.abrirModal(servico);
 }
 
 const abrirModalServico = (servico) => {
-    modalVisualizarServico.value.abrirModal(servico);
+	modalVisualizarServico.value.abrirModal(servico);
 }
 
 const deleteServico = (servico_id) => {
-    router.delete(route('contratos.contratada.servicos.delete', servico_id));
+	router.delete(route('contratos.contratada.servicos.delete', servico_id));
 }
 
 const enviaFiscal = (servico_id) => {
-    router.post(route('contratos.contratada.servicos.envia-fiscal', servico_id));
+	router.post(route('contratos.contratada.servicos.envia-fiscal', servico_id));
 }
 </script>
