@@ -66,9 +66,10 @@ class RegistrosService
             ->leftJoin('afugent_fauna_tipo_registro', 'afugent_fauna_exec_registro.id_tipo_registro', '=', 'afugent_fauna_tipo_registro.id')
             ->leftJoin('afugent_fauna_destinacao_registro', 'afugent_fauna_exec_registro.id_destinacao_registro', '=', 'afugent_fauna_destinacao_registro.id')
             ->leftJoin('estados', 'afugent_fauna_exec_registro.id_estado', '=', 'estados.id')
+            ->leftJoin('base_rodovia', 'afugent_fauna_exec_frente.rodovia', '=', 'base_rodovia.id')
             ->select(
                 'afugent_fauna_exec_registro.*',
-                'afugent_fauna_exec_frente.rodovia',
+                'base_rodovia.rodovia',
                 'afugent_fauna_forma_registro.nome as nome_forma_registro',
                 'afugent_fauna_tipo_registro.nome as nome_tipo_registro',
                 'afugent_fauna_destinacao_registro.nome as nome_destinacao_registro',
