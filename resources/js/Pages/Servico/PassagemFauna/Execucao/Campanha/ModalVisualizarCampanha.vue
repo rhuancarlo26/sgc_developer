@@ -26,7 +26,7 @@ defineExpose({abrirModal});
 </script>
 
 <template>
-    <Modal ref="modalVisualizarCampanha" :title="'Visualização da campanha ' + campanha.id"
+    <Modal ref="modalVisualizarCampanha" :title="'Visualização da campanha N° ' + campanha.id"
            modal-dialog-class="modal-xl">
         <template #body>
             <div class="mb-4">

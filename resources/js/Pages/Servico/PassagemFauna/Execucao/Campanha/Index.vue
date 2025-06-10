@@ -47,7 +47,7 @@ const abrirModalVisualizarCampanha = (item) => {
 
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
-                <ModelSearchFormAllColumns :columns="[]">
+                <ModelSearchFormAllColumns :columns="['id','periodo','data_inicial','data_final']">
                     <template #action>
                         <NavLink title="Nova campanha" class="btn btn-success"
                             route-name="contratos.contratada.servicos.passagem_fauna.execucao.campanha.create"
@@ -55,7 +55,7 @@ const abrirModalVisualizarCampanha = (item) => {
                     </template>
                 </ModelSearchFormAllColumns>
                 <Table class="text-center"
-                    :columns="['ID campanha', 'N° Campanha', 'Período', 'Data início', 'Data final', 'Observações', 'Ação']"
+                    :columns="['N° Campanha', 'N° Licença', 'Período', 'Data início', 'Data final', 'Observações', 'Ação']"
                     :records="campanhas" table-class="table-hover align-middle">
                     <template #body="{ item }">
                         <tr>
