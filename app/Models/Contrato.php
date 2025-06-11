@@ -18,6 +18,7 @@ class Contrato extends Model
     protected $guarded = ['id', 'created_at'];
 
     protected $appends = ['ufs', 'brs'];
+    
 
     public function tipo(): BelongsTo
     {
@@ -39,10 +40,10 @@ class Contrato extends Model
         return $this->hasMany(contratoTrecho::class, 'contrato_id');
     }
 
-//    public function empreendimento_trechos(): HasMany
-//    {
-//        return $this->hasMany(ContratoEmpreendimentoTrecho::class, 'contrato_id');
-//    }
+    //    public function empreendimento_trechos(): HasMany
+    //    {
+    //        return $this->hasMany(ContratoEmpreendimentoTrecho::class, 'contrato_id');
+    //    }
 
     public function introducao(): HasOne
     {
@@ -103,5 +104,8 @@ class Contrato extends Model
         );
     }
 
-    
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }

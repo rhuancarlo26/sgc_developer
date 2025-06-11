@@ -60,5 +60,8 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
-
+    public function contratos()
+    {
+        return $this->belongsToMany(Contrato::class);
+    }
 }
