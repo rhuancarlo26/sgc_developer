@@ -9,6 +9,7 @@ use App\Models\Uf;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class ListagemSgcService extends BaseModelService
@@ -19,19 +20,33 @@ class ListagemSgcService extends BaseModelService
 
     public function ListagemContratos($tipo, $searchParams)
     {
+        $query = $this->searchAllColumns(...$searchParams)
+            ->where('tipo_contrato', $tipo->id);
+
+        $user = Auth::user();
+
+        if ($user->hasRole('Contratada') || $user->hasRole('Fiscal')) {
+            $contratoIds = $user->contratos()->pluck('contratos.id')->toArray();
+
+            if (empty($contratoIds)) {
+                return [
+                    'contratos' => collect([])->paginate()
+                ];
+            }
+
+            $query->whereIn('id', $contratoIds);
+        }
+
         return [
-            'contratos' => $this->searchAllColumns(...$searchParams)
-                ->where('tipo_contrato', $tipo->id)
-                ->paginate()
-                ->appends($searchParams)
+            'contratos' => $query->paginate()->appends($searchParams)
         ];
     }
 
     public function create($contrato)
     {
-        $ufs = Cache::rememberForever('ufs', fn () => Uf::all());
-        $rodovias = Cache::rememberForever('rodovias', fn () => Rodovia::all());
-        $tipos = Cache::rememberForever('contrato_tipos', fn () => ContratoTipo::all());
+        $ufs = Cache::rememberForever('ufs', fn() => Uf::all());
+        $rodovias = Cache::rememberForever('rodovias', fn() => Rodovia::all());
+        $tipos = Cache::rememberForever('contrato_tipos', fn() => ContratoTipo::all());
 
         if ($contrato) {
             $contrato->load([
