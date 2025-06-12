@@ -17,7 +17,7 @@ const props = defineProps({
 	chartDataPieDiversidade: Object,
 	getChartDataPieTipoRegistro: Object,
 	totalRegistros: Object,
-	getChartDataPieFormaRegistro: Object,
+	taxaDeMortalidade: Object,
 	getChartDataPieFormaRegistroGrafico: Object,
 	chartDataBar2: Object,
 	contrato: Object
@@ -97,6 +97,11 @@ const chartOptionsBar2 = ref({
 		x: {
 			beginAtZero: true,
 			grid: { drawBorder: false },
+			ticks: {		
+				stepSize: 1,
+				precision: 0,
+				
+			},
 		},
 		y: {
 			grid: { display: false },
@@ -171,7 +176,8 @@ setTimeout(() => {
 							<div class="card-body d-flex flex-column justify-content-center align-items-center">
 								<h5 class="card-title text-center mb-3">Abundância</h5>
 								<div style="height: auto; width: 100%;">
-									<PieChart :chart_data="props.chartDataPieAbundancia" :chart_options="chartOptionsPie" />
+									<PieChart :chart_data="props.chartDataPieAbundancia"
+										:chart_options="chartOptionsPie" />
 								</div>
 							</div>
 						</div>
@@ -182,7 +188,8 @@ setTimeout(() => {
 							<div class="card-body d-flex flex-column justify-content-center align-items-center">
 								<h5 class="card-title text-center mb-3">Riqueza</h5>
 								<div style="height: auto; width: 100%;">
-									<PieChart :chart_data="props.chartDataPieDiversidade" :chart_options="chartOptionsPie" />
+									<PieChart :chart_data="props.chartDataPieDiversidade"
+										:chart_options="chartOptionsPie" />
 								</div>
 							</div>
 						</div>
@@ -196,7 +203,8 @@ setTimeout(() => {
 									<div class="col-md-6  py-2">
 										<h3>Total de Registros</h3>
 										<ul class="list-group">
-											<li class="list-group-item d-flex justify-content-between align-items-center">
+											<li
+												class="list-group-item d-flex justify-content-between align-items-center">
 												Total
 												<span class="badge rounded-pill">{{ totalRegistros }}</span>
 											</li>
@@ -206,10 +214,10 @@ setTimeout(() => {
 									<div class="col-md-6 py-2">
 										<h3>Taxa de Mortalidade</h3>
 										<ul class="list-group">
-											<li v-for="item in getChartDataPieFormaRegistro" :key="item.id"
+											<li v-for="item in taxaDeMortalidade" :key="item.id"
 												class="list-group-item d-flex justify-content-between align-items-center">
 												{{ item.nome }}
-												<span class="badge rounded-pill">{{ item.total }}</span>
+												<span class="badge rounded-pill">{{ item.total }}%</span>
 											</li>
 										</ul>
 									</div>
@@ -223,7 +231,8 @@ setTimeout(() => {
 							<div class="card-body d-flex flex-column justify-content-center align-items-center">
 								<h5 class="card-title text-center mb-3">Tipo de Registro</h5>
 								<div style="height: auto; width: 100%;">
-									<PieChart :chart_data="props.getChartDataPieTipoRegistro" :chart_options="chartOptionsPie" />
+									<PieChart :chart_data="props.getChartDataPieTipoRegistro"
+										:chart_options="chartOptionsPie" />
 								</div>
 							</div>
 						</div>
@@ -234,7 +243,8 @@ setTimeout(() => {
 							<div class="card-body d-flex flex-column justify-content-center align-items-center">
 								<h5 class="card-title text-center mb-3">Forma de registro</h5>
 								<div style="height: auto; width: 100%;">
-									<PieChart :chart_data="props.getChartDataPieFormaRegistroGrafico" :chart_options="chartOptionsPie" />
+									<PieChart :chart_data="props.getChartDataPieFormaRegistroGrafico"
+										:chart_options="chartOptionsPie" />
 								</div>
 							</div>
 						</div>
