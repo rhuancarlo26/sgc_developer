@@ -21,6 +21,8 @@ Route::prefix('gestao')->group(function () {
   Route::get('{tipo}/edicao-estudos',                         [EmpreendimentosController::class,                       'editavelestudos'])->name('sgc.gestao.edicaoestudos');
   Route::get('{tipo}/edicao-produtos',                        [EmpreendimentosController::class,                       'editavelprodutos'])->name('sgc.gestao.edicaoprodutos');
   Route::get('{tipo}/empreendimentos-export',                 [EmpreendimentosController::class,                       'export'])->name('sgc.gestao.empreendimentos.export');
+  Route::get('{tipo}/estudos-export',                         [EmpreendimentosController::class,                       'estudosexport'])->name('sgc.gestao.estudos.export');
+  Route::get('{tipo}/subprodutos-export',                     [EmpreendimentosController::class,                       'subprodutosexport'])->name('sgc.gestao.subprodutos.export');
   Route::post('/updatecampo/{corretor}',                      [EmpreendimentosController::class,                       'updatecampo'])->name('sgc.gestao.updatecampo');
   Route::post('/updatecampoestudos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoestudos'])->name('sgc.gestao.updatecampoestudos');
   Route::post('/updatecampoprodutos/{corretor}',              [EmpreendimentosController::class,                       'updatecampoprodutos'])->name('sgc.gestao.updatecampoprodutos');

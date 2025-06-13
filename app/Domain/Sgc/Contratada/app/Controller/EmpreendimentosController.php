@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Schema;
 
 use App\Exports\EmpreendimentoExport;
 // use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 
 
@@ -72,19 +73,91 @@ class EmpreendimentosController extends Controller
             'empreendimentos' => $empreendimentos,
         ]);
     }
-    public function editavelestudos(): Response
+    public function editavelestudos(Request $request): Response
     {
-        $empreendimentos = SgcvwEstudos::with(['changelogs'])->paginate(50);
+        $query = SgcvwEstudos::query();
+
+        if ($request->filled('ordenarPor')) {
+            $coluna = $request->get('ordenarPor');
+            $ordem = $request->get('ordem', 'asc');
+
+            if ($coluna === 'data_ultima_alteracao') {
+                // Para campo computado, você pode usar Collection ou subquery
+                $registros = $query->get()->sortByDesc(function ($item) {
+                    return $item->data_ultima_alteracao;
+                });
+
+                // Paginar manualmente
+                $pagina = $request->get('page', 1);
+                $porPagina = 50;
+                $paginado = $registros->forPage($pagina, $porPagina);
+
+                return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
+                    'empreendimentos' => new LengthAwarePaginator(
+                        $paginado->values(),
+                        $registros->count(),
+                        $porPagina,
+                        $pagina,
+                        ['path' => $request->url(), 'query' => $request->query()]
+                    ),
+                ]);
+            } else {
+                $query->orderBy($coluna, $ordem);
+            }
+        }
+
+        $empreendimentos = $query->paginate(50)->withQueryString();
+
         return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
             'empreendimentos' => $empreendimentos,
         ]);
+        // $empreendimentos = SgcvwEstudos::with(['changelogs'])->paginate(50);
+        // return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
+        //     'empreendimentos' => $empreendimentos,
+        // ]);
     }
-    public function editavelprodutos(): Response
+    public function editavelprodutos(Request $request): Response
     {
-        $empreendimentos = SgcvwSubprodutos::with(['changelogs'])->paginate(50);
+        $query = SgcvwSubprodutos::query();
+
+        if ($request->filled('ordenarPor')) {
+            $coluna = $request->get('ordenarPor');
+            $ordem = $request->get('ordem', 'asc');
+
+            if ($coluna === 'data_ultima_alteracao') {
+                // Para campo computado, você pode usar Collection ou subquery
+                $registros = $query->get()->sortByDesc(function ($item) {
+                    return $item->data_ultima_alteracao;
+                });
+
+                // Paginar manualmente
+                $pagina = $request->get('page', 1);
+                $porPagina = 50;
+                $paginado = $registros->forPage($pagina, $porPagina);
+
+                return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
+                    'empreendimentos' => new LengthAwarePaginator(
+                        $paginado->values(),
+                        $registros->count(),
+                        $porPagina,
+                        $pagina,
+                        ['path' => $request->url(), 'query' => $request->query()]
+                    ),
+                ]);
+            } else {
+                $query->orderBy($coluna, $ordem);
+            }
+        }
+
+        $empreendimentos = $query->paginate(50)->withQueryString();
+
         return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
             'empreendimentos' => $empreendimentos,
         ]);
+        // $empreendimentos = SgcvwSubprodutos::with(['changelogs'])->paginate(50);
+        // return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
+        //     'empreendimentos' => $empreendimentos,
+        // ]);
     }
     public function updatecampo(Request $request, $id)
     {
@@ -368,8 +441,22 @@ class EmpreendimentosController extends Controller
         }
     }
     public function export(Request $request){
-        $campos = explode(',', $request->input('campos', 'id,nome'));
-        return Excel::download(new EmpreendimentoExport($campos), 'empreendimentos.xlsx');
+        $campos = explode(',', $request->input('campos', 'id,cod_emp'));
+        $ordenarpor = $request->input('ordenarpor', 'id');
+        $ordem = $request->input('ordem', 'desc');
+        return Excel::download(new EmpreendimentoExport($campos, 'sgcvw_empreendimentos', $ordenarpor, $ordem), 'empreendimentos.xlsx');
+    }
+    public function estudosexport(Request $request){
+        $campos = explode(',', $request->input('campos', 'id,cod_emp'));
+        $ordenarpor = $request->input('ordenarpor', 'id');
+        $ordem = $request->input('ordem', 'desc');
+        return Excel::download(new EmpreendimentoExport($campos, 'sgcvw_estudos', $ordenarpor, $ordem), 'empreendimentos_estudos.xlsx');
+    }
+    public function subprodutosexport(Request $request){
+        $campos = explode(',', $request->input('campos', 'id'));
+        $ordenarpor = $request->input('ordenarpor', 'id');
+        $ordem = $request->input('ordem', 'desc');
+        return Excel::download(new EmpreendimentoExport($campos, 'sgcvw_subprodutos', $ordenarpor, $ordem), 'empreendimentos_subprodutos.xlsx');
     }
 
 }
