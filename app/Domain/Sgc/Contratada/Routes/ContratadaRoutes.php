@@ -20,6 +20,7 @@ use App\Domain\Sgc\Contratada\Cronograma\Controller\CronogController;
 use App\Domain\Sgc\Contratada\Ficha\Controller\FichaController;
 use App\Domain\Sgc\Contratada\Quantitativos\Controller\QuantitativosController;
 use App\Domain\Sgc\Contratada\Produtos\Controller\ProdutosController;
+use App\Domain\Sgc\Contratada\Produtos\Controller\StoreProdutoAbioController;
 
 
 use App\Mail\StatusChanged;
@@ -105,6 +106,14 @@ Route::prefix('/contratada')->group(function () {
 
     // PDF Consolidado
     Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');
+
+    // Produtos - Criação/Analise/Visualização    
+    Route::get('/{contrato}/produtos/{produto}', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
+    Route::get('/{contrato}/produtos/{produto}/create', [ProdutosController::class, 'create'])->name('sgc.contratada.produtos.create');
+    Route::post('/{contrato}/produtos/{produto}', [ProdutosController::class, 'store'])->name('sgc.contratada.produtos.store');
+  
+    Route::post('produtos/{produto}/abio', [StoreProdutoAbioController::class, 'store'])->name('sgc.contratada.produtos.abio.store');
+    Route::delete('produtos/{produto}/abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.delete');
 
 
 

@@ -9,13 +9,15 @@ const props = defineProps({
     subprodutos: Array,
     contrato: [Number, String],
     produto: String,
-    contratos: Object
+    contratos: Object,
 });
 
-console.log(props.contratos)
+console.log('Contratos:', props.contratos);
+console.log('Subprodutos recebidos:', props.subprodutos); // Log para verificar estrutura
+
 const selectedSubproduto = ref('');
 const uniqueSubprodutos = computed(() => {
-    const descriptions = props.subprodutos.map(sub => sub.descricao_revisada).filter(desc => desc);
+    const descriptions = (props.subprodutos || []).map(sub => sub.descricao_revisada).filter(desc => desc);
     return [...new Set(descriptions)];
 });
 
@@ -28,8 +30,10 @@ const handleAction = (action) => {
 };
 
 const filteredSubprodutos = computed(() => {
-    if (!selectedSubproduto.value) return props.subprodutos;
-    return props.subprodutos.filter(sub => sub.descricao_revisada === selectedSubproduto.value);
+    console.log('Filtrando subprodutos com selectedSubproduto:', selectedSubproduto.value); // Log para depuração
+    const subprodutos = props.subprodutos || [];
+    if (!selectedSubproduto.value) return subprodutos;
+    return subprodutos.filter(sub => sub.descricao_revisada === selectedSubproduto.value);
 });
 </script>
 
@@ -77,7 +81,7 @@ const filteredSubprodutos = computed(() => {
                                     <div class="col-md-8 mb-4">
                                         <div class="row">
                                             <div class="col-md-4 mb-4">
-                                                <div class="block-card block-card-short action-button bg-primary text-white cursor-pointer" @click="handleAction('cadastrar')">
+                                                <div class="block-card block-card-short action-button bg-primary text-white cursor-pointer" @click="console.log('Redirecionando com subproduto:', selectedSubproduto.value); $inertia.get(route('sgc.contratada.produtos.create', [props.contrato, props.produto.toLowerCase()]), { subproduto: selectedSubproduto.value ? encodeURIComponent(selectedSubproduto.value) : null })">
                                                     Cadastrar
                                                 </div>
                                             </div>
@@ -134,8 +138,8 @@ const filteredSubprodutos = computed(() => {
 }
 
 .block-card-short {
-    min-height: 100px; /* Reduz a altura mínima */
-    padding: 10px; /* Reduz o padding interno */
+    min-height: 100px;
+    padding: 10px;
 }
 
 .bg-primary {
@@ -163,20 +167,19 @@ const filteredSubprodutos = computed(() => {
     padding: 0.5rem;
 }
 
-/* Estilo específico para os botões */
 .action-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem; /* Aumenta o tamanho do texto */
+    font-size: 1.25rem;
     font-weight: 500;
     text-align: center;
-    border-radius: 8px; /* Bordas mais arredondadas */
+    border-radius: 8px;
     transition: transform 0.2s ease, background-color 0.3s ease;
 }
 
 .action-button:hover {
-    transform: scale(1.05); /* Efeito de leve aumento ao passar o mouse */
+    transform: scale(1.05);
     background-color: #e9ecef;
 }
 </style>
