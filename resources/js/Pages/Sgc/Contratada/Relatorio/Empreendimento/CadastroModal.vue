@@ -57,11 +57,17 @@
     </div>
 
     <!-- Botões -->
-    <div class="mt-6 flex gap-4">
+     <button v-if="abaAtiva > 0" @click="abaAtiva--" class="mt-3 btn btn-info px-4 py-2 mx-2 rounded hover:bg-gray-400">
+        Anterior
+    </button>
+    <button v-if="abaAtiva < abas.length - 1" @click="abaAtiva++" class="mt-3 btn btn-info px-4 py-2 mx-2 text-white rounded hover:bg-blue-700">
+        Próximo
+    </button>
+    <div class="mt-6 flex gap-4" v-if="abaAtiva === abas.length - 1">
       <button @click="salvar" class="btn btn-success">Salvar</button>
       <button @click="limpar" class="btn btn-secondary mx-1">
         <i class="fas fa-eraser"></i>
-        Limpar
+        Limpar todo o formulário
       </button>
     </div>
   </div>

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class SgcvwEmpreendimentos extends Model
 {
     use HasFactory;
+    protected $appends = ['data_ultima_alteracao'];
 
     protected $table = 'sgcvw_empreendimentos';
     protected $guarded = ['id', 'created_at'];
@@ -26,5 +27,17 @@ class SgcvwEmpreendimentos extends Model
     public function getContEstudosAttribute()
     {
         return $this->estudos()->count();
+    }
+    public function getDataUltimaAlteracaoAttribute()
+    {
+        $logs = $this->changelogs;
+
+        // Se for array de logs, pega a data mais recente
+        if (is_array($logs) && !empty($logs)) {
+            $datas = array_column($logs, 'created_at');
+            return max($datas);
+        }
+
+        return null;
     }
 }

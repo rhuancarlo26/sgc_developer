@@ -54,15 +54,15 @@
         <div class="card card-body">
           <div class="row">
             <div class="form-check form-switch col-12 mb-2">
-            <label class="form-check-label">
-                <input
-                class="form-check-input"
-                type="checkbox"
-                :checked="todosSelecionados"
-                @change="toggleSelecionarTodos"
-                />
-                Selecionar / Deselecionar Todos
-            </label>
+                <label class="form-check-label">
+                    <input
+                    class="form-check-input"
+                    type="checkbox"
+                    :checked="todosSelecionados"
+                    @change="toggleSelecionarTodos"
+                    />
+                    Marcar/Desmarcar Todos
+                </label>
             </div>
             <hr>
             <div
