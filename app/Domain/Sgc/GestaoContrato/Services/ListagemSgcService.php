@@ -23,20 +23,6 @@ class ListagemSgcService extends BaseModelService
         $query = $this->searchAllColumns(...$searchParams)
             ->where('tipo_contrato', $tipo->id);
 
-        $user = Auth::user();
-
-        if ($user->hasRole('Contratada') || $user->hasRole('Fiscal')) {
-            $contratoIds = $user->contratos()->pluck('contratos.id')->toArray();
-
-            if (empty($contratoIds)) {
-                return [
-                    'contratos' => collect([])->paginate()
-                ];
-            }
-
-            $query->whereIn('id', $contratoIds);
-        }
-
         return [
             'contratos' => $query->paginate()->appends($searchParams)
         ];
