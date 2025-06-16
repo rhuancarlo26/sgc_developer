@@ -9,7 +9,6 @@ use App\Models\Uf;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class ListagemSgcService extends BaseModelService
@@ -21,7 +20,7 @@ class ListagemSgcService extends BaseModelService
     public function ListagemContratos($tipo, $searchParams)
     {
         return [
-           'contratos' => $this->searchAllColumns(...$searchParams)
+            'contratos' => $this->searchAllColumns(...$searchParams)
                 ->where('tipo_contrato', $tipo->id)
                 ->paginate()
                 ->appends($searchParams)
