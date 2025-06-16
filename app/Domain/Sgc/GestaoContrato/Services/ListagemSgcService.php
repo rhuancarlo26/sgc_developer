@@ -20,19 +20,19 @@ class ListagemSgcService extends BaseModelService
 
     public function ListagemContratos($tipo, $searchParams)
     {
-        $query = $this->searchAllColumns(...$searchParams)
-            ->where('tipo_contrato', $tipo->id);
-
         return [
-            'contratos' => $query->paginate()->appends($searchParams)
+           'contratos' => $this->searchAllColumns(...$searchParams)
+                ->where('tipo_contrato', $tipo->id)
+                ->paginate()
+                ->appends($searchParams)
         ];
     }
 
     public function create($contrato)
     {
-        $ufs = Cache::rememberForever('ufs', fn() => Uf::all());
-        $rodovias = Cache::rememberForever('rodovias', fn() => Rodovia::all());
-        $tipos = Cache::rememberForever('contrato_tipos', fn() => ContratoTipo::all());
+        $ufs = Cache::rememberForever('ufs', fn () => Uf::all());
+        $rodovias = Cache::rememberForever('rodovias', fn () => Rodovia::all());
+        $tipos = Cache::rememberForever('contrato_tipos', fn () => ContratoTipo::all());
 
         if ($contrato) {
             $contrato->load([
