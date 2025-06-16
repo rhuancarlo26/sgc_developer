@@ -28,6 +28,7 @@ const form = useForm({
 const imagens = ref([]);
 const novaImagem = ref(null);
 const imagemFile = ref(null);
+const destinacaoId = ref(null);
 
 const salvarImagem = () => {
     if (!novaImagem.value) return;
@@ -95,47 +96,47 @@ const abrirModal = (item) => {
         Object.assign(form, item);
         carregarImagens();
     }
-    if (item.dt_envio) {
-        form.dt_envio = item.dt_envio?.substring(0, 10);
+    if (item && item.dt_envio) {
+        form.dt_envio = item.dt_envio.substring(0, 10);
     }
     modalRef.value.getBsModal().show();
 }
 
 const page = usePage()
 
-watch(() => page.props.errors, (errors) => {
-    form.setError(errors)
-})
-
 const save = () => {
-    form.transform((data) => ({
-        ...data,
+    const payload = {
+        ...form.data(),
         servico_id: props.servico.id,
-        pilhas: data.pilhas.map(pilha => pilha.id),
-    }));
-
-    const onSuccess = () => {
-        modalRef.value.getBsModal().hide();
-        form.reset();
-    }
+        pilhas: form.pilhas.map(p => p.id),
+    };
 
     if (form.id !== null) {
         router.post(route('contratos.contratada.servicos.supressao-vegetacao.execucao.destinacao.update'), {
             _method: 'patch',
-            ...form.data(),
-            pilhas: form.pilhas.map(pilha => pilha?.id),
+            ...payload,
         }, {
             preserveState: true,
-            onSuccess
-        })
-        return
+            onSuccess: () => carregarImagens()
+        });
+        return;
     }
 
-    form.post(route('contratos.contratada.servicos.supressao-vegetacao.execucao.destinacao.store'), {
-        preserveState: true,
-        onSuccess
-    })
-}
+    axios.post(route('contratos.contratada.servicos.supressao-vegetacao.execucao.destinacao.store'), payload)
+        .then(({ data }) => {
+            form.id = data.destinacao_id;
+            form.chave = data.destinacao_chave;
+            carregarImagens();
+            alert('Formulário salvo com sucesso!');
+        })
+        .catch(error => {
+            if (error.response?.data?.errors) {
+                form.setError(error.response.data.errors);
+            } else {
+                console.error('Erro geral ao salvar:', error.message);
+            }
+        });
+};
 
 const selectedPilha = ref({});
 
@@ -225,7 +226,18 @@ defineExpose({ abrirModal });
                         <textarea v-model="form.observacao" id="observacao" class="form-control"></textarea>
                         <InputError :message="form.errors.observacao" />
                     </div>
-                    <div class="col-12">
+                    <div class="col-12 d-flex justify-content-end mt-3 mb-3">
+                        <button type="button" class="btn btn-success" @click="save()">Salvar Formulário</button>
+                    </div>
+                    <hr>
+
+                    <div class="col-12" v-if="!form.id">
+                        <div class="alert alert-warning">
+                            ⚠️ Para cadastrar imagens, é necessário primeiro salvar o formulário antes.
+                        </div>
+                    </div>
+
+                    <div class="col-12" v-if="form.id" >
                         <div class="card border-secondary mt-3">
                             <div class="card-header bg-secondary text-white">
                                 Upload de Imagens
@@ -267,7 +279,8 @@ defineExpose({ abrirModal });
             </template>
             <template #footer>
                 <button @click="modalRef.getBsModal().hide()" type="button" class="btn btn-secondary">Fechar</button>
-                <button type="button" class="btn btn-success" @click="save()">Salvar</button>
+                <button type="button" class="btn btn-success"
+                    @click="save(), modalRef.getBsModal().hide()">Salvar</button>
             </template>
         </Modal>
     </form>
