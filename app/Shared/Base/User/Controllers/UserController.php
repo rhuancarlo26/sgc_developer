@@ -2,6 +2,7 @@
 
 namespace App\Shared\Base\User\Controllers;
 
+use App\Models\Contrato;
 use App\Models\User;
 use App\Shared\Base\Role\Services\RoleService;
 use App\Shared\Base\User\Requests\StoreUserRequest;
@@ -48,8 +49,9 @@ class UserController extends Controller
     public function create(User $user): Response
     {
         return Inertia::render('Base/User/Form', [
-            'user' => $user->load('roles'),
-            'roles' => $this->roleService->all()
+            'user' => $user->load('roles', 'contratos'),
+            'roles' => $this->roleService->all(),
+            'contratos' => Contrato::all()
         ]);
     }
 
@@ -67,6 +69,9 @@ class UserController extends Controller
                 userData: array_merge($request->only(['name', 'email']), ['password' => Hash::make($password)]),
                 rolesIds: $request->validated('roles')
             );
+
+            $user->contratos()->sync($request->input('contratos', []));
+
             return $user;
         });
 
@@ -91,6 +96,8 @@ class UserController extends Controller
             updatedData: $request->only(['name', 'email']),
             rolesIds: $request->validated('roles')
         );
+
+        $user->contratos()->sync($request->input('contratos', []));
 
         return back()->with('message', [
             'type' => 'success',
