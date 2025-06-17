@@ -9,7 +9,6 @@ class SgcvwSubprodutos extends Model
 {
     use HasFactory;
     protected $table = 'sgcvw_subprodutos';
-    protected $appends = ['data_ultima_alteracao'];
     protected $guarded = ['id', 'created_at'];
     public function changelogs()
     {

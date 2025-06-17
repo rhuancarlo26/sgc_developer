@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class SgcvwEmpreendimentos extends Model
 {
     use HasFactory;
-    protected $appends = ['data_ultima_alteracao'];
 
     protected $table = 'sgcvw_empreendimentos';
     protected $guarded = ['id', 'created_at'];

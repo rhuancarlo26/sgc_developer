@@ -9,7 +9,6 @@ class SgcvwEstudos extends Model
 {
 
     use HasFactory;
-    protected $appends = ['data_ultima_alteracao'];
 
     protected $fillable = [
         'contrato_id',
