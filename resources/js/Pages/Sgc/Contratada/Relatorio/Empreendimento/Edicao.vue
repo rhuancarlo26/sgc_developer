@@ -9,22 +9,15 @@
         </div> -->
         <H3>Módulo de EDIÇÃO</H3>
         <ul class="nav nav-tabs">
-
-      <div style="display: block; float: right;">
-
-
-        <ul class="nav">
-
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#"><b>Empreendimentos</b></a>
-          </li>
-          <li class="nav-item">
-
-            <a class="nav-link" href="/sgc/gestao/2/edicao-estudos">Estudos</a>
-          </li>
-          <li class="nav-item">
+            <li class="nav-item">
+            <a class="nav-link" href="#" aria-current="page">Empreendimentos</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link active" href="/sgc/gestao/2/edicao-estudos"><b>Estudos</b></a>
+            </li>
+            <li class="nav-item">
             <a class="nav-link" href="/sgc/gestao/2/edicao-produtos">Subprodutos</a>
-          </li>
+            </li>
         </ul>
         <br>
         <br>
@@ -42,15 +35,6 @@
       </p>
       <div class="collapse bg-white" id="collapseNovoEmp">
         <CadastroModal :empreendimentos="camposfixos" @salvar="handleSalvar" />
-
-            <Link class="nav-link" :href="route('sgc.contratada.edicaoestudos')"> >> Estudos</Link>
-          </li>
-          <li class="nav-item">
-            <Link class="nav-link" :href="route('sgc.contratada.edicaoprodutos')"> >> Subprodutos</Link>
-          </li>
-        </ul>
-
-
       </div>
 
       <!-- </div> -->
