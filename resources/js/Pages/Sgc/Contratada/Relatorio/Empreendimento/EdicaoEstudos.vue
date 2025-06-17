@@ -12,14 +12,6 @@
           </li>
           <li class="nav-item">
           <a class="nav-link" href="/sgc/gestao/2/edicao-produtos">Subprodutos</a>
-            <Link class="nav-link" :href="route('sgc.contratada.edicao')">Empreendimentos</Link>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled" aria-current="page" href="#"> >> Estudos</a>
-          </li>
-          <li class="nav-item">
-            <Link class="nav-link" :href="route('sgc.contratada.edicaoprodutos')"> >> Subprodutos</Link>
-
           </li>
       </ul>
       <br>
@@ -239,8 +231,6 @@
 </template>
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
-import { router, usePage } from "@inertiajs/vue3";
-import { ref, computed, onMounted } from "vue";
 import { router, usePage, Link } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
