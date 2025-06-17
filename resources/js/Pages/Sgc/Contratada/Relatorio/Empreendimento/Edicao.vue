@@ -13,10 +13,10 @@
             <a class="nav-link active" aria-current="page" href="#"><b>Empreendimentos</b></a>
             </li>
             <li class="nav-item">
-            <a class="nav-link" href="/sgc/gestao/2/edicao-estudos">Estudos</a>
+              <Link class="nav-link" :href="route('sgc.contratada.edicaoestudos')"> Estudos</Link>
             </li>
             <li class="nav-item">
-            <a class="nav-link" href="/sgc/gestao/2/edicao-produtos">Subprodutos</a>
+              <Link class="nav-link" :href="route('sgc.contratada.edicaoprodutos')"> Subprodutos</Link>
             </li>
         </ul>
         <br>

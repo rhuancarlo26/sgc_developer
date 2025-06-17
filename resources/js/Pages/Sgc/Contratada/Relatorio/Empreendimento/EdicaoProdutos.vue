@@ -5,15 +5,13 @@
       <H3>Módulo de EDIÇÃO</H3>
       <ul class="nav nav-tabs nav-center">
           <li class="nav-item">
-
-          <a class="nav-link" href="/sgc/gestao/2/edicao">Empreendimentos</a>
+            <Link class="nav-link" :href="route('sgc.contratada.edicao')">Empreendimentos</Link>
           </li>
+            <li class="nav-item">
+              <Link class="nav-link" :href="route('sgc.contratada.edicaoestudos')"> Estudos</Link>
+            </li>
           <li class="nav-item">
-          <a class="nav-link" href="/sgc/gestao/2/edicao-estudos">Estudos</a>
-          </li>
-          <li class="nav-item">
-          <a class="nav-link active"  aria-current="page" href="#"><b>Subprodutos</b></a>
-
+            <a class="nav-link active"  aria-current="page" href="#"><b>Subprodutos</b></a>
           </li>
       </ul>
       <br>
