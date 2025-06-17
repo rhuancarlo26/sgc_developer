@@ -21,6 +21,7 @@ use App\Domain\Sgc\Contratada\Ficha\Controller\FichaController;
 use App\Domain\Sgc\Contratada\Quantitativos\Controller\QuantitativosController;
 use App\Domain\Sgc\Contratada\Produtos\Controller\ProdutosController;
 use App\Domain\Sgc\Contratada\Produtos\Controller\StoreProdutoAbioController;
+use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\FaunaController;
 
 
 use App\Mail\StatusChanged;
@@ -116,5 +117,13 @@ Route::prefix('/contratada')->group(function () {
     Route::delete('produtos/{produto}/abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.delete');
 
 
+    Route::prefix('{contrato}/produtos/{produto}')->group(function () {
+        Route::get('/', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
+        Route::get('create', [ProdutosController::class, 'create'])->name('sgc.contratada.produtos.create');
+        Route::post('abio/store', [StoreProdutoAbioController::class, 'store'])->name('sgc.contratada.produtos.abio.store');
+        Route::delete('abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.destroy');
+        Route::post('salvar-campanha', [FaunaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.salvar_campanha');
+        Route::post('profissional', [FaunaController::class, 'salvarProfissional'])->name('sgc.contratada.produtos.profissional.store');
+    });
 
 });

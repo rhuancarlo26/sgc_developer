@@ -2,9 +2,9 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\Controller;
 
+use App\Shared\Http\Controllers\Controller;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use App\Models\Contrato;
-use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -14,9 +14,8 @@ class StoreProdutoAbioController extends Controller
 
     public function store(Contrato $contrato, string $produto, Request $request): RedirectResponse
     {
-        // Validação
         $validated = $request->validate([
-            'id_abio' => 'required|exists:servico_monitora_fauna_config_abios,id',
+            'id_abio' => 'required|exists:fauna_config_abio,id',
         ]);
 
         $response = $this->produtosService->store_abio($validated);

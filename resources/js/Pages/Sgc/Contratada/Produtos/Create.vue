@@ -1,18 +1,15 @@
-```javascript
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import NavButton from '@/Components/NavButton.vue';
 import Table from '@/Components/Table.vue';
-import { ref, watch, computed } from 'vue';
+import { ref, computed } from 'vue';
 import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
-import { router } from '@inertiajs/vue3';
-import ModalModuloAmostral from './ModalModuloAmostral.vue';
 
 const props = defineProps({
     contrato: [Number, String],
@@ -21,26 +18,18 @@ const props = defineProps({
     subproduto: [String, null],
     empreendimentos: Array,
     abios: Array,
+    profissionais: Array,
 });
 
-console.log('Subproduto recebido em Create.vue:', props.subproduto);
-console.log('Empreendimentos recebidos:', props.empreendimentos);
-console.log('ABIOs recebidos:', JSON.stringify(props.abios, null, 2));
-
-// Controle da aba atual
-const currentStep = ref('apresentacao');
-const steps = ['apresentacao', 'metodologias', 'equipe', 'resultados', 'anexos'];
-
-// Controle da subetapa na aba Apresentação
+// Controle da subetapa
 const subStep = ref(1);
 
-// Controle do alerta
-const showAlert = ref(false);
+// Controle do modal
+const showModal = ref(false);
 
-// Formulário principal (Apresentação, Subetapa 1/4)
+// Formulário principal (Subetapa 1/4)
 const form = useForm({
     cod_emp: '',
-    descricao_revisada: props.subproduto || '',
     familia: props.produto === 'Fauna' ? 'Fauna' : '',
 });
 
@@ -58,13 +47,19 @@ const formAbio = useForm({
     id_abio: null,
 });
 
-// Formulário de Vincular Profissionais (Subetapa 2/4)
+// Formulário de Vincular Profissional (Subetapa 2/4)
 const formProfissional = useForm({
-    id_profissional: null,
-    id_grupo_faunistico: null,
+    profissional: null,
+    grupo_faunistico: null,
 });
 
-// Formulário de Pontos de Quelônios e Crocodilianos (Subetapa 4/4)
+// Formulário de Cadastro de Profissional (Modal)
+const formNovoProfissional = useForm({
+    profissional: '',
+    formacao: '',
+});
+
+// Formulário de Pontos de Amostragem (Subetapa 4/4)
 const formPontosAmostragem = useForm({
     ponto_coleta: '',
     nome_curso_hidrico: '',
@@ -78,12 +73,6 @@ const formPontosAmostragem = useForm({
 // Controle do checkbox "Não se aplica"
 const naoSeAplica = ref(false);
 
-// Placeholders para outras abas
-const formMetodologias = useForm({});
-const formEquipe = useForm({});
-const formResultados = useForm({});
-const formAnexos = useForm({});
-
 // Dados para tabelas
 const abioRecords = ref([]);
 const profissionalRecords = ref([]);
@@ -94,76 +83,122 @@ const abioOptions = computed(() => {
         .filter(abio => abio.licenca)
         .map(abio => ({
             ...abio,
-            label: abio.licenca?.numero_licenca || 'Sem Licença'
+            label: abio.licenca?.numero_licenca || 'Sem Licença',
         }));
 });
 
-// Monitorar seleção de ABIO
-watch(() => formAbio.id_abio, (newValue) => {
-    console.log('ABIO selecionado:', newValue);
+// Mapeamento dos Profissionais para o v-select
+const profissionalOptions = computed(() => {
+    return props.profissionais.map(p => ({
+        value: p.profissional,
+        label: `${p.profissional} (${p.formacao})`,
+    }));
 });
 
-// Mostrar alerta
-const mostrarAlerta = () => {
-    console.log('Exibindo alerta de ABIO');
-    showAlert.value = true;
-    setTimeout(() => {
-        showAlert.value = false;
-    }, 5000);
-};
+// Grupos Faunísticos
+const grupoFaunisticoOptions = [
+    { value: 'Avifauna', label: 'Avifauna' },
+    { value: 'Herpertofauna', label: 'Herpertofauna' },
+    { value: 'Mastofauna', label: 'Mastofauna' },
+    { value: 'Ictiofauna', label: 'Ictiofauna' },
+    { value: 'Bentos', label: 'Bentos' },
+];
 
-// Salvar Dados Gerais (placeholder)
+// Salvar Dados Gerais
 const salvarDadosGerais = () => {
-    console.log('Salvando Dados Gerais:', formDadosGerais.data());
+    const data = {
+        id_campanha: formDadosGerais.id,
+        data_campanha_inicial: formDadosGerais.data_campanha_inicial,
+        data_campanha_final: formDadosGerais.data_campanha_final,
+        periodo: formDadosGerais.periodo,
+        observacoes: formDadosGerais.obs,
+        id_abio: formAbio.id_abio,
+        cod_emp: form.cod_emp,
+        subproduto: props.subproduto || '',
+        profissionais: profissionalRecords.value.map(p => ({
+            profissional: p.profissional,
+            grupo_faunistico: p.grupo_faunistico,
+        })),
+    };
+
+    router.post(route('sgc.contratada.produtos.salvar_campanha', [props.contrato, props.produto.toLowerCase()]), data, {
+        onSuccess: () => {
+            formDadosGerais.reset();
+            formAbio.reset();
+            formProfissional.reset();
+            profissionalRecords.value = [];
+            router.get(route('sgc.contratada.produtos.index', [props.contrato, props.produto.toLowerCase()]));
+        },
+        onError: (errors) => console.error('Erros ao salvar campanha:', errors),
+    });
 };
 
 // Salvar ABIO
 const salvarAbio = () => {
     formAbio.post(route('sgc.contratada.produtos.abio.store', [props.contrato, props.produto.toLowerCase()]), {
         onSuccess: () => {
+            const abio = props.abios.find(a => a.id === formAbio.id_abio);
+            if (abio) {
+                abioRecords.value.push({
+                    id: abio.id,
+                    abio: { licenca: { numero_licenca: abio.licenca?.numero_licenca } },
+                });
+            }
             formAbio.reset();
-            console.log('ABIO salvo com sucesso');
         },
+        onError: (errors) => console.error('Erros ao salvar ABIO:', errors),
     });
 };
 
 // Excluir ABIO
 const excluirAbio = (id) => {
-    router.delete(route('sgc.contratada.produtos.abio.delete', [props.contrato, props.produto.toLowerCase(), id]), {
+    router.delete(route('sgc.contratada.produtos.abio.destroy', [props.contrato, props.produto.toLowerCase(), id]), {
         onSuccess: () => {
-            console.log('ABIO excluído com sucesso');
+            abioRecords.value = abioRecords.value.filter(item => item.id !== id);
         },
+        onError: (errors) => console.error('Erros ao excluir ABIO:', errors),
     });
 };
 
-// Salvar Profissional (placeholder)
-const salvarProfissional = () => {
-    console.log('Salvando Profissional:', formProfissional.data());
-    profissionalRecords.value.push({
-        id: Date.now(),
-        rh: { rh: { nome: formProfissional.id_profissional || 'PROF_TEST' } },
-        grupo_faunistico: { grupo_faunistico: formProfissional.id_grupo_faunistico || 'GRUPO_TEST' },
+// Salvar Novo Profissional (Modal)
+const salvarNovoProfissional = () => {
+    formNovoProfissional.post(route('sgc.contratada.produtos.profissional.store', [props.contrato, props.produto.toLowerCase()]), {
+        onSuccess: () => {
+            props.profissionais.push({
+                id: Date.now(), // Substituir por ID real retornado
+                profissional: formNovoProfissional.profissional,
+                formacao: formNovoProfissional.formacao,
+            });
+            formNovoProfissional.reset();
+            showModal.value = false;
+        },
+        onError: (errors) => console.error('Erros ao salvar profissional:', errors),
     });
-    formProfissional.reset();
 };
 
-// Excluir Profissional (placeholder)
+// Vincular Profissional
+const vincularProfissional = () => {
+    if (formProfissional.profissional && formProfissional.grupo_faunistico) {
+        const profissionalData = props.profissionais.find(p => p.profissional === formProfissional.profissional);
+        profissionalRecords.value.push({
+            id: Date.now(),
+            profissional: formProfissional.profissional,
+            formacao: profissionalData?.formacao || 'N/A',
+            grupo_faunistico: formProfissional.grupo_faunistico,
+        });
+        formProfissional.reset();
+    }
+};
+
+// Excluir Profissional
 const excluirProfissional = (id) => {
-    console.log('Excluindo Profissional ID:', id);
     profissionalRecords.value = profissionalRecords.value.filter(item => item.id !== id);
-};
-
-// Salvar Pontos de Amostragem (placeholder)
-const salvarPontosAmostragem = () => {
-    console.log('Salvando Pontos de Amostragem:', formPontosAmostragem.data());
 };
 
 // Navegar entre subetapas
 const nextSubStep = () => {
     if (subStep.value < 4) {
         subStep.value += 1;
-    } else {
-        nextStep();
     }
 };
 
@@ -172,50 +207,6 @@ const prevSubStep = () => {
         subStep.value -= 1;
     }
 };
-
-// Navegar entre abas
-const nextStep = () => {
-    const currentIndex = steps.indexOf(currentStep.value);
-    if (currentIndex < steps.length - 1) {
-        currentStep.value = steps[currentIndex + 1];
-        subStep.value = 1;
-    } else {
-        submit();
-    }
-};
-
-const prevStep = () => {
-    const currentIndex = steps.indexOf(currentStep.value);
-    if (currentIndex > 0) {
-        currentStep.value = steps[currentIndex - 1];
-        subStep.value = 1;
-    }
-};
-
-// Submissão final
-const submit = () => {
-    console.log('Enviando formulário completo:', {
-        apresentacao: form.data(),
-        dadosGerais: formDadosGerais.data(),
-        abio: formAbio.data(),
-        profissional: formProfissional.data(),
-        pontosAmostragem: formPontosAmostragem.data(),
-        metodologias: formMetodologias.data(),
-        equipe: formEquipe.data(),
-        resultados: formResultados.data(),
-        anexos: formAnexos.data(),
-    });
-    form.post(route('sgc.contratada.produtos.store', [props.contrato, props.produto.toLowerCase()]), {
-        onSuccess: () => {
-            form.reset();
-            currentStep.value = 'apresentacao';
-            subStep.value = 1;
-        },
-    });
-};
-
-// Referência ao ModalModuloAmostral
-const modalModuloAmostral = ref(null);
 </script>
 
 <template>
@@ -238,392 +229,288 @@ const modalModuloAmostral = ref(null);
                     <div class="card-body">
                         <h2 class="text-center mb-4">CADASTRAR {{ produto.toUpperCase() }}</h2>
 
-                        <!-- Navegação por abas -->
-                        <ul class="nav nav-tabs mb-4">
-                            <li class="nav-item">
-                                <a class="nav-link" :class="{ active: currentStep === 'apresentacao' }" @click="currentStep = 'apresentacao'; subStep = 1" href="#">Apresentação</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" :class="{ active: currentStep === 'metodologias' }" @click="currentStep = 'metodologias'; subStep = 1" href="#">Metodologias</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" :class="{ active: currentStep === 'equipe' }" @click="currentStep = 'equipe'; subStep = 1" href="#">Equipe</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" :class="{ active: currentStep === 'resultados' }" @click="currentStep = 'resultados'; subStep = 1" href="#">Resultados</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" :class="{ active: currentStep === 'anexos' }" @click="currentStep = 'anexos'; subStep = 1" href="#">Anexos</a>
-                            </li>
-                        </ul>
+                        <!-- Navegação por subetapas -->
+                        <h5 class="mb-3">Etapa {{ subStep }}/4</h5>
 
-                        <!-- Conteúdo das abas -->
-                        <!-- Aba Apresentação -->
-                        <div v-if="currentStep === 'apresentacao'">
-                            <h5 class="mb-3">Etapa {{ subStep }}/4</h5>
+                        <!-- Subetapa 1/4 -->
+                        <div v-if="subStep === 1">
+                            <form @submit.prevent="nextSubStep">
+                                <div class="mb-3">
+                                    <label for="cod_emp" class="form-label">Empreendimento</label>
+                                    <select v-model="form.cod_emp" class="form-select" id="cod_emp" required>
+                                        <option value="">Selecione um empreendimento</option>
+                                        <option v-for="emp in props.empreendimentos" :key="emp" :value="emp">{{ emp }}</option>
+                                    </select>
+                                    <InputError :message="form.errors.cod_emp" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="familia" class="form-label">Família</label>
+                                    <input v-model="form.familia" type="text" class="form-control" id="familia" :disabled="produto === 'Fauna'" required />
+                                    <InputError :message="form.errors.familia" />
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <NavButton type="submit" type-button="primary" title="Avançar" />
+                                </div>
+                            </form>
+                        </div>
 
-                            <!-- Subetapa 1/4 -->
-                            <div v-if="subStep === 1">
-                                <form @submit.prevent="nextSubStep">
-                                    <div class="mb-3">
-                                        <label for="cod_emp" class="form-label">Empreendimento</label>
-                                        <select v-model="form.cod_emp" class="form-select" id="cod_emp" required>
-                                            <option value="">Selecione um empreendimento</option>
-                                            <option v-for="emp in props.empreendimentos" :key="emp" :value="emp">{{ emp }}</option>
-                                        </select>
-                                        <div v-if="form.errors.cod_emp" class="text-danger">{{ form.errors.cod_emp }}</div>
-                                    </div>
-                                    <!-- <div class="mb-3">
-                                        <label for="descricao_revisada" class="form-label">Descrição Revisada</label>
-                                        <input v-model="form.descricao_revisada" type="text" class="form-control" id="descricao_revisada" required />
-                                        <div v-if="form.errors.descricao_revisada" class="text-danger">{{ form.errors.descricao_revisada }}</div>
-                                    </div> -->
-                                    <div class="mb-3">
-                                        <label class="form-label">Vincular ABIO</label>
-                                        <button type="button" class="btn btn-primary" @click="mostrarAlerta">Vincular ABIO</button>
-                                        <div v-if="showAlert" class="alert alert-info alert-dismissible fade show mt-2" role="alert">
-                                            Para prosseguir para a próxima etapa, lembre-se de cadastrar a ABIO no módulo de teste.
-                                            <button type="button" class="btn-close" @click="showAlert = false"></button>
+                        <!-- Subetapa 2/4 -->
+                        <div v-if="subStep === 2">
+                            <form @submit.prevent="nextSubStep">
+                                <!-- Dados Gerais -->
+                                <h4 class="mb-3">DADOS GERAIS</h4>
+                                <div class="mb-4">
+                                    <div class="row mb-3">
+                                        <div class="col-12 col-md-6">
+                                            <InputLabel value="ID Campanha" for="id" />
+                                            <input type="text" id="id" class="form-control" v-model="formDadosGerais.id" disabled />
+                                            <InputError :message="formDadosGerais.errors.id" />
                                         </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="familia" class="form-label">Família</label>
-                                        <input v-model="form.familia" type="text" class="form-control" id="familia" :disabled="produto === 'Fauna'" required />
-                                        <div v-if="form.errors.familia" class="text-danger">{{ form.errors.familia }}</div>
+                                    <div class="row mb-3">
+                                        <div class="col-12 col-md-6">
+                                            <InputLabel value="Data Inicial" for="data_campanha_inicial" />
+                                            <input type="date" id="data_campanha_inicial" class="form-control" v-model="formDadosGerais.data_campanha_inicial" />
+                                            <InputError :message="formDadosGerais.errors.data_campanha_inicial" />
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <InputLabel value="Data Final" for="data_campanha_final" />
+                                            <input type="date" id="data_campanha_final" class="form-control" v-model="formDadosGerais.data_campanha_final" />
+                                            <InputError :message="formDadosGerais.errors.data_campanha_final" />
+                                        </div>
                                     </div>
-                                    <div class="d-flex justify-content-end">
-                                        <NavButton type="submit" type-button="primary" title="Avançar" />
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <InputLabel value="Período" for="periodo" />
+                                            <div class="d-flex align-items-center">
+                                                <label class="form-check form-check-inline me-3">
+                                                    <input class="form-check-input" type="radio" name="periodo" value="Seca" v-model="formDadosGerais.periodo" />
+                                                    <span class="form-check-label">Seca</span>
+                                                </label>
+                                                <label class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="periodo" value="Chuva" v-model="formDadosGerais.periodo" />
+                                                    <span class="form-check-label">Chuva</span>
+                                                </label>
+                                            </div>
+                                            <InputError :message="formDadosGerais.errors.periodo" />
+                                        </div>
                                     </div>
-                                </form>
-                            </div>
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <InputLabel value="Observações" for="obs" />
+                                            <textarea id="obs" class="form-control" v-model="formDadosGerais.obs" rows="5"></textarea>
+                                            <InputError :message="formDadosGerais.errors.obs" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-flex justify-content-end">
+                                            <NavButton type="button" type-button="success" title="Salvar" @click="salvarDadosGerais" />
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <!-- Subetapa 2/4 -->
-                            <div v-if="subStep === 2">
-                                <form @submit.prevent="nextSubStep">
-                                    <!-- Dados Gerais -->
-                                    <h4 class="mb-3">DADOS GERAIS</h4>
-                                    <div class="mb-4">
-                                        <div class="row mb-3">
-                                            <div class="col-12 col-md-6">
-                                                <InputLabel value="ID Campanha" for="id" />
-                                                <input type="text" id="id" class="form-control" v-model="formDadosGerais.id" disabled />
-                                                <InputError :message="formDadosGerais.errors.id" />
-                                            </div>
-                                            <div class="col-12 col-md-6">
-                                                <InputLabel value="Módulos Amostrais" for="modulos" />
-                                                <input type="text" id="modulos" value="N/A" disabled class="form-control" />
-                                                <InputError :message="formDadosGerais.errors.id" />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-12 col-md-6">
-                                                <InputLabel value="Data Inicial" for="data_campanha_inicial" />
-                                                <input type="date" id="data_campanha_inicial" class="form-control" v-model="formDadosGerais.data_campanha_inicial" />
-                                                <InputError :message="formDadosGerais.errors.data_campanha_inicial" />
-                                            </div>
-                                            <div class="col-12 col-md-6">
-                                                <InputLabel value="Data Final" for="data_campanha_final" />
-                                                <input type="date" id="data_campanha_final" class="form-control" v-model="formDadosGerais.data_campanha_final" />
-                                                <InputError :message="formDadosGerais.errors.data_campanha_final" />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-12">
-                                                <InputLabel value="Período" for="periodo" />
-                                                <div class="d-flex align-items-center">
-                                                    <label class="form-check form-check-inline me-3">
-                                                        <input class="form-check-input" type="radio" name="periodo" value="Seca" v-model="formDadosGerais.periodo" />
-                                                        <span class="form-check-label">Seca</span>
-                                                    </label>
-                                                    <label class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio" name="periodo" value="Chuva" v-model="formDadosGerais.periodo" />
-                                                        <span class="form-check-label">Chuva</span>
-                                                    </label>
-                                                </div>
-                                                <InputError :message="formDadosGerais.errors.periodo" />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-12">
-                                                <InputLabel value="Observações" for="obs" />
-                                                <textarea id="obs" class="form-control" v-model="formDadosGerais.obs" rows="5"></textarea>
-                                                <InputError :message="formDadosGerais.errors.obs" />
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col d-flex justify-content-end">
-                                                <NavButton type="button" type-button="success" title="Salvar" @click="salvarDadosGerais" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Vincular ABIO -->
-                                    <h4 class="mb-3">VINCULAR ABIO</h4>
-                                    <div class="mb-4">
-                                        <div class="row mb-3">
-                                            <div class="col-12 col-md-10">
-                                                <InputLabel value="N° ABIO Vigente" for="id_abio" />
-                                                <v-select
-                                                    :options="abioOptions"
-                                                    :reduce="a => a.id"
-                                                    v-model="formAbio.id_abio"
-                                                    placeholder="Selecione um ABIO"
-                                                    class="v-select-custom"
-                                                >
-                                                    <template #no-options>
-                                                        Nenhum registro encontrado.
-                                                    </template>
-                                                </v-select>
-                                                <InputError :message="formAbio.errors.id_abio" />
-                                            </div>
-                                            <div class="col-12 col-md-2 d-flex align-items-end">
-                                                <NavButton type="button" type-button="success" title="Salvar" class="w-100" @click="salvarAbio" />
-                                            </div>
-                                        </div>
-                                        <div class="table-responsive">
-                                            <Table :columns="['ABIOs Vigentes', 'Ação']" :records="{ data: abioRecords, links: [] }">
-                                                <template #body="{ item }">
-                                                    <tr>
-                                                        <td>{{ item.abio?.licenca?.numero_licenca || 'N/A' }}</td>
-                                                        <td class="text-center" style="min-width: 100px;">
-                                                            <NavButton @click="excluirAbio(item.id)" type-button="danger" title="Excluir">
-                                                                <i class="bi bi-trash"></i>
-                                                            </NavButton>
-                                                        </td>
-                                                    </tr>
+                                <!-- Vincular ABIO -->
+                                <h4 class="mb-3">VINCULAR ABIO</h4>
+                                <div class="mb-4">
+                                    <div class="row mb-3">
+                                        <div class="col-12 col-md-10">
+                                            <InputLabel value="N° ABIO Vigente" for="id_abio" />
+                                            <v-select
+                                                :options="abioOptions"
+                                                :reduce="a => a.id"
+                                                v-model="formAbio.id_abio"
+                                                placeholder="Selecione um ABIO"
+                                                class="v-select-custom"
+                                            >
+                                                <template #no-options>
+                                                    Nenhum registro encontrado.
                                                 </template>
-                                            </Table>
+                                            </v-select>
+                                            <InputError :message="formAbio.errors.id_abio" />
+                                        </div>
+                                        <div class="col-12 col-md-2 d-flex align-items-end">
+                                            <NavButton type="button" type-button="success" title="Salvar" class="w-100" @click="salvarAbio" />
                                         </div>
                                     </div>
+                                    <div class="table-responsive">
+                                        <Table :columns="['ABIOs Vigentes', 'Ação']" :records="{ data: abioRecords, links: [] }">
+                                            <template #body="{ item }">
+                                                <tr>
+                                                    <td>{{ item.abio?.licenca?.numero_licenca || 'N/A' }}</td>
+                                                    <td class="text-center" style="min-width: 100px;">
+                                                        <NavButton @click="excluirAbio(item.id)" type-button="danger" title="Excluir">
+                                                            <i class="bi bi-trash"></i>
+                                                        </NavButton>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </Table>
+                                    </div>
+                                </div>
 
-                                    <!-- Vincular Profissionais -->
-                                    <h4 class="mb-3">VINCULAR PROFISSIONAIS</h4>
-                                    <div class="mb-4">
-                                        <div class="row mb-3">
-                                            <div class="col-12 col-md-5">
-                                                <InputLabel value="Selecionar Profissional" for="id_profissional" />
-                                                <v-select v-model="formProfissional.id_profissional" placeholder="Selecione um profissional" class="v-select-custom" />
-                                                <InputError :message="formProfissional.errors.id_profissional" />
-                                            </div>
-                                            <div class="col-12 col-md-5">
-                                                <InputLabel value="Grupo Responsável" for="id_grupo_faunistico" />
-                                                <v-select v-model="formProfissional.id_grupo_faunistico" placeholder="Selecione um grupo" class="v-select-custom" />
-                                                <InputError :message="formProfissional.errors.id_grupo_faunistico" />
-                                            </div>
-                                            <div class="col-12 col-md-2 d-flex align-items-end">
-                                                <NavButton type="button" type-button="success" title="Salvar" class="w-100" @click="salvarProfissional" />
-                                            </div>
-                                        </div>
-                                        <div class="table-responsive">
-                                            <Table :columns="['Equipe Técnica', 'Grupo Responsável', 'Ação']" :records="{ data: profissionalRecords, links: [] }">
-                                                <template #body="{ item }">
-                                                    <tr>
-                                                        <td>{{ item.rh?.rh?.nome || 'N/A' }}</td>
-                                                        <td>{{ item.grupo_faunistico?.grupo_faunistico || 'N/A' }}</td>
-                                                        <td class="text-center" style="min-width: 100px;">
-                                                            <NavButton @click="excluirProfissional(item.id)" type-button="danger" title="Excluir">
-                                                                <i class="bi bi-trash"></i>
-                                                            </NavButton>
-                                                        </td>
-                                                    </tr>
-                                                </template>
-                                            </Table>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <NavButton type="button" type-button="secondary" title="Voltar" @click="prevSubStep" />
-                                        <NavButton type="submit" type-button="primary" title="Avançar" />
-                                    </div>
-                                </form>
-                            </div>
-
-                            <!-- Subetapa 3/4 -->
-                            <div v-if="subStep === 3">
-                                <form @submit.prevent="nextSubStep">
-                                    <h4 class="mb-3">MÓDULOS AMOSTRAIS</h4>
-                                    <div class="mb-4">
-                                        <NavButton
-                                            type="button"
-                                            type-button="primary"
-                                            title="Cadastrar Módulo"
-                                            @click="modalModuloAmostral.abrirModal()"
-                                        />
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <NavButton type="button" type-button="secondary" title="Voltar" @click="prevSubStep" />
-                                        <NavButton type="submit" type-button="primary" title="Avançar" />
-                                    </div>
-                                </form>
-                                <ModalModuloAmostral ref="modalModuloAmostral" />
-                            </div>
-
-                            <!-- Subetapa 4/4 -->
-                            <div v-if="subStep === 4">
-                                <form @submit.prevent="nextStep">
-                                    <h4 class="mb-3">1.2 Área de Amostragem</h4>
-                                    <h5 class="mb-3">1.2.3 Pontos de Quelônios e Crocodilianos</h5>
-                                    <div class="mb-4">
-                                        <div class="form-check mb-3">
-                                            <input
-                                                type="checkbox"
-                                                class="form-check-input"
-                                                id="nao_se_aplica"
-                                                v-model="naoSeAplica"
+                                <!-- Vincular Profissionais -->
+                                <h4 class="mb-3">VINCULAR PROFISSIONAIS</h4>
+                                <div class="mb-4">
+                                    <div class="row mb-3">
+                                        <div class="col-12 col-md-5">
+                                            <InputLabel value="Selecionar Profissional" for="profissional" />
+                                            <v-select
+                                                v-model="formProfissional.profissional"
+                                                :options="profissionalOptions"
+                                                :reduce="p => p.value"
+                                                placeholder="Selecione um profissional"
+                                                class="v-select-custom"
                                             />
-                                            <label class="form-check-label" for="nao_se_aplica">Não se aplica</label>
+                                            <InputError :message="formProfissional.errors.profissional" />
                                         </div>
-                                        <div class="row mb-3">
-                                            <div class="col-12 col-md-6">
-                                                <InputLabel value="Ponto de Coleta" for="ponto_coleta" />
-                                                <input
-                                                    type="text"
-                                                    id="ponto_coleta"
-                                                    class="form-control"
-                                                    v-model="formPontosAmostragem.ponto_coleta"
-                                                    :disabled="naoSeAplica"
-                                                />
-                                                <InputError :message="formPontosAmostragem.errors.ponto_coleta" />
-                                            </div>
-                                            <div class="col-12 col-md-6">
-                                                <InputLabel value="Nome do Curso Hídrico" for="nome_curso_hidrico" />
-                                                <input
-                                                    type="text"
-                                                    id="nome_curso_hidrico"
-                                                    class="form-control"
-                                                    v-model="formPontosAmostragem.nome_curso_hidrico"
-                                                    :disabled="naoSeAplica"
-                                                />
-                                                <InputError :message="formPontosAmostragem.errors.nome_curso_hidrico" />
-                                            </div>
+                                        <div class="col-12 col-md-5">
+                                            <InputLabel value="Grupo Responsável" for="grupo_faunistico" />
+                                            <v-select
+                                                v-model="formProfissional.grupo_faunistico"
+                                                :options="grupoFaunisticoOptions"
+                                                :reduce="g => g.value"
+                                                placeholder="Selecione um grupo"
+                                                class="v-select-custom"
+                                            />
+                                            <InputError :message="formProfissional.errors.grupo_faunistico" />
                                         </div>
-                                        <div class="row mb-3">
-                                            <div class="col-12 col-md-6">
-                                                <InputLabel value="Coordenadas" for="coordenadas" />
-                                                <input
-                                                    type="text"
-                                                    id="coordenadas"
-                                                    class="form-control"
-                                                    v-model="formPontosAmostragem.coordenadas"
-                                                    :disabled="naoSeAplica"
-                                                />
-                                                <InputError :message="formPontosAmostragem.errors.coordenadas" />
-                                            </div>
-                                            <div class="col-12 col-md-6">
-                                                <InputLabel value="Bacia Hidrográfica" for="bacia" />
-                                                <input
-                                                    type="text"
-                                                    id="bacia"
-                                                    class="form-control"
-                                                    v-model="formPontosAmostragem.bacia"
-                                                    :disabled="naoSeAplica"
-                                                />
-                                                <InputError :message="formPontosAmostragem.errors.bacia" />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-12 col-md-6">
-                                                <InputLabel value="Profundidade (m)" for="profundidade" />
-                                                <input
-                                                    type="number"
-                                                    step="any"
-                                                    id="profundidade"
-                                                    class="form-control"
-                                                    v-model="formPontosAmostragem.profundidade"
-                                                    :disabled="naoSeAplica"
-                                                />
-                                                <InputError :message="formPontosAmostragem.errors.profundidade" />
-                                            </div>
-                                            <div class="col-12 col-md-6">
-                                                <InputLabel value="Largura (m)" for="largura" />
-                                                <input
-                                                    type="number"
-                                                    step="any"
-                                                    id="largura"
-                                                    class="form-control"
-                                                    v-model="formPontosAmostragem.largura"
-                                                    :disabled="naoSeAplica"
-                                                />
-                                                <InputError :message="formPontosAmostragem.errors.largura" />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-12">
-                                                <InputLabel value="Tipo de Substrato" for="tipo_substrato" />
-                                                <input
-                                                    type="text"
-                                                    id="tipo_substrato"
-                                                    class="form-control"
-                                                    v-model="formPontosAmostragem.tipo_substrato"
-                                                    :disabled="naoSeAplica"
-                                                />
-                                                <InputError :message="formPontosAmostragem.errors.tipo_substrato" />
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col d-flex justify-content-end">
-                                                <NavButton
-                                                    type="button"
-                                                    type-button="success"
-                                                    title="Salvar"
-                                                    @click="salvarPontosAmostragem"
-                                                />
-                                            </div>
+                                        <div class="col-12 col-md-2 d-flex align-items-end">
+                                            <NavButton type="button" type-button="success" title="Vincular" class="w-100" @click="vincularProfissional" />
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-between">
-                                        <NavButton type="button" type-button="secondary" title="Voltar" @click="prevSubStep" />
-                                        <NavButton type="submit" type-button="primary" title="Avançar" />
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <NavButton type="button" type-button="primary" title="Cadastrar Profissional" @click="showModal = true" />
+                                        </div>
                                     </div>
-                                </form>
-                            </div>
-                        </div>
+                                    <div class="table-responsive">
+                                        <Table :columns="['Equipe Técnica', 'Formação', 'Grupo Responsável', 'Ação']" :records="{ data: profissionalRecords, links: [] }">
+                                            <template #body="{ item }">
+                                                <tr>
+                                                    <td>{{ item.profissional || 'N/A' }}</td>
+                                                    <td>{{ item.formacao || 'N/A' }}</td>
+                                                    <td>{{ item.grupo_faunistico || 'N/A' }}</td>
+                                                    <td class="text-center" style="min-width: 100px;">
+                                                        <NavButton @click="excluirProfissional(item.id)" type-button="danger" title="Excluir">
+                                                            <i class="bi bi-trash"></i>
+                                                        </NavButton>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </Table>
+                                    </div>
+                                </div>
 
-                        <!-- Aba Metodologias -->
-                        <div v-if="currentStep === 'metodologias'">
-                            <form @submit.prevent="nextStep">
-                                <h4 class="mb-3">Metodologias</h4>
-                                <p>Em desenvolvimento. Adicione aqui as metodologias utilizadas.</p>
                                 <div class="d-flex justify-content-between">
-                                    <NavButton type="button" type-button="secondary" title="Voltar" @click="prevStep" />
+                                    <NavButton type="button" type-button="secondary" title="Voltar" @click="prevSubStep" />
                                     <NavButton type="submit" type-button="primary" title="Avançar" />
                                 </div>
                             </form>
                         </div>
 
-                        <!-- Aba Equipe -->
-                        <div v-if="currentStep === 'equipe'">
-                            <form @submit.prevent="nextStep">
-                                <h4 class="mb-3">Equipe</h4>
-                                <p>Em desenvolvimento. Liste os membros da equipe.</p>
+                        <!-- Subetapa 3/4 -->
+                        <div v-if="subStep === 3">
+                            <form @submit.prevent="nextSubStep">
+                                <h4 class="mb-3">MÓDULOS AMOSTRAIS</h4>
+                                <div class="mb-4">
+                                    <p>Funcionalidade em desenvolvimento.</p>
+                                </div>
                                 <div class="d-flex justify-content-between">
-                                    <NavButton type="button" type-button="secondary" title="Voltar" @click="prevStep" />
+                                    <NavButton type="button" type-button="secondary" title="Voltar" @click="prevSubStep" />
                                     <NavButton type="submit" type-button="primary" title="Avançar" />
                                 </div>
                             </form>
                         </div>
 
-                        <!-- Aba Resultados -->
-                        <div v-if="currentStep === 'resultados'">
-                            <form @submit.prevent="nextStep">
-                                <h4 class="mb-3">Resultados</h4>
-                                <p>Em desenvolvimento. Insira os resultados obtidos.</p>
-                                <div class="d-flex justify-content-between">
-                                    <NavButton type="button" type-button="secondary" title="Voltar" @click="prevStep" />
-                                    <NavButton type="submit" type-button="primary" title="Avançar" />
+                        <!-- Subetapa 4/4 -->
+                        <div v-if="subStep === 4">
+                            <form @submit.prevent="nextSubStep">
+                                <h4 class="mb-3">1.2 Área de Amostragem</h4>
+                                <h5 class="mb-3">1.2.3 Pontos de Quelônios e Crocodilianos</h5>
+                                <div class="mb-4">
+                                    <div class="form-check mb-3">
+                                        <input type="checkbox" class="form-check-input" id="nao_se_aplica" v-model="naoSeAplica" />
+                                        <label class="form-check-label" for="nao_se_aplica">Não se aplica</label>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-12 col-md-6">
+                                            <InputLabel value="Ponto de Coleta" for="ponto_coleta" />
+                                            <input type="text" id="ponto_coleta" class="form-control" v-model="formPontosAmostragem.ponto_coleta" :disabled="naoSeAplica" />
+                                            <InputError :message="formPontosAmostragem.errors.ponto_coleta" />
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <InputLabel value="Nome do Curso Hídrico" for="nome_curso_hidrico" />
+                                            <input type="text" id="nome_curso_hidrico" class="form-control" v-model="formPontosAmostragem.nome_curso_hidrico" :disabled="naoSeAplica" />
+                                            <InputError :message="formPontosAmostragem.errors.nome_curso_hidrico" />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-12 col-md-6">
+                                            <InputLabel value="Coordenadas" for="coordenadas" />
+                                            <input type="text" id="coordenadas" class="form-control" v-model="formPontosAmostragem.coordenadas" :disabled="naoSeAplica" />
+                                            <InputError :message="formPontosAmostragem.errors.coordenadas" />
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <InputLabel value="Bacia Hidrográfica" for="bacia" />
+                                            <input type="text" id="bacia" class="form-control" v-model="formPontosAmostragem.bacia" :disabled="naoSeAplica" />
+                                            <InputError :message="formPontosAmostragem.errors.bacia" />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-12 col-md-6">
+                                            <InputLabel value="Profundidade (m)" for="profundidade" />
+                                            <input type="number" step="any" id="profundidade" class="form-control" v-model="formPontosAmostragem.profundidade" :disabled="naoSeAplica" />
+                                            <InputError :message="formPontosAmostragem.errors.profundidade" />
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <InputLabel value="Largura (m)" for="largura" />
+                                            <input type="number" step="any" id="largura" class="form-control" v-model="formPontosAmostragem.largura" :disabled="naoSeAplica" />
+                                            <InputError :message="formPontosAmostragem.errors.largura" />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <InputLabel value="Tipo de Substrato" for="tipo_substrato" />
+                                            <input type="text" id="tipo_substrato" class="form-control" v-model="formPontosAmostragem.tipo_substrato" :disabled="naoSeAplica" />
+                                            <InputError :message="formPontosAmostragem.errors.tipo_substrato" />
+                                        </div>
+                                    </div>
                                 </div>
-                            </form>
-                        </div>
-
-                        <!-- Aba Anexos -->
-                        <div v-if="currentStep === 'anexos'">
-                            <form @submit.prevent="submit">
-                                <h4 class="mb-3">Anexos</h4>
-                                <p>Em desenvolvimento. Adicione arquivos relevantes.</p>
                                 <div class="d-flex justify-content-between">
-                                    <NavButton type="button" type-button="secondary" title="Voltar" @click="prevStep" />
+                                    <NavButton type="button" type-button="secondary" title="Voltar" @click="prevSubStep" />
                                     <NavButton type="submit" type-button="primary" title="Finalizar" />
                                 </div>
                             </form>
+                        </div>
+
+                        <!-- Modal para Cadastrar Profissional -->
+                        <div v-if="showModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Cadastrar Profissional</h5>
+                                        <button type="button" class="btn-close" @click="showModal = false"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form @submit.prevent="salvarNovoProfissional">
+                                            <div class="mb-3">
+                                                <InputLabel value="Nome do Profissional" for="profissional" />
+                                                <input v-model="formNovoProfissional.profissional" type="text" class="form-control" id="profissional" required />
+                                                <InputError :message="formNovoProfissional.errors.profissional" />
+                                            </div>
+                                            <div class="mb-3">
+                                                <InputLabel value="Formação" for="formacao" />
+                                                <input v-model="formNovoProfissional.formacao" type="text" class="form-control" id="formacao" required />
+                                                <InputError :message="formNovoProfissional.errors.formacao" />
+                                            </div>
+                                            <div class="d-flex justify-content-end">
+                                                <NavButton type="button" type-button="secondary" title="Cancelar" @click="showModal = false" class="me-2" />
+                                                <NavButton type="submit" type-button="primary" title="Salvar" />
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -647,12 +534,7 @@ const modalModuloAmostral = ref(null);
 .table-responsive {
     margin-bottom: 1rem;
 }
-.nav-tabs .nav-link {
-    cursor: pointer;
-}
-.alert-dismissible {
-    position: relative;
-    padding-right: 4rem;
+.modal {
+    z-index: 1050;
 }
 </style>
-```
