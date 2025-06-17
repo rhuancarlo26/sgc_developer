@@ -9,6 +9,7 @@ class SgcvwEstudos extends Model
 {
 
     use HasFactory;
+    protected $appends = ['data_ultima_alteracao'];
 
     protected $fillable = [
         'contrato_id',
@@ -107,6 +108,20 @@ class SgcvwEstudos extends Model
             ->where('table_name', 'sgcvw_estudos')
             ->with('user')
             ->orderBy('created_at', 'desc');
+    }
+    // app/Models/Empreendimento.php
+
+    public function getDataUltimaAlteracaoAttribute()
+    {
+        $logs = $this->changelogs;
+
+        // Se for array de logs, pega a data mais recente
+        if (is_array($logs) && !empty($logs)) {
+            $datas = array_column($logs, 'created_at');
+            return max($datas);
+        }
+
+        return null;
     }
 
 }

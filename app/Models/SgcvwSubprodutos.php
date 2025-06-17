@@ -9,6 +9,7 @@ class SgcvwSubprodutos extends Model
 {
     use HasFactory;
     protected $table = 'sgcvw_subprodutos';
+    protected $appends = ['data_ultima_alteracao'];
     protected $guarded = ['id', 'created_at'];
     public function changelogs()
     {
@@ -16,6 +17,18 @@ class SgcvwSubprodutos extends Model
             ->where('table_name', $this->table)
             ->with('user')
             ->orderBy('created_at', 'desc');
+    }
+    public function getDataUltimaAlteracaoAttribute()
+    {
+        $logs = $this->changelogs;
+
+        // Se for array de logs, pega a data mais recente
+        if (is_array($logs) && !empty($logs)) {
+            $datas = array_column($logs, 'created_at');
+            return max($datas);
+        }
+
+        return null;
     }
 
 }
