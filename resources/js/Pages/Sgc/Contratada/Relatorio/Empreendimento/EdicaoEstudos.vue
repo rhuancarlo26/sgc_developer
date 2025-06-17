@@ -12,6 +12,14 @@
           </li>
           <li class="nav-item">
           <a class="nav-link" href="/sgc/gestao/2/edicao-produtos">Subprodutos</a>
+            <Link class="nav-link" :href="route('sgc.contratada.edicao')">Empreendimentos</Link>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" aria-current="page" href="#"> >> Estudos</a>
+          </li>
+          <li class="nav-item">
+            <Link class="nav-link" :href="route('sgc.contratada.edicaoprodutos')"> >> Subprodutos</Link>
+
           </li>
       </ul>
       <br>
@@ -232,6 +240,8 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
+import { ref, computed, onMounted } from "vue";
+import { router, usePage, Link } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import CadastroModal from './CadastroModal.vue';
@@ -354,7 +364,7 @@ const camposfixos = computed(() => {
 
 const salvarEdicao = () => {
   router.post(
-    `/sgc/gestao/updatecampoestudos/${empreendimentoEdit.value.id}`,
+    route('sgc.contratada.updatecampoestudos', empreendimentoEdit.value.id),
     { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
     {
       onSuccess: () => {

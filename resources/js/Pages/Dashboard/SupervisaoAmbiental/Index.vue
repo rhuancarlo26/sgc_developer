@@ -24,6 +24,7 @@ const props = defineProps({
     getChartDataBarLoteIntensidadeExecOcorrencia: Object,
     lotes: Array,
     registros: Array,
+    contrato: Object
 });
 
 
@@ -193,7 +194,14 @@ setTimeout(() => {
     <Head title="Dashboard Supervisao Ambiental" />
     <AuthenticatedLayout>
         <div class="card card-body mb-4">
-            <h1 class="text-center mb-4">Programa de Supervisao Ambiental</h1>
+            <div class="row justify-content-center">
+                <div class="card-body text-center">
+                    <h1 class="card-title mb-3">Programa de Supervisao Ambiental</h1>
+                    <p class="mb-2"><strong>Contratada:</strong> {{ contrato?.contratada }}</p>
+                    <p class="mb-2"><strong>Número do Contrato:</strong> {{ contrato?.numero_contrato }}</p>
+                    <p class="mb-0"><strong>UFs / BRs:</strong> {{ contrato?.ufs }} / {{ contrato?.brs }}</p>
+                </div>
+            </div>
         </div>
         <div class="row">
             <div class="col-lg-7 mb-4">
@@ -380,7 +388,7 @@ setTimeout(() => {
                                 <table class="table table-bordered mb-0">
                                     <thead>
                                         <tr>
-                                           
+
                                             <th>Descrição</th>
                                             <th>Tipo</th>
                                             <th>Intensidade</th>

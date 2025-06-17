@@ -41,7 +41,7 @@ class PatioEstocagemService extends BaseModelService
 
     public function store(array $request): array
     {
-        $this->handleShapefile(request: $request);
+        // $this->handleShapefile(request: $request);
         $response = $this->dataManagement->create(entity: $this->modelClass, infos: [
             ...$request,
             'chave' => $this->getCodigo(prefix: 'PE'),
@@ -57,7 +57,7 @@ class PatioEstocagemService extends BaseModelService
 
     public function update(array $request): array
     {
-        $this->handleShapefile(request: $request);
+        // $this->handleShapefile(request: $request);
         $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
         $this->arquivoUtils->handleFotos(
             fotos: $request['fotos'] ?? [],

@@ -15,12 +15,13 @@ class IndexDashboardSupervisaoAmbientalController extends Controller
   public function index(Servicos $servicos): Response
   {
 
-    $servicos->load(['monitora_supervisao_ambiental']);
+    $servicos->load(['monitora_supervisao_ambiental','contrato']);
 
     $charts =  $this->registros_service->graficos_monitora_supervisao($servicos);
 
 
     return Inertia::render('Dashboard/SupervisaoAmbiental/Index', [
+      'contrato' => $servicos->contrato,
       'lotes' =>      $charts['lotes'],
       'registros' =>  $charts['registros'],
       'monitora_supervisao_ambientais' => $servicos->monitora_supervisao_ambiental,

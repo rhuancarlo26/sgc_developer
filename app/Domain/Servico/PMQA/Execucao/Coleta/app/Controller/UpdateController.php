@@ -23,9 +23,9 @@ class UpdateController extends Controller
         $post['id'] = $request->validated('id');
         $post['fk_campanha_ponto'] = $request->validated('fk_campanha_ponto');
         $post['dt_coleta'] = $request->validated('dt_coleta');
-        $post['sem_coleta'] = $request->validated('sem_coleta');
+        $post['coleta'] = $request->validated('coleta');
 
-        if ($request->validated('sem_coleta') === true) {
+        if ($request->validated('coleta') === true) {
             $post['numero_amostra'] = null;
             $post['preservacao_amostra'] = null;
             $post['acondicionamento_amostra'] = null;

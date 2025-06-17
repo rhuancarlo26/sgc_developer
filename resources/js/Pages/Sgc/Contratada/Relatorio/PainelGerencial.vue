@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import { ref, computed, onMounted, reactive } from "vue";
+import { ref, computed, onMounted, reactive, watch } from "vue";
 import axios from "axios";
 import Navbar from "../Navbar.vue";
 import Tabs from "./Tabs.vue";
@@ -10,8 +10,9 @@ import ListaModal from "./ListaModal.vue";
 import DashboardMap from "@/Components/DashboardMap.vue";
 import NavLink from "@/Components/NavLink.vue";
 import { IconPencil, IconPlus, IconTrash, IconZoomCheck } from "@tabler/icons-vue";
-import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import SgcLinkConfirmation from "@/Components/SgcLinkConfirmation.vue";
 import PaginationSgc from '@/Components/PaginationSgc.vue';
+import Multiselect from 'vue-multiselect'
 
 const listaModal = ref();
 
@@ -53,20 +54,20 @@ const acessarEmpreendimento = (trecho) => {
   });
 };
 
-// Contagem de Estudos em Andamento 
+// Contagem de Estudos em Andamento
 const estudosEmAndamento = computed(() => {
   return empreendimentosFiltrados.value.filter(emp => emp.ose_sei && emp.ose_sei.trim() !== '').length;
 });
 
-// Contagem de Estudos no Total 
+// Contagem de Estudos no Total
 const estudosTotal = computed(() => {
   return empreendimentosFiltrados.value.filter(emp => emp.contrato_est_ambiental && emp.contrato_est_ambiental.trim() !== '').length;
 });
 
 const formatarData = (data) => {
-  if (!data) return ''; 
+  if (!data) return '';
   const dataObj = new Date(data);
-  if (isNaN(dataObj)) return data; 
+  if (isNaN(dataObj)) return data;
   const dia = String(dataObj.getDate()).padStart(2, '0');
   const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
   const ano = dataObj.getFullYear();
@@ -133,33 +134,41 @@ const submitForm = () => {
 const valoresContratoEstAmbiental = computed(() => {
   const valores = props.empreendimentos
     .map(emp => emp.contrato_est_ambiental)
-    .filter(val => val && val.trim() !== ''); 
+    .filter(val => val && val.trim() !== '');
   return [...new Set(valores)];
 });
 
-const contratoEstAmbientalSelecionado = ref(null);
+const contratoEstAmbientalSelecionado = ref([]);
+
+watch(contratoEstAmbientalSelecionado, () => {
+  atualizarFiltroContratoEstAmbiental();
+}, { deep: true });
 
 const atualizarFiltroContratoEstAmbiental = () => {
   setTimeout(() => {
-    let empreendimentosFiltrados = props.empreendimentos.filter(trecho => trecho.coordenadas);
+    let empreendimentosFiltradosParaMapa = props.empreendimentos.filter(trecho => trecho.coordenadas);
 
-    if (contratoEstAmbientalSelecionado.value) {
-      empreendimentosFiltrados = empreendimentosFiltrados.filter(
-        trecho => trecho.contrato_est_ambiental === contratoEstAmbientalSelecionado.value
+    const selectedValues = contratoEstAmbientalSelecionado.value.map(item => {
+      return typeof item === 'object' && item !== null ? item.name : item;
+    }).filter(value => value != null && String(value).trim() !== '');
+
+    if (selectedValues.length > 0) {
+      empreendimentosFiltradosParaMapa = empreendimentosFiltradosParaMapa.filter(
+        trecho => selectedValues.includes(trecho.contrato_est_ambiental)
       );
     }
 
     if (currentFilter.value === 'ose') {
-      empreendimentosFiltrados = empreendimentosFiltrados.filter(
+      empreendimentosFiltradosParaMapa = empreendimentosFiltradosParaMapa.filter(
         trecho => trecho.ose_sei && trecho.ose_sei.trim() !== ''
       );
     } else if (currentFilter.value === 's/ose') {
-      empreendimentosFiltrados = empreendimentosFiltrados.filter(
+      empreendimentosFiltradosParaMapa = empreendimentosFiltradosParaMapa.filter(
         trecho => !trecho.ose_sei || trecho.ose_sei.trim() === ''
       );
     }
 
-    mapaVisualizarTrecho.value.setGeoJson(empreendimentosFiltrados, 6);
+    mapaVisualizarTrecho.value.setGeoJson(empreendimentosFiltradosParaMapa, 6);
   }, 500);
 };
 
@@ -226,26 +235,27 @@ const filtrarempreendimentos = () => {
 const empreendimentosFiltrados = computed(() => {
   let filtrados = props.empreendimentos;
 
-  // Aplica o filtro de contrato_est_ambiental, se um valor estiver selecionado
-  if (contratoEstAmbientalSelecionado.value) {
-    filtrados = filtrados.filter(
-      trecho => trecho.contrato_est_ambiental === contratoEstAmbientalSelecionado.value
-    );
-  }
+  const selectedContratoValues = contratoEstAmbientalSelecionado.value.map(item => {
+    return typeof item === 'object' && item !== null ? item.name : item;
+  }).filter(value => value != null && String(value).trim() !== '');
 
-  // Aplica os outros filtros (OSE e Não tem OSE), se ativos
-  if (currentFilter.value === 'ose') {
+  if (selectedContratoValues.length > 0) {
     filtrados = filtrados.filter(
-      trecho => trecho.ose_sei && trecho.ose_sei.trim() !== ''
-    );
-  } else if (currentFilter.value === 's/ose') {
-    filtrados = filtrados.filter(
-      trecho => !trecho.ose_sei || trecho.ose_sei.trim() === ''
+      trecho => selectedContratoValues.includes(trecho.contrato_est_ambiental)
     );
   }
 
   return filtrados;
 });
+
+
+const addTag = (newTag) => {
+    const tag = {
+        name: newTag
+    }
+    contratoEstAmbientalSelecionado.value.push(tag);
+}
+
 </script>
 
 <template>
@@ -299,17 +309,18 @@ const empreendimentosFiltrados = computed(() => {
                           </button>
                         </div>
                         <!-- Dropdown para filtro de contrato_est_ambiental -->
-                        <div style="text-align: center; margin-top: 20px;">
-                          <select v-model="contratoEstAmbientalSelecionado" @change="atualizarFiltroContratoEstAmbiental" class="form-control" style="width: 200px; margin: 0 auto;">
-                            <option :value="null">Selecionar Contrato</option>
-                            <option
-                              v-for="valor in valoresContratoEstAmbiental"
-                              :key="valor"
-                              :value="valor"
-                            >
-                              {{ valor }}
-                            </option>
-                          </select>
+                        <div style="text-align: center; margin-top: 20px;" >
+                            <multiselect
+                            v-model="contratoEstAmbientalSelecionado"
+                            :options="valoresContratoEstAmbiental"
+                            :multiple="true"
+                            :taggable="true"
+                            selectLabel="Click para selecionar"
+                            selectedLabel="Selecionado"
+                            deselectLabel="Click para remover"
+                            placeholder="Selecione ou adicione"
+                            @tag="addTag"
+                            />
                         </div>
 
                         <div style="text-align: center; margin-top: 50px;">
@@ -431,17 +442,19 @@ const empreendimentosFiltrados = computed(() => {
                                   :icon="IconZoomCheck"
                                 />
                               </span>
-                              <LinkConfirmation v-slot="confirmation" :options="{ text: `Deseja excluir o empreendimento ${trecho.cod_emp}` }">
+                              <SgcLinkConfirmation v-slot="confirmation"
+                                :options="{ text: `Deseja excluir o empreendimento ${trecho.cod_emp}` }">
                                 <Link
-                                  :onBefore="confirmation.show"
-                                  :href="route('sgc.gestao.dashboard.empreendimento.delete', trecho.id)"
-                                  method="DELETE"
-                                  class="text-danger"
-                                  @click.stop
-                                >
+                                @click.stop
+                                :href="route('sgc.gestao.dashboard.empreendimento.delete', trecho.id)"
+                                :onBefore="() => confirmation.show(
+                                      { url: route('sgc.gestao.dashboard.empreendimento.delete', trecho.id), method: 'DELETE' },
+                                      () => window.location.reload()
+                                  )"
+                                  class="text-danger">
                                   <IconTrash />
                                 </Link>
-                              </LinkConfirmation>
+                              </SgcLinkConfirmation>
                               <a
                                 class="list-unstyled text-warning"
                                 :href="route('sgc.gestao.dashboard.empreendimento.create', [tipo.id, trecho.id])"
@@ -488,7 +501,7 @@ const empreendimentosFiltrados = computed(() => {
 }
 
 tbody tr:hover td:not(.acao) {
-  background-color: #f5f5f5; 
+  background-color: #f5f5f5;
 }
 
 </style>

@@ -21,8 +21,10 @@ class IndexDashboardPMQAController extends Controller
       'contrato',
       'pontos',
       'pmqaResultados',
-      'campanhas.campanha_pontos.ponto',
+      'campanhas.campanha_pontos.ponto.lista',
+      'campanhas.campanha_pontos.ponto.lista.parametros_vinculados.parametro',
       'campanhas.campanha_pontos.coleta',
+      'campanhas.campanha_pontos.medicao.parametros',
       'campanhas.campanha_pontos.coleta.arquivos',
     ]);
 

@@ -1,7 +1,8 @@
 <script setup>
 import { IconFilterOff } from '@tabler/icons-vue';
 import { computed, watch } from 'vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import Offcanvas from 'bootstrap/js/dist/offcanvas'
 
 const props = defineProps({
   ufs: { type: Array },
@@ -20,7 +21,8 @@ const contrato_selecionadas = ref([]);
 const filters = ref({
   uf: [],
   rodovia: [],
-  numero_contrato: []
+  numero_contrato: [],
+  showAtivos: false
 });
 
 const rodovias_ = computed(() => {
@@ -38,10 +40,15 @@ const getParsedCQLFilter = (layerTypeFilterParam, filtersToIgnore = [], likeComp
 
   let filterString = ''
 
+  if (filters.value.showAtivos) {
+    filterString += `situacao = 'ATIVO' AND `;
+  }
+
   const comparator = likeComparison ? 'like' : '=';
 
   for (const [key, value] of Object.entries(filters.value)) {
 
+    if (key === 'showAtivos') continue;
     if (filtersToIgnore.length && filtersToIgnore.includes(key)) continue;
 
     if (!value || (Array.isArray(value) && !value.length)) continue;
@@ -108,6 +115,7 @@ const resetFilters = () => {
     uf: [],
     rodovia: [],
     nr_contrato: [],
+    showAtivos: false
   };
 
   contrato_selecionadas.value = [];
@@ -125,10 +133,27 @@ watch(() => filters, updateFilters, { deep: true })
 
 const emit = defineEmits(['layerSelected', 'layerUnselected', 'filtersReset', 'ufChanged']);
 
+
+onMounted(() => {
+  const el = document.getElementById('filterOffCanvas')
+  const bs = Offcanvas.getOrCreateInstance(el, {
+    backdrop: false,
+    scroll: true
+  })
+  bs.show()
+
+
+  el.addEventListener('shown.bs.offcanvas', () => {
+    document.querySelector('.map').classList.add('with-sidebar')
+  })
+  el.addEventListener('hidden.bs.offcanvas', () => {
+    document.querySelector('.map').classList.remove('with-sidebar')
+  })
+})
 </script>
 <template>
-  <div class="offcanvas offcanvas-start" id="filterOffCanvas" aria-labelledby="offcanvasStartLabel" aria-modal="true"
-    role="dialog">
+  <div class="offcanvas offcanvas-start" id="filterOffCanvas" data-bs-backdrop="false" data-bs-scroll="true"
+    aria-labelledby="offcanvasStartLabel" aria-modal="true" role="dialog">
     <div class="offcanvas-header p-3">
       <h2 class="offcanvas-title" id="filterOffCanvasLabel">Filtro de Camadas</h2>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
@@ -161,6 +186,13 @@ const emit = defineEmits(['layerSelected', 'layerUnselected', 'filtersReset', 'u
             </template>
           </v-select>
         </div>
+        <div class="form-group form-check mb-3">
+          <input type="checkbox" class="form-check-input" id="filterShowAtivos" v-model="filters.showAtivos" />
+          <label class="form-check-label" for="filterShowAtivos">
+            Mostrar apenas contratos ativos
+          </label>
+        </div>
+
 
         <div class="hr-text my-0">Camadas</div>
 
@@ -204,8 +236,21 @@ const emit = defineEmits(['layerSelected', 'layerUnselected', 'filtersReset', 'u
     </div>
   </div>
 </template>
-<style>
-.offcanvas {
-  min-width: 23vw;
+<style scoped>
+.offcanvas#filterOffCanvas {
+  position: relative;
+  width: 23vw;
+  flex: 0 0 23vw;
+  border: none;
+  overflow: hidden;
+  transition: flex 0.3s ease, width 0.3s ease, visibility 0.3s;
+}
+
+
+.offcanvas#filterOffCanvas:not(.show) {
+  visibility: hidden !important;
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  padding: 0 !important;
 }
 </style>

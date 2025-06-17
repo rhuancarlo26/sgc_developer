@@ -2,10 +2,10 @@
 
 use App\Domain\Contrato\Contratada\DadosGerais\Empreendimento\Controller\StoreContratadaEmpreendimentoTrechoController;
 use Illuminate\Support\Facades\Route;
-
 use App\Domain\Sgc\Contratada\app\Controller\ContratoSgcController;
 use App\Domain\Sgc\Contratada\app\Controller\DashplanController;
 use App\Domain\Sgc\Contratada\app\Controller\EmpreendimentosController;
+use App\Domain\Sgc\Contratada\Comentario\Controller\DestroyComentarioController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\RelatorioCoordenacaoController;
 use App\Domain\Sgc\Contratada\Comentario\Controller\DestroyComentariosController;
 use App\Domain\Sgc\Contratada\Comentario\Controller\StoreSgcComentarioController;
@@ -17,6 +17,11 @@ use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StatusUpdateController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\CreateController;
 use App\Domain\Sgc\Contratada\Dav\Controller\ListagemDavController;
 use App\Domain\Sgc\Contratada\Cronograma\Controller\CronogController;
+use App\Domain\Sgc\Contratada\Ficha\Controller\FichaController;
+use App\Domain\Sgc\Contratada\Quantitativos\Controller\QuantitativosController;
+use App\Domain\Sgc\Contratada\Produtos\Controller\ProdutosController;
+
+
 use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
 
@@ -28,14 +33,6 @@ Route::prefix('/contratada')->group(function () {
     Route::get('{contrato}/relatorios',                                   [RelatorioCoordenacaoController::class,                  'relatorios'])->name('sgc.contratada.relatorios.index');
     Route::get('{contrato}/relatorio/{relatorio_num}',                    [RelatorioCoordenacaoController::class,                  'index'])->name('sgc.contratada.relatorio.detalhes');
     Route::get('{contrato}/relatorio/{relatorio_num}/historico/{versao}', [RelatorioCoordenacaoController::class,                  'showHistorico'])->name('sgc.contratada.relatorio.historico');
-
-    Route::get('/send-email/{contrato}/{status}/{relatorio_num}', function ($contrato, $status, $relatorio_num) {
-        $toEmail = 'rhuan.borges@jgpconsultoria.com.br';
-
-        //Mail::to($toEmail)->send(new StatusChanged($status, $contrato, $relatorio_num));
-
-        return 'E-mail enviado!';
-    })->name('sgc.contratada.send-email');
 
     // Download anexo
     Route::get('/sgc/contratada/download-anexo/{contratoId}/{itemId}/{relatorioNum}', [StoreUploadRelatorioController::class, 'downloadAnexo'])->name('sgc.contratada.download_anexo');
@@ -67,7 +64,7 @@ Route::prefix('/contratada')->group(function () {
     Route::post('/sgc/store_comentario',                           [StoreSgcComentarioController::class,                    'index'])->name('sgc.contratada.store_comentario');
     Route::post('/sgc/store_comentarios',                          [StoreSgcComentariosController::class,                   'index'])->name('sgc.contratada.store_comentarios');
     Route::delete('/destroy_comentarios/{comentarios}',            [DestroyComentariosController::class,                    'index'])->name('sgc.contratada.destroy_comentarios');
-    Route::delete('/destroy_comentarios/{comentarios}',            [DestroyComentariosController::class,                    'index'])->name('sgc.contratada.destroy_comentarios');
+    Route::delete('/destroy_comentario/{comentario}',              [DestroyComentarioController::class,                     'destroy'])->name('sgc.contratada.destroy_comentario');
 
     // Inserir novo Relatório de Coordenação
     Route::post('/sgc/relatorio/iniciar',                          [CreateController::class,                                 'index'])->name('sgc.contratada.relatorio.iniciar');
@@ -84,5 +81,32 @@ Route::prefix('/contratada')->group(function () {
     // Update Fóruns
     // Route::post('/sgc/empreendimento/{id}/updatecampo', [EmpreendimentosController::class, 'updatecampo'])->name('sgc.contratada.empreendimento.updatecampo');
     // Route::post('/sgc/gestao/{id}/cadastrarempreendimento', [EmpreendimentosController::class, 'cadastrarempreendimento'])->name('sgc.contratada.empreendimento.cadastrarempreendimento');
+
+    // Ficha Contratual
+    Route::get('{contrato}/ficha', [FichaController::class, 'index'])->name('sgc.contratada.ficha.index');
+
+    // Quantitativos
+    Route::get('{contrato}/quantitativos', [QuantitativosController::class, 'index'])->name('sgc.contratada.quantitativos.index');
+    
+    // Produtos
+    Route::get('/sgc/contratada/{contrato}/produtos/{produto}', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
+    
+    // DocxModal - Novo método    
+    Route::get('/sgc/contratada/get_docx/{itemId}/{contratoId}/{versao}/{numRelatorio}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
+
+
+    // Módulo de edição
+    Route::get('sgc/edicao',                                 [EmpreendimentosController::class,                       'editavel'])->name('sgc.contratada.edicao');
+    Route::get('sgc/edicao-estudos',                         [EmpreendimentosController::class,                       'editavelestudos'])->name('sgc.contratada.edicaoestudos');
+    Route::get('sgc/edicao-produtos',                         [EmpreendimentosController::class,                       'editavelprodutos'])->name('sgc.contratada.edicaoprodutos');
+
+    Route::post('/updatecampo/{corretor}',                      [EmpreendimentosController::class,                       'updatecampo'])->name('sgc.contratada.updatecampo');
+    Route::post('/updatecampoestudos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoestudos'])->name('sgc.contratada.updatecampoestudos');
+    Route::post('/updatecampoprodutos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoprodutos'])->name('sgc.contratada.updatecampoprodutos');
+
+    // PDF Consolidado
+    Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');
+
+
 
 });

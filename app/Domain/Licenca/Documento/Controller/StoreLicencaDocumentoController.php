@@ -19,4 +19,11 @@ class StoreLicencaDocumentoController extends Controller
 
     return to_route('licenca.create', ['licenca' => $request->licenca_id])->with('message', $response);
   }
+
+  public function termo(Request $request)
+  {
+    $response = $this->licencaService->storeDocumentoTermo($request->documentoTermo, $request->licenca_id);
+
+    return to_route('licenca.create', ['licenca' => $request->licenca_id])->with('message', $response);
+  }
 }

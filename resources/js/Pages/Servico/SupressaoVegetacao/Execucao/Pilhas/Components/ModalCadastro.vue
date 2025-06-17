@@ -122,13 +122,19 @@ watch(() => [form.tipo_pilha, form.area_supressao_id], async ([pilha, supressao]
 
 watch(selectedCorte, (value) => {
     if(!value || Object.keys(value).length === 0) {
-        selectedCorte.value = {};
         return;
     }
     form.corte_especie_id = value.id
 }, {immediate: true});
 
 defineExpose({abrirModal});
+
+const dateTimeLocal = computed({
+  get: () => form.created_at
+    ? form.created_at.slice(0,16)  // 'YYYY-MM-DDThh:mm'
+    : '',
+  set: val => form.created_at = val
+});
 </script>
 
 <template>
@@ -143,7 +149,7 @@ defineExpose({abrirModal});
                     </div>
                     <div class="col-lg-4">
                         <InputLabel value="Data do Cadastro" for="created_at"/>
-                        <input v-model="form.created_at" type="date" id="created_at" class="form-control" disabled/>
+                        <input :value="dateTimeLocal" type="datetime-local" id="created_at" class="form-control" disabled/>
                     </div>
                 </div>
                 <div class="row row-gap-2 mb-2">
