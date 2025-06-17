@@ -46,21 +46,8 @@ function formatDate(ts) {
 }
 
 function formatDateFromExcel(serial) {
-  // Recurso: convertia de Serial para o formato data - desativado devido à mudança para date no BD
-  /**
-   *
-   const excelEpoch = new Date(1899, 11, 30); // Excel começa em 30/12/1899
-   const date = new Date(excelEpoch.getTime() + serial * 86400000); // 86400000 = milissegundos por dia
-   return date.toLocaleDateString('pt-BR'); // Formato brasileiro de data (dd/mm/aaaa)
-   */
-  //   if (isSerialDate(serial)) {
-  //     const excelEpoch = new Date(1899, 11, 30); // Excel começa em 30/12/1899
-  //    const date = new Date(excelEpoch.getTime() + serial * 86400000); // 86400000 = milissegundos por dia
-  //    return date.toLocaleDateString('pt-BR'); // Formato brasileiro de data (dd/mm/aaaa)
-  //   } else {
   const date = new Date(serial);
   return date.toLocaleDateString("pt-BR");
-  // }
 }
 
 /** DEFINIÇÃO DE FASES LP  ================================================================================================================== */
@@ -163,7 +150,7 @@ const fases_lp = reactive([
     fase: "FCA",
     status: props.empreendimentos2.fca_sei !== null ? 1 : 0,
     periodo: formatDateFromExcel(props.empreendimentos2.fca_data),
-    numero_sei: props.empreendimentos2.fca_sei !== null ? props.empreendimentos2.fca_sei : "", // Adiciona o número SEI
+    numero_sei: props.empreendimentos2.fca_sei !== null ? props.empreendimentos2.fca_sei : "", 
   },
   {
     id: 2,
@@ -171,40 +158,49 @@ const fases_lp = reactive([
     status: props.empreendimentos2.tre_sei_dnit !== null ? 1 : 0,
     sei: (props.empreendimentos2.tre_sei_dnit),
     periodo: formatDateFromExcel(props.empreendimentos2.tre_data),
-    numero_sei: props.empreendimentos2.tre_sei_dnit !== null ? props.empreendimentos2.tre_sei_dnit : "", // Adiciona o número SEI
+    numero_sei: props.empreendimentos2.tre_sei_dnit !== null ? props.empreendimentos2.tre_sei_dnit : "", 
   },
   {
     id: 3,
     fase: "Plano de Trabalho",
     status: status_lp_pt,
     periodo: formatDateFromExcel(props.empreendimentos2.plano_de_trabalho_aprovado),
-    numero_sei: props.empreendimentos2.plano_de_trabalho_entregue !== null ? props.empreendimentos2.plano_de_trabalho_entregue : "", // Adiciona o número SEI
+    numero_sei: props.empreendimentos2.plano_de_trabalho_entregue !== null ? props.empreendimentos2.plano_de_trabalho_entregue : "", 
   },
   {
     id: 4,
     fase: "OSE",
     status: status_lp_ose,
     periodo: formatDateFromExcel(props.empreendimentos2.ose_data),
-    numero_sei: props.empreendimentos2.ose_sei !== null ? props.empreendimentos2.ose_sei : "", // Adiciona o número SEI
+    numero_sei: props.empreendimentos2.ose_sei !== null ? props.empreendimentos2.ose_sei : "",
   },
   {
     id: 5,
     fase: "Estudo Ambiental",
     status: status_estudos,
     periodo: lp_estudos_periodo,
-    
+    numero_sei: props.fm_eia_estudos_empreendimento.length > 0 && props.fm_eia_estudos_empreendimento[0].versao_00_sei !== null
+      ? props.fm_eia_estudos_empreendimento[0].versao_00_sei
+      : "",
   },
+
   {
     id: 6,
     fase: "Requerimento Externo",
     status: status_req_ext,
     periodo: data_req_ext,
+    numero_sei: props.fm_eia_estudos_empreendimento.length > 0 && props.fm_eia_estudos_empreendimento[0].req_ext_sei !== null
+      ? props.fm_eia_estudos_empreendimento[0].req_ext_sei
+      : "",
   },
-  {
+{
     id: 7,
     fase: "Análise do Órgão Externo",
     status: status_aut_ext_sei,
     periodo: data_aut_ext,
+    numero_sei: props.fm_eia_estudos_empreendimento.length > 0 && props.fm_eia_estudos_empreendimento[0].aut_ext_sei !== null
+      ? props.fm_eia_estudos_empreendimento[0].aut_ext_sei
+      : "",
   },
   {
     id: 8,
@@ -213,6 +209,7 @@ const fases_lp = reactive([
     periodo: props.empreendimentos2.lp_data
       ? formatDateFromExcel(props.empreendimentos2.lp_data)
       : "a definir",
+    numero_sei: props.empreendimentos2.lp_sei !== null ? props.empreendimentos2.lp_sei : "", 
   },
 ]);
 /** DEFINIÇÃO DE FASES LP */
@@ -293,19 +290,26 @@ const fases_li = reactive([
     fase: "PBA", 
     status: li_status_estudos, 
     periodo: li_data_estudos,
-    numero_sei: props.fm_pba_estudos_empreendimento.versao_aceita_sei !== null ? props.fm_pba_estudos_empreendimento.versao_aceita_sei : "", // Adiciona o número SEI 
+
+    numero_sei: props.empreendimentos2.li_sei !== null ? props.empreendimentos2.li_sei : "",
   },
   {
     id: 2,
     fase: "Requerimento Externo",
     status: li_status_req_ext,
     periodo: li_data_req_ext,
+    numero_sei: props.fm_pba_estudos_empreendimento.length > 0 && props.fm_pba_estudos_empreendimento[0].req_ext_sei !== null
+      ? props.fm_pba_estudos_empreendimento[0].req_ext_sei
+      : "",
   },
   {
     id: 3,
     fase: "Análise do Órgão Externo",
     status: li_status_aut_ext_sei,
     periodo: li_data_aut_ext,
+    numero_sei: props.fm_pba_estudos_empreendimento.length > 0 && props.fm_pba_estudos_empreendimento[0].aut_ext_sei !== null
+      ? props.fm_pba_estudos_empreendimento[0].aut_ext_sei
+      : "",
   },
   {
     id: 4,
@@ -314,6 +318,7 @@ const fases_li = reactive([
     periodo: props.empreendimentos2.li_data
       ? formatDateFromExcel(props.empreendimentos2.li_data)
       : "a definir",
+    numero_sei: props.empreendimentos2.li_sei !== null ? props.empreendimentos2.li_sei : "",
   },
 ]);
 /** ===================================================================================================== DEFINIÇÃO DE FASES LI */
@@ -399,9 +404,9 @@ if (props.abio_emp_estudos_311.length > 0) {
     );
   }
   // Análise Órgão Ext.
-  if (props.abio_emp_estudos_311[0].aut_ext_data) {
+  if (props.abio_emp_estudos_311[0].analise_ext_01_data) {
     periodo_analise_orgao_ext = formatDateFromExcel(
-      props.abio_emp_estudos_311[0].aut_ext_data
+      props.abio_emp_estudos_311[0].analise_ext_01_data
     );
   }
   if (props.abio_emp_estudos_311[0].aut_ext_sei) {
@@ -420,38 +425,42 @@ if (props.abio_emp_estudos_311.length > 0) {
   }
 }
 
-// correções forçadas
-// if (abio_status_trabalho == 2) {
-//     abio_status_req_ext = 0;
-// }
-// if (abio_status_req_ext == 2) {
-//     abio_analise_orgao_ext = 0;
-// }
-
 const fases_abio = reactive([
   {
     id: 1,
     fase: "Plano de Trabalho",
     status: abio_status_trabalho,
     periodo: periodo_abio_planotrabalho,
+    numero_sei: props.abio_emp_estudos_311.length > 0 && props.abio_emp_estudos_311[0].versao_aceita_sei !== null
+      ? props.abio_emp_estudos_311[0].versao_aceita_sei
+      : "",
   },
   {
     id: 2,
     fase: "Requerimento Externo",
     status: abio_status_req_ext,
     periodo: periodo_abio_req_ext,
+    numero_sei: props.abio_emp_estudos_311.length > 0 && props.abio_emp_estudos_311[0].req_ext_sei !== null
+      ? props.abio_emp_estudos_311[0].req_ext_sei
+      : "",
   },
   {
     id: 3,
     fase: "Análise do Órgão Externo",
     status: abio_analise_orgao_ext,
     periodo: periodo_analise_orgao_ext,
+    numero_sei: props.abio_emp_estudos_311.length > 0 && props.abio_emp_estudos_311[0].analise_ext_01_sei !== null
+      ? props.abio_emp_estudos_311[0].analise_ext_01_sei
+      : "",
   },
   {
     id: 4,
     fase: "ABio",
     status: abio_emitida ? 1 : 0,
     periodo: abio_emitida_periodo,
+    numero_sei: props.abio_emp_estudos_311.length > 0 && props.abio_emp_estudos_311[0].aut_ext_sei !== null
+      ? props.abio_emp_estudos_311[0].aut_ext_sei
+      : "",
   },
 ]);
 /** ================================================================================================== DEFINIÇÃO DE FASES ABIO  */
@@ -535,9 +544,9 @@ if (props.asv_emp_estudos.length > 0) {
     }
   }
   // Análise Órgão Ext.
-  if (props.asv_emp_estudos[0].aut_ext_data) {
+  if (props.asv_emp_estudos[0].analise_ext_01_data) {
     periodo_asv_analise_orgao_ext = formatDateFromExcel(
-      props.asv_emp_estudos[0].aut_ext_data
+      props.asv_emp_estudos[0].analise_ext_01_data
     );
   }
   if (props.asv_emp_estudos[0].aut_ext_sei) {
@@ -562,24 +571,36 @@ const fases_asv = reactive([
     fase: "Inventário Florestal",
     status: asv_inv_florestal,
     periodo: periodo_asv_inv_florestal,
+    numero_sei: props.asv_emp_estudos.length > 0 && props.asv_emp_estudos[0].versao_aceita_sei !== null
+      ? props.asv_emp_estudos[0].versao_aceita_sei
+      : "",
   },
   {
     id: 2,
     fase: "Requerimento Externo",
     status: asv_status_req_ext,
     periodo: periodo_asv_req_ext,
+    numero_sei: props.asv_emp_estudos.length > 0 && props.asv_emp_estudos[0].req_ext_sei !== null
+      ? props.asv_emp_estudos[0].req_ext_sei
+      : "",
   },
   {
     id: 3,
     fase: "Análise do Órgão Externo",
     status: asv_analise_orgao_ext,
     periodo: periodo_asv_analise_orgao_ext,
+    numero_sei: props.asv_emp_estudos.length > 0 && props.asv_emp_estudos[0].analise_ext_01_sei !== null
+      ? props.asv_emp_estudos[0].analise_ext_01_sei
+      : "",
   },
   {
     id: 4,
     fase: "ASV",
     status: asv_emitida ? 1 : 0,
     periodo: asv_emitida_periodo,
+    numero_sei: props.asv_emp_estudos.length > 0 && props.asv_emp_estudos[0].aut_ext_sei !== null
+      ? props.asv_emp_estudos[0].aut_ext_sei
+      : "",
   },
 ]);
 
@@ -687,9 +708,9 @@ if (props.iphan_emp_estudos_521.length > 0) {
   if (props.iphan_emp_estudos_521[0].aut_ext_sei) {
     analise_iphan_status = 1;
   }
-  if (props.iphan_emp_estudos_521[0].aut_ext_data) {
+  if (props.iphan_emp_estudos_521[0].analise_ext_01_data) {
     analise_iphan_data = formatDateFromExcel(
-      props.iphan_emp_estudos_521[0].aut_ext_data
+      props.iphan_emp_estudos_521[0].analise_ext_01_data
     );
   }
   if (
@@ -785,9 +806,9 @@ if (props.iphan_emp_estudos_531.length > 0) {
   } else if (!props.iphan_emp_estudos_531[0].req_ext_sei) {
     analise_raipa_iphan_status = 0;
   }
-  if (props.iphan_emp_estudos_531[0].aut_ext_data) {
+  if (props.iphan_emp_estudos_531[0].analise_ext_01_data) {
     analise_raipa_iphan_data = formatDateFromExcel(
-      props.iphan_emp_estudos_531[0].aut_ext_data
+      props.iphan_emp_estudos_531[0].analise_ext_01_data
     );
   }
   // Anuência LP IPHAN RAIPA
@@ -812,13 +833,16 @@ const fases_iphan = reactive([
     fase: "TR de Estudos",
     status: tre_iphan_status,
     periodo: tre_iphan_data,
-    numero_sei: props.empreendimentos2.tre_sei_dnit !== null ? props.empreendimentos2.tre_sei_dnit : "", // Adiciona o número SEI
+    numero_sei: props.empreendimentos2.tre_sei_dnit !== null ? props.empreendimentos2.tre_sei_dnit : "", 
   },
   {
     id: 3,
     fase: "PAIPA",
     status: paipa_iphan_status,
     periodo: paipa_iphan_data,
+    numero_sei: props.iphan_emp_estudos_521.length > 0 && props.iphan_emp_estudos_521[0].versao_aceita_sei !== null
+      ? props.iphan_emp_estudos_521[0].versao_aceita_sei
+      : "",
     
   },
   {
@@ -826,42 +850,63 @@ const fases_iphan = reactive([
     fase: "Requerimento Externo do PAIPA",
     status: reqext_iphan_status,
     periodo: reqext_iphan_data,
+    numero_sei: props.iphan_emp_estudos_521.length > 0 && props.iphan_emp_estudos_521[0].req_ext_sei !== null
+      ? props.iphan_emp_estudos_521[0].req_ext_sei
+      : "",
   },
   {
     id: 5,
     fase: "Análise do Órgão Externo",
     status: analise_iphan_status,
     periodo: analise_iphan_data,
+    numero_sei: props.iphan_emp_estudos_521.length > 0 && props.iphan_emp_estudos_521[0].analise_ext_01_sei !== null
+      ? props.iphan_emp_estudos_521[0].analise_ext_01_sei
+      : "",
   },
   {
     id: 6,
     fase: "Portaria IPHAN",
     status: portaria_iphan_status,
     periodo: portaria_iphan_data,
+    numero_sei: props.iphan_emp_estudos_521.length > 0 && props.iphan_emp_estudos_521[0].aut_ext_sei !== null
+      ? props.iphan_emp_estudos_521[0].aut_ext_sei
+      : "",
   },
   {
     id: 7,
     fase: "RAIPA",
     status: raipa_iphan_status,
     periodo: raipa_iphan_data,
+    numero_sei: props.iphan_emp_estudos_531.length > 0 && props.iphan_emp_estudos_531[0].versao_aceita_sei !== null
+      ? props.iphan_emp_estudos_531[0].versao_aceita_sei
+      : "",
   },
   {
     id: 8,
     fase: "Requerimento Externo do RAIPA",
     status: extrep_raipa_iphan_status,
     periodo: extrep_raipa_iphan_data,
+    numero_sei: props.iphan_emp_estudos_531.length > 0 && props.iphan_emp_estudos_531[0].req_ext_sei !== null
+      ? props.iphan_emp_estudos_531[0].req_ext_sei
+      : "",
   },
   {
     id: 9,
     fase: "Análise do Órgão Externo",
     status: analise_raipa_iphan_status,
     periodo: analise_raipa_iphan_data,
+    numero_sei: props.iphan_emp_estudos_531.length > 0 && props.iphan_emp_estudos_531[0].analise_ext_01_sei !== null
+      ? props.iphan_emp_estudos_531[0].analise_ext_01_sei
+      : "",
   },
   {
     id: 10,
     fase: "Anuência do IPHAN p/ LP",
     status: anuencia_lp_iphan_status,
     periodo: anuencia_lp_iphan_data,
+    numero_sei: props.iphan_emp_estudos_531.length > 0 && props.iphan_emp_estudos_531[0].aut_ext_sei !== null
+      ? props.iphan_emp_estudos_531[0].aut_ext_sei
+      : "",
   },
 ]);
 

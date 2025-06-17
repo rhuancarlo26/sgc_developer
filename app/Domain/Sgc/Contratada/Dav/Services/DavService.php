@@ -17,7 +17,6 @@ class DavService extends BaseModelService
 
   public function salvarDav($dados)
   {
-
     $response = $this->dataManagement->create(entity: $this->modelClass, infos: $dados);
 
     return $response;
