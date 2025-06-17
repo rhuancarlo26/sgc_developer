@@ -24,7 +24,7 @@ defineExpose({ abrirModal });
 </script>
 
 <template>
-  <Modal ref="modal" :title="`Visualizar ${ponto.ponto?.nomepontocoleta} - ${campanha.nome}`"
+  <Modal ref="modal" :title="`Visualizar ${ponto.ponto?.nome_ponto_coleta} - ${campanha.nome_campanha}`"
     modal-dialog-class="modal-xl">
     <template #body>
       <div class="card-body">

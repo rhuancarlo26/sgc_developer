@@ -26,6 +26,9 @@ class StoreRequest extends FormRequest
             'local_shape' => 'nullable',
             'fotos' => 'nullable|array',
             'corte_especies' => 'nullable|array',
+            'latitude'  => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'geometry' =>  'nullable',
         ];
     }
 

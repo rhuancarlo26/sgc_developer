@@ -21,11 +21,11 @@ class AfugentFaunaExecFrenteModel extends Model
 
     public function ufInicial()
     {
-        return $this->belongsTo(UF::class, 'uf_inicial');
+        return $this->belongsTo(Uf::class, 'uf_inicial');
     }
 
     public function ufFinal()
     {
-        return $this->belongsTo(UF::class, 'uf_final');
+        return $this->belongsTo(Uf::class, 'uf_final');
     }
 }

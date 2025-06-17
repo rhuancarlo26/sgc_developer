@@ -2,16 +2,24 @@
   <div>
     <Head :title="'Empreendimentos: edição'" />
     <AuthenticatedLayout>
+
       <!-- <div style="display: block; float: right;" class="mb-3"> -->
         <!-- <div v-if="page.props.flash?.message" class="alert alert-success">
           {{ page.props.flash.message }}
         </div> -->
         <H3>Módulo de EDIÇÃO</H3>
         <ul class="nav nav-tabs">
+
+      <div style="display: block; float: right;">
+
+
+        <ul class="nav">
+
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="#"><b>Empreendimentos</b></a>
           </li>
           <li class="nav-item">
+
             <a class="nav-link" href="/sgc/gestao/2/edicao-estudos">Estudos</a>
           </li>
           <li class="nav-item">
@@ -34,6 +42,15 @@
       </p>
       <div class="collapse bg-white" id="collapseNovoEmp">
         <CadastroModal :empreendimentos="camposfixos" @salvar="handleSalvar" />
+
+            <Link class="nav-link" :href="route('sgc.contratada.edicaoestudos')"> >> Estudos</Link>
+          </li>
+          <li class="nav-item">
+            <Link class="nav-link" :href="route('sgc.contratada.edicaoprodutos')"> >> Subprodutos</Link>
+          </li>
+        </ul>
+
+
       </div>
 
       <!-- </div> -->
@@ -232,12 +249,15 @@
 </template>
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { router, usePage } from "@inertiajs/vue3";
+import { router, usePage, Link } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import CadastroModal from './CadastroModal.vue';
 
 const mostrarModal = ref(false);
+
+import NavLink from '@/Components/NavLink.vue';
+
 
 const props = defineProps({ empreendimentos: Array });
 const campoEditando = ref({ id: null, campo: null });
@@ -293,7 +313,7 @@ const abrirEdicao = (empreendimento, campo) => {
 
 const salvarEdicao = () => {
   router.post(
-    `/sgc/gestao/updatecampo/${empreendimentoEdit.value.id}`,
+    route('sgc.contratada.updatecampo', empreendimentoEdit.value.id),
     { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
     {
       onSuccess: () => {

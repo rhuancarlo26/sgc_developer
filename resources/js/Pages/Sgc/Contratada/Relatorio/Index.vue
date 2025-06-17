@@ -3,13 +3,14 @@ import { Head } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import Navbar from "../Navbar.vue";
+import NavbarContrato from "../NavbarContrato.vue";
 import DocxModal from "./DocxModal.vue";
 import NavLinkSgc from "@/Components/NavLinkSgc.vue";
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { defineProps } from 'vue';
 import { computed } from 'vue';
 import { IconCheck, IconMessageDots, IconX, IconCircle } from "@tabler/icons-vue";
+import { route } from 'ziggy-js';
 import { atualizarStatus, revisaoStatus, aprovadoStatus } from './AtualizarStatus/statusUpdate.js';
 import { toggleAprovado } from './AtualizarStatus/aprovarItem.js';
 
@@ -19,26 +20,25 @@ const itens = ref([]);
 const docxModal = ref();
 const selectedItemId = ref(null);
 
-
-
 const props = defineProps({
-  contrato: Object,
-  dadosrelat: { type: Array },
-  update_anexo: Object,
-  comentarios: Object
+    contrato: Object,
+    dadosrelat: { type: Array },
+    update_anexo: Object,
+    comentarios: Object,
+    relatorioNum: [Number, String]
 });
 
 const form = useForm({
-  id: null,
-  contrato_id: props.contrato.id,
-  caminho: null,
-  arquivo: null,
-  versao: null,
-  item_id: null,
-  name: user.name,
-  email: user.email,
-  update_anexo: props.updated_at,
-  relatorio_num: props.dadosrelat.length > 0 ? props.dadosrelat[0].relatorio_num : null 
+    id: null,
+    contrato_id: props.contrato.id,
+    caminho: null,
+    arquivo: null,
+    versao: null,
+    item_id: null,
+    name: user.name,
+    email: user.email,
+    update_anexo: props.updated_at,
+    relatorio_num: props.relatorioNum
 });
 
 const showDiv = computed(() => {
@@ -51,9 +51,9 @@ const selecionarItem = (idItem) => {
 
 const abrirDoc = (idItem) => {
   const contratoId = form.contrato_id;
-  const itemVersion = props.update_anexo[idItem]?.versao; // Adicionar versão aqui
+  const itemVersion = props.update_anexo[idItem]?.versao; 
   selectedItemId.value = idItem;
-  docxModal.value.abrirModal(idItem, contratoId, itemVersion); // Passar a versão
+  docxModal.value.abrirModal(idItem, contratoId, itemVersion); 
 };
 
 
@@ -102,12 +102,6 @@ const enviarParaDnit = async () => {
   await atualizarStatus(contratoId, itemId, relatorioNum, itens.value);
   window.location.reload();
 
-  // Enviar e-mail
-  try {
-    await axios.get(`/sgc/contratada/send-email/${contratoId}/Em%20An%C3%A1lise/${form.relatorio_num}`);
-  } catch (error) {
-    console.error('Erro ao enviar e-mail:', error);
-  }
 };
 
 const enviarParaRevisao = async () => {
@@ -117,12 +111,6 @@ const enviarParaRevisao = async () => {
   await revisaoStatus(contratoId, itemId, relatorioNum, itens.value); 
   window.location.reload();
 
-  // Enviar e-mail
-  try {
-    await axios.get(`/sgc/contratada/send-email/${contratoId}/Em%20Revis%C3%A3o/${form.relatorio_num}`);
-  } catch (error) {
-    console.error('Erro ao enviar e-mail:', error);
-  }
 };
 
 const aprovarRelatorio = async () => {
@@ -132,12 +120,6 @@ const aprovarRelatorio = async () => {
   await aprovadoStatus(contratoId, itemId, relatorioNum, itens.value); 
   window.location.reload();
   
-  // Enviar e-mail
-  try {
-    await axios.get(`/sgc/contratada/send-email/${contratoId}/Em%20Revis%C3%A3o/${form.relatorio_num}`);
-  } catch (error) {
-    console.error('Erro ao enviar e-mail:', error);
-  }
 };
 
 const obterStatusRelatorio = (itemId, relatorioNum) => {
@@ -169,6 +151,15 @@ const downloadFile = (itemId) => {
   window.location.href = url;
 };
 
+const downloadPdfConsolidado = () => {
+    const url = route('sgc.contratada.download_pdf_consolidado', {
+        contratoId: props.contrato.id,
+        relatorioNum: form.relatorio_num
+    });
+    console.log('URL PDF Consolidado:', url); // Depuração
+    window.location.href = url;
+};
+
 const filteredRelatorios = ref([]);
 
 const filtrarRelatorios = () => {
@@ -183,7 +174,11 @@ const filtrarRelatorios = () => {
 };
 
 const temComentarios = (itemId) => {
-    return props.comentarios.some(comentario => comentario.item_id === itemId);
+    return props.comentarios.some(comentario => 
+        comentario.item_id === itemId && 
+        comentario.contrato_id === props.contrato.id && 
+        comentario.comment.length > 0 
+    );
 };
 
 const aprovarItem = async (item, contratoId, relatorioNum) => {
@@ -220,7 +215,7 @@ onMounted(() => {
         </div>
       </template>
 
-      <Navbar :contrato="contrato">
+      <NavbarContrato :tipo="contrato">
         <template #body>
           <div class="container mt-4">
             <div class="row mb-3">
@@ -265,6 +260,12 @@ onMounted(() => {
                     @click="aprovarRelatorio"
                     :disabled="isDisabledAprovarRelatorio()"
                   />
+                </div>
+                <!-- Botão para Download de PDF Consolidado -->
+                <div class="button-wrapper">
+                  <button @click="downloadPdfConsolidado" class="btn btn-outline-info" :disabled="props.dadosrelat.length === 0">
+                    Download PDF Consolidado
+                  </button>
                 </div>
               </div>
             </div>
@@ -336,7 +337,7 @@ onMounted(() => {
             </div>
           </div>
         </template>
-      </Navbar>
+      </NavbarContrato>
       <DocxModal ref="docxModal"
         href="javascript:void(0)"
         :itemId="selectedItemId"

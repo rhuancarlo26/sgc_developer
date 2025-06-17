@@ -5,6 +5,7 @@
       <H3>Módulo de EDIÇÃO</H3>
       <ul class="nav nav-tabs nav-center">
           <li class="nav-item">
+
           <a class="nav-link" href="/sgc/gestao/2/edicao">Empreendimentos</a>
           </li>
           <li class="nav-item">
@@ -12,6 +13,15 @@
           </li>
           <li class="nav-item">
           <a class="nav-link active"  aria-current="page" href="#"><b>Subprodutos</b></a>
+
+            <Link class="nav-link" :href="route('sgc.contratada.edicao')">Empreendimentos</Link>
+          </li>
+          <li class="nav-item">
+            <Link class="nav-link" :href="route('sgc.contratada.edicaoestudos')"> >> Estudos</Link>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" aria-current="page" href="#"> >> Subprodutos</a>
+
           </li>
       </ul>
       <br>
@@ -218,8 +228,13 @@
   </div>
 </template>
 <script setup>
+
 import { ref, computed, onMounted, watch } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
+
+import { ref, computed, onMounted } from "vue";
+import { router, usePage, Link } from "@inertiajs/vue3";
+
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import CadastroModal from './CadastroModal.vue';
@@ -333,7 +348,7 @@ const mudarPagina = (url) => {
 
 const salvarEdicao = () => {
   router.post(
-    `/sgc/gestao/updatecampoprodutos/${empreendimentoEdit.value.id}`,
+    route('sgc.contratada.updatecampoprodutos', empreendimentoEdit.value.id),
     { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
     {
       onSuccess: () => {

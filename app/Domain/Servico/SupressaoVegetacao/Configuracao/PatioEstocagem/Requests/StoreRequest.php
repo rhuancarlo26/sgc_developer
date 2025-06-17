@@ -15,6 +15,9 @@ class StoreRequest extends FormRequest
             'shapefile' => 'nullable',
             'observacao' => 'nullable',
             'fotos' => 'array|nullable',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+
         ];
     }
 

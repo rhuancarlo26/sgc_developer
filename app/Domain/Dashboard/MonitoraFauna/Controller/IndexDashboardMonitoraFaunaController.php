@@ -16,11 +16,12 @@ class IndexDashboardMonitoraFaunaController extends Controller
   public function index(Servicos $servicos): Response
   {
 
-    $servicos->load(["monitora_fauna_modulos.armadilhas"]);
+    $servicos->load(["monitora_fauna_modulos.armadilhas","contrato"]);
 
     $charts =  $this->registro_service->graficos_monitora($servicos);
 
     return Inertia::render('Dashboard/MonitoraFauna/Index', [
+      'contrato' => $servicos->contrato,
       'especiesGroup' => $charts["especiesGroup"],
       'chartDataPieAbundancia' => $charts["chartDataPieAbundancia"],
       'chartDataPieDiversidade' => $charts["chartDataPieDiversidade"],

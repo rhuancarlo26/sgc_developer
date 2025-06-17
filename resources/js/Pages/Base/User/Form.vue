@@ -6,6 +6,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import {IconDeviceFloppy, IconTrash} from "@tabler/icons-vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
+import { defineProps, watch } from 'vue';
 
 const props = defineProps({
     roles: {type: Array},
@@ -15,9 +16,21 @@ const props = defineProps({
 const form = useForm({
     name: null,
     email: null,
+    roles: props.user.roles ? props.user.roles.map(a => a.id) : [],
     ...props.user,
-    roles: props.user.roles ? props.user.roles.map(a => a.id) : []
 });
+
+if (props.user.roles) {
+    form.roles = props.user.roles.map(a => a.id);
+}
+
+watch(() => form.data(), (value) => {
+    for (let i in value) {
+        if (value[i] === '' || value[i]?.length > 1) {
+            form.errors[i] = ''
+        }
+    }
+}, { deep: true })
 
 const saveUser = () => {
 
@@ -53,7 +66,7 @@ const saveUser = () => {
                     <h3 class="my-0">Informações pessoais</h3>
                 </div>
                 <div class="card-body">
-                    <div class="row">
+                    <div class="row row-gap-2">
                         <div class="col-lg-6">
                             <InputLabel value="Nome" for="nome"/>
                             <input type="text" id="nome" class="form-control" v-model="form.name"/>

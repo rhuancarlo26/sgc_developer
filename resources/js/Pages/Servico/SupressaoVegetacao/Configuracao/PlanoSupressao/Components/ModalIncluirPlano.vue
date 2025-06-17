@@ -64,7 +64,7 @@ defineExpose({abrirModal});
                         <InputError :message="form.errors.dt_final"/>
                     </div>
                     <div class="col-12">
-                        <InputLabel value="Área APP (há)" for="area_em_app"/>
+                        <InputLabel value="Área APP (ha)" for="area_em_app"/>
                         <input v-model="form.area_em_app" id="area_em_app" type="number" step="0.1" class="form-control"/>
                         <InputError :message="form.errors.area_em_app"/>
                     </div>

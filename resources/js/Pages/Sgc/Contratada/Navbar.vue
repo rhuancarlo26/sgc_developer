@@ -3,7 +3,7 @@ import NavDropdown from '@/Components/NavDropdown.vue';
 import NavDropdownLink from '@/Components/NavDropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import {
-  IconTimeline, IconClipboardData, IconClipboardList
+  IconTimeline, IconClipboardData, IconClipboardList,IconDatabaseEdit
 } from "@tabler/icons-vue";
 
 const props = defineProps({
@@ -20,15 +20,17 @@ const props = defineProps({
       <div class="col-1">
         <ul class="navbar-nav">
 
+          <navLink route-name="sgc.gestao.dashboard.index" :param="2" title="Painel Gerencial"
+          :icon="IconClipboardData" />
+
           <!-- Contratos -->
           <navLink route-name="sgc.gestao.listagem"
           :param="2" title="Contratos" :icon="IconClipboardList" />
 
-          <!-- <navLink route-name="sgc.contratada.relatorios.index"
-          :param="tipo.id" title="Relatorio de coordenação" /> -->
-            
-          <navLink route-name="sgc.gestao.dashboard.index" :param="2" title="Painel Gerencial"
-            :icon="IconTimeline" />
+          <!-- Atualizar Base -->
+          <navLink route-name="sgc.contratada.edicao"
+          title="Atualizar Base" :icon="IconDatabaseEdit" />
+
         </ul>
       </div>
       <div class="col-11">

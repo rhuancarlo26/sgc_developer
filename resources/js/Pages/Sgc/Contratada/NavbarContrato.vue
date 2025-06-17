@@ -1,0 +1,147 @@
+<script setup>
+import NavExpandable from '@/Components/NavExpandable.vue';
+import NavLink from '@/Components/NavLink.vue';
+import {
+  IconClipboardList,
+  IconCalendar,
+  IconNotes,
+  IconDeviceAnalytics,
+  IconPlane,
+  IconLayoutDashboard
+} from "@tabler/icons-vue";
+import { computed, watch, onMounted } from 'vue';
+
+const props = defineProps({
+  tipo: {
+    type: Object,
+    required: true,
+  }
+});
+
+const contratoId = computed(() => props.tipo?.id || null);
+
+onMounted(() => {
+  console.log('Props tipo (onMounted):', props.tipo);
+  console.log('Contrato ID (onMounted):', contratoId.value);
+});
+
+watch(() => props.tipo, (newTipo) => {
+  console.log('Props tipo (watch):', newTipo);
+  console.log('Contrato ID (watch):', contratoId.value);
+});
+
+const handleClick = (routeName) => {
+  console.log(`Clicado em ${routeName} - Contrato ID:`, contratoId.value);
+};
+</script>
+
+<template>
+  <div class="card card-body space-y-3">
+    <div class="d-flex">
+      <div class="col-1">
+        <ul class="navbar-nav">
+          <NavLink
+            @click="handleClick('Relatórios')"
+            :route-name="'sgc.contratada.relatorios.index'"
+            :param="contratoId"
+            title="Relatório de Coordenação"
+            :icon="IconClipboardList"
+          />
+
+          <NavExpandable title="Produtos" :icon="IconLayoutDashboard">
+            <li v-for="(item, index) in produtos" :key="index">
+              <NavLink
+                @click="handleClick(item.title)"
+                :route-name="'sgc.contratada.produtos.index'"
+                :param="[contratoId, item.routeParam]"
+                :title="`- ${item.title}`"
+              />
+            </li>
+          </NavExpandable>
+
+          <NavLink
+            @click="handleClick('Cronograma')"
+            :route-name="'sgc.contratada.cronograma.index'"
+            :param="contratoId"
+            title="Cronograma Físico"
+            :icon="IconCalendar"
+          />
+
+          <NavLink
+            @click="handleClick('Quantitativos')"
+            :route-name="'sgc.contratada.quantitativos.index'"
+            :param="contratoId"
+            title="Quantitativos"
+            :icon="IconDeviceAnalytics"
+          />
+
+          <NavLink
+            @click="handleClick('DAV')"
+            :route-name="'sgc.gestao.listagemDav'"
+            :param="contratoId"
+            title="DAV"
+            :icon="IconPlane"
+          />
+
+          <NavLink
+            @click="handleClick('Ficha')"
+            :route-name="'sgc.contratada.ficha.index'"
+            :param="contratoId"
+            title="Ficha Contratual"
+            :icon="IconNotes"
+          />
+        </ul>
+      </div>
+      <div class="col-11">
+        <slot name="body" />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      produtos: [
+        { title: "Fauna", routeParam: "fauna" },
+        { title: "Espeleologia", routeParam: "espeleologia" },
+        { title: "Patrimônio", routeParam: "patrimonio" },
+        { title: "Indígena", routeParam: "indigena" },
+        { title: "Quilombola", routeParam: "quilombola" },
+        { title: "Malarígeno", routeParam: "malarigeno" },
+        { title: "Eia", routeParam: "eia" },
+        { title: "Rima", routeParam: "rima" },
+        { title: "Audiência", routeParam: "audiencia" },
+        { title: "PBA", routeParam: "pba" },
+        { title: "ASV", routeParam: "asv" },
+        { title: "Viagens", routeParam: "viagens" },
+      ],
+    };
+  },
+};
+</script>
+
+<style scoped>
+.navbar-nav {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.nav-item {
+  width: 100%;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  color: #182433;
+  padding: 0.5rem 0rem;
+  cursor: pointer;
+}
+
+.nav-sublist .nav-link {
+  padding-left: 2rem;
+}
+</style>
