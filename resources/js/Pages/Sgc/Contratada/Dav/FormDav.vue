@@ -179,6 +179,8 @@ const submitForm = () => {
     formDav.aquatico_valor
   );
 
+  console.log(formDav)
+
   formDav.post(route('sgc.gestao.storeDav'), {
     onSuccess: () => {
 

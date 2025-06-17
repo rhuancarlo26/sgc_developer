@@ -79,7 +79,8 @@ Route::prefix('/contratada')->group(function () {
      Route::post('{contrato}/cronograma/evento-auxiliar', [CronogController::class, 'storeEventoAuxiliar'])->name('sgc.contratada.cronograma.storeEventoAuxiliar');
 
     // Update Fóruns
-    Route::post('/sgc/empreendimento/{id}/updatecampo', [EmpreendimentosController::class, 'updatecampo'])->name('sgc.contratada.empreendimento.updatecampo');
+    // Route::post('/sgc/empreendimento/{id}/updatecampo', [EmpreendimentosController::class, 'updatecampo'])->name('sgc.contratada.empreendimento.updatecampo');
+    // Route::post('/sgc/gestao/{id}/cadastrarempreendimento', [EmpreendimentosController::class, 'cadastrarempreendimento'])->name('sgc.contratada.empreendimento.cadastrarempreendimento');
 
     // Ficha Contratual
     Route::get('{contrato}/ficha', [FichaController::class, 'index'])->name('sgc.contratada.ficha.index');

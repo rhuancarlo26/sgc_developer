@@ -2,25 +2,39 @@
   <div>
     <Head :title="'Empreendimentos - SUBPRODUTOS: edição'" />
     <AuthenticatedLayout>
+      <H3>Módulo de EDIÇÃO</H3>
+      <ul class="nav nav-tabs nav-center">
+          <li class="nav-item">
 
-      <div style="display: block; float: right;">
-        <ul class="nav">
-          <li class="nav-item">
-            <Link class="nav-link" :href="route('sgc.contratada.edicao')">Empreendimentos</Link>
+          <a class="nav-link" href="/sgc/gestao/2/edicao">Empreendimentos</a>
           </li>
           <li class="nav-item">
-            <Link class="nav-link" :href="route('sgc.contratada.edicaoestudos')"> >> Estudos</Link>
+          <a class="nav-link" href="/sgc/gestao/2/edicao-estudos">Estudos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link disabled" aria-current="page" href="#"> >> Subprodutos</a>
+          <a class="nav-link active"  aria-current="page" href="#"><b>Subprodutos</b></a>
+
           </li>
-        </ul>
-      </div>
-      <h3><strong>Empreendimentos - SUBPRODUTOS</strong></h3>
-      <H4>[EDIÇÃO]</H4>
+      </ul>
+      <br>
       <p>
         <a
-          class="btn btn-primary"
+          class="btn btn-defaut w-full fw-bold fs-underline"
+          data-bs-toggle="collapse"
+          href="#collapseNovoEmp"
+          role="button"
+          aria-expanded="false"
+          aria-controls="collapseExample"
+        >
+          Cadastrar Novo Estudo
+        </a>
+      </p>
+      <div class="collapse bg-white" id="collapseNovoEmp">
+        <CadastroModal :empreendimentos="camposfixos" @salvar="handleSalvar" />
+      </div>
+      <p>
+        <a
+          class="btn btn-defaut w-full fw-bold fs-underline"
           data-bs-toggle="collapse"
           href="#collapseExample"
           role="button"
@@ -33,6 +47,18 @@
       <div class="collapse" id="collapseExample">
         <div class="card card-body">
           <div class="row">
+            <div class="form-check form-switch col-12 mb-2">
+                <label class="form-check-label">
+                    <input
+                    class="form-check-input"
+                    type="checkbox"
+                    :checked="todosSelecionados"
+                    @change="toggleSelecionarTodos"
+                    />
+                    Marcar/Desmarcar Todos
+                </label>
+            </div>
+            <!-- <hr> -->
             <div
               class="form-check form-switch col-md-2"
               v-for="coluna in todasColunas"
@@ -108,6 +134,20 @@
       </div>
       </div>
       </div>
+      <!-- Botões de controle -->
+       <button @click="ordenar('id', 'asc')" :class="'mx-2 btn ' + ordemid_ativo" title="Ordem Padrão - ID">
+            🔝 Ordem Padrão
+        </button>
+        <button @click="ordenar('updated_at', 'desc')" :class="'mx-2 btn ' + ordemup_ativo" title="Ordem GERAL - Últimos Alterados">
+            🔝 Alterados Recentes
+        </button>
+
+        <button
+            @click="exportExcel"
+            class="px-4 py-2 btn btn-success text-white rounded float-end mb-3 mb-5"
+        >
+            Exportar Excel <i class="bi bi-file-earmark-excel"></i>
+        </button>
       <table
         class="table table-striped table-hover table-light"
       >
@@ -180,20 +220,78 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted } from "vue";
+
+import { ref, computed, onMounted, watch } from "vue";
 import { router, usePage, Link } from "@inertiajs/vue3";
+
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import CadastroModal from './CadastroModal.vue';
+
 const camposocultos = [
   "contrato_id",
   "created_at",
   "updated_at",
   "changelogs",
 ];
+// -------------------------------------------------------------------- reload com ordenamento
+const ordemid_ativo = ref('btn-outline-primary');
+const ordemup_ativo =  ref('btn-outline-primary');
+const ordememp_ativo = ref('btn-outline-primary');
+const ordem_importacao = ref('asc');
+const ordenarpor = ref('id');
+// -------------------------------------------------------------------- reload com ordenamento
+const ordenar = (campo, ordem = 'asc') => {
+  router.get(route('sgc.gestao.edicaoprodutos', { id: 2 }), {
+    ordenarPor: campo,
+    ordem: ordem,
+  }, { preserveState: true, preserveScroll: true });
+  switch (campo) {
+    case 'id':
+      ordemid_ativo.value = 'btn-primary';
+      ordememp_ativo.value = 'btn-outline-primary';
+      ordemup_ativo.value =  'btn-outline-primary';
+      break;
+    case 'updated_at':
+      ordemid_ativo.value = 'btn-outline-primary';
+      ordemup_ativo.value =  'btn-primary';
+      ordememp_ativo.value = 'btn-outline-primary';
+      break;
+  }
+  ordem_importacao.value = ordem;
+  ordenarpor.value = campo;
+};
+
+// -------------------------------------------------------------------- reload com ordenamento
 
 const props = defineProps({ empreendimentos: Array });
 const campoEditando = ref({ id: null, campo: null });
 const empreendimentoEdit = ref({ id: null, campo: "", valor: "" });
+
+const camposocultos2 = [
+  "change_field",
+  "old_value",
+  "new_value",
+  "user_id",
+  "change_user_id",
+  "change_date",
+  "change_field",
+  "id",
+  "contrato_id",
+  "created_at",
+  "updated_at",
+  "changelogs",
+];
+
+const camposfixos = computed(() => {
+  return props.empreendimentos.data.map(item => {
+    return Object.fromEntries(
+      Object.entries(item).filter(
+        ([chave]) => !camposocultos2.includes(chave)
+      )
+    );
+  });
+});
 
 const abrirEdicao = (empreendimento, campo) => {
   empreendimentoEdit.value = {
@@ -211,7 +309,23 @@ const fecharEdicao = () => {
 // Vamos trazer todas as colunas
 const page = usePage();
 const dados = ref(page.props.empreendimentos.data);
+// Atualiza `dados` sempre que os dados da página mudarem
+watch(
+  () => page.props.empreendimentos.data,
+  (novaLista) => {
+    dados.value = novaLista;
+  }
+);
 const links = ref(page.props.empreendimentos.links); // Links de paginação
+
+/** espera bem aqui */
+// Atualiza os links se necessário
+watch(
+  () => page.props.empreendimentos.links,
+  (novosLinks) => {
+    links.value = novosLinks;
+  }
+);
 // Pegando todas as chaves do primeiro objeto como colunas
 const todasColunas = Object.keys(dados.value[0] || {});
 const mudarPagina = (url) => {
@@ -272,7 +386,52 @@ function abrirModal(item) {
 function fecharModal() {
   if (modalInstance) modalInstance.hide()
 }
+// ------------------------------------------------------------------------- Selecionar Todos
 
+const colunaTravada = 'changelogs'
+
+// 🔍 Computando
+const todosSelecionados = computed(() => {
+  const colunasFiltradas = todasColunas.filter(
+    c => !camposocultos.includes(c) && c !== colunaTravada
+  )
+  return colunasFiltradas.every(c => colunasVisiveis.value.includes(c))
+})
+
+// 🔘 Selecionar
+function toggleSelecionarTodos(event) {
+  const checked = event.target.checked
+  const colunasFiltradas = todasColunas.filter(
+    c => !camposocultos.includes(c) && c !== colunaTravada
+  )
+
+  const atuais = colunasVisiveis.value.includes(colunaTravada)
+    ? ['changelogs']
+    : []
+
+  if (checked) {
+    colunasVisiveis.value = [...colunasFiltradas, ...atuais]
+  } else {
+    colunasVisiveis.value = [...atuais]
+  }
+}
+// ------------------------------------------------------------------------- Salvar Novo Estudo
+// ------------------------------------------------------------------------- Exportar para Excel
+function exportExcel() {
+    const camposvalidos = colunasVisiveis.value.filter(coluna => !camposocultos.includes(coluna));
+    const params = new URLSearchParams({
+        campos: camposvalidos.join(','),
+        ordenarpor: ordenarpor.value,
+        ordem: ordem_importacao.value,
+    })
+
+    const url = `subprodutos-export?${params.toString()}`
+    window.location.href = url
+}
+// ------------------------------------------------------------------------- Exportar para Excel
+function handleSalvar(dados) {
+    router.post(route('sgc.gestao.cadastrarsubproduto', { id: 2 }), dados);
+}
 onMounted(() => {
   const modalEl = modalRef.value
   if (modalEl) {
@@ -284,5 +443,8 @@ onMounted(() => {
 <style>
 .cursor-pointer {
   cursor: pointer;
+}
+li .active {
+    border-bottom: 2px solid #f6f8fb !important;
 }
 </style>
