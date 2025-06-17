@@ -10,10 +10,10 @@
         <H3>Módulo de EDIÇÃO</H3>
         <ul class="nav nav-tabs">
             <li class="nav-item">
-            <a class="nav-link" href="#" aria-current="page">Empreendimentos</a>
+            <a class="nav-link active" aria-current="page" href="#"><b>Empreendimentos</b></a>
             </li>
             <li class="nav-item">
-            <a class="nav-link active" href="/sgc/gestao/2/edicao-estudos"><b>Estudos</b></a>
+            <a class="nav-link" href="/sgc/gestao/2/edicao-estudos">Estudos</a>
             </li>
             <li class="nav-item">
             <a class="nav-link" href="/sgc/gestao/2/edicao-produtos">Subprodutos</a>
@@ -473,7 +473,7 @@ onMounted(() => {
   }
 })
 </script>
-<style scoped>
+<style>
 .cursor-pointer {
   cursor: pointer;
 }
