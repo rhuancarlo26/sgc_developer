@@ -1,40 +1,46 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import { ref, computed } from 'vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 
 const props = defineProps({
-    subprodutos: Array,
-    contrato: [Number, String],
-    produto: String,
-    contratos: Object,
+    subprodutos: { type: Array, default: () => [] },
+    contrato: { type: [Number, String], required: true },
+    produto: { type: String, required: true },
+    contratos: { type: Object, required: true },
 });
 
-console.log('Contratos:', props.contratos);
-console.log('Subprodutos recebidos:', props.subprodutos); // Log para verificar estrutura
-
+// Estado reativo para o subproduto selecionado
 const selectedSubproduto = ref('');
+
+// Lista única de descrições de subprodutos
 const uniqueSubprodutos = computed(() => {
-    const descriptions = (props.subprodutos || []).map(sub => sub.descricao_revisada).filter(desc => desc);
+    const descriptions = props.subprodutos.map(sub => sub.descricao_revisada).filter(desc => desc);
     return [...new Set(descriptions)];
 });
 
-const handleFilter = () => {
-    console.log('Filtro selecionado:', selectedSubproduto.value);
-};
-
-const handleAction = (action) => {
-    console.log(`Ação ${action} clicada - Contrato: ${props.contrato}, Produto: ${props.produto}`);
-};
-
+// Filtrar subprodutos com base no selecionado
 const filteredSubprodutos = computed(() => {
-    console.log('Filtrando subprodutos com selectedSubproduto:', selectedSubproduto.value); // Log para depuração
-    const subprodutos = props.subprodutos || [];
-    if (!selectedSubproduto.value) return subprodutos;
-    return subprodutos.filter(sub => sub.descricao_revisada === selectedSubproduto.value);
+    if (!selectedSubproduto.value) return props.subprodutos;
+    return props.subprodutos.filter(sub => sub.descricao_revisada === selectedSubproduto.value);
 });
+
+// Redirecionar para a página de criação
+const goToCreate = () => {
+    const subproduto = selectedSubproduto.value || '';
+    router.get(
+        route('sgc.contratada.produtos.create', [props.contrato, props.produto.toLowerCase()]),
+        { subproduto },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            onError: (errors) => console.error('Erro ao redirecionar:', errors),
+            onSuccess: () => console.log('Redirecionamento bem-sucedido para create'),
+        }
+    );
+};
 </script>
 
 <template>
@@ -58,7 +64,7 @@ const filteredSubprodutos = computed(() => {
                 <div class="card">
                     <div class="card-body">
                         <h2 class="text-center mb-4">FAUNA</h2>
-                        <div v-if="!subprodutos || subprodutos.length === 0" class="alert alert-danger">
+                        <div v-if="!subprodutos.length" class="alert alert-danger">
                             Nenhum dado encontrado para {{ produto }}.
                         </div>
                         <div v-else class="row">
@@ -68,7 +74,7 @@ const filteredSubprodutos = computed(() => {
                                     <div class="col-md-4 mb-4">
                                         <div class="block-card block-card-short">
                                             <h4 class="text-center mb-2">ESCOLHER SUBPRODUTO</h4>
-                                            <select v-model="selectedSubproduto" class="form-select" @change="handleFilter">
+                                            <select v-model="selectedSubproduto" class="form-select">
                                                 <option value="">Todos</option>
                                                 <option v-for="desc in uniqueSubprodutos" :key="desc" :value="desc">
                                                     {{ desc }}
@@ -81,17 +87,18 @@ const filteredSubprodutos = computed(() => {
                                     <div class="col-md-8 mb-4">
                                         <div class="row">
                                             <div class="col-md-4 mb-4">
-                                                <div class="block-card block-card-short action-button bg-primary text-white cursor-pointer" @click="console.log('Redirecionando com subproduto:', selectedSubproduto.value); $inertia.get(route('sgc.contratada.produtos.create', [props.contrato, props.produto.toLowerCase()]), { subproduto: selectedSubproduto.value ? encodeURIComponent(selectedSubproduto.value) : null })">
+                                                <div class="block-card block-card-short action-button bg-primary text-white cursor-pointer" @click="goToCreate">
                                                     Cadastrar
                                                 </div>
                                             </div>
+                                            <!-- Botões desativados até implementação -->
                                             <div class="col-md-4 mb-4">
-                                                <div class="block-card block-card-short action-button bg-success text-white cursor-pointer" @click="handleAction('analisar')">
+                                                <div class="block-card block-card-short action-button bg-success text-white cursor-not-allowed" title="Funcionalidade em desenvolvimento">
                                                     Analisar
                                                 </div>
                                             </div>
                                             <div class="col-md-4 mb-4">
-                                                <div class="block-card block-card-short action-button bg-info text-white cursor-pointer" @click="handleAction('visualizar')">
+                                                <div class="block-card block-card-short action-button bg-info text-white cursor-not-allowed" title="Funcionalidade em desenvolvimento">
                                                     Visualizar
                                                 </div>
                                             </div>
@@ -109,7 +116,7 @@ const filteredSubprodutos = computed(() => {
                                             <strong>ID:</strong> {{ subproduto.id }} |
                                             <strong>Código SIAC:</strong> {{ subproduto.cod_siac || 'N/A' }} |
                                             <strong>Descrição:</strong> {{ subproduto.descricao_revisada || 'N/A' }} |
-                                            <strong>Contrato:</strong> {{ subproduto.contrato || 'N/A' }} |
+                                            <strong>Contrato:</strong> {{ subproduto.contrato_id || 'N/A' }} |
                                             <strong>Família:</strong> {{ subproduto.familia || 'N/A' }}
                                         </li>
                                     </ul>
@@ -162,6 +169,11 @@ const filteredSubprodutos = computed(() => {
     cursor: pointer;
 }
 
+.cursor-not-allowed {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .form-select {
     width: 100%;
     padding: 0.5rem;
@@ -178,7 +190,7 @@ const filteredSubprodutos = computed(() => {
     transition: transform 0.2s ease, background-color 0.3s ease;
 }
 
-.action-button:hover {
+.action-button:not(.cursor-not-allowed):hover {
     transform: scale(1.05);
     background-color: #e9ecef;
 }
