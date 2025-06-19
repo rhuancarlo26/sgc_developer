@@ -172,13 +172,13 @@ const gerarPDF = () => {
   const logoLargura = 30;
   const logoAltura = 20;
 
-  const logoX = pdf.internal.pageSize.getWidth() - margemDireita - logoLargura;
+  const logoX = pdf.internal.pageSize.getWidth() - 30 - logoLargura;
   const logoY = 10;
 
-  pdf.addImage(img, 'PNG', logoX, logoY);
+  pdf.addImage(img, 'PNG', logoX, -8);
 
   pdf.setFontSize(17);
-  pdf.text('Documento de Autorização de Viagem', margemEsquerda, logoY + logoAltura / 2 - 4);
+  pdf.text('Documento de Autorização de Viagem', margemEsquerda, 20 + logoAltura / 2 - 4);
 
   pdf.setFontSize(tamanhoFonte);
   let y = logoY + logoAltura + 10;

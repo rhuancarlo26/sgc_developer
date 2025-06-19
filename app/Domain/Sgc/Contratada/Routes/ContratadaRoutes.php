@@ -80,7 +80,7 @@ Route::prefix('/contratada')->group(function () {
 
     // Update Fóruns
     Route::post('/sgc/empreendimento/{id}/updatecampo', [EmpreendimentosController::class, 'updatecampo'])->name('sgc.contratada.empreendimento.updatecampo');
-
+    
     // Ficha Contratual
     Route::get('{contrato}/ficha', [FichaController::class, 'index'])->name('sgc.contratada.ficha.index');
 
@@ -102,6 +102,16 @@ Route::prefix('/contratada')->group(function () {
     Route::post('/updatecampo/{corretor}',                      [EmpreendimentosController::class,                       'updatecampo'])->name('sgc.contratada.updatecampo');
     Route::post('/updatecampoestudos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoestudos'])->name('sgc.contratada.updatecampoestudos');
     Route::post('/updatecampoprodutos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoprodutos'])->name('sgc.contratada.updatecampoprodutos');
+    
+    Route::get('{tipo}/empreendimentos-export',                 [EmpreendimentosController::class,                       'export'])->name('sgc.contratada.empreendimentos.export');
+    Route::get('{tipo}/estudos-export',                         [EmpreendimentosController::class,                       'estudosexport'])->name('sgc.contratada.estudos.export');
+    Route::get('{tipo}/subprodutos-export',                     [EmpreendimentosController::class,                       'subprodutosexport'])->name('sgc.contratada.subprodutos.export');
+    Route::post('/updatecampo/{corretor}',                      [EmpreendimentosController::class,                       'updatecampo'])->name('sgc.contratada.updatecampo');
+    Route::post('/updatecampoestudos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoestudos'])->name('sgc.contratada.updatecampoestudos');
+    Route::post('/updatecampoprodutos/{corretor}',              [EmpreendimentosController::class,                       'updatecampoprodutos'])->name('sgc.contratada.updatecampoprodutos');
+    Route::post('/cadastrarempreendimento/{corretor}',          [EmpreendimentosController::class,                       'cadastrarempreendimento'])->name('sgc.contratada.cadastrarempreendimento');
+    Route::post('/cadastrarestudo/{corretor}',                  [EmpreendimentosController::class,                       'cadastrarestudo'])->name('sgc.contratada.cadastrarestudo');
+    Route::post('/cadastrarsubproduto/{corretor}',              [EmpreendimentosController::class,                       'cadastrarsubproduto'])->name('sgc.contratada.cadastrarsubproduto');
 
     // PDF Consolidado
     Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');

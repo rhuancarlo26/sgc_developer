@@ -2,27 +2,46 @@
   <div>
     <Head :title="'Empreendimentos: edição'" />
     <AuthenticatedLayout>
-      <div style="display: block; float: right;">
 
-
-        <ul class="nav">
-          <li class="nav-item">
-            <a class="nav-link disabled" aria-current="page" href="#">Empreendimentos</a>
-          </li>
-          <li class="nav-item">
-            <Link class="nav-link" :href="route('sgc.contratada.edicaoestudos')"> >> Estudos</Link>
-          </li>
-          <li class="nav-item">
-            <Link class="nav-link" :href="route('sgc.contratada.edicaoprodutos')"> >> Subprodutos</Link>
-          </li>
+      <!-- <div style="display: block; float: right;" class="mb-3"> -->
+        <!-- <div v-if="page.props.flash?.message" class="alert alert-success">
+          {{ page.props.flash.message }}
+        </div> -->
+        <H3>Módulo de EDIÇÃO</H3>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#"><b>Empreendimentos</b></a>
+            </li>
+            <li class="nav-item">
+              <Link class="nav-link" :href="route('sgc.contratada.edicaoestudos')"> Estudos</Link>
+            </li>
+            <li class="nav-item">
+              <Link class="nav-link" :href="route('sgc.contratada.edicaoprodutos')"> Subprodutos</Link>
+            </li>
         </ul>
-
+        <br>
+        <br>
+        <p>
+        <a
+          class="btn btn-defaut w-full fw-bold fs-underline"
+          data-bs-toggle="collapse"
+          href="#collapseNovoEmp"
+          role="button"
+          aria-expanded="false"
+          aria-controls="collapseExample"
+        >
+          Cadastrar Novo Empreendimento
+        </a>
+      </p>
+      <div class="collapse bg-white" id="collapseNovoEmp">
+        <CadastroModal :empreendimentos="camposfixos" @salvar="handleSalvar" />
       </div>
-      <h3><strong>Empreendimentos</strong></h3>
-      <H4>[EDIÇÃO]</H4>
+
+      <!-- </div> -->
+      <!-- <h4><strong>Empreendimentos</strong></h4> -->
       <p>
         <a
-          class="btn btn-primary"
+          class="btn btn-defaut w-full fw-bold fs-underline"
           data-bs-toggle="collapse"
           href="#collapseExample"
           role="button"
@@ -35,6 +54,18 @@
       <div class="collapse" id="collapseExample">
         <div class="card card-body">
           <div class="row">
+            <div class="form-check form-switch col-12 mb-2">
+                <label class="form-check-label">
+                    <input
+                    class="form-check-input"
+                    type="checkbox"
+                    :checked="todosSelecionados"
+                    @change="toggleSelecionarTodos"
+                    />
+                    Marcar/Desmarcar Todos
+                </label>
+            </div>
+            <hr>
             <div
               class="form-check form-switch col-md-2"
               v-for="coluna in todasColunas"
@@ -112,6 +143,24 @@
       </div>
       </div>
     </div>
+        <!-- <button class="btn btn-primary mb-3" @click="mostrarAlteradosNoTopo = !mostrarAlteradosNoTopo">
+            🔝 {{ mostrarAlteradosNoTopo ? 'Voltar à Ordem Normal' : 'Alterados Recentemente' }}
+        </button> -->
+        <button @click="ordenacao = ''" class="btn" :class="{ 'btn-primary': ordenacao === '', 'btn-outline-primary': ordenacao !== '' }">
+            🔝 Ordem Padrão
+        </button>
+
+        <button @click="ordenacao = 'created_at'" class="btn mx-2" :class="{ 'btn-primary': ordenacao === 'created_at', 'btn-outline-primary': ordenacao !== 'created_at' }">
+            🔝 Mais Recentes Primeiro
+        </button>
+
+        <button
+            @click="exportExcel"
+            class="px-4 py-2 btn btn-success text-white rounded float-end mb-3 mb-5"
+        >
+            Exportar Excel <i class="bi bi-file-earmark-excel"></i>
+        </button>
+
       <table
         class="table table-striped table-hover table-light"
       >
@@ -187,7 +236,12 @@ import { ref, computed, onMounted } from "vue";
 import { router, usePage, Link } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import CadastroModal from './CadastroModal.vue';
+
+const mostrarModal = ref(false);
+
 import NavLink from '@/Components/NavLink.vue';
+
 
 const props = defineProps({ empreendimentos: Array });
 const campoEditando = ref({ id: null, campo: null });
@@ -207,6 +261,30 @@ const camposocultos = [
   "updated_at",
   "changelogs",
 ];
+const camposocultos2 = [
+  "change_field",
+  "old_value",
+  "new_value",
+  "user_id",
+  "change_user_id",
+  "change_date",
+  "change_field",
+  "id",
+  "contrato_id",
+  "created_at",
+  "updated_at",
+  "changelogs",
+];
+
+const camposfixos = computed(() => {
+  return props.empreendimentos.map(item => {
+    return Object.fromEntries(
+      Object.entries(item).filter(
+        ([chave]) => !camposocultos2.includes(chave)
+      )
+    );
+  });
+});
 
 const abrirEdicao = (empreendimento, campo) => {
   empreendimentoEdit.value = {
@@ -238,26 +316,69 @@ const fecharEdicao = () => {
 const page = usePage();
 const dados = ref(page.props.empreendimentos);
 // Pegando todas as chaves do primeiro objeto como colunas
-// Pegando todas as chaves do primeiro objeto como colunas
 const todasColunas = Object.keys(dados.value[0] || {});
 
 // Definir visíveis apenas as 15 primeiras colunas no carregamento
 const colunasVisiveis = ref(todasColunas.slice(0, 15));
 colunasVisiveis.value.push(todasColunas[todasColunas.length - 1]);
 
+// Flag para mostrar os alterados no topo
+const mostrarAlteradosNoTopo = ref(false)
+const ordenacao = ref('');
+
 const dadosFiltrados = computed(() => {
-  return dados.value.map((item) => {
+  const lista = [...dados.value];
+
+  if (ordenacao.value === 'alterados_cima') {
+    lista.sort((a, b) => {
+      const aTem = temAlteracao(a.changelogs);
+      const bTem = temAlteracao(b.changelogs);
+
+      if (aTem && !bTem) return -1;
+      if (!aTem && bTem) return 1;
+      return 0;
+    });
+  }
+
+  if (ordenacao.value === 'created_at') {
+    lista.sort((a, b) => {
+      const dataA = extrairDataAlteracao(a.changelogs);
+      const dataB = extrairDataAlteracao(b.changelogs);
+
+      if (dataA && dataB) return new Date(dataB) - new Date(dataA);
+      if (dataA) return -1;
+      if (dataB) return 1;
+      return 0;
+    });
+  }
+
+  // Faz o filtro das colunas
+  return lista.map((item) => {
     let filtrado = {};
     todasColunas.forEach((coluna) => {
       if (colunasVisiveis.value.includes(coluna)) {
         filtrado[coluna] = item[coluna];
       } else {
-        filtrado[coluna] = null; // Mantém a posição original da coluna
+        filtrado[coluna] = null;
       }
     });
     return filtrado;
   });
 });
+
+
+// Exportar para Excel
+function exportExcel() {
+    const camposvalidos = colunasVisiveis.value.filter(coluna => !camposocultos.includes(coluna));
+    const params = new URLSearchParams({
+    campos: camposvalidos.join(','),
+    // status: 'ativo',
+    // cidade: 'Caxias'
+  })
+
+  const url = `empreendimentos-export?${params.toString()}`
+  window.location.href = url
+}
 
 // Campo foi editado
 function campoFoiEditado(linha, campo) {
@@ -265,7 +386,6 @@ function campoFoiEditado(linha, campo) {
 }
 
 //Modal de histórico
-// Bootstrap Modal (garante que Bootstrap JS esteja incluído)
 let modalInstance = null
 const modalRef = ref(null)
 
@@ -279,7 +399,72 @@ function abrirModal(item) {
 function fecharModal() {
   if (modalInstance) modalInstance.hide()
 }
+// ------------------------------------------------------------------------- Selecionar Todos
 
+const colunaTravada = 'changelogs'
+
+// 🔍 Computando
+const todosSelecionados = computed(() => {
+  const colunasFiltradas = todasColunas.filter(
+    c => !camposocultos.includes(c) && c !== colunaTravada
+  )
+  return colunasFiltradas.every(c => colunasVisiveis.value.includes(c))
+})
+
+// 🔘 Selecionar
+function toggleSelecionarTodos(event) {
+  const checked = event.target.checked
+  const colunasFiltradas = todasColunas.filter(
+    c => !camposocultos.includes(c) && c !== colunaTravada
+  )
+
+  const atuais = colunasVisiveis.value.includes(colunaTravada)
+    ? ['changelogs']
+    : []
+
+  if (checked) {
+    colunasVisiveis.value = [...colunasFiltradas, ...atuais]
+  } else {
+    colunasVisiveis.value = [...atuais]
+  }
+}
+// ------------------------------------------------------------------------- Ordenar Changelogs na frente
+function temAlteracao(changelogs) {
+  if (!changelogs) return false;
+
+  if (Array.isArray(changelogs)) return changelogs.length > 0;
+  if (typeof changelogs === 'object') return Object.keys(changelogs).length > 0;
+  if (typeof changelogs === 'string') return changelogs.trim() !== '';
+
+  return false;
+}
+function extrairDataAlteracao(changelogs) {
+  if (!changelogs) return null;
+
+  if (Array.isArray(changelogs)) {
+    const datas = changelogs
+      .map(c => c.created_at)
+      .filter(d => !!d)
+      .map(d => new Date(d));
+
+    if (datas.length === 0) return null;
+
+    return new Date(Math.max(...datas.map(d => d.getTime()))); // Mais recente
+  }
+
+  if (typeof changelogs === 'object') {
+    return changelogs.created_at ? new Date(changelogs.created_at) : null;
+  }
+
+  return null;
+}
+
+
+// ------------------------------------------------------------------------- Salvar
+function handleSalvar(dados) {
+    router.post(route('sgc.gestao.cadastrarempreendimento', { id: 2 }), dados);
+}
+// ------------------------------------------------------------------------- Salvar
 onMounted(() => {
   const modalEl = modalRef.value
   if (modalEl) {
@@ -288,7 +473,7 @@ onMounted(() => {
   }
 })
 </script>
-<style scoped>
+<style>
 .cursor-pointer {
   cursor: pointer;
 }
@@ -326,5 +511,8 @@ onMounted(() => {
 }
 float-right {
   float: right !important;
+}
+li .active {
+    border-bottom: 2px solid #f6f8fb !important;
 }
 </style>
