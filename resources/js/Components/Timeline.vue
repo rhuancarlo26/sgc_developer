@@ -400,9 +400,7 @@ const evolucaoComStatusAjustado = computed(() =>
   background-color: cyan !important;
 }
 
-.timeline-step:hover {
-  cursor: pointer;
-}
+
 
 /* Estilo para os símbolos (🗸, ©, •) */
 .my-5 {
