@@ -5,8 +5,11 @@ namespace App\Domain\Sgc\Contratada\Produtos\Fauna\Services;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcFaunaProfissionais;
 use App\Models\SgcFaunaCampanhaProfissional;
+use App\Models\SgcFaunaModuloAmostral;
+use App\Models\SgcFaunaQuelonios;
 use App\Models\ServicoMonitoraFaunaConfigAbio;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class FaunaService
 {
@@ -53,6 +56,56 @@ class FaunaService
                         'grupo_faunistico' => $profissionalData['grupo_faunistico'],
                     ]);
                 }
+            }
+        }
+
+        // Vincular módulos amostrais
+        if (!empty($data['modulos_amostrais'])) {
+            foreach ($data['modulos_amostrais'] as $moduloData) {
+                $moduloAttributes = [
+                    'campanha_id' => $campanha->id,
+                    'id_contrato' => $contratoId,
+                    'data_cadastro' => $moduloData['data_cadastro'] ?? null,
+                    'tamanho_modulo' => $moduloData['tamanho_modulo'] ?? null,
+                    'uf' => $moduloData['uf'] ?? null,
+                    'municipio' => $moduloData['municipio'] ?? null,
+                    'bioma' => $moduloData['bioma'] ?? null,
+                    'fitofisionomia' => $moduloData['fitofisionomia'] ?? null,
+                    'latitude_inicial' => $moduloData['latitude_inicial'] ?? null,
+                    'longitude_inicial' => $moduloData['longitude_inicial'] ?? null,
+                    'latitude_final' => $moduloData['latitude_final'] ?? null,
+                    'longitude_final' => $moduloData['longitude_final'] ?? null,
+                    'obs' => $moduloData['obs'] ?? null,
+                ];
+
+                // Processar upload de shapefile
+                if (!empty($moduloData['arquivo'])) {
+                    $file = $moduloData['arquivo'];
+                    $filename = time() . '_' . $file->getClientOriginalName();
+                    $path = $file->storeAs('shapefiles', $filename);
+                    $moduloAttributes['nome_arquivo'] = $filename;
+                    $moduloAttributes['local_shape'] = $path;
+                    $moduloAttributes['shape_file'] = file_get_contents($file->getRealPath());
+                }
+
+                SgcFaunaModuloAmostral::create($moduloAttributes);
+            }
+        }
+
+        // Vincular pontos de quelônios e crocodilianos
+        if (!empty($data['pontos_quelo_crocod']) && empty($data['nao_se_aplica'])) {
+            foreach ($data['pontos_quelo_crocod'] as $pontoData) {
+                SgcFaunaQuelonios::create([
+                    'id_contrato' => $contratoId,
+                    'id_campanha' => $campanha->id,
+                    'ponto_de_coleta' => $pontoData['ponto_de_coleta'] ?? null,
+                    'nome_curso_hidrico' => $pontoData['nome_curso_hidrico'] ?? null,
+                    'coordenadas' => $pontoData['coordenadas'] ?? null,
+                    'bacia_hidrografica' => $pontoData['bacia'] ?? null,
+                    'profundidade' => $pontoData['profundidade'] ?? null,
+                    'largura' => $pontoData['largura'] ?? null,
+                    'tipo_substrato' => $pontoData['tipo_substrato'] ?? null,
+                ]);
             }
         }
 
