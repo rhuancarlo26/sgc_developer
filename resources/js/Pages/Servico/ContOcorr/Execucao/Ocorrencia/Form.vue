@@ -19,6 +19,8 @@ import TabAcao from "./TabAcao.vue";
 import TabNorma from "./TabNorma.vue";
 import TabRegistro from "./TabRegistro.vue";
 import TabObservacao from "./TabObservacao.vue";
+import { router } from '@inertiajs/vue3';
+
 
 const props = defineProps({
 	contrato: { type: Object },
@@ -27,10 +29,6 @@ const props = defineProps({
 	lotes: { type: Array },
 	rodovias: { type: Array }
 });
-
-const voltarPagina = () => {
-	window.history.back();
-}
 
 </script>
 <template>
@@ -42,12 +40,14 @@ const voltarPagina = () => {
 		<template #header>
 			<div class="w-100 d-flex justify-content-between">
 				<Breadcrumb class="align-self-center" :links="[
-					{ route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
+					{ route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: 'Gestão de Contratos' },
 					{ route: '#', label: contrato.contratada }
-				]
-					" />
-				<NavButton @click="voltarPagina()" type-button="dark" title="Voltar" />
+				]" />
+				<NavButton @click="() => router.visit(route('contratos.gestao.listagem', contrato.tipo_contrato))"
+					type-button="dark" title="Voltar" />
+
 			</div>
+
 		</template>
 
 		<Navbar :contrato="contrato" :servico="servico">
