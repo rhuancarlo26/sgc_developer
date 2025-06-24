@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SgcFaunaCavernicola extends Model
+class SgcFaunaCampanhaAbios extends Model
 {
-    protected $table = 'sgc_fauna_amostragem_cavernicola';
+    protected $table = 'sgc_fauna_campanha_abios';
     protected $guarded = ['id'];
     public $timestamps = true;
 }

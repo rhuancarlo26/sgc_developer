@@ -26,13 +26,14 @@ class ProdutosController extends Controller
         $subprodutos = $this->produtosService->getSubprodutosByContrato($contrato, $produto);
         $contratoObj = Contrato::findOrFail($contrato);
 
-        return inertia('Sgc/Contratada/Produtos/Fauna', [
+        return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
             'contrato' => $contrato,
             'produto' => ucfirst($produto),
             'contratos' => $contratoObj,
         ]);
     }
+
 
     public function create(Request $request, $contrato, $produto): Response
     {
@@ -46,7 +47,13 @@ class ProdutosController extends Controller
         $abios = $this->produtosService->getAbios();
         $profissionais = $this->faunaService->getProfissionaisByContrato($contrato);
 
-        return inertia('Sgc/Contratada/Produtos/Create', [
+        // Log para depuração
+        \Log::info('Dados enviados para Create.vue:', [
+            'abios' => $abios,
+            'profissionais' => $profissionais,
+        ]);
+
+        return inertia('Sgc/Contratada/Produtos/Fauna/Create', [
             'contrato' => $contrato,
             'produto' => ucfirst($produto),
             'contratos' => $contratoObj,
@@ -56,4 +63,6 @@ class ProdutosController extends Controller
             'profissionais' => $profissionais,
         ]);
     }
+
+
 }

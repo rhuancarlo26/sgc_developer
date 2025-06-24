@@ -4,10 +4,10 @@ namespace App\Domain\Sgc\Contratada\Produtos\Fauna\Services;
 
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcFaunaProfissionais;
+use App\Models\SgcFaunaCavernicola;
 use App\Models\SgcFaunaCampanhaProfissional;
 use App\Models\SgcFaunaModuloAmostral;
 use App\Models\SgcFaunaQuelonios;
-use App\Models\ServicoMonitoraFaunaConfigAbio;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,18 +17,6 @@ class FaunaService
     {
         Log::info('FaunaService: Dados recebidos para salvar campanha: ' . json_encode($data));
 
-        $numAbio = null;
-        if (!empty($data['id_abio'])) {
-            Log::info('FaunaService: Buscando ABIO com ID: ' . $data['id_abio']);
-            $abio = ServicoMonitoraFaunaConfigAbio::with('licenca')->find($data['id_abio']);
-            if ($abio) {
-                Log::info('FaunaService: ABIO encontrado: ' . json_encode($abio->toArray()));
-                $numAbio = $abio->licenca->numero_licenca ?? null;
-            } else {
-                Log::info('FaunaService: ABIO não encontrado para ID: ' . $data['id_abio']);
-            }
-        }
-
         $campanha = SgcFaunaCampanha::create([
             'id_contrato' => $contratoId,
             'id_campanha' => $data['id_campanha'] ?? null,
@@ -37,7 +25,6 @@ class FaunaService
             'data_fim' => $data['data_campanha_final'] ?? null,
             'periodo' => $data['periodo'] ?? null,
             'observacoes' => $data['observacoes'] ?? null,
-            'num_abio' => $numAbio,
             'cod_emp' => $data['cod_emp'] ?? null,
             'subproduto' => $data['subproduto'] ?? null,
         ]);
@@ -52,6 +39,7 @@ class FaunaService
                 if ($profissional) {
                     SgcFaunaCampanhaProfissional::create([
                         'campanha_id' => $campanha->id,
+                        'id_contrato' => $contratoId,
                         'profissional_id' => $profissional->id,
                         'grupo_faunistico' => $profissionalData['grupo_faunistico'],
                     ]);
@@ -109,8 +97,27 @@ class FaunaService
             }
         }
 
+        // Vincular pontos de fauna cavernícola
+        if (!empty($data['pontos_cavernicola']) && !$data['nao_se_aplica']) {
+            foreach ($data['pontos_cavernicola'] as $pontoData) {
+                SgcFaunaCavernicola::create([
+                    'id_contrato' => $contratoId,
+                    'id_campanha' => $campanha->id,
+                    'cavidade' => $pontoData['cavidade'] ?? null,
+                    'latitude' => $pontoData['latitude'] ?? null,
+                    'longitude' => $pontoData['longitude'] ?? null,
+                    'distancia_eixo_rodovia' => $pontoData['distancia_eixo_rodovia'] ?? null,
+                    'formacao_associada' => $pontoData['formacao_associada'] ?? null,
+                    'temperatura_media_interna' => $pontoData['temperatura_media_interna'] ?? null,
+                    'temperatura_media_externa' => $pontoData['temperatura_media_externa'] ?? null,
+                    'umidade_relativa_interna' => $pontoData['umidade_relativa_interna'] ?? null,
+                    'umidade_relativa_externa' => $pontoData['umidade_relativa_externa'] ?? null,
+                ]);
+            }
+        }
+
         Log::info('FaunaService: Campanha salva com ID: ' . $campanha->id);
-        return $campanha;
+        return $campanha->id; // Alterado para retornar apenas o ID
     }
 
     public function salvarProfissional($contratoId, array $data)
