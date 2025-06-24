@@ -83,13 +83,18 @@ class OcorrenciaService extends BaseModelService
 
     public function storeRegistro(array $post): array
     {
-        $nome = $post['arquivo']->getClientOriginalName();
-        $caminho = $post['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'ConOcorr' . DIRECTORY_SEPARATOR . 'Registro' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+        $nomeArquivo = uniqid() . '_' . $post['arquivo']->getClientOriginalName();
+
+        $caminho = $post['arquivo']->storeAs(
+            'Servico/ConOcorr/Registro', // caminho
+            $nomeArquivo,
+            'public' 
+        );
 
         return $this->dataManagement->create(entity: $this->modelClassRegistro, infos: [
-            'id_ocorrencia' => $post['id_ocorrencia'],
-            'nome' => $nome,
-            'caminho_arquivo' => str_replace("public\\", "", $caminho)
+            'id_ocorrencia'    => $post['id_ocorrencia'],
+            'nome'             => $post['arquivo']->getClientOriginalName(),
+            'caminho_arquivo'  => $caminho 
         ]);
     }
 
