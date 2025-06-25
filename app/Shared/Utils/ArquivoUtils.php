@@ -23,7 +23,12 @@ class ArquivoUtils
             return null;
         }
 
-        $nomeArquivo = $prefixo . rand() . '.' . $arquivo->clientExtension();
+        $diretorio = str_starts_with($diretorio, 'public/') ? substr($diretorio, 7) : $diretorio;
+
+
+        $nomeArquivo = ($prefixo ?? '') . uniqid() . '.' . $arquivo->getClientOriginalExtension();
+
+        $caminhoWeb = '/' . trim($diretorio, '/') . '/' . $nomeArquivo;
 
         $caminhoDestino = public_path($diretorio);
         if (!is_dir($caminhoDestino)) {
@@ -33,11 +38,12 @@ class ArquivoUtils
         $arquivo->move($caminhoDestino, $nomeArquivo);
 
         $model = new Arquivo([
-            'chave'        => md5(uniqid(rand(), true)),
-            'arquivo'      => $nomeArquivo,
-            'extensao'     => $arquivo->clientExtension(),
-            'diretorio'    => $diretorio,
-            'nome_arquivo' => $arquivo->getClientOriginalName(),
+            'chave'         => md5(uniqid(rand(), true)),
+            'arquivo'       => $nomeArquivo,
+            'extensao'      => $arquivo->getClientOriginalExtension(),
+            'diretorio'     => $diretorio,
+            'nome_arquivo'  => $arquivo->getClientOriginalName(),
+            'caminho'       => $caminhoWeb,
         ]);
 
         if ($createModel) {
