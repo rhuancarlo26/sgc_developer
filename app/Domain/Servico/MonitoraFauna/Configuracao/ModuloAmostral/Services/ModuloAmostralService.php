@@ -3,6 +3,7 @@
 namespace App\Domain\Servico\MonitoraFauna\Configuracao\ModuloAmostral\Services;
 
 use App\Domain\Licenca\Shapefile\Services\LicencaShapefileService;
+use App\Domain\Servico\MonitoraFauna\Configuracao\ModuloAmostral\Controller\ImportController;
 use App\Models\ServicoMonitoraFaunaConfigModuloAmostral;
 use App\Models\Servicos;
 use App\Models\Uf;
@@ -13,6 +14,8 @@ use File;
 use Shapefile\ShapefileException;
 use Shapefile\ShapefileReader;
 use ZipArchive;
+use App\Domain\Sgc\Contratada\app\Imports\ArmadilhaImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ModuloAmostralService extends BaseModelService
 {
@@ -25,6 +28,7 @@ class ModuloAmostralService extends BaseModelService
     return [
       'modulos' => $this->searchAllColumns(...$searchParams)
         ->where('id_servico', $servico->id)
+        ->with('armadilhas')
         ->paginate()
         ->appends($searchParams),
       'ufs' => Cache::rememberForever('ufs', fn() => Uf::all())
@@ -33,6 +37,34 @@ class ModuloAmostralService extends BaseModelService
 
   public function store(array $post)
   {
+    
+    $post['nome_arquivo'] = null;
+    $post['shape_file']   = null;
+    if (isset($post['arquivo'])) {
+      $post['nome_arquivo'] = $post['arquivo']->getClientOriginalName();
+      $post['shape_file']   = $this->getFeatureCollection($post['arquivo']);
+    }
+
+    
+    $resultado = $this->dataManagement->create(
+      $this->modelClass,
+      $post
+    );
+
+    if ($resultado['model'] && ! empty($post['arquivoArmadilha'])) {
+      Excel::import(
+        new ArmadilhaImport($resultado['model']->id),
+        $post['arquivoArmadilha']
+      );
+    }
+
+   
+    return $resultado;
+  }
+
+  public function update(array $post)
+  {
+
     $post['nome_arquivo'] = null;
     $post['shape_file'] = null;
 
@@ -41,17 +73,11 @@ class ModuloAmostralService extends BaseModelService
       $post['shape_file'] = $this->getFeatureCollection($post['arquivo']);
     }
 
-    return $this->dataManagement->create($this->modelClass, $post);
-  }
-
-  public function update(array $post)
-  {
-    $post['nome_arquivo'] = null;
-    $post['shape_file'] = null;
-
-    if (isset($post['arquivo'])) {
-      $post['nome_arquivo'] = $post['arquivo']->getClientOriginalName();
-      $post['shape_file'] = $this->getFeatureCollection($post['arquivo']);
+    if (!empty($post['arquivoArmadilha'])) {
+      Excel::import(
+        new ArmadilhaImport($post['id']),
+        $post['arquivoArmadilha']
+      );
     }
 
     return $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['id']);
