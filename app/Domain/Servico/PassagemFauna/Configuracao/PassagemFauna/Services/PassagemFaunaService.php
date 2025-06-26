@@ -72,6 +72,12 @@ class PassagemFaunaService extends BaseModelService
 
     public function submeterFiscal(array $post)
     {
-        return $this->dataManagement->create(entity: $this->modelClassParecer, infos: $post);
+        $parecer = $this->modelClassParecer::where('fk_servico', $post['fk_servico'])->first();
+
+        if (empty($parecer)) {
+            return $this->dataManagement->create(entity: $this->modelClassParecer, infos: $post);
+        }
+        
+        return $this->dataManagement->update(entity: $this->modelClassParecer, infos: $post, id: $parecer->id);
     }
 }
