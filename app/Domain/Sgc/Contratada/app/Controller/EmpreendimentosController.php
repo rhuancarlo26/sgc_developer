@@ -54,7 +54,7 @@ class EmpreendimentosController extends Controller
     }
     public function editavelestudos(Request $request): Response
     {
-        $query = SgcvwEstudos::query();
+        $query = SgcvwEstudos::with(['changelogs']);
 
         if ($request->filled('ordenarPor')) {
             $coluna = $request->get('ordenarPor');
@@ -97,7 +97,7 @@ class EmpreendimentosController extends Controller
     }
     public function editavelprodutos(Request $request): Response
     {
-        $query = SgcvwSubprodutos::query();
+        $query = SgcvwSubprodutos::with(['changelogs']);
 
         if ($request->filled('ordenarPor')) {
             $coluna = $request->get('ordenarPor');

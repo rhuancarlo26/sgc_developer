@@ -134,30 +134,46 @@
 
       <!-- Botões de controle -->
        <!-- <button @click="ordenar('id', 'asc')" class="btn" :class="{ 'btn-primary': ordenacao === '', 'btn-outline-primary': ordenacao !== '' }"> -->
-       <button @click="ordenar('id', 'asc')" :class="'mx-2 btn ' + ordemid_ativo" title="Ordem Padrão - ID">
-            🔝 Ordem Padrão
-        </button>
-
-        <!-- <button @click="ordenacao = 'created_at'" class="btn mx-2" :class="{ 'btn-primary': ordenacao === 'created_at', 'btn-outline-primary': ordenacao !== 'created_at' }"> -->
-        <!-- <button @click="ordenacao = 'created_at'" class="btn mx-2 btn-primary btn-outline-primary">
-            🔝 Mais Recentes: página <strong class="mx-2">{{ paginaAtual }}</strong>
-        </button> -->
-
-        <button @click="ordenar('updated_at', 'desc')" :class="'mx-2 btn ' + ordemup_ativo" title="Ordem GERAL - Últimos Alterados">
-            🔝 Alterados Recentes
-        </button>
-
-        <button @click="ordenar('cod_emp', 'asc')" title="" :class="'mx-2 btn ' + ordememp_ativo">
-            🔝 Por Empreendimento
-        </button>
-
-        <button
-            @click="exportExcel"
-            class="px-4 py-2 btn btn-success text-white rounded float-end mb-3 mb-5"
-        >
-            Exportar Excel <i class="bi bi-file-earmark-excel"></i>
-        </button>
-
+        <!-- <pre>{{ ordenamento }}</pre> -->
+        <div class="row">
+            <div class="col-5">
+                <button @click="ordenar('id', 'asc')" :class="'mx-2 btn ' + ordemid_ativo" title="Ordem Padrão - ID">
+                    🔝 Ordem Padrão
+                </button>
+                <button @click="ordenar('updated_at', 'asc')" :class="'mx-2 btn ' + ordemup_ativo" title="Ordem GERAL - Últimos Alterados">
+                    🔝 Alterados Recentemente
+                </button>
+            </div>
+            <div class="col-5">
+                <!-- <button @click="ordenar('cod_emp', ordenamento)" title="" :class="'mx-2 btn ' + ordememp_ativo">
+                    Ordenar por Empreendimento
+                </button> -->
+                <div class="row">
+                    <div class="col-6">
+                        <select v-model="ordenarpor" class="form-select w-full mx-2 btn btn-info"  @change="ordenar(ordenarpor, ordenamento)">
+                            <option value="cod_emp">Cód. Empreendimento</option>
+                            <option value="empreendimento">Empreendimento</option>
+                            <option value="br">BR</option>
+                            <option value="uf">UF</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <select v-model="ordenamento" class="form-select w-full mx-2 btn" @change="ordenar(ordenarpor, ordenamento)">
+                            <option value="asc">Crescente</option>
+                            <option value="desc">Decrecente</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <button
+                    @click="exportExcel"
+                    class="px-4 py-2 btn btn-success text-white rounded float-end mb-3 mb-5"
+                >
+                    Exportar Excel <i class="bi bi-file-earmark-excel"></i>
+                </button>
+            </div>
+        </div>
       <table
         class="table table-striped table-hover table-light"
       >
@@ -249,6 +265,7 @@ const ordemup_ativo =  ref('btn-outline-primary');
 const ordememp_ativo = ref('btn-outline-primary');
 const ordem_importacao = ref('asc');
 const ordenarpor = ref('id');
+const ordenamento = ref('asc');
 // -------------------------------------------------------------------- reload com ordenamento
 const ordenar = (campo, ordem = 'asc') => {
   router.get(route('sgc.gestao.edicaoestudos', { id: 2 }), {
