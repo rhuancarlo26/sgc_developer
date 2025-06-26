@@ -91,7 +91,6 @@ const deleteVinculoAbio = (id) => {
               <td>{{ item.licenca?.fiscal }}</td>
               <td>{{ item.licenca?.processo_dnit }}</td>
               <td>
-                {{ item.rets[0].caminho_arquivo }}
                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   <IconDots />
