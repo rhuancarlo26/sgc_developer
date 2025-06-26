@@ -12,11 +12,15 @@ class PlanoSupressao extends Model
 
     protected $table = 'plano_supressao';
 
+    protected $casts = [
+        'local_shape_em_app' => 'array',
+        'local_shape_fora_app' => 'array',
+    ];
+
     protected $guarded = ['id', 'created_at'];
 
     public function arquivo(): BelongsTo
     {
         return $this->belongsTo(Arquivo::class);
     }
-
 }
