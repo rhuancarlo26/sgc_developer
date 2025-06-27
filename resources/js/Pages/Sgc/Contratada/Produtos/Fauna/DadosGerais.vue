@@ -59,12 +59,21 @@ const grupoFaunisticoOptions = [
     { value: 'Ictiofauna', label: 'Ictiofauna' },
     { value: 'Bentos', label: 'Bentos' },
 ];
+
+const conselhoDeClasseOptions = [
+    { value: 'Sim', label: 'Sim' },
+    { value: 'Não', label: 'Não' },
+];
+
+const statusOptions = [
+    { value: 'Ativo', label: 'Ativo' },
+    { value: 'Inativo', label: 'Inativo' },
+];
 </script>
 
 <template>
     <form @submit.prevent="$emit('next')">
-        <!-- Dados Gerais -->
-        <h4 class="mb-3">DADOS GERAIS</h4>
+        <h4 class="mb-3" style="text-align: center;">DADOS GERAIS</h4>
         <div class="mb-4">
             <div class="row mb-3">
                 <div class="col-12 col-md-6">
@@ -202,7 +211,7 @@ const grupoFaunisticoOptions = [
 
         <!-- Modal para Cadastrar Profissional -->
         <div v-if="showModalProfissional" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Cadastrar Profissional</h5>
@@ -210,15 +219,107 @@ const grupoFaunisticoOptions = [
                     </div>
                     <div class="modal-body">
                         <form @submit.prevent="$emit('salvar-novo-profissional')">
-                            <div class="mb-3">
-                                <InputLabel value="Nome do Profissional" for="profissional" />
-                                <input v-model="formNovoProfissional.profissional" type="text" class="form-control" id="profissional" required />
-                                <InputError :message="formNovoProfissional.errors.profissional" />
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="Nome do Profissional" for="profissional" />
+                                    <input v-model="formNovoProfissional.profissional" type="text" class="form-control" id="profissional" required />
+                                    <InputError :message="formNovoProfissional.errors.profissional" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="Telefone" for="telefone" />
+                                    <input v-model="formNovoProfissional.telefone" type="text" class="form-control" id="telefone" />
+                                    <InputError :message="formNovoProfissional.errors.telefone" />
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <InputLabel value="Formação" for="formacao" />
-                                <input v-model="formNovoProfissional.formacao" type="text" class="form-control" id="formacao" required />
-                                <InputError :message="formNovoProfissional.errors.formacao" />
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="CPF" for="cpf" />
+                                    <input v-model="formNovoProfissional.cpf" type="text" class="form-control" id="cpf" />
+                                    <InputError :message="formNovoProfissional.errors.cpf" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="E-mail" for="email" />
+                                    <input v-model="formNovoProfissional.email" type="email" class="form-control" id="email" />
+                                    <InputError :message="formNovoProfissional.errors.email" />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="Formação" for="formacao" />
+                                    <input v-model="formNovoProfissional.formacao" type="text" class="form-control" id="formacao" required />
+                                    <InputError :message="formNovoProfissional.errors.formacao" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="Curriculum Lattes" for="curriculum_lattes" />
+                                    <input v-model="formNovoProfissional.curriculum_lattes" type="text" class="form-control" id="curriculum_lattes" />
+                                    <InputError :message="formNovoProfissional.errors.curriculum_lattes" />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="Função" for="funcao" />
+                                    <input v-model="formNovoProfissional.funcao" type="text" class="form-control" id="funcao" />
+                                    <InputError :message="formNovoProfissional.errors.funcao" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="CTF" for="ctf" />
+                                    <input v-model="formNovoProfissional.ctf" type="text" class="form-control" id="ctf" />
+                                    <InputError :message="formNovoProfissional.errors.ctf" />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="Validade" for="validade" />
+                                    <input v-model="formNovoProfissional.validade" type="date" class="form-control" id="validade" />
+                                    <InputError :message="formNovoProfissional.errors.validade" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="Conselho de Classe" for="conselho_de_classe" />
+                                    <div class="d-flex align-items-center">
+                                        <label class="form-check form-check-inline me-3">
+                                            <input
+                                                class="form-check-input"
+                                                type="radio"
+                                                name="conselho_de_classe"
+                                                value="Sim"
+                                                v-model="formNovoProfissional.conselho_de_classe"
+                                            />
+                                            <span class="form-check-label">Sim</span>
+                                        </label>
+                                        <label class="form-check form-check-inline">
+                                            <input
+                                                class="form-check-input"
+                                                type="radio"
+                                                name="conselho_de_classe"
+                                                value="Não"
+                                                v-model="formNovoProfissional.conselho_de_classe"
+                                            />
+                                            <span class="form-check-label">Não</span>
+                                        </label>
+                                    </div>
+                                    <InputError :message="formNovoProfissional.errors.conselho_de_classe" />
+                                </div>
+                            </div>
+                            <div class="row mb-3" v-if="formNovoProfissional.conselho_de_classe === 'Sim'">
+                                <div class="col-12">
+                                    <InputLabel value="Número de Registro" for="numero_de_registro" />
+                                    <input v-model="formNovoProfissional.numero_de_registro" type="number" class="form-control" id="numero_de_registro" />
+                                    <InputError :message="formNovoProfissional.errors.numero_de_registro" />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="Status" for="status" />
+                                    <select v-model="formNovoProfissional.status" class="form-select" id="status">
+                                        <option v-for="option in statusOptions" :value="option.value" :key="option.value">{{ option.label }}</option>
+                                    </select>
+                                    <InputError :message="formNovoProfissional.errors.status" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <InputLabel value="Observação" for="observacao" />
+                                    <textarea v-model="formNovoProfissional.observacao" class="form-control" id="observacao" rows="3"></textarea>
+                                    <InputError :message="formNovoProfissional.errors.observacao" />
+                                </div>
                             </div>
                             <div class="d-flex justify-content-end">
                                 <NavButton type="button" type-button="secondary" title="Cancelar" @click="showModalProfissional = false" class="me-2" />
@@ -229,6 +330,7 @@ const grupoFaunisticoOptions = [
                 </div>
             </div>
         </div>
+        <slot name="footer"></slot>
     </form>
 </template>
 
@@ -246,5 +348,8 @@ const grupoFaunisticoOptions = [
 }
 .table-responsive {
     margin-bottom: 1rem;
+}
+.modal-dialog.modal-lg {
+    max-width: 1200px;
 }
 </style>

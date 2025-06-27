@@ -55,7 +55,7 @@ watch(() => props.formModuloAmostral.uf, (newUf) => {
 
 <template>
     <form @submit.prevent="$emit('next')">
-        <h4 class="mb-3">MÓDULOS AMOSTRAIS</h4>
+        <h4 class="mb-3" style="text-align: center;">MÓDULOS AMOSTRAIS</h4>
         <div class="mb-4">
             <div class="row mb-4">
                 <div class="col-12 col-md-6">
@@ -219,6 +219,7 @@ watch(() => props.formModuloAmostral.uf, (newUf) => {
             <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
             <NavButton type="submit" type-button="primary" title="Avançar" />
         </div>
+        <slot name="footer"></slot>
     </form>
 </template>
 

@@ -123,7 +123,10 @@ Route::prefix('/contratada')->group(function () {
         Route::post('abio/store', [StoreProdutoAbioController::class, 'store'])->name('sgc.contratada.produtos.abio.store');
         Route::delete('abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.destroy');
         Route::post('salvar-campanha', [FaunaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.salvar_campanha');
-        Route::post('profissional', [FaunaController::class, 'salvarProfissional'])->name('sgc.contratada.produtos.profissional.store');
+        Route::post('profissional/store', [FaunaController::class, 'storeProfissional'])->name('sgc.contratada.produtos.profissional.store');
+        Route::post('resultados/store', [FaunaController::class, 'storeResultados'])->name('sgc.contratada.produtos.resultados.store');
     });
+    
+    
 
 });
