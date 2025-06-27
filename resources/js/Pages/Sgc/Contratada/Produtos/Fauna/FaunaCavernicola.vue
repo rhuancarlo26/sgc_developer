@@ -6,17 +6,18 @@ import Table from '@/Components/Table.vue';
 
 defineProps({
     formPontosCavernicola: Object,
-    naoSeAplica: Boolean, // Prop recebida como valor
+    naoSeAplica: Boolean,
     pontoCavernicolaRecords: Array,
 });
 
-defineEmits(['adicionar-ponto-cavernicola', 'excluir-ponto-cavernicola', 'salvar', 'prev', 'update:naoSeAplica']); // Adiciona evento de atualização
+defineEmits(['adicionar-ponto-cavernicola', 'excluir-ponto-cavernicola', 'next', 'prev', 'update:naoSeAplica']);
 </script>
 
 <template>
-    <form @submit.prevent="$emit('salvar')">
-        <h4 class="mb-3">1.2 Área de Amostragem</h4>
-        <h5 class="mb-3">1.2.4 Pontos de Fauna Cavernícola</h5>
+    <form @submit.prevent="$emit('next')">
+        <h4 class="mb-3" style="text-align: center;">FAUNA CAVERNÍCOLA</h4>
+        <!-- <h4 class="mb-3">1.2 Área de Amostragem</h4>
+        <h5 class="mb-3">1.2.4 Pontos de Fauna Cavernícola</h5> -->
         <div class="mb-4">
             <div class="form-check mb-3">
                 <input
@@ -93,10 +94,10 @@ defineEmits(['adicionar-ponto-cavernicola', 'excluir-ponto-cavernicola', 'salvar
                     <template #body="{ item }">
                         <tr>
                             <td>{{ item.cavidade || 'N/A' }}</td>
-                            <td>{{ item.latitude || 'N/A' }}</td>
-                            <td>{{ item.longitude || 'N/A' }}</td>
-                            <td>{{ item.distancia_eixo_rodovia || 'N/A' }}</td>
-                            <td>{{ item.formacao_associada || 'N/A' }}</td>
+                            <td>{{ item.latitude || '' }}</td>
+                            <td>{{ item.longitude || '' }}</td>
+                            <td>{{ item.distancia_eixo_rodovia || '' }}</td>
+                            <td>{{ item.formacao_associada || '' }}</td>
                             <td class="text-center" align="center" style="min-width: 100px;">
                                 <NavButton @click="$emit('excluir-ponto-cavernicola', item.id)" type-button="danger" title="Excluir">
                                     <i class="bi bi-trash"></i>
@@ -109,8 +110,9 @@ defineEmits(['adicionar-ponto-cavernicola', 'excluir-ponto-cavernicola', 'salvar
         </div>
         <div class="d-flex justify-content-between">
             <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
-            <NavButton type="submit" type-button="primary" title="Finalizar" />
+            <NavButton type="submit" type-button="primary" title="Avançar" />
         </div>
+        <slot name="footer"></slot>
     </form>
 </template>
 

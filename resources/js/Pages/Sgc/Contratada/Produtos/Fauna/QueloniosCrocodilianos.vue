@@ -15,8 +15,9 @@ defineEmits(['adicionar-ponto', 'excluir-ponto', 'next', 'prev', 'update:naoSeAp
 
 <template>
     <form @submit.prevent="$emit('next')">
-        <h4 class="mb-3">1.2 Área de Amostragem</h4>
-        <h5 class="mb-3">1.2.3 Pontos de Quelônios e Crocodilianos</h5>
+        <h4 class="mb-3" style="text-align: center;">QUELÔNIOS E CROCODILIANOS</h4>
+        <!-- <h4 class="mb-3">1.2 Área de Amostragem</h4>
+        <h5 class="mb-3">1.2.3 Pontos de Quelônios e Crocodilianos</h5> -->
         <div class="mb-4">
             <div class="form-check mb-3">
                 <input
@@ -98,6 +99,7 @@ defineEmits(['adicionar-ponto', 'excluir-ponto', 'next', 'prev', 'update:naoSeAp
             <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
             <NavButton type="submit" type-button="primary" title="Avançar" />
         </div>
+        <slot name="footer"></slot>
     </form>
 </template>
 

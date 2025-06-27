@@ -4,13 +4,14 @@ import { Head, useForm, router } from '@inertiajs/vue3';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
 import NavButton from '@/Components/NavButton.vue';
 import { ref } from 'vue';
 import DadosGerais from './DadosGerais.vue';
 import ModulosAmostragem from './ModulosAmostrais.vue';
 import QueloniosCrocodilian from './QueloniosCrocodilianos.vue';
 import FaunaCavernic from './FaunaCavernicola.vue';
+import Metodologia from './Metodologia.vue';
+import FaunaResultados from './FaunaResultados.vue';
 
 // Props
 const props = defineProps({
@@ -37,6 +38,7 @@ const activeTab = ref('apresentacao');
 const subStep = ref(1);
 const showModalProfissional = ref(false);
 const naoSeAplica = ref(false);
+const resultadosRecords = ref([]);
 
 // Formulários
 const form = useForm({
@@ -60,6 +62,17 @@ const formProfissional = useForm({
 const formNovoProfissional = useForm({
     profissional: '',
     formacao: '',
+    telefone: '',
+    cpf: '',
+    email: '',
+    curriculum_lattes: '',
+    funcao: '',
+    ctf: '',
+    validade: '',
+    conselho_de_classe: 'Não',
+    numero_de_registro: null,
+    status: 'Ativo',
+    observacao: '',
 });
 const formModuloAmostral = useForm({
     data_cadastro: null,
@@ -95,6 +108,15 @@ const formPontosCavernicola = useForm({
     umidade_relativa_interna: null,
     umidade_relativa_externa: null,
 });
+const formMetodologia = useForm({
+    grupo_faunistico: null,
+    metodologia: '',
+});
+const formResultados = useForm({
+    planilha: null,
+    contrato: props.contrato,
+    produto: props.produto,
+});
 
 // Tabelas
 const abioRecords = ref([]);
@@ -102,6 +124,7 @@ const profissionalRecords = ref([]);
 const moduloRecords = ref([]);
 const pontoRecords = ref([]);
 const pontoCavernicolaRecords = ref([]);
+const metodologiaRecords = ref([]);
 
 // Funções
 const salvarDadosGerais = () => {
@@ -111,7 +134,7 @@ const salvarDadosGerais = () => {
         data_campanha_final: formDadosGerais.data_campanha_final,
         periodo: formDadosGerais.periodo,
         observacoes: formDadosGerais.obs,
-        id_abio: abioRecords.value.map(a => a.id), // Enviar array de IDs de ABIOs
+        id_abio: abioRecords.value.map(a => a.id),
         cod_emp: form.cod_emp,
         subproduto: props.subproduto || '',
         nao_se_aplica: naoSeAplica.value,
@@ -122,6 +145,11 @@ const salvarDadosGerais = () => {
         modulos_amostrais: moduloRecords.value,
         pontos_quelo_crocod: pontoRecords.value,
         pontos_cavernicola: pontoCavernicolaRecords.value,
+        metodologias: metodologiaRecords.value.map(m => ({
+            grupo_faunistico: m.grupo_faunistico,
+            metodologia: m.metodologia,
+        })),
+        resultados: resultadosRecords.value,
     };
     console.log('Enviando dados para salvar campanha:', JSON.stringify(data, null, 2));
     router.post(route('sgc.contratada.produtos.salvar_campanha', [props.contrato, props.produto.toLowerCase()]), data, {
@@ -130,11 +158,19 @@ const salvarDadosGerais = () => {
             formDadosGerais.reset();
             formAbio.reset();
             formProfissional.reset();
+            formNovoProfissional.reset();
+            formModuloAmostral.reset();
+            formPontosAmostragem.reset();
+            formPontosCavernicola.reset();
+            formMetodologia.reset();
+            formResultados.reset();
             profissionalRecords.value = [];
-            abioRecords.value = []; // Resetar abioRecords após salvamento
+            abioRecords.value = [];
             moduloRecords.value = [];
             pontoRecords.value = [];
             pontoCavernicolaRecords.value = [];
+            metodologiaRecords.value = [];
+            resultadosRecords.value = [];
             router.get(route('sgc.contratada.produtos.index', [props.contrato, props.produto.toLowerCase()]));
         },
         onError: (errors) => console.error('Erros ao salvar campanha:', errors),
@@ -167,6 +203,17 @@ const salvarNovoProfissional = () => {
                 id: Date.now(),
                 profissional: formNovoProfissional.profissional,
                 formacao: formNovoProfissional.formacao,
+                telefone: formNovoProfissional.telefone,
+                cpf: formNovoProfissional.cpf,
+                email: formNovoProfissional.email,
+                curriculum_lattes: formNovoProfissional.curriculum_lattes,
+                funcao: formNovoProfissional.funcao,
+                ctf: formNovoProfissional.ctf,
+                validade: formNovoProfissional.validade,
+                conselho_de_classe: formNovoProfissional.conselho_de_classe,
+                numero_de_registro: formNovoProfissional.numero_de_registro,
+                status: formNovoProfissional.status,
+                observacao: formNovoProfissional.observacao,
             });
             formNovoProfissional.reset();
             showModalProfissional.value = false;
@@ -190,6 +237,21 @@ const vincularProfissional = () => {
 
 const excluirProfissional = (id) => {
     profissionalRecords.value = profissionalRecords.value.filter(item => item.id !== id);
+};
+
+const adicionarMetodologia = () => {
+    if (formMetodologia.grupo_faunistico && formMetodologia.metodologia) {
+        metodologiaRecords.value.push({
+            id: Date.now(),
+            grupo_faunistico: formMetodologia.grupo_faunistico,
+            metodologia: formMetodologia.metodologia,
+        });
+        formMetodologia.reset();
+    }
+};
+
+const excluirMetodologia = (id) => {
+    metodologiaRecords.value = metodologiaRecords.value.filter(item => item.id !== id);
 };
 
 const adicionarModulo = () => {
@@ -303,11 +365,13 @@ const nextSubStep = () => {
         return;
     }
     if (subStep.value === 5 && !naoSeAplica.value && pontoCavernicolaRecords.value.length === 0) {
-        alert('Adicione pelo menos um ponto de fauna cavernícola antes de finalizar, ou marque "Não se aplica".');
+        alert('Adicione pelo menos um ponto de fauna cavernícola antes de avançar, ou marque "Não se aplica".');
         return;
     }
     if (subStep.value < 5) {
         subStep.value += 1;
+    } else {
+        setActiveTab('metodologia');
     }
 };
 
@@ -319,6 +383,9 @@ const prevSubStep = () => {
 
 const setActiveTab = (tab) => {
     activeTab.value = tab;
+    if (tab === 'apresentacao') {
+        subStep.value = 5; // Volta para a última subetapa (Fauna Cavernícola)
+    }
 };
 </script>
 
@@ -342,7 +409,7 @@ const setActiveTab = (tab) => {
                             <li class="nav-item">
                                 <a
                                     class="nav-link"
-                                    :class="{ 'active': activeTab === 'apresentacao' }"
+                                    :class="{ active: activeTab === 'apresentacao' }"
                                     @click.prevent="setActiveTab('apresentacao')"
                                     >Apresentação</a
                                 >
@@ -350,35 +417,33 @@ const setActiveTab = (tab) => {
                             <li class="nav-item">
                                 <a
                                     class="nav-link"
-                                    :class="{ 'active': activeTab === 'metodologia' }"
+                                    :class="{ active: activeTab === 'metodologia' }"
                                     @click.prevent="setActiveTab('metodologia')"
                                     >Metodologia</a
                                 >
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" :class="{ 'active': activeTab === 'equipe' }" @click.prevent="setActiveTab('equipe')"
-                                    >Equipe</a
-                                >
-                            </li>
-                            <li class="nav-item">
                                 <a
                                     class="nav-link"
-                                    :class="{ 'active': activeTab === 'resultados' }"
+                                    :class="{ active: activeTab === 'resultados' }"
                                     @click.prevent="setActiveTab('resultados')"
                                     >Resultados</a
                                 >
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" :class="{ 'active': activeTab === 'anexos' }" @click.prevent="setActiveTab('anexos')"
+                                <a
+                                    class="nav-link"
+                                    :class="{ active: activeTab === 'anexos' }"
+                                    @click.prevent="setActiveTab('anexos')"
                                     >Anexos</a
                                 >
                             </li>
                         </ul>
                         <div class="tab-content">
-                            <div v-if="activeTab === 'apresentacao'" class="tab-pane fade show active">
-                                <h5 class="mb-3">Etapa {{ subStep }}/5</h5>
+                            <div v-if="activeTab === 'apresentacao'" class="tab-pane fade" :class="{ 'show active': activeTab === 'apresentacao' }">
                                 <!-- Subetapa 1/5 -->
                                 <div v-if="subStep === 1">
+                                    <h4 class="mb-3" style="text-align: center;">APRESENTAÇÃO</h4>
                                     <form @submit.prevent="nextSubStep">
                                         <div class="mb-3">
                                             <label for="cod_emp" class="form-label">Empreendimento</label>
@@ -403,6 +468,7 @@ const setActiveTab = (tab) => {
                                         <div class="d-flex justify-content-end">
                                             <NavButton type="submit" type-button="primary" title="Avançar" />
                                         </div>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                     </form>
                                 </div>
                                 <DadosGerais
@@ -422,13 +488,17 @@ const setActiveTab = (tab) => {
                                     @excluir-profissional="excluirProfissional"
                                     @next="nextSubStep"
                                     @prev="prevSubStep"
-                                />
+                                >
+                                    <template #footer>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
+                                    </template>
+                                </DadosGerais>
                                 <ModulosAmostragem
                                     v-if="subStep === 3"
                                     :form-modulo-amostral="formModuloAmostral"
                                     :ufs="[
-                                        { uf: 'AC' },{ uf: 'AL' },{ uf: 'AP' },{ uf: 'AM' },{ uf: 'BA' },{ uf: 'CE' },{ uf: 'DF' },{ uf: 'ES' },{ uf: 'GO' },{ uf: 'MA' },{ uf: 'MT' },{ uf: 'MS' },{ uf: 'MG' },{ uf: 'PA' },
-                                        { uf: 'PB' },{ uf: 'PR' },{ uf: 'PE' },{ uf: 'PI' },{ uf: 'RJ' },{ uf: 'RN' },{ uf: 'RS' },{ uf: 'RO' },{ uf: 'RR' },{ uf: 'SC' },{ uf: 'SP' },{ uf: 'SE' },{ uf: 'TO' },
+                                        { uf: 'AC' },{ uf: 'AL' },{ uf: 'AP' },{ uf: 'AM' },{ uf: 'BA' },{ uf: 'CE' },{ uf: 'DF' },{ uf: 'ES' },{ uf: 'GO' },{ uf: 'MA' },{ uf: 'MT' },{ uf: 'MS' },{ uf: 'MG' },
+                                        { uf: 'PA' },{ uf: 'PB' },{ uf: 'PR' },{ uf: 'PE' },{ uf: 'PI' },{ uf: 'RJ' },{ uf: 'RN' },{ uf: 'RS' },{ uf: 'RO' },{ uf: 'RR' },{ uf: 'SC' },{ uf: 'SP' },{ uf: 'SE' },{ uf: 'TO' },
                                     ]"
                                     :biomas="[
                                         'Caatinga',
@@ -446,7 +516,11 @@ const setActiveTab = (tab) => {
                                     @excluir-modulo="excluirModulo"
                                     @next="nextSubStep"
                                     @prev="prevSubStep"
-                                />
+                                >
+                                    <template #footer>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
+                                    </template>
+                                </ModulosAmostragem>
                                 <QueloniosCrocodilian
                                     v-if="subStep === 4"
                                     v-model:naoSeAplica="naoSeAplica"
@@ -456,7 +530,11 @@ const setActiveTab = (tab) => {
                                     @excluir-ponto="excluirPonto"
                                     @next="nextSubStep"
                                     @prev="prevSubStep"
-                                />
+                                >
+                                    <template #footer>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
+                                    </template>
+                                </QueloniosCrocodilian>
                                 <FaunaCavernic
                                     v-if="subStep === 5"
                                     v-model:naoSeAplica="naoSeAplica"
@@ -464,23 +542,35 @@ const setActiveTab = (tab) => {
                                     :ponto-cavernicola-records="pontoCavernicolaRecords"
                                     @adicionar-ponto-cavernicola="adicionarPontoCavernicola"
                                     @excluir-ponto-cavernicola="excluirPontoCavernicola"
-                                    @salvar="salvarDadosGerais"
+                                    @next="nextSubStep"
                                     @prev="prevSubStep"
+                                >
+                                    <template #footer>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
+                                    </template>
+                                </FaunaCavernic>
+                            </div>
+                            <div v-if="activeTab === 'metodologia'" class="tab-pane fade" :class="{ 'show active': activeTab === 'metodologia' }">
+                                <Metodologia
+                                    :form-metodologia="formMetodologia"
+                                    :metodologia-records="metodologiaRecords"
+                                    @adicionar-metodologia="adicionarMetodologia"
+                                    @excluir-metodologia="excluirMetodologia"
+                                    @salvar="salvarDadosGerais"
+                                    @prev="setActiveTab('apresentacao')"
                                 />
                             </div>
-                            <div v-if="activeTab === 'metodologia'" class="tab-pane fade show active">
-                                <h4>METODOLOGIA</h4>
-                                <p>Funcionalidade em desenvolvimento.</p>
+                            <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
+                                <FaunaResultados
+                                    :form-resultados="formResultados"
+                                    :resultados-records.sync="resultadosRecords"
+                                    :id-campanha="formDadosGerais.id || props.contrato"
+                                    @update:resultadosRecords="resultadosRecords = $event"
+                                    @prev="setActiveTab('metodologia')"
+                                    @salvar="salvarDadosGerais"
+                                />
                             </div>
-                            <div v-if="activeTab === 'equipe'" class="tab-pane fade show active">
-                                <h4>EQUIPE</h4>
-                                <p>Funcionalidade em desenvolvimento.</p>
-                            </div>
-                            <div v-if="activeTab === 'resultados'" class="tab-pane fade show active">
-                                <h4>RESULTADOS</h4>
-                                <p>Funcionalidade em desenvolvimento.</p>
-                            </div>
-                            <div v-if="activeTab === 'anexos'" class="tab-pane fade show active">
+                            <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
                                 <h4>ANEXOS</h4>
                                 <p>Funcionalidade em desenvolvimento.</p>
                             </div>
@@ -503,12 +593,6 @@ const setActiveTab = (tab) => {
 }
 .v-select-custom :deep(.vs__selected) {
     margin: 2px;
-}
-.table-responsive {
-    margin-bottom: 1rem;
-}
-.modal {
-    z-index: 1050;
 }
 .nav-tabs {
     border-bottom: 1px solid #dee2e6;
