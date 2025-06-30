@@ -22,7 +22,8 @@ class UpdateRequest extends FormRequest
       'latitude_final' => ['required'],
       'longitude_final' => ['required'],
       'obs' => ['required'],
-      'arquivo' => ['nullable']
+      'arquivo' => ['nullable'],
+      'arquivoArmadilha' => ['required', 'file', 'mimes:xlsx,xls']
     ];
   }
 
