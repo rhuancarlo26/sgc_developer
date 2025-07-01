@@ -140,6 +140,7 @@ class FaunaController extends Controller
             'resultados.*.peso' => 'nullable|integer',
             'resultados.*.status_conservacao_federal' => 'nullable|',
             'resultados.*.status_conservacao_iucn' => 'nullable|',
+            'consideracoes' => 'nullable|string',
         ]);
 
         try {

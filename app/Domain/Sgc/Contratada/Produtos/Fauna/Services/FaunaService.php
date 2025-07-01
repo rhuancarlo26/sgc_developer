@@ -10,6 +10,7 @@ use App\Models\SgcFaunaModuloAmostral;
 use App\Models\SgcFaunaQuelonios;
 use App\Models\SgcFaunaMetodologia;
 use App\Models\SgcFaunaResultados;
+use App\Models\SgcFaunaResultadosConsideracoes;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -131,41 +132,13 @@ class FaunaService
             }
         }
 
-        // Vincular resultados
-        if (!empty($data['resultados'])) {
-            foreach ($data['resultados'] as $resultadoData) {
-                SgcFaunaResultados::create([
-                    'id_campanha' => $campanha->id,
-                    'modulo' => $resultadoData['modulo'] ?? null,
-                    'parcela' => $resultadoData['parcela'] ?? null,
-                    'id_armadilha' => $resultadoData['id_armadilha'] ?? null,
-                    'grupo_amostrado' => $resultadoData['grupo_amostrado'] ?? null,
-                    'data_registro' => $resultadoData['data_registro'] ?? null,
-                    'hora_registro' => $resultadoData['hora_registro'] ?? null,
-                    'categoria' => $resultadoData['categoria'] ?? null,
-                    'classe' => $resultadoData['classe'] ?? null,
-                    'ordem' => $resultadoData['ordem'] ?? null,
-                    'familia' => $resultadoData['familia'] ?? null,
-                    'genero' => $resultadoData['genero'] ?? null,
-                    'especie' => $resultadoData['especie'] ?? null,
-                    'nome_comum' => $resultadoData['nome_comum'] ?? null,
-                    'sexo' => $resultadoData['sexo'] ?? null,
-                    'faixa_etaria' => $resultadoData['faixa_etaria'] ?? null,
-                    'qnt_individuos' => $resultadoData['qnt_individuos'] ?? 0,
-                    'num_marcacao' => $resultadoData['num_marcacao'] ?? null,
-                    'coletado' => $resultadoData['coletado'] ?? null,
-                    'num_tombamento' => $resultadoData['num_tombamento'] ?? null,
-                    'dados_biometricos' => $resultadoData['dados_biometricos'] ?? null,
-                    'comp_total' => $resultadoData['comp_total'] ?? null,
-                    'cabeca' => $resultadoData['cabeca'] ?? null,
-                    'cauda' => $resultadoData['cauda'] ?? null,
-                    'femur' => $resultadoData['femur'] ?? null,
-                    'orelha' => $resultadoData['orelha'] ?? null,
-                    'peso' => $resultadoData['peso'] ?? null,
-                    'status_conservacao_federal' => $resultadoData['status_conservacao_federal'] ?? null,
-                    'status_conservacao_iucn' => $resultadoData['status_conservacao_iucn'] ?? null,
-                ]);
-            }
+        // Salvar considerações
+        if (!empty($data['consideracoes'])) {
+            SgcFaunaResultadosConsideracoes::create([
+                'id_contrato' => $contratoId,
+                'id_campanha' => $campanha->id,
+                'consideracoes' => $data['consideracoes'],
+            ]);
         }
 
         Log::info('FaunaService: Campanha salva com ID: ' . $campanha->id);
@@ -204,7 +177,6 @@ class FaunaService
             $worksheet = $spreadsheet->getActiveSheet();
             $rows = $worksheet->toArray();
 
-            // Validar cabeçalho
             $expectedHeaders = [
                 'ID Campanha', 'Módulo', 'Parcela', 'ID Armadilha', 'Grupo Amostrado', 'Data do Registro', 'Hora do Registro',
                 'Categoria', 'Classe', 'Ordem', 'Família', 'Gênero', 'Espécie', 'Nome Comum', 'Sexo', 'Faixa Etária',
@@ -212,21 +184,41 @@ class FaunaService
                 'Cabeça', 'Cauda', 'Fêmur', 'Orelha', 'Peso', 'Status Conservação Federal', 'Status Conservação IUCN'
             ];
 
-            $headerRow = array_map('trim', array_shift($rows)); // Remove e valida o cabeçalho
+            $headerRow = array_map('trim', array_shift($rows));
             if ($headerRow !== $expectedHeaders) {
                 throw new \Exception('Cabeçalho da planilha inválido. Use o modelo fornecido.');
             }
 
             foreach ($rows as $row) {
-                // Mapear os dados da planilha para os campos do modelo
+                // Converter data (DD/MM/YYYY)
+                $dataRegistro = null;
+                if ($row[5]) {
+                    $dateTime = \DateTime::createFromFormat('d/m/Y', trim($row[5]));
+                    if (!$dateTime) {
+                        throw new \Exception('Formato de data inválido: ' . $row[5]);
+                    }
+                    $dataRegistro = $dateTime->format('Y-m-d');
+                }
+
+                // Converter hora (HH:MM)
+                $horaRegistro = null;
+                if ($row[6]) {
+                    $dateTime = \DateTime::createFromFormat('H:i', trim($row[6]));
+                    if (!$dateTime) {
+                        throw new \Exception('Formato de hora inválido: ' . $row[6]);
+                    }
+                    $horaRegistro = $dateTime->format('H:i:s');
+                }
+
                 $data = [
+                    'id_contrato' => $contratoId,
                     'id_campanha' => $row[0] ?? null,
                     'modulo' => $row[1] ?? null,
                     'parcela' => $row[2] ?? null,
                     'id_armadilha' => $row[3] ?? null,
                     'grupo_amostrado' => $row[4] ?? null,
-                    'data_registro' => $row[5] ? date('Y-m-d', strtotime($row[5])) : null,
-                    'hora_registro' => $row[6] ?? null,
+                    'data_registro' => $dataRegistro,
+                    'hora_registro' => $horaRegistro,
                     'categoria' => $row[7] ?? null,
                     'classe' => $row[8] ?? null,
                     'ordem' => $row[9] ?? null,
@@ -251,9 +243,25 @@ class FaunaService
                     'status_conservacao_iucn' => $row[28] ?? null,
                 ];
 
-                // Validar id_campanha
-                if (!$data['id_campanha'] || !SgcFaunaCampanha::where('id', $data['id_campanha'])->exists()) {
+                if ($data['id_campanha'] && !SgcFaunaCampanha::where('id', $data['id_campanha'])->exists()) {
                     throw new \Exception('ID de campanha inválido: ' . $data['id_campanha']);
+                }
+
+                // Verificar duplicação
+                $exists = SgcFaunaResultados::where([
+                    'id_contrato' => $contratoId,
+                    'id_campanha' => $data['id_campanha'],
+                    'modulo' => $data['modulo'],
+                    'parcela' => $data['parcela'],
+                    'id_armadilha' => $data['id_armadilha'],
+                    'data_registro' => $data['data_registro'],
+                    'hora_registro' => $data['hora_registro'],
+                    'especie' => $data['especie'],
+                ])->exists();
+
+                if ($exists) {
+                    Log::warning('FaunaService: Registro duplicado ignorado.', $data);
+                    continue;
                 }
 
                 SgcFaunaResultados::create($data);
@@ -265,7 +273,7 @@ class FaunaService
                 'contrato' => $contratoId,
                 'erro' => $e->getMessage(),
             ]);
-            throw $e;
+            throw new \Exception('Erro ao salvar resultados: ' . $e->getMessage());
         }
     }
 
