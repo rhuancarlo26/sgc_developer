@@ -269,7 +269,7 @@ const ordenarpor = ref('id');
 const ordenamento = ref('asc');
 // -------------------------------------------------------------------- reload com ordenamento
 const ordenar = (campo, ordem = 'asc') => {
-  router.get(route('sgc.gestao.edicaoprodutos', { id: 2 }), {
+  router.get(route('sgc.contratada.edicaoprodutos', { id: 2 }), {
     ordenarPor: campo,
     ordem: ordem,
   }, { preserveState: true, preserveScroll: true });
