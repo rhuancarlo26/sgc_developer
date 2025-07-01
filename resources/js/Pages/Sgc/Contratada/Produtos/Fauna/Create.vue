@@ -127,7 +127,7 @@ const pontoCavernicolaRecords = ref([]);
 const metodologiaRecords = ref([]);
 
 // Funções
-const salvarDadosGerais = () => {
+const salvarDadosGerais = (consideracoesData = {}) => {
     const data = {
         id_campanha: formDadosGerais.id,
         data_campanha_inicial: formDadosGerais.data_campanha_inicial,
@@ -149,7 +149,7 @@ const salvarDadosGerais = () => {
             grupo_faunistico: m.grupo_faunistico,
             metodologia: m.metodologia,
         })),
-        resultados: resultadosRecords.value,
+        consideracoes: consideracoesData.consideracoes || null,
     };
     console.log('Enviando dados para salvar campanha:', JSON.stringify(data, null, 2));
     router.post(route('sgc.contratada.produtos.salvar_campanha', [props.contrato, props.produto.toLowerCase()]), data, {

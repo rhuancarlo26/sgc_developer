@@ -23,7 +23,10 @@ const props = defineProps({
 // Emits
 const emit = defineEmits(['update:resultadosRecords', 'prev', 'salvar']);
 
-// Funções
+// Dados
+const consideracoes = ref('');
+const resultadosRecords = ref(props.resultadosRecords);
+
 const downloadModelo = () => {
     const headers = [
         'ID Campanha', 'Módulo', 'Parcela', 'ID Armadilha', 'Grupo Amostrado', 'Data do Registro', 'Hora do Registro',
@@ -34,7 +37,17 @@ const downloadModelo = () => {
     const ws = XLSX.utils.json_to_sheet([{}], { header: headers });
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Resultados');
-    XLSX.write(wb, 'modelo_resultados.xlsx', { bookType: 'xlsx', type: 'array' });
+    
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], { type: 'application/octet-stream' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'modelo_resultados.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
 };
 
 const processarPlanilha = (event) => {
@@ -44,12 +57,12 @@ const processarPlanilha = (event) => {
     const reader = new FileReader();
     reader.onload = (e) => {
         const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, { type: 'array', cellDates: false });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet);
 
         const novosResultados = json.map(row => ({
-            id: Date.now() + Math.random(), // ID temporário
+            id: Date.now() + Math.random(),
             id_campanha: props.idCampanha,
             modulo: row['Módulo'] || null,
             parcela: row['Parcela'] || null,
@@ -81,22 +94,36 @@ const processarPlanilha = (event) => {
             status_conservacao_iucn: row['Status Conservação IUCN'] || null,
         }));
 
+        resultadosRecords.value = novosResultados;
         emit('update:resultadosRecords', novosResultados);
-
         props.formResultados.planilha = file;
-        props.formResultados.post(route('sgc.contratada.produtos.resultados.store', [props.formResultados.contrato, props.formResultados.produto.toLowerCase()]), {
-            onSuccess: () => {
-                alert('Planilha processada e dados salvos com sucesso!');
-                props.formResultados.reset();
-            },
-            onError: (errors) => console.error('Erro ao processar planilha:', errors),
-        });
     };
     reader.readAsArrayBuffer(file);
 };
 
+const salvar = () => {
+    emit('salvar', { consideracoes: consideracoes.value });
+    if (props.formResultados.planilha) {
+        props.formResultados.post(route('sgc.contratada.produtos.resultados.store', [props.formResultados.contrato, props.formResultados.produto.toLowerCase()]), {
+            onSuccess: () => {
+                alert('Planilha processada e dados salvos com sucesso!');
+                props.formResultados.reset();
+                resultadosRecords.value = [];
+                emit('update:resultadosRecords', resultadosRecords.value);
+            },
+            onError: (errors) => {
+                console.error('Erro ao processar planilha:', errors);
+                alert('Erro ao salvar resultados: ' + (errors.error || 'Verifique os dados e tente novamente.'));
+            },
+        });
+    } else {
+        alert('Nenhuma planilha selecionada para salvar.');
+    }
+};
+
 const excluirResultado = (id) => {
-    const novosResultados = props.resultadosRecords.filter(item => item.id !== id);
+    const novosResultados = resultadosRecords.value.filter(item => item.id !== id);
+    resultadosRecords.value = novosResultados;
     emit('update:resultadosRecords', novosResultados);
 };
 </script>
@@ -117,6 +144,17 @@ const excluirResultado = (id) => {
                 @change="processarPlanilha"
             />
             <InputError :message="formResultados.errors.planilha" />
+        </div>
+        <div class="mb-3">
+            <label for="consideracoes" class="form-label">Considerações</label>
+            <textarea
+                v-model="consideracoes"
+                class="form-control"
+                id="consideracoes"
+                rows="4"
+                placeholder="Digite suas considerações aqui..."
+            ></textarea>
+            <InputError :message="formResultados.errors.consideracoes" />
         </div>
         <div v-if="resultadosRecords.length" class="table-responsive">
             <table class="table table-bordered">
@@ -194,7 +232,7 @@ const excluirResultado = (id) => {
         </div>
         <div class="d-flex justify-content-between mt-4">
             <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
-            <NavButton type-button="primary" title="Salvar" @click="$emit('salvar')" />
+            <NavButton type-button="primary" title="Salvar" @click="salvar" />
         </div>
     </div>
 </template>
