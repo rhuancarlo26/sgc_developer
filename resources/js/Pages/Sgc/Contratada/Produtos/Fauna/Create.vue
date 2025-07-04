@@ -39,6 +39,17 @@ const subStep = ref(1);
 const showModalProfissional = ref(false);
 const naoSeAplica = ref(false);
 const resultadosRecords = ref([]);
+const anexos = ref({
+    anuencia_proprietarios: null,
+    registro_fotografico: null,
+    dados_secundarios: null,
+    art: null,
+    ret: null,
+    cr: null,
+    ctf: null,
+    anuencia_colecoes: null,
+    oficio_atividades_campo: null,
+});
 
 // Formulários
 const form = useForm({
@@ -128,32 +139,98 @@ const metodologiaRecords = ref([]);
 
 // Funções
 const salvarDadosGerais = (consideracoesData = {}) => {
-    const data = {
-        id_campanha: formDadosGerais.id,
-        data_campanha_inicial: formDadosGerais.data_campanha_inicial,
-        data_campanha_final: formDadosGerais.data_campanha_final,
-        periodo: formDadosGerais.periodo,
-        observacoes: formDadosGerais.obs,
-        id_abio: abioRecords.value.map(a => a.id),
-        cod_emp: form.cod_emp,
-        subproduto: props.subproduto || '',
-        nao_se_aplica: naoSeAplica.value,
-        profissionais: profissionalRecords.value.map(p => ({
-            profissional: p.profissional,
-            grupo_faunistico: p.grupo_faunistico,
-        })),
-        modulos_amostrais: moduloRecords.value,
-        pontos_quelo_crocod: pontoRecords.value,
-        pontos_cavernicola: pontoCavernicolaRecords.value,
-        metodologias: metodologiaRecords.value.map(m => ({
-            grupo_faunistico: m.grupo_faunistico,
-            metodologia: m.metodologia,
-        })),
-        consideracoes: consideracoesData.consideracoes || null,
-    };
-    console.log('Enviando dados para salvar campanha:', JSON.stringify(data, null, 2));
-    router.post(route('sgc.contratada.produtos.salvar_campanha', [props.contrato, props.produto.toLowerCase()]), data, {
+    const formData = new FormData();
+    formData.append('id_campanha', formDadosGerais.id || '');
+    formData.append('data_campanha_inicial', formDadosGerais.data_campanha_inicial || '');
+    formData.append('data_campanha_final', formDadosGerais.data_campanha_final || '');
+    formData.append('periodo', formDadosGerais.periodo || '');
+    formData.append('observacoes', formDadosGerais.obs || '');
+    formData.append('cod_emp', form.cod_emp || '');
+    formData.append('subproduto', props.subproduto || '');
+    formData.append('nao_se_aplica', naoSeAplica.value ? '1' : '0');
+    formData.append('consideracoes', consideracoesData.consideracoes || '');
+
+    // Adicionar ABIOs
+    abioRecords.value.forEach((abio, index) => {
+        formData.append(`id_abio[${index}]`, abio.id);
+    });
+
+    // Adicionar Profissionais
+    profissionalRecords.value.forEach((prof, index) => {
+        formData.append(`profissionais[${index}][profissional]`, prof.profissional || '');
+        formData.append(`profissionais[${index}][grupo_faunistico]`, prof.grupo_faunistico || '');
+    });
+
+    // Adicionar Módulos Amostrais
+    moduloRecords.value.forEach((modulo, index) => {
+        formData.append(`modulos_amostrais[${index}][data_cadastro]`, modulo.data_cadastro || '');
+        formData.append(`modulos_amostrais[${index}][tamanho_modulo]`, modulo.tamanho_modulo || '');
+        formData.append(`modulos_amostrais[${index}][uf]`, modulo.uf || '');
+        formData.append(`modulos_amostrais[${index}][municipio]`, modulo.municipio || '');
+        formData.append(`modulos_amostrais[${index}][bioma]`, modulo.bioma || '');
+        formData.append(`modulos_amostrais[${index}][fitofisionomia]`, modulo.fitofisionomia || '');
+        formData.append(`modulos_amostrais[${index}][latitude_inicial]`, modulo.latitude_inicial || '');
+        formData.append(`modulos_amostrais[${index}][longitude_inicial]`, modulo.longitude_inicial || '');
+        formData.append(`modulos_amostrais[${index}][latitude_final]`, modulo.latitude_final || '');
+        formData.append(`modulos_amostrais[${index}][longitude_final]`, modulo.longitude_final || '');
+        formData.append(`modulos_amostrais[${index}][obs]`, modulo.obs || '');
+        if (modulo.arquivo) {
+            formData.append(`modulos_amostrais[${index}][arquivo]`, modulo.arquivo);
+        }
+    });
+
+    // Adicionar Pontos Quelônios/Crocodinianos
+    pontoRecords.value.forEach((ponto, index) => {
+        formData.append(`pontos_quelo_crocod[${index}][ponto_de_coleta]`, ponto.ponto_de_coleta || '');
+        formData.append(`pontos_quelo_crocod[${index}][nome_curso_hidrico]`, ponto.nome_curso_hidrico || '');
+        formData.append(`pontos_quelo_crocod[${index}][coordenadas]`, ponto.coordenadas || '');
+        formData.append(`pontos_quelo_crocod[${index}][bacia]`, ponto.bacia || '');
+        formData.append(`pontos_quelo_crocod[${index}][profundidade]`, ponto.profundidade || '');
+        formData.append(`pontos_quelo_crocod[${index}][largura]`, ponto.largura || '');
+        formData.append(`pontos_quelo_crocod[${index}][tipo_substrato]`, ponto.tipo_substrato || '');
+    });
+
+    // Adicionar Pontos Cavernícolas
+    pontoCavernicolaRecords.value.forEach((ponto, index) => {
+        formData.append(`pontos_cavernicola[${index}][cavidade]`, ponto.cavidade || '');
+        formData.append(`pontos_cavernicola[${index}][latitude]`, ponto.latitude || '');
+        formData.append(`pontos_cavernicola[${index}][longitude]`, ponto.longitude || '');
+        formData.append(`pontos_cavernicola[${index}][distancia_eixo_rodovia]`, ponto.distancia_eixo_rodovia || '');
+        formData.append(`pontos_cavernicola[${index}][formacao_associada]`, ponto.formacao_associada || '');
+        formData.append(`pontos_cavernicola[${index}][temperatura_media_interna]`, ponto.temperatura_media_interna || '');
+        formData.append(`pontos_cavernicola[${index}][temperatura_media_externa]`, ponto.temperatura_media_externa || '');
+        formData.append(`pontos_cavernicola[${index}][umidade_relativa_interna]`, ponto.umidade_relativa_interna || '');
+        formData.append(`pontos_cavernicola[${index}][umidade_relativa_externa]`, ponto.umidade_relativa_externa || '');
+    });
+
+    // Adicionar Metodologias
+    metodologiaRecords.value.forEach((metodo, index) => {
+        formData.append(`metodologias[${index}][grupo_faunistico]`, metodo.grupo_faunistico || '');
+        formData.append(`metodologias[${index}][metodologia]`, metodo.metodologia || '');
+    });
+
+    // Adicionar Resultados (planilha)
+    if (formResultados.planilha) {
+        formData.append('planilha', formResultados.planilha);
+    }
+
+    // Adicionar Anexos
+    Object.entries(anexos.value).forEach(([key, file]) => {
+        if (file) {
+            formData.append(`anexos[${key}]`, file);
+        }
+    });
+
+    // Log para depuração
+    const formDataEntries = {};
+    for (let [key, value] of formData.entries()) {
+        formDataEntries[key] = value instanceof File ? { name: value.name, size: value.size } : value;
+    }
+    console.log('Enviando FormData para salvar campanha:', formDataEntries);
+
+    router.post(route('sgc.contratada.produtos.salvar_campanha', [props.contrato, props.produto.toLowerCase()]), formData, {
         preserveState: true,
+        forceFormData: true,
         onSuccess: () => {
             formDadosGerais.reset();
             formAbio.reset();
@@ -171,9 +248,23 @@ const salvarDadosGerais = (consideracoesData = {}) => {
             pontoCavernicolaRecords.value = [];
             metodologiaRecords.value = [];
             resultadosRecords.value = [];
+            anexos.value = {
+                anuencia_proprietarios: null,
+                registro_fotografico: null,
+                dados_secundarios: null,
+                art: null,
+                ret: null,
+                cr: null,
+                ctf: null,
+                anuencia_colecoes: null,
+                oficio_atividades_campo: null,
+            };
             router.get(route('sgc.contratada.produtos.index', [props.contrato, props.produto.toLowerCase()]));
         },
-        onError: (errors) => console.error('Erros ao salvar campanha:', errors),
+        onError: (errors) => {
+            console.error('Erros ao salvar campanha:', errors);
+            alert('Erro ao salvar campanha: ' + (errors.error || 'Verifique os dados e tente novamente.'));
+        },
     });
 };
 
@@ -286,19 +377,6 @@ const excluirModulo = (id) => {
 };
 
 const adicionarPonto = () => {
-    console.log('adicionarPonto chamado', {
-        naoSeAplica: naoSeAplica.value,
-        formPontosAmostragem: {
-            ponto_de_coleta: formPontosAmostragem.ponto_de_coleta,
-            nome_curso_hidrico: formPontosAmostragem.nome_curso_hidrico,
-            bacia: formPontosAmostragem.bacia,
-            largura: formPontosAmostragem.largura,
-            coordenadas: formPontosAmostragem.coordenadas,
-            profundidade: formPontosAmostragem.profundidade,
-            tipo_substrato: formPontosAmostragem.tipo_substrato,
-        },
-    });
-
     if (
         !naoSeAplica.value &&
         formPontosAmostragem.ponto_de_coleta?.trim() &&
@@ -386,6 +464,10 @@ const setActiveTab = (tab) => {
     if (tab === 'apresentacao') {
         subStep.value = 5; // Volta para a última subetapa (Fauna Cavernícola)
     }
+};
+
+const salvarAnexos = () => {
+    salvarDadosGerais();
 };
 </script>
 
@@ -572,7 +654,113 @@ const setActiveTab = (tab) => {
                             </div>
                             <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
                                 <h4>ANEXOS</h4>
-                                <p>Funcionalidade em desenvolvimento.</p>
+                                <form @submit.prevent="salvarAnexos">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="anuencia_proprietarios" class="form-label">Anuência dos Proprietários</label>
+                                            <input
+                                                type="file"
+                                                class="form-control"
+                                                id="anuencia_proprietarios"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                @change="anexos.anuencia_proprietarios = $event.target.files[0]"
+                                            />
+                                            <InputError :message="form.errors['anexos.anuencia_proprietarios']" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="registro_fotografico" class="form-label">Registro Fotográfico</label>
+                                            <input
+                                                type="file"
+                                                class="form-control"
+                                                id="registro_fotografico"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                @change="anexos.registro_fotografico = $event.target.files[0]"
+                                            />
+                                            <InputError :message="form.errors['anexos.registro_fotografico']" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="dados_secundarios" class="form-label">Dados Secundários</label>
+                                            <input
+                                                type="file"
+                                                class="form-control"
+                                                id="dados_secundarios"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                @change="anexos.dados_secundarios = $event.target.files[0]"
+                                            />
+                                            <InputError :message="form.errors['anexos.dados_secundarios']" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="art" class="form-label">ART</label>
+                                            <input
+                                                type="file"
+                                                class="form-control"
+                                                id="art"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                @change="anexos.art = $event.target.files[0]"
+                                            />
+                                            <InputError :message="form.errors['anexos.art']" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="ret" class="form-label">RET</label>
+                                            <input
+                                                type="file"
+                                                class="form-control"
+                                                id="ret"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                @change="anexos.ret = $event.target.files[0]"
+                                            />
+                                            <InputError :message="form.errors['anexos.ret']" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="cr" class="form-label">CR</label>
+                                            <input
+                                                type="file"
+                                                class="form-control"
+                                                id="cr"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                @change="anexos.cr = $event.target.files[0]"
+                                            />
+                                            <InputError :message="form.errors['anexos.cr']" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="ctf" class="form-label">CTF</label>
+                                            <input
+                                                type="file"
+                                                class="form-control"
+                                                id="ctf"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                @change="anexos.ctf = $event.target.files[0]"
+                                            />
+                                            <InputError :message="form.errors['anexos.ctf']" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="anuencia_colecoes" class="form-label">Anuência de Coleções</label>
+                                            <input
+                                                type="file"
+                                                class="form-control"
+                                                id="anuencia_colecoes"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                @change="anexos.anuencia_colecoes = $event.target.files[0]"
+                                            />
+                                            <InputError :message="form.errors['anexos.anuencia_colecoes']" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="oficio_atividades_campo" class="form-label">Ofício de Atividades de Campo</label>
+                                            <input
+                                                type="file"
+                                                class="form-control"
+                                                id="oficio_atividades_campo"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                @change="anexos.oficio_atividades_campo = $event.target.files[0]"
+                                            />
+                                            <InputError :message="form.errors['anexos.oficio_atividades_campo']" />
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <NavButton type="button" type-button="secondary" title="Voltar" @click="setActiveTab('resultados')" />
+                                        <NavButton type="submit" type-button="primary" title="Salvar" />
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -583,30 +771,19 @@ const setActiveTab = (tab) => {
 </template>
 
 <style scoped>
-.v-select-custom {
-    width: 100%;
-}
-.v-select-custom :deep(.vs__dropdown-toggle) {
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    padding: 0.375rem 0.75rem;
-}
-.v-select-custom :deep(.vs__selected) {
-    margin: 2px;
-}
-.nav-tabs {
-    border-bottom: 1px solid #dee2e6;
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .nav-tabs .nav-link {
-    color: #495057;
-    padding: 0.75rem 1.5rem;
+    color: #6c757d;
+    font-weight: 500;
 }
 .nav-tabs .nav-link.active {
-    color: #0d6efd;
-    border-color: #dee2e6 #dee2e6 #fff;
-    background-color: #fff;
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
 }
 .tab-content {
-    padding: 1rem 0;
+    padding: 20px;
 }
 </style>

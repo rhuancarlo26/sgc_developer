@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use App\Models\SgcFaunaCampanhaAbios;
+use App\Models\SgcFaunaCampanha;
+use Illuminate\Support\Facades\DB;
 
 class FaunaController extends Controller
 {
@@ -51,7 +53,7 @@ class FaunaController extends Controller
                 'produto' => $produto,
                 'erro' => $e->getMessage(),
             ]);
-            return redirect()->back()->withErrors(['error' => 'Erro ao salvar profissional.']);
+            return redirect()->back()->withErrors(['error' => 'Erro ao salvar profissional: ' . $e->getMessage()]);
         }
     }
 
@@ -61,6 +63,9 @@ class FaunaController extends Controller
             'contrato' => $contrato,
             'produto' => $produto,
             'dados' => $request->all(),
+            'files' => array_map(function ($file) {
+                return $file ? ['name' => $file->getClientOriginalName(), 'size' => $file->getSize()] : null;
+            }, $request->file('anexos') ?? []),
         ]);
 
         $validated = $request->validate([
@@ -110,40 +115,27 @@ class FaunaController extends Controller
             'metodologias' => 'nullable|array',
             'metodologias.*.grupo_faunistico' => 'required_with:metodologias|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
             'metodologias.*.metodologia' => 'required_with:metodologias|string',
-            'resultados' => 'nullable|array',
-            'resultados.*.id_campanha' => 'required_with:resultados|integer',
-            'resultados.*.modulo' => 'nullable|',
-            'resultados.*.parcela' => 'nullable|',
-            'resultados.*.id_armadilha' => 'nullable|integer',
-            'resultados.*.grupo_amostrado' => 'nullable|',
-            'resultados.*.data_registro' => 'nullable|',
-            'resultados.*.hora_registro' => 'nullable|',
-            'resultados.*.categoria' => 'nullable|',
-            'resultados.*.classe' => 'nullable|',
-            'resultados.*.ordem' => 'nullable|',
-            'resultados.*.familia' => 'nullable|',
-            'resultados.*.genero' => 'nullable|',
-            'resultados.*.especie' => 'nullable|',
-            'resultados.*.nome_comum' => 'nullable|',
-            'resultados.*.sexo' => 'nullable|',
-            'resultados.*.faixa_etaria' => 'nullable|',
-            'resultados.*.qnt_individuos' => 'nullable|integer|min:0',
-            'resultados.*.num_marcacao' => 'nullable|',
-            'resultados.*.coletado' => 'nullable|',
-            'resultados.*.num_tombamento' => 'nullable|',
-            'resultados.*.dados_biometricos' => 'nullable|',
-            'resultados.*.comp_total' => 'nullable|integer',
-            'resultados.*.cabeca' => 'nullable|integer',
-            'resultados.*.cauda' => 'nullable|integer',
-            'resultados.*.femur' => 'nullable|integer',
-            'resultados.*.orelha' => 'nullable|integer',
-            'resultados.*.peso' => 'nullable|integer',
-            'resultados.*.status_conservacao_federal' => 'nullable|',
-            'resultados.*.status_conservacao_iucn' => 'nullable|',
             'consideracoes' => 'nullable|string',
+            'planilha' => 'nullable|file|mimes:xlsx,xls|max:10240',
+            'anexos.anuencia_proprietarios' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.registro_fotografico' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.dados_secundarios' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.art' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.ret' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.cr' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.ctf' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.anuencia_colecoes' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.oficio_atividades_campo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
 
+        // Adicionar os arquivos anexos e a planilha ao array validated
+        $validated['anexos'] = $request->file('anexos') ?? [];
+        $validated['planilha'] = $request->file('planilha');
+
         try {
+            DB::beginTransaction();
+
+            // Salvar a campanha e obter o ID
             $campanhaId = $this->faunaService->salvarCampanha($contrato, $validated);
 
             // Salvar os ABIOs na tabela sgc_fauna_campanha_abios
@@ -157,24 +149,30 @@ class FaunaController extends Controller
                 }
             }
 
+            DB::commit();
             return redirect()->route('sgc.contratada.produtos.index', [$contrato, $produto])
                 ->with('success', 'Campanha salva com sucesso!');
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('FaunaController: Erro ao salvar campanha', [
                 'contrato' => $contrato,
                 'produto' => $produto,
                 'erro' => $e->getMessage(),
+                'linha' => $e->getLine(),
+                'arquivo' => $e->getFile(),
             ]);
-            return redirect()->back()->withErrors(['error' => 'Erro ao salvar campanha.']);
+            return redirect()->back()->withErrors(['error' => 'Erro ao salvar campanha: ' . $e->getMessage()]);
         }
     }
 
+    // Método storeResultados mantido apenas para compatibilidade, mas não será mais usado
     public function storeResultados(Request $request, $contrato, $produto): RedirectResponse
     {
         Log::info('FaunaController: Recebendo requisição para salvar resultados', [
             'contrato' => $contrato,
             'produto' => $produto,
             'dados' => $request->all(),
+            'file' => $request->file('planilha') ? ['name' => $request->file('planilha')->getClientOriginalName(), 'size' => $request->file('planilha')->getSize()] : null,
         ]);
 
         $validated = $request->validate([
@@ -182,15 +180,24 @@ class FaunaController extends Controller
         ]);
 
         try {
-            $this->faunaService->salvarResultados($contrato, $validated['planilha']);
-            return redirect()->back()->with('success', 'Resultados salvos com sucesso!');
+            // Buscar a campanha mais recente para o contrato, se disponível
+            $campanha = SgcFaunaCampanha::where('id_contrato', $contrato)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            $campanhaId = $campanha ? $campanha->id : null;
+
+            $result = $this->faunaService->salvarResultados($contrato, $validated['planilha'], $campanhaId);
+            return redirect()->back()->with('success', $result['message']);
         } catch (\Exception $e) {
             Log::error('FaunaController: Erro ao salvar resultados', [
                 'contrato' => $contrato,
                 'produto' => $produto,
                 'erro' => $e->getMessage(),
+                'linha' => $e->getLine(),
+                'arquivo' => $e->getFile(),
             ]);
-            return redirect()->back()->withErrors(['error' => 'Erro ao salvar resultados.']);
+            return redirect()->back()->withErrors(['error' => 'Erro ao salvar resultados: ' . $e->getMessage()]);
         }
     }
 }
