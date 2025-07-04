@@ -259,11 +259,18 @@ const salvarDadosGerais = (consideracoesData = {}) => {
                 anuencia_colecoes: null,
                 oficio_atividades_campo: null,
             };
+            alert('Campanha salva com sucesso!');
             router.get(route('sgc.contratada.produtos.index', [props.contrato, props.produto.toLowerCase()]));
         },
         onError: (errors) => {
             console.error('Erros ao salvar campanha:', errors);
-            alert('Erro ao salvar campanha: ' + (errors.error || 'Verifique os dados e tente novamente.'));
+            let errorMessage = 'Erro ao salvar campanha: ';
+            if (Object.keys(errors).some(key => key.startsWith('anexos.'))) {
+                errorMessage += 'Um ou mais anexos estão inválidos. Verifique o formato (PDF, JPG, JPEG, PNG) e o tamanho (máximo 10MB).';
+            } else {
+                errorMessage += errors.error || 'Verifique os dados e tente novamente.';
+            }
+            alert(errorMessage);
         },
     });
 };
@@ -638,7 +645,7 @@ const salvarAnexos = () => {
                                     :metodologia-records="metodologiaRecords"
                                     @adicionar-metodologia="adicionarMetodologia"
                                     @excluir-metodologia="excluirMetodologia"
-                                    @salvar="salvarDadosGerais"
+                                    @next="setActiveTab('resultados')"
                                     @prev="setActiveTab('apresentacao')"
                                 />
                             </div>
@@ -649,7 +656,7 @@ const salvarAnexos = () => {
                                     :id-campanha="formDadosGerais.id || props.contrato"
                                     @update:resultadosRecords="resultadosRecords = $event"
                                     @prev="setActiveTab('metodologia')"
-                                    @salvar="salvarDadosGerais"
+                                    @next="setActiveTab('anexos')"
                                 />
                             </div>
                             <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
