@@ -11,6 +11,7 @@ use App\Models\SgcFaunaQuelonios;
 use App\Models\SgcFaunaMetodologia;
 use App\Models\SgcFaunaResultados;
 use App\Models\SgcFaunaResultadosConsideracoes;
+use App\Models\SgcFaunaAnexo;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -19,7 +20,14 @@ class FaunaService
 {
     public function salvarCampanha($contratoId, array $data)
     {
-        Log::info('FaunaService: Dados recebidos para salvar campanha: ' . json_encode($data));
+        Log::info('FaunaService: Dados recebidos para salvar campanha', [
+            'contrato_id' => $contratoId,
+            'dados' => array_diff_key($data, array_flip(['anexos', 'planilha'])),
+            'anexos' => array_map(function ($file) {
+                return $file ? ['name' => $file->getClientOriginalName(), 'size' => $file->getSize()] : null;
+            }, $data['anexos'] ?? []),
+            'planilha' => $data['planilha'] ? ['name' => $data['planilha']->getClientOriginalName(), 'size' => $data['planilha']->getSize()] : null,
+        ]);
 
         $campanha = SgcFaunaCampanha::create([
             'id_contrato' => $contratoId,
@@ -71,14 +79,14 @@ class FaunaService
                 ];
 
                 // Processar upload de shapefile
-                if (!empty($moduloData['arquivo'])) {
-                    $file = $moduloData['arquivo'];
-                    $filename = time() . '_' . $file->getClientOriginalName();
-                    $path = $file->storeAs('shapefiles', $filename);
-                    $moduloAttributes['nome_arquivo'] = $filename;
-                    $moduloAttributes['local_shape'] = $path;
-                    $moduloAttributes['shape_file'] = file_get_contents($file->getRealPath());
-                }
+                // if (!empty($moduloData['arquivo']) && $moduloData['arquivo']->isValid()) {
+                //     $file = $moduloData['arquivo'];
+                //     $filename = time() . '_' . $file->getClientOriginalName();
+                //     $path = $file->storeAs('shapefiles', $filename, 'public');
+                //     $moduloAttributes['nome_arquivo'] = $filename;
+                //     $moduloAttributes['local_shape' => $path;
+                //     $moduloAttributes['shape_file' => file_get_contents($file->getRealPath());
+                // }
 
                 SgcFaunaModuloAmostral::create($moduloAttributes);
             }
@@ -141,6 +149,42 @@ class FaunaService
             ]);
         }
 
+        // Salvar resultados e atualizar id_campanha
+        if (!empty($data['planilha']) && $data['planilha']->isValid()) {
+            $result = $this->salvarResultados($contratoId, $data['planilha'], null);
+            // Atualizar registros salvos com o id_campanha da campanha criada
+            SgcFaunaResultados::where('id_contrato', $contratoId)
+                ->whereNull('id_campanha')
+                ->where('created_at', '>=', now()->subSeconds(30)) // Apenas registros recentes
+                ->update(['id_campanha' => $campanha->id]);
+        }
+
+        // Salvar anexos
+        if (!empty($data['anexos'])) {
+            foreach ($data['anexos'] as $tipo => $file) {
+                if ($file && $file->isValid()) {
+                    $filename = time() . '_' . $file->getClientOriginalName();
+                    $path = $file->storeAs('anexos', $filename, 'public');
+                    
+                    SgcFaunaAnexo::create([
+                        'id_contrato' => $contratoId,
+                        'id_campanha' => $campanha->id,
+                        'tipo' => $tipo,
+                        'nome_arquivo' => $filename,
+                        'caminho' => $path,
+                    ]);
+
+                    Log::info('FaunaService: Anexo salvo', [
+                        'contrato_id' => $contratoId,
+                        'campanha_id' => $campanha->id,
+                        'tipo' => $tipo,
+                        'nome_arquivo' => $filename,
+                        'caminho' => $path,
+                    ]);
+                }
+            }
+        }
+
         Log::info('FaunaService: Campanha salva com ID: ' . $campanha->id);
         return $campanha->id;
     }
@@ -168,9 +212,9 @@ class FaunaService
         return $profissional;
     }
 
-    public function salvarResultados($contratoId, $file)
+    public function salvarResultados($contratoId, $file, $campanhaId = null)
     {
-        Log::info('FaunaService: Processando planilha de resultados para contrato ID: ' . $contratoId);
+        Log::info('FaunaService: Processando planilha de resultados para contrato ID: ' . $contratoId . ', campanha ID: ' . ($campanhaId ?? 'não fornecido'));
 
         try {
             $spreadsheet = IOFactory::load($file->getRealPath());
@@ -186,33 +230,67 @@ class FaunaService
 
             $headerRow = array_map('trim', array_shift($rows));
             if ($headerRow !== $expectedHeaders) {
+                Log::error('FaunaService: Cabeçalho da planilha inválido', [
+                    'contrato_id' => $contratoId,
+                    'header_row' => $headerRow,
+                    'expected_headers' => $expectedHeaders,
+                ]);
                 throw new \Exception('Cabeçalho da planilha inválido. Use o modelo fornecido.');
             }
 
-            foreach ($rows as $row) {
+            $recordsSaved = 0;
+            $recordsSkipped = 0;
+
+            foreach ($rows as $index => $row) {
                 // Converter data (DD/MM/YYYY)
                 $dataRegistro = null;
-                if ($row[5]) {
-                    $dateTime = \DateTime::createFromFormat('d/m/Y', trim($row[5]));
-                    if (!$dateTime) {
-                        throw new \Exception('Formato de data inválido: ' . $row[5]);
+                if (!empty($row[5])) {
+                    try {
+                        $dateTime = \DateTime::createFromFormat('d/m/Y', trim($row[5]));
+                        if (!$dateTime) {
+                            Log::warning('FaunaService: Formato de data inválido na linha ' . ($index + 2), [
+                                'contrato_id' => $contratoId,
+                                'data' => $row[5],
+                            ]);
+                            throw new \Exception('Formato de data inválido na linha ' . ($index + 2) . ': ' . $row[5]);
+                        }
+                        $dataRegistro = $dateTime->format('Y-m-d');
+                    } catch (\Exception $e) {
+                        Log::error('FaunaService: Erro ao converter data na linha ' . ($index + 2), [
+                            'contrato_id' => $contratoId,
+                            'data' => $row[5],
+                            'erro' => $e->getMessage(),
+                        ]);
+                        throw $e;
                     }
-                    $dataRegistro = $dateTime->format('Y-m-d');
                 }
 
                 // Converter hora (HH:MM)
                 $horaRegistro = null;
-                if ($row[6]) {
-                    $dateTime = \DateTime::createFromFormat('H:i', trim($row[6]));
-                    if (!$dateTime) {
-                        throw new \Exception('Formato de hora inválido: ' . $row[6]);
+                if (!empty($row[6])) {
+                    try {
+                        $dateTime = \DateTime::createFromFormat('H:i', trim($row[6]));
+                        if (!$dateTime) {
+                            Log::warning('FaunaService: Formato de hora inválido na linha ' . ($index + 2), [
+                                'contrato_id' => $contratoId,
+                                'hora' => $row[6],
+                            ]);
+                            throw new \Exception('Formato de hora inválido na linha ' . ($index + 2) . ': ' . $row[6]);
+                        }
+                        $horaRegistro = $dateTime->format('H:i:s');
+                    } catch (\Exception $e) {
+                        Log::error('FaunaService: Erro ao converter hora na linha ' . ($index + 2), [
+                            'contrato_id' => $contratoId,
+                            'hora' => $row[6],
+                            'erro' => $e->getMessage(),
+                        ]);
+                        throw $e;
                     }
-                    $horaRegistro = $dateTime->format('H:i:s');
                 }
 
                 $data = [
                     'id_contrato' => $contratoId,
-                    'id_campanha' => $row[0] ?? null,
+                    'id_campanha' => $row[0] ?? $campanhaId, // Usar campanhaId como fallback, pode ser NULL
                     'modulo' => $row[1] ?? null,
                     'parcela' => $row[2] ?? null,
                     'id_armadilha' => $row[3] ?? null,
@@ -243,10 +321,6 @@ class FaunaService
                     'status_conservacao_iucn' => $row[28] ?? null,
                 ];
 
-                if ($data['id_campanha'] && !SgcFaunaCampanha::where('id', $data['id_campanha'])->exists()) {
-                    throw new \Exception('ID de campanha inválido: ' . $data['id_campanha']);
-                }
-
                 // Verificar duplicação
                 $exists = SgcFaunaResultados::where([
                     'id_contrato' => $contratoId,
@@ -260,20 +334,35 @@ class FaunaService
                 ])->exists();
 
                 if ($exists) {
-                    Log::warning('FaunaService: Registro duplicado ignorado.', $data);
+                    Log::warning('FaunaService: Registro duplicado ignorado na linha ' . ($index + 2), $data);
+                    $recordsSkipped++;
                     continue;
                 }
 
                 SgcFaunaResultados::create($data);
+                $recordsSaved++;
             }
 
-            Log::info('FaunaService: Resultados salvos com sucesso para contrato ID: ' . $contratoId);
+            Log::info('FaunaService: Resultados processados com sucesso', [
+                'contrato_id' => $contratoId,
+                'campanha_id' => $campanhaId ?? 'não fornecido',
+                'registros_salvos' => $recordsSaved,
+                'registros_ignorados' => $recordsSkipped,
+            ]);
+
+            return [
+                'success' => true,
+                'message' => 'Resultados salvos com sucesso. ' . $recordsSaved . ' registros salvos, ' . $recordsSkipped . ' registros ignorados.',
+            ];
         } catch (\Exception $e) {
             Log::error('FaunaService: Erro ao processar planilha de resultados', [
-                'contrato' => $contratoId,
+                'contrato_id' => $contratoId,
+                'campanha_id' => $campanhaId ?? 'não fornecido',
                 'erro' => $e->getMessage(),
+                'linha' => $e->getLine(),
+                'arquivo' => $e->getFile(),
             ]);
-            throw new \Exception('Erro ao salvar resultados: ' . $e->getMessage());
+            throw new \Exception($e->getMessage());
         }
     }
 

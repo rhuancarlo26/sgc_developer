@@ -63,7 +63,7 @@ const processarPlanilha = (event) => {
 
         const novosResultados = json.map(row => ({
             id: Date.now() + Math.random(),
-            id_campanha: props.idCampanha,
+            id_campanha: row['ID Campanha'] || null, // Não usar props.idCampanha, deixar a planilha definir
             modulo: row['Módulo'] || null,
             parcela: row['Parcela'] || null,
             id_armadilha: row['ID Armadilha'] || null,
@@ -102,20 +102,8 @@ const processarPlanilha = (event) => {
 };
 
 const salvar = () => {
-    emit('salvar', { consideracoes: consideracoes.value });
     if (props.formResultados.planilha) {
-        props.formResultados.post(route('sgc.contratada.produtos.resultados.store', [props.formResultados.contrato, props.formResultados.produto.toLowerCase()]), {
-            onSuccess: () => {
-                alert('Planilha processada e dados salvos com sucesso!');
-                props.formResultados.reset();
-                resultadosRecords.value = [];
-                emit('update:resultadosRecords', resultadosRecords.value);
-            },
-            onError: (errors) => {
-                console.error('Erro ao processar planilha:', errors);
-                alert('Erro ao salvar resultados: ' + (errors.error || 'Verifique os dados e tente novamente.'));
-            },
-        });
+        emit('salvar', { consideracoes: consideracoes.value });
     } else {
         alert('Nenhuma planilha selecionada para salvar.');
     }
