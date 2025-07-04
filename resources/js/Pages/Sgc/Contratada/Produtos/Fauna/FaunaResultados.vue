@@ -21,7 +21,7 @@ const props = defineProps({
 });
 
 // Emits
-const emit = defineEmits(['update:resultadosRecords', 'prev', 'salvar']);
+const emit = defineEmits(['update:resultadosRecords', 'prev', 'next']);
 
 // Dados
 const consideracoes = ref('');
@@ -63,7 +63,7 @@ const processarPlanilha = (event) => {
 
         const novosResultados = json.map(row => ({
             id: Date.now() + Math.random(),
-            id_campanha: row['ID Campanha'] || null, // Não usar props.idCampanha, deixar a planilha definir
+            id_campanha: row['ID Campanha'] || null,
             modulo: row['Módulo'] || null,
             parcela: row['Parcela'] || null,
             id_armadilha: row['ID Armadilha'] || null,
@@ -101,12 +101,8 @@ const processarPlanilha = (event) => {
     reader.readAsArrayBuffer(file);
 };
 
-const salvar = () => {
-    if (props.formResultados.planilha) {
-        emit('salvar', { consideracoes: consideracoes.value });
-    } else {
-        alert('Nenhuma planilha selecionada para salvar.');
-    }
+const avancar = () => {
+    emit('next');
 };
 
 const excluirResultado = (id) => {
@@ -220,7 +216,7 @@ const excluirResultado = (id) => {
         </div>
         <div class="d-flex justify-content-between mt-4">
             <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
-            <NavButton type-button="primary" title="Salvar" @click="salvar" />
+            <NavButton type-button="primary" title="Avançar" @click="avancar" />
         </div>
     </div>
 </template>

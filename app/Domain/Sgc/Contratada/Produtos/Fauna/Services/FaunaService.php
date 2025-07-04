@@ -78,15 +78,13 @@ class FaunaService
                     'obs' => $moduloData['obs'] ?? null,
                 ];
 
-                // Processar upload de shapefile
-                // if (!empty($moduloData['arquivo']) && $moduloData['arquivo']->isValid()) {
-                //     $file = $moduloData['arquivo'];
-                //     $filename = time() . '_' . $file->getClientOriginalName();
-                //     $path = $file->storeAs('shapefiles', $filename, 'public');
-                //     $moduloAttributes['nome_arquivo'] = $filename;
-                //     $moduloAttributes['local_shape' => $path;
-                //     $moduloAttributes['shape_file' => file_get_contents($file->getRealPath());
-                // }
+                if (!empty($moduloData['arquivo']) && $moduloData['arquivo']->isValid()) {
+                    $file = $moduloData['arquivo'];
+                    $filename = time() . '_' . $file->getClientOriginalName();
+                    $path = $file->storeAs('shapefiles', $filename, 'public');
+                    $moduloAttributes['nome_arquivo'] = $filename;
+
+                }
 
                 SgcFaunaModuloAmostral::create($moduloAttributes);
             }
@@ -152,10 +150,9 @@ class FaunaService
         // Salvar resultados e atualizar id_campanha
         if (!empty($data['planilha']) && $data['planilha']->isValid()) {
             $result = $this->salvarResultados($contratoId, $data['planilha'], null);
-            // Atualizar registros salvos com o id_campanha da campanha criada
             SgcFaunaResultados::where('id_contrato', $contratoId)
                 ->whereNull('id_campanha')
-                ->where('created_at', '>=', now()->subSeconds(30)) // Apenas registros recentes
+                ->where('created_at', '>=', now()->subSeconds(30))
                 ->update(['id_campanha' => $campanha->id]);
         }
 
@@ -169,17 +166,19 @@ class FaunaService
                     SgcFaunaAnexo::create([
                         'id_contrato' => $contratoId,
                         'id_campanha' => $campanha->id,
-                        'tipo' => $tipo,
-                        'nome_arquivo' => $filename,
+                        'tipo_anexo' => $tipo,
+                        'nome' => $file->getClientOriginalName(),
                         'caminho' => $path,
+                        'versao' => 1,
                     ]);
 
                     Log::info('FaunaService: Anexo salvo', [
                         'contrato_id' => $contratoId,
                         'campanha_id' => $campanha->id,
-                        'tipo' => $tipo,
-                        'nome_arquivo' => $filename,
+                        'tipo_anexo' => $tipo,
+                        'nome' => $file->getClientOriginalName(),
                         'caminho' => $path,
+                        'versao' => 1,
                     ]);
                 }
             }
@@ -242,7 +241,6 @@ class FaunaService
             $recordsSkipped = 0;
 
             foreach ($rows as $index => $row) {
-                // Converter data (DD/MM/YYYY)
                 $dataRegistro = null;
                 if (!empty($row[5])) {
                     try {
@@ -265,7 +263,6 @@ class FaunaService
                     }
                 }
 
-                // Converter hora (HH:MM)
                 $horaRegistro = null;
                 if (!empty($row[6])) {
                     try {
@@ -290,7 +287,7 @@ class FaunaService
 
                 $data = [
                     'id_contrato' => $contratoId,
-                    'id_campanha' => $row[0] ?? $campanhaId, // Usar campanhaId como fallback, pode ser NULL
+                    'id_campanha' => $row[0] ?? $campanhaId,
                     'modulo' => $row[1] ?? null,
                     'parcela' => $row[2] ?? null,
                     'id_armadilha' => $row[3] ?? null,
@@ -321,7 +318,6 @@ class FaunaService
                     'status_conservacao_iucn' => $row[28] ?? null,
                 ];
 
-                // Verificar duplicação
                 $exists = SgcFaunaResultados::where([
                     'id_contrato' => $contratoId,
                     'id_campanha' => $data['id_campanha'],

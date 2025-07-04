@@ -11,7 +11,7 @@ defineProps({
     metodologiaRecords: Array,
 });
 
-defineEmits(['adicionar-metodologia', 'excluir-metodologia', 'prev', 'salvar']);
+defineEmits(['adicionar-metodologia', 'excluir-metodologia', 'prev', 'next']);
 
 const grupoFaunisticoOptions = [
     { value: 'Avifauna', label: 'Avifauna' },
@@ -29,7 +29,7 @@ const grupoFaunisticoOptions = [
             <div class="row mb-3">
                 <div class="col-12 col-md-8">
                     <InputLabel value="Grupo Faunístico" for="grupo_faunistico" />
-                    <v-select
+                    <vSelect
                         v-model="formMetodologia.grupo_faunistico"
                         :options="grupoFaunisticoOptions"
                         :reduce="g => g.value"
@@ -38,7 +38,7 @@ const grupoFaunisticoOptions = [
                     />
                     <InputError :message="formMetodologia.errors.grupo_faunistico" />
                 </div>
-                <div class="col-15 col-md-8" style="margin-top: 1.5rem;">
+                <div class="col-12 col-md-8" style="margin-top: 1.5rem;">
                     <InputLabel value="Metodologia" for="metodologia" />
                     <textarea
                         v-model="formMetodologia.metodologia"
@@ -71,7 +71,7 @@ const grupoFaunisticoOptions = [
         </div>
         <div class="d-flex justify-content-between">
             <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
-            <NavButton type="button" type-button="primary" title="Salvar" @click="$emit('salvar')" />
+            <NavButton type="button" type-button="primary" title="Avançar" @click="$emit('next')" />
         </div>
         <slot name="footer"></slot>
     </form>
