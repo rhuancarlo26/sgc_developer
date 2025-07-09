@@ -12,4 +12,9 @@ class SgcFaunaModuloAmostral extends Model
     protected $table = 'sgc_fauna_modulos_amostrais';
     protected $guarded = ['id', 'created_at', 'updated_at', 'deleted_at'];
     protected $dates = ['deleted_at'];
+
+    public function campanha()
+    {
+        return $this->belongsTo(SgcFaunaCampanha::class, 'campanha_id', 'id');
+    }
 }

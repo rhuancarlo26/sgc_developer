@@ -4,16 +4,19 @@ import { Head, router } from '@inertiajs/vue3';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import { ref, computed } from 'vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
+import NavButton from '@/Components/NavButton.vue';
 
 const props = defineProps({
     subprodutos: { type: Array, default: () => [] },
     contrato: { type: [Number, String], required: true },
     produto: { type: String, required: true },
     contratos: { type: Object, required: true },
+    campanhas: { type: Array, default: () => [] },
 });
 
-// Estado reativo para o subproduto selecionado
+// Estado reativo para o subproduto selecionado e exibição de campanhas
 const selectedSubproduto = ref('');
+const showCampanhas = ref(false);
 
 // Lista única de descrições de subprodutos
 const uniqueSubprodutos = computed(() => {
@@ -25,6 +28,11 @@ const uniqueSubprodutos = computed(() => {
 const filteredSubprodutos = computed(() => {
     if (!selectedSubproduto.value) return props.subprodutos;
     return props.subprodutos.filter(sub => sub.descricao_revisada === selectedSubproduto.value);
+});
+
+// Exibir todas as campanhas, com filtro opcional por subproduto
+const filteredCampanhas = computed(() => {
+    return props.campanhas; // Remove filtro por subproduto inicialmente
 });
 
 // Redirecionar para a página de criação
@@ -40,6 +48,17 @@ const goToCreate = () => {
             onSuccess: () => console.log('Redirecionamento bem-sucedido para create'),
         }
     );
+};
+
+// Exibir campanhas ao clicar em "Visualizar"
+const visualizarCampanhas = () => {
+    showCampanhas.value = true;
+};
+
+// Redirecionar para a visualização de uma campanha específica
+const visualizarCampanha = (campanhaId) => {
+    // router.get(route('sgc.contratada.produtos.show', [campanhaId]));
+    router.get(route('sgc.contratada.produtos.show', [props.contrato, props.produto.toLowerCase(), campanhaId]));
 };
 </script>
 
@@ -91,14 +110,13 @@ const goToCreate = () => {
                                                     Cadastrar
                                                 </div>
                                             </div>
-                                            <!-- Botões desativados até implementação -->
                                             <div class="col-md-4 mb-4">
                                                 <div class="block-card block-card-short action-button bg-success text-white cursor-not-allowed" title="Funcionalidade em desenvolvimento">
                                                     Analisar
                                                 </div>
                                             </div>
                                             <div class="col-md-4 mb-4">
-                                                <div class="block-card block-card-short action-button bg-info text-white cursor-not-allowed" title="Funcionalidade em desenvolvimento">
+                                                <div class="block-card block-card-short action-button bg-info text-white cursor-pointer" @click="visualizarCampanhas">
                                                     Visualizar
                                                 </div>
                                             </div>
@@ -107,19 +125,43 @@ const goToCreate = () => {
                                 </div>
                             </div>
 
-                            <!-- Lista de Subprodutos -->
-                            <div class="col-md-12 mt-4">
+                            <!-- Tabela de Campanhas -->
+                            <div v-if="showCampanhas" class="col-md-12 mt-4">
                                 <div class="block-card">
-                                    <h4 class="text-center mb-4">{{ produto.toUpperCase() }} DETALHES</h4>
-                                    <ul class="list-group">
-                                        <li v-for="subproduto in filteredSubprodutos" :key="subproduto.id" class="list-group-item">
-                                            <strong>ID:</strong> {{ subproduto.id }} |
-                                            <strong>Código SIAC:</strong> {{ subproduto.cod_siac || 'N/A' }} |
-                                            <strong>Descrição:</strong> {{ subproduto.descricao_revisada || 'N/A' }} |
-                                            <strong>Contrato:</strong> {{ subproduto.contrato_id || 'N/A' }} |
-                                            <strong>Família:</strong> {{ subproduto.familia || 'N/A' }}
-                                        </li>
-                                    </ul>
+                                    <h4 class="text-center mb-4">CAMPANHAS DE {{ produto.toUpperCase() }}</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID Campanha</th>
+                                                    <th>Empreendimento</th>
+                                                    <th>Data Inicial</th>
+                                                    <th>Data Final</th>
+                                                    <th>Status</th>
+                                                    <th>Ação</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="campanha in filteredCampanhas" :key="campanha.id">
+                                                    <td>{{ campanha.id_campanha || 'N/A' }}</td>
+                                                    <td>{{ campanha.empreendimento }}</td>
+                                                    <td>{{ campanha.data_inicial || 'N/A' }}</td>
+                                                    <td>{{ campanha.data_final || 'N/A' }}</td>
+                                                    <td>{{ campanha.status || 'N/A' }}</td>
+                                                    <td class="text-center">
+                                                        <NavButton
+                                                            type-button="info"
+                                                            title="Visualizar"
+                                                            @click="visualizarCampanha(campanha.id)"
+                                                        />
+                                                    </td>
+                                                </tr>
+                                                <tr v-if="!filteredCampanhas.length">
+                                                    <td colspan="6" class="text-center">Nenhuma campanha disponível.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -161,8 +203,12 @@ const goToCreate = () => {
     background-color: #17a2b8 !important;
 }
 
-.list-group-item {
-    margin-bottom: 5px;
+.table-responsive {
+    margin-bottom: 1rem;
+}
+
+.table th, .table td {
+    vertical-align: middle;
 }
 
 .cursor-pointer {

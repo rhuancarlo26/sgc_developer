@@ -11,20 +11,68 @@ class SgcFaunaCampanha extends Model
     protected $fillable = [
         'id_contrato',
         'id_campanha',
-        'modulos_amostrais',
         'data_ini',
         'data_fim',
         'periodo',
         'observacoes',
         'num_abio',
-        'profissional',
-        'grupo_profissional',
         'cod_emp',
         'subproduto',
+        'status'
     ];
 
     public function contrato()
     {
         return $this->belongsTo(Contrato::class, 'id_contrato');
+    }
+
+    public function abios()
+    {
+        return $this->hasMany(SgcFaunaCampanhaAbios::class, 'campanha_id', 'id');
+    }
+
+    public function profissionais()
+    {
+        return $this->hasMany(SgcFaunaCampanhaProfissional::class, 'campanha_id', 'id'  );
+    }
+
+    // public function modulos_amostrais()
+    // {
+    //     return $this->hasMany(SgcFaunaModuloAmostral::class, 'campanha_id', 'id');
+    // }
+    
+    public function modulos_amostrais()
+    {
+        return $this->hasMany(\App\Models\SgcFaunaModuloAmostral::class, 'campanha_id', 'id');
+    }
+
+    public function pontos_quelo_crocod()
+    {
+        return $this->hasMany(SgcFaunaQuelonios::class, 'id_campanha', 'id');
+    }
+
+    public function pontos_cavernicola()
+    {
+        return $this->hasMany(SgcFaunaCavernicola::class, 'id_campanha', 'id');
+    }
+
+    public function metodologias()
+    {
+        return $this->hasMany(SgcFaunaMetodologia::class, 'campanha_id', 'id');
+    }
+
+    public function resultados()
+    {
+        return $this->hasMany(SgcFaunaResultados::class, 'id_campanha', 'id');
+    }
+
+    public function resultados_consideracoes()
+    {
+        return $this->hasOne(SgcFaunaResultadosConsideracoes::class, 'id_campanha', 'id');
+    }
+
+    public function anexos()
+    {
+        return $this->hasMany(SgcFaunaAnexo::class, 'id_campanha', 'id');
     }
 }
