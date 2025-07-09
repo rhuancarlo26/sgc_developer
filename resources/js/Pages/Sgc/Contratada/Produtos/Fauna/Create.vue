@@ -149,6 +149,7 @@ const salvarDadosGerais = (consideracoesData = {}) => {
     formData.append('subproduto', props.subproduto || '');
     formData.append('nao_se_aplica', naoSeAplica.value ? '1' : '0');
     formData.append('consideracoes', consideracoesData.consideracoes || '');
+    formData.append('status', 'Em análise');
 
     // Adicionar ABIOs
     abioRecords.value.forEach((abio, index) => {

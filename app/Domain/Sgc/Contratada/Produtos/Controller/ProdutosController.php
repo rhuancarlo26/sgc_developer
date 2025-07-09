@@ -7,6 +7,7 @@ use App\Models\Contrato;
 use App\Models\SgcvwEmpreendimentos;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaService;
+use App\Models\SgcFaunaCampanha;
 use Illuminate\Http\Request;
 use Inertia\Response;
 
@@ -26,14 +27,36 @@ class ProdutosController extends Controller
         $subprodutos = $this->produtosService->getSubprodutosByContrato($contrato, $produto);
         $contratoObj = Contrato::findOrFail($contrato);
 
+        // Buscar todas as campanhas para o contrato, sem filtro por subproduto
+        $campanhas = SgcFaunaCampanha::where('id_contrato', $contrato)
+            ->get(['id', 'id_campanha', 'cod_emp', 'data_ini', 'data_fim', 'status', 'subproduto'])
+            ->map(function ($campanha) {
+                return [
+                    'id' => $campanha->id,
+                    'id_campanha' => $campanha->id ?? 'N/A',
+                    'empreendimento' => $campanha->cod_emp ?? 'N/A',
+                    'data_inicial' => $campanha->data_ini ?? 'N/A',
+                    'data_final' => $campanha->data_fim ?? 'N/A',
+                    'status' => $campanha->status ?? 'Em análise',
+                    'subproduto' => $campanha->subproduto ?? 'N/A',
+                ];
+            });
+
+        \Log::info('Dados enviados para Fauna.vue:', [
+            'contrato' => $contrato,
+            'produto' => $produto,
+            'subprodutos' => $subprodutos,
+            'campanhas' => $campanhas,
+        ]);
+
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
             'contrato' => $contrato,
             'produto' => ucfirst($produto),
             'contratos' => $contratoObj,
+            'campanhas' => $campanhas,
         ]);
     }
-
 
     public function create(Request $request, $contrato, $produto): Response
     {
@@ -47,7 +70,6 @@ class ProdutosController extends Controller
         $abios = $this->produtosService->getAbios();
         $profissionais = $this->faunaService->getProfissionaisByContrato($contrato);
 
-        // Log para depuração
         \Log::info('Dados enviados para Create.vue:', [
             'abios' => $abios,
             'profissionais' => $profissionais,
@@ -63,6 +85,4 @@ class ProdutosController extends Controller
             'profissionais' => $profissionais,
         ]);
     }
-
-
 }

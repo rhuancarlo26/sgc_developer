@@ -39,6 +39,7 @@ class FaunaService
             'observacoes' => $data['observacoes'] ?? null,
             'cod_emp' => $data['cod_emp'] ?? null,
             'subproduto' => $data['subproduto'] ?? null,
+            'status' => $data['status'] ?? 'Em análise',
         ]);
 
         // Vincular profissionais

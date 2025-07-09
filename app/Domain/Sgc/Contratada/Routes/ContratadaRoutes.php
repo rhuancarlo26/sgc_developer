@@ -116,7 +116,6 @@ Route::prefix('/contratada')->group(function () {
     Route::post('produtos/{produto}/abio', [StoreProdutoAbioController::class, 'store'])->name('sgc.contratada.produtos.abio.store');
     Route::delete('produtos/{produto}/abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.delete');
 
-
     Route::prefix('{contrato}/produtos/{produto}')->group(function () {
         Route::get('/', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
         Route::get('create', [ProdutosController::class, 'create'])->name('sgc.contratada.produtos.create');
@@ -125,7 +124,11 @@ Route::prefix('/contratada')->group(function () {
         Route::post('salvar-campanha', [FaunaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.salvar_campanha');
         Route::post('profissional/store', [FaunaController::class, 'storeProfissional'])->name('sgc.contratada.produtos.profissional.store');
         Route::post('resultados/store', [FaunaController::class, 'storeResultados'])->name('sgc.contratada.produtos.resultados.store');
+        Route::get('campanhas/{campanhaId}', [FaunaController::class, 'show'])->name('sgc.contratada.produtos.show');
+        Route::post('campanhas/{campanhaId}/approve', [FaunaController::class, 'approve'])->name('sgc.contratada.produtos.approve')->middleware('auth', 'role:analista');
     });
+    
+
     
     
 
