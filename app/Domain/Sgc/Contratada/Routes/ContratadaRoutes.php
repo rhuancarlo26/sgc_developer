@@ -129,7 +129,4 @@ Route::prefix('/contratada')->group(function () {
     });
     
 
-    
-    
-
 });
