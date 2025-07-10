@@ -94,7 +94,6 @@ class FaunaController extends Controller
             'modulos_amostrais.*.longitude_inicial' => 'nullable|numeric',
             'modulos_amostrais.*.latitude_final' => 'nullable|numeric',
             'modulos_amostrais.*.longitude_final' => 'nullable|numeric',
-            'modulos_amostrais.*.obs' => 'nullable|string',
             'modulos_amostrais.*.arquivo' => 'nullable|file|mimes:shp,zip|max:1024',
             'pontos_quelo_crocod' => 'nullable|array',
             'pontos_quelo_crocod.*.ponto_de_coleta' => 'required_without:nao_se_aplica|string',
@@ -131,17 +130,14 @@ class FaunaController extends Controller
             'status' => 'required|string|in:Em análise,Aprovada,Rejeitada',
         ]);
 
-        // Adicionar os arquivos anexos e a planilha ao array validated
         $validated['anexos'] = $request->file('anexos') ?? [];
         $validated['planilha'] = $request->file('planilha');
 
         try {
             DB::beginTransaction();
 
-            // Salvar a campanha e obter o ID
             $campanhaId = $this->faunaService->salvarCampanha($contrato, $validated);
 
-            // Salvar os ABIOs na tabela sgc_fauna_campanha_abios
             if (!empty($validated['id_abio'])) {
                 foreach ($validated['id_abio'] as $abioId) {
                     SgcFaunaCampanhaAbios::create([
@@ -204,7 +200,6 @@ class FaunaController extends Controller
 
     public function show($contrato, $produto, $campanhaId)
     {
-        // Carregar a campanha com a relação modulos_amostrais
         $campanha = SgcFaunaCampanha::with([
             'abios.abio',
             'profissionais.profissional',
@@ -217,16 +212,16 @@ class FaunaController extends Controller
             'anexos'
         ])->findOrFail($campanhaId);
 
-        // Log detalhado para verificar o estado inicial
-        Log::info('FaunaController: Dados da campanha e modulos_amostrais (inicial)', [
+        Log::info('FaunaController: Dados da campanha e relações', [
             'campanha_id' => $campanhaId,
             'contrato' => $contrato,
             'produto' => $produto,
             'campanha' => $campanha->toArray(),
             'modulos_amostrais' => $campanha->modulos_amostrais ? $campanha->modulos_amostrais->toArray() : null,
+            'pontos_quelo_crocod' => $campanha->pontos_quelo_crocod ? $campanha->pontos_quelo_crocod->toArray() : null,
+            'pontos_cavernicola' => $campanha->pontos_cavernicola ? $campanha->pontos_cavernicola->toArray() : null,
         ]);
 
-        // Forçar recarregamento da relação se necessário
         if (!$campanha->relationLoaded('modulos_amostrais') || $campanha->modulos_amostrais === null) {
             $campanha->load('modulos_amostrais');
             Log::info('FaunaController: Modulos_amostrais recarregados', [
@@ -235,14 +230,12 @@ class FaunaController extends Controller
             ]);
         }
 
-        // Carregamento manual como fonte principal
         $modulosManuais = SgcFaunaModuloAmostral::where('campanha_id', $campanhaId)->get();
         Log::info('FaunaController: Modulos carregados manualmente', [
             'campanha_id' => $campanhaId,
             'modulos_manuais' => $modulosManuais->toArray(),
         ]);
 
-        // Selecionar o último módulo amostral como formModuloAmostral usando modulosManuais
         $formModuloAmostral = $modulosManuais->isNotEmpty() ? [
             'id' => $modulosManuais->last()->id,
             'data_cadastro' => $modulosManuais->last()->data_cadastro,
@@ -273,13 +266,62 @@ class FaunaController extends Controller
             'obs' => null,
         ];
 
-        // Log para verificar o conteúdo de formModuloAmostral
-        Log::info('FaunaController: formModuloAmostral', [
+        $formPontosAmostragem = $campanha->pontos_quelo_crocod->isNotEmpty() ? [
+            'ponto_de_coleta' => $campanha->pontos_quelo_crocod->last()->ponto_de_coleta,
+            'nome_curso_hidrico' => $campanha->pontos_quelo_crocod->last()->nome_curso_hidrico,
+            'coordenadas' => $campanha->pontos_quelo_crocod->last()->coordenadas,
+            'bacia' => $campanha->pontos_quelo_crocod->last()->bacia_hidrografica,
+            'profundidade' => $campanha->pontos_quelo_crocod->last()->profundidade,
+            'largura' => $campanha->pontos_quelo_crocod->last()->largura,
+            'tipo_substrato' => $campanha->pontos_quelo_crocod->last()->tipo_substrato,
+        ] : [
+            'ponto_de_coleta' => null,
+            'nome_curso_hidrico' => null,
+            'coordenadas' => null,
+            'bacia' => null,
+            'profundidade' => null,
+            'largura' => null,
+            'tipo_substrato' => null,
+        ];
+
+        $formPontosCavernicola = $campanha->pontos_cavernicola->isNotEmpty() ? [
+            'cavidade' => $campanha->pontos_cavernicola->last()->cavidade,
+            'latitude' => $campanha->pontos_cavernicola->last()->latitude,
+            'longitude' => $campanha->pontos_cavernicola->last()->longitude,
+            'distancia_eixo_rodovia' => $campanha->pontos_cavernicola->last()->distancia_eixo_rodovia,
+            'formacao_associada' => $campanha->pontos_cavernicola->last()->formacao_associada,
+            'temperatura_media_interna' => $campanha->pontos_cavernicola->last()->temperatura_media_interna,
+            'temperatura_media_externa' => $campanha->pontos_cavernicola->last()->temperatura_media_externa,
+            'umidade_relativa_interna' => $campanha->pontos_cavernicola->last()->umidade_relativa_interna,
+            'umidade_relativa_externa' => $campanha->pontos_cavernicola->last()->umidade_relativa_externa,
+        ] : [
+            'cavidade' => null,
+            'latitude' => null,
+            'longitude' => null,
+            'distancia_eixo_rodovia' => null,
+            'formacao_associada' => null,
+            'temperatura_media_interna' => null,
+            'temperatura_media_externa' => null,
+            'umidade_relativa_interna' => null,
+            'umidade_relativa_externa' => null,
+        ];
+
+        $formMetodologia = $campanha->metodologias->isNotEmpty() ? [
+            'grupo_faunistico' => $campanha->metodologias->last()->grupo_faunistico,
+            'metodologia' => $campanha->metodologias->last()->metodologia,
+        ] : [
+            'grupo_faunistico' => null,
+            'metodologia' => null,
+        ];
+
+        Log::info('FaunaController: Dados preparados para o frontend', [
             'campanha_id' => $campanhaId,
             'formModuloAmostral' => $formModuloAmostral,
+            'formPontosAmostragem' => $formPontosAmostragem,
+            'formPontosCavernicola' => $formPontosCavernicola,
+            'formMetodologia' => $formMetodologia,
         ]);
 
-        // Usar modulosManuais para modulos_amostrais
         $modulosAmostrais = $modulosManuais->map(function ($modulo) {
             return [
                 'id' => $modulo->id,
@@ -298,12 +340,6 @@ class FaunaController extends Controller
             ];
         })->toArray();
 
-        // Log final para verificar modulos_amostrais enviados
-        Log::info('FaunaController: modulos_amostrais enviados', [
-            'campanha_id' => $campanhaId,
-            'modulos_amostrais' => $modulosAmostrais,
-        ]);
-
         return Inertia::render('Sgc/Contratada/Produtos/Fauna/VisualizarCampanha', [
             'campanha' => [
                 'id' => $campanha->id,
@@ -317,6 +353,9 @@ class FaunaController extends Controller
                 'nao_se_aplica' => $campanha->nao_se_aplica ?? false,
                 'status' => $campanha->status,
                 'formModuloAmostral' => $formModuloAmostral,
+                'formPontosAmostragem' => $formPontosAmostragem,
+                'formPontosCavernicola' => $formPontosCavernicola,
+                'formMetodologia' => $formMetodologia,
                 'abios' => $campanha->abios->map(function ($abio) {
                     return [
                         'id' => $abio->n_abio,

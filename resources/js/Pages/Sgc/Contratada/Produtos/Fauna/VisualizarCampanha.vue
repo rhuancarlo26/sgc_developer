@@ -9,10 +9,10 @@ import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import DadosGeraisVisualizar from './Componentes/DadosGeraisVisualizar.vue';
 import ModulosAmostraisVisualizar from './Componentes/ModulosAmostraisVisualizar.vue';
-import QueloniosCrocodilian from './QueloniosCrocodilianos.vue';
-import FaunaCavernic from './FaunaCavernicola.vue';
-import Metodologia from './Metodologia.vue';
-import FaunaResultados from './FaunaResultados.vue';
+import QueloniosCrocodilianosVisualizar from './Componentes/QueloniosCrocodilianosVisualizar.vue';
+import FaunaCavernicolaVisualizar from './Componentes/FaunaCavernicolaVisualizar.vue';
+import MetodologiaVisualizar from './Componentes/MetodologiaVisualizar.vue';
+import FaunaResultadosVisualizar from './Componentes/FaunaResultadosVisualizar.vue';
 
 defineProps({
     campanha: {
@@ -160,44 +160,42 @@ const salvarAprovacao = () => {
                                     @next="subStep = 4"
                                     @prev="prevSubStep"
                                 />
-                                <QueloniosCrocodilian
+                                <QueloniosCrocodilianosVisualizar
                                     v-if="subStep === 4"
-                                    :nao-se-aplica="campanha.nao_se_aplica"
-                                    :ponto-records="campanha.pontos_quelo_crocod || []"
-                                    :read-only="true"
+                                    :formPontosAmostragem="campanha.formPontosAmostragem || {}"
+                                    :naoSeAplica="campanha.nao_se_aplica"
+                                    :subStep="subStep"
                                     @next="subStep = 5"
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
                                         <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                     </template>
-                                </QueloniosCrocodilian>
-                                <FaunaCavernic
+                                </QueloniosCrocodilianosVisualizar>
+                                <FaunaCavernicolaVisualizar
                                     v-if="subStep === 5"
-                                    :nao-se-aplica="campanha.nao_se_aplica"
-                                    :ponto-cavernicola-records="campanha.pontos_cavernicola || []"
-                                    :read-only="true"
+                                    :formPontosCavernicola="campanha.formPontosCavernicola || {}"
+                                    :naoSeAplica="campanha.nao_se_aplica"
+                                    :subStep="subStep"
                                     @next="setActiveTab('metodologia')"
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
                                         <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                     </template>
-                                </FaunaCavernic>
+                                </FaunaCavernicolaVisualizar>
                             </div>
                             <div v-if="activeTab === 'metodologia'" class="tab-pane fade" :class="{ 'show active': activeTab === 'metodologia' }">
-                                <Metodologia
-                                    :metodologia-records="campanha.metodologias || []"
-                                    :read-only="true"
+                                <MetodologiaVisualizar
+                                    :formMetodologia="campanha.formMetodologia || {}"
                                     @prev="setActiveTab('apresentacao')"
                                     @next="setActiveTab('resultados')"
                                 />
                             </div>
-                            <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
-                                <FaunaResultados
-                                    :resultados-records="campanha.resultados || []"
+                           <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
+                                <FaunaResultadosVisualizar
+                                    :formResultados="campanha.formResultados || {}"
                                     :consideracoes="campanha.consideracoes"
-                                    :read-only="true"
                                     @prev="setActiveTab('metodologia')"
                                     @next="setActiveTab('anexos')"
                                 />
