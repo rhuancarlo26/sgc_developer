@@ -24,12 +24,6 @@ class FaunaController extends Controller
 
     public function storeProfissional(Request $request, $contrato, $produto): RedirectResponse
     {
-        Log::info('FaunaController: Recebendo requisição para salvar profissional', [
-            'contrato' => $contrato,
-            'produto' => $produto,
-            'dados' => $request->all(),
-        ]);
-
         $validated = $request->validate([
             'profissional' => 'required|string|max:255',
             'formacao' => 'required|string|max:255',
@@ -61,15 +55,6 @@ class FaunaController extends Controller
 
     public function salvarCampanha(Request $request, $contrato, $produto): RedirectResponse
     {
-        Log::info('FaunaController: Recebendo requisição para salvar campanha', [
-            'contrato' => $contrato,
-            'produto' => $produto,
-            'dados' => $request->all(),
-            'files' => array_map(function ($file) {
-                return $file ? ['name' => $file->getClientOriginalName(), 'size' => $file->getSize()] : null;
-            }, $request->file('anexos') ?? []),
-        ]);
-
         $validated = $request->validate([
             'data_campanha_inicial' => 'nullable|date',
             'data_campanha_final' => 'nullable|date',
@@ -166,13 +151,6 @@ class FaunaController extends Controller
 
     public function storeResultados(Request $request, $contrato, $produto): RedirectResponse
     {
-        Log::info('FaunaController: Recebendo requisição para salvar resultados', [
-            'contrato' => $contrato,
-            'produto' => $produto,
-            'dados' => $request->all(),
-            'file' => $request->file('planilha') ? ['name' => $request->file('planilha')->getClientOriginalName(), 'size' => $request->file('planilha')->getSize()] : null,
-        ]);
-
         $validated = $request->validate([
             'planilha' => 'required|file|mimes:xlsx,xls|max:10240',
         ]);
@@ -212,29 +190,20 @@ class FaunaController extends Controller
             'anexos'
         ])->findOrFail($campanhaId);
 
-        Log::info('FaunaController: Dados da campanha e relações', [
+        // Log para depuração
+        Log::debug('FaunaController: Dados da campanha', [
             'campanha_id' => $campanhaId,
-            'contrato' => $contrato,
-            'produto' => $produto,
-            'campanha' => $campanha->toArray(),
-            'modulos_amostrais' => $campanha->modulos_amostrais ? $campanha->modulos_amostrais->toArray() : null,
-            'pontos_quelo_crocod' => $campanha->pontos_quelo_crocod ? $campanha->pontos_quelo_crocod->toArray() : null,
-            'pontos_cavernicola' => $campanha->pontos_cavernicola ? $campanha->pontos_cavernicola->toArray() : null,
+            'resultados_count' => $campanha->resultados->count(),
+            'resultados' => $campanha->resultados->toArray(),
+            'anexos_count' => $campanha->anexos->count(),
+            'anexos' => $campanha->anexos->toArray(),
         ]);
 
         if (!$campanha->relationLoaded('modulos_amostrais') || $campanha->modulos_amostrais === null) {
             $campanha->load('modulos_amostrais');
-            Log::info('FaunaController: Modulos_amostrais recarregados', [
-                'campanha_id' => $campanhaId,
-                'modulos_amostrais' => $campanha->modulos_amostrais ? $campanha->modulos_amostrais->toArray() : null,
-            ]);
         }
 
         $modulosManuais = SgcFaunaModuloAmostral::where('campanha_id', $campanhaId)->get();
-        Log::info('FaunaController: Modulos carregados manualmente', [
-            'campanha_id' => $campanhaId,
-            'modulos_manuais' => $modulosManuais->toArray(),
-        ]);
 
         $formModuloAmostral = $modulosManuais->isNotEmpty() ? [
             'id' => $modulosManuais->last()->id,
@@ -314,13 +283,67 @@ class FaunaController extends Controller
             'metodologia' => null,
         ];
 
-        Log::info('FaunaController: Dados preparados para o frontend', [
-            'campanha_id' => $campanhaId,
-            'formModuloAmostral' => $formModuloAmostral,
-            'formPontosAmostragem' => $formPontosAmostragem,
-            'formPontosCavernicola' => $formPontosCavernicola,
-            'formMetodologia' => $formMetodologia,
-        ]);
+        $formResultados = $campanha->resultados->isNotEmpty() ? [
+            'id_campanha' => $campanha->resultados->last()->id_campanha,
+            'modulo' => $campanha->resultados->last()->modulo,
+            'parcela' => $campanha->resultados->last()->parcela,
+            'id_armadilha' => $campanha->resultados->last()->id_armadilha,
+            'grupo_amostrado' => $campanha->resultados->last()->grupo_amostrado,
+            'data_registro' => $campanha->resultados->last()->data_registro,
+            'hora_registro' => $campanha->resultados->last()->hora_registro,
+            'categoria' => $campanha->resultados->last()->categoria,
+            'classe' => $campanha->resultados->last()->classe,
+            'ordem' => $campanha->resultados->last()->ordem,
+            'familia' => $campanha->resultados->last()->familia,
+            'genero' => $campanha->resultados->last()->genero,
+            'especie' => $campanha->resultados->last()->especie,
+            'nome_comum' => $campanha->resultados->last()->nome_comum,
+            'sexo' => $campanha->resultados->last()->sexo,
+            'faixa_etaria' => $campanha->resultados->last()->faixa_etaria,
+            'qnt_individuos' => $campanha->resultados->last()->qnt_individuos,
+            'num_marcacao' => $campanha->resultados->last()->num_marcacao,
+            'coletado' => $campanha->resultados->last()->coletado,
+            'num_tombamento' => $campanha->resultados->last()->num_tombamento,
+            'dados_biometricos' => $campanha->resultados->last()->dados_biometricos,
+            'comp_total' => $campanha->resultados->last()->comp_total,
+            'cabeca' => $campanha->resultados->last()->cabeca,
+            'cauda' => $campanha->resultados->last()->cauda,
+            'femur' => $campanha->resultados->last()->femur,
+            'orelha' => $campanha->resultados->last()->orelha,
+            'peso' => $campanha->resultados->last()->peso,
+            'status_conservacao_federal' => $campanha->resultados->last()->status_conservacao_federal,
+            'status_conservacao_iucn' => $campanha->resultados->last()->status_conservacao_iucn,
+        ] : [
+            'id_campanha' => null,
+            'modulo' => null,
+            'parcela' => null,
+            'id_armadilha' => null,
+            'grupo_amostrado' => null,
+            'data_registro' => null,
+            'hora_registro' => null,
+            'categoria' => null,
+            'classe' => null,
+            'ordem' => null,
+            'familia' => null,
+            'genero' => null,
+            'especie' => null,
+            'nome_comum' => null,
+            'sexo' => null,
+            'faixa_etaria' => null,
+            'qnt_individuos' => null,
+            'num_marcacao' => null,
+            'coletado' => null,
+            'num_tombamento' => null,
+            'dados_biometricos' => null,
+            'comp_total' => null,
+            'cabeca' => null,
+            'cauda' => null,
+            'femur' => null,
+            'orelha' => null,
+            'peso' => null,
+            'status_conservacao_federal' => null,
+            'status_conservacao_iucn' => null,
+        ];
 
         $modulosAmostrais = $modulosManuais->map(function ($modulo) {
             return [
@@ -356,6 +379,8 @@ class FaunaController extends Controller
                 'formPontosAmostragem' => $formPontosAmostragem,
                 'formPontosCavernicola' => $formPontosCavernicola,
                 'formMetodologia' => $formMetodologia,
+                'formResultados' => $formResultados,
+                'consideracoes' => $campanha->resultados_consideracoes->consideracoes ?? null,
                 'abios' => $campanha->abios->map(function ($abio) {
                     return [
                         'id' => $abio->n_abio,
@@ -439,9 +464,14 @@ class FaunaController extends Controller
                         'status_conservacao_iucn' => $resultado->status_conservacao_iucn,
                     ];
                 })->toArray(),
-                'consideracoes' => $campanha->resultados_consideracoes->consideracoes ?? null,
-                'anexos' => $campanha->anexos->groupBy('tipo_anexo')->mapWithKeys(function ($group, $key) {
-                    return [$key => $group->first()];
+                'anexos' => $campanha->anexos->map(function ($anexo) {
+                    return [
+                        'id' => $anexo->id,
+                        'tipo_anexo' => $anexo->tipo_anexo,
+                        'caminho' => $anexo->caminho,
+                        'nome_arquivo' => $anexo->nome_arquivo ?? basename($anexo->caminho),
+                        'created_at' => $anexo->created_at,
+                    ];
                 })->toArray(),
             ],
             'contrato' => $campanha->id_contrato,

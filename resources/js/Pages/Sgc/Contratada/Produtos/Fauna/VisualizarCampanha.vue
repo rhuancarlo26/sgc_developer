@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
@@ -192,24 +191,43 @@ const salvarAprovacao = () => {
                                     @next="setActiveTab('resultados')"
                                 />
                             </div>
-                           <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
+                            <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
                                 <FaunaResultadosVisualizar
-                                    :formResultados="campanha.formResultados || {}"
+                                    :resultados="campanha.resultados || []"
                                     :consideracoes="campanha.consideracoes"
                                     @prev="setActiveTab('metodologia')"
                                     @next="setActiveTab('anexos')"
                                 />
                             </div>
                             <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
-                                <h4>ANEXOS</h4>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3" v-for="(anexo, key) in campanha.anexos" :key="key">
-                                        <label class="form-label">{{ key.replace('_', ' ').toUpperCase() }}</label>
-                                        <div>
-                                            <a v-if="anexo" :href="'/storage/' + anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
-                                            <span v-else>Nenhum arquivo</span>
-                                        </div>
-                                    </div>
+                                <h4 class="mb-3" style="text-align: center;">ANEXOS</h4>
+                                <div v-if="campanha.anexos && campanha.anexos.length > 0" class="overflow-x-auto mb-6">
+                                    <table class="min-w-full bg-white border border-gray-300">
+                                        <thead>
+                                            <tr class="bg-gray-100">
+                                                <th class="py-2 px-4 border-b text-left">ID</th>
+                                                <th class="py-2 px-4 border-b text-left">Tipo de Anexo</th>
+                                                <th class="py-2 px-4 border-b text-left">Nome do Arquivo</th>
+                                                <th class="py-2 px-4 border-b text-left">Data de Criação</th>
+                                                <th class="py-2 px-4 border-b text-left">Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="anexo in campanha.anexos" :key="anexo.id" class="hover:bg-gray-50">
+                                                <td class="py-2 px-4 border-b">{{ anexo.id || 'Não informado' }}</td>
+                                                <td class="py-2 px-4 border-b">{{ anexo.tipo_anexo ? anexo.tipo_anexo.replace('_', ' ').toUpperCase() : 'Não informado' }}</td>
+                                                <td class="py-2 px-4 border-b">{{ anexo.nome_arquivo || 'Não informado' }}</td>
+                                                <td class="py-2 px-4 border-b">{{ anexo.created_at || 'Não informado' }}</td>
+                                                <td class="py-2 px-4 border-b">
+                                                    <a v-if="anexo.caminho" :href="'/storage/' + anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
+                                                    <span v-else>Nenhum arquivo</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div v-else class="alert alert-info text-center">
+                                    Nenhum anexo disponível.
                                 </div>
                                 <div v-if="canApprove && campanha.status === 'Em análise'" class="mt-4">
                                     <h4>APROVAÇÃO</h4>
@@ -265,5 +283,24 @@ const salvarAprovacao = () => {
 .tab-content {
     padding: 20px;
 }
+table {
+    border-collapse: collapse;
+}
+th, td {
+    padding: 0.5rem 1rem;
+    border: 1px solid #dee2e6;
+}
+thead {
+    background-color: #f8f9fa;
+}
+tr:hover {
+    background-color: #f1f5f9;
+}
+.alert-info {
+    font-size: 1rem;
+    padding: 1rem;
+    border-radius: 6px;
+    background-color: #e7f1ff;
+    color: #084298;
+}
 </style>
-```
