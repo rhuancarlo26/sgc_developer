@@ -10,6 +10,7 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaService;
 use App\Models\SgcFaunaCampanha;
 use Illuminate\Http\Request;
 use Inertia\Response;
+use Illuminate\Support\Facades\Auth;
 
 class ProdutosController extends Controller
 {
@@ -33,7 +34,7 @@ class ProdutosController extends Controller
             ->map(function ($campanha) {
                 return [
                     'id' => $campanha->id,
-                    'id_campanha' => $campanha->id ?? 'N/A',
+                    'id_campanha' => $campanha->id_campanha ?? 'N/A',
                     'empreendimento' => $campanha->cod_emp ?? 'N/A',
                     'data_inicial' => $campanha->data_ini ?? 'N/A',
                     'data_final' => $campanha->data_fim ?? 'N/A',
@@ -55,6 +56,7 @@ class ProdutosController extends Controller
             'produto' => ucfirst($produto),
             'contratos' => $contratoObj,
             'campanhas' => $campanhas,
+            'canApprove' => Auth::user()->perfis_id === 2 && count(array_filter($campanhas->toArray(), fn($c) => $c['status'] === 'Em análise')) > 0,
         ]);
     }
 

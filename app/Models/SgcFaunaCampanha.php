@@ -36,15 +36,15 @@ class SgcFaunaCampanha extends Model
         return $this->hasMany(SgcFaunaCampanhaProfissional::class, 'campanha_id', 'id'  );
     }
 
-    // public function modulos_amostrais()
-    // {
-    //     return $this->hasMany(SgcFaunaModuloAmostral::class, 'campanha_id', 'id');
-    // }
-    
     public function modulos_amostrais()
     {
-        return $this->hasMany(\App\Models\SgcFaunaModuloAmostral::class, 'campanha_id', 'id');
+        return $this->hasMany(SgcFaunaModuloAmostral::class, 'campanha_id', 'id');
     }
+    
+    // public function modulos_amostrais()
+    // {
+    //     return $this->hasMany(\App\Models\SgcFaunaModuloAmostral::class, 'campanha_id', 'id');
+    // }
 
     public function pontos_quelo_crocod()
     {
