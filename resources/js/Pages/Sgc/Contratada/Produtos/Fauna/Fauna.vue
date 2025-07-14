@@ -12,6 +12,7 @@ const props = defineProps({
     produto: { type: String, required: true },
     contratos: { type: Object, required: true },
     campanhas: { type: Array, default: () => [] },
+    canApprove: { type: Boolean, default: false },
 });
 
 // Estado reativo para o subproduto selecionado e exibição de campanhas
@@ -30,9 +31,10 @@ const filteredSubprodutos = computed(() => {
     return props.subprodutos.filter(sub => sub.descricao_revisada === selectedSubproduto.value);
 });
 
-// Exibir todas as campanhas, com filtro opcional por subproduto
+// Filtrar campanhas com base no subproduto selecionado
 const filteredCampanhas = computed(() => {
-    return props.campanhas; // Remove filtro por subproduto inicialmente
+    if (!selectedSubproduto.value) return props.campanhas;
+    return props.campanhas.filter(campanha => campanha.subproduto === selectedSubproduto.value);
 });
 
 // Redirecionar para a página de criação
@@ -57,8 +59,12 @@ const visualizarCampanhas = () => {
 
 // Redirecionar para a visualização de uma campanha específica
 const visualizarCampanha = (campanhaId) => {
-    // router.get(route('sgc.contratada.produtos.show', [campanhaId]));
     router.get(route('sgc.contratada.produtos.show', [props.contrato, props.produto.toLowerCase(), campanhaId]));
+};
+
+// Redirecionar para a análise de uma campanha específica
+const analisarCampanha = (campanhaId) => {
+    router.get(route('sgc.contratada.produtos.analise', [props.contrato, props.produto.toLowerCase(), campanhaId]));
 };
 </script>
 
@@ -111,7 +117,12 @@ const visualizarCampanha = (campanhaId) => {
                                                 </div>
                                             </div>
                                             <div class="col-md-4 mb-4">
-                                                <div class="block-card block-card-short action-button bg-success text-white cursor-not-allowed" title="Funcionalidade em desenvolvimento">
+                                                <div
+                                                    class="block-card block-card-short action-button bg-success text-white"
+                                                    :class="{ 'cursor-not-allowed': !canApprove, 'cursor-pointer': canApprove }"
+                                                    :title="!canApprove ? 'Nenhuma campanha em análise ou acesso negado' : 'Analisar campanhas'"
+                                                    @click="canApprove && visualizarCampanhas()"
+                                                >
                                                     Analisar
                                                 </div>
                                             </div>
@@ -135,6 +146,7 @@ const visualizarCampanha = (campanhaId) => {
                                                 <tr>
                                                     <th>ID Campanha</th>
                                                     <th>Empreendimento</th>
+                                                    <th>Subproduto</th>
                                                     <th>Data Inicial</th>
                                                     <th>Data Final</th>
                                                     <th>Status</th>
@@ -143,8 +155,9 @@ const visualizarCampanha = (campanhaId) => {
                                             </thead>
                                             <tbody>
                                                 <tr v-for="campanha in filteredCampanhas" :key="campanha.id">
-                                                    <td>{{ campanha.id_campanha || 'N/A' }}</td>
-                                                    <td>{{ campanha.empreendimento }}</td>
+                                                    <td>{{ campanha.id || 'N/A' }}</td>
+                                                    <td>{{ campanha.empreendimento || 'N/A' }}</td>
+                                                    <td>{{ campanha.subproduto || 'N/A' }}</td>
                                                     <td>{{ campanha.data_inicial || 'N/A' }}</td>
                                                     <td>{{ campanha.data_final || 'N/A' }}</td>
                                                     <td>{{ campanha.status || 'N/A' }}</td>
@@ -154,10 +167,16 @@ const visualizarCampanha = (campanhaId) => {
                                                             title="Visualizar"
                                                             @click="visualizarCampanha(campanha.id)"
                                                         />
+                                                        <NavButton
+                                                            v-if="canApprove && campanha.status === 'Em análise'"
+                                                            type-button="success"
+                                                            title="Analisar"
+                                                            @click="analisarCampanha(campanha.id)"
+                                                        />
                                                     </td>
                                                 </tr>
                                                 <tr v-if="!filteredCampanhas.length">
-                                                    <td colspan="6" class="text-center">Nenhuma campanha disponível.</td>
+                                                    <td colspan="7" class="text-center">Nenhuma campanha disponível.</td>
                                                 </tr>
                                             </tbody>
                                         </table>

@@ -4,6 +4,7 @@ namespace App\Domain\Sgc\Contratada\Produtos\Fauna\Controller;
 
 use App\Shared\Http\Controllers\Controller;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaService;
+use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaFiscalService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -11,15 +12,18 @@ use App\Models\SgcFaunaCampanhaAbios;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcFaunaModuloAmostral;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class FaunaController extends Controller
 {
     protected $faunaService;
+    protected $faunaFiscalService;
 
-    public function __construct(FaunaService $faunaService)
+    public function __construct(FaunaService $faunaService, FaunaFiscalService $faunaFiscalService)
     {
         $this->faunaService = $faunaService;
+        $this->faunaFiscalService = $faunaFiscalService;
     }
 
     public function storeProfissional(Request $request, $contrato, $produto): RedirectResponse
@@ -477,7 +481,354 @@ class FaunaController extends Controller
             'contrato' => $campanha->id_contrato,
             'produto' => $campanha->subproduto,
             'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
-            'canApprove' => auth()->user()->hasRole('analista'),
+            'canApprove' => Auth::user()->perfis_id === 2 && $campanha->status === 'Em análise',
         ]);
     }
-}
+
+    public function analise ($contrato, $produto, $campanha)
+    {
+        if (Auth::user()->perfis_id !== 2) {
+            return redirect()->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanha])
+                ->withErrors(['error' => 'Acesso negado. Apenas fiscais podem analisar campanhas.']);
+        }
+
+        $campanhaObj = SgcFaunaCampanha::with([
+            'abios.abio',
+            'profissionais.profissional',
+            'modulos_amostrais',
+            'pontos_quelo_crocod',
+            'pontos_cavernicola',
+            'metodologias',
+            'resultados',
+            'resultados_consideracoes',
+            'anexos',
+        ])->findOrFail($campanha);
+
+        if ($campanhaObj->status !== 'Em análise') {
+            return redirect()->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanha])
+                ->withErrors(['error' => 'Campanha não está em análise.']);
+        }
+
+        $analises = $this->faunaFiscalService->getAnalisesByCampanha($contrato, $campanha);
+
+        // Verificar se a relação modulos_amostrais está carregada e é uma coleção
+        $formModuloAmostral = ($campanhaObj->relationLoaded('modulos_amostrais') && $campanhaObj->modulos_amostrais && $campanhaObj->modulos_amostrais->isNotEmpty()) ? [
+            'id' => $campanhaObj->modulos_amostrais->last()->id,
+            'data_cadastro' => $campanhaObj->modulos_amostrais->last()->data_cadastro,
+            'tamanho_modulo' => $campanhaObj->modulos_amostrais->last()->tamanho_modulo,
+            'uf' => $campanhaObj->modulos_amostrais->last()->uf,
+            'municipio' => $campanhaObj->modulos_amostrais->last()->municipio,
+            'bioma' => $campanhaObj->modulos_amostrais->last()->bioma,
+            'fitofisionomia' => $campanhaObj->modulos_amostrais->last()->fitofisionomia,
+            'latitude_inicial' => $campanhaObj->modulos_amostrais->last()->latitude_inicial,
+            'longitude_inicial' => $campanhaObj->modulos_amostrais->last()->longitude_inicial,
+            'latitude_final' => $campanhaObj->modulos_amostrais->last()->latitude_final,
+            'longitude_final' => $campanhaObj->modulos_amostrais->last()->longitude_final,
+            'arquivo' => $campanhaObj->modulos_amostrais->last()->nome_arquivo,
+            'obs' => $campanhaObj->modulos_amostrais->last()->obs,
+        ] : [
+            'id' => null,
+            'data_cadastro' => null,
+            'tamanho_modulo' => null,
+            'uf' => null,
+            'municipio' => null,
+            'bioma' => null,
+            'fitofisionomia' => null,
+            'latitude_inicial' => null,
+            'longitude_inicial' => null,
+            'latitude_final' => null,
+            'longitude_final' => null,
+            'arquivo' => null,
+            'obs' => null,
+        ];
+
+        // Verificar se a relação pontos_quelo_crocod está carregada e é uma coleção
+        $formPontosAmostragem = ($campanhaObj->relationLoaded('pontos_quelo_crocod') && $campanhaObj->pontos_quelo_crocod && $campanhaObj->pontos_quelo_crocod->isNotEmpty()) ? [
+            'ponto_de_coleta' => $campanhaObj->pontos_quelo_crocod->last()->ponto_de_coleta,
+            'nome_curso_hidrico' => $campanhaObj->pontos_quelo_crocod->last()->nome_curso_hidrico,
+            'coordenadas' => $campanhaObj->pontos_quelo_crocod->last()->coordenadas,
+            'bacia' => $campanhaObj->pontos_quelo_crocod->last()->bacia_hidrografica,
+            'profundidade' => $campanhaObj->pontos_quelo_crocod->last()->profundidade,
+            'largura' => $campanhaObj->pontos_quelo_crocod->last()->largura,
+            'tipo_substrato' => $campanhaObj->pontos_quelo_crocod->last()->tipo_substrato,
+        ] : [
+            'ponto_de_coleta' => null,
+            'nome_curso_hidrico' => null,
+            'coordenadas' => null,
+            'bacia' => null,
+            'profundidade' => null,
+            'largura' => null,
+            'tipo_substrato' => null,
+        ];
+
+        // Verificar se a relação pontos_cavernicola está carregada e é uma coleção
+        $formPontosCavernicola = ($campanhaObj->relationLoaded('pontos_cavernicola') && $campanhaObj->pontos_cavernicola && $campanhaObj->pontos_cavernicola->isNotEmpty()) ? [
+            'cavidade' => $campanhaObj->pontos_cavernicola->last()->cavidade,
+            'latitude' => $campanhaObj->pontos_cavernicola->last()->latitude,
+            'longitude' => $campanhaObj->pontos_cavernicola->last()->longitude,
+            'distancia_eixo_rodovia' => $campanhaObj->pontos_cavernicola->last()->distancia_eixo_rodovia,
+            'formacao_associada' => $campanhaObj->pontos_cavernicola->last()->formacao_associada,
+            'temperatura_media_interna' => $campanhaObj->pontos_cavernicola->last()->temperatura_media_interna,
+            'temperatura_media_externa' => $campanhaObj->pontos_cavernicola->last()->temperatura_media_externa,
+            'umidade_relativa_interna' => $campanhaObj->pontos_cavernicola->last()->umidade_relativa_interna,
+            'umidade_relativa_externa' => $campanhaObj->pontos_cavernicola->last()->umidade_relativa_externa,
+        ] : [
+            'cavidade' => null,
+            'latitude' => null,
+            'longitude' => null,
+            'distancia_eixo_rodovia' => null,
+            'formacao_associada' => null,
+            'temperatura_media_interna' => null,
+            'temperatura_media_externa' => null,
+            'umidade_relativa_interna' => null,
+            'umidade_relativa_externa' => null,
+        ];
+
+        // Verificar se a relação metodologias está carregada e é uma coleção
+        $formMetodologia = ($campanhaObj->relationLoaded('metodologias') && $campanhaObj->metodologias && $campanhaObj->metodologias->isNotEmpty()) ? [
+            'grupo_faunistico' => $campanhaObj->metodologias->last()->grupo_faunistico,
+            'metodologia' => $campanhaObj->metodologias->last()->metodologia,
+        ] : [
+            'grupo_faunistico' => null,
+            'metodologia' => null,
+        ];
+
+        // Verificar se a relação resultados está carregada e é uma coleção
+        $formResultados = ($campanhaObj->relationLoaded('resultados') && $campanhaObj->resultados && $campanhaObj->resultados->isNotEmpty()) ? [
+            'id_campanha' => $campanhaObj->resultados->last()->id_campanha,
+            'modulo' => $campanhaObj->resultados->last()->modulo,
+            'parcela' => $campanhaObj->resultados->last()->parcela,
+            'id_armadilha' => $campanhaObj->resultados->last()->id_armadilha,
+            'grupo_amostrado' => $campanhaObj->resultados->last()->grupo_amostrado,
+            'data_registro' => $campanhaObj->resultados->last()->data_registro,
+            'hora_registro' => $campanhaObj->resultados->last()->hora_registro,
+            'categoria' => $campanhaObj->resultados->last()->categoria,
+            'classe' => $campanhaObj->resultados->last()->classe,
+            'ordem' => $campanhaObj->resultados->last()->ordem,
+            'familia' => $campanhaObj->resultados->last()->familia,
+            'genero' => $campanhaObj->resultados->last()->genero,
+            'especie' => $campanhaObj->resultados->last()->especie,
+            'nome_comum' => $campanhaObj->resultados->last()->nome_comum,
+            'sexo' => $campanhaObj->resultados->last()->sexo,
+            'faixa_etaria' => $campanhaObj->resultados->last()->faixa_etaria,
+            'qnt_individuos' => $campanhaObj->resultados->last()->qnt_individuos,
+            'num_marcacao' => $campanhaObj->resultados->last()->num_marcacao,
+            'coletado' => $campanhaObj->resultados->last()->coletado,
+            'num_tombamento' => $campanhaObj->resultados->last()->num_tombamento,
+            'dados_biometricos' => $campanhaObj->resultados->last()->dados_biometricos,
+            'comp_total' => $campanhaObj->resultados->last()->comp_total,
+            'cabeca' => $campanhaObj->resultados->last()->cabeca,
+            'cauda' => $campanhaObj->resultados->last()->cauda,
+            'femur' => $campanhaObj->resultados->last()->femur,
+            'orelha' => $campanhaObj->resultados->last()->orelha,
+            'peso' => $campanhaObj->resultados->last()->peso,
+            'status_conservacao_federal' => $campanhaObj->resultados->last()->status_conservacao_federal,
+            'status_conservacao_iucn' => $campanhaObj->resultados->last()->status_conservacao_iucn,
+        ] : [
+            'id_campanha' => null,
+            'modulo' => null,
+            'parcela' => null,
+            'id_armadilha' => null,
+            'grupo_amostrado' => null,
+            'data_registro' => null,
+            'hora_registro' => null,
+            'categoria' => null,
+            'classe' => null,
+            'ordem' => null,
+            'familia' => null,
+            'genero' => null,
+            'especie' => null,
+            'nome_comum' => null,
+            'sexo' => null,
+            'faixa_etaria' => null,
+            'qnt_individuos' => null,
+            'num_marcacao' => null,
+            'coletado' => null,
+            'num_tombamento' => null,
+            'dados_biometricos' => null,
+            'comp_total' => null,
+            'cabeca' => null,
+            'cauda' => null,
+            'femur' => null,
+            'orelha' => null,
+            'peso' => null,
+            'status_conservacao_federal' => null,
+            'status_conservacao_iucn' => null,
+        ];
+
+        return Inertia::render('Sgc/Contratada/Produtos/Fauna/AnaliseCampanha', [
+            'campanha' => [
+                'id' => $campanhaObj->id,
+                'id_campanha' => $campanhaObj->id_campanha,
+                'cod_emp' => $campanhaObj->cod_emp,
+                'familia' => $campanhaObj->subproduto,
+                'data_campanha_inicial' => $campanhaObj->data_ini,
+                'data_campanha_final' => $campanhaObj->data_fim,
+                'periodo' => $campanhaObj->periodo,
+                'observacoes' => $campanhaObj->observacoes,
+                'nao_se_aplica' => $campanhaObj->nao_se_aplica ?? false,
+                'status' => $campanhaObj->status,
+                'formModuloAmostral' => $formModuloAmostral,
+                'formPontosAmostragem' => $formPontosAmostragem,
+                'formPontosCavernicola' => $formPontosCavernicola,
+                'formMetodologia' => $formMetodologia,
+                'formResultados' => $formResultados,
+                'consideracoes' => $campanhaObj->resultados_consideracoes->consideracoes ?? null,
+                'abios' => $campanhaObj->abios->map(function ($abio) {
+                    return [
+                        'id' => $abio->n_abio,
+                        'abio' => ['numero_licenca' => $abio->abio->numero_licenca ?? 'N/A'],
+                    ];
+                })->toArray(),
+                'profissionais' => $campanhaObj->profissionais->map(function ($prof) {
+                    return [
+                        'id' => $prof->id,
+                        'profissional' => $prof->profissional->profissional ?? 'N/A',
+                        'grupo_faunistico' => $prof->grupo_faunistico,
+                        'formacao' => $prof->profissional->formacao ?? 'N/A',
+                        'funcao' => $prof->profissional->funcao ?? 'N/A',
+                        'ctf' => $prof->profissional->ctf ?? 'N/A',
+                    ];
+                })->toArray(),
+                'modulos_amostrais' => ($campanhaObj->relationLoaded('modulos_amostrais') && $campanhaObj->modulos_amostrais) ? $campanhaObj->modulos_amostrais->map(function ($modulo) {
+                    return [
+                        'id' => $modulo->id,
+                        'data_cadastro' => $modulo->data_cadastro,
+                        'tamanho_modulo' => $modulo->tamanho_modulo,
+                        'uf' => $modulo->uf,
+                        'municipio' => $modulo->municipio,
+                        'bioma' => $modulo->bioma,
+                        'fitofisionomia' => $modulo->fitofisionomia,
+                        'latitude_inicial' => $modulo->latitude_inicial,
+                        'longitude_inicial' => $modulo->longitude_inicial,
+                        'latitude_final' => $modulo->latitude_final,
+                        'longitude_final' => $modulo->longitude_final,
+                        'obs' => $modulo->obs,
+                        'arquivo' => $modulo->nome_arquivo,
+                    ];
+                })->toArray() : [],
+                'pontos_quelo_crocod' => ($campanhaObj->relationLoaded('pontos_quelo_crocod') && $campanhaObj->pontos_quelo_crocod) ? $campanhaObj->pontos_quelo_crocod->map(function ($ponto) {
+                    return [
+                        'id' => $ponto->id,
+                        'ponto_de_coleta' => $ponto->ponto_de_coleta,
+                        'nome_curso_hidrico' => $ponto->nome_curso_hidrico,
+                        'coordenadas' => $ponto->coordenadas,
+                        'bacia' => $ponto->bacia_hidrografica,
+                        'profundidade' => $ponto->profundidade,
+                        'largura' => $ponto->largura,
+                        'tipo_substrato' => $ponto->tipo_substrato,
+                    ];
+                })->toArray() : [],
+                'pontos_cavernicola' => ($campanhaObj->relationLoaded('pontos_cavernicola') && $campanhaObj->pontos_cavernicola) ? $campanhaObj->pontos_cavernicola->map(function ($ponto) {
+                    return [
+                        'id' => $ponto->id,
+                        'cavidade' => $ponto->cavidade,
+                        'latitude' => $ponto->latitude,
+                        'longitude' => $ponto->longitude,
+                        'distancia_eixo_rodovia' => $ponto->distancia_eixo_rodovia,
+                        'formacao_associada' => $ponto->formacao_associada,
+                        'temperatura_media_interna' => $ponto->temperatura_media_interna,
+                        'temperatura_media_externa' => $ponto->temperatura_media_externa,
+                        'umidade_relativa_interna' => $ponto->umidade_relativa_interna,
+                        'umidade_relativa_externa' => $ponto->umidade_relativa_externa,
+                    ];
+                })->toArray() : [],
+                'metodologias' => ($campanhaObj->relationLoaded('metodologias') && $campanhaObj->metodologias) ? $campanhaObj->metodologias->map(function ($metodologia) {
+                    return [
+                        'id' => $metodologia->id,
+                        'grupo_faunistico' => $metodologia->grupo_faunistico,
+                        'metodologia' => $metodologia->metodologia,
+                    ];
+                })->toArray() : [],
+                'resultados' => ($campanhaObj->relationLoaded('resultados') && $campanhaObj->resultados) ? $campanhaObj->resultados->map(function ($resultado) {
+                    return [
+                        'id' => $resultado->id,
+                        'modulo' => $resultado->modulo,
+                        'parcela' => $resultado->parcela,
+                        'id_armadilha' => $resultado->id_armadilha,
+                        'grupo_amostrado' => $resultado->grupo_amostrado,
+                        'data_registro' => $resultado->data_registro,
+                        'hora_registro' => $resultado->hora_registro,
+                        'categoria' => $resultado->categoria,
+                        'classe' => $resultado->classe,
+                        'ordem' => $resultado->ordem,
+                        'familia' => $resultado->familia,
+                        'genero' => $resultado->genero,
+                        'especie' => $resultado->especie,
+                        'nome_comum' => $resultado->nome_comum,
+                        'sexo' => $resultado->sexo,
+                        'faixa_etaria' => $resultado->faixa_etaria,
+                        'qnt_individuos' => $resultado->qnt_individuos,
+                        'num_marcacao' => $resultado->num_marcacao,
+                        'coletado' => $resultado->coletado,
+                        'num_tombamento' => $resultado->num_tombamento,
+                        'dados_biometricos' => $resultado->dados_biometricos,
+                        'comp_total' => $resultado->comp_total,
+                        'cabeca' => $resultado->cabeca,
+                        'cauda' => $resultado->cauda,
+                        'femur' => $resultado->femur,
+                        'orelha' => $resultado->orelha,
+                        'peso' => $resultado->peso,
+                        'status_conservacao_federal' => $resultado->status_conservacao_federal,
+                        'status_conservacao_iucn' => $resultado->status_conservacao_iucn,
+                    ];
+                })->toArray() : [],
+                'anexos' => ($campanhaObj->relationLoaded('anexos') && $campanhaObj->anexos) ? $campanhaObj->anexos->map(function ($anexo) {
+                    return [
+                        'id' => $anexo->id,
+                        'tipo_anexo' => $anexo->tipo_anexo,
+                        'caminho' => $anexo->caminho,
+                        'nome_arquivo' => $anexo->nome_arquivo ?? basename($anexo->caminho),
+                        'created_at' => $anexo->created_at,
+                    ];
+                })->toArray() : [],
+            ],
+            'contrato' => $campanhaObj->id_contrato,
+            'produto' => $campanhaObj->subproduto,
+            'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
+            'canApprove' => Auth::user()->perfis_id === 2 && $campanhaObj->status === 'Em análise',
+            'analises' => $analises,
+        ]);
+    }
+
+    public function salvarAnalise(Request $request, $contrato, $produto, $campanha): RedirectResponse
+    {
+        if (Auth::user()->perfis_id !== 2) {
+            return redirect()->back()->withErrors(['error' => 'Acesso negado. Apenas fiscais podem salvar análises.']);
+        }
+
+        \Log::info('Dados recebidos em salvarAnalise:', [
+            'request' => $request->all(),
+            'contrato' => $contrato,
+            'produto' => $produto,
+            'campanha' => $campanha,
+        ]);
+
+        try {
+            $validated = $request->validate([
+                'etapa' => 'required|string|in:apresentacao_geral,caracterizacao_area,modulos_amostrais,pontos_quelo_crocod,pontos_cavernicola,metodologia,resultados,anexos',
+                'status' => 'required|string|in:Aprovada,Rejeitada',
+                'observacoes' => 'nullable|string',
+            ]);
+
+            $this->faunaFiscalService->salvarAnaliseEtapa($contrato, $campanha, $validated);
+            return redirect()->route('sgc.contratada.produtos.analise', [$contrato, $produto, $campanha])
+                ->with('success', 'Análise da etapa salva com sucesso!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('FaunaController: Erro de validação ao salvar análise', [
+                'contrato_id' => $contrato,
+                'campanha_id' => $campanha,
+                'errors' => $e->errors(),
+            ]);
+            return redirect()->back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            \Log::error('FaunaController: Erro ao salvar análise da etapa', [
+                'contrato_id' => $contrato,
+                'campanha_id' => $campanha,
+                'erro' => $e->getMessage(),
+            ]);
+            return redirect()->back()->withErrors(['error' => 'Erro ao salvar análise: ' . $e->getMessage()]);
+        }
+    }
+    
+}  

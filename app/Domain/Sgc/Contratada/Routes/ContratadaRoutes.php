@@ -126,7 +126,12 @@ Route::prefix('/contratada')->group(function () {
         Route::post('resultados/store', [FaunaController::class, 'storeResultados'])->name('sgc.contratada.produtos.resultados.store');
         Route::get('campanhas/{campanhaId}', [FaunaController::class, 'show'])->name('sgc.contratada.produtos.show');
         Route::post('campanhas/{campanhaId}/approve', [FaunaController::class, 'approve'])->name('sgc.contratada.produtos.approve')->middleware('auth', 'role:analista');
-    });
     
+        Route::get('fauna/campanhas/{campanha}/analise', [FaunaController::class, 'analise'])->name('sgc.contratada.produtos.analise');
+        Route::post('fauna/campanhas/{campanha}/analise', [FaunaController::class, 'salvarAnalise'])->name('sgc.contratada.produtos.salvarAnalise');
+    
+    });
+
+   
 
 });
