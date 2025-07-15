@@ -78,6 +78,11 @@ const getTabStatus = (tab) => {
     return 'Pendente';
 };
 
+// Verifica se todas as etapas foram analisadas
+const todasEtapasAnalisadas = () => {
+    return etapas.every(etapa => getEtapaStatus(etapa.value) !== 'Pendente');
+};
+
 const setActiveTab = (tab) => {
     activeTab.value = tab;
     if (tab === 'apresentacao') {
@@ -152,6 +157,38 @@ const rejeitarEtapa = (etapa) => {
     }
     analiseForms.value[etapa].status = 'Rejeitada';
     salvarAnalise(etapa);
+};
+
+const finalizarAvaliacao = () => {
+    if (!todasEtapasAnalisadas()) {
+        alert('Todas as etapas devem ser analisadas antes de salvar a avaliação final.');
+        return;
+    }
+
+    if (!props.contrato || !props.produto || !props.campanha || !props.campanha.id) {
+        console.error('Erro: Props não definidas em finalizarAvaliacao', {
+            contrato: props.contrato,
+            produto: props.produto,
+            campanha: props.campanha,
+        });
+        alert('Erro: Dados da campanha não estão disponíveis. Tente recarregar a página.');
+        return;
+    }
+
+    const form = useForm({});
+    form.post(
+        route('sgc.contratada.produtos.finalizarAvaliacao', [props.contrato, props.produto.toLowerCase(), props.campanha.id]),
+        {
+            onSuccess: () => {
+                alert('Avaliação da campanha finalizada com sucesso!');
+                router.get(route('sgc.contratada.produtos.index', [props.contrato, props.produto?.toLowerCase()]));
+            },
+            onError: (errors) => {
+                console.error('Erro ao finalizar avaliação da campanha', { errors });
+                alert('Erro ao finalizar avaliação: ' + (Object.values(errors).join(', ') || 'Verifique os dados e tente novamente.'));
+            },
+        }
+    );
 };
 </script>
 
@@ -280,6 +317,9 @@ const rejeitarEtapa = (etapa) => {
                                         <label class="form-label">Família</label>
                                         <input type="text" class="form-control" :value="props.campanha?.familia || 'Fauna'" disabled />
                                     </div>
+                                    <div class="d-flex justify-content-end mt-4">
+                                        <NavButton type="button" type-button="primary" title="Avançar" @click="subStep = 2" />
+                                    </div>
                                     <div v-if="props.canApprove && props.campanha?.status === 'Em análise'" class="mt-4">
                                         <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('apresentacao_geral')">
@@ -299,9 +339,6 @@ const rejeitarEtapa = (etapa) => {
                                                 <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('apresentacao_geral')" />
                                             </div>
                                         </form>
-                                    </div>
-                                    <div class="d-flex justify-content-end mt-4">
-                                        <NavButton type="button" type-button="primary" title="Avançar" @click="subStep = 2" />
                                     </div>
                                     <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                 </div>
@@ -602,8 +639,10 @@ const rejeitarEtapa = (etapa) => {
                                     <NavButton
                                         type="button"
                                         type-button="primary"
-                                        title="Voltar à Lista"
-                                        @click="router.get(route('sgc.contratada.produtos.index', [props.contrato, props.produto?.toLowerCase()]))"
+                                        title="Salvar Avaliação"
+                                        :disabled="!props.canApprove || !todasEtapasAnalisadas()"
+                                        :title="!props.canApprove || !todasEtapasAnalisadas() ? 'Todas as etapas devem ser analisadas antes de salvar a avaliação.' : ''"
+                                        @click="finalizarAvaliacao"
                                     />
                                 </div>
                             </div>
