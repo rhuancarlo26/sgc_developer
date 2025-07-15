@@ -31,20 +31,6 @@ defineEmits(['next', 'prev']);
     <div class="card-body">
       <h4 class="mb-3" style="text-align: center;">DADOS GERAIS DA CAMPANHA</h4>
       
-      <!-- Status -->
-      <div v-if="campanha && Object.keys(campanha).length" class="status-container">
-        <span :class="{
-          'badge bg-success': campanha.status === 'Aprovada',
-          'badge bg-warning': campanha.status === 'Em análise',
-          'badge bg-danger': campanha.status === 'Rejeitada'
-        }">
-          {{ campanha.status || 'Não informado' }}
-        </span>
-      </div>
-      <div v-else class="alert alert-info text-center">
-        Nenhum dado da campanha disponível.
-      </div>
-
       <!-- Dados da Campanha -->
       <div v-if="campanha && Object.keys(campanha).length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div>

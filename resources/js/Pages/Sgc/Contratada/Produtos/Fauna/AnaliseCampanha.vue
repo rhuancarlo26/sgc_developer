@@ -22,7 +22,7 @@ const props = defineProps({
     analises: { type: Array, default: () => [] },
 });
 
-// Log para depuração, semelhante ao Fauna.vue
+// Log para depuração
 console.log('Props recebidas em AnaliseCampanha.vue:', {
     contrato: props.contrato,
     produto: props.produto,
@@ -52,12 +52,31 @@ const analiseForms = ref(
     etapas.reduce((acc, etapa) => ({
         ...acc,
         [etapa.value]: useForm({
-            etapa: etapa.value, // Inicializar etapa no formulário
+            etapa: etapa.value,
             status: '',
             observacoes: '',
         }),
     }), {})
 );
+
+// Função para obter o status de uma etapa
+const getEtapaStatus = (etapaValue) => {
+    const analises = Array.isArray(props.analises) ? props.analises : [];
+    const analise = analises.find(a => a.etapa === etapaValue);
+    return analise ? analise.status : 'Pendente';
+};
+
+// Função para determinar o status de uma aba
+const getTabStatus = (tab) => {
+    const analises = Array.isArray(props.analises) ? props.analises : [];
+    const etapasDaAba = etapas.filter(e => e.tab === tab).map(e => e.value);
+    const analisesDaAba = analises.filter(a => etapasDaAba.includes(a.etapa));
+    
+    if (analisesDaAba.length === 0) return 'Pendente';
+    if (analisesDaAba.some(a => a.status === 'Rejeitada')) return 'Rejeitada';
+    if (analisesDaAba.every(a => a.status === 'Aprovada')) return 'Aprovada';
+    return 'Pendente';
+};
 
 const setActiveTab = (tab) => {
     activeTab.value = tab;
@@ -88,7 +107,6 @@ const salvarAnalise = (etapa) => {
         return;
     }
 
-    // Verificar se as props estão definidas
     if (!props.contrato || !props.produto || !props.campanha || !props.campanha.id) {
         console.error('Erro: Props não definidas em salvarAnalise', {
             contrato: props.contrato,
@@ -99,7 +117,6 @@ const salvarAnalise = (etapa) => {
         return;
     }
 
-    // Log para depurar os dados enviados
     console.log('Enviando análise para etapa:', {
         etapa: form.etapa,
         status: form.status,
@@ -110,7 +127,7 @@ const salvarAnalise = (etapa) => {
         route('sgc.contratada.produtos.salvarAnalise', [props.contrato, props.produto.toLowerCase(), props.campanha.id]),
         {
             onSuccess: () => {
-                form.reset('status', 'observacoes'); // Preservar etapa
+                form.reset('status', 'observacoes');
                 router.reload({ only: ['analises'] });
                 alert(`Análise da etapa ${etapas.find(e => e.value === etapa)?.label || etapa} salva com sucesso!`);
             },
@@ -158,35 +175,87 @@ const rejeitarEtapa = (etapa) => {
                         <ul class="nav nav-tabs mb-4">
                             <li class="nav-item">
                                 <a
-                                    class="nav-link"
+                                    class="nav-link d-flex align-items-center"
                                     :class="{ active: activeTab === 'apresentacao' }"
                                     @click.prevent="setActiveTab('apresentacao')"
-                                    >Apresentação</a
                                 >
+                                    Apresentação
+                                    <i
+                                        v-if="getTabStatus('apresentacao') === 'Aprovada'"
+                                        class="bi bi-check-circle-fill ms-2 text-success"
+                                    ></i>
+                                    <i
+                                        v-else-if="getTabStatus('apresentacao') === 'Rejeitada'"
+                                        class="bi bi-x-circle-fill ms-2 text-danger"
+                                    ></i>
+                                    <i
+                                        v-else
+                                        class="bi bi-hourglass-split ms-2 text-warning"
+                                    ></i>
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <a
-                                    class="nav-link"
+                                    class="nav-link d-flex align-items-center"
                                     :class="{ active: activeTab === 'metodologia' }"
                                     @click.prevent="setActiveTab('metodologia')"
-                                    >Metodologia</a
                                 >
+                                    Metodologia
+                                    <i
+                                        v-if="getTabStatus('metodologia') === 'Aprovada'"
+                                        class="bi bi-check-circle-fill ms-2 text-success"
+                                    ></i>
+                                    <i
+                                        v-else-if="getTabStatus('metodologia') === 'Rejeitada'"
+                                        class="bi bi-x-circle-fill ms-2 text-danger"
+                                    ></i>
+                                    <i
+                                        v-else
+                                        class="bi bi-hourglass-split ms-2 text-warning"
+                                    ></i>
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <a
-                                    class="nav-link"
+                                    class="nav-link d-flex align-items-center"
                                     :class="{ active: activeTab === 'resultados' }"
                                     @click.prevent="setActiveTab('resultados')"
-                                    >Resultados</a
                                 >
+                                    Resultados
+                                    <i
+                                        v-if="getTabStatus('resultados') === 'Aprovada'"
+                                        class="bi bi-check-circle-fill ms-2 text-success"
+                                    ></i>
+                                    <i
+                                        v-else-if="getTabStatus('resultados') === 'Rejeitada'"
+                                        class="bi bi-x-circle-fill ms-2 text-danger"
+                                    ></i>
+                                    <i
+                                        v-else
+                                        class="bi bi-hourglass-split ms-2 text-warning"
+                                    ></i>
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <a
-                                    class="nav-link"
+                                    class="nav-link d-flex align-items-center"
                                     :class="{ active: activeTab === 'anexos' }"
                                     @click.prevent="setActiveTab('anexos')"
-                                    >Anexos</a
                                 >
+                                    Anexos
+                                    <i
+                                        v-if="getTabStatus('anexos') === 'Aprovada'"
+                                        class="bi bi-check-circle-fill ms-2 text-success"
+                                    ></i>
+                                    <i
+                                        v-else-if="getTabStatus('anexos') === 'Rejeitada'"
+                                        class="bi bi-x-circle-fill ms-2 text-danger"
+                                    ></i>
+                                    <i
+                                        v-else
+                                        class="bi bi-hourglass-split ms-2 text-warning"
+                                    ></i>
+                                </a>
                             </li>
                         </ul>
                         <div class="tab-content">
@@ -194,6 +263,15 @@ const rejeitarEtapa = (etapa) => {
                             <div v-if="activeTab === 'apresentacao'" class="tab-pane fade" :class="{ 'show active': activeTab === 'apresentacao' }">
                                 <div v-if="subStep === 1">
                                     <h4 class="text-center mb-3" style="font-weight: bold;">APRESENTAÇÃO GERAL</h4>
+                                    <div v-if="getEtapaStatus('apresentacao_geral') === 'Aprovada'" class="status-container">
+                                        <span class="badge bg-success text-white">Aprovado</span>
+                                    </div>
+                                    <div v-else-if="getEtapaStatus('apresentacao_geral') === 'Rejeitada'" class="status-container">
+                                        <span class="badge bg-danger text-white">Rejeitada</span>
+                                    </div>
+                                    <div v-else class="status-container">
+                                        <span class="badge bg-warning text-white">Pendente</span>
+                                    </div>
                                     <div class="mb-3">
                                         <label class="form-label">Empreendimento</label>
                                         <input type="text" class="form-control" :value="props.campanha?.cod_emp || 'Não informado'" disabled />
@@ -203,7 +281,7 @@ const rejeitarEtapa = (etapa) => {
                                         <input type="text" class="form-control" :value="props.campanha?.familia || 'Fauna'" disabled />
                                     </div>
                                     <div v-if="props.canApprove && props.campanha?.status === 'Em análise'" class="mt-4">
-                                        <h4>Análise de Apresentação Geral</h4>
+                                        <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('apresentacao_geral')">
                                             <div class="mb-3">
                                                 <label for="observacoes_apresentacao" class="form-label">Observações (obrigatório para rejeição)</label>
@@ -216,9 +294,9 @@ const rejeitarEtapa = (etapa) => {
                                                 ></textarea>
                                                 <InputError :message="analiseForms.apresentacao_geral.errors.observacoes" />
                                             </div>
-                                            <div class="d-flex justify-content-between">
-                                                <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('apresentacao_geral')" />
+                                            <div class="d-flex justify-content-end gap-2">
                                                 <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                                <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('apresentacao_geral')" />
                                             </div>
                                         </form>
                                     </div>
@@ -228,7 +306,15 @@ const rejeitarEtapa = (etapa) => {
                                     <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                 </div>
                                 <div v-if="subStep === 2">
-                                    <h4 class="text-center mb-3" style="font-weight: bold;">CARACTERIZAÇÃO DA ÁREA</h4>
+                                    <div v-if="getEtapaStatus('caracterizacao_area') === 'Aprovada'" class="status-container">
+                                        <span class="badge bg-success text-white">Aprovado</span>
+                                    </div>
+                                    <div v-else-if="getEtapaStatus('caracterizacao_area') === 'Rejeitada'" class="status-container">
+                                        <span class="badge bg-danger text-white">Rejeitada</span>
+                                    </div>
+                                    <div v-else class="status-container">
+                                        <span class="badge bg-warning text-white">Pendente</span>
+                                    </div>
                                     <DadosGeraisVisualizar
                                         :campanha="props.campanha"
                                         :abio-records="props.campanha?.abios || []"
@@ -238,7 +324,7 @@ const rejeitarEtapa = (etapa) => {
                                         @prev="prevSubStep"
                                     />
                                     <div v-if="props.canApprove && props.campanha?.status === 'Em análise'" class="mt-4">
-                                        <h4>Análise de Caracterização da Área</h4>
+                                        <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('caracterizacao_area')">
                                             <div class="mb-3">
                                                 <label for="observacoes_caracterizacao" class="form-label">Observações (obrigatório para rejeição)</label>
@@ -251,16 +337,23 @@ const rejeitarEtapa = (etapa) => {
                                                 ></textarea>
                                                 <InputError :message="analiseForms.caracterizacao_area.errors.observacoes" />
                                             </div>
-                                            <div class="d-flex justify-content-between">
-                                                <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('caracterizacao_area')" />
+                                            <div class="d-flex justify-content-end gap-2">
                                                 <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                                <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('caracterizacao_area')" />
                                             </div>
                                         </form>
                                     </div>
-                                    <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                 </div>
                                 <div v-if="subStep === 3">
-                                    <h4 class="text-center mb-3" style="font-weight: bold;">MÓDULOS AMOSTRAIS</h4>
+                                    <div v-if="getEtapaStatus('modulos_amostrais') === 'Aprovada'" class="status-container">
+                                        <span class="badge bg-success text-white">Aprovado</span>
+                                    </div>
+                                    <div v-else-if="getEtapaStatus('modulos_amostrais') === 'Rejeitada'" class="status-container">
+                                        <span class="badge bg-danger text-white">Rejeitada</span>
+                                    </div>
+                                    <div v-else class="status-container">
+                                        <span class="badge bg-warning text-white">Pendente</span>
+                                    </div>
                                     <ModulosAmostraisVisualizar
                                         :form-modulo-amostral="props.campanha?.formModuloAmostral || {}"
                                         :modulo-records="props.campanha?.modulos_amostrais || []"
@@ -269,7 +362,7 @@ const rejeitarEtapa = (etapa) => {
                                         @prev="prevSubStep"
                                     />
                                     <div v-if="props.canApprove && props.campanha?.status === 'Em análise'" class="mt-4">
-                                        <h4>Análise de Módulos Amostrais</h4>
+                                        <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('modulos_amostrais')">
                                             <div class="mb-3">
                                                 <label for="observacoes_modulos" class="form-label">Observações (obrigatório para rejeição)</label>
@@ -282,16 +375,24 @@ const rejeitarEtapa = (etapa) => {
                                                 ></textarea>
                                                 <InputError :message="analiseForms.modulos_amostrais.errors.observacoes" />
                                             </div>
-                                            <div class="d-flex justify-content-between">
-                                                <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('modulos_amostrais')" />
+                                            <div class="d-flex justify-content-end gap-2">
                                                 <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                                <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('modulos_amostrais')" />
                                             </div>
                                         </form>
                                     </div>
                                     <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                 </div>
                                 <div v-if="subStep === 4">
-                                    <h4 class="text-center mb-3" style="font-weight: bold;">QUELÔNIOS/CROCODILIANOS</h4>
+                                    <div v-if="getEtapaStatus('pontos_quelo_crocod') === 'Aprovada'" class="status-container">
+                                        <span class="badge bg-success text-white">Aprovado</span>
+                                    </div>
+                                    <div v-else-if="getEtapaStatus('pontos_quelo_crocod') === 'Rejeitada'" class="status-container">
+                                        <span class="badge bg-danger text-white">Rejeitada</span>
+                                    </div>
+                                    <div v-else class="status-container">
+                                        <span class="badge bg-warning text-white">Pendente</span>
+                                    </div>
                                     <QueloniosCrocodilianosVisualizar
                                         :formPontosAmostragem="props.campanha?.formPontosAmostragem || {}"
                                         :naoSeAplica="props.campanha?.nao_se_aplica"
@@ -300,7 +401,7 @@ const rejeitarEtapa = (etapa) => {
                                         @prev="prevSubStep"
                                     />
                                     <div v-if="props.canApprove && props.campanha?.status === 'Em análise'" class="mt-4">
-                                        <h4>Análise de Pontos Quelo/Crocod</h4>
+                                        <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('pontos_quelo_crocod')">
                                             <div class="mb-3">
                                                 <label for="observacoes_quelo" class="form-label">Observações (obrigatório para rejeição)</label>
@@ -313,16 +414,24 @@ const rejeitarEtapa = (etapa) => {
                                                 ></textarea>
                                                 <InputError :message="analiseForms.pontos_quelo_crocod.errors.observacoes" />
                                             </div>
-                                            <div class="d-flex justify-content-between">
-                                                <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('pontos_quelo_crocod')" />
+                                            <div class="d-flex justify-content-end gap-2">
                                                 <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                                <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('pontos_quelo_crocod')" />
                                             </div>
                                         </form>
                                     </div>
                                     <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                 </div>
                                 <div v-if="subStep === 5">
-                                    <h4 class="text-center mb-3" style="font-weight: bold;">FAUNA CAVERNÍCOLA</h4>
+                                    <div v-if="getEtapaStatus('pontos_cavernicola') === 'Aprovada'" class="status-container">
+                                        <span class="badge bg-success text-white">Aprovado</span>
+                                    </div>
+                                    <div v-else-if="getEtapaStatus('pontos_cavernicola') === 'Rejeitada'" class="status-container">
+                                        <span class="badge bg-danger text-white">Rejeitada</span>
+                                    </div>
+                                    <div v-else class="status-container">
+                                        <span class="badge bg-warning text-white">Pendente</span>
+                                    </div>
                                     <FaunaCavernicolaVisualizar
                                         :formPontosCavernicola="props.campanha?.formPontosCavernicola || {}"
                                         :naoSeAplica="props.campanha?.nao_se_aplica"
@@ -331,7 +440,7 @@ const rejeitarEtapa = (etapa) => {
                                         @prev="prevSubStep"
                                     />
                                     <div v-if="props.canApprove && props.campanha?.status === 'Em análise'" class="mt-4">
-                                        <h4>Análise de Pontos Cavernícola</h4>
+                                        <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('pontos_cavernicola')">
                                             <div class="mb-3">
                                                 <label for="observacoes_cavernicola" class="form-label">Observações (obrigatório para rejeição)</label>
@@ -344,9 +453,9 @@ const rejeitarEtapa = (etapa) => {
                                                 ></textarea>
                                                 <InputError :message="analiseForms.pontos_cavernicola.errors.observacoes" />
                                             </div>
-                                            <div class="d-flex justify-content-between">
-                                                <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('pontos_cavernicola')" />
+                                            <div class="d-flex justify-content-end gap-2">
                                                 <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                                <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('pontos_cavernicola')" />
                                             </div>
                                         </form>
                                     </div>
@@ -355,14 +464,22 @@ const rejeitarEtapa = (etapa) => {
                             </div>
                             <!-- Aba Metodologia -->
                             <div v-if="activeTab === 'metodologia'" class="tab-pane fade" :class="{ 'show active': activeTab === 'metodologia' }">
-                                <h4 class="text-center mb-3" style="font-weight: bold;">METODOLOGIA</h4>
+                                <div v-if="getEtapaStatus('metodologia') === 'Aprovada'" class="status-container">
+                                    <span class="badge bg-success text-white">Aprovado</span>
+                                </div>
+                                <div v-else-if="getEtapaStatus('metodologia') === 'Rejeitada'" class="status-container">
+                                    <span class="badge bg-danger text-white">Rejeitada</span>
+                                </div>
+                                <div v-else class="status-container">
+                                    <span class="badge bg-warning text-white">Pendente</span>
+                                </div>
                                 <MetodologiaVisualizar
                                     :formMetodologia="props.campanha?.formMetodologia || {}"
                                     @prev="setActiveTab('apresentacao')"
                                     @next="setActiveTab('resultados')"
                                 />
                                 <div v-if="props.canApprove && props.campanha?.status === 'Em análise'" class="mt-4">
-                                    <h4>Análise de Metodologia</h4>
+                                    <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                     <form @submit.prevent="rejeitarEtapa('metodologia')">
                                         <div class="mb-3">
                                             <label for="observacoes_metodologia" class="form-label">Observações (obrigatório para rejeição)</label>
@@ -375,20 +492,24 @@ const rejeitarEtapa = (etapa) => {
                                             ></textarea>
                                             <InputError :message="analiseForms.metodologia.errors.observacoes" />
                                         </div>
-                                        <div class="d-flex justify-content-between">
-                                            <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('metodologia')" />
+                                        <div class="d-flex justify-content-end gap-2">
                                             <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                            <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('metodologia')" />
                                         </div>
                                     </form>
-                                </div>
-                                <div class="d-flex justify-content-between mt-4">
-                                    <NavButton type="button" type-button="secondary" title="Voltar" @click="setActiveTab('apresentacao')" />
-                                    <NavButton type="button" type-button="primary" title="Avançar" @click="setActiveTab('resultados')" />
                                 </div>
                             </div>
                             <!-- Aba Resultados -->
                             <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
-                                <h4 class="text-center mb-3" style="font-weight: bold;">RESULTADOS</h4>
+                                <div v-if="getEtapaStatus('resultados') === 'Aprovada'" class="status-container">
+                                    <span class="badge bg-success text-white">Aprovado</span>
+                                </div>
+                                <div v-else-if="getEtapaStatus('resultados') === 'Rejeitada'" class="status-container">
+                                    <span class="badge bg-danger text-white">Rejeitada</span>
+                                </div>
+                                <div v-else class="status-container">
+                                    <span class="badge bg-warning text-white">Pendente</span>
+                                </div>
                                 <FaunaResultadosVisualizar
                                     :resultados="props.campanha?.resultados || []"
                                     :consideracoes="props.campanha?.consideracoes"
@@ -396,7 +517,7 @@ const rejeitarEtapa = (etapa) => {
                                     @next="setActiveTab('anexos')"
                                 />
                                 <div v-if="props.canApprove && props.campanha?.status === 'Em análise'" class="mt-4">
-                                    <h4>Análise de Resultados</h4>
+                                    <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                     <form @submit.prevent="rejeitarEtapa('resultados')">
                                         <div class="mb-3">
                                             <label for="observacoes_resultados" class="form-label">Observações (obrigatório para rejeição)</label>
@@ -409,20 +530,25 @@ const rejeitarEtapa = (etapa) => {
                                             ></textarea>
                                             <InputError :message="analiseForms.resultados.errors.observacoes" />
                                         </div>
-                                        <div class="d-flex justify-content-between">
-                                            <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('resultados')" />
+                                        <div class="d-flex justify-content-end gap-2">
                                             <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                            <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('resultados')" />
                                         </div>
                                     </form>
-                                </div>
-                                <div class="d-flex justify-content-between mt-4">
-                                    <NavButton type="button" type-button="secondary" title="Voltar" @click="setActiveTab('metodologia')" />
-                                    <NavButton type="button" type-button="primary" title="Avançar" @click="setActiveTab('anexos')" />
                                 </div>
                             </div>
                             <!-- Aba Anexos -->
                             <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
-                                <h4 class="mb-3" style="text-align: center;">ANEXOS</h4>
+                                <h4 class="text-center mb-3" style="font-weight: bold;">ANEXOS</h4>
+                                <div v-if="getEtapaStatus('anexos') === 'Aprovada'" class="status-container">
+                                    <span class="badge bg-success text-white">Aprovado</span>
+                                </div>
+                                <div v-else-if="getEtapaStatus('anexos') === 'Rejeitada'" class="status-container">
+                                    <span class="badge bg-danger text-white">Rejeitada</span>
+                                </div>
+                                <div v-else class="status-container">
+                                    <span class="badge bg-warning text-white">Pendente</span>
+                                </div>
                                 <div v-if="props.campanha?.anexos && props.campanha.anexos.length > 0" class="overflow-x-auto mb-6">
                                     <table class="min-w-full bg-white border border-gray-300">
                                         <thead>
@@ -452,7 +578,7 @@ const rejeitarEtapa = (etapa) => {
                                     Nenhum anexo disponível.
                                 </div>
                                 <div v-if="props.canApprove && props.campanha?.status === 'Em análise'" class="mt-4">
-                                    <h4>Análise de Anexos</h4>
+                                    <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                     <form @submit.prevent="rejeitarEtapa('anexos')">
                                         <div class="mb-3">
                                             <label for="observacoes_anexos" class="form-label">Observações (obrigatório para rejeição)</label>
@@ -465,9 +591,9 @@ const rejeitarEtapa = (etapa) => {
                                             ></textarea>
                                             <InputError :message="analiseForms.anexos.errors.observacoes" />
                                         </div>
-                                        <div class="d-flex justify-content-between">
-                                            <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('anexos')" />
+                                        <div class="d-flex justify-content-end gap-2">
                                             <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                            <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('anexos')" />
                                         </div>
                                     </form>
                                 </div>
@@ -498,7 +624,9 @@ const rejeitarEtapa = (etapa) => {
                                     <tbody>
                                         <tr v-for="analise in props.analises" :key="analise.id" class="hover:bg-gray-50">
                                             <td class="py-2 px-4 border-b">{{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}</td>
-                                            <td class="py-2 px-4 border-b">{{ analise.status || 'Não informado' }}</td>
+                                            <td class="py-2 px-4 border-b" :class="{ 'text-success': analise.status === 'Aprovada', 'text-danger': analise.status === 'Rejeitada' }">
+                                                {{ analise.status || 'Não informado' }}
+                                            </td>
                                             <td class="py-2 px-4 border-b">{{ analise.comentario || 'Não informado' }}</td>
                                             <td class="py-2 px-4 border-b">{{ analise.created_at || 'Não informado' }}</td>
                                         </tr>
@@ -529,6 +657,9 @@ const rejeitarEtapa = (etapa) => {
     color: #007bff;
     border-bottom: 2px solid #007bff;
 }
+.nav-tabs .nav-link i {
+    font-size: 0.9rem;
+}
 .tab-content {
     padding: 20px;
 }
@@ -551,5 +682,16 @@ tr:hover {
     border-radius: 6px;
     background-color: #e7f1ff;
     color: #084298;
+}
+.status-indicator {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+.bi-check-circle-fill, .bi-x-circle-fill, .bi-hourglass-split {
+    font-size: 1rem;
+}
+.status-container {
+    text-align: center;
+    margin-bottom: 4rem;
 }
 </style>

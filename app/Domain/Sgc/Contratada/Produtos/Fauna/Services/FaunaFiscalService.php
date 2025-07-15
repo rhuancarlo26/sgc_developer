@@ -125,9 +125,7 @@ class FaunaFiscalService
         return SgcFaunaAnaliseEtapa::where('id_contrato', $contratoId)
             ->where('id_campanha', $campanhaId)
             ->where('fiscal_id', Auth::id())
-            ->get(['etapa', 'status', 'comentario'])
-            ->keyBy('etapa')
+            ->get(['id', 'etapa', 'status', 'comentario', 'created_at'])
             ->toArray();
     }
 }
-
