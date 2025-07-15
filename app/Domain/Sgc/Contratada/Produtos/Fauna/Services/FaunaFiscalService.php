@@ -89,38 +89,74 @@ class FaunaFiscalService
             'comentario' => $data['observacoes'],
         ]);
 
-        // Verificar se todas as etapas foram analisadas
+        return $analise;
+    }
+
+    public function finalizarAvaliacaoCampanha($contratoId, $campanhaId)
+    {
+        Log::info('FaunaFiscalService: Finalizando avaliação da campanha', [
+            'contrato_id' => $contratoId,
+            'campanha_id' => $campanhaId,
+            'fiscal_id' => Auth::id(),
+        ]);
+
+        // Verificar se a campanha está em análise
+        $campanha = SgcFaunaCampanha::where('id_contrato', $contratoId)
+            ->where('id', $campanhaId)
+            ->firstOrFail();
+
+        if ($campanha->status !== 'Em análise') {
+            Log::error('FaunaFiscalService: Campanha não está em análise', [
+                'campanha_id' => $campanhaId,
+                'status' => $campanha->status,
+            ]);
+            throw new \Exception('Campanha não está em análise.');
+        }
+
+        // Validar se todas as etapas foram analisadas
+        $validEtapas = [
+            'apresentacao_geral',
+            'caracterizacao_area',
+            'modulos_amostrais',
+            'pontos_quelo_crocod',
+            'pontos_cavernicola',
+            'metodologia',
+            'resultados',
+            'anexos'
+        ];
+
         $etapasAnalisadas = SgcFaunaAnaliseEtapa::where('id_contrato', $contratoId)
             ->where('id_campanha', $campanhaId)
             ->where('fiscal_id', Auth::id())
             ->count();
 
-        if ($etapasAnalisadas === count($validEtapas)) {
-            $temRejeicao = SgcFaunaAnaliseEtapa::where('id_contrato', $contratoId)
-                ->where('id_campanha', $campanhaId)
-                ->where('fiscal_id', Auth::id())
-                ->where('status', 'Rejeitada')
-                ->exists();
-
-            $novoStatus = $temRejeicao ? 'Rejeitada' : 'Aprovada';
-            $campanha->update(['status' => $novoStatus]);
-
-            Log::info('FaunaFiscalService: Status da campanha atualizado', [
-                'campanha_id' => $campanhaId,
-                'novo_status' => $novoStatus,
+        if ($etapasAnalisadas !== count($validEtapas)) {
+            Log::error('FaunaFiscalService: Nem todas as etapas foram analisadas', [
+                'etapas_analisadas' => $etapasAnalisadas,
+                'etapas_esperadas' => count($validEtapas),
             ]);
+            throw new \Exception('Todas as etapas devem ser analisadas antes de finalizar a avaliação.');
         }
 
-        Log::info('FaunaFiscalService: Análise de etapa salva', [
-            'analise_id' => $analise->id,
-            'etapa' => $data['etapa'],
-            'status' => $data['status'],
+        // Determinar o status da campanha
+        $temRejeicao = SgcFaunaAnaliseEtapa::where('id_contrato', $contratoId)
+            ->where('id_campanha', $campanhaId)
+            ->where('fiscal_id', Auth::id())
+            ->where('status', 'Rejeitada')
+            ->exists();
+
+        $novoStatus = $temRejeicao ? 'Rejeitada' : 'Aprovada';
+        $campanha->update(['status' => $novoStatus]);
+
+        Log::info('FaunaFiscalService: Status da campanha atualizado', [
+            'campanha_id' => $campanhaId,
+            'novo_status' => $novoStatus,
         ]);
 
-        return $analise;
+        return $campanha;
     }
 
-    public function getAnalisesByCampanha($contratoId, $campanhaId)
+        public function getAnalisesByCampanha($contratoId, $campanhaId)
     {
         return SgcFaunaAnaliseEtapa::where('id_contrato', $contratoId)
             ->where('id_campanha', $campanhaId)

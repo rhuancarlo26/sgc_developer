@@ -787,7 +787,6 @@ class FaunaController extends Controller
             'produto' => $campanhaObj->subproduto,
             'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
             'canApprove' => Auth::user()->perfis_id === 2 && $campanhaObj->status === 'Em análise',
-            // 'analises' => $analises,
             'analises' => $analises ?? [],
         ]);
     }
@@ -829,6 +828,17 @@ class FaunaController extends Controller
                 'erro' => $e->getMessage(),
             ]);
             return redirect()->back()->withErrors(['error' => 'Erro ao salvar análise: ' . $e->getMessage()]);
+        }
+    }
+
+    public function finalizarAvaliacao($contrato, $produto, $campanha, Request $request)
+    {
+        $service = new FaunaFiscalService();
+        try {
+            $service->finalizarAvaliacaoCampanha($contrato, $campanha);
+            return Inertia::location(route('sgc.contratada.produtos.index', [$contrato, $produto]));
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
     

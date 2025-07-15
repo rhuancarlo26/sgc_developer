@@ -129,8 +129,10 @@ Route::prefix('/contratada')->group(function () {
     
         Route::get('fauna/campanhas/{campanha}/analise', [FaunaController::class, 'analise'])->name('sgc.contratada.produtos.analise');
         Route::post('fauna/campanhas/{campanha}/analise', [FaunaController::class, 'salvarAnalise'])->name('sgc.contratada.produtos.salvarAnalise');
+        Route::post('/campanhas/{campanha}/finalizar-avaliacao', [FaunaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.finalizarAvaliacao');
     
     });
+  
 
    
 
