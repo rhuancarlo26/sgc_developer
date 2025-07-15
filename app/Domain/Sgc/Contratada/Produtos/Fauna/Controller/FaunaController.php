@@ -787,7 +787,8 @@ class FaunaController extends Controller
             'produto' => $campanhaObj->subproduto,
             'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
             'canApprove' => Auth::user()->perfis_id === 2 && $campanhaObj->status === 'Em análise',
-            'analises' => $analises,
+            // 'analises' => $analises,
+            'analises' => $analises ?? [],
         ]);
     }
 
