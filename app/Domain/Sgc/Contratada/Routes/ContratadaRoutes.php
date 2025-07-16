@@ -130,10 +130,12 @@ Route::prefix('/contratada')->group(function () {
         Route::get('fauna/campanhas/{campanha}/analise', [FaunaController::class, 'analise'])->name('sgc.contratada.produtos.analise');
         Route::post('fauna/campanhas/{campanha}/analise', [FaunaController::class, 'salvarAnalise'])->name('sgc.contratada.produtos.salvarAnalise');
         Route::post('/campanhas/{campanha}/finalizar-avaliacao', [FaunaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.finalizarAvaliacao');
+
+        Route::get('campanha/{campanha}/edit', [FaunaController::class, 'edit'])->name('sgc.contratada.produtos.edit');
+        Route::post('campanha/{campanha}/update', [FaunaController::class, 'update'])->name('sgc.contratada.produtos.update');
     
     });
   
-
    
 
 });

@@ -636,14 +636,19 @@ const finalizarAvaliacao = () => {
                                 </div>
                                 <div class="d-flex justify-content-between mt-4">
                                     <NavButton type="button" type-button="secondary" title="Voltar" @click="setActiveTab('resultados')" />
-                                    <NavButton
-                                        type="button"
-                                        type-button="primary"
-                                        title="Salvar Avaliação"
-                                        :disabled="!props.canApprove || !todasEtapasAnalisadas()"
-                                        :title="!props.canApprove || !todasEtapasAnalisadas() ? 'Todas as etapas devem ser analisadas antes de salvar a avaliação.' : ''"
-                                        @click="finalizarAvaliacao"
-                                    />
+                                    <div
+                                        v-if="props.canApprove && props.campanha?.status === 'Em análise'"
+                                        class="tooltip-wrapper"
+                                        :class="{ 'tooltip-disabled': !props.canApprove || !todasEtapasAnalisadas() }"
+                                    >
+                                        <NavButton
+                                            type="button"
+                                            type-button="primary"
+                                            title="Salvar Avaliação"
+                                            :disabled="!props.canApprove || !todasEtapasAnalisadas()"
+                                            @click="finalizarAvaliacao"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -732,5 +737,37 @@ tr:hover {
 .status-container {
     text-align: center;
     margin-bottom: 4rem;
+}
+button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+.tooltip-wrapper {
+    position: relative;
+}
+.tooltip-disabled:hover::after {
+    content: 'Analíse todas as etapas antes de salvar';
+    position: absolute;
+    background: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    z-index: 1000;
+    font-size: 0.9rem;
+}
+.tooltip-disabled:hover::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+    z-index: 1000;
 }
 </style>
