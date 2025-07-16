@@ -144,23 +144,37 @@ const analisarCampanha = (campanhaId) => {
                                         <table class="table table-bordered">
                                             <thead>
                                                 <tr>
-                                                    <th>ID Campanha</th>
-                                                    <th>Empreendimento</th>
-                                                    <th>Subproduto</th>
-                                                    <th>Data Inicial</th>
-                                                    <th>Data Final</th>
-                                                    <th>Status</th>
+                                                    <th class="text-center">ID Campanha</th>
+                                                    <th class="text-center">Empreendimento</th>
+                                                    <th class="text-center">Subproduto</th>
+                                                    <th class="text-center">Data Inicial</th>
+                                                    <th class="text-center">Data Final</th>
+                                                    <th class="text-center">Status</th>
                                                     <th>Ação</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr v-for="campanha in filteredCampanhas" :key="campanha.id">
-                                                    <td>{{ campanha.id || 'N/A' }}</td>
-                                                    <td>{{ campanha.empreendimento || 'N/A' }}</td>
-                                                    <td>{{ campanha.subproduto || 'N/A' }}</td>
-                                                    <td>{{ campanha.data_inicial || 'N/A' }}</td>
-                                                    <td>{{ campanha.data_final || 'N/A' }}</td>
-                                                    <td>{{ campanha.status || 'N/A' }}</td>
+                                                    <td class="text-center">{{ campanha.id || 'N/A' }}</td>
+                                                    <td class="text-center">{{ campanha.empreendimento || 'N/A' }}</td>
+                                                    <td class="text-center">{{ campanha.subproduto || 'N/A' }}</td>
+                                                    <td class="text-center">{{ campanha.data_inicial || 'N/A' }}</td>
+                                                    <td class="text-center">{{ campanha.data_final || 'N/A' }}</td>
+                                                    <td class="text-center">
+                                                        <span
+                                                            v-if="campanha.status === 'Aprovada'"
+                                                            class="status-circle status-circle-approved"
+                                                        ></span>
+                                                        <span
+                                                            v-else-if="campanha.status === 'Rejeitada'"
+                                                            class="status-circle status-circle-rejected"
+                                                        ></span>
+                                                        <span
+                                                            v-else-if="campanha.status === 'Em análise'"
+                                                            class="status-circle status-circle-in-analysis"
+                                                        ></span>
+                                                        {{ campanha.status || 'N/A' }}
+                                                    </td>
                                                     <td class="text-center">
                                                         <NavButton
                                                             type-button="info"
@@ -193,8 +207,8 @@ const analisarCampanha = (campanhaId) => {
 
 <style scoped>
 .block-card {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
+    background-color: #fffffff3;
+    border: 1px solid #e2e4e6;
     border-radius: 5px;
     padding: 15px;
     min-height: 200px;
@@ -202,7 +216,7 @@ const analisarCampanha = (campanhaId) => {
 }
 
 .block-card:hover {
-    background-color: #e9ecef;
+    background-color: #ffffff;
 }
 
 .block-card-short {
@@ -258,5 +272,26 @@ const analisarCampanha = (campanhaId) => {
 .action-button:not(.cursor-not-allowed):hover {
     transform: scale(1.05);
     background-color: #e9ecef;
+}
+
+.status-circle {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.status-circle-approved {
+    background-color: #28a745;
+}
+
+.status-circle-rejected {
+    background-color: #dc3545;
+}
+
+.status-circle-in-analysis {
+    background-color: #fd7e14;
 }
 </style>

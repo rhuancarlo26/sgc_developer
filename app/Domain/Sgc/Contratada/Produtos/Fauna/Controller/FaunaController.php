@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\SgcFaunaCampanhaAbios;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcFaunaModuloAmostral;
+use Inertia\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -841,5 +842,140 @@ class FaunaController extends Controller
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+
+    public function edit($contrato, $produto, $campanhaId)
+    {
+        $campanha = SgcFaunaCampanha::with([
+            'abios' => fn($query) => $query->with('abio'),
+            'profissionais',
+            'modulos_amostrais',
+            'pontos_quelo_crocod',
+            'pontos_cavernicola',
+            'metodologias',
+            'analises',
+            'anexos',
+        ])->findOrFail($campanhaId);
+
+        Log::info('Dados enviados para EditarCampanha.vue', [
+            'campanha' => $campanha->toArray(),
+            'contrato' => $contrato,
+            'produto' => $produto,
+        ]);
+
+        if ($campanha->status !== 'Rejeitada') {
+            return redirect()->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanhaId])
+                ->withErrors(['error' => 'Apenas campanhas rejeitadas podem ser editadas.']);
+        }
+
+        if (Auth::user()->perfis_id === 2) {
+            return redirect()->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanhaId])
+                ->withErrors(['error' => 'Acesso negado. Fiscais não podem editar campanhas.']);
+        }
+
+        return Inertia::render('Sgc/Contratada/Produtos/Fauna/EditarCampanha', [
+            'campanha' => $campanha,
+            'contrato' => $contrato,
+            'produto' => $produto,
+            'contratos' => [
+                'tipo_contrato' => $campanha->tipo_contrato,
+                'contratada' => $campanha->contratada,
+            ],
+        ]);
+    }
+
+    public function update(Request $request, $contrato, $produto, $campanhaId): RedirectResponse
+    {
+        if (Auth::user()->perfis_id === 2) {
+            return redirect()->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanhaId])
+                ->withErrors(['error' => 'Acesso negado. Fiscais não podem atualizar campanhas.']);
+        }
+
+        $campanha = SgcFaunaCampanha::findOrFail($campanhaId);
+        if ($campanha->status !== 'Rejeitada') {
+            return redirect()->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanhaId])
+                ->withErrors(['error' => 'Apenas campanhas rejeitadas podem ser atualizadas.']);
+        }
+
+        $validated = $request->validate([
+            'data_campanha_inicial' => 'nullable|date',
+            'data_campanha_final' => 'nullable|date',
+            'periodo' => 'nullable|string|max:255',
+            'observacoes' => 'nullable|string',
+            'id_abio' => 'nullable|array',
+            'id_abio.*' => 'integer|exists:fauna_config_abio,id',
+            'cod_emp' => 'required|string|max:255',
+            'subproduto' => 'required|string|max:255',
+            'nao_se_aplica' => 'nullable|boolean',
+            'profissionais' => 'nullable|array',
+            'profissionais.*.profissional' => 'required_with:profissionais|string|max:255',
+            'profissionais.*.grupo_faunistico' => 'required_with:profissionais|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
+            'modulos_amostrais' => 'nullable|array',
+            'modulos_amostrais.*.data_cadastro' => 'nullable|date',
+            'modulos_amostrais.*.tamanho_modulo' => 'nullable|in:1,2,3,4,5',
+            'modulos_amostrais.*.uf' => 'nullable|string|size:2',
+            'modulos_amostrais.*.municipio' => 'nullable|string|max:50',
+            'modulos_amostrais.*.bioma' => 'nullable|string|max:30',
+            'modulos_amostrais.*.fitofisionomia' => 'nullable|string',
+            'modulos_amostrais.*.latitude_inicial' => 'nullable|numeric',
+            'modulos_amostrais.*.longitude_inicial' => 'nullable|numeric',
+            'modulos_amostrais.*.latitude_final' => 'nullable|numeric',
+            'modulos_amostrais.*.longitude_final' => 'nullable|numeric',
+            'modulos_amostrais.*.arquivo' => 'nullable|file|mimes:shp,zip|max:1024',
+            'pontos_quelo_crocod' => 'nullable|array',
+            'pontos_quelo_crocod.*.ponto_de_coleta' => 'required_without:nao_se_aplica|string',
+            'pontos_quelo_crocod.*.nome_curso_hidrico' => 'required_without:nao_se_aplica|string',
+            'pontos_quelo_crocod.*.coordenadas' => 'nullable|string',
+            'pontos_quelo_crocod.*.bacia' => 'required_without:nao_se_aplica|string',
+            'pontos_quelo_crocod.*.profundidade' => 'nullable|numeric',
+            'pontos_quelo_crocod.*.largura' => 'required_without:nao_se_aplica|numeric',
+            'pontos_quelo_crocod.*.tipo_substrato' => 'nullable|string',
+            'pontos_cavernicola' => 'nullable|array',
+            'pontos_cavernicola.*.cavidade' => 'required_without:nao_se_aplica|string',
+            'pontos_cavernicola.*.latitude' => 'required_without:nao_se_aplica|numeric',
+            'pontos_cavernicola.*.longitude' => 'required_without:nao_se_aplica|numeric',
+            'pontos_cavernicola.*.distancia_eixo_rodovia' => 'required_without:nao_se_aplica|numeric',
+            'pontos_cavernicola.*.formacao_associada' => 'required_without:nao_se_aplica|string',
+            'pontos_cavernicola.*.temperatura_media_interna' => 'nullable|numeric',
+            'pontos_cavernicola.*.temperatura_media_externa' => 'nullable|numeric',
+            'pontos_cavernicola.*.umidade_relativa_interna' => 'nullable|numeric',
+            'pontos_cavernicola.*.umidade_relativa_externa' => 'nullable|numeric',
+            'metodologias' => 'nullable|array',
+            'metodologias.*.grupo_faunistico' => 'required_with:metodologias|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
+            'metodologias.*.metodologia' => 'required_with:metodologias|string',
+            'consideracoes' => 'nullable|string',
+            'planilha' => 'nullable|file|mimes:xlsx,xls|max:10240',
+            'anexos.anuencia_proprietarios' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.registro_fotografico' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.dados_secundarios' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.art' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.ret' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.cr' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.ctf' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.anuencia_colecoes' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.oficio_atividades_campo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+        ]);
+
+        $validated['anexos'] = $request->file('anexos') ?? [];
+        $validated['planilha'] = $request->file('planilha');
+
+        try {
+            DB::beginTransaction();
+            $this->faunaService->atualizarCampanha($contrato, $campanhaId, $validated);
+            DB::commit();
+            return redirect()->route('sgc.contratada.produtos.index', [$contrato, $produto])
+                ->with('success', 'Campanha atualizada com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('FaunaController: Erro ao atualizar campanha', [
+                'contrato' => $contrato,
+                'produto' => $produto,
+                'campanha_id' => $campanhaId,
+                'erro' => $e->getMessage(),
+                'linha' => $e->getLine(),
+                'arquivo' => $e->getFile(),
+            ]);
+            return redirect()->back()->withErrors(['error' => 'Erro ao atualizar campanha: ' . $e->getMessage()]);
+        }
+    }
     
-}  
+}
