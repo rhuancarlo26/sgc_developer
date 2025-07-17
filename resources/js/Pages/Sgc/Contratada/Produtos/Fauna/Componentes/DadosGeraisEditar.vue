@@ -8,13 +8,14 @@ import 'vue-select/dist/vue-select.css';
 import { ref, computed } from 'vue';
 
 const props = defineProps({
+  formAbio: Object,
   form: {
     type: Object,
     required: true,
   },
   abios: {
-    type: Array,
-    default: () => [],
+      type: Array,
+      default: () => []
   },
   profissionais: {
     type: Array,
@@ -28,7 +29,12 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  abioRecords: { 
+    type: Array, default: () => [] 
+  },
+   
 });
+
 
 defineEmits(['vincular-abio', 'excluir-abio', 'salvar-novo-profissional', 'vincular-profissional', 'excluir-profissional', 'next', 'prev']);
 
@@ -175,19 +181,19 @@ const vincularProfissional = () => {
         </div>
       </div>
       <div class="table-responsive">
-        <Table :columns="['ABIOs Vigentes', 'Ação']" :records="{ data: abioRecords, links: [] }">
-          <template #body="{ item }">
-            <tr>
-              <td>{{ item.abio?.licenca?.numero_licenca || 'N/A' }}</td>
-              <td class="text-center" style="min-width: 100px;">
-                <NavButton @click="$emit('excluir-abio', item.id)" type-button="danger" title="Excluir">
-                  <i class="bi bi-trash"></i>
-                </NavButton>
-              </td>
-            </tr>
-          </template>
-        </Table>
-      </div>
+      <Table :columns="['ABIOs Vigentes', 'Ação']" :records="{ data: abioRecords, links: [] }">
+        <template #body="{ item }">
+          <tr>
+            <td>{{ item.abio?.numero_licenca || 'N/A' }}</td>
+            <td class="text-center" style="min-width: 100px;">
+              <NavButton @click="$emit('excluir-abio', item.id)" type-button="danger" title="Excluir">
+                <i class="bi bi-trash"></i>
+              </NavButton>
+            </td>
+          </tr>
+        </template>
+      </Table>
+    </div>
     </div>
 
     <!-- Vincular Profissionais -->

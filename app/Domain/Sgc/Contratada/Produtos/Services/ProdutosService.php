@@ -5,6 +5,7 @@ namespace App\Domain\Sgc\Contratada\Produtos\Services;
 use App\Models\SgcvwSubprodutos;
 use App\Models\ServicoMonitoraFaunaConfigAbio;
 use App\Models\SgcProdutoAbio;
+use App\Models\Licenca;
 use Illuminate\Support\Facades\Log;
 
 class ProdutosService
@@ -17,18 +18,33 @@ class ProdutosService
             ->toArray();
     }
 
+    // public function getAbios()
+    // {
+        
+    //     return ServicoMonitoraFaunaConfigAbio::with(['licenca:id,numero_licenca'])
+    //         ->get(['id', 'id_licenca'])
+    //         ->map(function ($abio) {
+    //             return [
+    //                 'id' => $abio->id,
+    //                 'licenca' => $abio->licenca ? [
+    //                     'id' => $abio->licenca->id,
+    //                     'numero_licenca' => $abio->licenca->numero_licenca
+    //                 ] : null
+    //             ];
+    //         });
+    // }
+
     public function getAbios()
     {
-        
-        return ServicoMonitoraFaunaConfigAbio::with(['licenca:id,numero_licenca'])
-            ->get(['id', 'id_licenca'])
-            ->map(function ($abio) {
+        return Licenca::where('tipo', 12)
+            ->get(['id', 'numero_licenca'])
+            ->map(function ($licenca) {
                 return [
-                    'id' => $abio->id,
-                    'licenca' => $abio->licenca ? [
-                        'id' => $abio->licenca->id,
-                        'numero_licenca' => $abio->licenca->numero_licenca
-                    ] : null
+                    'id' => $licenca->id,
+                    'licenca' => [
+                        'id' => $licenca->id,
+                        'numero_licenca' => $licenca->numero_licenca
+                    ]
                 ];
             });
     }
