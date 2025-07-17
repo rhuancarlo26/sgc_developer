@@ -21,6 +21,7 @@ const props = defineProps({
   contrato: [Number, String],
   produto: String,
   contratos: Object,
+  empreendimentos: Array,
   abios: {
     type: Array,
     default: () => [],
@@ -404,15 +405,12 @@ const submitForm = () => {
                   <div v-if="subStep === 1">
                     <h4 class="text-center mb-3" style="font-weight: bold;">APRESENTAÇÃO</h4>
                     <div class="mb-3">
-                      <label class="form-label">Empreendimento</label>
-                      <input
-                        v-model="form.cod_emp"
-                        type="text"
-                        class="form-control"
-                        :disabled="props.campanha.status !== 'Rejeitada'"
-                        required
-                      />
-                      <InputError :message="form.errors.cod_emp" />
+                        <label for="cod_emp" class="form-label">Empreendimento</label>
+                        <select v-model="form.cod_emp" class="form-select" id="cod_emp" required>
+                            <option value="">Selecione um empreendimento</option>
+                            <option v-for="emp in props.empreendimentos" :key="emp" :value="emp">{{ emp }}</option>
+                        </select>
+                        <InputError :message="form.errors.cod_emp" />
                     </div>
                     <div class="mb-3">
                       <label class="form-label">Família</label>
@@ -438,15 +436,16 @@ const submitForm = () => {
                   <DadosGeraisEditar
                     v-if="subStep === 2"
                     :form="form"
-                    :abios="props.abios"
-                    :profissionais="props.profissionais"
-                    :abio-records="form.abios"
-                    :profissional-records="form.profissionais"
+                    :abios="abios"
+                    :profissionais="campanha.profissionais"
+                    :abio-records="campanha.abios || []"
+                    :profissional-records="campanha.profissionais || []"
+                    :sub-step="subStep"
                     @vincular-abio="vincularAbio"
                     @excluir-abio="excluirAbio"
+                    @salvar-novo-profissional="salvarNovoProfissional"
                     @vincular-profissional="vincularProfissional"
                     @excluir-profissional="excluirProfissional"
-                    @salvar-novo-profissional="salvarNovoProfissional"
                     @next="subStep = 3"
                     @prev="prevSubStep"
                   />

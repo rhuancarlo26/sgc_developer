@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use App\Models\SgcFaunaCampanhaAbios;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcFaunaModuloAmostral;
+use App\Models\SgcvwEmpreendimentos;
+use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use Inertia\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -19,11 +21,14 @@ use Inertia\Inertia;
 class FaunaController extends Controller
 {
     protected $faunaService;
+
+    protected $produtosService;
     protected $faunaFiscalService;
 
-    public function __construct(FaunaService $faunaService, FaunaFiscalService $faunaFiscalService)
+    public function __construct(FaunaService $faunaService, FaunaFiscalService $faunaFiscalService, ProdutosService $produtosService)
     {
         $this->faunaService = $faunaService;
+        $this->produtosService = $produtosService;
         $this->faunaFiscalService = $faunaFiscalService;
     }
 
@@ -66,7 +71,6 @@ class FaunaController extends Controller
             'periodo' => 'nullable|string|max:255',
             'observacoes' => 'nullable|string',
             'id_abio' => 'nullable|array',
-            'id_abio.*' => 'integer|exists:fauna_config_abio,id',
             'cod_emp' => 'required|string|max:255',
             'subproduto' => 'required|string|max:255',
             'nao_se_aplica' => 'nullable|boolean',
@@ -843,7 +847,7 @@ class FaunaController extends Controller
         }
     }
 
-    public function edit($contrato, $produto, $campanhaId)
+    public function edit(Request $request,$contrato, $produto, $campanhaId)
     {
         $campanha = SgcFaunaCampanha::with([
             'abios' => fn($query) => $query->with('abio'),
@@ -856,10 +860,20 @@ class FaunaController extends Controller
             'anexos',
         ])->findOrFail($campanhaId);
 
+        $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+            ->pluck('cod_emp')
+            ->toArray();
+        
+         $subproduto = $request->query('subproduto');
+
+        // Adicionar dependência de ProdutosService no construtor
+        $abios = $this->produtosService->getAbios();
+
         Log::info('Dados enviados para EditarCampanha.vue', [
             'campanha' => $campanha->toArray(),
             'contrato' => $contrato,
             'produto' => $produto,
+            'abios' => $abios,
         ]);
 
         if ($campanha->status !== 'Rejeitada') {
@@ -876,6 +890,9 @@ class FaunaController extends Controller
             'campanha' => $campanha,
             'contrato' => $contrato,
             'produto' => $produto,
+            'abios' => $abios, // Adicionar a lista completa de ABIOS
+            'empreendimentos' => $empreendimentos,
+            'subproduto' => $subproduto,
             'contratos' => [
                 'tipo_contrato' => $campanha->tipo_contrato,
                 'contratada' => $campanha->contratada,
