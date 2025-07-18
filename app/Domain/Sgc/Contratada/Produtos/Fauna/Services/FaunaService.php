@@ -370,263 +370,210 @@ class FaunaService
             ->toArray();
     }
 
-public function atualizarCampanha($contratoId, $campanhaId, array $data)
+
+    public function atualizarCampanha($contrato, $campanhaId, array $data): int
     {
         Log::info('FaunaService: Iniciando atualização da campanha', [
-            'contrato_id' => $contratoId,
             'campanha_id' => $campanhaId,
-            'dados' => array_diff_key($data, array_flip(['anexos', 'planilha'])),
+            'contrato' => $contrato,
+            'data' => array_diff_key($data, array_flip(['anexos', 'planilha'])),
         ]);
 
         $campanha = SgcFaunaCampanha::findOrFail($campanhaId);
+
+        // Atualiza os campos principais da campanha
         $campanha->update([
-            'data_ini' => $data['data_campanha_inicial'] ?? $campanha->data_ini,
-            'data_fim' => $data['data_campanha_final'] ?? $campanha->data_fim,
-            'periodo' => $data['periodo'] ?? $campanha->periodo,
-            'observacoes' => $data['observacoes'] ?? $campanha->observacoes,
-            'cod_emp' => $data['cod_emp'] ?? $campanha->cod_emp,
-            'subproduto' => $data['subproduto'] ?? $campanha->subproduto,
+            'cod_emp' => $data['cod_emp'],
+            'subproduto' => $data['subproduto'],
+            'data_campanha_inicial' => $data['data_campanha_inicial'] ?? null,
+            'data_campanha_final' => $data['data_campanha_final'] ?? null,
+            'periodo' => $data['periodo'] ?? null,
+            'observacoes' => $data['observacoes'] ?? null,
+            'nao_se_aplica' => $data['nao_se_aplica'] ?? false,
+            'consideracoes' => $data['consideracoes'] ?? null,
             'status' => 'Em análise',
-            'nao_se_aplica' => $data['nao_se_aplica'] ?? $campanha->nao_se_aplica,
         ]);
 
-        // Atualizar ABIOs
-        if (isset($data['id_abio']) && is_array($data['id_abio'])) {
-            Log::info('FaunaService: Processando ABIOs', [
-                'campanha_id' => $campanhaId,
-                'id_abio' => $data['id_abio'],
-            ]);
-
-            // Obter IDs de ABIOs existentes
-            $existingAbioIds = SgcFaunaCampanhaAbios::where('campanha_id', $campanhaId)
-                ->pluck('n_abio')
-                ->toArray();
-            
-            $newAbioIds = array_filter($data['id_abio'], 'is_numeric');
-
-            // Remover ABIOs que não estão na nova lista
-            SgcFaunaCampanhaAbios::where('campanha_id', $campanhaId)
-                ->whereNotIn('n_abio', $newAbioIds)
-                ->delete();
-
-            // Adicionar ou manter ABIOs
-            foreach ($newAbioIds as $abioId) {
-                SgcFaunaCampanhaAbios::updateOrCreate(
-                    [
-                        'campanha_id' => $campanhaId,
-                        'n_abio' => $abioId,
-                    ],
-                    [
-                        'id_contrato' => $contratoId,
-                    ]
-                );
-            }
-
-            Log::info('FaunaService: ABIOs atualizados', [
-                'campanha_id' => $campanhaId,
-                'abios_atualizados' => SgcFaunaCampanhaAbios::where('campanha_id', $campanhaId)
-                    ->pluck('n_abio')
-                    ->toArray(),
-            ]);
-        } else {
-            Log::info('FaunaService: Nenhum ABIO enviado', [
-                'campanha_id' => $campanhaId,
-            ]);
-        }
-
-        // Atualizar profissionais
-        if (isset($data['profissionais']) && is_array($data['profissionais'])) {
-            Log::info('FaunaService: Processando profissionais', [
-                'campanha_id' => $campanhaId,
-                'profissionais' => $data['profissionais'],
-            ]);
-
-            // Obter IDs de profissionais existentes
-            $existingProfissionalIds = SgcFaunaCampanhaProfissional::where('campanha_id', $campanhaId)
-                ->pluck('profissional_id')
-                ->toArray();
-            
-            $newProfissionalIds = array_unique(array_column($data['profissionais'], 'id_profissional'));
-
-            // Remover profissionais que não estão na nova lista
-            SgcFaunaCampanhaProfissional::where('campanha_id', $campanhaId)
-                ->whereNotIn('profissional_id', $newProfissionalIds)
-                ->delete();
-
-            // Adicionar ou atualizar profissionais
-            foreach ($data['profissionais'] as $profissionalData) {
-                if (isset($profissionalData['id_profissional']) && is_numeric($profissionalData['id_profissional'])) {
-                    SgcFaunaCampanhaProfissional::updateOrCreate(
-                        [
-                            'campanha_id' => $campanhaId,
-                            'profissional_id' => $profissionalData['id_profissional'],
-                        ],
-                        [
-                            'id_contrato' => $contratoId,
-                            'grupo_faunistico' => $profissionalData['grupo_faunistico'] ?? null,
-                        ]
-                    );
-                }
-            }
-
-            Log::info('FaunaService: Profissionais atualizados', [
-                'campanha_id' => $campanhaId,
-                'profissionais_atualizados' => SgcFaunaCampanhaProfissional::where('campanha_id', $campanhaId)
-                    ->pluck('profissional_id')
-                    ->toArray(),
-            ]);
-        } else {
-            Log::info('FaunaService: Nenhum profissional enviado', [
-                'campanha_id' => $campanhaId,
-            ]);
-        }
-
-        // Atualizar módulos amostrais
-        if (!empty($data['modulos_amostrais'])) {
-            SgcFaunaModuloAmostral::where('campanha_id', $campanhaId)->delete();
-            foreach ($data['modulos_amostrais'] as $moduloData) {
-                $moduloAttributes = [
-                    'campanha_id' => $campanhaId,
-                    'id_contrato' => $contratoId,
-                    'data_cadastro' => $moduloData['data_cadastro'] ?? null,
-                    'tamanho_modulo' => $moduloData['tamanho_modulo'] ?? null,
-                    'uf' => $moduloData['uf'] ?? null,
-                    'municipio' => $moduloData['municipio'] ?? null,
-                    'bioma' => $moduloData['bioma'] ?? null,
-                    'fitofisionomia' => $moduloData['fitofisionomia'] ?? null,
-                    'latitude_inicial' => $moduloData['latitude_inicial'] ?? null,
-                    'longitude_inicial' => $moduloData['longitude_inicial'] ?? null,
-                    'latitude_final' => $moduloData['latitude_final'] ?? null,
-                    'longitude_final' => $moduloData['longitude_final'] ?? null,
-                    'obs' => $moduloData['obs'] ?? null,
-                ];
-
-                if (!empty($moduloData['arquivo']) && $moduloData['arquivo'] instanceof \Illuminate\Http\UploadedFile && $moduloData['arquivo']->isValid()) {
-                    $file = $moduloData['arquivo'];
-                    $filename = time() . '_' . $file->getClientOriginalName();
-                    $path = $file->storeAs('shapefiles', $filename, 'public');
-                    $moduloAttributes['nome_arquivo'] = $filename;
-                }
-
-                SgcFaunaModuloAmostral::create($moduloAttributes);
-            }
-        } else {
-            SgcFaunaModuloAmostral::where('campanha_id', $campanhaId)->delete();
-        }
-
-        // Atualizar pontos de quelônios/crocodilianos
-        if (!empty($data['pontos_quelo_crocod']) && empty($data['nao_se_aplica'])) {
-            SgcFaunaQuelonios::where('id_campanha', $campanhaId)->delete();
-            foreach ($data['pontos_quelo_crocod'] as $pontoData) {
-                SgcFaunaQuelonios::create([
-                    'id_contrato' => $contratoId,
-                    'id_campanha' => $campanhaId,
-                    'ponto_de_coleta' => $pontoData['ponto_de_coleta'] ?? null,
-                    'nome_curso_hidrico' => $pontoData['nome_curso_hidrico'] ?? null,
-                    'coordenadas' => $pontoData['coordenadas'] ?? null,
-                    'bacia_hidrografica' => $pontoData['bacia'] ?? null,
-                    'profundidade' => $pontoData['profundidade'] ?? null,
-                    'largura' => $pontoData['largura'] ?? null,
-                    'tipo_substrato' => $pontoData['tipo_substrato'] ?? null,
+        // Atualiza ABIOs
+        Log::info('FaunaService: Processando ABIOs', [
+            'id_abio' => $data['id_abio'] ?? [],
+        ]);
+        // Remove todos os ABIOs existentes
+        $campanha->abios()->delete();
+        // Adiciona os novos ABIOs
+        if (!empty($data['id_abio'])) {
+            foreach ($data['id_abio'] as $id) {
+                SgcFaunaCampanhaAbios::create([
+                    'campanha_id' => $campanha->id,
+                    'n_abio' => (int) $id,
                 ]);
             }
-        } else {
-            SgcFaunaQuelonios::where('id_campanha', $campanhaId)->delete();
         }
+        Log::info('FaunaService: ABIOs atualizados', [
+            'id_abio' => $data['id_abio'] ?? [],
+        ]);
 
-        // Atualizar pontos de fauna cavernícola
-        if (!empty($data['pontos_cavernicola']) && empty($data['nao_se_aplica'])) {
-            SgcFaunaCavernicola::where('id_campanha', $campanhaId)->delete();
-            foreach ($data['pontos_cavernicola'] as $pontoData) {
-                SgcFaunaCavernicola::create([
-                    'id_contrato' => $contratoId,
-                    'id_campanha' => $campanhaId,
-                    'cavidade' => $pontoData['cavidade'] ?? null,
-                    'latitude' => $pontoData['latitude'] ?? null,
-                    'longitude' => $pontoData['longitude'] ?? null,
-                    'distancia_eixo_rodovia' => $pontoData['distancia_eixo_rodovia'] ?? null,
-                    'formacao_associada' => $pontoData['formacao_associada'] ?? null,
-                    'temperatura_media_interna' => $pontoData['temperatura_media_interna'] ?? null,
-                    'temperatura_media_externa' => $pontoData['temperatura_media_externa'] ?? null,
-                    'umidade_relativa_interna' => $pontoData['umidade_relativa_interna'] ?? null,
-                    'umidade_relativa_externa' => $pontoData['umidade_relativa_externa'] ?? null,
-                ]);
-            }
-        } else {
-            SgcFaunaCavernicola::where('id_campanha', $campanhaId)->delete();
-        }
-
-        // Atualizar metodologias
-        if (!empty($data['metodologias'])) {
-            SgcFaunaMetodologia::where('campanha_id', $campanhaId)->delete();
-            foreach ($data['metodologias'] as $metodologiaData) {
-                SgcFaunaMetodologia::create([
-                    'campanha_id' => $campanhaId,
-                    'id_contrato' => $contratoId,
-                    'grupo_faunistico' => $metodologiaData['grupo_faunistico'] ?? null,
-                    'metodologia' => $metodologiaData['metodologia'] ?? null,
-                ]);
-            }
-        } else {
-            SgcFaunaMetodologia::where('campanha_id', $campanhaId)->delete();
-        }
-
-        // Atualizar considerações
-        if (!empty($data['consideracoes'])) {
-            SgcFaunaResultadosConsideracoes::updateOrCreate(
-                ['id_contrato' => $contratoId, 'id_campanha' => $campanhaId],
-                ['consideracoes' => $data['consideracoes']]
-            );
-        } else {
-            SgcFaunaResultadosConsideracoes::where('id_campanha', $campanhaId)->delete();
-        }
-
-        // Atualizar resultados
-        if (!empty($data['planilha']) && $data['planilha'] instanceof \Illuminate\Http\UploadedFile && $data['planilha']->isValid()) {
-            SgcFaunaResultados::where('id_campanha', $campanhaId)->delete();
-            $this->salvarResultados($contratoId, $data['planilha'], $campanhaId);
-        }
-
-        // Atualizar anexos
-        if (!empty($data['anexos'])) {
-            foreach ($data['anexos'] as $tipo => $file) {
-                if ($file && $file instanceof \Illuminate\Http\UploadedFile && $file->isValid()) {
-                    $existingAnexo = SgcFaunaAnexo::where('id_campanha', $campanhaId)
-                        ->where('tipo_anexo', $tipo)
-                        ->first();
-                    $versao = $existingAnexo ? $existingAnexo->versao + 1 : 1;
-
-                    $filename = time() . '_' . $file->getClientOriginalName();
-                    $path = $file->storeAs('anexos', $filename, 'public');
-
-                    SgcFaunaAnexo::updateOrCreate(
-                        ['id_campanha' => $campanhaId, 'tipo_anexo' => $tipo],
-                        [
-                            'id_contrato' => $contratoId,
-                            'nome' => $file->getClientOriginalName(),
-                            'caminho' => $path,
-                            'versao' => $versao,
-                        ]
-                    );
-
-                    Log::info('FaunaService: Anexo atualizado', [
-                        'contrato_id' => $contratoId,
-                        'campanha_id' => $campanhaId,
-                        'tipo_anexo' => $tipo,
-                        'nome' => $file->getClientOriginalName(),
-                        'caminho' => $path,
-                        'versao' => $versao,
+        // Atualiza profissionais
+        Log::info('FaunaService: Processando profissionais', [
+            'profissionais' => $data['profissionais'] ?? [],
+        ]);
+        // Remove todos os profissionais existentes
+        $campanha->profissionais()->delete();
+        // Adiciona os novos profissionais
+        if (!empty($data['profissionais'])) {
+            foreach ($data['profissionais'] as $profissional) {
+                if (isset($profissional['id_profissional'])) {
+                    SgcFaunaCampanhaProfissional::create([
+                        'campanha_id' => $campanha->id,
+                        'profissional_id' => (int) $profissional['id_profissional'],
+                        'grupo_faunistico' => $profissional['grupo_faunistico'] ?? null,
+                        'formacao' => $profissional['formacao'] ?? null,
                     ]);
                 }
             }
         }
+        Log::info('FaunaService: Profissionais atualizados', [
+            'profissionais' => $data['profissionais'] ?? [],
+        ]);
+
+        // Atualiza módulos amostrais
+        if (isset($data['modulos_amostrais'])) {
+            foreach ($data['modulos_amostrais'] as $moduloData) {
+                $modulo = SgcFaunaModuloAmostral::updateOrCreate(
+                    ['campanha_id' => $campanha->id, 'data_cadastro' => $moduloData['data_cadastro']],
+                    array_filter([
+                        'tamanho_modulo' => $moduloData['tamanho_modulo'] ?? null,
+                        'uf' => $moduloData['uf'] ?? null,
+                        'municipio' => $moduloData['municipio'] ?? null,
+                        'bioma' => $moduloData['bioma'] ?? null,
+                        'fitofisionomia' => $moduloData['fitofisionomia'] ?? null,
+                        'latitude_inicial' => $moduloData['latitude_inicial'] ?? null,
+                        'longitude_inicial' => $moduloData['longitude_inicial'] ?? null,
+                        'latitude_final' => $moduloData['latitude_final'] ?? null,
+                        'longitude_final' => $moduloData['longitude_final'] ?? null,
+                        'obs' => $moduloData['obs'] ?? null,
+                    ])
+                );
+                if (isset($moduloData['arquivo']) && $moduloData['arquivo']) {
+                    $path = $moduloData['arquivo']->store('modulos_amostrais');
+                    $modulo->update(['arquivo' => $path]);
+                }
+            }
+        }
+
+        // Atualiza pontos de quelônios/crocodilianos
+        if (isset($data['pontos_quelo_crocod'])) {
+            foreach ($data['pontos_quelo_crocod'] as $pontoData) {
+                SgcFaunaQuelonios::updateOrCreate(
+                    ['campanha_id' => $campanha->id, 'ponto_de_coleta' => $pontoData['ponto_de_coleta']],
+                    array_filter([
+                        'nome_curso_hidrico' => $pontoData['nome_curso_hidrico'] ?? null,
+                        'coordenadas' => $pontoData['coordenadas'] ?? null,
+                        'bacia' => $pontoData['bacia'] ?? null,
+                        'profundidade' => $pontoData['profundidade'] ?? null,
+                        'largura' => $pontoData['largura'] ?? null,
+                        'tipo_substrato' => $pontoData['tipo_substrato'] ?? null,
+                    ])
+                );
+            }
+        }
+
+        // Atualiza pontos de fauna cavernícola
+        if (isset($data['pontos_cavernicola'])) {
+            foreach ($data['pontos_cavernicola'] as $pontoData) {
+                SgcFaunaCavernicola::updateOrCreate(
+                    ['campanha_id' => $campanha->id, 'cavidade' => $pontoData['cavidade']],
+                    array_filter([
+                        'latitude' => $pontoData['latitude'] ?? null,
+                        'longitude' => $pontoData['longitude'] ?? null,
+                        'distancia_eixo_rodovia' => $pontoData['distancia_eixo_rodovia'] ?? null,
+                        'formacao_associada' => $pontoData['formacao_associada'] ?? null,
+                        'temperatura_media_interna' => $pontoData['temperatura_media_interna'] ?? null,
+                        'temperatura_media_externa' => $pontoData['temperatura_media_externa'] ?? null,
+                        'umidade_relativa_interna' => $pontoData['umidade_relativa_interna'] ?? null,
+                        'umidade_relativa_externa' => $pontoData['umidade_relativa_externa'] ?? null,
+                    ])
+                );
+            }
+        }
+
+        // Atualiza metodologias
+        if (isset($data['metodologias'])) {
+            foreach ($data['metodologias'] as $metodologiaData) {
+                SgcFaunaMetodologia::updateOrCreate(
+                    ['campanha_id' => $campanha->id, 'grupo_faunistico' => $metodologiaData['grupo_faunistico']],
+                    ['metodologia' => $metodologiaData['metodologia'] ?? null]
+                );
+            }
+        }
+
+        // Atualiza resultados
+        if (isset($data['resultados'])) {
+            foreach ($data['resultados'] as $resultadoData) {
+                SgcFaunaResultados::updateOrCreate(
+                    [
+                        'campanha_id' => $campanha->id,
+                        'modulo' => $resultadoData['modulo'],
+                        'parcela' => $resultadoData['parcela'],
+                        'id_armadilha' => $resultadoData['id_armadilha'],
+                    ],
+                    array_filter([
+                        'grupo_amostrado' => $resultadoData['grupo_amostrado'] ?? null,
+                        'data_registro' => $resultadoData['data_registro'] ?? null,
+                        'hora_registro' => $resultadoData['hora_registro'] ?? null,
+                        'categoria' => $resultadoData['categoria'] ?? null,
+                        'classe' => $resultadoData['classe'] ?? null,
+                        'ordem' => $resultadoData['ordem'] ?? null,
+                        'familia' => $resultadoData['familia'] ?? null,
+                        'genero' => $resultadoData['genero'] ?? null,
+                        'especie' => $resultadoData['especie'] ?? null,
+                        'nome_comum' => $resultadoData['nome_comum'] ?? null,
+                        'sexo' => $resultadoData['sexo'] ?? null,
+                        'faixa_etaria' => $resultadoData['faixa_etaria'] ?? null,
+                        'qnt_individuos' => $resultadoData['qnt_individuos'] ?? null,
+                        'num_marcacao' => $resultadoData['num_marcacao'] ?? null,
+                        'coletado' => $resultadoData['coletado'] ?? null,
+                        'num_tombamento' => $resultadoData['num_tombamento'] ?? null,
+                        'dados_biometricos' => $resultadoData['dados_biometricos'] ?? null,
+                        'comp_total' => $resultadoData['comp_total'] ?? null,
+                        'cabeca' => $resultadoData['cabeca'] ?? null,
+                        'cauda' => $resultadoData['cauda'] ?? null,
+                        'femur' => $resultadoData['femur'] ?? null,
+                        'orelha' => $resultadoData['orelha'] ?? null,
+                        'peso' => $resultadoData['peso'] ?? null,
+                        'status_conservacao_federal' => $resultadoData['status_conservacao_federal'] ?? null,
+                        'status_conservacao_iucn' => $resultadoData['status_conservacao_iucn'] ?? null,
+                    ])
+                );
+            }
+        }
+
+        // Atualiza anexos
+        if (isset($data['anexos'])) {
+            foreach ($data['anexos'] as $tipo => $file) {
+                if ($file) {
+                    $path = $file->store('anexos');
+                    $campanha->anexos()->updateOrCreate(
+                        ['tipo' => $tipo],
+                        ['caminho' => $path]
+                    );
+                }
+            }
+        }
+
+        // Atualiza planilha
+        if (isset($data['planilha']) && $data['planilha']) {
+            $path = $data['planilha']->store('planilhas');
+            $campanha->update(['planilha' => $path]);
+        }
 
         Log::info('FaunaService: Campanha atualizada com sucesso', [
-            'contrato_id' => $contratoId,
-            'campanha_id' => $campanhaId,
+            'campanha_id' => $campanha->id,
         ]);
+
         return $campanha->id;
     }
+
 
 
 }
