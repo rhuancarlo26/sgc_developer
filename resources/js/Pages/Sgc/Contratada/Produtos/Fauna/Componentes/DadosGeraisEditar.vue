@@ -29,14 +29,59 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  abioRecords: { 
-    type: Array, default: () => [] 
-  },
    
 });
+console.log('Props.form:', props.form);
+console.log('ABIO RECORDS:', props.abioRecords);
 
+const emit = defineEmits(['vincular-abio', 'excluir-abio', 'salvar-novo-profissional', 'vincular-profissional', 'excluir-profissional', 'next', 'prev']);
 
-defineEmits(['vincular-abio', 'excluir-abio', 'salvar-novo-profissional', 'vincular-profissional', 'excluir-profissional', 'next', 'prev']);
+const vincularProfissional = () => {
+  if (props.form.profissional.id_profissional && props.form.profissional.grupo_faunistico) {
+    const prof = props.profissionais.find(p => p.id === props.form.profissional.id_profissional);
+    if (prof) {
+      const profissionalData = {
+        id: prof.id,
+        profissional: {
+          id: prof.id,
+          profissional: prof.profissional || 'N/A',
+          formacao: prof.formacao || 'N/A',
+        },
+        grupo_faunistico: props.form.profissional.grupo_faunistico,
+      };
+      console.log('Emitindo vincular-profissional:', profissionalData);
+      emit('vincular-profissional', profissionalData);
+      props.form.profissional.id_profissional = null;
+      props.form.profissional.grupo_faunistico = null;
+    } else {
+      console.error('Profissional não encontrado:', props.form.profissional.id_profissional);
+    }
+  } else {
+    console.error('Campos obrigatórios não preenchidos:', props.form.profissional);
+  }
+};
+
+const vincularAbio = () => {
+  if (props.form.abio.id_abio) {
+    const abio = props.abios.find(a => a.id === props.form.abio.id_abio);
+    if (abio) {
+      const abioData = {
+        id: abio.id,
+        abio: {
+          id: abio.id,
+          numero_licenca: abio.numero_licenca || abio.licenca?.numero_licenca || 'N/A',
+        },
+      };
+      console.log('Emitindo vincular-abio:', abioData);
+      emit('vincular-abio', abioData);
+      props.form.abio.id_abio = null;
+    } else {
+      console.error('ABIO não encontrado:', props.form.abio.id_abio);
+    }
+  } else {
+    console.error('Campo id_abio não preenchido:', props.form.abio);
+  }
+};
 
 const showModalProfissional = ref(false);
 const formNovoProfissional = ref({
@@ -74,7 +119,7 @@ const profissionalOptions = computed(() => {
     return [];
   }
   return props.profissionais.map(p => ({
-    value: p.profissional,
+    value: p.id, // Usar ID em vez de nome
     label: `${p.profissional} (${p.formacao})`,
   }));
 });
@@ -97,23 +142,6 @@ const statusOptions = [
   { value: 'Inativo', label: 'Inativo' },
 ];
 
-const vincularAbio = () => {
-  if (form.abio.id_abio) {
-    emit('vincular-abio', form.abio.id_abio);
-    form.abio.id_abio = null; // Limpa o campo após vincular
-  }
-};
-
-const vincularProfissional = () => {
-  if (form.profissional.profissional && form.profissional.grupo_faunistico) {
-    emit('vincular-profissional', {
-      profissional: form.profissional.profissional,
-      grupo_faunistico: form.profissional.grupo_faunistico,
-    });
-    form.profissional.profissional = null;
-    form.profissional.grupo_faunistico = null; // Limpa os campos após vincular
-  }
-};
 </script>
 
 <template>
@@ -177,7 +205,7 @@ const vincularProfissional = () => {
           <InputError :message="form.errors['abio.id_abio']" />
         </div>
         <div class="col-12 col-md-2 d-flex align-items-end">
-          <NavButton type="button" type-button="success" title="Vincular Abio" class="w-100" @click="$emit('vincular-abio')" />
+          <NavButton type="button" type-button="success" title="Vincular Abio" class="w-100" @click="vincularAbio" />
         </div>
       </div>
       <div class="table-responsive">
@@ -202,14 +230,14 @@ const vincularProfissional = () => {
       <div class="row mb-3">
         <div class="col-12 col-md-5">
           <InputLabel value="Selecionar Profissional" for="profissional" />
-          <v-select
-            v-model="form.profissional.profissional"
+        <v-select
+            v-model="form.profissional.id_profissional"
             :options="profissionalOptions"
             :reduce="p => p.value"
             placeholder="Selecione um profissional"
             class="v-select-custom"
-          />
-          <InputError :message="form.errors['profissional.profissional']" />
+        />
+        <InputError :message="form.errors['profissional.id_profissional']" />
         </div>
         <div class="col-12 col-md-5">
           <InputLabel value="Grupo Responsável" for="grupo_faunistico" />
@@ -222,8 +250,11 @@ const vincularProfissional = () => {
           />
           <InputError :message="form.errors['profissional.grupo_faunistico']" />
         </div>
-        <div class="col-12 col-md-2 d-flex align-items-end">
+        <!-- <div class="col-12 col-md-2 d-flex align-items-end">
           <NavButton type="button" type-button="success" title="Vincular" class="w-100" @click="$emit('vincular-profissional')" />
+        </div> -->
+        <div class="col-12 col-md-2 d-flex align-items-end">
+          <NavButton type="button" type-button="success" title="Vincular" class="w-100" @click="vincularProfissional" />
         </div>
       </div>
       <div class="row mb-3">
@@ -235,14 +266,14 @@ const vincularProfissional = () => {
         <Table :columns="['Equipe Técnica', 'Formação', 'Grupo Responsável', 'Ação']" :records="{ data: profissionalRecords, links: [] }">
           <template #body="{ item }">
             <tr>
-              <td>{{ item.profissional || 'N/A' }}</td>
-              <td>{{ item.formacao || 'N/A' }}</td>
-              <td>{{ item.grupo_faunistico || 'N/A' }}</td>
-              <td class="text-center" style="min-width: 100px;">
-                <NavButton @click="$emit('excluir-profissional', item.id)" type-button="danger" title="Excluir">
-                  <i class="bi bi-trash"></i>
-                </NavButton>
-              </td>
+                <td>{{ item.profissional.profissional || 'N/A' }}</td>
+                <td>{{ item.profissional.formacao || 'N/A' }}</td>
+                <td>{{ item.grupo_faunistico || 'N/A' }}</td>
+                <td class="text-center" style="min-width: 100px;">
+                    <NavButton @click="$emit('excluir-profissional', item.id)" type-button="danger" title="Excluir">
+                        <i class="bi bi-trash"></i>
+                    </NavButton>
+                </td>
             </tr>
           </template>
         </Table>
