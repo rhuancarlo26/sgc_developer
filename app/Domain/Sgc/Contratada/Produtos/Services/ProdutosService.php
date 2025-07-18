@@ -18,22 +18,6 @@ class ProdutosService
             ->toArray();
     }
 
-    // public function getAbios()
-    // {
-        
-    //     return ServicoMonitoraFaunaConfigAbio::with(['licenca:id,numero_licenca'])
-    //         ->get(['id', 'id_licenca'])
-    //         ->map(function ($abio) {
-    //             return [
-    //                 'id' => $abio->id,
-    //                 'licenca' => $abio->licenca ? [
-    //                     'id' => $abio->licenca->id,
-    //                     'numero_licenca' => $abio->licenca->numero_licenca
-    //                 ] : null
-    //             ];
-    //         });
-    // }
-
     public function getAbios()
     {
         return Licenca::where('tipo', 12)

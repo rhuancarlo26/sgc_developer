@@ -12,6 +12,7 @@ use App\Models\SgcFaunaCampanhaAbios;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcFaunaModuloAmostral;
 use App\Models\SgcvwEmpreendimentos;
+use App\Models\Contrato;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use Inertia\Response;
 use Illuminate\Support\Facades\DB;
@@ -847,11 +848,13 @@ class FaunaController extends Controller
         }
     }
 
-    public function edit(Request $request,$contrato, $produto, $campanhaId)
+    public function edit(Request $request, $contrato, $produto, $campanhaId)
     {
         $campanha = SgcFaunaCampanha::with([
-            'abios' => fn($query) => $query->with('abio'),
-            'profissionais',
+            'abios' => fn($query) => $query->with([
+                'abio' => fn($q) => $q->select('id', 'numero_licenca')
+            ]),
+            'profissionais' => fn($query) => $query->with(['profissional' => fn($q) => $q->select('id', 'profissional', 'formacao')]),
             'modulos_amostrais',
             'pontos_quelo_crocod',
             'pontos_cavernicola',
@@ -860,20 +863,21 @@ class FaunaController extends Controller
             'anexos',
         ])->findOrFail($campanhaId);
 
+        $subproduto = $request->query('subproduto');
+
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->pluck('cod_emp')
             ->toArray();
-        
-         $subproduto = $request->query('subproduto');
 
-        // Adicionar dependência de ProdutosService no construtor
         $abios = $this->produtosService->getAbios();
+        $profissionais = $this->faunaService->getProfissionaisByContrato($contrato);
 
         Log::info('Dados enviados para EditarCampanha.vue', [
             'campanha' => $campanha->toArray(),
             'contrato' => $contrato,
             'produto' => $produto,
             'abios' => $abios,
+            'profissionais' => $profissionais,
         ]);
 
         if ($campanha->status !== 'Rejeitada') {
@@ -890,9 +894,10 @@ class FaunaController extends Controller
             'campanha' => $campanha,
             'contrato' => $contrato,
             'produto' => $produto,
-            'abios' => $abios, // Adicionar a lista completa de ABIOS
+            'abios' => $abios,
             'empreendimentos' => $empreendimentos,
             'subproduto' => $subproduto,
+            'profissionais' => $profissionais,
             'contratos' => [
                 'tipo_contrato' => $campanha->tipo_contrato,
                 'contratada' => $campanha->contratada,
@@ -902,6 +907,13 @@ class FaunaController extends Controller
 
     public function update(Request $request, $contrato, $produto, $campanhaId): RedirectResponse
     {
+        Log::info('FaunaController: Requisição recebida em update', [
+            'method' => $request->method(),
+            'input' => array_diff_key($request->all(), array_flip(['anexos', 'planilha'])),
+            'profissionais' => $request->input('profissionais'),
+            'files' => array_keys($request->files->all()),
+        ]);
+
         if (Auth::user()->perfis_id === 2) {
             return redirect()->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanhaId])
                 ->withErrors(['error' => 'Acesso negado. Fiscais não podem atualizar campanhas.']);
@@ -919,13 +931,14 @@ class FaunaController extends Controller
             'periodo' => 'nullable|string|max:255',
             'observacoes' => 'nullable|string',
             'id_abio' => 'nullable|array',
-            'id_abio.*' => 'integer|exists:fauna_config_abio,id',
+            'id_abio.*' => 'integer|exists:sgc_licencas,id',
             'cod_emp' => 'required|string|max:255',
             'subproduto' => 'required|string|max:255',
             'nao_se_aplica' => 'nullable|boolean',
             'profissionais' => 'nullable|array',
-            'profissionais.*.profissional' => 'required_with:profissionais|string|max:255',
-            'profissionais.*.grupo_faunistico' => 'required_with:profissionais|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
+            'profissionais.*.id_profissional' => 'nullable|integer|exists:sgc_profissionais,id',
+            'profissionais.*.grupo_faunistico' => 'required_with:profissionais.*.id_profissional|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
+            'profissionais.*.formacao' => 'nullable|string|max:255',
             'modulos_amostrais' => 'nullable|array',
             'modulos_amostrais.*.data_cadastro' => 'nullable|date',
             'modulos_amostrais.*.tamanho_modulo' => 'nullable|in:1,2,3,4,5',
@@ -942,7 +955,6 @@ class FaunaController extends Controller
             'pontos_quelo_crocod.*.ponto_de_coleta' => 'required_without:nao_se_aplica|string',
             'pontos_quelo_crocod.*.nome_curso_hidrico' => 'required_without:nao_se_aplica|string',
             'pontos_quelo_crocod.*.coordenadas' => 'nullable|string',
-            'pontos_quelo_crocod.*.bacia' => 'required_without:nao_se_aplica|string',
             'pontos_quelo_crocod.*.profundidade' => 'nullable|numeric',
             'pontos_quelo_crocod.*.largura' => 'required_without:nao_se_aplica|numeric',
             'pontos_quelo_crocod.*.tipo_substrato' => 'nullable|string',
@@ -977,8 +989,13 @@ class FaunaController extends Controller
 
         try {
             DB::beginTransaction();
-            $this->faunaService->atualizarCampanha($contrato, $campanhaId, $validated);
+            $campanhaId = $this->faunaService->atualizarCampanha($contrato, $campanhaId, $validated);
             DB::commit();
+            Log::info('FaunaController: Campanha atualizada com sucesso', [
+                'contrato' => $contrato,
+                'produto' => $produto,
+                'campanha_id' => $campanhaId,
+            ]);
             return redirect()->route('sgc.contratada.produtos.index', [$contrato, $produto])
                 ->with('success', 'Campanha atualizada com sucesso!');
         } catch (\Exception $e) {
@@ -994,5 +1011,6 @@ class FaunaController extends Controller
             return redirect()->back()->withErrors(['error' => 'Erro ao atualizar campanha: ' . $e->getMessage()]);
         }
     }
-    
+
+
 }

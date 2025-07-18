@@ -25,4 +25,5 @@ class SgcFaunaCampanhaAbios extends Model
     {
         return $this->belongsTo(SgcFaunaCampanha::class, 'campanha_id', 'id');
     }
+    
 }

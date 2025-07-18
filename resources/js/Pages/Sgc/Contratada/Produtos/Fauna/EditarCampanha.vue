@@ -44,15 +44,23 @@ const form = useForm({
   obs: props.campanha.observacoes || '',
   abio: { id_abio: null },
   profissional: { profissional: null, grupo_faunistico: null },
+
   abios: props.campanha.abios?.map(abio => ({
     id: abio.id,
-    abio: props.abios.find(a => a.id === abio.id) || { licenca: { numero_licenca: 'N/A' } },
+    abio: {
+      id: abio.id,
+      numero_licenca: abio.abio?.numero_licenca || 'N/A',
+    },
   })) || [],
+
   profissionais: props.campanha.profissionais?.map(prof => ({
     id: prof.id,
-    profissional: prof.profissional || '',
-    grupo_faunistico: prof.grupo_faunistico || '',
-    formacao: prof.formacao || '',
+    profissional: {
+      id: prof.profissional?.id || prof.id,
+      profissional: prof.profissional?.profissional || 'N/A',
+      formacao: prof.profissional?.formacao || 'N/A',
+    },
+    grupo_faunistico: prof.grupo_faunistico || 'N/A',
   })) || [],
   modulos_amostrais: props.campanha.modulos_amostrais?.map(modulo => ({
     data_cadastro: modulo.data_cadastro || '',
@@ -138,6 +146,10 @@ const form = useForm({
   },
 });
 
+console.log('Props.campanha.abios:', JSON.stringify(props.campanha.abios, null, 2));
+console.log('Props.abios:', JSON.stringify(props.abios, null, 2));
+console.log('Form.abios:', JSON.stringify(form.abios, null, 2));
+
 const setActiveTab = (tab) => {
   activeTab.value = tab;
   if (tab === 'apresentacao') {
@@ -151,13 +163,19 @@ const prevSubStep = () => {
   }
 };
 
-const vincularAbio = () => {
-  if (form.abio.id_abio) {
-    const abio = props.abios.find(a => a.id === form.abio.id_abio);
-    if (abio) {
-      form.abios.push({ id: abio.id, abio });
-      form.abio.id_abio = null;
-    }
+const vincularAbio = (abioData) => {
+  console.log('Recebido em vincularAbio:', abioData);
+  if (abioData && abioData.id && abioData.abio) {
+    form.abios.push({
+      id: abioData.id,
+      abio: {
+        id: abioData.abio.id,
+        numero_licenca: abioData.abio.numero_licenca || 'N/A',
+      },
+    });
+    form.abio.id_abio = null;
+  } else {
+    console.error('Dados do ABIO inválidos:', abioData);
   }
 };
 
@@ -165,17 +183,22 @@ const excluirAbio = (id) => {
   form.abios = form.abios.filter(a => a.id !== id);
 };
 
-const vincularProfissional = () => {
-  if (form.profissional.profissional && form.profissional.grupo_faunistico) {
-    const prof = props.profissionais.find(p => p.profissional === form.profissional.profissional);
+const vincularProfissional = (profissionalData) => {
+  console.log('Recebido em vincularProfissional:', profissionalData);
+  if (profissionalData && profissionalData.id && profissionalData.grupo_faunistico && profissionalData.profissional) {
     form.profissionais.push({
-      id: Date.now(), // ID temporário para renderização
-      profissional: form.profissional.profissional,
-      grupo_faunistico: form.profissional.grupo_faunistico,
-      formacao: prof?.formacao || 'N/A',
+      id: profissionalData.id,
+      profissional: {
+        id: profissionalData.profissional.id,
+        profissional: profissionalData.profissional.profissional || 'N/A',
+        formacao: profissionalData.profissional.formacao || 'N/A',
+      },
+      grupo_faunistico: profissionalData.grupo_faunistico,
     });
-    form.profissional.profissional = null;
+    form.profissional.id_profissional = null;
     form.profissional.grupo_faunistico = null;
+  } else {
+    console.error('Dados do profissional inválidos:', profissionalData);
   }
 };
 
@@ -186,13 +209,16 @@ const excluirProfissional = (id) => {
 const salvarNovoProfissional = (novoProfissional) => {
   form.post(route('profissionais.store'), {
     data: novoProfissional,
-    onSuccess: () => {
-      form.profissionais.push({
-        id: Date.now(), // ID temporário
-        profissional: novoProfissional.profissional,
-        grupo_faunistico: form.profissional.grupo_faunistico || '',
-        formacao: novoProfissional.formacao || 'N/A',
-      });
+    onSuccess: (page) => {
+      const novoProfissionalRetornado = page.props.flash.novoProfissional; 
+      if (novoProfissionalRetornado) {
+        props.profissionais.push({
+          id: novoProfissionalRetornado.id,
+          profissional: novoProfissionalRetornado.profissional,
+          formacao: novoProfissionalRetornado.formacao,
+        });
+      }
+      showModalProfissional.value = false;
     },
   });
 };
@@ -218,28 +244,40 @@ const formatAnexoLabel = (tipo) => {
 };
 
 const submitForm = () => {
+  // Log do estado inicial de abios e profissionais para depuração
+  console.log('form.abios antes de enviar:', JSON.stringify(form.abios, null, 2));
+  console.log('form.profissionais antes de enviar:', JSON.stringify(form.profissionais, null, 2));
+
   const formData = new FormData();
-  formData.append('_method', 'PUT');
+  formData.append('_method', 'PUT'); // Simula PUT para o backend
   formData.append('cod_emp', form.cod_emp);
   formData.append('subproduto', form.subproduto);
   if (form.data_campanha_inicial) formData.append('data_campanha_inicial', form.data_campanha_inicial);
   if (form.data_campanha_final) formData.append('data_campanha_final', form.data_campanha_final);
   if (form.periodo) formData.append('periodo', form.periodo);
-  if (form.obs) formData.append('obs', form.obs);
+  if (form.obs) formData.append('observacoes', form.obs);
   if (form.nao_se_aplica) formData.append('nao_se_aplica', form.nao_se_aplica);
   if (form.consideracoes) formData.append('consideracoes', form.consideracoes);
   if (form.planilha) formData.append('planilha', form.planilha);
 
+  // Envia todos os ABIOs (existentes e novos)
   form.abios.forEach((abio, index) => {
-    formData.append(`abios[${index}][id]`, abio.id);
+    formData.append(`id_abio[${index}]`, abio.id);
   });
 
+  // Envia todos os profissionais (existentes e novos), com verificação
   form.profissionais.forEach((prof, index) => {
-    formData.append(`profissionais[${index}][profissional]`, prof.profissional);
-    formData.append(`profissionais[${index}][grupo_faunistico]`, prof.grupo_faunistico);
-    if (prof.formacao) formData.append(`profissionais[${index}][formacao]`, prof.formacao);
+    console.log(`Processando profissional ${index}:`, JSON.stringify(prof, null, 2));
+    if (prof.profissional && prof.profissional.id) {
+      formData.append(`profissionais[${index}][id_profissional]`, prof.profissional.id);
+      formData.append(`profissionais[${index}][grupo_faunistico]`, prof.grupo_faunistico);
+      if (prof.profissional.formacao) formData.append(`profissionais[${index}][formacao]`, prof.profissional.formacao);
+    } else {
+      console.warn(`Profissional ${index} não tem id_profissional válido:`, JSON.stringify(prof, null, 2));
+    }
   });
 
+  // Envia módulos amostrais
   form.modulos_amostrais.forEach((modulo, index) => {
     if (modulo.data_cadastro) formData.append(`modulos_amostrais[${index}][data_cadastro]`, modulo.data_cadastro);
     if (modulo.tamanho_modulo) formData.append(`modulos_amostrais[${index}][tamanho_modulo]`, modulo.tamanho_modulo);
@@ -255,6 +293,7 @@ const submitForm = () => {
     if (modulo.arquivo) formData.append(`modulos_amostrais[${index}][arquivo]`, modulo.arquivo);
   });
 
+  // Envia pontos de quelônios/crocodilianos
   form.pontos_quelo_crocod.forEach((ponto, index) => {
     if (ponto.ponto_de_coleta) formData.append(`pontos_quelo_crocod[${index}][ponto_de_coleta]`, ponto.ponto_de_coleta);
     if (ponto.nome_curso_hidrico) formData.append(`pontos_quelo_crocod[${index}][nome_curso_hidrico]`, ponto.nome_curso_hidrico);
@@ -265,6 +304,7 @@ const submitForm = () => {
     if (ponto.tipo_substrato) formData.append(`pontos_quelo_crocod[${index}][tipo_substrato]`, ponto.tipo_substrato);
   });
 
+  // Envia pontos de fauna cavernícola
   form.pontos_cavernicola.forEach((ponto, index) => {
     if (ponto.cavidade) formData.append(`pontos_cavernicola[${index}][cavidade]`, ponto.cavidade);
     if (ponto.latitude) formData.append(`pontos_cavernicola[${index}][latitude]`, ponto.latitude);
@@ -277,11 +317,13 @@ const submitForm = () => {
     if (ponto.umidade_relativa_externa) formData.append(`pontos_cavernicola[${index}][umidade_relativa_externa]`, ponto.umidade_relativa_externa);
   });
 
+  // Envia metodologias
   form.metodologias.forEach((met, index) => {
     if (met.grupo_faunistico) formData.append(`metodologias[${index}][grupo_faunistico]`, met.grupo_faunistico);
     if (met.metodologia) formData.append(`metodologias[${index}][metodologia]`, met.metodologia);
   });
 
+  // Envia resultados
   form.resultados.forEach((res, index) => {
     if (res.modulo) formData.append(`resultados[${index}][modulo]`, res.modulo);
     if (res.parcela) formData.append(`resultados[${index}][parcela]`, res.parcela);
@@ -313,15 +355,20 @@ const submitForm = () => {
     if (res.status_conservacao_iucn) formData.append(`resultados[${index}][status_conservacao_iucn]`, res.status_conservacao_iucn);
   });
 
+  // Envia anexos
   Object.keys(form.anexos).forEach(tipo => {
     if (form.anexos[tipo]) {
       formData.append(`anexos[${tipo}]`, form.anexos[tipo]);
     }
   });
 
-  form.put(route('sgc.contratada.produtos.update', [props.contrato, props.produto, props.campanha.id]), {
+  // Log do formData enviado
+  console.log('Enviando formData:', Array.from(formData.entries()));
+
+  form.post(route('sgc.contratada.produtos.update', [props.contrato, props.produto, props.campanha.id]), {
     preserveState: true,
     onSuccess: () => {
+      console.log('Campanha atualizada com sucesso!');
       form.reset('planilha', 'anexos');
       form.anexos = {
         anuencia_proprietarios: null,
@@ -335,8 +382,12 @@ const submitForm = () => {
         oficio_atividades_campo: null,
       };
     },
+    onError: (errors) => {
+      console.error('Erros ao salvar campanha:', errors);
+    },
   });
 };
+
 </script>
 
 <template>
@@ -437,9 +488,9 @@ const submitForm = () => {
                     v-if="subStep === 2"
                     :form="form"
                     :abios="abios"
-                    :profissionais="campanha.profissionais"
-                    :abio-records="campanha.abios || []"
-                    :profissional-records="campanha.profissionais || []"
+                    :profissionais="profissionais"
+                    :abio-records="form.abios"
+                    :profissional-records="form.profissionais"
                     :sub-step="subStep"
                     @vincular-abio="vincularAbio"
                     @excluir-abio="excluirAbio"
