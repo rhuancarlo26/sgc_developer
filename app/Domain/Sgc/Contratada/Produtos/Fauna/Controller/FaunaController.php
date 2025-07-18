@@ -411,7 +411,7 @@ class FaunaController extends Controller
                 'pontos_quelo_crocod' => $campanha->pontos_quelo_crocod->map(function ($ponto) {
                     return [
                         'id' => $ponto->id,
-                        'ponto_de_coleta' => $ponto->ponto_de_coleta,
+                        // 'ponto_de_coleta' => $ponto->ponto_de_coleta,
                         'nome_curso_hidrico' => $ponto->nome_curso_hidrico,
                         'coordenadas' => $ponto->coordenadas,
                         'bacia' => $ponto->bacia_hidrografica,
