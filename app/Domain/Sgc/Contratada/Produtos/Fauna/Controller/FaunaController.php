@@ -908,10 +908,11 @@ class FaunaController extends Controller
     public function update(Request $request, $contrato, $produto, $campanhaId): RedirectResponse
     {
         Log::info('FaunaController: Requisição recebida em update', [
-            'method' => $request->method(),
-            'input' => array_diff_key($request->all(), array_flip(['anexos', 'planilha'])),
+            'contrato' => $contrato,
+            'campanha_id' => $campanhaId,
+            'request_all' => $request->all(),
             'profissionais' => $request->input('profissionais'),
-            'files' => array_keys($request->files->all()),
+            'id_abio' => $request->input('id_abio'),
         ]);
 
         if (Auth::user()->perfis_id === 2) {
@@ -925,69 +926,107 @@ class FaunaController extends Controller
                 ->withErrors(['error' => 'Apenas campanhas rejeitadas podem ser atualizadas.']);
         }
 
-        $validated = $request->validate([
-            'data_campanha_inicial' => 'nullable|date',
-            'data_campanha_final' => 'nullable|date',
-            'periodo' => 'nullable|string|max:255',
-            'observacoes' => 'nullable|string',
-            'id_abio' => 'nullable|array',
-            'id_abio.*' => 'integer|exists:sgc_licencas,id',
-            'cod_emp' => 'required|string|max:255',
-            'subproduto' => 'required|string|max:255',
-            'nao_se_aplica' => 'nullable|boolean',
-            'profissionais' => 'nullable|array',
-            'profissionais.*.id_profissional' => 'nullable|integer|exists:sgc_profissionais,id',
-            'profissionais.*.grupo_faunistico' => 'required_with:profissionais.*.id_profissional|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
-            'profissionais.*.formacao' => 'nullable|string|max:255',
-            'modulos_amostrais' => 'nullable|array',
-            'modulos_amostrais.*.data_cadastro' => 'nullable|date',
-            'modulos_amostrais.*.tamanho_modulo' => 'nullable|in:1,2,3,4,5',
-            'modulos_amostrais.*.uf' => 'nullable|string|size:2',
-            'modulos_amostrais.*.municipio' => 'nullable|string|max:50',
-            'modulos_amostrais.*.bioma' => 'nullable|string|max:30',
-            'modulos_amostrais.*.fitofisionomia' => 'nullable|string',
-            'modulos_amostrais.*.latitude_inicial' => 'nullable|numeric',
-            'modulos_amostrais.*.longitude_inicial' => 'nullable|numeric',
-            'modulos_amostrais.*.latitude_final' => 'nullable|numeric',
-            'modulos_amostrais.*.longitude_final' => 'nullable|numeric',
-            'modulos_amostrais.*.arquivo' => 'nullable|file|mimes:shp,zip|max:1024',
-            'pontos_quelo_crocod' => 'nullable|array',
-            'pontos_quelo_crocod.*.ponto_de_coleta' => 'required_without:nao_se_aplica|string',
-            'pontos_quelo_crocod.*.nome_curso_hidrico' => 'required_without:nao_se_aplica|string',
-            'pontos_quelo_crocod.*.coordenadas' => 'nullable|string',
-            'pontos_quelo_crocod.*.profundidade' => 'nullable|numeric',
-            'pontos_quelo_crocod.*.largura' => 'required_without:nao_se_aplica|numeric',
-            'pontos_quelo_crocod.*.tipo_substrato' => 'nullable|string',
-            'pontos_cavernicola' => 'nullable|array',
-            'pontos_cavernicola.*.cavidade' => 'required_without:nao_se_aplica|string',
-            'pontos_cavernicola.*.latitude' => 'required_without:nao_se_aplica|numeric',
-            'pontos_cavernicola.*.longitude' => 'required_without:nao_se_aplica|numeric',
-            'pontos_cavernicola.*.distancia_eixo_rodovia' => 'required_without:nao_se_aplica|numeric',
-            'pontos_cavernicola.*.formacao_associada' => 'required_without:nao_se_aplica|string',
-            'pontos_cavernicola.*.temperatura_media_interna' => 'nullable|numeric',
-            'pontos_cavernicola.*.temperatura_media_externa' => 'nullable|numeric',
-            'pontos_cavernicola.*.umidade_relativa_interna' => 'nullable|numeric',
-            'pontos_cavernicola.*.umidade_relativa_externa' => 'nullable|numeric',
-            'metodologias' => 'nullable|array',
-            'metodologias.*.grupo_faunistico' => 'required_with:metodologias|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
-            'metodologias.*.metodologia' => 'required_with:metodologias|string',
-            'consideracoes' => 'nullable|string',
-            'planilha' => 'nullable|file|mimes:xlsx,xls|max:10240',
-            'anexos.anuencia_proprietarios' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'anexos.registro_fotografico' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'anexos.dados_secundarios' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'anexos.art' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'anexos.ret' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'anexos.cr' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'anexos.ctf' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'anexos.anuencia_colecoes' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'anexos.oficio_atividades_campo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-        ]);
-
-        $validated['anexos'] = $request->file('anexos') ?? [];
-        $validated['planilha'] = $request->file('planilha');
-
         try {
+            $validated = $request->validate([
+                'data_campanha_inicial' => 'nullable|date',
+                'data_campanha_final' => 'nullable|date|after_or_equal:data_campanha_inicial',
+                'periodo' => 'nullable|string|max:255',
+                'observacoes' => 'nullable|string',
+                'cod_emp' => 'required|string|max:255',
+                'subproduto' => 'required|string|max:255',
+                'nao_se_aplica' => 'nullable|boolean',
+                'abios' => 'nullable|array', // Ajustado para validar o array abios
+                'abios.*.id' => 'nullable|integer|exists:licencas,id', // Valida abios.*.id
+                'profissionais' => 'nullable|array',
+                'profissionais.*.id' => 'nullable|integer|exists:sgc_fauna_profissionais,id',
+                'profissionais.*.grupo_faunistico' => 'nullable|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
+                'profissionais.*.profissional.formacao' => 'nullable|string|max:255',
+                'modulos_amostrais' => 'nullable|array',
+                'modulos_amostrais.*.data_cadastro' => 'nullable|date',
+                'modulos_amostrais.*.tamanho_modulo' => 'nullable|in:1,2,3,4,5',
+                'modulos_amostrais.*.uf' => 'nullable|string|size:2',
+                'modulos_amostrais.*.municipio' => 'nullable|string|max:50',
+                'modulos_amostrais.*.bioma' => 'nullable|string|max:30',
+                'modulos_amostrais.*.fitofisionomia' => 'nullable|string',
+                'modulos_amostrais.*.latitude_inicial' => 'nullable|numeric',
+                'modulos_amostrais.*.longitude_inicial' => 'nullable|numeric',
+                'modulos_amostrais.*.latitude_final' => 'nullable|numeric',
+                'modulos_amostrais.*.longitude_final' => 'nullable|numeric',
+                'modulos_amostrais.*.arquivo' => 'nullable|file|mimes:shp,zip|max:1024',
+                'pontos_quelo_crocod' => 'nullable|array',
+                'pontos_quelo_crocod.*.ponto_de_coleta' => 'nullable|string',
+                'pontos_quelo_crocod.*.nome_curso_hidrico' => 'nullable|string',
+                'pontos_quelo_crocod.*.coordenadas' => 'nullable|string',
+                'pontos_quelo_crocod.*.profundidade' => 'nullable|numeric',
+                'pontos_quelo_crocod.*.largura' => 'nullable|numeric',
+                'pontos_quelo_crocod.*.tipo_substrato' => 'nullable|string',
+                'pontos_cavernicola' => 'nullable|array',
+                'pontos_cavernicola.*.cavidade' => 'nullable|string',
+                'pontos_cavernicola.*.latitude' => 'nullable|numeric',
+                'pontos_cavernicola.*.longitude' => 'nullable|numeric',
+                'pontos_cavernicola.*.distancia_eixo_rodovia' => 'nullable|numeric',
+                'pontos_cavernicola.*.formacao_associada' => 'nullable|string',
+                'pontos_cavernicola.*.temperatura_media_interna' => 'nullable|numeric',
+                'pontos_cavernicola.*.temperatura_media_externa' => 'nullable|numeric',
+                'pontos_cavernicola.*.umidade_relativa_interna' => 'nullable|numeric',
+                'pontos_cavernicola.*.umidade_relativa_externa' => 'nullable|numeric',
+                'metodologias' => 'nullable|array',
+                'metodologias.*.grupo_faunistico' => 'nullable|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
+                'metodologias.*.metodologia' => 'nullable|string',
+                'consideracoes' => 'nullable|string',
+                'planilha' => 'nullable|file|mimes:xlsx,xls|max:10240',
+                'anexos.anuencia_proprietarios' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'anexos.registro_fotografico' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'anexos.dados_secundarios' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'anexos.art' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'anexos.ret' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'anexos.cr' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'anexos.ctf' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'anexos.anuencia_colecoes' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'anexos.oficio_atividades_campo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            ]);
+
+            // Log detalhado antes do parsing
+            Log::info('FaunaController: Antes do parsing', [
+                'id_abio_raw' => $request->input('id_abio'),
+                'profissionais_raw' => $request->input('profissionais'),
+            ]);
+
+            // Forçar parsing correto de abios
+            $validated['id_abio'] = array_map(function ($abio) {
+                Log::info('FaunaController: Processando abio', [
+                    'abio_raw' => $abio,
+                    'id_abio' => isset($abio['abio']['id']) ? (int) $abio['abio']['id'] : null,
+                ]);
+                return isset($abio['abio']['id']) ? (int) $abio['abio']['id'] : null;
+            }, (array) $request->input('abios', []));
+
+            // Remover valores nulos
+            $validated['id_abio'] = array_filter($validated['id_abio'], fn($id) => !is_null($id));
+
+            // Forçar parsing correto de profissionais
+            $validated['profissionais'] = array_map(function ($profissional) {
+                Log::info('FaunaController: Processando profissional', [
+                    'profissional_raw' => $profissional,
+                    'id_profissional' => isset($profissional['profissional']['id']) ? (int) $profissional['profissional']['id'] : null,
+                    'formacao' => isset($profissional['profissional']['formacao']) ? $profissional['profissional']['formacao'] : null,
+                ]);
+                return [
+                    'id_profissional' => isset($profissional['profissional']['id']) ? (int) $profissional['profissional']['id'] : null,
+                    'grupo_faunistico' => $profissional['grupo_faunistico'] ?? null,
+                    'formacao' => isset($profissional['profissional']['formacao']) ? $profissional['profissional']['formacao'] : null,
+                ];
+            }, (array) $request->input('profissionais', []));
+
+            // Log após o parsing
+            Log::info('FaunaController: Após o parsing', [
+                'id_abio' => $validated['id_abio'],
+                'profissionais' => $validated['profissionais'],
+            ]);
+
+            $validated['anexos'] = $request->file('anexos') ?? [];
+            $validated['planilha'] = $request->file('planilha');
+
             DB::beginTransaction();
             $campanhaId = $this->faunaService->atualizarCampanha($contrato, $campanhaId, $validated);
             DB::commit();
@@ -998,6 +1037,14 @@ class FaunaController extends Controller
             ]);
             return redirect()->route('sgc.contratada.produtos.index', [$contrato, $produto])
                 ->with('success', 'Campanha atualizada com sucesso!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            Log::error('FaunaController: Erro de validação', [
+                'contrato' => $contrato,
+                'campanha_id' => $campanhaId,
+                'errors' => $e->errors(),
+            ]);
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('FaunaController: Erro ao atualizar campanha', [
@@ -1011,6 +1058,5 @@ class FaunaController extends Controller
             return redirect()->back()->withErrors(['error' => 'Erro ao atualizar campanha: ' . $e->getMessage()]);
         }
     }
-
 
 }
