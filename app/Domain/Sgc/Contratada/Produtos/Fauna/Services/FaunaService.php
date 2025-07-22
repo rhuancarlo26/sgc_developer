@@ -453,6 +453,7 @@ class FaunaService
         Log::info('FaunaService: Profissionais atualizados', [
             'profissionais' => $data['profissionais'] ?? [],
         ]);
+      
 
         // Atualiza ABIOs
         Log::info('FaunaService: Processando ABIOs', [

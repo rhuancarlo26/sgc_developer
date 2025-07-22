@@ -5,8 +5,8 @@ import NavButton from '@/Components/NavButton.vue';
 
 defineProps({
   formPontosAmostragem: {
-    type: Object,
-    default: () => ({}),
+    type: Array,
+    default: () => [],
   },
   naoSeAplica: {
     type: Boolean,
@@ -26,94 +26,41 @@ defineEmits(['next', 'prev']);
     <div class="card-body">
       <h4 class="mb-3" style="text-align: center;">QUELÔNIOS E CROCODILIANOS</h4>
 
-      <!-- Dados do Ponto de Amostragem -->
-      <div v-if="formPontosAmostragem && Object.keys(formPontosAmostragem).length" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div>
-          <InputLabel value="NÃO SE APLICA" for="nao_se_aplica" />
-          <input
-            type="text"
-            class="form-control"
-            id="nao_se_aplica"
-            :value="naoSeAplica ? 'Sim' : 'Não'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="PONTO DE COLETA" for="ponto_de_coleta" />
-          <input
-            type="text"
-            class="form-control"
-            id="ponto_de_coleta"
-            :value="formPontosAmostragem.ponto_de_coleta || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="NOME DO CURSO HÍDRICO" for="nome_curso_hidrico" />
-          <input
-            type="text"
-            class="form-control"
-            id="nome_curso_hidrico"
-            :value="formPontosAmostragem.nome_curso_hidrico || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="COORDENADAS" for="coordenadas" />
-          <input
-            type="text"
-            class="form-control"
-            id="coordenadas"
-            :value="formPontosAmostragem.coordenadas || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="BACIA HIDROGRÁFICA" for="bacia" />
-          <input
-            type="text"
-            class="form-control"
-            id="bacia"
-            :value="formPontosAmostragem.bacia || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="PROFUNDIDADE (m)" for="profundidade" />
-          <input
-            type="text"
-            class="form-control"
-            id="profundidade"
-            :value="formPontosAmostragem.profundidade || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="LARGURA (m)" for="largura" />
-          <input
-            type="text"
-            class="form-control"
-            id="largura"
-            :value="formPontosAmostragem.largura || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div class="col-span-full sm:col-span-2">
-          <InputLabel value="TIPO DE SUBSTRATO" for="tipo_substrato" />
-          <textarea
-            class="form-control"
-            id="tipo_substrato"
-            rows="5"
-            :value="formPontosAmostragem.tipo_substrato || 'Não informado'"
-            disabled
-          ></textarea>
-        </div>
+      <div v-if="naoSeAplica" class="alert alert-info text-center">
+        Não se aplica.
+      </div>
+      <div v-else-if="formPontosAmostragem && formPontosAmostragem.length" class="overflow-x-auto mb-6">
+        <table class="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="py-2 px-4 border-b text-left">ID</th>
+              <th class="py-2 px-4 border-b text-left">Ponto de Coleta</th>
+              <th class="py-2 px-4 border-b text-left">Nome do Curso Hídrico</th>
+              <th class="py-2 px-4 border-b text-left">Coordenadas</th>
+              <th class="py-2 px-4 border-b text-left">Bacia Hidrográfica</th>
+              <th class="py-2 px-4 border-b text-left">Profundidade (m)</th>
+              <th class="py-2 px-4 border-b text-left">Largura (m)</th>
+              <th class="py-2 px-4 border-b text-left">Tipo de Substrato</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="ponto in formPontosAmostragem" :key="ponto.id" class="hover:bg-gray-50">
+              <td class="py-2 px-4 border-b">{{ ponto.id || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.ponto_de_coleta || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.nome_curso_hidrico || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.coordenadas || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.bacia || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.profundidade || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.largura || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.tipo_substrato || 'Não informado' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div v-else class="alert alert-info text-center">
         Nenhum dado de ponto de amostragem disponível.
       </div>
 
-      <!-- Navegação -->
       <div class="d-flex justify-content-between mt-4">
         <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
         <NavButton type="button" type-button="primary" title="Avançar" @click="$emit('next')" />
@@ -128,10 +75,10 @@ defineEmits(['next', 'prev']);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   background-color: #fff;
-  margin: 1.5rem; /* Alinhado com etapas 2/5 e 3/5 */
+  margin: 1.5rem;
 }
 .card-body {
-  padding: 2rem; /* Alinhado com etapas 2/5 e 3/5 */
+  padding: 2rem;
 }
 .card-title {
   font-size: 1.75rem;
@@ -140,39 +87,18 @@ defineEmits(['next', 'prev']);
   margin-bottom: 1.5rem;
   text-align: center;
 }
-.form-control:disabled {
-  background-color: #f8f9fa;
-  color: #495057;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 200px; /* Alinhado com etapas 2/5 e 3/5 */
-  max-width: 100%;
-  padding: 0.5rem 1rem; /* Alinhado com etapas 2/5 e 3/5 */
-  font-size: 1rem;
+table {
+  border-collapse: collapse;
 }
-textarea.form-control:disabled {
-  resize: none;
-  min-height: 120px;
-  max-height: 400px; /* Alinhado com etapas 2/5 e 3/5 */
-  overflow-y: auto;
-  width: 100%;
-  min-width: 300px; /* Alinhado com etapas 2/5 e 3/5 */
-  max-width: 100%;
+th, td {
   padding: 0.5rem 1rem;
-  box-sizing: border-box;
-  font-size: 1rem;
+  border: 1px solid #dee2e6;
 }
-.grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(1, 1fr);
+thead {
+  background-color: #f8f9fa;
 }
-@media (min-width: 640px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr); /* Alinhado com a view de cadastro */
-  }
+tr:hover {
+  background-color: #f1f5f9;
 }
 .alert-info {
   font-size: 1rem;

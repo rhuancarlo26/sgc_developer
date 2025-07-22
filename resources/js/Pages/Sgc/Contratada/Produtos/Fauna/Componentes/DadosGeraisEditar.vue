@@ -29,8 +29,8 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-   
 });
+
 console.log('Props.form:', props.form);
 console.log('ABIO RECORDS:', props.abioRecords);
 
@@ -66,10 +66,10 @@ const vincularAbio = () => {
     const abio = props.abios.find(a => a.id === props.form.abio.id_abio);
     if (abio) {
       const abioData = {
-        id: abio.id,
+        id: abio.licenca?.id || abio.id, // Priorizar o ID da licença
         abio: {
-          id: abio.id,
-          numero_licenca: abio.numero_licenca || abio.licenca?.numero_licenca || 'N/A',
+          id: abio.licenca?.id || abio.id, // Garantir o ID da licença
+          numero_licenca: abio.licenca?.numero_licenca || abio.numero_licenca || 'N/A',
         },
       };
       console.log('Emitindo vincular-abio:', abioData);
@@ -109,6 +109,7 @@ const abioOptions = computed(() => {
     .filter(abio => abio?.licenca)
     .map(abio => ({
       ...abio,
+      id: abio.licenca?.id || abio.id, // Garantir que o ID seja o da licença
       label: abio.licenca?.numero_licenca || 'Sem Licença',
     }));
 });
@@ -119,7 +120,7 @@ const profissionalOptions = computed(() => {
     return [];
   }
   return props.profissionais.map(p => ({
-    value: p.id, // Usar ID em vez de nome
+    value: p.id,
     label: `${p.profissional} (${p.formacao})`,
   }));
 });
@@ -250,9 +251,6 @@ const statusOptions = [
           />
           <InputError :message="form.errors['profissional.grupo_faunistico']" />
         </div>
-        <!-- <div class="col-12 col-md-2 d-flex align-items-end">
-          <NavButton type="button" type-button="success" title="Vincular" class="w-100" @click="$emit('vincular-profissional')" />
-        </div> -->
         <div class="col-12 col-md-2 d-flex align-items-end">
           <NavButton type="button" type-button="success" title="Vincular" class="w-100" @click="vincularProfissional" />
         </div>

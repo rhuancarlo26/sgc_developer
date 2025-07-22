@@ -418,7 +418,6 @@ const finalizarAvaliacao = () => {
                                             </div>
                                         </form>
                                     </div>
-                                    <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                 </div>
                                 <div v-if="subStep === 4">
                                     <div v-if="getEtapaStatus('pontos_quelo_crocod') === 'Aprovada'" class="status-container">
@@ -431,7 +430,7 @@ const finalizarAvaliacao = () => {
                                         <span class="badge bg-warning text-white">Pendente</span>
                                     </div>
                                     <QueloniosCrocodilianosVisualizar
-                                        :formPontosAmostragem="props.campanha?.formPontosAmostragem || {}"
+                                        :formPontosAmostragem="props.campanha?.formPontosAmostragem || []"
                                         :naoSeAplica="props.campanha?.nao_se_aplica"
                                         :subStep="subStep"
                                         @next="subStep = 5"
@@ -457,7 +456,6 @@ const finalizarAvaliacao = () => {
                                             </div>
                                         </form>
                                     </div>
-                                    <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                 </div>
                                 <div v-if="subStep === 5">
                                     <div v-if="getEtapaStatus('pontos_cavernicola') === 'Aprovada'" class="status-container">
@@ -470,7 +468,7 @@ const finalizarAvaliacao = () => {
                                         <span class="badge bg-warning text-white">Pendente</span>
                                     </div>
                                     <FaunaCavernicolaVisualizar
-                                        :formPontosCavernicola="props.campanha?.formPontosCavernicola || {}"
+                                        :formPontosCavernicola="props.campanha?.formPontosCavernicola || []"
                                         :naoSeAplica="props.campanha?.nao_se_aplica"
                                         :subStep="subStep"
                                         @next="setActiveTab('metodologia')"
@@ -496,8 +494,7 @@ const finalizarAvaliacao = () => {
                                             </div>
                                         </form>
                                     </div>
-                                    <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
-                                </div>
+                                 </div>
                             </div>
                             <!-- Aba Metodologia -->
                             <div v-if="activeTab === 'metodologia'" class="tab-pane fade" :class="{ 'show active': activeTab === 'metodologia' }">
