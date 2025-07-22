@@ -186,7 +186,7 @@ const salvarAprovacao = () => {
                             </div>
                             <div v-if="activeTab === 'metodologia'" class="tab-pane fade" :class="{ 'show active': activeTab === 'metodologia' }">
                                 <MetodologiaVisualizar
-                                    :formMetodologia="campanha.formMetodologia || {}"
+                                    :formMetodologia="campanha.metodologias || []"
                                     @prev="setActiveTab('apresentacao')"
                                     @next="setActiveTab('resultados')"
                                 />

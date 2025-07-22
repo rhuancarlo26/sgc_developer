@@ -285,13 +285,13 @@ class FaunaController extends Controller
             'umidade_relativa_externa' => null,
         ];
 
-        $formMetodologia = $campanha->metodologias->isNotEmpty() ? [
-            'grupo_faunistico' => $campanha->metodologias->last()->grupo_faunistico,
-            'metodologia' => $campanha->metodologias->last()->metodologia,
-        ] : [
-            'grupo_faunistico' => null,
-            'metodologia' => null,
-        ];
+        $formMetodologia = $campanha->metodologias->isNotEmpty() ? $campanha->metodologias->map(function ($metodologia) {
+            return [
+                'id' => $metodologia->id,
+                'grupo_faunistico' => $metodologia->grupo_faunistico,
+                'metodologia' => $metodologia->metodologia,
+            ];
+        })->toArray() : [];
 
         $formResultados = $campanha->resultados->isNotEmpty() ? [
             'id_campanha' => $campanha->resultados->last()->id_campanha,
@@ -591,13 +591,14 @@ class FaunaController extends Controller
         ];
 
         // Verificar se a relação metodologias está carregada e é uma coleção
-        $formMetodologia = ($campanhaObj->relationLoaded('metodologias') && $campanhaObj->metodologias && $campanhaObj->metodologias->isNotEmpty()) ? [
-            'grupo_faunistico' => $campanhaObj->metodologias->last()->grupo_faunistico,
-            'metodologia' => $campanhaObj->metodologias->last()->metodologia,
-        ] : [
-            'grupo_faunistico' => null,
-            'metodologia' => null,
-        ];
+        $formMetodologia = ($campanhaObj->relationLoaded('metodologias') && $campanhaObj->metodologias && $campanhaObj->metodologias->isNotEmpty()) ? 
+            $campanhaObj->metodologias->map(function ($metodologia) {
+                return [
+                    'id' => $metodologia->id,
+                    'grupo_faunistico' => $metodologia->grupo_faunistico,
+                    'metodologia' => $metodologia->metodologia,
+                ];
+            })->toArray() : [];
 
         // Verificar se a relação resultados está carregada e é uma coleção
         $formResultados = ($campanhaObj->relationLoaded('resultados') && $campanhaObj->resultados && $campanhaObj->resultados->isNotEmpty()) ? [
