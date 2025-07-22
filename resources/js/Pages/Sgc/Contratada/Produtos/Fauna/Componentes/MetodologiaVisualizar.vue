@@ -5,8 +5,8 @@ import NavButton from '@/Components/NavButton.vue';
 
 defineProps({
   formMetodologia: {
-    type: Object,
-    default: () => ({}),
+    type: Array, // Alterado de Object para Array
+    default: () => [], // Padrão é um array vazio
   },
 });
 
@@ -19,26 +19,28 @@ defineEmits(['next', 'prev']);
       <h4 class="mb-3" style="text-align: center;">METODOLOGIA</h4>
 
       <!-- Dados da Metodologia -->
-      <div v-if="formMetodologia && Object.keys(formMetodologia).length" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div>
-          <InputLabel value="GRUPO FAUNÍSTICO" for="grupo_faunistico" />
-          <input
-            type="text"
-            class="form-control"
-            id="grupo_faunistico"
-            :value="formMetodologia.grupo_faunistico || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div class="sm:col-span-2">
-          <InputLabel value="METODOLOGIA" for="metodologia" />
-          <textarea
-            class="form-control"
-            id="metodologia"
-            rows="4"
-            :value="formMetodologia.metodologia || 'Não informado'"
-            disabled
-          ></textarea>
+      <div v-if="formMetodologia && formMetodologia.length" class="mb-6">
+        <div v-for="(metodologia, index) in formMetodologia" :key="index" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <InputLabel :value="'GRUPO FAUNÍSTICO ' + (index + 1)" :for="'grupo_faunistico_' + index" />
+            <input
+              type="text"
+              class="form-control"
+              :id="'grupo_faunistico_' + index"
+              :value="metodologia.grupo_faunistico || 'Não informado'"
+              disabled
+            />
+          </div>
+          <div class="sm:col-span-2">
+            <InputLabel :value="'METODOLOGIA ' + (index + 1)" :for="'metodologia_' + index" />
+            <textarea
+              class="form-control"
+              :id="'metodologia_' + index"
+              rows="4"
+              :value="metodologia.metodologia || 'Não informado'"
+              disabled
+            ></textarea>
+          </div>
         </div>
       </div>
       <div v-else class="alert alert-info text-center">

@@ -511,7 +511,7 @@ const finalizarAvaliacao = () => {
                                     <span class="badge bg-warning text-white">Pendente</span>
                                 </div>
                                 <MetodologiaVisualizar
-                                    :formMetodologia="props.campanha?.formMetodologia || {}"
+                                    :formMetodologia="props.campanha?.formMetodologia || []"
                                     @prev="setActiveTab('apresentacao')"
                                     @next="setActiveTab('resultados')"
                                 />
