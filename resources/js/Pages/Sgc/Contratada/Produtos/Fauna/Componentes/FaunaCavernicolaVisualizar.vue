@@ -5,8 +5,8 @@ import NavButton from '@/Components/NavButton.vue';
 
 defineProps({
   formPontosCavernicola: {
-    type: Object,
-    default: () => ({}),
+    type: Array,
+    default: () => [],
   },
   naoSeAplica: {
     type: Boolean,
@@ -26,114 +26,45 @@ defineEmits(['next', 'prev']);
     <div class="card-body">
       <h4 class="mb-3" style="text-align: center;">FAUNA CAVERNÍCOLA</h4>
 
-      <!-- Dados do Ponto de Fauna Cavernícola -->
-      <div v-if="formPontosCavernicola && Object.keys(formPontosCavernicola).length" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div>
-          <InputLabel value="NÃO SE APLICA" for="nao_se_aplica" />
-          <input
-            type="text"
-            class="form-control"
-            id="nao_se_aplica"
-            :value="naoSeAplica ? 'Sim' : 'Não'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="CAVIDADE" for="cavidade" />
-          <input
-            type="text"
-            class="form-control"
-            id="cavidade"
-            :value="formPontosCavernicola.cavidade || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="LATITUDE" for="latitude" />
-          <input
-            type="text"
-            class="form-control"
-            id="latitude"
-            :value="formPontosCavernicola.latitude || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="LONGITUDE" for="longitude" />
-          <input
-            type="text"
-            class="form-control"
-            id="longitude"
-            :value="formPontosCavernicola.longitude || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="DISTÂNCIA DO EIXO DA RODOVIA (m)" for="distancia_eixo_rodovia" />
-          <input
-            type="text"
-            class="form-control"
-            id="distancia_eixo_rodovia"
-            :value="formPontosCavernicola.distancia_eixo_rodovia || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="FORMAÇÃO ASSOCIADA" for="formacao_associada" />
-          <input
-            type="text"
-            class="form-control"
-            id="formacao_associada"
-            :value="formPontosCavernicola.formacao_associada || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="TEMPERATURA MÉDIA INTERNA (°C)" for="temperatura_media_interna" />
-          <input
-            type="text"
-            class="form-control"
-            id="temperatura_media_interna"
-            :value="formPontosCavernicola.temperatura_media_interna || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="TEMPERATURA MÉDIA EXTERNA (°C)" for="temperatura_media_externa" />
-          <input
-            type="text"
-            class="form-control"
-            id="temperatura_media_externa"
-            :value="formPontosCavernicola.temperatura_media_externa || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="UMIDADE RELATIVA INTERNA (%)" for="umidade_relativa_interna" />
-          <input
-            type="text"
-            class="form-control"
-            id="umidade_relativa_interna"
-            :value="formPontosCavernicola.umidade_relativa_interna || 'Não informado'"
-            disabled
-          />
-        </div>
-        <div>
-          <InputLabel value="UMIDADE RELATIVA EXTERNA (%)" for="umidade_relativa_externa" />
-          <input
-            type="text"
-            class="form-control"
-            id="umidade_relativa_externa"
-            :value="formPontosCavernicola.umidade_relativa_externa || 'Não informado'"
-            disabled
-          />
-        </div>
+      <div v-if="naoSeAplica" class="alert alert-info text-center">
+        Não se aplica.
+      </div>
+      <div v-else-if="formPontosCavernicola && formPontosCavernicola.length" class="overflow-x-auto mb-6">
+        <table class="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="py-2 px-4 border-b text-left">ID</th>
+              <th class="py-2 px-4 border-b text-left">Cavidade</th>
+              <th class="py-2 px-4 border-b text-left">Latitude</th>
+              <th class="py-2 px-4 border-b text-left">Longitude</th>
+              <th class="py-2 px-4 border-b text-left">Distância do Eixo da Rodovia (m)</th>
+              <th class="py-2 px-4 border-b text-left">Formação Associada</th>
+              <th class="py-2 px-4 border-b text-left">Temp. Média Interna (°C)</th>
+              <th class="py-2 px-4 border-b text-left">Temp. Média Externa (°C)</th>
+              <th class="py-2 px-4 border-b text-left">Umidade Relativa Interna (%)</th>
+              <th class="py-2 px-4 border-b text-left">Umidade Relativa Externa (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="ponto in formPontosCavernicola" :key="ponto.id" class="hover:bg-gray-50">
+              <td class="py-2 px-4 border-b">{{ ponto.id || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.cavidade || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.latitude || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.longitude || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.distancia_eixo_rodovia || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.formacao_associada || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.temperatura_media_interna || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.temperatura_media_externa || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.umidade_relativa_interna || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.umidade_relativa_externa || 'Não informado' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div v-else class="alert alert-info text-center">
         Nenhum dado de ponto de fauna cavernícola disponível.
       </div>
 
-      <!-- Navegação -->
       <div class="d-flex justify-content-between mt-4">
         <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
         <NavButton type="button" type-button="primary" title="Avançar" @click="$emit('next')" />
@@ -160,27 +91,18 @@ defineEmits(['next', 'prev']);
   margin-bottom: 1.5rem;
   text-align: center;
 }
-.form-control:disabled {
-  background-color: #f8f9fa;
-  color: #495057;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 200px;
-  max-width: 100%;
+table {
+  border-collapse: collapse;
+}
+th, td {
   padding: 0.5rem 1rem;
-  font-size: 1rem;
+  border: 1px solid #dee2e6;
 }
-.grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(1, 1fr);
+thead {
+  background-color: #f8f9fa;
 }
-@media (min-width: 640px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+tr:hover {
+  background-color: #f1f5f9;
 }
 .alert-info {
   font-size: 1rem;

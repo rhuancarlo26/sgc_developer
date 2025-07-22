@@ -153,7 +153,7 @@ const salvarAprovacao = () => {
                                 />
                                 <ModulosAmostraisVisualizar
                                     v-if="subStep === 3"
-                                    :form-modulo-amostral="campanha.formModuloAmostral || {}"
+                                    :form-modulo-amostral="campanha.modulos_amostrais || []"
                                     :modulo-records="campanha.modulos_amostrais || []"
                                     :sub-step="subStep"
                                     @next="subStep = 4"
@@ -161,7 +161,7 @@ const salvarAprovacao = () => {
                                 />
                                 <QueloniosCrocodilianosVisualizar
                                     v-if="subStep === 4"
-                                    :formPontosAmostragem="campanha.formPontosAmostragem || {}"
+                                    :formPontosAmostragem="campanha.pontos_quelo_crocod || []"
                                     :naoSeAplica="campanha.nao_se_aplica"
                                     :subStep="subStep"
                                     @next="subStep = 5"
@@ -173,7 +173,7 @@ const salvarAprovacao = () => {
                                 </QueloniosCrocodilianosVisualizar>
                                 <FaunaCavernicolaVisualizar
                                     v-if="subStep === 5"
-                                    :formPontosCavernicola="campanha.formPontosCavernicola || {}"
+                                    :formPontosCavernicola="campanha.formPontosCavernicola || []"
                                     :naoSeAplica="campanha.nao_se_aplica"
                                     :subStep="subStep"
                                     @next="setActiveTab('metodologia')"

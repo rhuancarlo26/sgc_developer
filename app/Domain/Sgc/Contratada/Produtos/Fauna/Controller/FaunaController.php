@@ -215,75 +215,51 @@ class FaunaController extends Controller
 
         $modulosManuais = SgcFaunaModuloAmostral::where('campanha_id', $campanhaId)->get();
 
-        $formModuloAmostral = $modulosManuais->isNotEmpty() ? [
-            'id' => $modulosManuais->last()->id,
-            'data_cadastro' => $modulosManuais->last()->data_cadastro,
-            'tamanho_modulo' => $modulosManuais->last()->tamanho_modulo,
-            'uf' => $modulosManuais->last()->uf,
-            'municipio' => $modulosManuais->last()->municipio,
-            'bioma' => $modulosManuais->last()->bioma,
-            'fitofisionomia' => $modulosManuais->last()->fitofisionomia,
-            'latitude_inicial' => $modulosManuais->last()->latitude_inicial,
-            'longitude_inicial' => $modulosManuais->last()->longitude_inicial,
-            'latitude_final' => $modulosManuais->last()->latitude_final,
-            'longitude_final' => $modulosManuais->last()->longitude_final,
-            'arquivo' => $modulosManuais->last()->nome_arquivo,
-            'obs' => $modulosManuais->last()->obs,
-        ] : [
-            'id' => null,
-            'data_cadastro' => null,
-            'tamanho_modulo' => null,
-            'uf' => null,
-            'municipio' => null,
-            'bioma' => null,
-            'fitofisionomia' => null,
-            'latitude_inicial' => null,
-            'longitude_inicial' => null,
-            'latitude_final' => null,
-            'longitude_final' => null,
-            'arquivo' => null,
-            'obs' => null,
-        ];
+        $formModuloAmostral = $modulosManuais->isNotEmpty() ? $modulosManuais->map(function ($modulo) {
+            return [
+                'id' => $modulo->id,
+                'data_cadastro' => $modulo->data_cadastro,
+                'tamanho_modulo' => $modulo->tamanho_modulo,
+                'uf' => $modulo->uf,
+                'municipio' => $modulo->municipio,
+                'bioma' => $modulo->bioma,
+                'fitofisionomia' => $modulo->fitofisionomia,
+                'latitude_inicial' => $modulo->latitude_inicial,
+                'longitude_inicial' => $modulo->longitude_inicial,
+                'latitude_final' => $modulo->latitude_final,
+                'longitude_final' => $modulo->longitude_final,
+                'arquivo' => $modulo->nome_arquivo,
+                'obs' => $modulo->obs,
+            ];
+        })->toArray() : [];
 
-        $formPontosAmostragem = $campanha->pontos_quelo_crocod->isNotEmpty() ? [
-            'ponto_de_coleta' => $campanha->pontos_quelo_crocod->last()->ponto_de_coleta,
-            'nome_curso_hidrico' => $campanha->pontos_quelo_crocod->last()->nome_curso_hidrico,
-            'coordenadas' => $campanha->pontos_quelo_crocod->last()->coordenadas,
-            'bacia' => $campanha->pontos_quelo_crocod->last()->bacia_hidrografica,
-            'profundidade' => $campanha->pontos_quelo_crocod->last()->profundidade,
-            'largura' => $campanha->pontos_quelo_crocod->last()->largura,
-            'tipo_substrato' => $campanha->pontos_quelo_crocod->last()->tipo_substrato,
-        ] : [
-            'ponto_de_coleta' => null,
-            'nome_curso_hidrico' => null,
-            'coordenadas' => null,
-            'bacia' => null,
-            'profundidade' => null,
-            'largura' => null,
-            'tipo_substrato' => null,
-        ];
+        $formPontosAmostragem = $campanha->pontos_quelo_crocod->isNotEmpty() ? $campanha->pontos_quelo_crocod->map(function ($ponto) {
+            return [
+                'id' => $ponto->id,
+                'ponto_de_coleta' => $ponto->ponto_de_coleta,
+                'nome_curso_hidrico' => $ponto->nome_curso_hidrico,
+                'coordenadas' => $ponto->coordenadas,
+                'bacia' => $ponto->bacia_hidrografica,
+                'profundidade' => $ponto->profundidade,
+                'largura' => $ponto->largura,
+                'tipo_substrato' => $ponto->tipo_substrato,
+            ];
+        })->toArray() : [];
 
-        $formPontosCavernicola = $campanha->pontos_cavernicola->isNotEmpty() ? [
-            'cavidade' => $campanha->pontos_cavernicola->last()->cavidade,
-            'latitude' => $campanha->pontos_cavernicola->last()->latitude,
-            'longitude' => $campanha->pontos_cavernicola->last()->longitude,
-            'distancia_eixo_rodovia' => $campanha->pontos_cavernicola->last()->distancia_eixo_rodovia,
-            'formacao_associada' => $campanha->pontos_cavernicola->last()->formacao_associada,
-            'temperatura_media_interna' => $campanha->pontos_cavernicola->last()->temperatura_media_interna,
-            'temperatura_media_externa' => $campanha->pontos_cavernicola->last()->temperatura_media_externa,
-            'umidade_relativa_interna' => $campanha->pontos_cavernicola->last()->umidade_relativa_interna,
-            'umidade_relativa_externa' => $campanha->pontos_cavernicola->last()->umidade_relativa_externa,
-        ] : [
-            'cavidade' => null,
-            'latitude' => null,
-            'longitude' => null,
-            'distancia_eixo_rodovia' => null,
-            'formacao_associada' => null,
-            'temperatura_media_interna' => null,
-            'temperatura_media_externa' => null,
-            'umidade_relativa_interna' => null,
-            'umidade_relativa_externa' => null,
-        ];
+        $formPontosCavernicola = $campanha->pontos_cavernicola->isNotEmpty() ? $campanha->pontos_cavernicola->map(function ($ponto) {
+            return [
+                'id' => $ponto->id,
+                'cavidade' => $ponto->cavidade,
+                'latitude' => $ponto->latitude,
+                'longitude' => $ponto->longitude,
+                'distancia_eixo_rodovia' => $ponto->distancia_eixo_rodovia,
+                'formacao_associada' => $ponto->formacao_associada,
+                'temperatura_media_interna' => $ponto->temperatura_media_interna,
+                'temperatura_media_externa' => $ponto->temperatura_media_externa,
+                'umidade_relativa_interna' => $ponto->umidade_relativa_interna,
+                'umidade_relativa_externa' => $ponto->umidade_relativa_externa,
+            ];
+        })->toArray() : [];
 
         $formMetodologia = $campanha->metodologias->isNotEmpty() ? $campanha->metodologias->map(function ($metodologia) {
             return [
@@ -411,7 +387,7 @@ class FaunaController extends Controller
                 'pontos_quelo_crocod' => $campanha->pontos_quelo_crocod->map(function ($ponto) {
                     return [
                         'id' => $ponto->id,
-                        // 'ponto_de_coleta' => $ponto->ponto_de_coleta,
+                        'ponto_de_coleta' => $ponto->ponto_de_coleta,
                         'nome_curso_hidrico' => $ponto->nome_curso_hidrico,
                         'coordenadas' => $ponto->coordenadas,
                         'bacia' => $ponto->bacia_hidrografica,
@@ -518,77 +494,55 @@ class FaunaController extends Controller
         $analises = $this->faunaFiscalService->getAnalisesByCampanha($contrato, $campanha);
 
         // Verificar se a relação modulos_amostrais está carregada e é uma coleção
-        $formModuloAmostral = ($campanhaObj->relationLoaded('modulos_amostrais') && $campanhaObj->modulos_amostrais && $campanhaObj->modulos_amostrais->isNotEmpty()) ? [
-            'id' => $campanhaObj->modulos_amostrais->last()->id,
-            'data_cadastro' => $campanhaObj->modulos_amostrais->last()->data_cadastro,
-            'tamanho_modulo' => $campanhaObj->modulos_amostrais->last()->tamanho_modulo,
-            'uf' => $campanhaObj->modulos_amostrais->last()->uf,
-            'municipio' => $campanhaObj->modulos_amostrais->last()->municipio,
-            'bioma' => $campanhaObj->modulos_amostrais->last()->bioma,
-            'fitofisionomia' => $campanhaObj->modulos_amostrais->last()->fitofisionomia,
-            'latitude_inicial' => $campanhaObj->modulos_amostrais->last()->latitude_inicial,
-            'longitude_inicial' => $campanhaObj->modulos_amostrais->last()->longitude_inicial,
-            'latitude_final' => $campanhaObj->modulos_amostrais->last()->latitude_final,
-            'longitude_final' => $campanhaObj->modulos_amostrais->last()->longitude_final,
-            'arquivo' => $campanhaObj->modulos_amostrais->last()->nome_arquivo,
-            'obs' => $campanhaObj->modulos_amostrais->last()->obs,
-        ] : [
-            'id' => null,
-            'data_cadastro' => null,
-            'tamanho_modulo' => null,
-            'uf' => null,
-            'municipio' => null,
-            'bioma' => null,
-            'fitofisionomia' => null,
-            'latitude_inicial' => null,
-            'longitude_inicial' => null,
-            'latitude_final' => null,
-            'longitude_final' => null,
-            'arquivo' => null,
-            'obs' => null,
-        ];
+        $formModuloAmostral = ($campanhaObj->relationLoaded('modulos_amostrais') && $campanhaObj->modulos_amostrais && $campanhaObj->modulos_amostrais->isNotEmpty()) ? 
+            $campanhaObj->modulos_amostrais->map(function ($modulo) {
+                return [
+                    'id' => $modulo->id,
+                    'data_cadastro' => $modulo->data_cadastro,
+                    'tamanho_modulo' => $modulo->tamanho_modulo,
+                    'uf' => $modulo->uf,
+                    'municipio' => $modulo->municipio,
+                    'bioma' => $modulo->bioma,
+                    'fitofisionomia' => $modulo->fitofisionomia,
+                    'latitude_inicial' => $modulo->latitude_inicial,
+                    'longitude_inicial' => $modulo->longitude_inicial,
+                    'latitude_final' => $modulo->latitude_final,
+                    'longitude_final' => $modulo->longitude_final,
+                    'arquivo' => $modulo->nome_arquivo,
+                    'obs' => $modulo->obs,
+                ];
+            })->toArray() : [];
 
         // Verificar se a relação pontos_quelo_crocod está carregada e é uma coleção
-        $formPontosAmostragem = ($campanhaObj->relationLoaded('pontos_quelo_crocod') && $campanhaObj->pontos_quelo_crocod && $campanhaObj->pontos_quelo_crocod->isNotEmpty()) ? [
-            'ponto_de_coleta' => $campanhaObj->pontos_quelo_crocod->last()->ponto_de_coleta,
-            'nome_curso_hidrico' => $campanhaObj->pontos_quelo_crocod->last()->nome_curso_hidrico,
-            'coordenadas' => $campanhaObj->pontos_quelo_crocod->last()->coordenadas,
-            'bacia' => $campanhaObj->pontos_quelo_crocod->last()->bacia_hidrografica,
-            'profundidade' => $campanhaObj->pontos_quelo_crocod->last()->profundidade,
-            'largura' => $campanhaObj->pontos_quelo_crocod->last()->largura,
-            'tipo_substrato' => $campanhaObj->pontos_quelo_crocod->last()->tipo_substrato,
-        ] : [
-            'ponto_de_coleta' => null,
-            'nome_curso_hidrico' => null,
-            'coordenadas' => null,
-            'bacia' => null,
-            'profundidade' => null,
-            'largura' => null,
-            'tipo_substrato' => null,
-        ];
+        $formPontosAmostragem = ($campanhaObj->relationLoaded('pontos_quelo_crocod') && $campanhaObj->pontos_quelo_crocod && $campanhaObj->pontos_quelo_crocod->isNotEmpty()) ? 
+            $campanhaObj->pontos_quelo_crocod->map(function ($ponto) {
+                return [
+                    'id' => $ponto->id,
+                    'ponto_de_coleta' => $ponto->ponto_de_coleta,
+                    'nome_curso_hidrico' => $ponto->nome_curso_hidrico,
+                    'coordenadas' => $ponto->coordenadas,
+                    'bacia' => $ponto->bacia_hidrografica,
+                    'profundidade' => $ponto->profundidade,
+                    'largura' => $ponto->largura,
+                    'tipo_substrato' => $ponto->tipo_substrato,
+                ];
+            })->toArray() : [];
 
-        // Verificar se a relação pontos_cavernicola está carregada e é uma coleção
-        $formPontosCavernicola = ($campanhaObj->relationLoaded('pontos_cavernicola') && $campanhaObj->pontos_cavernicola && $campanhaObj->pontos_cavernicola->isNotEmpty()) ? [
-            'cavidade' => $campanhaObj->pontos_cavernicola->last()->cavidade,
-            'latitude' => $campanhaObj->pontos_cavernicola->last()->latitude,
-            'longitude' => $campanhaObj->pontos_cavernicola->last()->longitude,
-            'distancia_eixo_rodovia' => $campanhaObj->pontos_cavernicola->last()->distancia_eixo_rodovia,
-            'formacao_associada' => $campanhaObj->pontos_cavernicola->last()->formacao_associada,
-            'temperatura_media_interna' => $campanhaObj->pontos_cavernicola->last()->temperatura_media_interna,
-            'temperatura_media_externa' => $campanhaObj->pontos_cavernicola->last()->temperatura_media_externa,
-            'umidade_relativa_interna' => $campanhaObj->pontos_cavernicola->last()->umidade_relativa_interna,
-            'umidade_relativa_externa' => $campanhaObj->pontos_cavernicola->last()->umidade_relativa_externa,
-        ] : [
-            'cavidade' => null,
-            'latitude' => null,
-            'longitude' => null,
-            'distancia_eixo_rodovia' => null,
-            'formacao_associada' => null,
-            'temperatura_media_interna' => null,
-            'temperatura_media_externa' => null,
-            'umidade_relativa_interna' => null,
-            'umidade_relativa_externa' => null,
-        ];
+        $formPontosCavernicola = ($campanhaObj->relationLoaded('pontos_cavernicola') && $campanhaObj->pontos_cavernicola && $campanhaObj->pontos_cavernicola->isNotEmpty()) ? 
+            $campanhaObj->pontos_cavernicola->map(function ($ponto) {
+                return [
+                    'id' => $ponto->id,
+                    'cavidade' => $ponto->cavidade,
+                    'latitude' => $ponto->latitude,
+                    'longitude' => $ponto->longitude,
+                    'distancia_eixo_rodovia' => $ponto->distancia_eixo_rodovia,
+                    'formacao_associada' => $ponto->formacao_associada,
+                    'temperatura_media_interna' => $ponto->temperatura_media_interna,
+                    'temperatura_media_externa' => $ponto->temperatura_media_externa,
+                    'umidade_relativa_interna' => $ponto->umidade_relativa_interna,
+                    'umidade_relativa_externa' => $ponto->umidade_relativa_externa,
+                ];
+            })->toArray() : [];
 
         // Verificar se a relação metodologias está carregada e é uma coleção
         $formMetodologia = ($campanhaObj->relationLoaded('metodologias') && $campanhaObj->metodologias && $campanhaObj->metodologias->isNotEmpty()) ? 
@@ -936,10 +890,9 @@ class FaunaController extends Controller
                 'cod_emp' => 'required|string|max:255',
                 'subproduto' => 'required|string|max:255',
                 'nao_se_aplica' => 'nullable|boolean',
-                'abios' => 'nullable|array', // Ajustado para validar o array abios
-                'abios.*.id' => 'nullable|integer|exists:licencas,id', // Valida abios.*.id
+                'abios' => 'nullable|array',
                 'profissionais' => 'nullable|array',
-                'profissionais.*.id' => 'nullable|integer|exists:sgc_fauna_profissionais,id',
+                // 'profissionais.*.id' => 'nullable|integer|exists:sgc_fauna_profissionais,id',
                 'profissionais.*.grupo_faunistico' => 'nullable|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
                 'profissionais.*.profissional.formacao' => 'nullable|string|max:255',
                 'modulos_amostrais' => 'nullable|array',
@@ -991,6 +944,7 @@ class FaunaController extends Controller
             Log::info('FaunaController: Antes do parsing', [
                 'id_abio_raw' => $request->input('id_abio'),
                 'profissionais_raw' => $request->input('profissionais'),
+                'abios_raw' => $request->input('abios'),
             ]);
 
             // Forçar parsing correto de abios
@@ -999,6 +953,7 @@ class FaunaController extends Controller
                     'abio_raw' => $abio,
                     'id_abio' => isset($abio['abio']['id']) ? (int) $abio['abio']['id'] : null,
                 ]);
+                // Usar o ID da licença recebido diretamente do frontend
                 return isset($abio['abio']['id']) ? (int) $abio['abio']['id'] : null;
             }, (array) $request->input('abios', []));
 

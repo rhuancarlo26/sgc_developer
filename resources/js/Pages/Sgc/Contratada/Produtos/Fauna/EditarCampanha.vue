@@ -44,15 +44,13 @@ const form = useForm({
   obs: props.campanha.observacoes || '',
   abio: { id_abio: null },
   profissional: { profissional: null, grupo_faunistico: null },
-
   abios: props.campanha.abios?.map(abio => ({
     id: abio.id,
     abio: {
-      id: abio.id,
-      numero_licenca: abio.abio?.numero_licenca || 'N/A',
+      id: abio.n_abio || abio.abio?.licenca?.id || abio.id, // Priorizar o ID da licença
+      numero_licenca: abio.abio?.licenca?.numero_licenca || abio.abio?.numero_licenca || 'N/A',
     },
   })) || [],
-
   profissionais: props.campanha.profissionais?.map(prof => ({
     id: prof.id,
     profissional: {
@@ -169,7 +167,7 @@ const vincularAbio = (abioData) => {
     form.abios.push({
       id: abioData.id,
       abio: {
-        id: abioData.abio.id,
+        id: abioData.abio.id, // ID da licença
         numero_licenca: abioData.abio.numero_licenca || 'N/A',
       },
     });
@@ -244,12 +242,11 @@ const formatAnexoLabel = (tipo) => {
 };
 
 const submitForm = () => {
-  // Log do estado inicial de abios e profissionais para depuração
   console.log('form.abios antes de enviar:', JSON.stringify(form.abios, null, 2));
   console.log('form.profissionais antes de enviar:', JSON.stringify(form.profissionais, null, 2));
 
   const formData = new FormData();
-  formData.append('_method', 'PUT'); // Simula PUT para o backend
+  formData.append('_method', 'PUT');
   formData.append('cod_emp', form.cod_emp);
   formData.append('subproduto', form.subproduto);
   if (form.data_campanha_inicial) formData.append('data_campanha_inicial', form.data_campanha_inicial);
@@ -260,9 +257,11 @@ const submitForm = () => {
   if (form.consideracoes) formData.append('consideracoes', form.consideracoes);
   if (form.planilha) formData.append('planilha', form.planilha);
 
-  // Envia todos os ABIOs (existentes e novos)
+  // Envia todos os ABIOs (existentes e novos) usando o ID da licença
   form.abios.forEach((abio, index) => {
-    formData.append(`id_abio[${index}]`, abio.id);
+    formData.append(`abios[${index}][id]`, abio.abio.id); // Enviar o ID da licença
+    formData.append(`abios[${index}][abio][id]`, abio.abio.id);
+    formData.append(`abios[${index}][abio][numero_licenca]`, abio.abio.numero_licenca || 'N/A');
   });
 
   // Envia todos os profissionais (existentes e novos), com verificação
@@ -362,7 +361,6 @@ const submitForm = () => {
     }
   });
 
-  // Log do formData enviado
   console.log('Enviando formData:', Array.from(formData.entries()));
 
   form.post(route('sgc.contratada.produtos.update', [props.contrato, props.produto, props.campanha.id]), {
@@ -405,15 +403,20 @@ const submitForm = () => {
         <div class="card">
           <div class="card-body">
             <h2 class="text-center mb-4">EDITAR CAMPANHA {{ props.produto.toUpperCase() }}</h2>
-            <h4 class="mb-3">Status: {{ props.campanha.status || 'Rejeitada' }}</h4>
+            <!-- <h4 class="mb-3">Status: {{ props.campanha.status || 'Rejeitada' }}</h4> -->
 
             <!-- Exibir análises (motivos da rejeição) -->
             <div v-if="props.campanha.analises?.length" class="mb-6">
-              <h4 class="mb-3" style="font-weight: bold;">Motivos da Rejeição</h4>
+              <h4 class="mb-3" style="font-weight: bold;">MOTIVOS DA REJEIÇÃO</h4>
               <div class="alert alert-info">
-                <ul class="list-disc pl-5">
-                  <li v-for="analise in props.campanha.analises" :key="analise.id">
-                    {{ analise.etapa }}: {{ analise.observacoes || 'Sem observações' }}
+                <ul class="list-none pl-0">
+                  <li
+                    v-for="(analise, index) in props.campanha.analises.filter(a => a.comentario)"
+                    :key="analise.id"
+                    class="analise-item"
+                    :class="{ 'analise-item-even': index % 2 === 0, 'analise-item-odd': index % 2 !== 0 }"
+                  >
+                    <span class="etapa">{{ analise.etapa }}:</span> {{ analise.comentario }}
                   </li>
                 </ul>
               </div>
@@ -684,5 +687,38 @@ tr:hover {
 .form-label {
   font-weight: 500;
   margin-bottom: 0.5rem;
+}
+
+.alert.alert-info {
+  background-color: #e7f1ff;
+  border: 1px solid #b6d4fe;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.analise-item {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: background-color 0.2s ease;
+}
+
+.analise-item-even {
+  background-color: #f8f9fa; /* Cinza claro para linhas pares */
+}
+
+.analise-item-odd {
+  background-color: #ffffff; /* Branco para linhas ímpares */
+}
+
+.analise-item:hover {
+  background-color: #e2e6ea; /* Efeito hover suave */
+}
+
+.etapa {
+  font-weight: 600;
+  color: #084298; /* Cor do texto da etapa, combinando com o alert-info */
 }
 </style>
