@@ -30,6 +30,14 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  ufs: {
+    type: Array,
+    default: () => [],
+  },
+  biomas: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const activeTab = ref('apresentacao');
@@ -47,7 +55,7 @@ const form = useForm({
   abios: props.campanha.abios?.map(abio => ({
     id: abio.id,
     abio: {
-      id: abio.n_abio || abio.abio?.licenca?.id || abio.id, // Priorizar o ID da licença
+      id: abio.n_abio || abio.abio?.licenca?.id || abio.id,
       numero_licenca: abio.abio?.licenca?.numero_licenca || abio.abio?.numero_licenca || 'N/A',
     },
   })) || [],
@@ -61,6 +69,7 @@ const form = useForm({
     grupo_faunistico: prof.grupo_faunistico || 'N/A',
   })) || [],
   modulos_amostrais: props.campanha.modulos_amostrais?.map(modulo => ({
+    id: modulo.id || null,
     data_cadastro: modulo.data_cadastro || '',
     tamanho_modulo: modulo.tamanho_modulo || '',
     uf: modulo.uf || '',
@@ -73,8 +82,10 @@ const form = useForm({
     longitude_final: modulo.longitude_final || null,
     obs: modulo.obs || '',
     arquivo: null,
+    arquivo_existente: modulo.arquivo_existente || null,
   })) || [],
   pontos_quelo_crocod: props.campanha.pontos_quelo_crocod?.map(ponto => ({
+    id: ponto.id || null,
     ponto_de_coleta: ponto.ponto_de_coleta || '',
     nome_curso_hidrico: ponto.nome_curso_hidrico || '',
     coordenadas: ponto.coordenadas || '',
@@ -84,6 +95,7 @@ const form = useForm({
     tipo_substrato: ponto.tipo_substrato || '',
   })) || [],
   pontos_cavernicola: props.campanha.pontos_cavernicola?.map(ponto => ({
+    id: ponto.id || null,
     cavidade: ponto.cavidade || '',
     latitude: ponto.latitude || null,
     longitude: ponto.longitude || null,
@@ -144,9 +156,76 @@ const form = useForm({
   },
 });
 
-console.log('Props.campanha.abios:', JSON.stringify(props.campanha.abios, null, 2));
-console.log('Props.abios:', JSON.stringify(props.abios, null, 2));
-console.log('Form.abios:', JSON.stringify(form.abios, null, 2));
+const adicionarPontoCavernicola = (ponto) => {
+  const newPonto = {
+    id: ponto.id || null,
+    cavidade: ponto.cavidade || '',
+    latitude: ponto.latitude || null,
+    longitude: ponto.longitude || null,
+    distancia_eixo_rodovia: ponto.distancia_eixo_rodovia || null,
+    formacao_associada: ponto.formacao_associada || '',
+    temperatura_media_interna: ponto.temperatura_media_interna || null,
+    temperatura_media_externa: ponto.temperatura_media_externa || null,
+    umidade_relativa_interna: ponto.umidade_relativa_interna || null,
+    umidade_relativa_externa: ponto.umidade_relativa_externa || null,
+  };
+  if (newPonto.id) {
+    const index = form.pontos_cavernicola.findIndex(p => p.id === newPonto.id);
+    if (index !== -1) {
+      form.pontos_cavernicola[index] = newPonto;
+    } else {
+      form.pontos_cavernicola.push(newPonto);
+    }
+  } else {
+    newPonto.id = Math.max(0, ...form.pontos_cavernicola.map(p => p.id || 0)) + 1;
+    form.pontos_cavernicola.push(newPonto);
+  }
+};
+
+const excluirPontoCavernicola = (id) => {
+  form.pontos_cavernicola = form.pontos_cavernicola.filter(ponto => ponto.id !== id);
+};
+
+const adicionarPontoQuelonios = (ponto) => {
+  const newPonto = {
+    ...ponto.value,
+    id: ponto.value.id || null,
+  };
+  if (newPonto.id) {
+    // Atualiza ponto existente
+    const index = form.pontos_quelo_crocod.findIndex(p => p.id === newPonto.id);
+    if (index !== -1) {
+      form.pontos_quelo_crocod[index] = newPonto;
+    }
+  } else {
+    // Adiciona novo ponto
+    form.pontos_quelo_crocod.push(newPonto);
+  }
+};
+
+const excluirPontoQuelonios = (id) => {
+  form.pontos_quelo_crocod = form.pontos_quelo_crocod.filter(ponto => ponto.id !== id);
+};
+
+const adicionarModulo = (modulo) => {
+  const newModulo = {
+    ...modulo.value,
+    id: modulo.value.id || null,
+    arquivo_existente: modulo.value.arquivo_existente || null,
+  };
+  if (newModulo.id) {
+    const index = form.modulos_amostrais.findIndex(m => m.id === newModulo.id);
+    if (index !== -1) {
+      form.modulos_amostrais[index] = newModulo;
+    }
+  } else {
+    form.modulos_amostrais.push(newModulo);
+  }
+};
+
+const excluirModulo = (id) => {
+  form.modulos_amostrais = form.modulos_amostrais.filter(modulo => modulo.id !== id);
+};
 
 const setActiveTab = (tab) => {
   activeTab.value = tab;
@@ -167,7 +246,7 @@ const vincularAbio = (abioData) => {
     form.abios.push({
       id: abioData.id,
       abio: {
-        id: abioData.abio.id, // ID da licença
+        id: abioData.abio.id,
         numero_licenca: abioData.abio.numero_licenca || 'N/A',
       },
     });
@@ -208,7 +287,7 @@ const salvarNovoProfissional = (novoProfissional) => {
   form.post(route('profissionais.store'), {
     data: novoProfissional,
     onSuccess: (page) => {
-      const novoProfissionalRetornado = page.props.flash.novoProfissional; 
+      const novoProfissionalRetornado = page.props.flash.novoProfissional;
       if (novoProfissionalRetornado) {
         props.profissionais.push({
           id: novoProfissionalRetornado.id,
@@ -216,7 +295,6 @@ const salvarNovoProfissional = (novoProfissional) => {
           formacao: novoProfissionalRetornado.formacao,
         });
       }
-      showModalProfissional.value = false;
     },
   });
 };
@@ -244,6 +322,8 @@ const formatAnexoLabel = (tipo) => {
 const submitForm = () => {
   console.log('form.abios antes de enviar:', JSON.stringify(form.abios, null, 2));
   console.log('form.profissionais antes de enviar:', JSON.stringify(form.profissionais, null, 2));
+  console.log('form.modulos_amostrais antes de enviar:', JSON.stringify(form.modulos_amostrais, null, 2));
+  console.log('form.pontos_quelo_crocod antes de enviar:', JSON.stringify(form.pontos_quelo_crocod, null, 2));
 
   const formData = new FormData();
   formData.append('_method', 'PUT');
@@ -257,27 +337,25 @@ const submitForm = () => {
   if (form.consideracoes) formData.append('consideracoes', form.consideracoes);
   if (form.planilha) formData.append('planilha', form.planilha);
 
-  // Envia todos os ABIOs (existentes e novos) usando o ID da licença
+  // Envia todos os ABIOs
   form.abios.forEach((abio, index) => {
-    formData.append(`abios[${index}][id]`, abio.abio.id); // Enviar o ID da licença
+    formData.append(`abios[${index}][id]`, abio.abio.id);
     formData.append(`abios[${index}][abio][id]`, abio.abio.id);
     formData.append(`abios[${index}][abio][numero_licenca]`, abio.abio.numero_licenca || 'N/A');
   });
 
-  // Envia todos os profissionais (existentes e novos), com verificação
+  // Envia todos os profissionais
   form.profissionais.forEach((prof, index) => {
-    console.log(`Processando profissional ${index}:`, JSON.stringify(prof, null, 2));
     if (prof.profissional && prof.profissional.id) {
       formData.append(`profissionais[${index}][id_profissional]`, prof.profissional.id);
       formData.append(`profissionais[${index}][grupo_faunistico]`, prof.grupo_faunistico);
       if (prof.profissional.formacao) formData.append(`profissionais[${index}][formacao]`, prof.profissional.formacao);
-    } else {
-      console.warn(`Profissional ${index} não tem id_profissional válido:`, JSON.stringify(prof, null, 2));
     }
   });
 
   // Envia módulos amostrais
   form.modulos_amostrais.forEach((modulo, index) => {
+    if (modulo.id) formData.append(`modulos_amostrais[${index}][id]`, modulo.id);
     if (modulo.data_cadastro) formData.append(`modulos_amostrais[${index}][data_cadastro]`, modulo.data_cadastro);
     if (modulo.tamanho_modulo) formData.append(`modulos_amostrais[${index}][tamanho_modulo]`, modulo.tamanho_modulo);
     if (modulo.uf) formData.append(`modulos_amostrais[${index}][uf]`, modulo.uf);
@@ -289,11 +367,13 @@ const submitForm = () => {
     if (modulo.latitude_final) formData.append(`modulos_amostrais[${index}][latitude_final]`, modulo.latitude_final);
     if (modulo.longitude_final) formData.append(`modulos_amostrais[${index}][longitude_final]`, modulo.longitude_final);
     if (modulo.obs) formData.append(`modulos_amostrais[${index}][obs]`, modulo.obs);
-    if (modulo.arquivo) formData.append(`modulos_amostrais[${index}][arquivo]`, modulo.arquivo);
+    if (modulo.arquivo instanceof File) formData.append(`modulos_amostrais[${index}][arquivo]`, modulo.arquivo);
+    if (modulo.arquivo_existente) formData.append(`modulos_amostrais[${index}][arquivo_existente]`, modulo.arquivo_existente);
   });
 
   // Envia pontos de quelônios/crocodilianos
   form.pontos_quelo_crocod.forEach((ponto, index) => {
+    if (ponto.id) formData.append(`pontos_quelo_crocod[${index}][id]`, ponto.id);
     if (ponto.ponto_de_coleta) formData.append(`pontos_quelo_crocod[${index}][ponto_de_coleta]`, ponto.ponto_de_coleta);
     if (ponto.nome_curso_hidrico) formData.append(`pontos_quelo_crocod[${index}][nome_curso_hidrico]`, ponto.nome_curso_hidrico);
     if (ponto.coordenadas) formData.append(`pontos_quelo_crocod[${index}][coordenadas]`, ponto.coordenadas);
@@ -305,6 +385,7 @@ const submitForm = () => {
 
   // Envia pontos de fauna cavernícola
   form.pontos_cavernicola.forEach((ponto, index) => {
+    if (ponto.id) formData.append(`pontos_cavernicola[${index}][id]`, ponto.id);
     if (ponto.cavidade) formData.append(`pontos_cavernicola[${index}][cavidade]`, ponto.cavidade);
     if (ponto.latitude) formData.append(`pontos_cavernicola[${index}][latitude]`, ponto.latitude);
     if (ponto.longitude) formData.append(`pontos_cavernicola[${index}][longitude]`, ponto.longitude);
@@ -382,10 +463,19 @@ const submitForm = () => {
     },
     onError: (errors) => {
       console.error('Erros ao salvar campanha:', errors);
+      // Propagar erros para o formulário de pontos de quelônios/crocodilianos
+      Object.keys(errors).forEach(key => {
+        if (key.startsWith('pontos_quelo_crocod.')) {
+          const [_, index, field] = key.split('.');
+          if (!form.pontos_quelo_crocod[index].errors) {
+            form.pontos_quelo_crocod[index].errors = {};
+          }
+          form.pontos_quelo_crocod[index].errors[field] = errors[key];
+        }
+      });
     },
   });
 };
-
 </script>
 
 <template>
@@ -409,9 +499,14 @@ const submitForm = () => {
             <div v-if="props.campanha.analises?.length" class="mb-6">
               <h4 class="mb-3" style="font-weight: bold;">Motivos da Rejeição</h4>
               <div class="alert alert-info">
-                <ul class="list-disc pl-5">
-                  <li v-for="analise in props.campanha.analises" :key="analise.id">
-                    {{ analise.etapa }}: {{ analise.observacoes || 'Sem observações' }}
+                <ul class="list-none pl-0">
+                  <li
+                    v-for="(analise, index) in props.campanha.analises.filter(a => a.comentario)"
+                    :key="analise.id"
+                    class="analise-item"
+                    :class="{ 'analise-item-even': index % 2 === 0, 'analise-item-odd': index % 2 !== 0 }"
+                  >
+                    <span class="etapa">{{ analise.etapa }}:</span> {{ analise.comentario }}
                   </li>
                 </ul>
               </div>
@@ -454,12 +549,12 @@ const submitForm = () => {
                   <div v-if="subStep === 1">
                     <h4 class="text-center mb-3" style="font-weight: bold;">APRESENTAÇÃO</h4>
                     <div class="mb-3">
-                        <label for="cod_emp" class="form-label">Empreendimento</label>
-                        <select v-model="form.cod_emp" class="form-select" id="cod_emp" required>
-                            <option value="">Selecione um empreendimento</option>
-                            <option v-for="emp in props.empreendimentos" :key="emp" :value="emp">{{ emp }}</option>
-                        </select>
-                        <InputError :message="form.errors.cod_emp" />
+                      <label for="cod_emp" class="form-label">Empreendimento</label>
+                      <select v-model="form.cod_emp" class="form-select" id="cod_emp" required>
+                        <option value="">Selecione um empreendimento</option>
+                        <option v-for="emp in props.empreendimentos" :key="emp" :value="emp">{{ emp }}</option>
+                      </select>
+                      <InputError :message="form.errors.cod_emp" />
                     </div>
                     <div class="mb-3">
                       <label class="form-label">Família</label>
@@ -502,7 +597,11 @@ const submitForm = () => {
                     v-if="subStep === 3"
                     :form="form"
                     :modulo-records="form.modulos_amostrais"
+                    :ufs="ufs"
+                    :biomas="biomas"
                     :sub-step="subStep"
+                    @adicionar-modulo="adicionarModulo"
+                    @excluir-modulo="excluirModulo"
                     @next="subStep = 4"
                     @prev="prevSubStep"
                   />
@@ -511,6 +610,8 @@ const submitForm = () => {
                     :form="form"
                     :ponto-records="form.pontos_quelo_crocod"
                     :sub-step="subStep"
+                    @adicionar-ponto="adicionarPontoQuelonios"
+                    @excluir-ponto="excluirPontoQuelonios"
                     @next="subStep = 5"
                     @prev="prevSubStep"
                   >
@@ -523,6 +624,8 @@ const submitForm = () => {
                     :form="form"
                     :ponto-records="form.pontos_cavernicola"
                     :sub-step="subStep"
+                    @adicionar-ponto-cavernicola="adicionarPontoCavernicola"
+                    @excluir-ponto-cavernicola="excluirPontoCavernicola"
                     @next="setActiveTab('metodologia')"
                     @prev="prevSubStep"
                   >
@@ -682,5 +785,32 @@ tr:hover {
 .form-label {
   font-weight: 500;
   margin-bottom: 0.5rem;
+}
+.alert.alert-info {
+  background-color: #e7f1ff;
+  border: 1px solid #b6d4fe;
+  border-radius: 6px;
+  padding: 1rem;
+}
+.analise-item {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: background-color 0.2s ease;
+}
+.analise-item-even {
+  background-color: #f8f9fa;
+}
+.analise-item-odd {
+  background-color: #ffffff;
+}
+.analise-item:hover {
+  background-color: #e2e6ea;
+}
+.etapa {
+  font-weight: 600;
+  color: #084298;
 }
 </style>

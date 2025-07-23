@@ -20,7 +20,11 @@ class SgcFaunaQuelonios extends Model
         'profundidade',
         'largura',
         'tipo_substrato',
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
+
 
     public function campanha()
     {

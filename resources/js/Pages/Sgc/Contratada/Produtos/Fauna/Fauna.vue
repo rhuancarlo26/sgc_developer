@@ -150,7 +150,7 @@ const analisarCampanha = (campanhaId) => {
                                                     <th class="text-center">Data Inicial</th>
                                                     <th class="text-center">Data Final</th>
                                                     <th class="text-center">Status</th>
-                                                    <th>Ação</th>
+                                                    <th class="text-center">Ação</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
