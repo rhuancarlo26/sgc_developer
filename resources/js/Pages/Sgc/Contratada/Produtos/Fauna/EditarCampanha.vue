@@ -432,38 +432,6 @@ console.log('FormData antes de enviar:', Array.from(formData.entries()));
     if (met.metodologia) formData.append(`metodologias[${index}][metodologia]`, met.metodologia);
   });
 
-  // Envia resultados
-  // form.resultados.forEach((res, index) => {
-  //   if (res.modulo) formData.append(`resultados[${index}][modulo]`, res.modulo);
-  //   if (res.parcela) formData.append(`resultados[${index}][parcela]`, res.parcela);
-  //   if (res.id_armadilha) formData.append(`resultados[${index}][id_armadilha]`, res.id_armadilha);
-  //   if (res.grupo_amostrado) formData.append(`resultados[${index}][grupo_amostrado]`, res.grupo_amostrado);
-  //   if (res.data_registro) formData.append(`resultados[${index}][data_registro]`, res.data_registro);
-  //   if (res.hora_registro) formData.append(`resultados[${index}][hora_registro]`, res.hora_registro);
-  //   if (res.categoria) formData.append(`resultados[${index}][categoria]`, res.categoria);
-  //   if (res.classe) formData.append(`resultados[${index}][classe]`, res.classe);
-  //   if (res.ordem) formData.append(`resultados[${index}][ordem]`, res.ordem);
-  //   if (res.familia) formData.append(`resultados[${index}][familia]`, res.familia);
-  //   if (res.genero) formData.append(`resultados[${index}][genero]`, res.genero);
-  //   if (res.especie) formData.append(`resultados[${index}][especie]`, res.especie);
-  //   if (res.nome_comum) formData.append(`resultados[${index}][nome_comum]`, res.nome_comum);
-  //   if (res.sexo) formData.append(`resultados[${index}][sexo]`, res.sexo);
-  //   if (res.faixa_etaria) formData.append(`resultados[${index}][faixa_etaria]`, res.faixa_etaria);
-  //   if (res.qnt_individuos) formData.append(`resultados[${index}][qnt_individuos]`, res.qnt_individuos);
-  //   if (res.num_marcacao) formData.append(`resultados[${index}][num_marcacao]`, res.num_marcacao);
-  //   if (res.coletado) formData.append(`resultados[${index}][coletado]`, res.coletado);
-  //   if (res.num_tombamento) formData.append(`resultados[${index}][num_tombamento]`, res.num_tombamento);
-  //   if (res.dados_biometricos) formData.append(`resultados[${index}][dados_biometricos]`, res.dados_biometricos);
-  //   if (res.comp_total) formData.append(`resultados[${index}][comp_total]`, res.comp_total);
-  //   if (res.cabeca) formData.append(`resultados[${index}][cabeca]`, res.cabeca);
-  //   if (res.cauda) formData.append(`resultados[${index}][cauda]`, res.cauda);
-  //   if (res.femur) formData.append(`resultados[${index}][femur]`, res.femur);
-  //   if (res.orelha) formData.append(`resultados[${index}][orelha]`, res.orelha);
-  //   if (res.peso) formData.append(`resultados[${index}][peso]`, res.peso);
-  //   if (res.status_conservacao_federal) formData.append(`resultados[${index}][status_conservacao_federal]`, res.status_conservacao_federal);
-  //   if (res.status_conservacao_iucn) formData.append(`resultados[${index}][status_conservacao_iucn]`, res.status_conservacao_iucn);
-  // });
-
   // Envia anexos
   Object.keys(form.anexos).forEach(tipo => {
     if (form.anexos[tipo]) {
@@ -681,6 +649,7 @@ console.log('FormData antes de enviar:', Array.from(formData.entries()));
                     @next="setActiveTab('anexos')"
                   />
                 </div>
+                
                 <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
                   <h4 class="mb-3" style="text-align: center;">ANEXOS</h4>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
