@@ -13,7 +13,10 @@ const props = defineProps({
     contratos: { type: Object, required: true },
     campanhas: { type: Array, default: () => [] },
     canApprove: { type: Boolean, default: false },
+    auth: { type: Object, required: true },
 });
+
+console.log('Auth:', props.auth);
 
 // Estado reativo para o subproduto selecionado e exibição de campanhas
 const selectedSubproduto = ref('');
@@ -65,6 +68,11 @@ const visualizarCampanha = (campanhaId) => {
 // Redirecionar para a análise de uma campanha específica
 const analisarCampanha = (campanhaId) => {
     router.get(route('sgc.contratada.produtos.analise', [props.contrato, props.produto.toLowerCase(), campanhaId]));
+};
+
+// Redirecionar para a edição de uma campanha específica
+const editarCampanha = (campanhaId) => {
+    router.get(route('sgc.contratada.produtos.edit', [props.contrato, props.produto.toLowerCase(), campanhaId]));
 };
 </script>
 
@@ -187,6 +195,12 @@ const analisarCampanha = (campanhaId) => {
                                                             title="Analisar"
                                                             @click="analisarCampanha(campanha.id)"
                                                         />
+                                                        <NavButton
+                                                            v-if="campanha.status === 'Rejeitada' && (props.auth.user.perfis_id ?? 0) !== 2"
+                                                            type-button="warning"
+                                                            title="Editar"
+                                                            @click="editarCampanha(campanha.id)"
+                                                        />
                                                     </td>
                                                 </tr>
                                                 <tr v-if="!filteredCampanhas.length">
@@ -234,6 +248,14 @@ const analisarCampanha = (campanhaId) => {
 
 .bg-info {
     background-color: #17a2b8 !important;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important; /* Estilo para o botão Editar */
+}
+
+.action-button.bg-warning:not(.cursor-not-allowed):hover {
+    background-color: #e0a800 !important; /* Hover para warning */
 }
 
 .table-responsive {
