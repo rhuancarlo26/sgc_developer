@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import { defineProps, defineEmits } from 'vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -165,4 +164,3 @@ tr:hover {
     background-color: #f1f5f9;
 }
 </style>
-```

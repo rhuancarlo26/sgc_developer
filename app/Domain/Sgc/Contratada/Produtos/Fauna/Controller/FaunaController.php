@@ -816,6 +816,8 @@ class FaunaController extends Controller
             'metodologias',
             'analises',
             'anexos',
+            'resultados', // Garante que a relação está carregada
+            'resultados_consideracoes',
         ])->findOrFail($campanhaId);
 
         $subproduto = $request->query('subproduto');
@@ -842,6 +844,54 @@ class FaunaController extends Controller
             'Amazônia', 'Caatinga', 'Cerrado', 'Mata Atlântica', 'Pampa', 'Pantanal'
         ];
 
+        // Mapeamento dos resultados
+        $resultados = $campanha->resultados->map(function ($resultado) {
+            return [
+                'id' => $resultado->id,
+                'id_campanha' => $resultado->id_campanha,
+                'modulo' => $resultado->modulo,
+                'parcela' => $resultado->parcela,
+                'id_armadilha' => $resultado->id_armadilha,
+                'grupo_amostrado' => $resultado->grupo_amostrado,
+                'data_registro' => $resultado->data_registro,
+                'hora_registro' => $resultado->hora_registro,
+                'categoria' => $resultado->categoria,
+                'classe' => $resultado->classe,
+                'ordem' => $resultado->ordem,
+                'familia' => $resultado->familia,
+                'genero' => $resultado->genero,
+                'especie' => $resultado->especie,
+                'nome_comum' => $resultado->nome_comum,
+                'sexo' => $resultado->sexo,
+                'faixa_etaria' => $resultado->faixa_etaria,
+                'qnt_individuos' => $resultado->qnt_individuos,
+                'num_marcacao' => $resultado->num_marcacao,
+                'coletado' => $resultado->coletado,
+                'num_tombamento' => $resultado->num_tombamento,
+                'dados_biometricos' => $resultado->dados_biometricos,
+                'comp_total' => $resultado->comp_total,
+                'cabeca' => $resultado->cabeca,
+                'cauda' => $resultado->cauda,
+                'femur' => $resultado->femur,
+                'orelha' => $resultado->orelha,
+                'peso' => $resultado->peso,
+                'status_conservacao_federal' => $resultado->status_conservacao_federal,
+                'status_conservacao_iucn' => $resultado->status_conservacao_iucn,
+            ];
+        })->toArray();
+
+        Log::info('Dados enviados para EditarCampanha.vue', [
+            'campanha' => $campanha->toArray(),
+            'contrato' => $contrato,
+            'produto' => $produto,
+            'abios' => $abios,
+            'profissionais' => $profissionais,
+            'ufs' => $ufs,
+            'biomas' => $biomas,
+            'resultados_count' => $campanha->resultados->count(),
+            'resultados' => $resultados,
+        ]);
+
         Log::info('Dados enviados para EditarCampanha.vue', [
             'campanha' => $campanha->toArray(),
             'contrato' => $contrato,
@@ -863,7 +913,11 @@ class FaunaController extends Controller
         }
 
         return Inertia::render('Sgc/Contratada/Produtos/Fauna/EditarCampanha', [
-            'campanha' => $campanha,
+            // 'campanha' => $campanha,
+            'campanha' => array_merge($campanha->toArray(), [
+            'resultados' => $resultados,
+            'resultados_consideracoes' => $campanha->resultados_consideracoes->consideracoes ?? null,
+        ]),
             'contrato' => $contrato,
             'produto' => $produto,
             'abios' => $abios,
@@ -944,6 +998,7 @@ class FaunaController extends Controller
                 'pontos_cavernicola.*.temperatura_media_externa' => 'nullable|numeric',
                 'pontos_cavernicola.*.umidade_relativa_interna' => 'nullable|numeric',
                 'pontos_cavernicola.*.umidade_relativa_externa' => 'nullable|numeric',
+                // 'metodologias.*.id' => 'nullable|integer|exists:sgc_fauna_metodologia,id',
                 'metodologias' => 'nullable|array',
                 'metodologias.*.grupo_faunistico' => 'nullable|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
                 'metodologias.*.metodologia' => 'nullable|string',
@@ -1033,6 +1088,10 @@ class FaunaController extends Controller
             ]);
             return redirect()->back()->withErrors(['error' => 'Erro ao atualizar campanha: ' . $e->getMessage()]);
         }
+
+        Log::info('FaunaController: Planilha recebida em update', [
+            'nome' => $request->hasFile('planilha') ? $request->file('planilha')->getClientOriginalName() : 'Nenhuma',
+        ]);
     }
 
 }

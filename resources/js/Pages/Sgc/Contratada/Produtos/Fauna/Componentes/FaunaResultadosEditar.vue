@@ -1,10 +1,12 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
-import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
+import InputLabel from '@/Components/InputLabel.vue';
 import NavButton from '@/Components/NavButton.vue';
+import { ref, watch } from 'vue';
+import * as XLSX from 'xlsx';
 
-defineProps({
+// Props
+const props = defineProps({
   form: {
     type: Object,
     required: true,
@@ -13,45 +15,112 @@ defineProps({
     type: Array,
     default: () => [],
   },
+  idCampanha: {
+    type: [String, Number],
+    required: true,
+  },
 });
 
-defineEmits(['next', 'prev']);
+// Emits
+const emit = defineEmits(['update:resultadosRecords', 'prev', 'next']);
 
-const addResultado = () => {
-  form.resultados.push({
-    modulo: '',
-    parcela: '',
-    id_armadilha: '',
-    grupo_amostrado: '',
-    data_registro: '',
-    hora_registro: '',
-    categoria: '',
-    classe: '',
-    ordem: '',
-    familia: '',
-    genero: '',
-    especie: '',
-    nome_comum: '',
-    sexo: '',
-    faixa_etaria: '',
-    qnt_individuos: null,
-    num_marcacao: '',
-    coletado: '',
-    num_tombamento: '',
-    dados_biometricos: '',
-    comp_total: null,
-    cabeca: null,
-    cauda: null,
-    femur: null,
-    orelha: null,
-    peso: null,
-    status_conservacao_federal: '',
-    status_conservacao_iucn: '',
-  });
+// Dados
+const consideracoes = ref(props.form.consideracoes || '');
+const resultadosRecords = ref(props.resultadosRecords);
+
+// Sincronizar considerações com o form pai
+watch(consideracoes, (newValue) => {
+  props.form.consideracoes = newValue;
+});
+
+// Download do modelo de planilha
+const downloadModelo = () => {
+  const headers = [
+    'ID Campanha', 'Módulo', 'Parcela', 'ID Armadilha', 'Grupo Amostrado', 'Data do Registro', 'Hora do Registro',
+    'Categoria', 'Classe', 'Ordem', 'Família', 'Gênero', 'Espécie', 'Nome Comum', 'Sexo', 'Faixa Etária',
+    'Qnt de Indivíduos', 'Num Marcação', 'Coletado', 'Num de Tombamento', 'Dados Biométricos', 'Comp total',
+    'Cabeça', 'Cauda', 'Fêmur', 'Orelha', 'Peso', 'Status Conservação Federal', 'Status Conservação IUCN'
+  ];
+  const ws = XLSX.utils.json_to_sheet([{}], { header: headers });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Resultados');
+  
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([wbout], { type: 'application/octet-stream' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'modelo_resultados.xlsx';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };
 
-const removeResultado = (index) => {
-  form.resultados.splice(index, 1);
+// Processar upload da planilha
+const processarPlanilha = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array', cellDates: false });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(sheet);
+
+    const novosResultados = json.map(row => ({
+      id: null, // ID será gerado pelo backend
+      id_campanha: row['ID Campanha'] || props.idCampanha,
+      modulo: row['Módulo'] || null,
+      parcela: row['Parcela'] || null,
+      id_armadilha: row['ID Armadilha'] || null,
+      grupo_amostrado: row['Grupo Amostrado'] || '',
+      data_registro: row['Data do Registro'] || '',
+      hora_registro: row['Hora do Registro'] || null,
+      categoria: row['Categoria'] || null,
+      classe: row['Classe'] || null,
+      ordem: row['Ordem'] || null,
+      familia: row['Família'] || null,
+      genero: row['Gênero'] || null,
+      especie: row['Espécie'] || '',
+      nome_comum: row['Nome Comum'] || null,
+      sexo: row['Sexo'] || null,
+      faixa_etaria: row['Faixa Etária'] || null,
+      qnt_individuos: row['Qnt de Indivíduos'] || null,
+      num_marcacao: row['Num Marcação'] || null,
+      coletado: row['Coletado'] || null,
+      num_tombamento: row['Num de Tombamento'] || null,
+      dados_biometricos: row['Dados Biométricos'] || null,
+      comp_total: row['Comp total'] || null,
+      cabeca: row['Cabeça'] || null,
+      cauda: row['Cauda'] || null,
+      femur: row['Fêmur'] || null,
+      orelha: row['Orelha'] || null,
+      peso: row['Peso'] || null,
+      status_conservacao_federal: row['Status Conservação Federal'] || null,
+      status_conservacao_iucn: row['Status Conservação IUCN'] || null,
+    }));
+
+    resultadosRecords.value = novosResultados;
+    emit('update:resultadosRecords', novosResultados);
+    props.form.planilha = file;
+    props.form.resultados = novosResultados; // Sincroniza com o form pai
+  };
+  reader.readAsArrayBuffer(file);
+};
+
+// Excluir resultado
+const excluirResultado = (id) => {
+  const novosResultados = resultadosRecords.value.filter(item => item.id !== id);
+  resultadosRecords.value = novosResultados;
+  emit('update:resultadosRecords', novosResultados);
+  props.form.resultados = novosResultados; // Sincroniza com o form pai
+};
+
+// Avançar
+const avancar = () => {
+  emit('next');
 };
 </script>
 
@@ -59,11 +128,42 @@ const removeResultado = (index) => {
   <div class="card">
     <div class="card-body">
       <h4 class="mb-3" style="text-align: center;">RESULTADOS</h4>
-
+      
+      <!-- Upload da Planilha -->
+      <div class="mb-3">
+        <button class="btn btn-primary" @click="downloadModelo">Baixar Planilha Modelo</button>
+      </div>
+      <div class="mb-3">
+        <InputLabel for="planilha" value="Upload da Planilha Preenchida" />
+        <input
+          type="file"
+          class="form-control"
+          id="planilha"
+          accept=".xlsx,.xls"
+          @change="processarPlanilha"
+        />
+        <InputError :message="form.errors.planilha" />
+      </div>
+      
+      <!-- Considerações -->
+      <div class="mb-3">
+        <InputLabel for="consideracoes" value="CONSIDERAÇÕES" />
+        <textarea
+          v-model="consideracoes"
+          class="form-control"
+          id="consideracoes"
+          rows="4"
+          placeholder="Digite suas considerações aqui..."
+        ></textarea>
+        <InputError :message="form.errors.consideracoes" />
+      </div>
+      
+      <!-- Tabela de Resultados -->
       <div v-if="resultadosRecords.length" class="overflow-x-auto mb-6">
         <table class="min-w-full bg-white border border-gray-300">
           <thead>
             <tr class="bg-gray-100">
+              <th class="py-2 px-4 border-b text-left">ID</th>
               <th class="py-2 px-4 border-b text-left">Módulo</th>
               <th class="py-2 px-4 border-b text-left">Parcela</th>
               <th class="py-2 px-4 border-b text-left">ID Armadilha</th>
@@ -96,146 +196,51 @@ const removeResultado = (index) => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(resultado, index) in resultadosRecords" :key="index" class="hover:bg-gray-50">
+            <tr v-for="resultado in resultadosRecords" :key="resultado.id || Math.random()" class="hover:bg-gray-50">
+              <td class="py-2 px-4 border-b">{{ resultado.id || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.modulo || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.parcela || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.id_armadilha || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.grupo_amostrado || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.data_registro || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.hora_registro || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.categoria || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.classe || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.ordem || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.familia || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.genero || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.especie || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.nome_comum || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.sexo || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.faixa_etaria || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.qnt_individuos || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.num_marcacao || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.coletado || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.num_tombamento || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.dados_biometricos || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.comp_total || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.cabeca || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.cauda || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.femur || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.orelha || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.peso || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.status_conservacao_federal || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ resultado.status_conservacao_iucn || 'Não informado' }}</td>
               <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].modulo" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.modulo`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].parcela" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.parcela`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].id_armadilha" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.id_armadilha`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].grupo_amostrado" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.grupo_amostrado`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].data_registro" type="date" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.data_registro`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].hora_registro" type="time" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.hora_registro`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].categoria" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.categoria`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].classe" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.classe`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].ordem" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.ordem`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].familia" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.familia`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].genero" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.genero`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].especie" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.especie`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].nome_comum" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.nome_comum`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].sexo" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.sexo`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].faixa_etaria" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.faixa_etaria`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].qnt_individuos" type="number" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.qnt_individuos`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].num_marcacao" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.num_marcacao`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].coletado" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.coletado`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].num_tombamento" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.num_tombamento`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].dados_biometricos" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.dados_biometricos`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].comp_total" type="number" step="any" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.comp_total`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].cabeca" type="number" step="any" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.cabeca`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].cauda" type="number" step="any" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.cauda`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].femur" type="number" step="any" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.femur`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].orelha" type="number" step="any" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.orelha`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].peso" type="number" step="any" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.peso`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].status_conservacao_federal" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.status_conservacao_federal`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <input v-model="form.resultados[index].status_conservacao_iucn" type="text" class="form-control" />
-                <InputError :message="form.errors[`resultados.${index}.status_conservacao_iucn`]" />
-              </td>
-              <td class="py-2 px-4 border-b">
-                <button type="button" class="btn btn-danger btn-sm" @click="removeResultado(index)">Remover</button>
+                <button class="btn btn-danger btn-sm" @click="excluirResultado(resultado.id)">Excluir</button>
               </td>
             </tr>
           </tbody>
         </table>
-        <button type="button" class="btn btn-primary btn-sm mt-2" @click="addResultado">Adicionar Resultado</button>
       </div>
       <div v-else class="alert alert-info text-center">
-        Nenhum resultado disponível. Clique em "Adicionar Resultado" para começar.
+        Nenhum resultado disponível. Faça o upload de uma planilha para visualizar os dados.
       </div>
-
-      <div class="mb-6">
-        <InputLabel value="CONSIDERAÇÕES" for="consideracoes" />
-        <textarea v-model="form.consideracoes" class="form-control" id="consideracoes" rows="4"></textarea>
-        <InputError :message="form.errors.consideracoes" />
-      </div>
-
-      <div class="mb-6">
-        <InputLabel value="PLANILHA" for="planilha" />
-        <input type="file" @change="form.planilha = $event.target.files[0] || null" accept=".xlsx,.xls,.csv" class="form-control" id="planilha" />
-        <InputError :message="form.errors.planilha" />
-      </div>
-
+      
+      <!-- Navegação -->
       <div class="d-flex justify-content-between mt-4">
         <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
-        <NavButton type="button" type-button="primary" title="Avançar" @click="$emit('next')" />
+        <NavButton type="button" type-button="primary" title="Avançar" @click="avancar" />
       </div>
     </div>
   </div>
@@ -271,8 +276,7 @@ textarea.form-control {
 table {
   border-collapse: collapse;
 }
-th,
-td {
+th, td {
   padding: 0.5rem 1rem;
   border: 1px solid #dee2e6;
 }
@@ -281,9 +285,5 @@ thead {
 }
 tr:hover {
   background-color: #f1f5f9;
-}
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
 }
 </style>
