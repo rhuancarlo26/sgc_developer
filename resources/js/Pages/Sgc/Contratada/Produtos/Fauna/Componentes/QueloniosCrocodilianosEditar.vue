@@ -1,10 +1,11 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import NavButton from '@/Components/NavButton.vue';
+import Table from '@/Components/Table.vue';
+import { ref } from 'vue';
 
-defineProps({
+const props = defineProps({
   form: {
     type: Object,
     required: true,
@@ -19,10 +20,33 @@ defineProps({
   },
 });
 
-defineEmits(['next', 'prev']);
+const emit = defineEmits(['next', 'prev', 'adicionar-ponto', 'excluir-ponto']);
 
-const addPonto = () => {
-  form.pontos_quelo_crocod.push({
+// Estado para gerenciar o formulário de um único ponto
+const formPontoAmostragem = ref({
+  id: null,
+  ponto_de_coleta: '',
+  nome_curso_hidrico: '',
+  coordenadas: '',
+  bacia: '',
+  profundidade: null,
+  largura: null,
+  tipo_substrato: '',
+  errors: {},
+});
+
+// Função para editar um ponto existente
+const editPonto = (ponto) => {
+  formPontoAmostragem.value = {
+    ...ponto,
+    errors: {},
+  };
+};
+
+// Função para limpar o formulário após adicionar ou atualizar
+const resetForm = () => {
+  formPontoAmostragem.value = {
+    id: null,
     ponto_de_coleta: '',
     nome_curso_hidrico: '',
     coordenadas: '',
@@ -30,79 +54,183 @@ const addPonto = () => {
     profundidade: null,
     largura: null,
     tipo_substrato: '',
-  });
+    errors: {},
+  };
 };
 
-const removePonto = (index) => {
-  form.pontos_quelo_crocod.splice(index, 1);
+// Função para adicionar ou atualizar ponto
+const handleAdicionarPonto = () => {
+  emit('adicionar-ponto', formPontoAmostragem);
+  resetForm();
 };
 </script>
 
 <template>
-  <div class="card">
-    <div class="card-body">
-      <h4 class="mb-3" style="text-align: center;">QUELÔNIOS E CROCODILIANOS</h4>
+  <form @submit.prevent="$emit('next')">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="mb-3" style="text-align: center;">QUELÔNIOS E CROCODILIANOS</h4>
 
-      <div class="mb-4">
-        <InputLabel value="NÃO SE APLICA" for="nao_se_aplica" />
-        <input type="checkbox" v-model="form.nao_se_aplica" id="nao_se_aplica" />
-        <InputError :message="form.errors.nao_se_aplica" />
-      </div>
+        <div class="mb-4">
+          <div class="form-check mb-3">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="nao_se_aplica"
+              v-model="form.nao_se_aplica"
+            />
+            <label class="form-check-label" for="nao_se_aplica">Não se aplica</label>
+            <InputError :message="form.errors.nao_se_aplica" />
+          </div>
 
-      <div v-if="!form.nao_se_aplica" class="mb-6">
-        <div v-for="(ponto, index) in pontoRecords" :key="index" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <div>
-            <InputLabel value="PONTO DE COLETA" for="ponto_de_coleta" />
-            <input v-model="form.pontos_quelo_crocod[index].ponto_de_coleta" type="text" class="form-control" :id="'ponto_de_coleta_' + index" />
-            <InputError :message="form.errors[`pontos_quelo_crocod.${index}.ponto_de_coleta`]" />
+          <div v-if="!form.nao_se_aplica" class="mb-6">
+            <div class="row mb-3">
+              <div class="col-12 col-md-6">
+                <InputLabel value="Ponto de Coleta" for="ponto_de_coleta" />
+                <input
+                  type="text"
+                  id="ponto_de_coleta"
+                  class="form-control"
+                  v-model="formPontoAmostragem.ponto_de_coleta"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoAmostragem.errors.ponto_de_coleta" />
+              </div>
+              <div class="col-12 col-md-6">
+                <InputLabel value="Nome do Curso Hídrico" for="nome_curso_hidrico" />
+                <input
+                  type="text"
+                  id="nome_curso_hidrico"
+                  class="form-control"
+                  v-model="formPontoAmostragem.nome_curso_hidrico"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoAmostragem.errors.nome_curso_hidrico" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-12 col-md-6">
+                <InputLabel value="Coordenadas" for="coordenadas" />
+                <input
+                  type="text"
+                  id="coordenadas"
+                  class="form-control"
+                  v-model="formPontoAmostragem.coordenadas"
+                  placeholder="Ex: -23.123, -46.456"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoAmostragem.errors.coordenadas" />
+              </div>
+              <div class="col-12 col-md-6">
+                <InputLabel value="Bacia Hidrográfica" for="bacia" />
+                <input
+                  type="text"
+                  id="bacia"
+                  class="form-control"
+                  v-model="formPontoAmostragem.bacia"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoAmostragem.errors.bacia" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-12 col-md-6">
+                <InputLabel value="Profundidade (m)" for="profundidade" />
+                <input
+                  type="number"
+                  step="any"
+                  id="profundidade"
+                  class="form-control"
+                  v-model="formPontoAmostragem.profundidade"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoAmostragem.errors.profundidade" />
+              </div>
+              <div class="col-12 col-md-6">
+                <InputLabel value="Largura (m)" for="largura" />
+                <input
+                  type="number"
+                  step="any"
+                  id="largura"
+                  class="form-control"
+                  v-model="formPontoAmostragem.largura"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoAmostragem.errors.largura" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-12">
+                <InputLabel value="Tipo de Substrato" for="tipo_substrato" />
+                <textarea
+                  id="tipo_substrato"
+                  class="form-control"
+                  v-model="formPontoAmostragem.tipo_substrato"
+                  rows="5"
+                  :disabled="form.nao_se_aplica"
+                ></textarea>
+                <InputError :message="formPontoAmostragem.errors.tipo_substrato" />
+              </div>
+            </div>
+            <div class="row mb-4">
+              <div class="col d-flex justify-content-end">
+                <NavButton
+                  type="button"
+                  type-button="success"
+                  title="Adicionar Ponto"
+                  @click="handleAdicionarPonto"
+                  :disabled="form.nao_se_aplica"
+                />
+              </div>
+            </div>
+            <div class="table-responsive">
+              <Table
+                :columns="['Ponto de Coleta', 'Curso Hídrico', 'Bacia', 'Largura (m)', 'Ação']"
+                :records="{ data: pontoRecords, links: [] }"
+              >
+                <template #body="{ item }">
+                  <tr>
+                    <td>{{ item.ponto_de_coleta || 'N/A' }}</td>
+                    <td>{{ item.nome_curso_hidrico || 'N/A' }}</td>
+                    <td>{{ item.bacia || 'N/A' }}</td>
+                    <td>{{ item.largura || 'N/A' }}</td>
+                    <td class="text-center" style="min-width: 150px;">
+                      <NavButton
+                        @click="editPonto(item)"
+                        type-button="primary"
+                        title="Editar"
+                        class="me-2"
+                      >
+                        <i class="bi bi-pencil"></i>
+                      </NavButton>
+                      <NavButton
+                        @click="$emit('excluir-ponto', item.id)"
+                        type-button="danger"
+                        title="Excluir"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </NavButton>
+                    </td>
+                  </tr>
+                </template>
+              </Table>
+            </div>
           </div>
-          <div>
-            <InputLabel value="NOME DO CURSO HÍDRICO" for="nome_curso_hidrico" />
-            <input v-model="form.pontos_quelo_crocod[index].nome_curso_hidrico" type="text" class="form-control" :id="'nome_curso_hidrico_' + index" />
-            <InputError :message="form.errors[`pontos_quelo_crocod.${index}.nome_curso_hidrico`]" />
-          </div>
-          <div>
-            <InputLabel value="COORDENADAS" for="coordenadas" />
-            <input v-model="form.pontos_quelo_crocod[index].coordenadas" type="text" class="form-control" :id="'coordenadas_' + index" placeholder="Ex: -23.123, -46.456" />
-            <InputError :message="form.errors[`pontos_quelo_crocod.${index}.coordenadas`]" />
-          </div>
-          <div>
-            <InputLabel value="BACIA HIDROGRÁFICA" for="bacia" />
-            <input v-model="form.pontos_quelo_crocod[index].bacia" type="text" class="form-control" :id="'bacia_' + index" />
-            <InputError :message="form.errors[`pontos_quelo_crocod.${index}.bacia`]" />
-          </div>
-          <div>
-            <InputLabel value="PROFUNDIDADE (m)" for="profundidade" />
-            <input v-model="form.pontos_quelo_crocod[index].profundidade" type="number" step="any" class="form-control" :id="'profundidade_' + index" />
-            <InputError :message="form.errors[`pontos_quelo_crocod.${index}.profundidade`]" />
-          </div>
-          <div>
-            <InputLabel value="LARGURA (m)" for="largura" />
-            <input v-model="form.pontos_quelo_crocod[index].largura" type="number" step="any" class="form-control" :id="'largura_' + index" />
-            <InputError :message="form.errors[`pontos_quelo_crocod.${index}.largura`]" />
-          </div>
-          <div class="col-span-full sm:col-span-2">
-            <InputLabel value="TIPO DE SUBSTRATO" for="tipo_substrato" />
-            <textarea v-model="form.pontos_quelo_crocod[index].tipo_substrato" class="form-control" :id="'tipo_substrato_' + index" rows="5"></textarea>
-            <InputError :message="form.errors[`pontos_quelo_crocod.${index}.tipo_substrato`]" />
-          </div>
-          <div class="col-span-full">
-            <button type="button" class="btn btn-danger btn-sm" @click="removePonto(index)">Remover Ponto</button>
+          <div v-else class="alert alert-info text-center">
+            Nenhum ponto de amostragem disponível, pois a opção "Não se aplica" está marcada.
           </div>
         </div>
-        <button type="button" class="btn btn-primary btn-sm mt-2" @click="addPonto">Adicionar Ponto</button>
-      </div>
-      <div v-else-if="!form.nao_se_aplica" class="alert alert-info text-center">
-        Nenhum ponto de amostragem disponível. Clique em "Adicionar Ponto" para começar.
-      </div>
 
-      <div class="d-flex justify-content-between mt-4">
-        <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
-        <NavButton type="button" type-button="primary" title="Avançar" @click="$emit('next')" />
+        <div class="d-flex justify-content-between mt-4">
+          <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
+          <NavButton type="submit" type-button="primary" title="Avançar" />
+        </div>
+        <slot name="footer">
+          <h4 class="text-center mt-4 font-weight-bold text-muted">{{ subStep }}/5</h4>
+        </slot>
       </div>
-      <h4 class="text-center mt-4 font-weight-bold text-muted">{{ subStep }}/5</h4>
     </div>
-  </div>
+  </form>
 </template>
 
 <style scoped>
@@ -138,5 +266,8 @@ textarea.form-control {
 .btn-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
+}
+.table-responsive {
+  margin-bottom: 1rem;
 }
 </style>

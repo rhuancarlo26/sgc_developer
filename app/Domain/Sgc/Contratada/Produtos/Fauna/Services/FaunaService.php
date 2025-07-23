@@ -502,28 +502,63 @@ class FaunaService
             Log::info('FaunaService: Processando módulos amostrais', [
                 'modulos_amostrais' => $data['modulos_amostrais'],
             ]);
-            foreach ($data['modulos_amostrais'] as $moduloData) {
-                $modulo = SgcFaunaModuloAmostral::updateOrCreate(
-                    ['campanha_id' => $campanha->id, 'data_cadastro' => $moduloData['data_cadastro']],
-                    array_filter([
-                        'id_contrato' => $contrato,
-                        'tamanho_modulo' => $moduloData['tamanho_modulo'] ?? null,
-                        'uf' => $moduloData['uf'] ?? null,
-                        'municipio' => $moduloData['municipio'] ?? null,
-                        'bioma' => $moduloData['bioma'] ?? null,
-                        'fitofisionomia' => $moduloData['fitofisionomia'] ?? null,
-                        'latitude_inicial' => $moduloData['latitude_inicial'] ?? null,
-                        'longitude_inicial' => $moduloData['longitude_inicial'] ?? null,
-                        'latitude_final' => $moduloData['latitude_final'] ?? null,
-                        'longitude_final' => $moduloData['longitude_final'] ?? null,
-                        'obs' => $moduloData['obs'] ?? null,
-                    ])
+
+            // Obtém os IDs dos módulos enviados pelo frontend
+            $modulosEnviadosIds = collect($data['modulos_amostrais'])->pluck('id')->filter()->toArray();
+
+            // Deleta os módulos que não estão mais no array enviado
+            SgcFaunaModuloAmostral::where('campanha_id', $campanha->id)
+                ->whereNotIn('id', $modulosEnviadosIds)
+                ->delete();
+
+            foreach ($data['modulos_amostrais'] as $index => $moduloData) {
+                Log::info('FaunaService: Processando módulo amostral individual', [
+                    'index' => $index,
+                    'modulo_data' => $moduloData,
+                ]);
+
+                $modulo = array_filter([
+                    'id_contrato' => $contrato,
+                    'data_cadastro' => $moduloData['data_cadastro'] ?? null,
+                    'tamanho_modulo' => $moduloData['tamanho_modulo'] ?? null,
+                    'uf' => $moduloData['uf'] ?? null,
+                    'municipio' => $moduloData['municipio'] ?? null,
+                    'bioma' => $moduloData['bioma'] ?? null,
+                    'fitofisionomia' => $moduloData['fitofisionomia'] ?? null,
+                    'latitude_inicial' => $moduloData['latitude_inicial'] ?? null,
+                    'longitude_inicial' => $moduloData['longitude_inicial'] ?? null,
+                    'latitude_final' => $moduloData['latitude_final'] ?? null,
+                    'longitude_final' => $moduloData['longitude_final'] ?? null,
+                    'obs' => $moduloData['obs'] ?? null,
+                ]);
+
+                $moduloModel = SgcFaunaModuloAmostral::updateOrCreate(
+                    [
+                        'id' => isset($moduloData['id']) ? (int) $moduloData['id'] : null,
+                        'campanha_id' => $campanha->id,
+                    ],
+                    $modulo
                 );
+
                 if (isset($moduloData['arquivo']) && $moduloData['arquivo']) {
                     $path = $moduloData['arquivo']->store('modulos_amostrais');
-                    $modulo->update(['arquivo' => $path]);
+                    $moduloModel->update(['arquivo' => $path]);
+                    Log::info('FaunaService: Arquivo do módulo amostral salvo', [
+                        'modulo_id' => $moduloModel->id,
+                        'caminho' => $path,
+                    ]);
                 }
+
+                Log::info('FaunaService: Módulo amostral processado com sucesso', [
+                    'modulo_id' => $moduloModel->id,
+                    'modulo_data' => $moduloData,
+                ]);
             }
+
+            Log::info('FaunaService: Módulos amostrais atualizados', [
+                'campanha_id' => $campanha->id,
+                'modulos_amostrais' => $data['modulos_amostrais'],
+            ]);
         }
 
         // Atualiza pontos de quelônios/crocodilianos
@@ -531,20 +566,56 @@ class FaunaService
             Log::info('FaunaService: Processando pontos_quelo_crocod', [
                 'pontos_quelo_crocod' => $data['pontos_quelo_crocod'],
             ]);
-            foreach ($data['pontos_quelo_crocod'] as $pontoData) {
-                SgcFaunaQuelonios::updateOrCreate(
-                    ['id_campanha' => $campanha->id, 'ponto_de_coleta' => $pontoData['ponto_de_coleta']],
-                    array_filter([
-                        'id_contrato' => $contrato,
-                        'nome_curso_hidrico' => $pontoData['nome_curso_hidrico'] ?? null,
-                        'coordenadas' => $pontoData['coordenadas'] ?? null,
-                        'bacia_hidrografica' => $pontoData['bacia'] ?? null,
-                        'profundidade' => $pontoData['profundidade'] ?? null,
-                        'largura' => $pontoData['largura'] ?? null,
-                        'tipo_substrato' => $pontoData['tipo_substrato'] ?? null,
-                    ])
+
+            // Obtém os IDs dos pontos enviados pelo frontend
+            $pontosEnviadosIds = collect($data['pontos_quelo_crocod'])->pluck('id')->filter()->toArray();
+
+            // Deleta os pontos que não estão mais no array enviado
+            SgcFaunaQuelonios::where('id_campanha', $campanha->id)
+                ->whereNotIn('id', $pontosEnviadosIds)
+                ->delete();
+
+            foreach ($data['pontos_quelo_crocod'] as $index => $pontoData) {
+                Log::info('FaunaService: Processando ponto quelônio individual', [
+                    'index' => $index,
+                    'ponto_data' => $pontoData,
+                ]);
+
+                $ponto = array_filter([
+                    'id_contrato' => $contrato,
+                    'ponto_de_coleta' => $pontoData['ponto_de_coleta'] ?? null,
+                    'nome_curso_hidrico' => $pontoData['nome_curso_hidrico'] ?? null,
+                    'coordenadas' => $pontoData['coordenadas'] ?? null,
+                    'bacia_hidrografica' => $pontoData['bacia'] ?? null,
+                    'profundidade' => $pontoData['profundidade'] ?? null,
+                    'largura' => $pontoData['largura'] ?? null,
+                    'tipo_substrato' => $pontoData['tipo_substrato'] ?? null,
+                ]);
+
+                $pontoModel = SgcFaunaQuelonios::updateOrCreate(
+                    [
+                        'id' => isset($pontoData['id']) ? (int) $pontoData['id'] : null,
+                        'id_campanha' => $campanha->id,
+                    ],
+                    $ponto
                 );
+
+                Log::info('FaunaService: Ponto quelônio processado com sucesso', [
+                    'ponto_id' => $pontoModel->id,
+                    'ponto_data' => $pontoData,
+                ]);
             }
+
+            Log::info('FaunaService: Pontos quelônios atualizados', [
+                'campanha_id' => $campanha->id,
+                'pontos_quelo_crocod' => $data['pontos_quelo_crocod'],
+            ]);
+        } else {
+            // Se pontos_quelo_crocod não for enviado, deleta todos os pontos
+            SgcFaunaQuelonios::where('id_campanha', $campanha->id)->delete();
+            Log::info('FaunaService: Todos os pontos quelônios deletados, pois nenhum foi enviado', [
+                'campanha_id' => $campanha->id,
+            ]);
         }
 
         // Atualiza pontos de fauna cavernícola
@@ -552,22 +623,58 @@ class FaunaService
             Log::info('FaunaService: Processando pontos_cavernicola', [
                 'pontos_cavernicola' => $data['pontos_cavernicola'],
             ]);
-            foreach ($data['pontos_cavernicola'] as $pontoData) {
-                SgcFaunaCavernicola::updateOrCreate(
-                    ['id_campanha' => $campanha->id, 'cavidade' => $pontoData['cavidade']],
-                    array_filter([
-                        'id_contrato' => $contrato,
-                        'latitude' => $pontoData['latitude'] ?? null,
-                        'longitude' => $pontoData['longitude'] ?? null,
-                        'distancia_eixo_rodovia' => $pontoData['distancia_eixo_rodovia'] ?? null,
-                        'formacao_associada' => $pontoData['formacao_associada'] ?? null,
-                        'temperatura_media_interna' => $pontoData['temperatura_media_interna'] ?? null,
-                        'temperatura_media_externa' => $pontoData['temperatura_media_externa'] ?? null,
-                        'umidade_relativa_interna' => $pontoData['umidade_relativa_interna'] ?? null,
-                        'umidade_relativa_externa' => $pontoData['umidade_relativa_externa'] ?? null,
-                    ])
+
+            // Obtém os IDs dos pontos enviados pelo frontend
+            $pontosCavernicolaIds = collect($data['pontos_cavernicola'])->pluck('id')->filter()->toArray();
+
+            // Deleta os pontos que não estão mais no array enviado
+            SgcFaunaCavernicola::where('id_campanha', $campanha->id)
+                ->whereNotIn('id', $pontosCavernicolaIds)
+                ->delete();
+
+            foreach ($data['pontos_cavernicola'] as $index => $pontoData) {
+                Log::info('FaunaService: Processando ponto cavernícola individual', [
+                    'index' => $index,
+                    'ponto_data' => $pontoData,
+                ]);
+
+                $ponto = array_filter([
+                    'id_contrato' => $contrato,
+                    'cavidade' => $pontoData['cavidade'] ?? null,
+                    'latitude' => $pontoData['latitude'] ?? null,
+                    'longitude' => $pontoData['longitude'] ?? null,
+                    'distancia_eixo_rodovia' => $pontoData['distancia_eixo_rodovia'] ?? null,
+                    'formacao_associada' => $pontoData['formacao_associada'] ?? null,
+                    'temperatura_media_interna' => $pontoData['temperatura_media_interna'] ?? null,
+                    'temperatura_media_externa' => $pontoData['temperatura_media_externa'] ?? null,
+                    'umidade_relativa_interna' => $pontoData['umidade_relativa_interna'] ?? null,
+                    'umidade_relativa_externa' => $pontoData['umidade_relativa_externa'] ?? null,
+                ]);
+
+                $pontoModel = SgcFaunaCavernicola::updateOrCreate(
+                    [
+                        'id' => isset($pontoData['id']) ? (int) $pontoData['id'] : null,
+                        'id_campanha' => $campanha->id,
+                    ],
+                    $ponto
                 );
+
+                Log::info('FaunaService: Ponto cavernícola processado com sucesso', [
+                    'ponto_id' => $pontoModel->id,
+                    'ponto_data' => $pontoData,
+                ]);
             }
+
+            Log::info('FaunaService: Pontos cavernícolas atualizados', [
+                'campanha_id' => $campanha->id,
+                'pontos_cavernicola' => $data['pontos_cavernicola'],
+            ]);
+        } else {
+            // Se pontos_cavernicola não for enviado, deleta todos os pontos
+            SgcFaunaCavernicola::where('id_campanha', $campanha->id)->delete();
+            Log::info('FaunaService: Todos os pontos cavernícolas deletados, pois nenhum foi enviado', [
+                'campanha_id' => $campanha->id,
+            ]);
         }
 
         // Atualiza metodologias

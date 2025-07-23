@@ -1,10 +1,11 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import NavButton from '@/Components/NavButton.vue';
+import Table from '@/Components/Table.vue';
+import { ref } from 'vue';
 
-defineProps({
+const props = defineProps({
   form: {
     type: Object,
     required: true,
@@ -19,10 +20,44 @@ defineProps({
   },
 });
 
-defineEmits(['next', 'prev']);
+const emit = defineEmits(['next', 'prev', 'adicionar-ponto-cavernicola', 'excluir-ponto-cavernicola']);
 
-const addPonto = () => {
-  form.pontos_cavernicola.push({
+// Estado para gerenciar o formulário de um único ponto
+const formPontoCavernicola = ref({
+  id: null,
+  cavidade: '',
+  latitude: null,
+  longitude: null,
+  distancia_eixo_rodovia: null,
+  formacao_associada: '',
+  temperatura_media_interna: null,
+  temperatura_media_externa: null,
+  umidade_relativa_interna: null,
+  umidade_relativa_externa: null,
+  errors: {},
+});
+
+// Função para editar um ponto existente
+const editPonto = (ponto) => {
+  formPontoCavernicola.value = {
+    id: ponto.id || null,
+    cavidade: ponto.cavidade || '',
+    latitude: ponto.latitude || null,
+    longitude: ponto.longitude || null,
+    distancia_eixo_rodovia: ponto.distancia_eixo_rodovia || null,
+    formacao_associada: ponto.formacao_associada || '',
+    temperatura_media_interna: ponto.temperatura_media_interna || null,
+    temperatura_media_externa: ponto.temperatura_media_externa || null,
+    umidade_relativa_interna: ponto.umidade_relativa_interna || null,
+    umidade_relativa_externa: ponto.umidade_relativa_externa || null,
+    errors: {},
+  };
+};
+
+// Função para limpar o formulário após adicionar ou atualizar
+const resetForm = () => {
+  formPontoCavernicola.value = {
+    id: null,
     cavidade: '',
     latitude: null,
     longitude: null,
@@ -32,89 +67,225 @@ const addPonto = () => {
     temperatura_media_externa: null,
     umidade_relativa_interna: null,
     umidade_relativa_externa: null,
-  });
+    errors: {},
+  };
 };
 
-const removePonto = (index) => {
-  form.pontos_cavernicola.splice(index, 1);
+// Função para validar o formulário antes de adicionar ou atualizar
+const validatePonto = () => {
+  const errors = {};
+  if (!formPontoCavernicola.value.cavidade) {
+    errors.cavidade = 'O campo Cavidade é obrigatório.';
+  }
+  formPontoCavernicola.value.errors = errors;
+  return Object.keys(errors).length === 0;
+};
+
+// Função para adicionar ou atualizar ponto
+const handleAdicionarPonto = () => {
+  if (!validatePonto()) {
+    return;
+  }
+  emit('adicionar-ponto-cavernicola', { ...formPontoCavernicola.value });
+  resetForm();
 };
 </script>
 
 <template>
-  <div class="card">
-    <div class="card-body">
-      <h4 class="mb-3" style="text-align: center;">FAUNA CAVERNÍCOLA</h4>
+  <form @submit.prevent="$emit('next')">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="mb-3" style="text-align: center;">FAUNA CAVERNÍCOLA</h4>
 
-      <div class="mb-4">
-        <InputLabel value="NÃO SE APLICA" for="nao_se_aplica" />
-        <input type="checkbox" v-model="form.nao_se_aplica" id="nao_se_aplica" />
-        <InputError :message="form.errors.nao_se_aplica" />
-      </div>
+        <div class="mb-4">
+          <div class="form-check mb-3">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="nao_se_aplica"
+              v-model="form.nao_se_aplica"
+            />
+            <label class="form-check-label" for="nao_se_aplica">Não se aplica</label>
+            <InputError :message="form.errors.nao_se_aplica" />
+          </div>
 
-      <div v-if="!form.nao_se_aplica" class="mb-6">
-        <div v-for="(ponto, index) in pontoRecords" :key="index" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <div>
-            <InputLabel value="CAVIDADE" for="cavidade" />
-            <input v-model="form.pontos_cavernicola[index].cavidade" type="text" class="form-control" :id="'cavidade_' + index" />
-            <InputError :message="form.errors[`pontos_cavernicola.${index}.cavidade`]" />
+          <div v-if="!form.nao_se_aplica" class="mb-6">
+            <div class="row mb-3">
+              <div class="col-12 col-md-6">
+                <InputLabel value="Cavidade" for="cavidade" />
+                <input
+                  type="text"
+                  id="cavidade"
+                  class="form-control"
+                  v-model="formPontoCavernicola.cavidade"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoCavernicola.errors.cavidade" />
+              </div>
+              <div class="col-12 col-md-6">
+                <InputLabel value="Latitude" for="latitude" />
+                <input
+                  type="number"
+                  step="any"
+                  id="latitude"
+                  class="form-control"
+                  v-model="formPontoCavernicola.latitude"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoCavernicola.errors.latitude" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-12 col-md-6">
+                <InputLabel value="Longitude" for="longitude" />
+                <input
+                  type="number"
+                  step="any"
+                  id="longitude"
+                  class="form-control"
+                  v-model="formPontoCavernicola.longitude"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoCavernicola.errors.longitude" />
+              </div>
+              <div class="col-12 col-md-6">
+                <InputLabel value="Distância do Eixo da Rodovia (m)" for="distancia_eixo_rodovia" />
+                <input
+                  type="number"
+                  step="any"
+                  id="distancia_eixo_rodovia"
+                  class="form-control"
+                  v-model="formPontoCavernicola.distancia_eixo_rodovia"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoCavernicola.errors.distancia_eixo_rodovia" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-12">
+                <InputLabel value="Formação Associada" for="formacao_associada" />
+                <input
+                  type="text"
+                  id="formacao_associada"
+                  class="form-control"
+                  v-model="formPontoCavernicola.formacao_associada"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoCavernicola.errors.formacao_associada" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-12 col-md-6">
+                <InputLabel value="Temperatura Média Interna (°C)" for="temperatura_media_interna" />
+                <input
+                  type="number"
+                  step="any"
+                  id="temperatura_media_interna"
+                  class="form-control"
+                  v-model="formPontoCavernicola.temperatura_media_interna"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoCavernicola.errors.temperatura_media_interna" />
+              </div>
+              <div class="col-12 col-md-6">
+                <InputLabel value="Temperatura Média Externa (°C)" for="temperatura_media_externa" />
+                <input
+                  type="number"
+                  step="any"
+                  id="temperatura_media_externa"
+                  class="form-control"
+                  v-model="formPontoCavernicola.temperatura_media_externa"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoCavernicola.errors.temperatura_media_externa" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-12 col-md-6">
+                <InputLabel value="Umidade Relativa Interna (%)" for="umidade_relativa_interna" />
+                <input
+                  type="number"
+                  step="any"
+                  id="umidade_relativa_interna"
+                  class="form-control"
+                  v-model="formPontoCavernicola.umidade_relativa_interna"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoCavernicola.errors.umidade_relativa_interna" />
+              </div>
+              <div class="col-12 col-md-6">
+                <InputLabel value="Umidade Relativa Externa (%)" for="umidade_relativa_externa" />
+                <input
+                  type="number"
+                  step="any"
+                  id="umidade_relativa_externa"
+                  class="form-control"
+                  v-model="formPontoCavernicola.umidade_relativa_externa"
+                  :disabled="form.nao_se_aplica"
+                />
+                <InputError :message="formPontoCavernicola.errors.umidade_relativa_externa" />
+              </div>
+            </div>
+            <div class="row mb-4">
+              <div class="col d-flex justify-content-end">
+                <NavButton
+                  type="button"
+                  type-button="success"
+                  :title="formPontoCavernicola.id ? 'Atualizar Ponto' : 'Adicionar Ponto'"
+                  @click="handleAdicionarPonto"
+                  :disabled="form.nao_se_aplica"
+                />
+              </div>
+            </div>
+            <div class="table-responsive">
+              <Table
+                :columns="['Cavidade', 'Latitude', 'Longitude', 'Distância (m)', 'Formação', 'Ação']"
+                :records="{ data: pontoRecords, links: [] }"
+              >
+                <template #body="{ item }">
+                  <tr>
+                    <td>{{ item.cavidade || 'N/A' }}</td>
+                    <td>{{ item.latitude || '' }}</td>
+                    <td>{{ item.longitude || '' }}</td>
+                    <td>{{ item.distancia_eixo_rodovia || '' }}</td>
+                    <td>{{ item.formacao_associada || '' }}</td>
+                    <td class="text-center" style="min-width: 150px;">
+                      <NavButton
+                        @click="editPonto(item)"
+                        type-button="primary"
+                        title="Editar"
+                        class="me-2"
+                      >
+                        <i class="bi bi-pencil"></i>
+                      </NavButton>
+                      <NavButton
+                        @click="$emit('excluir-ponto-cavernicola', item.id)"
+                        type-button="danger"
+                        title="Excluir"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </NavButton>
+                    </td>
+                  </tr>
+                </template>
+              </Table>
+            </div>
           </div>
-          <div>
-            <InputLabel value="LATITUDE" for="latitude" />
-            <input v-model="form.pontos_cavernicola[index].latitude" type="number" step="any" class="form-control" :id="'latitude_' + index" />
-            <InputError :message="form.errors[`pontos_cavernicola.${index}.latitude`]" />
-          </div>
-          <div>
-            <InputLabel value="LONGITUDE" for="longitude" />
-            <input v-model="form.pontos_cavernicola[index].longitude" type="number" step="any" class="form-control" :id="'longitude_' + index" />
-            <InputError :message="form.errors[`pontos_cavernicola.${index}.longitude`]" />
-          </div>
-          <div>
-            <InputLabel value="DISTÂNCIA DO EIXO DA RODOVIA (m)" for="distancia_eixo_rodovia" />
-            <input v-model="form.pontos_cavernicola[index].distancia_eixo_rodovia" type="number" step="any" class="form-control" :id="'distancia_eixo_rodovia_' + index" />
-            <InputError :message="form.errors[`pontos_cavernicola.${index}.distancia_eixo_rodovia`]" />
-          </div>
-          <div>
-            <InputLabel value="FORMAÇÃO ASSOCIADA" for="formacao_associada" />
-            <input v-model="form.pontos_cavernicola[index].formacao_associada" type="text" class="form-control" :id="'formacao_associada_' + index" />
-            <InputError :message="form.errors[`pontos_cavernicola.${index}.formacao_associada`]" />
-          </div>
-          <div>
-            <InputLabel value="TEMPERATURA MÉDIA INTERNA (°C)" for="temperatura_media_interna" />
-            <input v-model="form.pontos_cavernicola[index].temperatura_media_interna" type="number" step="any" class="form-control" :id="'temperatura_media_interna_' + index" />
-            <InputError :message="form.errors[`pontos_cavernicola.${index}.temperatura_media_interna`]" />
-          </div>
-          <div>
-            <InputLabel value="TEMPERATURA MÉDIA EXTERNA (°C)" for="temperatura_media_externa" />
-            <input v-model="form.pontos_cavernicola[index].temperatura_media_externa" type="number" step="any" class="form-control" :id="'temperatura_media_externa_' + index" />
-            <InputError :message="form.errors[`pontos_cavernicola.${index}.temperatura_media_externa`]" />
-          </div>
-          <div>
-            <InputLabel value="UMIDADE RELATIVA INTERNA (%)" for="umidade_relativa_interna" />
-            <input v-model="form.pontos_cavernicola[index].umidade_relativa_interna" type="number" step="any" class="form-control" :id="'umidade_relativa_interna_' + index" />
-            <InputError :message="form.errors[`pontos_cavernicola.${index}.umidade_relativa_interna`]" />
-          </div>
-          <div>
-            <InputLabel value="UMIDADE RELATIVA EXTERNA (%)" for="umidade_relativa_externa" />
-            <input v-model="form.pontos_cavernicola[index].umidade_relativa_externa" type="number" step="any" class="form-control" :id="'umidade_relativa_externa_' + index" />
-            <InputError :message="form.errors[`pontos_cavernicola.${index}.umidade_relativa_externa`]" />
-          </div>
-          <div class="col-span-full">
-            <button type="button" class="btn btn-danger btn-sm" @click="removePonto(index)">Remover Ponto</button>
+          <div v-else class="alert alert-info text-center">
+            Nenhum ponto de fauna cavernícola disponível, pois a opção "Não se aplica" está marcada.
           </div>
         </div>
-        <button type="button" class="btn btn-primary btn-sm mt-2" @click="addPonto">Adicionar Ponto</button>
-      </div>
-      <div v-else-if="!form.nao_se_aplica" class="alert alert-info text-center">
-        Nenhum ponto de fauna cavernícola disponível. Clique em "Adicionar Ponto" para começar.
-      </div>
 
-      <div class="d-flex justify-content-between mt-4">
-        <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
-        <NavButton type="button" type-button="primary" title="Avançar" @click="$emit('next')" />
+        <div class="d-flex justify-content-between mt-4">
+          <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
+          <NavButton type="submit" type-button="primary" title="Avançar" />
+        </div>
+        <slot name="footer">
+          <h4 class="text-center mt-4 font-weight-bold text-muted">{{ subStep }}/5</h4>
+        </slot>
       </div>
-      <h4 class="text-center mt-4 font-weight-bold text-muted">{{ subStep }}/5</h4>
     </div>
-  </div>
+  </form>
 </template>
 
 <style scoped>
@@ -146,5 +317,8 @@ const removePonto = (index) => {
 .btn-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
+}
+.table-responsive {
+  margin-bottom: 1rem;
 }
 </style>
