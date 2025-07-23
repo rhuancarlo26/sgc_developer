@@ -470,7 +470,7 @@ class FaunaService
                     try {
                         SgcFaunaCampanhaAbios::create([
                             'campanha_id' => $campanha->id,
-                            'id_contrato' => $contrato,
+                            'contrato_id' => $contrato,
                             'n_abio' => (int) $id,
                         ]);
                         Log::info('FaunaService: ABIO criado com sucesso', [

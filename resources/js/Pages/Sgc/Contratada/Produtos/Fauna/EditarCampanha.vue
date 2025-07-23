@@ -403,20 +403,15 @@ const submitForm = () => {
         <div class="card">
           <div class="card-body">
             <h2 class="text-center mb-4">EDITAR CAMPANHA {{ props.produto.toUpperCase() }}</h2>
-            <!-- <h4 class="mb-3">Status: {{ props.campanha.status || 'Rejeitada' }}</h4> -->
+            <h4 class="mb-3">Status: {{ props.campanha.status || 'Rejeitada' }}</h4>
 
             <!-- Exibir análises (motivos da rejeição) -->
             <div v-if="props.campanha.analises?.length" class="mb-6">
-              <h4 class="mb-3" style="font-weight: bold;">MOTIVOS DA REJEIÇÃO</h4>
+              <h4 class="mb-3" style="font-weight: bold;">Motivos da Rejeição</h4>
               <div class="alert alert-info">
-                <ul class="list-none pl-0">
-                  <li
-                    v-for="(analise, index) in props.campanha.analises.filter(a => a.comentario)"
-                    :key="analise.id"
-                    class="analise-item"
-                    :class="{ 'analise-item-even': index % 2 === 0, 'analise-item-odd': index % 2 !== 0 }"
-                  >
-                    <span class="etapa">{{ analise.etapa }}:</span> {{ analise.comentario }}
+                <ul class="list-disc pl-5">
+                  <li v-for="analise in props.campanha.analises" :key="analise.id">
+                    {{ analise.etapa }}: {{ analise.observacoes || 'Sem observações' }}
                   </li>
                 </ul>
               </div>
@@ -687,38 +682,5 @@ tr:hover {
 .form-label {
   font-weight: 500;
   margin-bottom: 0.5rem;
-}
-
-.alert.alert-info {
-  background-color: #e7f1ff;
-  border: 1px solid #b6d4fe;
-  border-radius: 6px;
-  padding: 1rem;
-}
-
-.analise-item {
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  line-height: 1.5;
-  transition: background-color 0.2s ease;
-}
-
-.analise-item-even {
-  background-color: #f8f9fa; /* Cinza claro para linhas pares */
-}
-
-.analise-item-odd {
-  background-color: #ffffff; /* Branco para linhas ímpares */
-}
-
-.analise-item:hover {
-  background-color: #e2e6ea; /* Efeito hover suave */
-}
-
-.etapa {
-  font-weight: 600;
-  color: #084298; /* Cor do texto da etapa, combinando com o alert-info */
 }
 </style>
