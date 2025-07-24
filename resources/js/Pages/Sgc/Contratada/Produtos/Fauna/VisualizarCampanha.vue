@@ -134,7 +134,7 @@ const salvarAprovacao = () => {
                                         <input type="text" class="form-control" :value="campanha.cod_emp" disabled />
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Família</label>
+                                        <label class="form-label">Subproduto</label>
                                         <input type="text" class="form-control" :value="campanha.familia || 'Fauna'" disabled />
                                     </div>
                                     <div class="d-flex justify-content-end">
