@@ -48,16 +48,13 @@ const handleClick = (routeName) => {
             :icon="IconClipboardList"
           />
 
-          <NavExpandable title="Produtos" :icon="IconLayoutDashboard">
-            <li v-for="(item, index) in produtos" :key="index">
-              <NavLink
-                @click="handleClick(item.title)"
-                :route-name="'sgc.contratada.produtos.index'"
-                :param="[contratoId, item.routeParam]"
-                :title="`- ${item.title}`"
-              />
-            </li>
-          </NavExpandable>
+          <NavLink
+            @click="handleClick('Produtos')"
+            :route-name="'sgc.contratada.produtos.index'"
+            :param="[contratoId, 'fauna']"
+            title="Produtos"
+            :icon="IconLayoutDashboard"
+          />
 
           <NavLink
             @click="handleClick('Cronograma')"
@@ -99,28 +96,6 @@ const handleClick = (routeName) => {
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      produtos: [
-        { title: "Fauna", routeParam: "fauna" },
-        { title: "Espeleologia", routeParam: "espeleologia" },
-        { title: "Patrimônio", routeParam: "patrimonio" },
-        { title: "Indígena", routeParam: "indigena" },
-        { title: "Quilombola", routeParam: "quilombola" },
-        { title: "Malarígeno", routeParam: "malarigeno" },
-        { title: "Eia", routeParam: "eia" },
-        { title: "Rima", routeParam: "rima" },
-        { title: "Audiência", routeParam: "audiencia" },
-        { title: "PBA", routeParam: "pba" },
-        { title: "ASV", routeParam: "asv" },
-        { title: "Viagens", routeParam: "viagens" },
-      ],
-    };
-  },
-};
-</script>
 
 <style scoped>
 .navbar-nav {
