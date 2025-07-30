@@ -70,6 +70,12 @@ class VinculacaoPontoService extends BaseModelService
 
     public function enviarListaFiscal(array $post)
     {
-        return $this->dataManagement->create(entity: $this->modelClassConfigParecer, infos: $post);
+        $parecer = $this->modelClassConfigParecer::where('fk_servico', $post['fk_servico'])->first();
+
+        if (empty($parecer)) {
+            return $this->dataManagement->create(entity: $this->modelClassConfigParecer, infos: $post);
+        }
+        
+        return $this->dataManagement->update(entity: $this->modelClassConfigParecer, infos: $post, id: $parecer->id);
     }
 }

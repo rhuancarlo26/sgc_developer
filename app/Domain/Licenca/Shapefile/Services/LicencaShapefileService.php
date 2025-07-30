@@ -26,7 +26,7 @@ class LicencaShapefileService extends BaseModelService
             'nome_file_shape' => $request['shapefile']->getClientOriginalName(),
             'geo_json' => $this->getFeatureCollection($request['shapefile'])
         ];
-        
+
         $shapefile = $this->dataManagement->update(entity: $this->modelClass, infos: $post, id: $post['licenca_id']);
 
         return [
@@ -82,7 +82,7 @@ class LicencaShapefileService extends BaseModelService
                         'features' => $features
                     ];
 
-                    $folderPath = storage_path('app' . DIRECTORY_SEPARATOR . 'shapefile'); // Caminho da pasta
+                    $folderPath = storage_path('app' . DIRECTORY_SEPARATOR . 'shapefile');
 
                     if (File::exists($folderPath)) {
                         File::deleteDirectory($folderPath);

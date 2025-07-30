@@ -15,7 +15,9 @@ class StoreController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, Request $request): RedirectResponse
   {
+   
     $response = $this->campanhaService->store(post: $request->all());
+
 
     return to_route('contratos.contratada.servicos.monitora_fauna.execucao.campanha.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $response['model']['id'] ?? null])->with('message', $response['request']);
   }

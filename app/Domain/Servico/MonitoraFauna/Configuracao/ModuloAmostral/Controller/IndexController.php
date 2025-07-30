@@ -22,6 +22,7 @@ class IndexController extends Controller
     $response = $this->moduloAmostralService->index($servico, $searchParams);
 
     return Inertia::render('Servico/MonitoraFauna/Configuracao/ModuloAmostral/Index', [
+      'modeloUrl' => asset('file/Servico/MonFauna/modelo_planilha_armadilha_metodo.xlsx'),
       'contrato' => $contrato,
       'servico' => $servico->load(['tipo']),
       ...$response
