@@ -45,16 +45,25 @@ class EmpreendimentosController extends Controller
     /**
      * Empreendimentos: Sistema de Edição Interativo no Front-End --------------------------------------------------------
      */
-    public function editavel(): Response
+    public function editavel(Request $request): Response
     {
-        $empreendimentos = SgcvwEmpreendimentos::with(['changelogs'])->get();
+        $empreendimentos = SgcvwEmpreendimentos::with(['changelogs']);
+        if ($request->filled('ordenarPor')) {
+            $coluna = $request->get('ordenarPor');
+            $ordem = $request->get('ordem', 'asc');
+            $empreendimentos->orderBy($coluna, $ordem);
+        }
+        $empreendimentos = $empreendimentos->get();
+        // $empreendimentos = $empreendimentos->withQueryString();
         return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/Edicao', [
             'empreendimentos' => $empreendimentos,
+            'ordem' => $ordem ?? 'asc',
+            'coluna' => $coluna ?? 'id',
         ]);
     }
     public function editavelestudos(Request $request): Response
     {
-        $query = SgcvwEstudos::query();
+        $query = SgcvwEstudos::with(['changelogs']);
 
         if ($request->filled('ordenarPor')) {
             $coluna = $request->get('ordenarPor');
@@ -89,6 +98,8 @@ class EmpreendimentosController extends Controller
 
         return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
             'empreendimentos' => $empreendimentos,
+            'ordem' => $ordem ?? 'asc',
+            'coluna' => $coluna ?? 'id',
         ]);
         // $empreendimentos = SgcvwEstudos::with(['changelogs'])->paginate(50);
         // return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
@@ -97,7 +108,7 @@ class EmpreendimentosController extends Controller
     }
     public function editavelprodutos(Request $request): Response
     {
-        $query = SgcvwSubprodutos::query();
+        $query = SgcvwSubprodutos::with(['changelogs']);
 
         if ($request->filled('ordenarPor')) {
             $coluna = $request->get('ordenarPor');
@@ -132,6 +143,8 @@ class EmpreendimentosController extends Controller
 
         return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
             'empreendimentos' => $empreendimentos,
+            'ordem' => $ordem ?? 'asc',
+            'coluna' => $coluna ?? 'id',
         ]);
         // $empreendimentos = SgcvwSubprodutos::with(['changelogs'])->paginate(50);
         // return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [

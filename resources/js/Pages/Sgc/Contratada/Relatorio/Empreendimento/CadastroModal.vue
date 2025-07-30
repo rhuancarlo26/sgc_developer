@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-5xl mx-auto p-6">
+  <div class="max-w-5xl mx-auto pb-5 pt-5">
     <!-- <h2 class="text-2xl font-semibold mb-4">Cadastrar Empreendimento</h2> -->
 
     <!-- Abas -->
@@ -57,18 +57,22 @@
     </div>
 
     <!-- Botões -->
-     <button v-if="abaAtiva > 0" @click="abaAtiva--" class="mt-3 btn btn-info px-4 py-2 mx-2 rounded hover:bg-gray-400">
-        Anterior
-    </button>
-    <button v-if="abaAtiva < abas.length - 1" @click="abaAtiva++" class="mt-3 btn btn-info px-4 py-2 mx-2 text-white rounded hover:bg-blue-700">
-        Próximo
-    </button>
+     <div class="row my-3">
+        <div class="col-md-11">
+            <button v-if="abaAtiva < abas.length - 1" @click="abaAtiva++" class="mx-2 btn btn-warning rounded hover:bg-blue-700 float-right">
+                Próximo
+            </button>
+            <button v-if="abaAtiva > 0" @click="abaAtiva--" class="mx-2 btn btn-warning rounded hover:bg-gray-400 float-right">
+                Anterior
+            </button>
+        </div>
     <div class="mt-6 flex gap-4" v-if="abaAtiva === abas.length - 1">
       <button @click="salvar" class="btn btn-success">Salvar</button>
       <button @click="limpar" class="btn btn-secondary mx-1">
         <i class="fas fa-eraser"></i>
         Limpar todo o formulário
       </button>
+    </div>
     </div>
   </div>
 </template>
@@ -238,6 +242,57 @@ h2 {
   .form-row textarea {
     flex: 1 0 100%;
   }
+}
+.float-left {
+  float: left !important;
+}
+.float-right {
+  float: right !important;
+}
+.text-center {
+  text-align: center !important;
+}
+.text-right {
+  text-align: right !important;
+}
+.text-left {
+  text-align: left !important;
+}
+.text-justify {
+  text-align: justify !important;
+}
+.text-nowrap {
+  white-space: nowrap !important;
+}
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.text-lowercase {
+  text-transform: lowercase !important;
+}
+.text-uppercase {
+  text-transform: uppercase !important;
+}
+.text-capitalize {
+  text-transform: capitalize !important;
+}
+.text-decoration-none {
+  text-decoration: none !important;
+}
+.text-decoration-underline {
+  text-decoration: underline !important;
+}
+.text-decoration-line-through {
+  text-decoration: line-through !important;
+}
+.text-decoration-overline {
+  text-decoration: overline !important;
+}
+.text-decoration-blink {
+  text-decoration: blink !important;
 }
 </style>
 <!--

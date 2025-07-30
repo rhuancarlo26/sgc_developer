@@ -143,23 +143,43 @@
       </div>
       </div>
     </div>
-        <!-- <button class="btn btn-primary mb-3" @click="mostrarAlteradosNoTopo = !mostrarAlteradosNoTopo">
-            🔝 {{ mostrarAlteradosNoTopo ? 'Voltar à Ordem Normal' : 'Alterados Recentemente' }}
-        </button> -->
-        <button @click="ordenacao = ''" class="btn" :class="{ 'btn-primary': ordenacao === '', 'btn-outline-primary': ordenacao !== '' }">
-            🔝 Ordem Padrão
-        </button>
-
-        <button @click="ordenacao = 'created_at'" class="btn mx-2" :class="{ 'btn-primary': ordenacao === 'created_at', 'btn-outline-primary': ordenacao !== 'created_at' }">
-            🔝 Mais Recentes Primeiro
-        </button>
-
-        <button
-            @click="exportExcel"
-            class="px-4 py-2 btn btn-success text-white rounded float-end mb-3 mb-5"
-        >
-            Exportar Excel <i class="bi bi-file-earmark-excel"></i>
-        </button>
+        <div class="row">
+            <div class="col-5">
+                <button @click="ordenar('id', 'asc')" :class="'mx-2 btn ' + ordemid_ativo" title="Ordem Padrão - ID">
+                    🔝 Ordem Padrão
+                </button>
+                <button @click="ordenar('updated_at', 'desc')" :class="'mx-2 btn ' + ordemup_ativo" title="Ordem GERAL - Últimos Alterados">
+                    🔝 Alterados Recentemente
+                </button>
+            </div>
+            <div class="col-5">
+                <!-- <div class="row">
+                    <div class="col-6">
+                        <select v-model="ordenarpor" class="form-select w-full mx-2 btn btn-info"  @change="ordenar(ordenarpor, ordenamento)">
+                            <option value="cod_emp">Cód. Empreendimento</option>
+                            <option value="empreendimento">Empreendimento</option>
+                            <option value="br">BR</option>
+                            <option value="uf">UF</option>
+                            <option value="tipo_de_intervencao">Tipo de Intervenção</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <select v-model="ordenamento" class="form-select w-full mx-2 btn" @change="ordenar(ordenarpor, ordenamento)">
+                            <option value="asc">Crescente</option>
+                            <option value="desc">Decrecente</option>
+                        </select>
+                    </div>
+                </div> -->
+            </div>
+            <div class="col-2">
+                <button
+                    @click="exportExcel"
+                    class="px-4 py-2 btn btn-success text-white rounded float-end mb-3 mb-5"
+                >
+                    Exportar Excel <i class="bi bi-file-earmark-excel"></i>
+                </button>
+            </div>
+        </div>
 
       <table
         class="table table-striped table-hover table-light"
@@ -171,7 +191,8 @@
               :key="coluna"
               v-show="colunasVisiveis.includes(coluna) && !camposocultos.includes(coluna)"
             >
-              {{ coluna }}
+              <button class="btn btn-link" @click="ordenar(coluna, (props.ordem === 'asc' ? 'desc' : 'asc'))">{{ coluna }}</button>
+              {{ props.coluna === coluna ? (props.ordem === 'asc' ? '⬆️' : '⬇️') : '' }}
             </th>
           </tr>
         </thead>
@@ -232,7 +253,7 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { router, usePage, Link } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
@@ -243,7 +264,11 @@ const mostrarModal = ref(false);
 import NavLink from '@/Components/NavLink.vue';
 
 
-const props = defineProps({ empreendimentos: Array });
+const props = defineProps({
+    empreendimentos: Array,
+    ordem: String,
+    coluna: String
+});
 const campoEditando = ref({ id: null, campo: null });
 const empreendimentoEdit = ref({ id: null, campo: "", valor: "" });
 
@@ -315,6 +340,14 @@ const fecharEdicao = () => {
 // Vamos trazer todas as colunas
 const page = usePage();
 const dados = ref(page.props.empreendimentos);
+
+watch(
+  () => page.props.empreendimentos,
+  (novaLista) => {
+    dados.value = novaLista;
+  }
+);
+
 // Pegando todas as chaves do primeiro objeto como colunas
 const todasColunas = Object.keys(dados.value[0] || {});
 
@@ -322,9 +355,36 @@ const todasColunas = Object.keys(dados.value[0] || {});
 const colunasVisiveis = ref(todasColunas.slice(0, 15));
 colunasVisiveis.value.push(todasColunas[todasColunas.length - 1]);
 
-// Flag para mostrar os alterados no topo
-const mostrarAlteradosNoTopo = ref(false)
-const ordenacao = ref('');
+// -------------------------------------------------------------------- reload com ordenamento
+const ordemid_ativo = ref('btn-outline-primary');
+const ordemup_ativo =  ref('btn-outline-primary');
+const ordememp_ativo = ref('btn-outline-primary');
+const ordem_importacao = ref('asc');
+const ordenacao = ref('id');
+const ordenarpor = ref('id');
+const ordenamento = ref('asc');
+// -------------------------------------------------------------------- reload com ordenamento
+const ordenar = (campo, ordem = 'asc') => {
+  router.get(route('sgc.contratada.edicao', { id: 2 }), {
+    ordenarPor: campo,
+    ordem: ordem,
+  }, { preserveState: true, preserveScroll: true });
+  switch (campo) {
+    case 'id':
+      ordemid_ativo.value = 'btn-primary';
+      ordememp_ativo.value = 'btn-outline-primary';
+      ordemup_ativo.value =  'btn-outline-primary';
+      break;
+    case 'updated_at':
+      ordemid_ativo.value = 'btn-outline-primary';
+      ordemup_ativo.value =  'btn-primary';
+      ordememp_ativo.value = 'btn-outline-primary';
+      break;
+  }
+  ordem_importacao.value = ordem;
+  ordenarpor.value = campo;
+  ordenacao.value = campo;
+};
 
 const dadosFiltrados = computed(() => {
   const lista = [...dados.value];
