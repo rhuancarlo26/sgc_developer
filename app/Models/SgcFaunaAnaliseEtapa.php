@@ -12,6 +12,7 @@ class SgcFaunaAnaliseEtapa extends Model
         'id_contrato',
         'id_campanha',
         'etapa',
+        'analise',
         'status',
         'comentario',
         'fiscal_id',
