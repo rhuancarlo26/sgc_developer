@@ -1,3 +1,4 @@
+```vue
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
@@ -10,7 +11,7 @@ import QueloniosCrocodilianosVisualizar from './Componentes/QueloniosCrocodilian
 import FaunaCavernicolaVisualizar from './Componentes/FaunaCavernicolaVisualizar.vue';
 import MetodologiaVisualizar from './Componentes/MetodologiaVisualizar.vue';
 import FaunaResultadosVisualizar from './Componentes/FaunaResultadosVisualizar.vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -58,6 +59,11 @@ const analiseForms = ref(
         }),
     }), {})
 );
+
+// Estado da análise atual para a etapa selecionada
+const currentAnalise = computed(() => {
+    return props.analises.find(analise => analise.etapa === analiseForms.value[activeTab.value === 'apresentacao' ? etapas.find(e => e.tab === 'apresentacao' && e.subStep === subStep.value)?.value : activeTab.value]?.etapa) || null;
+});
 
 // Função para obter o status de uma etapa
 const getEtapaStatus = (etapaValue) => {
@@ -324,15 +330,21 @@ const finalizarAvaliacao = () => {
                                         <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('apresentacao_geral')">
                                             <div class="mb-3">
-                                                <label for="observacoes_apresentacao" class="form-label">Observações (obrigatório para rejeição)</label>
+                                                <label for="observacoes_apresentacao" class="form-label">Observações (obrigatório para reprovação)</label>
                                                 <textarea
                                                     v-model="analiseForms.apresentacao_geral.observacoes"
                                                     id="observacoes_apresentacao"
                                                     class="form-control"
                                                     rows="4"
-                                                    placeholder="Digite observações (obrigatório para rejeição)"
+                                                    placeholder="Digite observações (obrigatório para reprovação)"
                                                 ></textarea>
                                                 <InputError :message="analiseForms.apresentacao_geral.errors.observacoes" />
+                                                <p v-if="currentAnalise?.status" class="mt-2 text-sm text-gray-600">
+                                                    Status atual: {{ currentAnalise.status }} (Análise {{ currentAnalise.analise }})
+                                                </p>
+                                                <p v-if="currentAnalise?.observacoes" class="mt-2 text-sm text-gray-600">
+                                                    Observações anteriores: {{ currentAnalise.observacoes }}
+                                                </p>
                                             </div>
                                             <div class="d-flex justify-content-end gap-2">
                                                 <NavButton type="submit" type-button="danger" title="Rejeitar" />
@@ -364,15 +376,21 @@ const finalizarAvaliacao = () => {
                                         <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('caracterizacao_area')">
                                             <div class="mb-3">
-                                                <label for="observacoes_caracterizacao" class="form-label">Observações (obrigatório para rejeição)</label>
+                                                <label for="observacoes_caracterizacao" class="form-label">Observações (obrigatório para reprovação)</label>
                                                 <textarea
                                                     v-model="analiseForms.caracterizacao_area.observacoes"
                                                     id="observacoes_caracterizacao"
                                                     class="form-control"
                                                     rows="4"
-                                                    placeholder="Digite observações (obrigatório para rejeição)"
+                                                    placeholder="Digite observações (obrigatório para reprovação)"
                                                 ></textarea>
                                                 <InputError :message="analiseForms.caracterizacao_area.errors.observacoes" />
+                                                <p v-if="currentAnalise?.status" class="mt-2 text-sm text-gray-600">
+                                                    Status atual: {{ currentAnalise.status }} (Análise {{ currentAnalise.analise }})
+                                                </p>
+                                                <p v-if="currentAnalise?.observacoes" class="mt-2 text-sm text-gray-600">
+                                                    Observações anteriores: {{ currentAnalise.observacoes }}
+                                                </p>
                                             </div>
                                             <div class="d-flex justify-content-end gap-2">
                                                 <NavButton type="submit" type-button="danger" title="Rejeitar" />
@@ -402,15 +420,21 @@ const finalizarAvaliacao = () => {
                                         <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('modulos_amostrais')">
                                             <div class="mb-3">
-                                                <label for="observacoes_modulos" class="form-label">Observações (obrigatório para rejeição)</label>
+                                                <label for="observacoes_modulos" class="form-label">Observações (obrigatório para reprovação)</label>
                                                 <textarea
                                                     v-model="analiseForms.modulos_amostrais.observacoes"
                                                     id="observacoes_modulos"
                                                     class="form-control"
                                                     rows="4"
-                                                    placeholder="Digite observações (obrigatório para rejeição)"
+                                                    placeholder="Digite observações (obrigatório para reprovação)"
                                                 ></textarea>
                                                 <InputError :message="analiseForms.modulos_amostrais.errors.observacoes" />
+                                                <p v-if="currentAnalise?.status" class="mt-2 text-sm text-gray-600">
+                                                    Status atual: {{ currentAnalise.status }} (Análise {{ currentAnalise.analise }})
+                                                </p>
+                                                <p v-if="currentAnalise?.observacoes" class="mt-2 text-sm text-gray-600">
+                                                    Observações anteriores: {{ currentAnalise.observacoes }}
+                                                </p>
                                             </div>
                                             <div class="d-flex justify-content-end gap-2">
                                                 <NavButton type="submit" type-button="danger" title="Rejeitar" />
@@ -440,15 +464,21 @@ const finalizarAvaliacao = () => {
                                         <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('pontos_quelo_crocod')">
                                             <div class="mb-3">
-                                                <label for="observacoes_quelo" class="form-label">Observações (obrigatório para rejeição)</label>
+                                                <label for="observacoes_quelo" class="form-label">Observações (obrigatório para reprovação)</label>
                                                 <textarea
                                                     v-model="analiseForms.pontos_quelo_crocod.observacoes"
                                                     id="observacoes_quelo"
                                                     class="form-control"
                                                     rows="4"
-                                                    placeholder="Digite observações (obrigatório para rejeição)"
+                                                    placeholder="Digite observações (obrigatório para reprovação)"
                                                 ></textarea>
                                                 <InputError :message="analiseForms.pontos_quelo_crocod.errors.observacoes" />
+                                                <p v-if="currentAnalise?.status" class="mt-2 text-sm text-gray-600">
+                                                    Status atual: {{ currentAnalise.status }} (Análise {{ currentAnalise.analise }})
+                                                </p>
+                                                <p v-if="currentAnalise?.observacoes" class="mt-2 text-sm text-gray-600">
+                                                    Observações anteriores: {{ currentAnalise.observacoes }}
+                                                </p>
                                             </div>
                                             <div class="d-flex justify-content-end gap-2">
                                                 <NavButton type="submit" type-button="danger" title="Rejeitar" />
@@ -478,15 +508,21 @@ const finalizarAvaliacao = () => {
                                         <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                         <form @submit.prevent="rejeitarEtapa('pontos_cavernicola')">
                                             <div class="mb-3">
-                                                <label for="observacoes_cavernicola" class="form-label">Observações (obrigatório para rejeição)</label>
+                                                <label for="observacoes_cavernicola" class="form-label">Observações (obrigatório para reprovação)</label>
                                                 <textarea
                                                     v-model="analiseForms.pontos_cavernicola.observacoes"
                                                     id="observacoes_cavernicola"
                                                     class="form-control"
                                                     rows="4"
-                                                    placeholder="Digite observações (obrigatório para rejeição)"
+                                                    placeholder="Digite observações (obrigatório para reprovação)"
                                                 ></textarea>
                                                 <InputError :message="analiseForms.pontos_cavernicola.errors.observacoes" />
+                                                <p v-if="currentAnalise?.status" class="mt-2 text-sm text-gray-600">
+                                                    Status atual: {{ currentAnalise.status }} (Análise {{ currentAnalise.analise }})
+                                                </p>
+                                                <p v-if="currentAnalise?.observacoes" class="mt-2 text-sm text-gray-600">
+                                                    Observações anteriores: {{ currentAnalise.observacoes }}
+                                                </p>
                                             </div>
                                             <div class="d-flex justify-content-end gap-2">
                                                 <NavButton type="submit" type-button="danger" title="Rejeitar" />
@@ -516,15 +552,21 @@ const finalizarAvaliacao = () => {
                                     <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                     <form @submit.prevent="rejeitarEtapa('metodologia')">
                                         <div class="mb-3">
-                                            <label for="observacoes_metodologia" class="form-label">Observações (obrigatório para rejeição)</label>
+                                            <label for="observacoes_metodologia" class="form-label">Observações (obrigatório para reprovação)</label>
                                             <textarea
                                                 v-model="analiseForms.metodologia.observacoes"
                                                 id="observacoes_metodologia"
                                                 class="form-control"
                                                 rows="4"
-                                                placeholder="Digite observações (obrigatório para rejeição)"
+                                                placeholder="Digite observações (obrigatório para reprovação)"
                                             ></textarea>
                                             <InputError :message="analiseForms.metodologia.errors.observacoes" />
+                                            <p v-if="currentAnalise?.status" class="mt-2 text-sm text-gray-600">
+                                                Status atual: {{ currentAnalise.status }} (Análise {{ currentAnalise.analise }})
+                                            </p>
+                                            <p v-if="currentAnalise?.observacoes" class="mt-2 text-sm text-gray-600">
+                                                Observações anteriores: {{ currentAnalise.observacoes }}
+                                            </p>
                                         </div>
                                         <div class="d-flex justify-content-end gap-2">
                                             <NavButton type="submit" type-button="danger" title="Rejeitar" />
@@ -554,15 +596,21 @@ const finalizarAvaliacao = () => {
                                     <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                     <form @submit.prevent="rejeitarEtapa('resultados')">
                                         <div class="mb-3">
-                                            <label for="observacoes_resultados" class="form-label">Observações (obrigatório para rejeição)</label>
+                                            <label for="observacoes_resultados" class="form-label">Observações (obrigatório para reprovação)</label>
                                             <textarea
                                                 v-model="analiseForms.resultados.observacoes"
                                                 id="observacoes_resultados"
                                                 class="form-control"
                                                 rows="4"
-                                                placeholder="Digite observações (obrigatório para rejeição)"
+                                                placeholder="Digite observações (obrigatório para reprovação)"
                                             ></textarea>
                                             <InputError :message="analiseForms.resultados.errors.observacoes" />
+                                            <p v-if="currentAnalise?.status" class="mt-2 text-sm text-gray-600">
+                                                Status atual: {{ currentAnalise.status }} (Análise {{ currentAnalise.analise }})
+                                            </p>
+                                            <p v-if="currentAnalise?.observacoes" class="mt-2 text-sm text-gray-600">
+                                                Observações anteriores: {{ currentAnalise.observacoes }}
+                                            </p>
                                         </div>
                                         <div class="d-flex justify-content-end gap-2">
                                             <NavButton type="submit" type-button="danger" title="Rejeitar" />
@@ -615,15 +663,21 @@ const finalizarAvaliacao = () => {
                                     <h4 class="text-center">ANÁLISE DA ETAPA</h4>
                                     <form @submit.prevent="rejeitarEtapa('anexos')">
                                         <div class="mb-3">
-                                            <label for="observacoes_anexos" class="form-label">Observações (obrigatório para rejeição)</label>
+                                            <label for="observacoes_anexos" class="form-label">Observações (obrigatório para reprovação)</label>
                                             <textarea
                                                 v-model="analiseForms.anexos.observacoes"
                                                 id="observacoes_anexos"
                                                 class="form-control"
                                                 rows="4"
-                                                placeholder="Digite observações (obrigatório para rejeição)"
+                                                placeholder="Digite observações (obrigatório para reprovação)"
                                             ></textarea>
                                             <InputError :message="analiseForms.anexos.errors.observacoes" />
+                                            <p v-if="currentAnalise?.status" class="mt-2 text-sm text-gray-600">
+                                                Status atual: {{ currentAnalise.status }} (Análise {{ currentAnalise.analise }})
+                                            </p>
+                                            <p v-if="currentAnalise?.observacoes" class="mt-2 text-sm text-gray-600">
+                                                Observações anteriores: {{ currentAnalise.observacoes }}
+                                            </p>
                                         </div>
                                         <div class="d-flex justify-content-end gap-2">
                                             <NavButton type="submit" type-button="danger" title="Rejeitar" />
@@ -656,6 +710,7 @@ const finalizarAvaliacao = () => {
                                 <table class="min-w-full bg-white border border-gray-300">
                                     <thead>
                                         <tr class="bg-gray-100">
+                                            <th class="py-2 px-4 border-b text-left">Análise</th>
                                             <th class="py-2 px-4 border-b text-left">Etapa</th>
                                             <th class="py-2 px-4 border-b text-left">Status</th>
                                             <th class="py-2 px-4 border-b text-left">Observações</th>
@@ -664,6 +719,7 @@ const finalizarAvaliacao = () => {
                                     </thead>
                                     <tbody>
                                         <tr v-for="analise in props.analises" :key="analise.id" class="hover:bg-gray-50">
+                                            <td class="py-2 px-4 border-b">{{ analise.analise || 'N/A' }}</td>
                                             <td class="py-2 px-4 border-b">{{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}</td>
                                             <td class="py-2 px-4 border-b" :class="{ 'text-success': analise.status === 'Aprovada', 'text-danger': analise.status === 'Rejeitada' }">
                                                 {{ analise.status || 'Não informado' }}
@@ -768,3 +824,4 @@ button:disabled {
     z-index: 1000;
 }
 </style>
+```

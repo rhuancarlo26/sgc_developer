@@ -12,6 +12,7 @@ use App\Models\SgcFaunaCampanhaAbios;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcFaunaModuloAmostral;
 use App\Models\SgcvwEmpreendimentos;
+use App\Models\SgcFaunaAnaliseEtapa;
 use App\Models\Contrato;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use Inertia\Response;
@@ -752,6 +753,46 @@ class FaunaController extends Controller
         ]);
     }
 
+    // public function salvarAnalise(Request $request, $contrato, $produto, $campanha): RedirectResponse
+    // {
+    //     if (Auth::user()->perfis_id !== 2) {
+    //         return redirect()->back()->withErrors(['error' => 'Acesso negado. Apenas fiscais podem salvar análises.']);
+    //     }
+
+    //     \Log::info('Dados recebidos em salvarAnalise:', [
+    //         'request' => $request->all(),
+    //         'contrato' => $contrato,
+    //         'produto' => $produto,
+    //         'campanha' => $campanha,
+    //     ]);
+
+    //     try {
+    //         $validated = $request->validate([
+    //             'etapa' => 'required|string|in:apresentacao_geral,caracterizacao_area,modulos_amostrais,pontos_quelo_crocod,pontos_cavernicola,metodologia,resultados,anexos',
+    //             'status' => 'required|string|in:Aprovada,Rejeitada',
+    //             'observacoes' => 'nullable|string',
+    //         ]);
+
+    //         $this->faunaFiscalService->salvarAnaliseEtapa($contrato, $campanha, $validated);
+    //         return redirect()->route('sgc.contratada.produtos.analise', [$contrato, $produto, $campanha])
+    //             ->with('success', 'Análise da etapa salva com sucesso!');
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         \Log::error('FaunaController: Erro de validação ao salvar análise', [
+    //             'contrato_id' => $contrato,
+    //             'campanha_id' => $campanha,
+    //             'errors' => $e->errors(),
+    //         ]);
+    //         return redirect()->back()->withErrors($e->errors());
+    //     } catch (\Exception $e) {
+    //         \Log::error('FaunaController: Erro ao salvar análise da etapa', [
+    //             'contrato_id' => $contrato,
+    //             'campanha_id' => $campanha,
+    //             'erro' => $e->getMessage(),
+    //         ]);
+    //         return redirect()->back()->withErrors(['error' => 'Erro ao salvar análise: ' . $e->getMessage()]);
+    //     }
+    // }
+
     public function salvarAnalise(Request $request, $contrato, $produto, $campanha): RedirectResponse
     {
         if (Auth::user()->perfis_id !== 2) {
@@ -771,6 +812,19 @@ class FaunaController extends Controller
                 'status' => 'required|string|in:Aprovada,Rejeitada',
                 'observacoes' => 'nullable|string',
             ]);
+
+            // Verificar se há análises anteriores rejeitadas para a mesma etapa
+            $hasPreviousRejection = SgcFaunaAnaliseEtapa::where('id_contrato', $contrato)
+                ->where('id_campanha', $campanha)
+                ->where('etapa', $validated['etapa'])
+                ->where('fiscal_id', Auth::id())
+                ->where('status', 'Rejeitada')
+                ->exists();
+
+            // Adicionar nova_analise se houver rejeição anterior
+            if ($hasPreviousRejection) {
+                $validated['nova_analise'] = true;
+            }
 
             $this->faunaFiscalService->salvarAnaliseEtapa($contrato, $campanha, $validated);
             return redirect()->route('sgc.contratada.produtos.analise', [$contrato, $produto, $campanha])
