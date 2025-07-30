@@ -159,11 +159,10 @@ const downloadPdfConsolidado = () => {
     });
     setTimeout(() => {
         window.location.href = url;
-        // Fechar o modal após um pequeno atraso, assumindo que o download começou
         setTimeout(() => {
             console.log('Executado após 35 segundos');
             isLoading.value = false;
-        }, 35000); //35 segundos
+        }, 250000);
     }, 100);
 };
 
@@ -273,25 +272,25 @@ onMounted(() => {
                   <button
                     @click="downloadPdfConsolidado"
                     class="btn btn-outline-info"
-                    :disabled="props.dadosrelat.length === 0 || isLoading"
+                    :disabled="props.dadosrelat.length === 1 || isLoading || obterStatusRelatorio(form.item_id, form.relatorio_num) != 'Relatório Aprovado'"
                   >
                     {{ isLoading ? 'Gerando...' : 'Download PDF Consolidado' }}
                   </button>
                 </div>
               </div>
             </div>
-            <div v-if="isLoading" class="modal fade show" style="display: block;" tabindex="-1">
-              <div class="modal-dialog modal-dialog-centered">
+            <div v-if="isLoading" class="modal fade show" style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1055;" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered" style="z-index: 1056;">
                 <div class="modal-content">
-                  <div class="modal-body text-center">
+                <div class="modal-body text-center">
                     <div class="spinner-border text-primary" role="status">
-                      <span class="visually-hidden">Carregando...</span>
+                    <span class="visually-hidden">Carregando...</span>
                     </div>
                     <p class="mt-3">Gerando relatório, por favor aguarde...</p>
-                  </div>
                 </div>
-              </div>
-              <div class="modal-backdrop fade show"></div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show" style="z-index: 1050; position: fixed;"></div>
             </div>
             <div class="row">
               <div class="col-12">
