@@ -154,4 +154,56 @@ class PlanoSupressaoService extends BaseModelService
             ->where('plano_supressao.servico_id', $servicoId)
             ->get();
     }
+
+
+    public function graficos_monitora_plano_supressao(Servicos $servico): array
+    {
+
+
+        $allRegistros = PlanoSupressao::select(
+            'plano_supressao.*',
+            'tipo_biomas.nome as bioma_nome'
+        )
+            ->join('tipo_biomas', 'plano_supressao.tipo_bioma_id', '=', 'tipo_biomas.id')
+            ->where('plano_supressao.servico_id', $servico->id)
+            ->get();
+
+
+        return [
+            'totalRegistros' => $allRegistros->count(),
+            'getChartDataPieAreas'   => $this->getChartDataPieAreas($allRegistros),
+            'getChartDataBarPorBiomaPlano'   => $this->getChartDataBarPorBiomaPlano($allRegistros),
+        ];
+    }
+
+    private function getChartDataPieAreas($allRegistros): array
+    {
+        $somaEmApp   = $allRegistros->sum('area_em_app');
+        $somaForaApp = $allRegistros->sum('area_fora_app');
+
+        return [
+            'labels'   => ['Área em APP', 'Área fora APP'],
+            'datasets' => [[
+                'data'            => [$somaEmApp, $somaForaApp],
+                'backgroundColor' => ['#4e73df', '#e74a3b'],
+                'borderColor'     => '#ffffff',
+                'borderWidth'     => 2,
+            ]],
+        ];
+    }
+
+    private function getChartDataBarPorBiomaPlano($allRegistros): array
+    {
+        $groupByBioma = $allRegistros->groupBy('bioma_nome');
+
+        return [
+            'labels'   => $groupByBioma->keys()->toArray(),
+            'datasets' => [[
+                'label'           => 'Área Total (m²)',
+                'data'            => $groupByBioma->map(fn($g) => $g->sum('area_total'))->values()->toArray(),
+                'backgroundColor' => "#28a745",
+                'borderRadius'    => 5,
+            ]],
+        ];
+    }
 }

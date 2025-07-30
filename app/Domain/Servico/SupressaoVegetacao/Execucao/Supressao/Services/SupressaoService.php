@@ -27,8 +27,7 @@ class SupressaoService extends BaseModelService
         DataManagement                           $dataManagement,
         private readonly LicencaShapefileService $licencaShapefileService,
         private readonly ArquivoUtils            $arquivoUtils,
-    )
-    {
+    ) {
         parent::__construct($dataManagement);
     }
 
@@ -156,4 +155,35 @@ class SupressaoService extends BaseModelService
             ->get();
     }
 
+
+    public function graficos_monitora_supressao(Servicos $servico): array
+    {
+        $allRegistros = AreaSupressao::select(
+            'area_supressao.*',
+            'tipo_biomas.nome as bioma_nome' 
+        )
+            ->join('tipo_biomas', 'area_supressao.tipo_bioma_id', '=', 'tipo_biomas.id')
+            ->where('area_supressao.servico_id', $servico->id)
+            ->get();
+
+        return [
+            'totalRegistros' => $allRegistros->count(),
+            'getChartDataBarPorBioma'   => $this->getChartDataBarPorBioma($allRegistros),
+        ];
+    }
+
+    private function getChartDataBarPorBioma($allRegistros): array
+    {
+        $groupByBioma = $allRegistros->groupBy('bioma_nome');
+
+        return [
+            'labels'   => $groupByBioma->keys()->toArray(),
+            'datasets' => [[
+                'label'           => 'Área Total (m²)',
+                'data'            => $groupByBioma->map(fn($g) => $g->sum('area_total'))->values()->toArray(),
+                'backgroundColor' => "#28a745",
+                'borderRadius'    => 5,
+            ]],
+        ];
+    }
 }
