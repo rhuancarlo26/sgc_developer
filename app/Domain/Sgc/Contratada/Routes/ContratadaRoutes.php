@@ -36,6 +36,7 @@ Route::prefix('/contratada')->group(function () {
 
     // Download anexo
     Route::get('/sgc/contratada/download-anexo/{contratoId}/{itemId}/{relatorioNum}', [StoreUploadRelatorioController::class, 'downloadAnexo'])->name('sgc.contratada.download_anexo');
+    Route::get('/sgc/contratada/download-anexo/{contratoId}/{relatorioNum}',          [StoreUploadRelatorioController::class, 'downloadRelatorioCompleto'])->name('sgc.contratada.download_relatorio');
 
     // Relatório de Coordenação
     Route::get('/sgc/visualizar',                                  [VisualizarDocxController::class,                        'index'])->name('sgc.contratada.visualizar_doc');
@@ -80,17 +81,17 @@ Route::prefix('/contratada')->group(function () {
 
     // Update Fóruns
     Route::post('/sgc/empreendimento/{id}/updatecampo', [EmpreendimentosController::class, 'updatecampo'])->name('sgc.contratada.empreendimento.updatecampo');
-    
+
     // Ficha Contratual
     Route::get('{contrato}/ficha', [FichaController::class, 'index'])->name('sgc.contratada.ficha.index');
 
     // Quantitativos
     Route::get('{contrato}/quantitativos', [QuantitativosController::class, 'index'])->name('sgc.contratada.quantitativos.index');
-    
+
     // Produtos
     Route::get('/sgc/contratada/{contrato}/produtos/{produto}', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
-    
-    // DocxModal - Novo método    
+
+    // DocxModal - Novo método
     Route::get('/sgc/contratada/get_docx/{itemId}/{contratoId}/{versao}/{numRelatorio}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
 
 
@@ -102,7 +103,7 @@ Route::prefix('/contratada')->group(function () {
     Route::post('/updatecampo/{corretor}',                      [EmpreendimentosController::class,                       'updatecampo'])->name('sgc.contratada.updatecampo');
     Route::post('/updatecampoestudos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoestudos'])->name('sgc.contratada.updatecampoestudos');
     Route::post('/updatecampoprodutos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoprodutos'])->name('sgc.contratada.updatecampoprodutos');
-    
+
     Route::get('{tipo}/empreendimentos-export',                 [EmpreendimentosController::class,                       'export'])->name('sgc.contratada.empreendimentos.export');
     Route::get('{tipo}/estudos-export',                         [EmpreendimentosController::class,                       'estudosexport'])->name('sgc.contratada.estudos.export');
     Route::get('{tipo}/subprodutos-export',                     [EmpreendimentosController::class,                       'subprodutosexport'])->name('sgc.contratada.subprodutos.export');
