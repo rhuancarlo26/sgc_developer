@@ -41,6 +41,7 @@ class FaunaService
             'cod_emp' => $data['cod_emp'] ?? null,
             'subproduto' => $data['subproduto'] ?? null,
             'status' => $data['status'] ?? 'Em análise',
+            'versao_analise' => 1,
         ]);
 
         // Vincular profissionais

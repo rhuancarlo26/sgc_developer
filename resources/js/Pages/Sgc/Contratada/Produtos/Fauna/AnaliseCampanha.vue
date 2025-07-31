@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
@@ -87,6 +86,44 @@ const getTabStatus = (tab) => {
 // Verifica se todas as etapas foram analisadas
 const todasEtapasAnalisadas = () => {
     return etapas.every(etapa => getEtapaStatus(etapa.value) !== 'Pendente');
+};
+
+// Agrupar análises por etapa e ordenar por análise
+const groupedAnalises = computed(() => {
+    // Mapear a ordem das etapas conforme o array 'etapas'
+    const etapaOrder = etapas.reduce((acc, etapa, index) => ({
+        ...acc,
+        [etapa.value]: index
+    }), {});
+    
+    // Agrupar análises por etapa
+    const grouped = props.analises.reduce((acc, analise) => {
+        if (!acc[analise.etapa]) {
+            acc[analise.etapa] = [];
+        }
+        acc[analise.etapa].push(analise);
+        return acc;
+    }, {});
+
+    // Ordenar análises dentro de cada etapa por 'analise' (como número)
+    Object.keys(grouped).forEach(etapa => {
+        grouped[etapa].sort((a, b) => Number(a.analise) - Number(b.analise));
+    });
+
+    // Flattar o array, ordenando por etapa
+    return Object.keys(grouped)
+        .sort((a, b) => (etapaOrder[a] ?? 999) - (etapaOrder[b] ?? 999))
+        .flatMap(etapa => grouped[etapa]);
+});
+
+// Calcular o rowspan para cada etapa
+const getRowspan = (etapa) => {
+    return props.analises.filter(analise => analise.etapa === etapa).length;
+};
+
+// Verificar se a célula de etapa deve ser exibida (apenas na primeira ocorrência)
+const shouldShowEtapa = (etapa, index) => {
+    return index === 0 || groupedAnalises.value[index - 1].etapa !== etapa;
 };
 
 const setActiveTab = (tab) => {
@@ -704,28 +741,34 @@ const finalizarAvaliacao = () => {
                             </div>
                         </div>
                         <!-- Tabela de Análises Realizadas -->
-                        <div class="mt-4">
-                            <h4>Análises Realizadas</h4>
+                        <div class="mt-6">
+                            <h4 class="mb-3">Análises Realizadas</h4>
                             <div v-if="props.analises && props.analises.length > 0" class="overflow-x-auto">
                                 <table class="min-w-full bg-white border border-gray-300">
                                     <thead>
                                         <tr class="bg-gray-100">
-                                            <th class="py-2 px-4 border-b text-left">Análise</th>
-                                            <th class="py-2 px-4 border-b text-left">Etapa</th>
-                                            <th class="py-2 px-4 border-b text-left">Status</th>
-                                            <th class="py-2 px-4 border-b text-left">Observações</th>
-                                            <th class="py-2 px-4 border-b text-left">Data</th>
+                                            <th class="py-2 px-4 border-b text-center font-semibold">Etapa</th>
+                                            <th class="py-2 px-4 border-b text-center font-semibold">Análise</th>
+                                            <th class="py-2 px-4 border-b text-center font-semibold">Status</th>
+                                            <th class="py-2 px-4 border-b text-center font-semibold">Observações</th>
+                                            <th class="py-2 px-4 border-b text-center font-semibold">Data</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="analise in props.analises" :key="analise.id" class="hover:bg-gray-50">
-                                            <td class="py-2 px-4 border-b">{{ analise.analise || 'N/A' }}</td>
-                                            <td class="py-2 px-4 border-b">{{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}</td>
-                                            <td class="py-2 px-4 border-b" :class="{ 'text-success': analise.status === 'Aprovada', 'text-danger': analise.status === 'Rejeitada' }">
+                                        <tr v-for="(analise, index) in groupedAnalises" :key="analise.id" class="hover:bg-gray-50">
+                                            <td
+                                                v-if="shouldShowEtapa(analise.etapa, index)"
+                                                class="py-2 px-4 border-b text-center align-middle"
+                                                :rowspan="getRowspan(analise.etapa)"
+                                            >
+                                                {{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}
+                                            </td>
+                                            <td class="py-2 px-4 border-b text-center align-middle">{{ analise.analise || 'N/A' }}</td>
+                                            <td class="py-2 px-4 border-b text-center align-middle" :class="{ 'text-success': analise.status === 'Aprovada', 'text-danger': analise.status === 'Rejeitada' }">
                                                 {{ analise.status || 'Não informado' }}
                                             </td>
-                                            <td class="py-2 px-4 border-b">{{ analise.comentario || 'Não informado' }}</td>
-                                            <td class="py-2 px-4 border-b">{{ analise.created_at || 'Não informado' }}</td>
+                                            <td class="py-2 px-4 border-b text-center align-middle">{{ analise.comentario || 'Não informado' }}</td>
+                                            <td class="py-2 px-4 border-b text-center align-middle">{{ analise.created_at || 'Não informado' }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -762,15 +805,26 @@ const finalizarAvaliacao = () => {
 }
 table {
     border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
 }
 th, td {
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     border: 1px solid #dee2e6;
+    vertical-align: middle;
+    text-align: center;
 }
-thead {
+th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+td {
+    word-wrap: break-word;
+}
+thead tr {
     background-color: #f8f9fa;
 }
-tr:hover {
+tbody tr:hover {
     background-color: #f1f5f9;
 }
 .alert-info {
@@ -780,16 +834,9 @@ tr:hover {
     background-color: #e7f1ff;
     color: #084298;
 }
-.status-indicator {
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-.bi-check-circle-fill, .bi-x-circle-fill, .bi-hourglass-split {
-    font-size: 1rem;
-}
 .status-container {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
 }
 button:disabled {
     opacity: 0.65;
@@ -824,4 +871,3 @@ button:disabled {
     z-index: 1000;
 }
 </style>
-```
