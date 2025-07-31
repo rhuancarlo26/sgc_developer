@@ -9,33 +9,51 @@ use Illuminate\Support\Facades\Log;
 
 class FaunaFiscalService
 {
+    public function getAnalisesByCampanha($contrato, $campanha)
+    {
+        $analises = SgcFaunaAnaliseEtapa::where('id_contrato', $contrato)
+            ->where('id_campanha', $campanha)
+            ->get(['id', 'etapa', 'analise', 'status', 'comentario', 'created_at'])
+            ->map(function ($analise) {
+                return [
+                    'id' => $analise->id,
+                    'etapa' => $analise->etapa,
+                    'analise' => $analise->analise,
+                    'status' => $analise->status,
+                    'comentario' => $analise->comentario,
+                    'created_at' => $analise->created_at,
+                ];
+            })
+            ->toArray();
+
+        Log::info('FaunaFiscalService: Dados retornados por getAnalisesByCampanha', [
+            'contrato' => $contrato,
+            'campanha' => $campanha,
+            'analises' => $analises,
+        ]);
+
+        return $analises;
+    }
+
     public function salvarAnaliseEtapa($contrato, $campanha, $data)
     {
-        // Encontrar o maior número de análise para a campanha
-        $maxAnalise = SgcFaunaAnaliseEtapa::where('id_contrato', $contrato)
-            ->where('id_campanha', $campanha)
-            ->max('analise') ?? 0;
-
-        // Verificar o status da campanha
-        $campanhaStatus = SgcFaunaCampanha::where('id', $campanha)
+        // Obter a versão atual da análise da campanha
+        $versaoAnalise = SgcFaunaCampanha::where('id', $campanha)
             ->where('id_contrato', $contrato)
-            ->value('status');
+            ->value('versao_analise') ?? 1;
 
-        // Se a campanha está em análise pela primeira vez ou após rejeição, determinar o número da análise
-        $analiseNumero = $campanhaStatus === 'Em análise' && $maxAnalise > 0 ? $maxAnalise : $maxAnalise + 1;
-
-        // Verificar se já existe uma análise para a etapa no ciclo atual
+        // Verificar se já existe uma análise para a etapa na versão atual
         $existingAnalise = SgcFaunaAnaliseEtapa::where('id_contrato', $contrato)
             ->where('id_campanha', $campanha)
             ->where('etapa', $data['etapa'])
-            ->where('analise', $analiseNumero)
+            ->where('analise', $versaoAnalise)
             ->first();
 
         $analiseData = [
             'id_contrato' => $contrato,
             'id_campanha' => $campanha,
             'etapa' => $data['etapa'],
-            'analise' => $analiseNumero,
+            'analise' => $versaoAnalise,
             'status' => $data['status'],
             'comentario' => $data['observacoes'] ?? null,
             'fiscal_id' => Auth::id(),
@@ -65,24 +83,24 @@ class FaunaFiscalService
             ->get();
 
         $hasRejeitada = $analises->contains('status', 'Rejeitada');
-        
+
+        // Atualizar status e incrementar versao_analise se rejeitada
+        $updateData = ['status' => $hasRejeitada ? 'Rejeitada' : 'Aprovada'];
+        if ($hasRejeitada) {
+            $updateData['versao_analise'] = SgcFaunaCampanha::where('id', $campanha)
+                ->where('id_contrato', $contrato)
+                ->value('versao_analise') + 1;
+        }
+
         SgcFaunaCampanha::where('id', $campanha)
             ->where('id_contrato', $contrato)
-            ->update(['status' => $hasRejeitada ? 'Rejeitada' : 'Aprovada']);
+            ->update($updateData);
 
         Log::info('FaunaFiscalService: Avaliação finalizada', [
             'contrato' => $contrato,
             'campanha' => $campanha,
             'status' => $hasRejeitada ? 'Rejeitada' : 'Aprovada',
+            'versao_analise' => $updateData['versao_analise'] ?? 1,
         ]);
-    }
-
-        public function getAnalisesByCampanha($contratoId, $campanhaId)
-    {
-        return SgcFaunaAnaliseEtapa::where('id_contrato', $contratoId)
-            ->where('id_campanha', $campanhaId)
-            ->where('fiscal_id', Auth::id())
-            ->get(['id', 'etapa','analise', 'status', 'comentario', 'created_at'])
-            ->toArray();
     }
 }

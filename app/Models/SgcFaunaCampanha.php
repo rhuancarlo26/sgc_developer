@@ -18,7 +18,8 @@ class SgcFaunaCampanha extends Model
         'num_abio',
         'cod_emp',
         'subproduto',
-        'status'
+        'status',
+        'versao_analise'
     ];
 
     public function contrato()

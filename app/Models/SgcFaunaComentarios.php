@@ -10,4 +10,9 @@ class SgcFaunaComentarios extends Model
     protected $guarded = ['id', 'created_at'];
 
 
+     public function campanha()
+    {
+        return $this->belongsTo(SgcFaunaCampanha::class, 'id_campanha');
+    }
+
 }
