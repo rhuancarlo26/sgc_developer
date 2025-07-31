@@ -16,7 +16,8 @@ const props = defineProps({
     data: { type: Object },
     contrato: { type: Object },
     servico: { type: Object },
-    aprovacao: { type: Object }
+    aprovacao: { type: Object },
+    biomas: {type: Array}
 });
 
 const modalIncluirPlanoRef = ref();
@@ -121,7 +122,7 @@ const ap = (ap) => {
                 </Table>
             </template>
         </Navbar>
-        <ModalIncluirPlano ref="modalIncluirPlanoRef" :servico="servico" />
+        <ModalIncluirPlano ref="modalIncluirPlanoRef" :biomas="biomas" :servico="servico" />
         <ModalMapa ref="modalMapaRef" />
     </AuthenticatedLayout>
 
