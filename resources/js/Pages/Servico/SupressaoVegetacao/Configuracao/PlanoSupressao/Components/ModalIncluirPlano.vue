@@ -6,7 +6,8 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 
 const props = defineProps({
-    servico: { type: Object }
+    servico: { type: Object },
+    biomas: { type: Array },
 })
 
 const form = useForm({
@@ -20,6 +21,10 @@ const form = useForm({
     local_shape_fora_app: null,
     servico_id: null,
     doc: null,
+    tipo_bioma_id: null,
+    area_total: 0,
+
+
 })
 
 const modalRef = ref();
@@ -37,6 +42,8 @@ const abrirModal = (d = null) => {
         form.local_shape_em_app = null;
         form.local_shape_fora_app = null;
         form.doc = null;
+        form.tipo_bioma_id = d.tipo_bioma_id;
+       form.area_total = d.tipo_bioma_id;
     }
     modalRef.value.getBsModal().show();
 }
@@ -74,6 +81,23 @@ const fecharModal = () => {
     dados.value = null;
 };
 
+const limitaesoma = (field) => {
+    const val = form[field];
+    if (val !== null && val !== undefined && !isNaN(val)) {
+
+        form[field] = parseFloat(val.toFixed(4));
+    }
+
+    somaTotalApp();
+};
+
+const somaTotalApp = () => {
+    const a = form.area_em_app || 0;
+    const b = form.area_fora_app || 0;
+    form.area_total = parseFloat((a + b).toFixed(4));
+};
+
+
 defineExpose({ abrirModal });
 </script>
 
@@ -82,27 +106,29 @@ defineExpose({ abrirModal });
         <Modal ref="modalRef" title="Cadastro de plano de supressão" modal-dialog-class="modal-xl">
             <template #body>
                 <div class="row row-gap-2">
-                    <div class="col-lg-4">
+                    <div class="col-lg-6">
                         <InputLabel value="Código" for="codigo" />
                         <input v-model="form.chave" id="nome" class="form-control" disabled />
                         <InputError :message="form.errors.chave" />
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-6">
+                        <InputLabel value="Bioma" for="tipo_bioma_id" />
+                        <v-select :options="biomas" v-model="form.tipo_bioma_id" label="nome" :reduce="t => t.id">
+                            <template #no-options="{ }">
+                                Nenhum registro encontrado.
+                            </template>
+                        </v-select>
+                        <InputError :message="form.errors.tipo_bioma_id" />
+                    </div>
+                    <div class="col-lg-6">
                         <InputLabel value="Data inicial" for="dt_inicial" />
                         <input v-model="form.dt_inicial" id="dt_inicial" type="date" class="form-control" />
                         <InputError :message="form.errors.dt_inicial" />
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-6">
                         <InputLabel value="Data final" for="dt_inicial" />
                         <input v-model="form.dt_final" id="dt_final" type="date" class="form-control" />
                         <InputError :message="form.errors.dt_final" />
-                    </div>
-                    <div class="col-12">
-                        <InputLabel value="Área APP (ha)" for="area_em_app" />
-                        <input v-model="form.area_em_app" id="area_em_app" type="number" step="0.1"
-                            class="form-control" />
-                        <InputError :message="form.errors.area_em_app" />
-
                     </div>
                     <div class="col-12">
                         <InputLabel value="Shapefile em área de APP (.ZIP)" for="local_shape_em_app" />
@@ -114,12 +140,24 @@ defineExpose({ abrirModal });
                         </div>
 
                     </div>
-                    <div class="col-12">
-                        <InputLabel value="Área fora APP (há)" for="area_fora_app" />
-                        <input v-model="form.area_fora_app" id="area_fora_app" type="number" step="0.1"
-                            class="form-control" />
-                        <InputError :message="form.errors.area_fora_app" />
+                    <div class="col-lg-4">
+                        <InputLabel value="Área em APP:" for="area_em_app" />
+                        <input id="area_em_app" type="number" step="0.0001" v-model.number="form.area_em_app"
+                            @blur="limitaesoma('area_em_app')" class="form-control" />
+                        <InputError :message="form.errors.area_em_app" />
+                    </div>
 
+                    <div class="col-lg-4">
+                        <InputLabel value="Área Fora APP:" for="area_fora_app" />
+                        <input id="area_fora_app" type="number" step="0.0001" v-model.number="form.area_fora_app"
+                            @blur="limitaesoma('area_fora_app')" class="form-control" />
+                        <InputError :message="form.errors.area_fora_app" />
+                    </div>
+                    <div class="col-lg-4">
+                        <InputLabel value="Área total:" for="area_fora_app" />
+                        <input v-model="form.area_total" type="number" step="0.0001" id="area_total"
+                            class="form-control" readonly />
+                        <InputError :message="form.errors.area_total" />
                     </div>
                     <div class="col-12">
                         <InputLabel value="Shapefile em área fora de APP (.ZIP)" for="local_shape_fora_app" />

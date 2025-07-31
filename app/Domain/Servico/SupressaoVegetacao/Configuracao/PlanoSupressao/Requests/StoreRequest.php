@@ -13,6 +13,8 @@ class StoreRequest extends FormRequest
             'servico_id' => $this->isMethod('post') ? 'required|exists:servicos,id' : 'nullable',
             'area_em_app' => 'nullable|numeric',
             'area_fora_app' => 'nullable|numeric',
+            'tipo_bioma_id' => 'required',
+            'area_total' => 'required|numeric',
             'dt_final' => 'date|nullable',
             'dt_inicial' => 'date|nullable',
             'local_shape_em_app' => 'file|nullable',

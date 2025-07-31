@@ -62,7 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::get('/{servicos}', [IndexDashboardAfugentamentoFaunaController::class, 'index'])->name('dashboard.afugentamentoFauna');
             });
             Route::prefix('supressaoVegetal')->group(function () {
-                Route::get('/', [IndexDashboardSupressaoVegetalController::class, 'index'])->name('dashboard.supressaoVegetal');
+                Route::get('/{servicos}', [IndexDashboardSupressaoVegetalController::class, 'index'])->name('dashboard.supressaoVegetal');
             });
             Route::prefix('supervisaoAmbiental')->group(function () {
                 Route::get('/{servicos}', [IndexDashboardSupervisaoAmbientalController::class, 'index'])->name('dashboard.supervisaoAmbiental');
