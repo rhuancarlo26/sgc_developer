@@ -13,6 +13,7 @@ use App\Models\SgcFaunaResultados;
 use App\Models\SgcFaunaResultadosConsideracoes;
 use App\Models\SgcFaunaAnexo;
 use App\Models\SgcFaunaCampanhaAbios;
+use App\Models\SgcFaunaComentarios;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -759,6 +760,43 @@ class FaunaService
         ]);
 
         return $campanha->id;
+    }
+    
+    public function salvarComentario($contratoId, $campanhaId, array $data)
+    {
+        
+        $comentario = SgcFaunaComentarios::create([
+            'id_contrato' => $contratoId,
+            'campanha_id' => $campanhaId,
+            'user_id' => auth()->id(), 
+            'etapa' => $data['etapa'],
+            'comentario' => $data['comentario'],
+        ]);
+
+        Log::info('FaunaService: Comentário salvo com sucesso', [
+            'comentario_id' => $comentario->id,
+        ]);
+
+        return $comentario;
+    }
+
+    public function getComentariosByCampanha($contratoId, $campanhaId)
+    {
+        return SgcFaunaComentarios::where('id_contrato', $contratoId)
+            ->where('id_campanha', $campanhaId)
+            ->with(['fiscal' => function ($query) {
+                $query->select('id', 'name'); // Assumindo que o modelo User tem um campo 'name'
+            }])
+            ->get()
+            ->map(function ($comentario) {
+                return [
+                    'id' => $comentario->id,
+                    'etapa' => $comentario->etapa,
+                    'comentario' => $comentario->comentario,
+                    'fiscal' => $comentario->fiscal ? $comentario->fiscal->name : 'N/A',
+                    'created_at' => $comentario->created_at,
+                ];
+            })->toArray();
     }
 
 

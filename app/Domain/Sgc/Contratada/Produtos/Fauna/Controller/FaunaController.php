@@ -468,6 +468,38 @@ class FaunaController extends Controller
         ]);
     }
 
+    public function salvarComentario(Request $request, $contrato, $produto, $campanha): RedirectResponse
+    {
+        if (!Auth::check()) {
+            return redirect()->back()->withErrors(['error' => 'Acesso negado. Você precisa estar autenticado.']);
+        }
+
+        try {
+            $validated = $request->validate([
+                'etapa' => 'required|string|in:apresentacao_geral,caracterizacao_area,modulos_amostrais,pontos_quelo_crocod,pontos_cavernicola,metodologia,resultados,anexos',
+                'comentario' => 'required|string|max:1000',
+            ]);
+
+            $this->faunaService->salvarComentario($contrato, $campanha, $validated);
+            return redirect()->route('sgc.contratada.produtos.edit', [$contrato, $produto, $campanha])
+            ->with('success', 'Comentário salvo com sucesso!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('FaunaController: Erro de validação ao salvar comentário', [
+                'contrato_id' => $contrato,
+                'campanha_id' => $campanha,
+                'errors' => $e->errors(),
+            ]);
+            return redirect()->back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            Log::error('FaunaController: Erro ao salvar comentário', [
+                'contrato_id' => $contrato,
+                'campanha_id' => $campanha,
+                'erro' => $e->getMessage(),
+            ]);
+            return redirect()->back()->withErrors(['error' => 'Erro ao salvar comentário: ' . $e->getMessage()]);
+        }
+    }
+
     public function analise ($contrato, $produto, $campanha)
     {
         if (Auth::user()->perfis_id !== 2) {
@@ -493,6 +525,7 @@ class FaunaController extends Controller
         }
 
         $analises = $this->faunaFiscalService->getAnalisesByCampanha($contrato, $campanha);
+        $comentarios = $this->faunaService->getComentariosByCampanha($contrato, $campanha);
 
         // Verificar se a relação modulos_amostrais está carregada e é uma coleção
         $formModuloAmostral = ($campanhaObj->relationLoaded('modulos_amostrais') && $campanhaObj->modulos_amostrais && $campanhaObj->modulos_amostrais->isNotEmpty()) ? 
@@ -750,48 +783,9 @@ class FaunaController extends Controller
             'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
             'canApprove' => Auth::user()->perfis_id === 2 && $campanhaObj->status === 'Em análise',
             'analises' => $analises ?? [],
+            'comentarios' => $comentarios ?? [],
         ]);
     }
-
-    // public function salvarAnalise(Request $request, $contrato, $produto, $campanha): RedirectResponse
-    // {
-    //     if (Auth::user()->perfis_id !== 2) {
-    //         return redirect()->back()->withErrors(['error' => 'Acesso negado. Apenas fiscais podem salvar análises.']);
-    //     }
-
-    //     \Log::info('Dados recebidos em salvarAnalise:', [
-    //         'request' => $request->all(),
-    //         'contrato' => $contrato,
-    //         'produto' => $produto,
-    //         'campanha' => $campanha,
-    //     ]);
-
-    //     try {
-    //         $validated = $request->validate([
-    //             'etapa' => 'required|string|in:apresentacao_geral,caracterizacao_area,modulos_amostrais,pontos_quelo_crocod,pontos_cavernicola,metodologia,resultados,anexos',
-    //             'status' => 'required|string|in:Aprovada,Rejeitada',
-    //             'observacoes' => 'nullable|string',
-    //         ]);
-
-    //         $this->faunaFiscalService->salvarAnaliseEtapa($contrato, $campanha, $validated);
-    //         return redirect()->route('sgc.contratada.produtos.analise', [$contrato, $produto, $campanha])
-    //             ->with('success', 'Análise da etapa salva com sucesso!');
-    //     } catch (\Illuminate\Validation\ValidationException $e) {
-    //         \Log::error('FaunaController: Erro de validação ao salvar análise', [
-    //             'contrato_id' => $contrato,
-    //             'campanha_id' => $campanha,
-    //             'errors' => $e->errors(),
-    //         ]);
-    //         return redirect()->back()->withErrors($e->errors());
-    //     } catch (\Exception $e) {
-    //         \Log::error('FaunaController: Erro ao salvar análise da etapa', [
-    //             'contrato_id' => $contrato,
-    //             'campanha_id' => $campanha,
-    //             'erro' => $e->getMessage(),
-    //         ]);
-    //         return redirect()->back()->withErrors(['error' => 'Erro ao salvar análise: ' . $e->getMessage()]);
-    //     }
-    // }
 
     public function salvarAnalise(Request $request, $contrato, $produto, $campanha): RedirectResponse
     {
@@ -1147,5 +1141,7 @@ class FaunaController extends Controller
             'nome' => $request->hasFile('planilha') ? $request->file('planilha')->getClientOriginalName() : 'Nenhuma',
         ]);
     }
+
+
 
 }
