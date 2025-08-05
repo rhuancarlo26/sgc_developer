@@ -4,8 +4,8 @@ import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import InputError from '@/Components/InputError.vue';
 import NavButton from '@/Components/NavButton.vue';
-import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { useForm, router } from '@inertiajs/vue3';
 import DadosGeraisEditar from './Componentes/DadosGeraisEditar.vue';
 import ModulosAmostraisEditar from './Componentes/ModulosAmostraisEditar.vue';
 import QueloniosCrocodilianosEditar from './Componentes/QueloniosCrocodilianosEditar.vue';
@@ -38,11 +38,28 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  comentarios: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const activeTab = ref('apresentacao');
 const subStep = ref(1);
 
+// Mapeamento de etapas para labels
+const etapas = [
+  { value: 'apresentacao_geral', label: 'Apresentação Geral' },
+  { value: 'caracterizacao_area', label: 'Caracterização da Área' },
+  { value: 'modulos_amostrais', label: 'Módulos Amostrais' },
+  { value: 'pontos_quelo_crocod', label: 'Pontos Quelo/Crocod' },
+  { value: 'pontos_cavernicola', label: 'Pontos Cavernícola' },
+  { value: 'metodologia', label: 'Metodologia' },
+  { value: 'resultados', label: 'Resultados' },
+  { value: 'anexos', label: 'Anexos' },
+];
+
+// Formulário principal para edição da campanha
 const form = useForm({
   cod_emp: props.campanha.cod_emp || '',
   subproduto: props.campanha.subproduto || '',
@@ -157,6 +174,56 @@ const form = useForm({
   },
 });
 
+// Formulários para comentários de análises
+const comentarioForms = ref(
+  props.campanha.analises
+    .filter(analise => analise.status === 'Rejeitada')
+    .reduce((acc, analise) => {
+      const comentarioExistente = props.comentarios.find(c => c.etapa === analise.etapa && c.campanha_id === props.campanha.id);
+      return {
+        ...acc,
+        [analise.id]: useForm({
+          analise_id: analise.id,
+          comentario: comentarioExistente?.comentario || '',
+          etapa: analise.etapa,
+          id_modulo: null,
+        }),
+      };
+    }, {})
+);
+
+// Função para salvar comentário
+const salvarComentario = (analiseId) => {
+    const form = comentarioForms.value[analiseId];
+    if (!form) {
+        console.error('Formulário de comentário não encontrado para análise', analiseId);
+        return;
+    }
+
+    console.log('ID da CAMPANHA:', props.campanha.id); // Log para verificar o ID da campanha
+
+    if (!form.comentario.trim()) {
+        form.errors.comentario = 'O comentário é obrigatório.';
+        return;
+    }
+
+    form.post(
+        route('sgc.contratada.produtos.comentario', [props.contrato, props.produto.toLowerCase(), props.campanha.id]),
+        {
+            onSuccess: () => {
+                form.reset('comentario');
+                router.reload({ only: ['comentarios'] });
+                alert('Comentário salvo com sucesso!');
+            },
+            onError: (errors) => {
+                console.error('Erro ao salvar comentário:', errors);
+                alert('Erro ao salvar comentário: ' + (Object.values(errors).join(', ') || 'Tente novamente.'));
+            },
+        }
+    );
+};
+
+// Funções existentes (mantidas sem alterações)
 const adicionarPontoCavernicola = (ponto) => {
   const newPonto = {
     id: ponto.id || null,
@@ -193,13 +260,11 @@ const adicionarPontoQuelonios = (ponto) => {
     id: ponto.value.id || null,
   };
   if (newPonto.id) {
-    // Atualiza ponto existente
     const index = form.pontos_quelo_crocod.findIndex(p => p.id === newPonto.id);
     if (index !== -1) {
       form.pontos_quelo_crocod[index] = newPonto;
     }
   } else {
-    // Adiciona novo ponto
     form.pontos_quelo_crocod.push(newPonto);
   }
 };
@@ -363,9 +428,6 @@ const submitForm = () => {
   if (form.consideracoes) formData.append('consideracoes', form.consideracoes);
   if (form.planilha) formData.append('planilha', form.planilha);
 
-console.log('FormData antes de enviar:', Array.from(formData.entries()));
-
-
   // Envia todos os ABIOs
   form.abios.forEach((abio, index) => {
     formData.append(`abios[${index}][id]`, abio.abio.id);
@@ -460,7 +522,6 @@ console.log('FormData antes de enviar:', Array.from(formData.entries()));
     },
     onError: (errors) => {
       console.error('Erros ao salvar campanha:', errors);
-      // Propagar erros para o formulário de pontos de quelônios/crocodilianos
       Object.keys(errors).forEach(key => {
         if (key.startsWith('pontos_quelo_crocod.')) {
           const [_, index, field] = key.split('.');
@@ -473,6 +534,14 @@ console.log('FormData antes de enviar:', Array.from(formData.entries()));
     },
   });
 };
+
+//Mapeamento de activeTab para valores de etapa do backend
+const etapaMap = {
+  apresentacao: ['apresentacao_geral', 'caracterizacao_area','modulos_amostrais','pontos_quelo_crocod','pontos_cavernicola'],
+  metodologia: ['metodologia'],
+  resultados: ['resultados'],
+  anexos: ['anexos'],
+};
 </script>
 
 <template>
@@ -480,32 +549,57 @@ console.log('FormData antes de enviar:', Array.from(formData.entries()));
     <template #header>
       <Breadcrumb
         :links="[
-          { route: route('sgc.contratada.produtos.index', [contrato, produto.toLowerCase()]), label: contratos.contratada },
+          { route: route('sgc.contratada.produtos.index', [props.contrato, props.produto.toLowerCase()]), label: props.contratos.contratada },
           { route: '#', label: `Editar Campanha ${props.campanha.id_campanha || props.campanha.id}` },
         ]"
       />
     </template>
-    <NavbarContrato :tipo="{ id: contrato }">
+    <NavbarContrato :tipo="{ id: props.contrato }">
       <template #body>
         <div class="card">
           <div class="card-body">
             <h2 class="text-center mb-4">EDITAR CAMPANHA {{ props.produto.toUpperCase() }}</h2>
             <h4 class="mb-3">Status: {{ props.campanha.status || 'Rejeitada' }}</h4>
 
-            <!-- Exibir análises (motivos da rejeição) -->
+            <!-- Exibir análises (motivos da rejeição) e formulário de comentários -->
             <div v-if="props.campanha.analises?.length" class="mb-6">
               <h4 class="mb-3" style="font-weight: bold;">Motivos da Rejeição</h4>
               <div class="alert alert-info">
                 <ul class="list-none pl-0">
                   <li
-                    v-for="(analise, index) in props.campanha.analises.filter(a => a.comentario)"
+                    v-for="analise in props.campanha.analises.filter(a => a.status === 'Rejeitada' && etapaMap[activeTab]?.includes(a.etapa))"
                     :key="analise.id"
                     class="analise-item"
-                    :class="{ 'analise-item-even': index % 2 === 0, 'analise-item-odd': index % 2 !== 0 }"
+                    :class="{ 'analise-item-even': props.campanha.analises.filter(a => a.status === 'Rejeitada' && etapaMap[activeTab]?.includes(a.etapa)).indexOf(analise) % 2 === 0, 'analise-item-odd': props.campanha.analises.filter(a => a.status === 'Rejeitada' && etapaMap[activeTab]?.includes(a.etapa)).indexOf(analise) % 2 !== 0 }"
                   >
-                    <span class="etapa">{{ analise.etapa }}:</span> {{ analise.comentario }}
+                    <div class="analise-content">
+                      <span class="etapa">{{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}:</span> {{ analise.comentario || 'Não informado' }}
+                    </div>
+                    <form v-if="props.campanha.status === 'Rejeitada'" @submit.prevent="salvarComentario(analise.id)" class="mt-2">
+                      <div class="mb-3">
+                        <label :for="'comentario_' + analise.id" class="form-label">Comentário sobre a análise</label>
+                        <textarea
+                          v-model="comentarioForms[analise.id].comentario"
+                          :id="'comentario_' + analise.id"
+                          class="form-control"
+                          rows="4"
+                          placeholder="Digite seu comentário sobre a análise do fiscal"
+                          required
+                        ></textarea>
+                        <InputError :message="comentarioForms[analise.id].errors.comentario" />
+                        <p v-if="props.comentarios.find(c => c.etapa === analise.etapa && c.campanha_id === props.campanha.id)?.created_at" class="mt-2 text-sm text-gray-600">
+                          Comentário anterior salvo em: {{ new Date(props.comentarios.find(c => c.etapa === analise.etapa && c.campanha_id === props.campanha.id).created_at).toLocaleString('pt-BR') }}
+                        </p>
+                      </div>
+                      <div class="d-flex justify-content-end">
+                        <NavButton type="submit" type-button="primary" title="Salvar Comentário" :disabled="comentarioForms[analise.id].processing" />
+                      </div>
+                    </form>
                   </li>
                 </ul>
+                <div v-if="!props.campanha.analises.some(a => a.status === 'Rejeitada' && etapaMap[activeTab]?.includes(a.etapa))" class="text-center">
+                  Nenhuma análise rejeitada para esta etapa.
+                </div>
               </div>
             </div>
 
@@ -577,8 +671,8 @@ console.log('FormData antes de enviar:', Array.from(formData.entries()));
                   <DadosGeraisEditar
                     v-if="subStep === 2"
                     :form="form"
-                    :abios="abios"
-                    :profissionais="profissionais"
+                    :abios="props.abios"
+                    :profissionais="props.profissionais"
                     :abio-records="form.abios"
                     :profissional-records="form.profissionais"
                     :sub-step="subStep"
@@ -594,8 +688,8 @@ console.log('FormData antes de enviar:', Array.from(formData.entries()));
                     v-if="subStep === 3"
                     :form="form"
                     :modulo-records="form.modulos_amostrais"
-                    :ufs="ufs"
-                    :biomas="biomas"
+                    :ufs="props.ufs"
+                    :biomas="props.biomas"
                     :sub-step="subStep"
                     @adicionar-modulo="adicionarModulo"
                     @excluir-modulo="excluirModulo"
@@ -649,7 +743,6 @@ console.log('FormData antes de enviar:', Array.from(formData.entries()));
                     @next="setActiveTab('anexos')"
                   />
                 </div>
-                
                 <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
                   <h4 class="mb-3" style="text-align: center;">ANEXOS</h4>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -703,7 +796,7 @@ console.log('FormData antes de enviar:', Array.from(formData.entries()));
                       type="button"
                       type-button="secondary"
                       title="Cancelar"
-                      @click="$router.get(route('sgc.contratada.produtos.index', [contrato, produto.toLowerCase()]))"
+                      @click="router.get(route('sgc.contratada.produtos.index', [props.contrato, props.produto.toLowerCase()]))"
                     />
                     <NavButton
                       type="submit"
@@ -812,5 +905,8 @@ tr:hover {
 .etapa {
   font-weight: 600;
   color: #084298;
+}
+.analise-content {
+  margin-bottom: 0.5rem;
 }
 </style>

@@ -136,9 +136,13 @@ Route::prefix('/contratada')->group(function () {
         Route::post('campanha/{campanha}/update', [FaunaController::class, 'update'])
             ->name('sgc.contratada.produtos.update')
             ->middleware(['auth']);
+
+        Route::post('campanha/{campanha}/comentario', [FaunaController::class, 'salvarComentario'])->name('sgc.contratada.produtos.comentario');
     
+        
     });
+
+
   
-   
 
 });
