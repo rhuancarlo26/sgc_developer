@@ -14,6 +14,7 @@ use App\Models\SgcFaunaResultadosConsideracoes;
 use App\Models\SgcFaunaAnexo;
 use App\Models\SgcFaunaCampanhaAbios;
 use App\Models\SgcFaunaComentarios;
+use App\Models\SgcFaunaAnaliseEtapa;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -761,20 +762,38 @@ class FaunaService
 
         return $campanha->id;
     }
-    
+
     public function salvarComentario($contratoId, $campanhaId, array $data)
     {
-        
+        // Validar os dados recebidos
+        $validated = validator($data, [
+            'analise_id' => 'required|integer|exists:sgc_fauna_analise_etapas,id',
+            'etapa' => 'required|string|in:apresentacao_geral,caracterizacao_area,modulos_amostrais,pontos_quelo_crocod,pontos_cavernicola,metodologia,resultados,anexos',
+            'comentario' => 'required|string|max:1000',
+            'id_modulo' => 'nullable|integer',
+        ])->validate();
+
+        // Buscar a análise para obter o valor de 'analise'
+        $analise = SgcFaunaAnaliseEtapa::where('id', $validated['analise_id'])
+            ->where('id_campanha', $campanhaId)
+            ->firstOrFail();
+
+        // Criar o comentário
         $comentario = SgcFaunaComentarios::create([
             'id_contrato' => $contratoId,
             'campanha_id' => $campanhaId,
-            'user_id' => auth()->id(), 
-            'etapa' => $data['etapa'],
-            'comentario' => $data['comentario'],
+            'user_id' => auth()->id(),
+            'analise' => $analise->analise,
+            'etapa' => $validated['etapa'],
+            'comentario' => $validated['comentario'],
+            'id_modulo' => $validated['id_modulo'] ?? null,
         ]);
 
         Log::info('FaunaService: Comentário salvo com sucesso', [
             'comentario_id' => $comentario->id,
+            'analise' => $comentario->analise,
+            'etapa' => $comentario->etapa,
+            'campanha_id' => $campanhaId,
         ]);
 
         return $comentario;
@@ -783,21 +802,18 @@ class FaunaService
     public function getComentariosByCampanha($contratoId, $campanhaId)
     {
         return SgcFaunaComentarios::where('id_contrato', $contratoId)
-            ->where('id_campanha', $campanhaId)
-            ->with(['fiscal' => function ($query) {
-                $query->select('id', 'name'); // Assumindo que o modelo User tem um campo 'name'
-            }])
+            ->where('campanha_id', $campanhaId)
+            ->whereNull('deleted_at')
             ->get()
             ->map(function ($comentario) {
                 return [
                     'id' => $comentario->id,
+                    'analise' => $comentario->analise, // Adiciona o campo 'analise'
                     'etapa' => $comentario->etapa,
                     'comentario' => $comentario->comentario,
-                    'fiscal' => $comentario->fiscal ? $comentario->fiscal->name : 'N/A',
                     'created_at' => $comentario->created_at,
                 ];
             })->toArray();
     }
-
 
 }
