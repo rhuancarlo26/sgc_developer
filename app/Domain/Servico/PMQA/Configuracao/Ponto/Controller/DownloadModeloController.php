@@ -11,11 +11,10 @@ class DownloadModeloController extends Controller
 {
     public function index(): BinaryFileResponse
     {
-        $path = public_path('file\Servico\PMQA\Ponto\modelo_planilha_pontos_pmqa_teste.xlsx');
-
+        $path = public_path('file' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'PMQA' . DIRECTORY_SEPARATOR . 'Ponto' . DIRECTORY_SEPARATOR . 'modelo_planilha_pontos_pmqa_teste.xlsx');
 
         if (!File::exists($path)) {
-            abort(404);
+            abort(404, 'Arquivo não encontrado.');
         }
 
         return Response::download($path);
