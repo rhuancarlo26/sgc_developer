@@ -34,23 +34,23 @@ const props = defineProps({
                                         <NavLink route-name="fiscal.dados.servicos.index" :param="contrato.id"
                                             title="Serviços" :icon="IconLayoutDashboard" />
 
-                                        <NavDropdown prefix="fiscal.dados.configuracoes*" title="Configurações"
+                                        <NavDropdown prefix="fiscal.configuracoes*" title="Configurações"
                                             :icon="IconLayoutDashboard">
                                             <NavDropdownLink route-name="fiscal.configuracoes.afugentamento.index"
                                                 :route-param="{ contrato: contrato.id }"
-                                                active-on-route-prefix="fiscal.configuracoes.supressao.index"
+                                                active-on-route-prefix="fiscal.configuracoes.afugentamento*"
                                                 title="Fauna - Afugentamento e resgate de fauna" />
                                             <NavDropdownLink route-name="fiscal.configuracoes.supressao.index"
                                                 :route-param="{ contrato: contrato.id }"
-                                                active-on-route-prefix="fiscal.configuracoes.supressao.index"
+                                                active-on-route-prefix="fiscal.configuracoes.supressao*"
                                                 title="Flora - Supressão da vegetação" />
                                             <NavDropdownLink route-name="fiscal.configuracoes.pmqa.index"
                                                 :route-param="{ contrato: contrato.id }"
-                                                active-on-route-prefix="fiscal.configuracoes.pmqa.index"
+                                                active-on-route-prefix="fiscal.configuracoes.pmqa*"
                                                 title="Programa de Monitoramento da Qualidade da Água" />
                                             <NavDropdownLink route-name="fiscal.configuracoes.ocorrencia.index"
                                                 :route-param="{ contrato: contrato.id }"
-                                                active-on-route-prefix="fiscal.configuracoes.ocorrencia.index"
+                                                active-on-route-prefix="fiscal.configuracoes.ocorrencia*"
                                                 title="Supervisão ambiental - Controle de ocorrência" />
                                             <NavDropdownLink route-name="fiscal.configuracoes.passagem_fauna.index"
                                                 :route-param="{ contrato: contrato.id }"
