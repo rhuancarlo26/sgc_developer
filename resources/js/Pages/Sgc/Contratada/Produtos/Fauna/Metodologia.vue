@@ -19,6 +19,10 @@ const grupoFaunisticoOptions = [
     { value: 'Mastofauna', label: 'Mastofauna' },
     { value: 'Ictiofauna', label: 'Ictiofauna' },
     { value: 'Bentos', label: 'Bentos' },
+    { value: 'Quelônios e Crocodilianos', label: 'Quelônios e Crocodilianos' },
+    { value: 'Fauna Cavernícola', label: 'Fauna Cavernícola' },
+    { value: 'Invertebrados', label: 'Invertebrados' }
+    
 ];
 </script>
 

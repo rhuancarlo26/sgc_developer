@@ -591,15 +591,12 @@ const salvarAnexos = () => {
                                         { uf: 'PA' },{ uf: 'PB' },{ uf: 'PR' },{ uf: 'PE' },{ uf: 'PI' },{ uf: 'RJ' },{ uf: 'RN' },{ uf: 'RS' },{ uf: 'RO' },{ uf: 'RR' },{ uf: 'SC' },{ uf: 'SP' },{ uf: 'SE' },{ uf: 'TO' },
                                     ]"
                                     :biomas="[
+                                        'Amazônia',
                                         'Caatinga',
                                         'Cerrado',
-                                        'Floresta Amazônica',
                                         'Mata Atlântica',
-                                        'Mata de Araucária',
-                                        'Mata de Cocais',
                                         'Pampa',
                                         'Pantanal',
-                                        'Zonas Litorâneas',
                                     ]"
                                     :modulo-records="moduloRecords"
                                     @adicionar-modulo="adicionarModulo"
