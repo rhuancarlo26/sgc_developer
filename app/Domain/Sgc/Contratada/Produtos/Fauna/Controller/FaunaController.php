@@ -111,7 +111,7 @@ class FaunaController extends Controller
             'pontos_cavernicola.*.umidade_relativa_interna' => 'nullable|numeric',
             'pontos_cavernicola.*.umidade_relativa_externa' => 'nullable|numeric',
             'metodologias' => 'nullable|array',
-            'metodologias.*.grupo_faunistico' => 'required_with:metodologias|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
+            'metodologias.*.grupo_faunistico' => 'nullable|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos,Quelônios e Crocodilianos,Fauna Cavernícola,Invertebrados',
             'metodologias.*.metodologia' => 'required_with:metodologias|string',
             'consideracoes' => 'nullable|string',
             'planilha' => 'nullable|file|mimes:xlsx,xls|max:10240',
@@ -301,6 +301,12 @@ class FaunaController extends Controller
             'peso' => $campanha->resultados->last()->peso,
             'status_conservacao_federal' => $campanha->resultados->last()->status_conservacao_federal,
             'status_conservacao_iucn' => $campanha->resultados->last()->status_conservacao_iucn,
+
+            'especies_bioindicadores' => $campanha->resultados->last()->especies_bioindicadoras ?? null,
+            'especies_alvo_monitoramento' => $campanha->resultados->last()->especies_alvo_monitoramento ?? null,
+
+          
+
         ] : [
             'id_campanha' => null,
             'modulo' => null,
@@ -331,6 +337,8 @@ class FaunaController extends Controller
             'peso' => null,
             'status_conservacao_federal' => null,
             'status_conservacao_iucn' => null,
+            'especies_bioindicadores',
+            'especies_alvo_monitoramento'
         ];
 
         $modulosAmostrais = $modulosManuais->map(function ($modulo) {
@@ -1058,7 +1066,7 @@ class FaunaController extends Controller
                 'pontos_cavernicola.*.umidade_relativa_externa' => 'nullable|numeric',
                 // 'metodologias.*.id' => 'nullable|integer|exists:sgc_fauna_metodologia,id',
                 'metodologias' => 'nullable|array',
-                'metodologias.*.grupo_faunistico' => 'nullable|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
+                'metodologias.*.grupo_faunistico' => 'nullable|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos,Quelônios e Crocodilianos,Fauna Cavernícola,Invertebrados',
                 'metodologias.*.metodologia' => 'nullable|string',
                 'consideracoes' => 'nullable|string',
                 'planilha' => 'nullable|file|mimes:xlsx,xls|max:10240',

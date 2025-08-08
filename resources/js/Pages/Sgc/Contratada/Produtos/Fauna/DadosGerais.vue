@@ -99,6 +99,10 @@ const statusOptions = [
                             <input class="form-check-input" type="radio" name="periodo" value="Chuva" v-model="formDadosGerais.periodo" />
                             <span class="form-check-label">Chuva</span>
                         </label>
+                        <label class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="periodo" value="Outros" v-model="formDadosGerais.periodo" />
+                            <span class="form-check-label">Outros</span>
+                        </label>
                     </div>
                     <InputError :message="formDadosGerais.errors.periodo" />
                 </div>
