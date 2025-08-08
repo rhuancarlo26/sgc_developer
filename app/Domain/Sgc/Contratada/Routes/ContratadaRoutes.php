@@ -139,7 +139,17 @@ Route::prefix('/contratada')->group(function () {
 
         Route::post('campanha/{campanha}/comentario', [FaunaController::class, 'salvarComentario'])->name('sgc.contratada.produtos.comentario');
    
+        Route::delete('campanha/{campanha}/comentario/{comentario}', [FaunaController::class, 'destroyComentario'])
+        ->name('sgc.contratada.produtos.comentario.destroy');
+    
+    
     });
+
+
+
+
+    
+
 
 
   

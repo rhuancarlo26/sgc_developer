@@ -469,71 +469,60 @@ class FaunaController extends Controller
         ]);
     }
 
-    // public function salvarComentario(Request $request, $contrato, $produto, $campanha): RedirectResponse
-    // {
-    //     if (!Auth::check()) {
-    //         return redirect()->back()->withErrors(['error' => 'Acesso negado. Você precisa estar autenticado.']);
-    //     }
-
-    //     try {
-    //         $validated = $request->validate([
-    //             'etapa' => 'required|string|in:apresentacao_geral,caracterizacao_area,modulos_amostrais,pontos_quelo_crocod,pontos_cavernicola,metodologia,resultados,anexos',
-    //             'comentario' => 'required|string|max:1000',
-    //         ]);
-
-    //         $this->faunaService->salvarComentario($contrato, $campanha, $validated);
-    //         return redirect()->route('sgc.contratada.produtos.edit', [$contrato, $produto, $campanha])
-    //         ->with('success', 'Comentário salvo com sucesso!');
-    //     } catch (\Illuminate\Validation\ValidationException $e) {
-    //         Log::error('FaunaController: Erro de validação ao salvar comentário', [
-    //             'contrato_id' => $contrato,
-    //             'campanha_id' => $campanha,
-    //             'errors' => $e->errors(),
-    //         ]);
-    //         return redirect()->back()->withErrors($e->errors());
-    //     } catch (\Exception $e) {
-    //         Log::error('FaunaController: Erro ao salvar comentário', [
-    //             'contrato_id' => $contrato,
-    //             'campanha_id' => $campanha,
-    //             'erro' => $e->getMessage(),
-    //         ]);
-    //         return redirect()->back()->withErrors(['error' => 'Erro ao salvar comentário: ' . $e->getMessage()]);
-    //     }
-    // }
-
     public function salvarComentario(Request $request, $contrato, $produto, $campanha): RedirectResponse
-{
-    if (!Auth::check()) {
-        return redirect()->back()->withErrors(['error' => 'Acesso negado. Você precisa estar autenticado.']);
-    }
+    {
+        if (!Auth::check()) {
+            return redirect()->back()->withErrors(['error' => 'Acesso negado. Você precisa estar autenticado.']);
+        }
 
-    try {
-        $validated = $request->validate([
-            'analise_id' => 'required|integer|exists:sgc_fauna_analise_etapas,id',
-            'etapa' => 'required|string|in:apresentacao_geral,caracterizacao_area,modulos_amostrais,pontos_quelo_crocod,pontos_cavernicola,metodologia,resultados,anexos',
-            'comentario' => 'required|string|max:1000',
-            'id_modulo' => 'nullable|integer',
-        ]);
+        try {
+            $validated = $request->validate([
+                'analise_id' => 'required|integer|exists:sgc_fauna_analise_etapas,id',
+                'etapa' => 'required|string|in:apresentacao_geral,caracterizacao_area,modulos_amostrais,pontos_quelo_crocod,pontos_cavernicola,metodologia,resultados,anexos',
+                'comentario' => 'required|string|max:1000',
+                'id_modulo' => 'nullable|integer',
+            ]);
 
-        $this->faunaService->salvarComentario($contrato, $campanha, $validated);
-        return redirect()->route('sgc.contratada.produtos.edit', [$contrato, $produto, $campanha])
-            ->with('success', 'Comentário salvo com sucesso!');
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        Log::error('FaunaController: Erro de validação ao salvar comentário', [
-            'contrato_id' => $contrato,
-            'campanha_id' => $campanha,
-            'errors' => $e->errors(),
-        ]);
-        return redirect()->back()->withErrors($e->errors());
-    } catch (\Exception $e) {
-        Log::error('FaunaController: Erro ao salvar comentário', [
-            'contrato_id' => $contrato,
-            'campanha_id' => $campanha,
-            'erro' => $e->getMessage(),
-        ]);
-        return redirect()->back()->withErrors(['error' => 'Erro ao salvar comentário: ' . $e->getMessage()]);
+            $this->faunaService->salvarComentario($contrato, $campanha, $validated);
+            return redirect()->route('sgc.contratada.produtos.edit', [$contrato, $produto, $campanha])
+                ->with('success', 'Comentário salvo com sucesso!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('FaunaController: Erro de validação ao salvar comentário', [
+                'contrato_id' => $contrato,
+                'campanha_id' => $campanha,
+                'errors' => $e->errors(),
+            ]);
+            return redirect()->back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            Log::error('FaunaController: Erro ao salvar comentário', [
+                'contrato_id' => $contrato,
+                'campanha_id' => $campanha,
+                'erro' => $e->getMessage(),
+            ]);
+            return redirect()->back()->withErrors(['error' => 'Erro ao salvar comentário: ' . $e->getMessage()]);
+        }
     }
-}
+    
+    public function destroyComentario($contrato, $produto, $campanha, $comentarioId): RedirectResponse
+    {
+        if (!Auth::check()) {
+            return redirect()->back()->withErrors(['error' => 'Acesso negado. Você precisa estar autenticado.']);
+        }
+
+        try {
+            $this->faunaService->excluirComentario($contrato, $campanha, $comentarioId, Auth::id());
+            return redirect()->route('sgc.contratada.produtos.edit', [$contrato, $produto, $campanha])
+                ->with('success', 'Comentário excluído com sucesso!');
+        } catch (\Exception $e) {
+            Log::error('FaunaController: Erro ao excluir comentário', [
+                'contrato_id' => $contrato,
+                'campanha_id' => $campanha,
+                'comentario_id' => $comentarioId,
+                'erro' => $e->getMessage(),
+            ]);
+            return redirect()->back()->withErrors(['error' => 'Erro ao excluir comentário: ' . $e->getMessage()]);
+        }
+    }
 
     public function analise ($contrato, $produto, $campanha)
     {

@@ -799,6 +799,27 @@ class FaunaService
         return $comentario;
     }
 
+    public function excluirComentario($contratoId, $campanhaId, $comentarioId, $userId)
+    {
+        $comentario = SgcFaunaComentarios::where('id', $comentarioId)
+            ->where('id_contrato', $contratoId)
+            ->where('campanha_id', $campanhaId)
+            ->where('user_id', $userId)
+            ->whereNull('deleted_at')
+            ->firstOrFail();
+
+        $comentario->delete(); // Soft delete
+
+        Log::info('FaunaService: Comentário excluído com sucesso', [
+            'comentario_id' => $comentarioId,
+            'contrato_id' => $contratoId,
+            'campanha_id' => $campanhaId,
+            'user_id' => $userId,
+        ]);
+
+        return true;
+    }
+
     public function getComentariosByCampanha($contratoId, $campanhaId)
     {
         return SgcFaunaComentarios::where('id_contrato', $contratoId)

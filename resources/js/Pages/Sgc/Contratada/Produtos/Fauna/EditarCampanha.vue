@@ -184,57 +184,71 @@ const form = useForm({
   },
 });
 
-// Formulários para comentários de análises
-const comentarioForms = ref(
-  props.campanha.analises
-    .filter(analise => analise.status === 'Rejeitada')
-    .reduce((acc, analise) => {
-      const comentarioExistente = props.comentarios.find(c => c.etapa === analise.etapa && c.campanha_id === props.campanha.id);
-      return {
-        ...acc,
-        [analise.id]: useForm({
-          analise_id: analise.id,
-          comentario: comentarioExistente?.comentario || '',
-          etapa: analise.etapa,
-          id_modulo: null,
-        }),
-      };
-    }, {})
+// Formulário para comentários da análise mais recente
+const comentarioForm = ref(
+  useForm({
+    analise_id: null,
+    comentario: '',
+    etapa: '',
+    id_modulo: null,
+  })
 );
 
 // Função para abrir o modal com as análises da etapa
 const openAnaliseModal = (etapa) => {
   modalEtapa.value = etapa;
+  const analiseAtual = analiseAtualPorEtapa.value;
+  if (analiseAtual) {
+    comentarioForm.value.analise_id = analiseAtual.id;
+    comentarioForm.value.etapa = analiseAtual.etapa;
+    comentarioForm.value.comentario = '';
+    comentarioForm.value.id_modulo = null;
+  }
   showModal.value = true;
 };
 
 // Função para salvar comentário
-const salvarComentario = (analiseId) => {
-  const form = comentarioForms.value[analiseId];
-  if (!form) {
-    console.error('Formulário de comentário não encontrado para análise', analiseId);
+const salvarComentario = () => {
+  if (!comentarioForm.value.comentario.trim()) {
+    comentarioForm.value.errors.comentario = 'O comentário é obrigatório.';
     return;
   }
 
+  console.log('Payload a ser enviado:', comentarioForm.value.data());
   console.log('ID da CAMPANHA:', props.campanha.id);
 
-  if (!form.comentario.trim()) {
-    form.errors.comentario = 'O comentário é obrigatório.';
-    return;
-  }
-
-  form.post(
+  comentarioForm.value.post(
     route('sgc.contratada.produtos.comentario', [props.contrato, props.produto.toLowerCase(), props.campanha.id]),
     {
       onSuccess: () => {
-        form.reset('comentario');
+        comentarioForm.value.reset('comentario');
         router.reload({ only: ['comentarios'] });
         alert('Comentário salvo com sucesso!');
-        showModal.value = false;
       },
       onError: (errors) => {
         console.error('Erro ao salvar comentário:', errors);
         alert('Erro ao salvar comentário: ' + (Object.values(errors).join(', ') || 'Tente novamente.'));
+      },
+    }
+  );
+};
+
+// Função para excluir comentário
+const excluirComentario = (comentarioId) => {
+  if (!confirm('Tem certeza que deseja excluir este comentário?')) {
+    return;
+  }
+
+  router.delete(
+    route('sgc.contratada.produtos.comentario.destroy', [props.contrato, props.produto.toLowerCase(), props.campanha.id, comentarioId]),
+    {
+      onSuccess: () => {
+        router.reload({ only: ['comentarios'] });
+        alert('Comentário excluído com sucesso!');
+      },
+      onError: (errors) => {
+        console.error('Erro ao excluir comentário:', errors);
+        alert('Erro ao excluir comentário: ' + (Object.values(errors).join(', ') || 'Tente novamente.'));
       },
     }
   );
@@ -254,7 +268,7 @@ const prevSubStep = () => {
   }
 };
 
-// Funções para manipulação de dados (inalteradas)
+// Funções para manipulação de dados
 const adicionarPontoCavernicola = (ponto) => {
   const newPonto = {
     id: ponto.id || null,
@@ -427,6 +441,27 @@ const formatAnexoLabel = (tipo) => {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 };
+
+// Computed para análises rejeitadas ordenadas por número da análise
+const analisesRejeitadas = computed(() => {
+  return props.campanha.analises
+    .filter(a => a.status === 'Rejeitada' && etapaMap[modalEtapa.value]?.includes(a.etapa))
+    .sort((a, b) => Number(a.analise) - Number(b.analise));
+});
+
+// Computed para a análise mais recente por etapa
+const analiseAtualPorEtapa = computed(() => {
+  return analisesRejeitadas.value.reduce((max, analise) => {
+    return !max || Number(analise.analise) > Number(max.analise) ? analise : max;
+  }, null);
+});
+
+// Computed para comentários por análise
+const comentariosPorAnalise = computed(() => (analise) => {
+  return props.comentarios
+    .filter(c => c.analise === analise.analise && c.etapa === analise.etapa && c.campanha_id === props.campanha.id)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+});
 
 const submitForm = () => {
   console.log('form.abios antes de enviar:', JSON.stringify(form.abios, null, 2));
@@ -797,37 +832,70 @@ const submitForm = () => {
                     <button type="button" class="btn-close" @click="showModal = false" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
-                    <div v-if="props.campanha.analises?.some(a => a.status === 'Rejeitada' && etapaMap[modalEtapa]?.includes(a.etapa))">
+                    <div v-if="analisesRejeitadas.length">
                       <ul class="list-none pl-0">
                         <li
-                          v-for="analise in props.campanha.analises.filter(a => a.status === 'Rejeitada' && etapaMap[modalEtapa]?.includes(a.etapa))"
+                          v-for="analise in analisesRejeitadas"
                           :key="analise.id"
                           class="analise-item"
-                          :class="{ 'analise-item-even': props.campanha.analises.filter(a => a.status === 'Rejeitada' && etapaMap[modalEtapa]?.includes(a.etapa)).indexOf(analise) % 2 === 0, 'analise-item-odd': props.campanha.analises.filter(a => a.status === 'Rejeitada' && etapaMap[modalEtapa]?.includes(a.etapa)).indexOf(analise) % 2 !== 0 }"
+                          :class="{ 
+                            'analise-item-even': analisesRejeitadas.indexOf(analise) % 2 === 0, 
+                            'analise-item-odd': analisesRejeitadas.indexOf(analise) % 2 !== 0,
+                            'analise-item-current': analise.id === analiseAtualPorEtapa?.id
+                          }"
                         >
                           <div class="analise-content">
-                            <span class="etapa">{{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}:</span> {{ analise.comentario || 'Não informado' }}
+                            <div class="analise-header">
+                              <span class="etapa">Análise {{ analise.analise }} - {{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}</span>
+                              <span class="analise-date">{{ analise.created_at ? new Date(analise.created_at).toLocaleString('pt-BR') : 'Data não informada' }}</span>
+                            </div>
+                            <div class="analise-text">{{ analise.comentario || 'Não informado' }}</div>
+                            <div class="comentarios-list mt-2">
+                              <h6>Seus Comentários:</h6>
+                              <div v-if="comentariosPorAnalise(analise).length">
+                                <div v-for="comentario in comentariosPorAnalise(analise)" :key="comentario.id" class="comentario-content">
+                                  <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                      <span class="comentario-text">{{ comentario.comentario }}</span>
+                                      <span class="comentario-date">Salvo em: {{ new Date(comentario.created_at).toLocaleString('pt-BR') }}</span>
+                                    </div>
+                                    <button
+                                      v-if="props.campanha.status === 'Rejeitada' && analise.id === analiseAtualPorEtapa?.id"
+                                      class="btn btn-link text-danger p-0 ms-2"
+                                      title="Excluir Comentário"
+                                      @click="excluirComentario(comentario.id)"
+                                    >
+                                      x
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                              <div v-else class="comentario-content">
+                                <span class="comentario-label">Nenhum comentário salvo para esta análise.</span>
+                              </div>
+                            </div>
+                            <form 
+                              v-if="props.campanha.status === 'Rejeitada' && analise.id === analiseAtualPorEtapa?.id"
+                              @submit.prevent="salvarComentario"
+                              class="mt-2"
+                            >
+                              <div class="mb-3">
+                                <label for="novo_comentario" class="form-label">Adicionar Novo Comentário</label>
+                                <textarea
+                                  v-model="comentarioForm.comentario"
+                                  id="novo_comentario"
+                                  class="form-control"
+                                  rows="4"
+                                  placeholder="Digite seu comentário sobre a análise do fiscal"
+                                  required
+                                ></textarea>
+                                <InputError :message="comentarioForm.errors.comentario" />
+                              </div>
+                              <div class="d-flex justify-content-end">
+                                <NavButton type="submit" type-button="primary" title="Salvar Comentário" :disabled="comentarioForm.processing" />
+                              </div>
+                            </form>
                           </div>
-                          <form v-if="props.campanha.status === 'Rejeitada'" @submit.prevent="salvarComentario(analise.id)" class="mt-2">
-                            <div class="mb-3">
-                              <label :for="'comentario_' + analise.id" class="form-label">Comentário sobre a análise</label>
-                              <textarea
-                                v-model="comentarioForms[analise.id].comentario"
-                                :id="'comentario_' + analise.id"
-                                class="form-control"
-                                rows="4"
-                                placeholder="Digite seu comentário sobre a análise do fiscal"
-                                required
-                              ></textarea>
-                              <InputError :message="comentarioForms[analise.id].errors.comentario" />
-                              <p v-if="props.comentarios.find(c => c.etapa === analise.etapa && c.campanha_id === props.campanha.id)?.created_at" class="mt-2 text-sm text-gray-600">
-                                Comentário anterior salvo em: {{ new Date(props.comentarios.find(c => c.etapa === analise.etapa && c.campanha_id === props.campanha.id).created_at).toLocaleString('pt-BR') }}
-                              </p>
-                            </div>
-                            <div class="d-flex justify-content-end">
-                              <NavButton type="submit" type-button="primary" title="Salvar Comentário" :disabled="comentarioForms[analise.id].processing" />
-                            </div>
-                          </form>
                         </li>
                       </ul>
                     </div>
@@ -932,14 +1000,52 @@ tr:hover {
 .analise-item-odd {
   background-color: #ffffff;
 }
+.analise-item-current {
+  border: 2px solid #007bff;
+  background-color: #e7f1ff;
+}
 .analise-item:hover {
   background-color: #e2e6ea;
+}
+.analise-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 .etapa {
   font-weight: 600;
   color: #084298;
 }
+.analise-date {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+.analise-text {
+  margin-bottom: 0.5rem;
+}
+.comentarios-list {
+  margin-top: 0.5rem;
+}
+.comentario-content {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #d4edda;
+  border-radius: 4px;
+}
+.comentario-label {
+  font-weight: 600;
+  color: #155724;
+}
+.comentario-text {
+  display: block;
+  margin: 0.25rem 0;
+}
+.comentario-date {
+  font-size: 0.85rem;
+  color: #155724;
+}
 .modal-lg {
   max-width: 800px;
 }
-</style>  
+</style>
