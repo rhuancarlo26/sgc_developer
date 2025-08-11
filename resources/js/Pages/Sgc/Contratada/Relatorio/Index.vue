@@ -14,11 +14,11 @@ import { route } from 'ziggy-js';
 import { atualizarStatus, revisaoStatus, aprovadoStatus } from './AtualizarStatus/statusUpdate.js';
 import { toggleAprovado } from './AtualizarStatus/aprovarItem.js';
 
+
 const user = usePage().props.auth.user;
 const itens = ref([]);
 const docxModal = ref();
 const selectedItemId = ref(null);
-const isLoading = ref(false);
 
 const props = defineProps({
     contrato: Object,
@@ -51,9 +51,9 @@ const selecionarItem = (idItem) => {
 
 const abrirDoc = (idItem) => {
   const contratoId = form.contrato_id;
-  const itemVersion = props.update_anexo[idItem]?.versao;
+  const itemVersion = props.update_anexo[idItem]?.versao; 
   selectedItemId.value = idItem;
-  docxModal.value.abrirModal(idItem, contratoId, itemVersion);
+  docxModal.value.abrirModal(idItem, contratoId, itemVersion); 
 };
 
 
@@ -108,7 +108,7 @@ const enviarParaRevisao = async () => {
   const contratoId = form.contrato_id;
   const itemId = form.item_id;
   const relatorioNum = form.relatorio_num;
-  await revisaoStatus(contratoId, itemId, relatorioNum, itens.value);
+  await revisaoStatus(contratoId, itemId, relatorioNum, itens.value); 
   window.location.reload();
 
 };
@@ -117,9 +117,9 @@ const aprovarRelatorio = async () => {
   const contratoId = form.contrato_id;
   const itemId = form.item_id;
   const relatorioNum = form.relatorio_num;
-  await aprovadoStatus(contratoId, itemId, relatorioNum, itens.value);
+  await aprovadoStatus(contratoId, itemId, relatorioNum, itens.value); 
   window.location.reload();
-
+  
 };
 
 const obterStatusRelatorio = (itemId, relatorioNum) => {
@@ -152,18 +152,12 @@ const downloadFile = (itemId) => {
 };
 
 const downloadPdfConsolidado = () => {
-    isLoading.value = true;
-    const url = route('sgc.contratada.download_relatorio', {
+    const url = route('sgc.contratada.download_pdf_consolidado', {
         contratoId: props.contrato.id,
         relatorioNum: form.relatorio_num
     });
-    setTimeout(() => {
-        window.location.href = url;
-        setTimeout(() => {
-            console.log('Executado após 35 segundos');
-            isLoading.value = false;
-        }, 250000);
-    }, 100);
+    console.log('URL PDF Consolidado:', url); // Depuração
+    window.location.href = url;
 };
 
 const filteredRelatorios = ref([]);
@@ -180,22 +174,22 @@ const filtrarRelatorios = () => {
 };
 
 const temComentarios = (itemId) => {
-    return props.comentarios.some(comentario =>
-        comentario.item_id === itemId &&
-        comentario.contrato_id === props.contrato.id &&
-        comentario.comment.length > 0
+    return props.comentarios.some(comentario => 
+        comentario.item_id === itemId && 
+        comentario.contrato_id === props.contrato.id && 
+        comentario.comment.length > 0 
     );
 };
 
 const aprovarItem = async (item, contratoId, relatorioNum) => {
     if (item.aprovado !== 1) {
-        await toggleAprovado(item, contratoId, relatorioNum, 1);
+        await toggleAprovado(item, contratoId, relatorioNum, 1); 
     }
 };
 
 const reprovarItem = async (item, contratoId, relatorioNum) => {
     if (item.aprovado !== 0) {
-        await toggleAprovado(item, contratoId, relatorioNum, 0);
+        await toggleAprovado(item, contratoId, relatorioNum, 0); 
     }
 };
 
@@ -259,7 +253,7 @@ onMounted(() => {
                   />
                 </div>
                 <div class="button-wrapper">
-                  <NavLinkSgc
+                  <NavLinkSgc 
                     route-name="sgc.relatorio_coordenacao.aprovado_status"
                     class="btn btn-outline-success"
                     title="Aprovar Relatório"
@@ -269,28 +263,11 @@ onMounted(() => {
                 </div>
                 <!-- Botão para Download de PDF Consolidado -->
                 <div class="button-wrapper">
-                  <button
-                    @click="downloadPdfConsolidado"
-                    class="btn btn-outline-info"
-                    :disabled="props.dadosrelat.length === 1 || isLoading || obterStatusRelatorio(form.item_id, form.relatorio_num) != 'Relatório Aprovado'"
-                  >
-                    {{ isLoading ? 'Gerando...' : 'Download PDF Consolidado' }}
+                  <button @click="downloadPdfConsolidado" class="btn btn-outline-info" :disabled="props.dadosrelat.length === 0">
+                    Download PDF Consolidado
                   </button>
                 </div>
               </div>
-            </div>
-            <div v-if="isLoading" class="modal fade show" style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1055;" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered" style="z-index: 1056;">
-                <div class="modal-content">
-                <div class="modal-body text-center">
-                    <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="mt-3">Gerando relatório, por favor aguarde...</p>
-                </div>
-                </div>
-            </div>
-            <div class="modal-backdrop fade show" style="z-index: 1050; position: fixed;"></div>
             </div>
             <div class="row">
               <div class="col-12">
@@ -340,13 +317,13 @@ onMounted(() => {
 
                       <td class="align-middle">
                         <template v-if="user.roles.some(role => role.name === 'Fiscal') && item.status === 'Análise DNIT'">
-                            <button @click="aprovarItem(item, props.contrato.id, form.relatorio_num)"
-                                    class="btn btn-sm btn-success me-1"
+                            <button @click="aprovarItem(item, props.contrato.id, form.relatorio_num)" 
+                                    class="btn btn-sm btn-success me-1" 
                                     :disabled="item.aprovado === 1">
                                 Aprovar
                             </button>
-                            <button @click="reprovarItem(item, props.contrato.id, form.relatorio_num)"
-                                    class="btn btn-sm btn-danger"
+                            <button @click="reprovarItem(item, props.contrato.id, form.relatorio_num)" 
+                                    class="btn btn-sm btn-danger" 
                                     :disabled="item.aprovado === 0">
                                 Reprovar
                             </button>
@@ -396,4 +373,3 @@ onMounted(() => {
     color: #2808b9;
 }
 </style>
-
