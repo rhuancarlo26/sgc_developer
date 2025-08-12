@@ -36,7 +36,6 @@ Route::prefix('/contratada')->group(function () {
 
     // Download anexo
     Route::get('/sgc/contratada/download-anexo/{contratoId}/{itemId}/{relatorioNum}', [StoreUploadRelatorioController::class, 'downloadAnexo'])->name('sgc.contratada.download_anexo');
-    Route::get('/sgc/contratada/download-anexo/{contratoId}/{relatorioNum}',          [StoreUploadRelatorioController::class, 'downloadRelatorioCompleto'])->name('sgc.contratada.download_relatorio');
 
     // Relatório de Coordenação
     Route::get('/sgc/visualizar',                                  [VisualizarDocxController::class,                        'index'])->name('sgc.contratada.visualizar_doc');
@@ -115,7 +114,7 @@ Route::prefix('/contratada')->group(function () {
     Route::post('/cadastrarsubproduto/{corretor}',              [EmpreendimentosController::class,                       'cadastrarsubproduto'])->name('sgc.contratada.cadastrarsubproduto');
 
     // PDF Consolidado
-    Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');
+    // Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');
 
 
 
