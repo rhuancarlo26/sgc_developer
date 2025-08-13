@@ -127,11 +127,13 @@ defineExpose({ abrirModal });
                   <td>{{ licenca.fim_subtrecho }}</td>
                 </tr>
                 <tr>
-                  <a v-if="licenca.arquivo_licenca" class="dropdown-item" target="_blank"
-                    :href="route('licenca.documento.visualizar', licenca.id)">
-                    Visualizar PDF
-                    <IconEye />
-                  </a>
+                  <td>
+                    <a v-if="licenca.arquivo_licenca" class="dropdown-item" target="_blank"
+                      :href="route('licenca.documento.visualizar', licenca.id)">
+                      Visualizar PDF
+                      <IconEye />
+                    </a>
+                  </td>
                 </tr>
               </table>
             </div>
