@@ -32,7 +32,8 @@ const downloadModelo = () => {
         'ID Campanha', 'Módulo', 'Parcela', 'ID Armadilha', 'Grupo Amostrado', 'Data do Registro', 'Hora do Registro',
         'Categoria', 'Classe', 'Ordem', 'Família', 'Gênero', 'Espécie', 'Nome Comum', 'Sexo', 'Faixa Etária',
         'Qnt de Indivíduos', 'Num Marcação', 'Coletado', 'Num de Tombamento', 'Dados Biométricos', 'Comp total',
-        'Cabeça', 'Cauda', 'Fêmur', 'Orelha', 'Peso', 'Status Conservação Federal', 'Status Conservação IUCN'
+        'Cabeça', 'Cauda', 'Fêmur', 'Orelha', 'Peso', 'Status Conservação Federal', 'Status Conservação IUCN',
+        'Espécies Bioindicadoras', 'Espécies Alvo de Monitoramento'
     ];
     const ws = XLSX.utils.json_to_sheet([{}], { header: headers });
     const wb = XLSX.utils.book_new();
@@ -64,9 +65,9 @@ const processarPlanilha = (event) => {
         const novosResultados = json.map(row => ({
             id: Date.now() + Math.random(),
             id_campanha: row['ID Campanha'] || null,
-            modulo: row['Módulo'] || null,
-            parcela: row['Parcela'] || null,
-            id_armadilha: row['ID Armadilha'] || null,
+            modulo: row['Módulo'] || 0,
+            parcela: row['Parcela'] || 0,
+            id_armadilha: row['ID Armadilha'] || 0,
             grupo_amostrado: row['Grupo Amostrado'] || '',
             data_registro: row['Data do Registro'] || '',
             hora_registro: row['Hora do Registro'] || null,
@@ -80,18 +81,20 @@ const processarPlanilha = (event) => {
             sexo: row['Sexo'] || null,
             faixa_etaria: row['Faixa Etária'] || null,
             qnt_individuos: row['Qnt de Indivíduos'] || 0,
-            num_marcacao: row['Num Marcação'] || null,
+            num_marcacao: row['Num Marcação'] || 0,
             coletado: row['Coletado'] || null,
             num_tombamento: row['Num de Tombamento'] || null,
             dados_biometricos: row['Dados Biométricos'] || null,
-            comp_total: row['Comp total'] || null,
-            cabeca: row['Cabeça'] || null,
-            cauda: row['Cauda'] || null,
-            femur: row['Fêmur'] || null,
-            orelha: row['Orelha'] || null,
-            peso: row['Peso'] || null,
+            comp_total: row['Comp total'] || 0,
+            cabeca: row['Cabeça'] || 0,
+            cauda: row['Cauda'] || 0,
+            femur: row['Fêmur'] || 0,
+            orelha: row['Orelha'] || 0,
+            peso: row['Peso'] || 0,
             status_conservacao_federal: row['Status Conservação Federal'] || null,
             status_conservacao_iucn: row['Status Conservação IUCN'] || null,
+            especies_bioindicadoras: row['Espécies Bioindicadoras'] || null,
+            especies_alvo_monitoramento: row['Espécies Alvo de Monitoramento'] || null,
         }));
 
         resultadosRecords.value = novosResultados;
@@ -173,6 +176,8 @@ const excluirResultado = (id) => {
                         <th>Peso</th>
                         <th>Status Conservação Federal</th>
                         <th>Status Conservação IUCN</th>
+                        <th>Espécies Bioindicadoras</th>
+                        <th>Espécies Alvo de Monitoramento</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -207,6 +212,8 @@ const excluirResultado = (id) => {
                         <td>{{ resultado.peso }}</td>
                         <td>{{ resultado.status_conservacao_federal }}</td>
                         <td>{{ resultado.status_conservacao_iucn }}</td>
+                        <td>{{ resultado.especies_bioindicadoras }}</td>
+                        <td>{{ resultado.especies_alvo_monitoramento }}</td>
                         <td>
                             <button class="btn btn-danger btn-sm" @click="excluirResultado(resultado.id)">Excluir</button>
                         </td>

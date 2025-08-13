@@ -301,11 +301,8 @@ class FaunaController extends Controller
             'peso' => $campanha->resultados->last()->peso,
             'status_conservacao_federal' => $campanha->resultados->last()->status_conservacao_federal,
             'status_conservacao_iucn' => $campanha->resultados->last()->status_conservacao_iucn,
-
-            'especies_bioindicadores' => $campanha->resultados->last()->especies_bioindicadoras ?? null,
+            'especies_bioindicadoras' => $campanha->resultados->last()->especies_bioindicadoras ?? null,
             'especies_alvo_monitoramento' => $campanha->resultados->last()->especies_alvo_monitoramento ?? null,
-
-          
 
         ] : [
             'id_campanha' => null,
@@ -337,8 +334,8 @@ class FaunaController extends Controller
             'peso' => null,
             'status_conservacao_federal' => null,
             'status_conservacao_iucn' => null,
-            'especies_bioindicadores',
-            'especies_alvo_monitoramento'
+            'especies_bioindicadoras' => null,
+            'especies_alvo_monitoramento' => null,
         ];
 
         $modulosAmostrais = $modulosManuais->map(function ($modulo) {
@@ -458,6 +455,8 @@ class FaunaController extends Controller
                         'peso' => $resultado->peso,
                         'status_conservacao_federal' => $resultado->status_conservacao_federal,
                         'status_conservacao_iucn' => $resultado->status_conservacao_iucn,
+                        'especies_bioindicadoras' => $resultado->especies_bioindicadoras ?? null,
+                        'especies_alvo_monitoramento' => $resultado->especies_alvo_monitoramento ?? null,
                     ];
                 })->toArray(),
                 'anexos' => $campanha->anexos->map(function ($anexo) {
@@ -651,6 +650,8 @@ class FaunaController extends Controller
             'peso' => $campanhaObj->resultados->last()->peso,
             'status_conservacao_federal' => $campanhaObj->resultados->last()->status_conservacao_federal,
             'status_conservacao_iucn' => $campanhaObj->resultados->last()->status_conservacao_iucn,
+            'especies_bioindicadoras' => $campanhaObj->resultados->last()->especies_bioindicadoras ?? null,
+            'especies_alvo_monitoramento' => $campanhaObj->resultados->last()->especies_alvo_monitoramento ?? null,
         ] : [
             'id_campanha' => null,
             'modulo' => null,
@@ -681,6 +682,8 @@ class FaunaController extends Controller
             'peso' => null,
             'status_conservacao_federal' => null,
             'status_conservacao_iucn' => null,
+            'especies_bioindicadoras' => null,
+            'especies_alvo_monitoramento' => null,
         ];
 
         return Inertia::render('Sgc/Contratada/Produtos/Fauna/AnaliseCampanha', [
@@ -798,6 +801,8 @@ class FaunaController extends Controller
                         'peso' => $resultado->peso,
                         'status_conservacao_federal' => $resultado->status_conservacao_federal,
                         'status_conservacao_iucn' => $resultado->status_conservacao_iucn,
+                        'especies_bioindicadoras' => $resultado->especies_bioindicadoras ?? null,
+                        'especies_alvo_monitoramento' => $resultado->especies_alvo_monitoramento ?? null,
                     ];
                 })->toArray() : [],
                 'anexos' => ($campanhaObj->relationLoaded('anexos') && $campanhaObj->anexos) ? $campanhaObj->anexos->map(function ($anexo) {
@@ -957,6 +962,8 @@ class FaunaController extends Controller
                 'peso' => $resultado->peso,
                 'status_conservacao_federal' => $resultado->status_conservacao_federal,
                 'status_conservacao_iucn' => $resultado->status_conservacao_iucn,
+                'especies_bioindicadoras' => $resultado->especies_bioindicadoras ?? null,
+                'especies_alvo_monitoramento' => $resultado->especies_alvo_monitoramento ?? null,
             ];
         })->toArray();
 

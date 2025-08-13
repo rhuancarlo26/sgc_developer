@@ -236,7 +236,8 @@ class FaunaService
                 'ID Campanha', 'Módulo', 'Parcela', 'ID Armadilha', 'Grupo Amostrado', 'Data do Registro', 'Hora do Registro',
                 'Categoria', 'Classe', 'Ordem', 'Família', 'Gênero', 'Espécie', 'Nome Comum', 'Sexo', 'Faixa Etária',
                 'Qnt de Indivíduos', 'Num Marcação', 'Coletado', 'Num de Tombamento', 'Dados Biométricos', 'Comp total',
-                'Cabeça', 'Cauda', 'Fêmur', 'Orelha', 'Peso', 'Status Conservação Federal', 'Status Conservação IUCN'
+                'Cabeça', 'Cauda', 'Fêmur', 'Orelha', 'Peso', 'Status Conservação Federal', 'Status Conservação IUCN',
+                'Espécies Bioindicadoras', 'Espécies Alvo de Monitoramento'
             ];
 
             $headerRow = array_map('trim', array_shift($rows));
@@ -328,6 +329,8 @@ class FaunaService
                     'peso' => $row[26] ? (float)$row[26] : null,
                     'status_conservacao_federal' => $row[27] ?? null,
                     'status_conservacao_iucn' => $row[28] ?? null,
+                    'especies_bioindicadoras' => $row[29] ?? null,
+                    'especies_alvo_monitoramento' => $row[30] ?? null,
                 ];
 
                 // Removida a verificação de duplicatas, pois resultados antigos foram deletados

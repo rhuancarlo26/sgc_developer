@@ -39,7 +39,8 @@ const downloadModelo = () => {
     'ID Campanha', 'Módulo', 'Parcela', 'ID Armadilha', 'Grupo Amostrado', 'Data do Registro', 'Hora do Registro',
     'Categoria', 'Classe', 'Ordem', 'Família', 'Gênero', 'Espécie', 'Nome Comum', 'Sexo', 'Faixa Etária',
     'Qnt de Indivíduos', 'Num Marcação', 'Coletado', 'Num de Tombamento', 'Dados Biométricos', 'Comp total',
-    'Cabeça', 'Cauda', 'Fêmur', 'Orelha', 'Peso', 'Status Conservação Federal', 'Status Conservação IUCN'
+    'Cabeça', 'Cauda', 'Fêmur', 'Orelha', 'Peso', 'Status Conservação Federal', 'Status Conservação IUCN',
+    'Espécies Bioindicadoras', 'Espécies Alvo de Monitoramento'
   ];
   const ws = XLSX.utils.json_to_sheet([{}], { header: headers });
   const wb = XLSX.utils.book_new();
@@ -72,9 +73,9 @@ const processarPlanilha = (event) => {
     const novosResultados = json.map(row => ({
       id: null, // ID será gerado pelo backend
       id_campanha: row['ID Campanha'] || props.idCampanha,
-      modulo: row['Módulo'] || null,
-      parcela: row['Parcela'] || null,
-      id_armadilha: row['ID Armadilha'] || null,
+      modulo: row['Módulo'] || 0,
+      parcela: row['Parcela'] || 0,
+      id_armadilha: row['ID Armadilha'] || 0,
       grupo_amostrado: row['Grupo Amostrado'] || '',
       data_registro: row['Data do Registro'] || '',
       hora_registro: row['Hora do Registro'] || null,
@@ -87,19 +88,21 @@ const processarPlanilha = (event) => {
       nome_comum: row['Nome Comum'] || null,
       sexo: row['Sexo'] || null,
       faixa_etaria: row['Faixa Etária'] || null,
-      qnt_individuos: row['Qnt de Indivíduos'] || null,
+      qnt_individuos: row['Qnt de Indivíduos'] || 0,
       num_marcacao: row['Num Marcação'] || null,
       coletado: row['Coletado'] || null,
       num_tombamento: row['Num de Tombamento'] || null,
       dados_biometricos: row['Dados Biométricos'] || null,
-      comp_total: row['Comp total'] || null,
-      cabeca: row['Cabeça'] || null,
-      cauda: row['Cauda'] || null,
-      femur: row['Fêmur'] || null,
-      orelha: row['Orelha'] || null,
-      peso: row['Peso'] || null,
+      comp_total: row['Comp total'] || 0,
+      cabeca: row['Cabeça'] || 0,
+      cauda: row['Cauda'] || 0,
+      femur: row['Fêmur'] || 0,
+      orelha: row['Orelha'] || 0,
+      peso: row['Peso'] || 0,
       status_conservacao_federal: row['Status Conservação Federal'] || null,
       status_conservacao_iucn: row['Status Conservação IUCN'] || null,
+      especies_bioindicadoras: row['Espécies Bioindicadoras'] || null,
+      especies_alvo_monitoramento: row['Espécies Alvo de Monitoramento'] || null,
     }));
 
     resultadosRecords.value = novosResultados;
@@ -161,71 +164,76 @@ const avancar = () => {
       <!-- Tabela de Resultados -->
       <div v-if="resultadosRecords.length" class="overflow-x-auto mb-6">
         <table class="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="py-2 px-4 border-b text-left">ID</th>
-              <th class="py-2 px-4 border-b text-left">Módulo</th>
-              <th class="py-2 px-4 border-b text-left">Parcela</th>
-              <th class="py-2 px-4 border-b text-left">ID Armadilha</th>
-              <th class="py-2 px-4 border-b text-left">Grupo Amostrado</th>
-              <th class="py-2 px-4 border-b text-left">Data Registro</th>
-              <th class="py-2 px-4 border-b text-left">Hora Registro</th>
-              <th class="py-2 px-4 border-b text-left">Categoria</th>
-              <th class="py-2 px-4 border-b text-left">Classe</th>
-              <th class="py-2 px-4 border-b text-left">Ordem</th>
-              <th class="py-2 px-4 border-b text-left">Família</th>
-              <th class="py-2 px-4 border-b text-left">Gênero</th>
-              <th class="py-2 px-4 border-b text-left">Espécie</th>
-              <th class="py-2 px-4 border-b text-left">Nome Comum</th>
-              <th class="py-2 px-4 border-b text-left">Sexo</th>
-              <th class="py-2 px-4 border-b text-left">Faixa Etária</th>
-              <th class="py-2 px-4 border-b text-left">Quantidade</th>
-              <th class="py-2 px-4 border-b text-left">Nº Marcação</th>
-              <th class="py-2 px-4 border-b text-left">Coletado</th>
-              <th class="py-2 px-4 border-b text-left">Nº Tombamento</th>
-              <th class="py-2 px-4 border-b text-left">Dados Biométricos</th>
-              <th class="py-2 px-4 border-b text-left">Comp. Total (cm)</th>
-              <th class="py-2 px-4 border-b text-left">Cabeça (cm)</th>
-              <th class="py-2 px-4 border-b text-left">Cauda (cm)</th>
-              <th class="py-2 px-4 border-b text-left">Fêmur (cm)</th>
-              <th class="py-2 px-4 border-b text-left">Orelha (cm)</th>
-              <th class="py-2 px-4 border-b text-left">Peso (g)</th>
-              <th class="py-2 px-4 border-b text-left">Status Federal</th>
-              <th class="py-2 px-4 border-b text-left">Status IUCN</th>
-              <th class="py-2 px-4 border-b text-left">Ações</th>
-            </tr>
-          </thead>
+                <thead>
+                    <tr>
+                        <th>ID Campanha</th>
+                        <th>Módulo</th>
+                        <th>Parcela</th>
+                        <th>ID Armadilha</th>
+                        <th>Grupo Amostrado</th>
+                        <th>Data do Registro</th>
+                        <th>Hora do Registro</th>
+                        <th>Categoria</th>
+                        <th>Classe</th>
+                        <th>Ordem</th>
+                        <th>Família</th>
+                        <th>Gênero</th>
+                        <th>Espécie</th>
+                        <th>Nome Comum</th>
+                        <th>Sexo</th>
+                        <th>Faixa Etária</th>
+                        <th>Qnt de Indivíduos</th>
+                        <th>Num Marcação</th>
+                        <th>Coletado</th>
+                        <th>Num de Tombamento</th>
+                        <th>Dados Biométricos</th>
+                        <th>Comp total</th>
+                        <th>Cabeça</th>
+                        <th>Cauda</th>
+                        <th>Fêmur</th>
+                        <th>Orelha</th>
+                        <th>Peso</th>
+                        <th>Status Conservação Federal</th>
+                        <th>Status Conservação IUCN</th>
+                        <th>Espécies Bioindicadoras</th>
+                        <th>Espécies Alvo de Monitoramento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
           <tbody>
             <tr v-for="resultado in resultadosRecords" :key="resultado.id || Math.random()" class="hover:bg-gray-50">
-              <td class="py-2 px-4 border-b">{{ resultado.id || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.modulo || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.parcela || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.id_armadilha || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.grupo_amostrado || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.data_registro || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.hora_registro || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.categoria || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.classe || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.ordem || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.familia || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.genero || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.especie || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.nome_comum || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.sexo || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.faixa_etaria || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.qnt_individuos || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.num_marcacao || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.coletado || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.num_tombamento || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.dados_biometricos || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.comp_total || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.cabeca || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.cauda || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.femur || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.orelha || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.peso || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.status_conservacao_federal || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ resultado.status_conservacao_iucn || 'Não informado' }}</td>
+                         <td>{{ resultado.id_campanha }}</td>
+                        <td>{{ resultado.modulo }}</td>
+                        <td>{{ resultado.parcela }}</td>
+                        <td>{{ resultado.id_armadilha }}</td>
+                        <td>{{ resultado.grupo_amostrado }}</td>
+                        <td>{{ resultado.data_registro }}</td>
+                        <td>{{ resultado.hora_registro }}</td>
+                        <td>{{ resultado.categoria }}</td>
+                        <td>{{ resultado.classe }}</td>
+                        <td>{{ resultado.ordem }}</td>
+                        <td>{{ resultado.familia }}</td>
+                        <td>{{ resultado.genero }}</td>
+                        <td>{{ resultado.especie }}</td>
+                        <td>{{ resultado.nome_comum }}</td>
+                        <td>{{ resultado.sexo }}</td>
+                        <td>{{ resultado.faixa_etaria }}</td>
+                        <td>{{ resultado.qnt_individuos }}</td>
+                        <td>{{ resultado.num_marcacao }}</td>
+                        <td>{{ resultado.coletado }}</td>
+                        <td>{{ resultado.num_tombamento }}</td>
+                        <td>{{ resultado.dados_biometricos }}</td>
+                        <td>{{ resultado.comp_total }}</td>
+                        <td>{{ resultado.cabeca }}</td>
+                        <td>{{ resultado.cauda }}</td>
+                        <td>{{ resultado.femur }}</td>
+                        <td>{{ resultado.orelha }}</td>
+                        <td>{{ resultado.peso }}</td>
+                        <td>{{ resultado.status_conservacao_federal }}</td>
+                        <td>{{ resultado.status_conservacao_iucn }}</td>
+                        <td>{{ resultado.especies_bioindicadoras }}</td>
+                        <td>{{ resultado.especies_alvo_monitoramento }}</td>
+                        
               <td class="py-2 px-4 border-b">
                 <button class="btn btn-danger btn-sm" @click="excluirResultado(resultado.id)">Excluir</button>
               </td>
