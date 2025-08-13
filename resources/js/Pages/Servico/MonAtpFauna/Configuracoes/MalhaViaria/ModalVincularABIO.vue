@@ -49,7 +49,7 @@ defineExpose({ abrirModal });
         <div class="row">
           <div class="col">
             <v-select :options="licencas" label="numero_licenca" v-model="numero_licenca">
-              <template #no-options="{}">
+              <template #no-options="{ }">
                 Nenhum registro encontrado.
               </template>
             </v-select>
@@ -127,10 +127,11 @@ defineExpose({ abrirModal });
                   <td>{{ licenca.fim_subtrecho }}</td>
                 </tr>
                 <tr>
-                  <th>Visualizar PDF</th>
-                  <td>
+                  <a v-if="licenca.arquivo_licenca" class="dropdown-item" target="_blank"
+                    :href="route('licenca.documento.visualizar', licenca.id)">
+                    Visualizar PDF
                     <IconEye />
-                  </td>
+                  </a>
                 </tr>
               </table>
             </div>

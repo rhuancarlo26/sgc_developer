@@ -1,17 +1,17 @@
 <script setup>
 import Modal from "@/Components/Modal.vue";
-import {ref} from "vue";
+import { ref } from "vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
-import {useForm} from "@inertiajs/vue3";
+import { useForm } from "@inertiajs/vue3";
 import NavButton from "@/Components/NavButton.vue";
-import {useToast} from "vue-toastification";
-import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
-import {IconEye} from "@tabler/icons-vue";
+import { useToast } from "vue-toastification";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils.js";
+import { IconEye } from "@tabler/icons-vue";
 
 const props = defineProps({
-    contrato: {type: Object},
-    servico: {type: Object}
+    contrato: { type: Object },
+    servico: { type: Object }
 });
 const toast = useToast();
 const modalVisualizarABIO = ref();
@@ -50,7 +50,7 @@ const vincularABIO = () => {
     });
 }
 
-defineExpose({abrirModal});
+defineExpose({ abrirModal });
 </script>
 
 <template>
@@ -58,19 +58,17 @@ defineExpose({abrirModal});
         <template #body>
             <div class="row mb-4">
                 <div class="col">
-                    <InputLabel value="N° da licença" for="numero_licenca"/>
+                    <InputLabel value="N° da licença" for="numero_licenca" />
                     <div class="row g-2">
                         <div class="col">
                             <input type="text" name="numero_licenca" id="numero_licenca" class="form-control"
-                                   v-model="form.numero_licenca">
+                                v-model="form.numero_licenca">
                         </div>
                         <div class="col-auto">
-                            <NavButton @click="buscarLicenca()" class="nav-item"
-                                       type-button="success" title="Buscar"
-                            />
+                            <NavButton @click="buscarLicenca()" class="nav-item" type-button="success" title="Buscar" />
                         </div>
                     </div>
-                    <InputError :message="form.errors.numero_licenca"/>
+                    <InputError :message="form.errors.numero_licenca" />
                 </div>
             </div>
             <div v-if="licenca.id" class="mt-4">
@@ -120,10 +118,10 @@ defineExpose({abrirModal});
                                     <th>BR</th>
                                     <td>
                                         <template v-if="licenca.brs">
-                                          <span v-for="br in licenca?.brs.split(',')" :key="br"
+                                            <span v-for="br in licenca?.brs.split(',')" :key="br"
                                                 class="badge bg-warning text-white m-1">
-                                            {{ br }}
-                                          </span>
+                                                {{ br }}
+                                            </span>
                                         </template>
                                     </td>
                                 </tr>
@@ -131,14 +129,14 @@ defineExpose({abrirModal});
                                     <th>UF/KM inicial</th>
                                     <td>
                                         <template v-if="licenca.iniciais">
-                                          <span v-for="uf in licenca.iniciais.split(',')" :key="uf"
+                                            <span v-for="uf in licenca.iniciais.split(',')" :key="uf"
                                                 class="badge bg-warning text-white m-1">
-                                            {{ uf }}
-                                          </span>
+                                                {{ uf }}
+                                            </span>
                                         </template>
                                         <template v-if="licenca.segmentos.length">
                                             <span class="badge bg-warning text-white m-1">
-                                            {{
+                                                {{
                                                     Math.min(...licenca.segmentos.map(segmento => segmento.km_inicio))
                                                 }}
                                             </span>
@@ -149,14 +147,14 @@ defineExpose({abrirModal});
                                     <th>UF/KM final</th>
                                     <td>
                                         <template v-if="licenca.finais">
-                                          <span v-for="uf in licenca.finais.split(',')" :key="uf"
+                                            <span v-for="uf in licenca.finais.split(',')" :key="uf"
                                                 class="badge bg-warning text-white m-1">
-                                            {{ uf }}
-                                          </span>
+                                                {{ uf }}
+                                            </span>
                                         </template>
                                         <template v-if="licenca.segmentos.length">
                                             <span class="badge bg-warning text-white m-1">
-                                                {{ Math.max(...licenca.segmentos.map(segmento => segmento.km_fim)) }}
+                                                {{Math.max(...licenca.segmentos.map(segmento => segmento.km_fim))}}
                                             </span>
                                         </template>
                                     </td>
@@ -178,17 +176,20 @@ defineExpose({abrirModal});
                                     <td>{{ licenca.fim_subtrecho }}</td>
                                 </tr>
                                 <tr>
-                                    <th>Visualizar PDF</th>
-                                    <td>
-                                        <IconEye/>
-                                    </td>
+
+                                    <a v-if="licenca.arquivo_licenca" class="dropdown-item" target="_blank"
+                                        :href="route('licenca.documento.visualizar', licenca.id)">
+                                        Visualizar PDF
+                                        <IconEye />
+                                    </a>
+
                                 </tr>
                             </table>
                         </div>
                     </div>
                 </div>
                 <div class="d-flex justify-content-end mt-4">
-                    <NavButton @click="vincularABIO()" type-button="success" title="Vincular ABIO"/>
+                    <NavButton @click="vincularABIO()" type-button="success" title="Vincular ABIO" />
                 </div>
             </div>
         </template>
