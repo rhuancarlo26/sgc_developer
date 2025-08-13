@@ -76,10 +76,14 @@ defineExpose({ abrirModal });
                             <div class="mb-2">
                                 <strong>Fim do Sub-Trecho (PNV): </strong> {{ licenca.fim_subtrecho }}
                             </div>
-                            <div class="mb-2">
-                                <strong>Visualizar PDF: </strong>
-                                <IconEye />
+                            <div class="mb-2">                            
+                                <a v-if="licenca.arquivo_licenca" class="dropdown-item" target="_blank"
+                                    :href="route('licenca.documento.visualizar', licenca.id)">
+                                    Visualizar PDF
+                                    <IconEye />
+                                </a>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -87,8 +91,8 @@ defineExpose({ abrirModal });
         </template>
         <template #footer>
             <div class="">
-                <button type="button" class="btn btn-success" @click="vincularASV(licenca, servico)" data-dismiss="modal"
-                    aria-label="vincular asv">
+                <button type="button" class="btn btn-success" @click="vincularASV(licenca, servico)"
+                    data-dismiss="modal" aria-label="vincular asv">
                     Vincular ASV
                 </button>
             </div>
