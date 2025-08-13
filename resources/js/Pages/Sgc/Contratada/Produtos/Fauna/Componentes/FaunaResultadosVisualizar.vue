@@ -56,6 +56,8 @@ defineEmits(['next', 'prev']);
                             <th class="py-2 px-4 border-b text-left">Peso (g)</th>
                             <th class="py-2 px-4 border-b text-left">Status Federal</th>
                             <th class="py-2 px-4 border-b text-left">Status IUCN</th>
+                            <th class="py-2 px-4 border-b text-left">Espécies Bioindicadoras</th>
+                            <th class="py-2 px-4 border-b text-left">Espécies Alvo de Monitoramento</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -89,6 +91,8 @@ defineEmits(['next', 'prev']);
                             <td class="py-2 px-4 border-b">{{ resultado.peso || 'Não informado' }}</td>
                             <td class="py-2 px-4 border-b">{{ resultado.status_conservacao_federal || 'Não informado' }}</td>
                             <td class="py-2 px-4 border-b">{{ resultado.status_conservacao_iucn || 'Não informado' }}</td>
+                            <td class="py-2 px-4 border-b">{{ resultado.especies_bioindicadoras || 'Não informado' }}</td>
+                            <td class="py-2 px-4 border-b">{{ resultado.especies_alvo_monitoramento || 'Não informado' }}</td>
                         </tr>
                     </tbody>
                 </table>
