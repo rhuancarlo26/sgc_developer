@@ -95,7 +95,8 @@ class FaunaController extends Controller
             'pontos_quelo_crocod' => 'nullable|array',
             'pontos_quelo_crocod.*.ponto_de_coleta' => 'required_without:nao_se_aplica|string',
             'pontos_quelo_crocod.*.nome_curso_hidrico' => 'required_without:nao_se_aplica|string',
-            'pontos_quelo_crocod.*.coordenadas' => 'nullable|string',
+            'pontos_quelo_crocod.*.latitude' => 'nullable|string',
+            'pontos_quelo_crocod.*.longitude' => 'nullable|string',
             'pontos_quelo_crocod.*.bacia' => 'required_without:nao_se_aplica|string',
             'pontos_quelo_crocod.*.profundidade' => 'nullable|numeric',
             'pontos_quelo_crocod.*.largura' => 'required_without:nao_se_aplica|numeric',
@@ -240,7 +241,8 @@ class FaunaController extends Controller
                 'id' => $ponto->id,
                 'ponto_de_coleta' => $ponto->ponto_de_coleta,
                 'nome_curso_hidrico' => $ponto->nome_curso_hidrico,
-                'coordenadas' => $ponto->coordenadas,
+                'latitude' => $ponto->latitude,
+                'longitude' => $ponto->longitude,
                 'bacia' => $ponto->bacia_hidrografica,
                 'profundidade' => $ponto->profundidade,
                 'largura' => $ponto->largura,
@@ -396,7 +398,8 @@ class FaunaController extends Controller
                         'id' => $ponto->id,
                         'ponto_de_coleta' => $ponto->ponto_de_coleta,
                         'nome_curso_hidrico' => $ponto->nome_curso_hidrico,
-                        'coordenadas' => $ponto->coordenadas,
+                        'latitude' => $ponto->latitude,
+                        'longitude' => $ponto->longitude,
                         'bacia' => $ponto->bacia_hidrografica,
                         'profundidade' => $ponto->profundidade,
                         'largura' => $ponto->largura,
@@ -585,7 +588,9 @@ class FaunaController extends Controller
                     'id' => $ponto->id,
                     'ponto_de_coleta' => $ponto->ponto_de_coleta,
                     'nome_curso_hidrico' => $ponto->nome_curso_hidrico,
-                    'coordenadas' => $ponto->coordenadas,
+                    // 'coordenadas' => $ponto->coordenadas,
+                    'latitude' => $ponto->latitude,
+                    'longitude' => $ponto->longitude,
                     'bacia' => $ponto->bacia_hidrografica,
                     'profundidade' => $ponto->profundidade,
                     'largura' => $ponto->largura,
@@ -742,7 +747,8 @@ class FaunaController extends Controller
                         'id' => $ponto->id,
                         'ponto_de_coleta' => $ponto->ponto_de_coleta,
                         'nome_curso_hidrico' => $ponto->nome_curso_hidrico,
-                        'coordenadas' => $ponto->coordenadas,
+                        'latitude' => $ponto->latitude,
+                        'longitude' => $ponto->longitude,
                         'bacia' => $ponto->bacia_hidrografica,
                         'profundidade' => $ponto->profundidade,
                         'largura' => $ponto->largura,
@@ -1004,8 +1010,6 @@ class FaunaController extends Controller
         ]);
     }
 
-    
-
     public function update(Request $request, $contrato, $produto, $campanhaId): RedirectResponse
     {
         Log::info('FaunaController: Requisição recebida em update', [
@@ -1057,7 +1061,8 @@ class FaunaController extends Controller
                 'pontos_quelo_crocod' => 'nullable|array',
                 'pontos_quelo_crocod.*.ponto_de_coleta' => 'nullable|string',
                 'pontos_quelo_crocod.*.nome_curso_hidrico' => 'nullable|string',
-                'pontos_quelo_crocod.*.coordenadas' => 'nullable|string',
+                'pontos_quelo_crocod.*.latitude' => 'nullable|string',
+                'pontos_quelo_crocod.*.longitude' => 'nullable|string',
                 'pontos_quelo_crocod.*.profundidade' => 'nullable|numeric',
                 'pontos_quelo_crocod.*.largura' => 'nullable|numeric',
                 'pontos_quelo_crocod.*.tipo_substrato' => 'nullable|string',
@@ -1071,7 +1076,6 @@ class FaunaController extends Controller
                 'pontos_cavernicola.*.temperatura_media_externa' => 'nullable|numeric',
                 'pontos_cavernicola.*.umidade_relativa_interna' => 'nullable|numeric',
                 'pontos_cavernicola.*.umidade_relativa_externa' => 'nullable|numeric',
-                // 'metodologias.*.id' => 'nullable|integer|exists:sgc_fauna_metodologia,id',
                 'metodologias' => 'nullable|array',
                 'metodologias.*.grupo_faunistico' => 'nullable|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos,Quelônios e Crocodilianos,Fauna Cavernícola,Invertebrados',
                 'metodologias.*.metodologia' => 'nullable|string',

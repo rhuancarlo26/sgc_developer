@@ -65,10 +65,17 @@ const currentAnalise = computed(() => {
 });
 
 // Função para obter o status de uma etapa
+// const getEtapaStatus = (etapaValue) => {
+//     const analises = Array.isArray(props.analises) ? props.analises : [];
+//     const analise = analises.find(a => a.etapa === etapaValue);
+//     return analise ? analise.status : 'Pendente';
+// };
+
 const getEtapaStatus = (etapaValue) => {
     const analises = Array.isArray(props.analises) ? props.analises : [];
-    const analise = analises.find(a => a.etapa === etapaValue);
-    return analise ? analise.status : 'Pendente';
+    const analisesEtapa = analises.filter(a => a.etapa === etapaValue);
+    const analiseMaisRecente = analisesEtapa.sort((a, b) => Number(b.analise) - Number(a.analise))[0];
+    return analiseMaisRecente ? analiseMaisRecente.status : 'Pendente';
 };
 
 // Função para determinar o status de uma aba
@@ -742,7 +749,7 @@ const finalizarAvaliacao = () => {
                         </div>
                         <!-- Tabela de Análises Realizadas -->
                         <div class="mt-6">
-                            <h4 class="mb-3">Análises Realizadas</h4>
+                            <h4 class="mb-3" style="text-align: center;">ANÁLISES REALIZADAS</h4>
                             <div v-if="props.analises && props.analises.length > 0" class="overflow-x-auto">
                                 <table class="min-w-full bg-white border border-gray-300">
                                     <thead>

@@ -16,6 +16,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['next', 'prev', 'adicionar-metodologia', 'excluir-metodologia']);
@@ -39,6 +43,7 @@ const formMetodologia = ref({
 
 // Função para editar uma metodologia existente
 const editMetodologia = (metodologia) => {
+  if (props.disabled) return;
   formMetodologia.value = {
     id: metodologia.id || null,
     grupo_faunistico: metodologia.grupo_faunistico || '',
@@ -69,6 +74,7 @@ const validateMetodologia = () => {
 
 // Função para adicionar ou atualizar metodologia
 const handleAdicionarMetodologia = () => {
+  if (props.disabled) return;
   if (!validateMetodologia()) {
     return;
   }
@@ -94,6 +100,7 @@ const handleAdicionarMetodologia = () => {
                 placeholder="Selecione um grupo"
                 class="form-control"
                 id="grupo_faunistico"
+                :disabled="disabled"
               />
               <InputError :message="formMetodologia.errors.grupo_faunistico" />
             </div>
@@ -106,6 +113,7 @@ const handleAdicionarMetodologia = () => {
                 class="form-control"
                 v-model="formMetodologia.metodologia"
                 rows="4"
+                :disabled="disabled"
               ></textarea>
               <InputError :message="formMetodologia.errors.metodologia" />
             </div>
@@ -117,6 +125,7 @@ const handleAdicionarMetodologia = () => {
                 type-button="success"
                 :title="formMetodologia.id ? 'Atualizar Metodologia' : 'Adicionar Metodologia'"
                 @click="handleAdicionarMetodologia"
+                :disabled="disabled"
               />
             </div>
           </div>
@@ -136,6 +145,7 @@ const handleAdicionarMetodologia = () => {
                       type-button="primary"
                       title="Editar"
                       class="me-2"
+                      :disabled="disabled"
                     >
                       <i class="bi bi-pencil"></i>
                     </NavButton>
@@ -143,6 +153,7 @@ const handleAdicionarMetodologia = () => {
                       @click="$emit('excluir-metodologia', item.id)"
                       type-button="danger"
                       title="Excluir"
+                      :disabled="disabled"
                     >
                       <i class="bi bi-trash"></i>
                     </NavButton>
@@ -194,5 +205,17 @@ textarea.form-control {
 }
 .table-responsive {
   margin-bottom: 1rem;
+}
+.v-select:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+input:disabled,
+textarea:disabled,
+button:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
 }
 </style>

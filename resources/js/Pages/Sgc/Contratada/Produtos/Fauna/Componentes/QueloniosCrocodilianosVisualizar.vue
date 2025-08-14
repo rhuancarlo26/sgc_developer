@@ -36,7 +36,8 @@ defineEmits(['next', 'prev']);
               <th class="py-2 px-4 border-b text-left">ID</th>
               <th class="py-2 px-4 border-b text-left">Ponto de Coleta</th>
               <th class="py-2 px-4 border-b text-left">Nome do Curso Hídrico</th>
-              <th class="py-2 px-4 border-b text-left">Coordenadas</th>
+              <th class="py-2 px-4 border-b text-left">Latitude</th>
+              <th class="py-2 px-4 border-b text-left">Longitude</th>
               <th class="py-2 px-4 border-b text-left">Bacia Hidrográfica</th>
               <th class="py-2 px-4 border-b text-left">Profundidade (m)</th>
               <th class="py-2 px-4 border-b text-left">Largura (m)</th>
@@ -48,7 +49,8 @@ defineEmits(['next', 'prev']);
               <td class="py-2 px-4 border-b">{{ ponto.id || 'Não informado' }}</td>
               <td class="py-2 px-4 border-b">{{ ponto.ponto_de_coleta || 'Não informado' }}</td>
               <td class="py-2 px-4 border-b">{{ ponto.nome_curso_hidrico || 'Não informado' }}</td>
-              <td class="py-2 px-4 border-b">{{ ponto.coordenadas || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.latitude || 'Não informado' }}</td>
+              <td class="py-2 px-4 border-b">{{ ponto.longitude || 'Não informado' }}</td>
               <td class="py-2 px-4 border-b">{{ ponto.bacia || 'Não informado' }}</td>
               <td class="py-2 px-4 border-b">{{ ponto.profundidade || 'Não informado' }}</td>
               <td class="py-2 px-4 border-b">{{ ponto.largura || 'Não informado' }}</td>

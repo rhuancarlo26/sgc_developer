@@ -18,6 +18,10 @@ const props = defineProps({
     type: Number,
     default: 4,
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['next', 'prev', 'adicionar-ponto', 'excluir-ponto']);
@@ -27,7 +31,9 @@ const formPontoAmostragem = ref({
   id: null,
   ponto_de_coleta: '',
   nome_curso_hidrico: '',
-  coordenadas: '',
+  // coordenadas: '',
+  latitude: '',
+  longitude: '',
   bacia: '',
   profundidade: null,
   largura: null,
@@ -37,6 +43,7 @@ const formPontoAmostragem = ref({
 
 // Função para editar um ponto existente
 const editPonto = (ponto) => {
+  if (props.disabled) return;
   formPontoAmostragem.value = {
     ...ponto,
     errors: {},
@@ -49,7 +56,9 @@ const resetForm = () => {
     id: null,
     ponto_de_coleta: '',
     nome_curso_hidrico: '',
-    coordenadas: '',
+    // coordenadas: '',
+    latitude: '',
+    longitude: '',
     bacia: '',
     profundidade: null,
     largura: null,
@@ -60,6 +69,7 @@ const resetForm = () => {
 
 // Função para adicionar ou atualizar ponto
 const handleAdicionarPonto = () => {
+  if (props.disabled) return;
   emit('adicionar-ponto', formPontoAmostragem);
   resetForm();
 };
@@ -78,6 +88,7 @@ const handleAdicionarPonto = () => {
               class="form-check-input"
               id="nao_se_aplica"
               v-model="form.nao_se_aplica"
+              :disabled="disabled"
             />
             <label class="form-check-label" for="nao_se_aplica">Não se aplica</label>
             <InputError :message="form.errors.nao_se_aplica" />
@@ -92,7 +103,7 @@ const handleAdicionarPonto = () => {
                   id="ponto_de_coleta"
                   class="form-control"
                   v-model="formPontoAmostragem.ponto_de_coleta"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoAmostragem.errors.ponto_de_coleta" />
               </div>
@@ -103,23 +114,35 @@ const handleAdicionarPonto = () => {
                   id="nome_curso_hidrico"
                   class="form-control"
                   v-model="formPontoAmostragem.nome_curso_hidrico"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoAmostragem.errors.nome_curso_hidrico" />
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-12 col-md-6">
-                <InputLabel value="Coordenadas" for="coordenadas" />
+                <InputLabel value="Latitude" for="latitude" />
                 <input
                   type="text"
-                  id="coordenadas"
+                  id="latitude"
                   class="form-control"
-                  v-model="formPontoAmostragem.coordenadas"
+                  v-model="formPontoAmostragem.latitude"
                   placeholder="Ex: -23.123, -46.456"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
-                <InputError :message="formPontoAmostragem.errors.coordenadas" />
+                <InputError :message="formPontoAmostragem.errors.latitude" />
+              </div>
+              <div class="col-12 col-md-6">
+                <InputLabel value="Longitude" for="longitude" />
+                <input
+                  type="text"
+                  id="longitude"
+                  class="form-control"
+                  v-model="formPontoAmostragem.longitude"
+                  placeholder="Ex: -23.123, -46.456"
+                  :disabled="disabled || form.nao_se_aplica"
+                />
+                <InputError :message="formPontoAmostragem.errors.longitude" />
               </div>
               <div class="col-12 col-md-6">
                 <InputLabel value="Bacia Hidrográfica" for="bacia" />
@@ -128,7 +151,7 @@ const handleAdicionarPonto = () => {
                   id="bacia"
                   class="form-control"
                   v-model="formPontoAmostragem.bacia"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoAmostragem.errors.bacia" />
               </div>
@@ -142,7 +165,7 @@ const handleAdicionarPonto = () => {
                   id="profundidade"
                   class="form-control"
                   v-model="formPontoAmostragem.profundidade"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoAmostragem.errors.profundidade" />
               </div>
@@ -154,7 +177,7 @@ const handleAdicionarPonto = () => {
                   id="largura"
                   class="form-control"
                   v-model="formPontoAmostragem.largura"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoAmostragem.errors.largura" />
               </div>
@@ -167,7 +190,7 @@ const handleAdicionarPonto = () => {
                   class="form-control"
                   v-model="formPontoAmostragem.tipo_substrato"
                   rows="5"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 ></textarea>
                 <InputError :message="formPontoAmostragem.errors.tipo_substrato" />
               </div>
@@ -179,7 +202,7 @@ const handleAdicionarPonto = () => {
                   type-button="success"
                   title="Adicionar Ponto"
                   @click="handleAdicionarPonto"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
               </div>
             </div>
@@ -200,6 +223,7 @@ const handleAdicionarPonto = () => {
                         type-button="primary"
                         title="Editar"
                         class="me-2"
+                        :disabled="disabled"
                       >
                         <i class="bi bi-pencil"></i>
                       </NavButton>
@@ -207,6 +231,7 @@ const handleAdicionarPonto = () => {
                         @click="$emit('excluir-ponto', item.id)"
                         type-button="danger"
                         title="Excluir"
+                        :disabled="disabled"
                       >
                         <i class="bi bi-trash"></i>
                       </NavButton>
@@ -269,5 +294,13 @@ textarea.form-control {
 }
 .table-responsive {
   margin-bottom: 1rem;
+}
+input:disabled,
+textarea:disabled,
+button:disabled,
+.form-check-input:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
 }
 </style>
