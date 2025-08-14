@@ -118,6 +118,12 @@ const statusOptions = [
 
         <!-- Vincular ABIO -->
         <h4 class="mb-3">VINCULAR ABIO</h4>
+        <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <div>
+                Caso a ABIO não esteja na lista abaixo, cadastre uma nova acessando o menu <strong>Gestão Ambiental > Contrato > Serviços > Cadastrar Serviços</strong>.
+            </div>
+        </div>
         <div class="mb-4">
             <div class="row mb-3">
                 <div class="col-12 col-md-10">

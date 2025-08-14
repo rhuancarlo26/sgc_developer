@@ -156,24 +156,24 @@ watch(() => props.formModuloAmostral.uf, (newUf) => {
             <div class="row mb-4">
                 <div class="col-12 col-md-6">
                     <InputLabel value="Latitude inicial" for="latitude_inicial" />
-                    <input type="number" step="any" class="form-control" id="latitude_inicial" v-model="formModuloAmostral.latitude_inicial" />
+                    <input type="number" placeholder="-12.2001" step="any" class="form-control" id="latitude_inicial" v-model="formModuloAmostral.latitude_inicial" />
                     <InputError :message="formModuloAmostral.errors.latitude_inicial" />
                 </div>
                 <div class="col-12 col-md-6">
                     <InputLabel value="Longitude inicial" for="longitude_inicial" />
-                    <input type="number" step="any" class="form-control" id="longitude_inicial" v-model="formModuloAmostral.longitude_inicial" />
+                    <input type="number" placeholder="-38.2001" step="any" class="form-control" id="longitude_inicial" v-model="formModuloAmostral.longitude_inicial" />
                     <InputError :message="formModuloAmostral.errors.longitude_inicial" />
                 </div>
             </div>
             <div class="row mb-4">
                 <div class="col-12 col-md-6">
                     <InputLabel value="Latitude final" for="latitude_final" />
-                    <input type="number" step="any" class="form-control" id="latitude_final" v-model="formModuloAmostral.latitude_final" />
+                    <input type="number" placeholder="-12.2001" step="any" class="form-control" id="latitude_final" v-model="formModuloAmostral.latitude_final" />
                     <InputError :message="formModuloAmostral.errors.latitude_final" />
                 </div>
                 <div class="col-12 col-md-6">
                     <InputLabel value="Longitude final" for="longitude_final" />
-                    <input type="number" step="any" class="form-control" id="longitude_final" v-model="formModuloAmostral.longitude_final" />
+                    <input type="number" placeholder="-38.2001" step="any" class="form-control" id="longitude_final" v-model="formModuloAmostral.longitude_final" />
                     <InputError :message="formModuloAmostral.errors.longitude_final" />
                 </div>
             </div>

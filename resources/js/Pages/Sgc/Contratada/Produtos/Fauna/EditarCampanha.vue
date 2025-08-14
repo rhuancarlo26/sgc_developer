@@ -580,6 +580,14 @@ const submitForm = () => {
     },
   });
 };
+
+const etapasStatus = computed(() => {
+  const statusMap = {};
+  props.campanha.analises.forEach(a => {
+    statusMap[a.etapa] = a.status;
+  });
+  return statusMap;
+});
 </script>
 
 <template>
@@ -652,7 +660,13 @@ const submitForm = () => {
                     <h4 class="text-center mb-3" style="font-weight: bold;">APRESENTAÇÃO</h4>
                     <div class="mb-3">
                       <label for="cod_emp" class="form-label">Empreendimento</label>
-                      <select v-model="form.cod_emp" class="form-select" id="cod_emp" required>
+                      <select
+                        v-model="form.cod_emp"
+                        class="form-select"
+                        id="cod_emp"
+                        required
+                        :disabled="etapasStatus['apresentacao_geral'] === 'Aprovada'"
+                      >
                         <option value="">Selecione um empreendimento</option>
                         <option v-for="emp in props.empreendimentos" :key="emp" :value="emp">{{ emp }}</option>
                       </select>
@@ -664,8 +678,8 @@ const submitForm = () => {
                         v-model="form.subproduto"
                         type="text"
                         class="form-control"
-                        :disabled="props.campanha.status !== 'Rejeitada'"
                         required
+                        :disabled="etapasStatus['apresentacao_geral'] === 'Aprovada'"
                       />
                       <InputError :message="form.errors.subproduto" />
                     </div>
@@ -687,6 +701,7 @@ const submitForm = () => {
                     :abio-records="form.abios"
                     :profissional-records="form.profissionais"
                     :sub-step="subStep"
+                    :disabled="etapasStatus['caracterizacao_area'] === 'Aprovada'"
                     @vincular-abio="vincularAbio"
                     @excluir-abio="excluirAbio"
                     @salvar-novo-profissional="salvarNovoProfissional"
@@ -702,6 +717,7 @@ const submitForm = () => {
                     :ufs="props.ufs"
                     :biomas="props.biomas"
                     :sub-step="subStep"
+                    :disabled="etapasStatus['modulos_amostrais'] === 'Aprovada'"
                     @adicionar-modulo="adicionarModulo"
                     @excluir-modulo="excluirModulo"
                     @next="subStep = 4"
@@ -712,6 +728,7 @@ const submitForm = () => {
                     :form="form"
                     :ponto-records="form.pontos_quelo_crocod"
                     :sub-step="subStep"
+                    :disabled="etapasStatus['pontos_quelo_crocod'] === 'Aprovada'"
                     @adicionar-ponto="adicionarPontoQuelonios"
                     @excluir-ponto="excluirPontoQuelonios"
                     @next="subStep = 5"
@@ -727,6 +744,7 @@ const submitForm = () => {
                     :ponto-records="form.pontos_cavernicola"
                     :sub-step="subStep"
                     :set-active-tab="setActiveTab"
+                    :disabled="etapasStatus['pontos_cavernicola'] === 'Aprovada'"
                     @adicionar-ponto-cavernicola="adicionarPontoCavernicola"
                     @excluir-ponto-cavernicola="excluirPontoCavernicola"
                     @next="setActiveTab('metodologia')"
@@ -742,6 +760,7 @@ const submitForm = () => {
                     :form="form"
                     :metodologia-records="form.metodologias"
                     :set-active-tab="setActiveTab"
+                    :disabled="etapasStatus['metodologia'] === 'Aprovada'"
                     @adicionar-metodologia="adicionarMetodologia"
                     @excluir-metodologia="excluirMetodologia"
                     @prev="setActiveTab('apresentacao')"
@@ -753,6 +772,7 @@ const submitForm = () => {
                     :form="form"
                     :resultados-records="form.resultados"
                     :set-active-tab="setActiveTab"
+                    :disabled="etapasStatus['resultados'] === 'Aprovada'"
                     @prev="setActiveTab('metodologia')"
                     @next="setActiveTab('anexos')"
                   />
@@ -767,6 +787,7 @@ const submitForm = () => {
                         @change="form.anexos[tipo] = $event.target.files[0] || null"
                         accept=".pdf,.jpg,.jpeg,.png"
                         class="form-control"
+                        :disabled="etapasStatus['anexos'] === 'Aprovada'"
                       />
                       <InputError :message="form.errors[`anexos.${tipo}`]" />
                     </div>
@@ -1047,5 +1068,12 @@ tr:hover {
 }
 .modal-lg {
   max-width: 800px;
+}
+.form-control:disabled,
+.form-select:disabled,
+input[type="file"]:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
 }
 </style>

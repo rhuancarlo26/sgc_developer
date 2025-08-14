@@ -19,6 +19,10 @@ const props = defineProps({
     type: [String, Number],
     required: true,
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Emits
@@ -30,7 +34,9 @@ const resultadosRecords = ref(props.resultadosRecords);
 
 // Sincronizar considerações com o form pai
 watch(consideracoes, (newValue) => {
-  props.form.consideracoes = newValue;
+  if (!props.disabled) {
+    props.form.consideracoes = newValue;
+  }
 });
 
 // Download do modelo de planilha
@@ -60,6 +66,7 @@ const downloadModelo = () => {
 
 // Processar upload da planilha
 const processarPlanilha = (event) => {
+  if (props.disabled) return;
   const file = event.target.files[0];
   if (!file) return;
 
@@ -108,17 +115,18 @@ const processarPlanilha = (event) => {
     resultadosRecords.value = novosResultados;
     emit('update:resultadosRecords', novosResultados);
     props.form.planilha = file;
-    props.form.resultados = novosResultados; // Sincroniza com o form pai
+    props.form.resultados = novosResultados;
   };
   reader.readAsArrayBuffer(file);
 };
 
 // Excluir resultado
 const excluirResultado = (id) => {
+  if (props.disabled) return;
   const novosResultados = resultadosRecords.value.filter(item => item.id !== id);
   resultadosRecords.value = novosResultados;
   emit('update:resultadosRecords', novosResultados);
-  props.form.resultados = novosResultados; // Sincroniza com o form pai
+  props.form.resultados = novosResultados;
 };
 
 // Avançar
@@ -134,7 +142,7 @@ const avancar = () => {
       
       <!-- Upload da Planilha -->
       <div class="mb-3">
-        <button class="btn btn-primary" @click="downloadModelo">Baixar Planilha Modelo</button>
+        <button class="btn btn-primary" @click="downloadModelo" :disabled="disabled">Baixar Planilha Modelo</button>
       </div>
       <div class="mb-3">
         <InputLabel for="planilha" value="Upload da Planilha Preenchida" />
@@ -144,6 +152,7 @@ const avancar = () => {
           id="planilha"
           accept=".xlsx,.xls"
           @change="processarPlanilha"
+          :disabled="disabled"
         />
         <InputError :message="form.errors.planilha" />
       </div>
@@ -157,6 +166,7 @@ const avancar = () => {
           id="consideracoes"
           rows="4"
           placeholder="Digite suas considerações aqui..."
+          :disabled="disabled"
         ></textarea>
         <InputError :message="form.errors.consideracoes" />
       </div>
@@ -164,78 +174,81 @@ const avancar = () => {
       <!-- Tabela de Resultados -->
       <div v-if="resultadosRecords.length" class="overflow-x-auto mb-6">
         <table class="min-w-full bg-white border border-gray-300">
-                <thead>
-                    <tr>
-                        <th>ID Campanha</th>
-                        <th>Módulo</th>
-                        <th>Parcela</th>
-                        <th>ID Armadilha</th>
-                        <th>Grupo Amostrado</th>
-                        <th>Data do Registro</th>
-                        <th>Hora do Registro</th>
-                        <th>Categoria</th>
-                        <th>Classe</th>
-                        <th>Ordem</th>
-                        <th>Família</th>
-                        <th>Gênero</th>
-                        <th>Espécie</th>
-                        <th>Nome Comum</th>
-                        <th>Sexo</th>
-                        <th>Faixa Etária</th>
-                        <th>Qnt de Indivíduos</th>
-                        <th>Num Marcação</th>
-                        <th>Coletado</th>
-                        <th>Num de Tombamento</th>
-                        <th>Dados Biométricos</th>
-                        <th>Comp total</th>
-                        <th>Cabeça</th>
-                        <th>Cauda</th>
-                        <th>Fêmur</th>
-                        <th>Orelha</th>
-                        <th>Peso</th>
-                        <th>Status Conservação Federal</th>
-                        <th>Status Conservação IUCN</th>
-                        <th>Espécies Bioindicadoras</th>
-                        <th>Espécies Alvo de Monitoramento</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
+          <thead>
+            <tr>
+              <th>ID Campanha</th>
+              <th>Módulo</th>
+              <th>Parcela</th>
+              <th>ID Armadilha</th>
+              <th>Grupo Amostrado</th>
+              <th>Data do Registro</th>
+              <th>Hora do Registro</th>
+              <th>Categoria</th>
+              <th>Classe</th>
+              <th>Ordem</th>
+              <th>Família</th>
+              <th>Gênero</th>
+              <th>Espécie</th>
+              <th>Nome Comum</th>
+              <th>Sexo</th>
+              <th>Faixa Etária</th>
+              <th>Qnt de Indivíduos</th>
+              <th>Num Marcação</th>
+              <th>Coletado</th>
+              <th>Num de Tombamento</th>
+              <th>Dados Biométricos</th>
+              <th>Comp total</th>
+              <th>Cabeça</th>
+              <th>Cauda</th>
+              <th>Fêmur</th>
+              <th>Orelha</th>
+              <th>Peso</th>
+              <th>Status Conservação Federal</th>
+              <th>Status Conservação IUCN</th>
+              <th>Espécies Bioindicadoras</th>
+              <th>Espécies Alvo de Monitoramento</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
           <tbody>
             <tr v-for="resultado in resultadosRecords" :key="resultado.id || Math.random()" class="hover:bg-gray-50">
-                         <td>{{ resultado.id_campanha }}</td>
-                        <td>{{ resultado.modulo }}</td>
-                        <td>{{ resultado.parcela }}</td>
-                        <td>{{ resultado.id_armadilha }}</td>
-                        <td>{{ resultado.grupo_amostrado }}</td>
-                        <td>{{ resultado.data_registro }}</td>
-                        <td>{{ resultado.hora_registro }}</td>
-                        <td>{{ resultado.categoria }}</td>
-                        <td>{{ resultado.classe }}</td>
-                        <td>{{ resultado.ordem }}</td>
-                        <td>{{ resultado.familia }}</td>
-                        <td>{{ resultado.genero }}</td>
-                        <td>{{ resultado.especie }}</td>
-                        <td>{{ resultado.nome_comum }}</td>
-                        <td>{{ resultado.sexo }}</td>
-                        <td>{{ resultado.faixa_etaria }}</td>
-                        <td>{{ resultado.qnt_individuos }}</td>
-                        <td>{{ resultado.num_marcacao }}</td>
-                        <td>{{ resultado.coletado }}</td>
-                        <td>{{ resultado.num_tombamento }}</td>
-                        <td>{{ resultado.dados_biometricos }}</td>
-                        <td>{{ resultado.comp_total }}</td>
-                        <td>{{ resultado.cabeca }}</td>
-                        <td>{{ resultado.cauda }}</td>
-                        <td>{{ resultado.femur }}</td>
-                        <td>{{ resultado.orelha }}</td>
-                        <td>{{ resultado.peso }}</td>
-                        <td>{{ resultado.status_conservacao_federal }}</td>
-                        <td>{{ resultado.status_conservacao_iucn }}</td>
-                        <td>{{ resultado.especies_bioindicadoras }}</td>
-                        <td>{{ resultado.especies_alvo_monitoramento }}</td>
-                        
+              <td>{{ resultado.id_campanha }}</td>
+              <td>{{ resultado.modulo }}</td>
+              <td>{{ resultado.parcela }}</td>
+              <td>{{ resultado.id_armadilha }}</td>
+              <td>{{ resultado.grupo_amostrado }}</td>
+              <td>{{ resultado.data_registro }}</td>
+              <td>{{ resultado.hora_registro }}</td>
+              <td>{{ resultado.categoria }}</td>
+              <td>{{ resultado.classe }}</td>
+              <td>{{ resultado.ordem }}</td>
+              <td>{{ resultado.familia }}</td>
+              <td>{{ resultado.genero }}</td>
+              <td>{{ resultado.especie }}</td>
+              <td>{{ resultado.nome_comum }}</td>
+              <td>{{ resultado.sexo }}</td>
+              <td>{{ resultado.faixa_etaria }}</td>
+              <td>{{ resultado.qnt_individuos }}</td>
+              <td>{{ resultado.num_marcacao }}</td>
+              <td>{{ resultado.coletado }}</td>
+              <td>{{ resultado.num_tombamento }}</td>
+              <td>{{ resultado.dados_biometricos }}</td>
+              <td>{{ resultado.comp_total }}</td>
+              <td>{{ resultado.cabeca }}</td>
+              <td>{{ resultado.cauda }}</td>
+              <td>{{ resultado.femur }}</td>
+              <td>{{ resultado.orelha }}</td>
+              <td>{{ resultado.peso }}</td>
+              <td>{{ resultado.status_conservacao_federal }}</td>
+              <td>{{ resultado.status_conservacao_iucn }}</td>
+              <td>{{ resultado.especies_bioindicadoras }}</td>
+              <td>{{ resultado.especies_alvo_monitoramento }}</td>
               <td class="py-2 px-4 border-b">
-                <button class="btn btn-danger btn-sm" @click="excluirResultado(resultado.id)">Excluir</button>
+                <button
+                  class="btn btn-danger btn-sm"
+                  @click="excluirResultado(resultado.id)"
+                  :disabled="disabled"
+                >Excluir</button>
               </td>
             </tr>
           </tbody>
@@ -293,5 +306,12 @@ thead {
 }
 tr:hover {
   background-color: #f1f5f9;
+}
+input:disabled,
+textarea:disabled,
+button:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
 }
 </style>

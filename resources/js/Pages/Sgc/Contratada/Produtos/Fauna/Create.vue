@@ -102,7 +102,9 @@ const formModuloAmostral = useForm({
 const formPontosAmostragem = useForm({
     ponto_de_coleta: '',
     nome_curso_hidrico: '',
-    coordenadas: '',
+    // coordenadas: '',
+    latitude: '',
+    longitude: '',
     bacia: '',
     profundidade: null,
     largura: null,
@@ -184,7 +186,9 @@ const salvarDadosGerais = (consideracoesData = {}) => {
     pontoRecords.value.forEach((ponto, index) => {
         formData.append(`pontos_quelo_crocod[${index}][ponto_de_coleta]`, ponto.ponto_de_coleta || '');
         formData.append(`pontos_quelo_crocod[${index}][nome_curso_hidrico]`, ponto.nome_curso_hidrico || '');
-        formData.append(`pontos_quelo_crocod[${index}][coordenadas]`, ponto.coordenadas || '');
+        // formData.append(`pontos_quelo_crocod[${index}][coordenadas]`, ponto.coordenadas || '');
+        formData.append(`pontos_quelo_crocod[${index}][latitude]`, ponto.latitude || '');
+        formData.append(`pontos_quelo_crocod[${index}][longitude]`, ponto.longitude || '');
         formData.append(`pontos_quelo_crocod[${index}][bacia]`, ponto.bacia || '');
         formData.append(`pontos_quelo_crocod[${index}][profundidade]`, ponto.profundidade || '');
         formData.append(`pontos_quelo_crocod[${index}][largura]`, ponto.largura || '');
@@ -396,7 +400,8 @@ const adicionarPonto = () => {
             id: Date.now(),
             ponto_de_coleta: formPontosAmostragem.ponto_de_coleta,
             nome_curso_hidrico: formPontosAmostragem.nome_curso_hidrico,
-            coordenadas: formPontosAmostragem.coordenadas,
+            latitude: formPontosAmostragem.latitude,
+            longitude: formPontosAmostragem.longitude,
             bacia: formPontosAmostragem.bacia,
             profundidade: formPontosAmostragem.profundidade,
             largura: formPontosAmostragem.largura,

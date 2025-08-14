@@ -18,6 +18,10 @@ const props = defineProps({
     type: Number,
     default: 5,
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['next', 'prev', 'adicionar-ponto-cavernicola', 'excluir-ponto-cavernicola']);
@@ -39,6 +43,7 @@ const formPontoCavernicola = ref({
 
 // Função para editar um ponto existente
 const editPonto = (ponto) => {
+  if (props.disabled) return;
   formPontoCavernicola.value = {
     id: ponto.id || null,
     cavidade: ponto.cavidade || '',
@@ -83,6 +88,7 @@ const validatePonto = () => {
 
 // Função para adicionar ou atualizar ponto
 const handleAdicionarPonto = () => {
+  if (props.disabled) return;
   if (!validatePonto()) {
     return;
   }
@@ -104,6 +110,7 @@ const handleAdicionarPonto = () => {
               class="form-check-input"
               id="nao_se_aplica"
               v-model="form.nao_se_aplica"
+              :disabled="disabled"
             />
             <label class="form-check-label" for="nao_se_aplica">Não se aplica</label>
             <InputError :message="form.errors.nao_se_aplica" />
@@ -118,7 +125,7 @@ const handleAdicionarPonto = () => {
                   id="cavidade"
                   class="form-control"
                   v-model="formPontoCavernicola.cavidade"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoCavernicola.errors.cavidade" />
               </div>
@@ -130,7 +137,7 @@ const handleAdicionarPonto = () => {
                   id="latitude"
                   class="form-control"
                   v-model="formPontoCavernicola.latitude"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoCavernicola.errors.latitude" />
               </div>
@@ -144,7 +151,7 @@ const handleAdicionarPonto = () => {
                   id="longitude"
                   class="form-control"
                   v-model="formPontoCavernicola.longitude"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoCavernicola.errors.longitude" />
               </div>
@@ -156,7 +163,7 @@ const handleAdicionarPonto = () => {
                   id="distancia_eixo_rodovia"
                   class="form-control"
                   v-model="formPontoCavernicola.distancia_eixo_rodovia"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoCavernicola.errors.distancia_eixo_rodovia" />
               </div>
@@ -169,7 +176,7 @@ const handleAdicionarPonto = () => {
                   id="formacao_associada"
                   class="form-control"
                   v-model="formPontoCavernicola.formacao_associada"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoCavernicola.errors.formacao_associada" />
               </div>
@@ -183,7 +190,7 @@ const handleAdicionarPonto = () => {
                   id="temperatura_media_interna"
                   class="form-control"
                   v-model="formPontoCavernicola.temperatura_media_interna"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoCavernicola.errors.temperatura_media_interna" />
               </div>
@@ -195,7 +202,7 @@ const handleAdicionarPonto = () => {
                   id="temperatura_media_externa"
                   class="form-control"
                   v-model="formPontoCavernicola.temperatura_media_externa"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoCavernicola.errors.temperatura_media_externa" />
               </div>
@@ -209,7 +216,7 @@ const handleAdicionarPonto = () => {
                   id="umidade_relativa_interna"
                   class="form-control"
                   v-model="formPontoCavernicola.umidade_relativa_interna"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoCavernicola.errors.umidade_relativa_interna" />
               </div>
@@ -221,7 +228,7 @@ const handleAdicionarPonto = () => {
                   id="umidade_relativa_externa"
                   class="form-control"
                   v-model="formPontoCavernicola.umidade_relativa_externa"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
                 <InputError :message="formPontoCavernicola.errors.umidade_relativa_externa" />
               </div>
@@ -233,7 +240,7 @@ const handleAdicionarPonto = () => {
                   type-button="success"
                   :title="formPontoCavernicola.id ? 'Atualizar Ponto' : 'Adicionar Ponto'"
                   @click="handleAdicionarPonto"
-                  :disabled="form.nao_se_aplica"
+                  :disabled="disabled || form.nao_se_aplica"
                 />
               </div>
             </div>
@@ -255,6 +262,7 @@ const handleAdicionarPonto = () => {
                         type-button="primary"
                         title="Editar"
                         class="me-2"
+                        :disabled="disabled"
                       >
                         <i class="bi bi-pencil"></i>
                       </NavButton>
@@ -262,6 +270,7 @@ const handleAdicionarPonto = () => {
                         @click="$emit('excluir-ponto-cavernicola', item.id)"
                         type-button="danger"
                         title="Excluir"
+                        :disabled="disabled"
                       >
                         <i class="bi bi-trash"></i>
                       </NavButton>
@@ -320,5 +329,12 @@ const handleAdicionarPonto = () => {
 }
 .table-responsive {
   margin-bottom: 1rem;
+}
+input:disabled,
+button:disabled,
+.form-check-input:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
 }
 </style>

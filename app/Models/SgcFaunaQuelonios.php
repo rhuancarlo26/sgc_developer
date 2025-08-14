@@ -15,6 +15,8 @@ class SgcFaunaQuelonios extends Model
         'id_campanha',
         'ponto_de_coleta',
         'nome_curso_hidrico',
+        'latitude',
+        'longitude',
         'coordenadas',
         'bacia_hidrografica',
         'profundidade',

@@ -43,9 +43,14 @@ defineEmits(['adicionar-ponto', 'excluir-ponto', 'next', 'prev', 'update:naoSeAp
             </div>
             <div class="row mb-3">
                 <div class="col-12 col-md-6">
-                    <InputLabel value="Coordenadas" for="coordenadas" />
-                    <input type="text" id="coordenadas" class="form-control" v-model="formPontosAmostragem.coordenadas" :disabled="naoSeAplica" />
-                    <InputError :message="formPontosAmostragem.errors.coordenadas" />
+                    <InputLabel value="Latitude" for="latitude" />
+                    <input type="text" id="latitude" class="form-control" v-model="formPontosAmostragem.latitude" :disabled="naoSeAplica" />
+                    <InputError :message="formPontosAmostragem.errors.latitude" />
+                </div>
+                <div class="col-12 col-md-6">
+                    <InputLabel value="Longitude" for="longitude" />
+                    <input type="text" id="longitude" class="form-control" v-model="formPontosAmostragem.longitude" :disabled="naoSeAplica" />
+                    <InputError :message="formPontosAmostragem.errors.longitude" />
                 </div>
                 <div class="col-12 col-md-6">
                     <InputLabel value="Bacia Hidrográfica" for="bacia" />

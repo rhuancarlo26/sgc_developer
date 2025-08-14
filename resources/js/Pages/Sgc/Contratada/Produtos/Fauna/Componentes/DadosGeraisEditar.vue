@@ -14,8 +14,8 @@ const props = defineProps({
     required: true,
   },
   abios: {
-      type: Array,
-      default: () => []
+    type: Array,
+    default: () => [],
   },
   profissionais: {
     type: Array,
@@ -29,6 +29,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 console.log('Props.form:', props.form);
@@ -37,6 +41,7 @@ console.log('ABIO RECORDS:', props.abioRecords);
 const emit = defineEmits(['vincular-abio', 'excluir-abio', 'salvar-novo-profissional', 'vincular-profissional', 'excluir-profissional', 'next', 'prev']);
 
 const vincularProfissional = () => {
+  if (props.disabled) return;
   if (props.form.profissional.id_profissional && props.form.profissional.grupo_faunistico) {
     const prof = props.profissionais.find(p => p.id === props.form.profissional.id_profissional);
     if (prof) {
@@ -62,13 +67,14 @@ const vincularProfissional = () => {
 };
 
 const vincularAbio = () => {
+  if (props.disabled) return;
   if (props.form.abio.id_abio) {
     const abio = props.abios.find(a => a.id === props.form.abio.id_abio);
     if (abio) {
       const abioData = {
-        id: abio.licenca?.id || abio.id, // Priorizar o ID da licença
+        id: abio.licenca?.id || abio.id,
         abio: {
-          id: abio.licenca?.id || abio.id, // Garantir o ID da licença
+          id: abio.licenca?.id || abio.id,
           numero_licenca: abio.licenca?.numero_licenca || abio.numero_licenca || 'N/A',
         },
       };
@@ -100,6 +106,12 @@ const formNovoProfissional = ref({
   observacao: '',
 });
 
+// Função para salvar novo profissional
+const salvarNovoProfissional = () => {
+  if (props.disabled) return;
+  emit('salvar-novo-profissional', formNovoProfissional.value);
+};
+
 const abioOptions = computed(() => {
   if (!props.abios) {
     console.warn('Props abios está indefinido ou vazio:', props.abios);
@@ -109,7 +121,7 @@ const abioOptions = computed(() => {
     .filter(abio => abio?.licenca)
     .map(abio => ({
       ...abio,
-      id: abio.licenca?.id || abio.id, // Garantir que o ID seja o da licença
+      id: abio.licenca?.id || abio.id,
       label: abio.licenca?.numero_licenca || 'Sem Licença',
     }));
 });
@@ -142,7 +154,6 @@ const statusOptions = [
   { value: 'Ativo', label: 'Ativo' },
   { value: 'Inativo', label: 'Inativo' },
 ];
-
 </script>
 
 <template>
@@ -152,12 +163,24 @@ const statusOptions = [
       <div class="row mb-3">
         <div class="col-12 col-md-6">
           <InputLabel value="Data Inicial" for="data_campanha_inicial" />
-          <input type="date" id="data_campanha_inicial" class="form-control" v-model="form.data_campanha_inicial" />
+          <input
+            type="date"
+            id="data_campanha_inicial"
+            class="form-control"
+            v-model="form.data_campanha_inicial"
+            :disabled="disabled"
+          />
           <InputError :message="form.errors.data_campanha_inicial" />
         </div>
         <div class="col-12 col-md-6">
           <InputLabel value="Data Final" for="data_campanha_final" />
-          <input type="date" id="data_campanha_final" class="form-control" v-model="form.data_campanha_final" />
+          <input
+            type="date"
+            id="data_campanha_final"
+            class="form-control"
+            v-model="form.data_campanha_final"
+            :disabled="disabled"
+          />
           <InputError :message="form.errors.data_campanha_final" />
         </div>
       </div>
@@ -165,22 +188,42 @@ const statusOptions = [
         <div class="col-12">
           <InputLabel value="Período" for="periodo" />
           <div class="d-flex align-items-center">
-            <label class="form-check form-check-inline me-3">
-              <input class="form-check-input" type="radio" name="periodo" value="Seca" v-model="form.periodo" />
-              <span class="form-check-label">Seca</span>
-            </label>
-            <label class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="periodo" value="Chuva" v-model="form.periodo" />
-              <span class="form-check-label">Chuva</span>
-            </label>
-          </div>
-          <InputError :message="form.errors.periodo" />
+  <label class="form-check form-check-inline me-3">
+    <input
+      class="form-check-input"
+      type="radio"
+      name="periodo"
+      value="Seca"
+      v-model="form.periodo"
+      :disabled="disabled"
+    />
+    <span class="form-check-label">Seca</span>
+  </label>
+  <label class="form-check form-check-inline">
+    <input
+      class="form-check-input"
+      type="radio"
+      name="periodo"
+      value="Chuva"
+      v-model="form.periodo"
+      :disabled="disabled"
+    />
+    <span class="form-check-label">Chuva</span>
+  </label>
+</div>
+<InputError :message="form.errors.periodo" />
         </div>
       </div>
       <div class="row mb-3">
         <div class="col-12">
           <InputLabel value="Observações" for="obs" />
-          <textarea id="obs" class="form-control" v-model="form.obs" rows="5"></textarea>
+          <textarea
+            id="obs"
+            class="form-control"
+            v-model="form.obs"
+            rows="5"
+            :disabled="disabled"
+          ></textarea>
           <InputError :message="form.errors.obs" />
         </div>
       </div>
@@ -198,6 +241,7 @@ const statusOptions = [
             v-model="form.abio.id_abio"
             placeholder="Selecione um ABIO"
             class="v-select-custom"
+            :disabled="disabled"
           >
             <template #no-options>
               Nenhum registro encontrado.
@@ -206,23 +250,35 @@ const statusOptions = [
           <InputError :message="form.errors['abio.id_abio']" />
         </div>
         <div class="col-12 col-md-2 d-flex align-items-end">
-          <NavButton type="button" type-button="success" title="Vincular Abio" class="w-100" @click="vincularAbio" />
+          <NavButton
+            type="button"
+            type-button="success"
+            title="Vincular Abio"
+            class="w-100"
+            @click="vincularAbio"
+            :disabled="disabled"
+          />
         </div>
       </div>
       <div class="table-responsive">
-      <Table :columns="['ABIOs Vigentes', 'Ação']" :records="{ data: abioRecords, links: [] }">
-        <template #body="{ item }">
-          <tr>
-            <td>{{ item.abio?.numero_licenca || 'N/A' }}</td>
-            <td class="text-center" style="min-width: 100px;">
-              <NavButton @click="$emit('excluir-abio', item.id)" type-button="danger" title="Excluir">
-                <i class="bi bi-trash"></i>
-              </NavButton>
-            </td>
-          </tr>
-        </template>
-      </Table>
-    </div>
+        <Table :columns="['ABIOs Vigentes', 'Ação']" :records="{ data: abioRecords, links: [] }">
+          <template #body="{ item }">
+            <tr>
+              <td>{{ item.abio?.numero_licenca || 'N/A' }}</td>
+              <td class="text-center" style="min-width: 100px;">
+                <NavButton
+                  @click="$emit('excluir-abio', item.id)"
+                  type-button="danger"
+                  title="Excluir"
+                  :disabled="disabled"
+                >
+                  <i class="bi bi-trash"></i>
+                </NavButton>
+              </td>
+            </tr>
+          </template>
+        </Table>
+      </div>
     </div>
 
     <!-- Vincular Profissionais -->
@@ -231,14 +287,15 @@ const statusOptions = [
       <div class="row mb-3">
         <div class="col-12 col-md-5">
           <InputLabel value="Selecionar Profissional" for="profissional" />
-        <v-select
+          <v-select
             v-model="form.profissional.id_profissional"
             :options="profissionalOptions"
             :reduce="p => p.value"
             placeholder="Selecione um profissional"
             class="v-select-custom"
-        />
-        <InputError :message="form.errors['profissional.id_profissional']" />
+            :disabled="disabled"
+          />
+          <InputError :message="form.errors['profissional.id_profissional']" />
         </div>
         <div class="col-12 col-md-5">
           <InputLabel value="Grupo Responsável" for="grupo_faunistico" />
@@ -248,30 +305,49 @@ const statusOptions = [
             :reduce="g => g.value"
             placeholder="Selecione um grupo"
             class="v-select-custom"
+            :disabled="disabled"
           />
           <InputError :message="form.errors['profissional.grupo_faunistico']" />
         </div>
         <div class="col-12 col-md-2 d-flex align-items-end">
-          <NavButton type="button" type-button="success" title="Vincular" class="w-100" @click="vincularProfissional" />
+          <NavButton
+            type="button"
+            type-button="success"
+            title="Vincular"
+            class="w-100"
+            @click="vincularProfissional"
+            :disabled="disabled"
+          />
         </div>
       </div>
       <div class="row mb-3">
         <div class="col-12">
-          <NavButton type="button" type-button="primary" title="Cadastrar Profissional" @click="showModalProfissional = true" />
+          <NavButton
+            type="button"
+            type-button="primary"
+            title="Cadastrar Profissional"
+            @click="showModalProfissional = true"
+            :disabled="disabled"
+          />
         </div>
       </div>
       <div class="table-responsive">
         <Table :columns="['Equipe Técnica', 'Formação', 'Grupo Responsável', 'Ação']" :records="{ data: profissionalRecords, links: [] }">
           <template #body="{ item }">
             <tr>
-                <td>{{ item.profissional.profissional || 'N/A' }}</td>
-                <td>{{ item.profissional.formacao || 'N/A' }}</td>
-                <td>{{ item.grupo_faunistico || 'N/A' }}</td>
-                <td class="text-center" style="min-width: 100px;">
-                    <NavButton @click="$emit('excluir-profissional', item.id)" type-button="danger" title="Excluir">
-                        <i class="bi bi-trash"></i>
-                    </NavButton>
-                </td>
+              <td>{{ item.profissional.profissional || 'N/A' }}</td>
+              <td>{{ item.profissional.formacao || 'N/A' }}</td>
+              <td>{{ item.grupo_faunistico || 'N/A' }}</td>
+              <td class="text-center" style="min-width: 100px;">
+                <NavButton
+                  @click="$emit('excluir-profissional', item.id)"
+                  type-button="danger"
+                  title="Excluir"
+                  :disabled="disabled"
+                >
+                  <i class="bi bi-trash"></i>
+                </NavButton>
+              </td>
             </tr>
           </template>
         </Table>
@@ -289,62 +365,123 @@ const statusOptions = [
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Cadastrar Profissional</h5>
-            <button type="button" class="btn-close" @click="showModalProfissional = false"></button>
+            <button
+              type="button"
+              class="btn-close"
+              @click="showModalProfissional = false"
+              :disabled="disabled"
+            ></button>
           </div>
           <div class="modal-body">
-            <form @submit.prevent="$emit('salvar-novo-profissional', formNovoProfissional)">
+            <form @submit.prevent="salvarNovoProfissional">
               <div class="row mb-3">
                 <div class="col-12 col-md-6">
                   <InputLabel value="Nome do Profissional" for="profissional" />
-                  <input v-model="formNovoProfissional.profissional" type="text" class="form-control" id="profissional" required />
+                  <input
+                    v-model="formNovoProfissional.profissional"
+                    type="text"
+                    class="form-control"
+                    id="profissional"
+                    required
+                    :disabled="disabled"
+                  />
                   <InputError :message="formNovoProfissional.errors?.profissional" />
                 </div>
                 <div class="col-12 col-md-6">
                   <InputLabel value="Telefone" for="telefone" />
-                  <input v-model="formNovoProfissional.telefone" type="text" class="form-control" id="telefone" />
+                  <input
+                    v-model="formNovoProfissional.telefone"
+                    type="text"
+                    class="form-control"
+                    id="telefone"
+                    :disabled="disabled"
+                  />
                   <InputError :message="formNovoProfissional.errors?.telefone" />
                 </div>
               </div>
               <div class="row mb-3">
                 <div class="col-12 col-md-6">
                   <InputLabel value="CPF" for="cpf" />
-                  <input v-model="formNovoProfissional.cpf" type="text" class="form-control" id="cpf" />
+                  <input
+                    v-model="formNovoProfissional.cpf"
+                    type="text"
+                    class="form-control"
+                    id="cpf"
+                    :disabled="disabled"
+                  />
                   <InputError :message="formNovoProfissional.errors?.cpf" />
                 </div>
                 <div class="col-12 col-md-6">
                   <InputLabel value="E-mail" for="email" />
-                  <input v-model="formNovoProfissional.email" type="email" class="form-control" id="email" />
+                  <input
+                    v-model="formNovoProfissional.email"
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    :disabled="disabled"
+                  />
                   <InputError :message="formNovoProfissional.errors?.email" />
                 </div>
               </div>
               <div class="row mb-3">
                 <div class="col-12 col-md-6">
                   <InputLabel value="Formação" for="formacao" />
-                  <input v-model="formNovoProfissional.formacao" type="text" class="form-control" id="formacao" required />
+                  <input
+                    v-model="formNovoProfissional.formacao"
+                    type="text"
+                    class="form-control"
+                    id="formacao"
+                    required
+                    :disabled="disabled"
+                  />
                   <InputError :message="formNovoProfissional.errors?.formacao" />
                 </div>
                 <div class="col-12 col-md-6">
                   <InputLabel value="Curriculum Lattes" for="curriculum_lattes" />
-                  <input v-model="formNovoProfissional.curriculum_lattes" type="text" class="form-control" id="curriculum_lattes" />
+                  <input
+                    v-model="formNovoProfissional.curriculum_lattes"
+                    type="text"
+                    class="form-control"
+                    id="curriculum_lattes"
+                    :disabled="disabled"
+                  />
                   <InputError :message="formNovoProfissional.errors?.curriculum_lattes" />
                 </div>
               </div>
               <div class="row mb-3">
                 <div class="col-12 col-md-6">
                   <InputLabel value="Função" for="funcao" />
-                  <input v-model="formNovoProfissional.funcao" type="text" class="form-control" id="funcao" />
+                  <input
+                    v-model="formNovoProfissional.funcao"
+                    type="text"
+                    class="form-control"
+                    id="funcao"
+                    :disabled="disabled"
+                  />
                   <InputError :message="formNovoProfissional.errors?.funcao" />
                 </div>
                 <div class="col-12 col-md-6">
                   <InputLabel value="CTF" for="ctf" />
-                  <input v-model="formNovoProfissional.ctf" type="text" class="form-control" id="ctf" />
+                  <input
+                    v-model="formNovoProfissional.ctf"
+                    type="text"
+                    class="form-control"
+                    id="ctf"
+                    :disabled="disabled"
+                  />
                   <InputError :message="formNovoProfissional.errors?.ctf" />
                 </div>
               </div>
               <div class="row mb-3">
                 <div class="col-12 col-md-6">
                   <InputLabel value="Validade" for="validade" />
-                  <input v-model="formNovoProfissional.validade" type="date" class="form-control" id="validade" />
+                  <input
+                    v-model="formNovoProfissional.validade"
+                    type="date"
+                    class="form-control"
+                    id="validade"
+                    :disabled="disabled"
+                  />
                   <InputError :message="formNovoProfissional.errors?.validade" />
                 </div>
                 <div class="col-12 col-md-6">
@@ -357,6 +494,7 @@ const statusOptions = [
                         name="conselho_de_classe"
                         value="Sim"
                         v-model="formNovoProfissional.conselho_de_classe"
+                        :disabled="disabled"
                       />
                       <span class="form-check-label">Sim</span>
                     </label>
@@ -367,6 +505,7 @@ const statusOptions = [
                         name="conselho_de_classe"
                         value="Não"
                         v-model="formNovoProfissional.conselho_de_classe"
+                        :disabled="disabled"
                       />
                       <span class="form-check-label">Não</span>
                     </label>
@@ -377,27 +516,55 @@ const statusOptions = [
               <div class="row mb-3" v-if="formNovoProfissional.conselho_de_classe === 'Sim'">
                 <div class="col-12">
                   <InputLabel value="Número de Registro" for="numero_de_registro" />
-                  <input v-model="formNovoProfissional.numero_de_registro" type="number" class="form-control" id="numero_de_registro" />
+                  <input
+                    v-model="formNovoProfissional.numero_de_registro"
+                    type="number"
+                    class="form-control"
+                    id="numero_de_registro"
+                    :disabled="disabled"
+                  />
                   <InputError :message="formNovoProfissional.errors?.numero_de_registro" />
                 </div>
               </div>
               <div class="row mb-3">
                 <div class="col-12 col-md-6">
                   <InputLabel value="Status" for="status" />
-                  <select v-model="formNovoProfissional.status" class="form-select" id="status">
+                  <select
+                    v-model="formNovoProfissional.status"
+                    class="form-select"
+                    id="status"
+                    :disabled="disabled"
+                  >
                     <option v-for="option in statusOptions" :value="option.value" :key="option.value">{{ option.label }}</option>
                   </select>
                   <InputError :message="formNovoProfissional.errors?.status" />
                 </div>
                 <div class="col-12 col-md-6">
                   <InputLabel value="Observação" for="observacao" />
-                  <textarea v-model="formNovoProfissional.observacao" class="form-control" id="observacao" rows="3"></textarea>
+                  <textarea
+                    v-model="formNovoProfissional.observacao"
+                    class="form-control"
+                    id="observacao"
+                    rows="3"
+                    :disabled="disabled"
+                  ></textarea>
                   <InputError :message="formNovoProfissional.errors?.observacao" />
                 </div>
               </div>
               <div class="d-flex justify-content-end">
-                <NavButton type="button" type-button="secondary" title="Cancelar" @click="showModalProfissional = false" class="me-2" />
-                <NavButton type="submit" type-button="primary" title="Salvar" />
+                <NavButton
+                  type="button"
+                  type-button="secondary"
+                  title="Cancelar"
+                  @click="showModalProfissional = false"
+                  :disabled="disabled"
+                />
+                <NavButton
+                  type="submit"
+                  type-button="primary"
+                  title="Salvar"
+                  :disabled="disabled"
+                />
               </div>
             </form>
           </div>
@@ -419,6 +586,11 @@ const statusOptions = [
 .v-select-custom :deep(.vs__selected) {
   margin: 2px;
 }
+.v-select-custom:disabled :deep(.vs__dropdown-toggle) {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
 .table-responsive {
   margin-bottom: 1rem;
 }
@@ -434,5 +606,14 @@ const statusOptions = [
 textarea.form-control {
   resize: vertical;
   min-height: 100px;
+}
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled,
+.form-check-input:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
 }
 </style>
