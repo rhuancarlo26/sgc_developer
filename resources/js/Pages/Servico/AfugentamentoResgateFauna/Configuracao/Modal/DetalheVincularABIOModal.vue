@@ -76,9 +76,12 @@ defineExpose({ abrirModal });
                             <div class="mb-2">
                                 <strong>Fim do Sub-Trecho (PNV): </strong> {{ licenca.fim_subtrecho }}
                             </div>
-                            <div class="mb-2">
-                                <strong>Visualizar PDF: </strong>
-                                <IconEye />
+                             <div class="mb-2">                            
+                                <a v-if="licenca.arquivo_licenca" class="dropdown-item" target="_blank"
+                                    :href="route('licenca.documento.visualizar', licenca.id)">
+                                    Visualizar PDF
+                                    <IconEye />
+                                </a>
                             </div>
                         </div>
                     </div>
