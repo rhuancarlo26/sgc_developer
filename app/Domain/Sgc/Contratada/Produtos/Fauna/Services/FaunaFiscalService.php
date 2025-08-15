@@ -26,12 +26,6 @@ class FaunaFiscalService
             })
             ->toArray();
 
-        Log::info('FaunaFiscalService: Dados retornados por getAnalisesByCampanha', [
-            'contrato' => $contrato,
-            'campanha' => $campanha,
-            'analises' => $analises,
-        ]);
-
         return $analises;
     }
 
@@ -68,11 +62,6 @@ class FaunaFiscalService
             $analiseId = $analise->id;
         }
 
-        Log::info('FaunaFiscalService: Análise salva ou atualizada', [
-            'analiseData' => $analiseData,
-            'analiseId' => $analiseId,
-        ]);
-
         return $analiseId;
     }
 
@@ -96,11 +85,5 @@ class FaunaFiscalService
             ->where('id_contrato', $contrato)
             ->update($updateData);
 
-        Log::info('FaunaFiscalService: Avaliação finalizada', [
-            'contrato' => $contrato,
-            'campanha' => $campanha,
-            'status' => $hasRejeitada ? 'Rejeitada' : 'Aprovada',
-            'versao_analise' => $updateData['versao_analise'] ?? 1,
-        ]);
     }
 }
