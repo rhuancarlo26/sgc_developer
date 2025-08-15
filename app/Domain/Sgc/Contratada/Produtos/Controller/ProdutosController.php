@@ -43,13 +43,6 @@ class ProdutosController extends Controller
                 ];
             });
 
-        \Log::info('Dados enviados para Fauna.vue:', [
-            'contrato' => $contrato,
-            'produto' => $produto,
-            'subprodutos' => $subprodutos,
-            'campanhas' => $campanhas,
-        ]);
-
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
             'contrato' => $contrato,
@@ -71,11 +64,6 @@ class ProdutosController extends Controller
 
         $abios = $this->produtosService->getAbios();
         $profissionais = $this->faunaService->getProfissionaisByContrato($contrato);
-
-        \Log::info('Dados enviados para Create.vue:', [
-            'abios' => $abios,
-            'profissionais' => $profissionais,
-        ]);
 
         return inertia('Sgc/Contratada/Produtos/Fauna/Create', [
             'contrato' => $contrato,

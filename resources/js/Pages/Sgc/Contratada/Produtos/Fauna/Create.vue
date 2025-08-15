@@ -37,7 +37,9 @@ console.log('Create.vue props:', { abios: props.abios, profissionais: props.prof
 const activeTab = ref('apresentacao');
 const subStep = ref(1);
 const showModalProfissional = ref(false);
-const naoSeAplica = ref(false);
+// const naoSeAplica = ref(false);
+const naoSeAplicaQuelonios = ref(false);
+const naoSeAplicaCavernicola = ref(false);
 const resultadosRecords = ref([]);
 const anexos = ref({
     anuencia_proprietarios: null,
@@ -149,7 +151,9 @@ const salvarDadosGerais = (consideracoesData = {}) => {
     formData.append('observacoes', formDadosGerais.obs || '');
     formData.append('cod_emp', form.cod_emp || '');
     formData.append('subproduto', props.subproduto || '');
-    formData.append('nao_se_aplica', naoSeAplica.value ? '1' : '0');
+    // formData.append('nao_se_aplica', naoSeAplica.value ? '1' : '0');
+    formData.append('nao_se_aplica_quelo', naoSeAplicaQuelonios.value ? '1' : '0'); 
+    formData.append('nao_se_aplica_cavernicola', naoSeAplicaCavernicola.value ? '1' : '0'); 
     formData.append('consideracoes', consideracoesData.consideracoes || '');
     formData.append('status', 'Em análise');
 
@@ -390,7 +394,7 @@ const excluirModulo = (id) => {
 
 const adicionarPonto = () => {
     if (
-        !naoSeAplica.value &&
+        !naoSeAplicaQuelonios.value &&
         formPontosAmostragem.ponto_de_coleta?.trim() &&
         formPontosAmostragem.nome_curso_hidrico?.trim() &&
         formPontosAmostragem.bacia?.trim() &&
@@ -419,7 +423,7 @@ const excluirPonto = (id) => {
 
 const adicionarPontoCavernicola = () => {
     if (
-        !naoSeAplica.value &&
+        !naoSeAplicaCavernicola.value &&
         formPontosCavernicola.cavidade &&
         formPontosCavernicola.latitude !== null &&
         formPontosCavernicola.longitude !== null &&
@@ -451,11 +455,11 @@ const nextSubStep = () => {
         alert('Adicione ao menos um módulo amostral antes de avançar.');
         return;
     }
-    if (subStep.value === 4 && !naoSeAplica.value && pontoRecords.value.length === 0) {
+    if (subStep.value === 4 && !naoSeAplicaQuelonios.value && pontoRecords.value.length === 0) {
         alert('Adicione ao menos um ponto de quelônio ou crocodiliano antes de avançar, ou marque "Não se aplica".');
         return;
     }
-    if (subStep.value === 5 && !naoSeAplica.value && pontoCavernicolaRecords.value.length === 0) {
+    if (subStep.value === 5 && !naoSeAplicaCavernicola.value && pontoCavernicolaRecords.value.length === 0) {
         alert('Adicione pelo menos um ponto de fauna cavernícola antes de avançar, ou marque "Não se aplica".');
         return;
     }
@@ -615,7 +619,7 @@ const salvarAnexos = () => {
                                 </ModulosAmostragem>
                                 <QueloniosCrocodilian
                                     v-if="subStep === 4"
-                                    v-model:naoSeAplica="naoSeAplica"
+                                    v-model:naoSeAplica="naoSeAplicaQuelonios"
                                     :form-pontos-amostragem="formPontosAmostragem"
                                     :ponto-records="pontoRecords"
                                     @adicionar-ponto="adicionarPonto"
@@ -629,7 +633,7 @@ const salvarAnexos = () => {
                                 </QueloniosCrocodilian>
                                 <FaunaCavernic
                                     v-if="subStep === 5"
-                                    v-model:naoSeAplica="naoSeAplica"
+                                    v-model:naoSeAplica="naoSeAplicaCavernicola"
                                     :form-pontos-cavernicola="formPontosCavernicola"
                                     :ponto-cavernicola-records="pontoCavernicolaRecords"
                                     @adicionar-ponto-cavernicola="adicionarPontoCavernicola"
