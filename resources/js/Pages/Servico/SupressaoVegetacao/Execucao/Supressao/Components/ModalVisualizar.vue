@@ -3,6 +3,8 @@ import { ref } from "vue";
 import Modal from "@/Components/Modal.vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils.js";
 import Table from "@/Components/Table.vue";
+import { usePage } from '@inertiajs/vue3'; 
+
 
 const modalRef = ref();
 const supressao = ref(null);
@@ -10,6 +12,8 @@ const abrirModal = (item) => {
     supressao.value = item;
     modalRef.value.getBsModal().show();
 }
+const page = usePage();
+const appUrl = page.props.app_url; 
 
 defineExpose({ abrirModal });
 </script>
@@ -50,8 +54,8 @@ defineExpose({ abrirModal });
                     <h5>Fotos da Área</h5>
                     <div class="d-flex flex-wrap gap-3">
                         <div v-for="foto in supressao.fotos" :key="foto.id" class="border rounded p-2">
-                            <a :href="foto.caminho" target="_blank">
-                                <img :src="foto.caminho" :alt="foto.nome_arquivo"
+                            <a :href="appUrl + foto.caminho"  target="_blank">
+                                <img :src="appUrl + foto.caminho" :alt="foto.nome_arquivo"
                                     style="max-width: 200px; max-height: 200px; object-fit: cover;" />
                             </a>
                             <p class="text-center small mt-2">{{ foto.nome_arquivo }}</p>
