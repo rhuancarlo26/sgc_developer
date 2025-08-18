@@ -383,7 +383,7 @@ defineExpose({ abrirModal });
                                     accept=".jpg, .jpeg, .png" multiple>
                                 <InputError :message="form.errors.fotos" />
                                 <ul class="list-unstyled d-flex gap-2 flex-wrap mt-3">
-                                    <li v-for="img in images" class="d-flex flex-column">
+                                    <li v-for="img in images" class="d-flex flex-column mt-3">
                                         <span class="avatar avatar-xl">
                                             <img :src="img.path" alt />
                                         </span>
