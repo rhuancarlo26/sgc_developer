@@ -40,14 +40,6 @@ class ProdutosService
         ]);
     }
 
-    // public function store_abio(array $post)
-    // {
-    //     $licenca = Licenca::findOrFail($post['id_abio']);
-    //     return SgcProdutoAbio::create([
-    //         'id_abio' => $licenca->id,
-    //     ]);
-    // }
-
     public function delete_abio($produto_abio)
     {
         $abio = SgcProdutoAbio::findOrFail($produto_abio);
