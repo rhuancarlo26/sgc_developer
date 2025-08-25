@@ -136,6 +136,11 @@ class FaunaService
             }
         }
 
+        // Salvar resultados e considerações
+        if (!empty($data['planilha']) && $data['planilha']->isValid()) {
+            $this->salvarResultados($contratoId, $data['planilha'], $campanha->id, $data['consideracoes'] ?? null);
+        }
+
         // Salvar considerações
         if (!empty($data['consideracoes'])) {
             SgcFaunaResultadosConsideracoes::create([
@@ -229,7 +234,7 @@ class FaunaService
         return $profissional;
     }
 
-public function salvarResultados($contratoId, $file, $campanhaId = null)
+    public function salvarResultados($contratoId, $file, $campanhaId = null, $consideracoes = null)
 {
     try {
         // Deleta resultados antigos associados à campanha
@@ -262,23 +267,21 @@ public function salvarResultados($contratoId, $file, $campanhaId = null)
         // Preencher a coluna 'ID Campanha' com o campanhaId, se fornecido
         if ($campanhaId) {
             $tempDir = storage_path('app/temp');
-            // Criar diretório temporário, se não existir
             if (!file_exists($tempDir)) {
                 mkdir($tempDir, 0755, true);
             }
             $tempPath = $tempDir . '/updated_planilha_' . time() . '.xlsx';
             $highestRow = $worksheet->getHighestRow();
-            for ($row = 2; $row <= $highestRow; $row++) { // Começa na linha 2, assumindo cabeçalho na linha 1
+            for ($row = 2; $row <= $highestRow; $row++) {
                 $worksheet->setCellValue('A' . $row, $campanhaId);
             }
-            // Salvar a planilha atualizada temporariamente para processar
             $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
             $writer->save($tempPath);
             $spreadsheet = IOFactory::load($tempPath);
             $worksheet = $spreadsheet->getActiveSheet();
             $rows = $worksheet->toArray();
-            array_shift($rows); // Remover cabeçalho novamente após recarregar
-            unlink($tempPath); // Deletar arquivo temporário
+            array_shift($rows);
+            unlink($tempPath);
         }
 
         $recordsSaved = 0;
@@ -368,6 +371,14 @@ public function salvarResultados($contratoId, $file, $campanhaId = null)
             $recordsSaved++;
         }
 
+        // Salvar considerações, se fornecidas
+        if ($campanhaId && $consideracoes) {
+            SgcFaunaResultadosConsideracoes::updateOrCreate(
+                ['id_campanha' => $campanhaId, 'id_contrato' => $contratoId],
+                ['consideracoes' => $consideracoes]
+            );
+        }
+
         return [
             'success' => true,
             'message' => 'Resultados salvos com sucesso. ' . $recordsSaved . ' registros salvos, ' . $recordsSkipped . ' registros ignorados.',
@@ -376,6 +387,7 @@ public function salvarResultados($contratoId, $file, $campanhaId = null)
         Log::error('FaunaService: Erro ao processar planilha de resultados', [
             'contrato_id' => $contratoId,
             'campanha_id' => $campanhaId ?? 'não fornecido',
+            'consideracoes' => $consideracoes ?? 'não fornecido',
             'erro' => $e->getMessage(),
             'linha' => $e->getLine(),
             'arquivo' => $e->getFile(),
@@ -390,7 +402,6 @@ public function salvarResultados($contratoId, $file, $campanhaId = null)
             ->get(['id', 'profissional', 'formacao'])
             ->toArray();
     }
-
 
     public function atualizarCampanha($contrato, $campanhaId, array $data): int
     {
@@ -407,6 +418,7 @@ public function salvarResultados($contratoId, $file, $campanhaId = null)
             'periodo' => $data['periodo'] ?? $campanha->periodo,
             'observacoes' => $data['observacoes'] ?? $campanha->observacoes,
             'status' => $data['status'] ?? 'Em análise',
+            'versao_analise' => $campanha->versao_analise ?? 1,
         ];
 
         $campanha->update($updateData);
@@ -648,12 +660,9 @@ public function salvarResultados($contratoId, $file, $campanhaId = null)
 
         // Atualiza planilha
         if (isset($data['planilha']) && $data['planilha'] && $data['planilha']->isValid()) {
-
             $path = $data['planilha']->store('planilhas');
             $campanha->update(['planilha' => $path]);
-            
-            // Chama salvarResultados para processar a planilha
-            $this->salvarResultados($contrato, $data['planilha'], $campanha->id);
+            $this->salvarResultados($contrato, $data['planilha'], $campanha->id, $data['consideracoes'] ?? null);
         }
 
         return $campanha->id;

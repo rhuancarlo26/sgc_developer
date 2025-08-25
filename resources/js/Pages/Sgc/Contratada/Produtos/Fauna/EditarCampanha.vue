@@ -809,8 +809,12 @@ const etapasStatus = computed(() => {
                           <td class="py-2 px-4 border-b">{{ anexo.tipo_anexo ? anexo.tipo_anexo.replace('_', ' ').toUpperCase() : 'Não informado' }}</td>
                           <td class="py-2 px-4 border-b">{{ anexo.nome_arquivo || 'Não informado' }}</td>
                           <td class="py-2 px-4 border-b">{{ anexo.created_at || 'Não informado' }}</td>
-                          <td class="py-2 px-4 border-b">
+                          <!-- <td class="py-2 px-4 border-b">
                             <a v-if="anexo.caminho" :href="'/storage/' + anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
+                            <span v-else>Nenhum arquivo</span>
+                          </td> -->
+                          <td class="py-2 px-4 border-b">
+                            <a v-if="anexo.caminho" :href="anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
                             <span v-else>Nenhum arquivo</span>
                           </td>
                         </tr>

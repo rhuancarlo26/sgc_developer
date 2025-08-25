@@ -105,7 +105,8 @@ const processarPlanilha = (event) => {
 };
 
 const avancar = () => {
-    emit('next');
+    props.formResultados.consideracoes = consideracoes.value;
+    emit('next', { consideracoes: consideracoes.value });
 };
 
 const excluirResultado = (id) => {
