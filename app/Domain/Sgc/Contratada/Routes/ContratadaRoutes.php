@@ -142,16 +142,8 @@ Route::prefix('/contratada')->group(function () {
         Route::delete('campanha/{campanha}/comentario/{comentario}', [FaunaController::class, 'destroyComentario'])
         ->name('sgc.contratada.produtos.comentario.destroy');
     
+        Route::post('/campanha/{campanhaId}/update-partial', [FaunaController::class, 'updatePartial'])->name('sgc.contratada.produtos.updatePartial');
     
     });
-
-
-
-
-    
-
-
-
-  
 
 });

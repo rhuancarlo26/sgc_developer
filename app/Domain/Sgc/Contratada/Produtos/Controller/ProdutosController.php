@@ -58,6 +58,21 @@ class ProdutosController extends Controller
         $contratoObj = Contrato::findOrFail($contrato);
         $subproduto = $request->query('subproduto');
 
+        // Verificar se há draft para o usuário e contrato
+        $draft = SgcFaunaCampanha::where('id_contrato', $contrato)
+            ->where('subproduto', $subproduto)
+            ->where('status', 'Em elaboração')
+            ->first();
+
+        if (!$draft) {
+            $draft = SgcFaunaCampanha::create([
+                'id_contrato' => $contrato,
+                'subproduto' => $subproduto,
+                'status' => 'Em elaboração',
+                // 'user_id' => Auth::id(),
+            ]);
+        }
+
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->pluck('cod_emp')
             ->toArray();
@@ -73,6 +88,9 @@ class ProdutosController extends Controller
             'empreendimentos' => $empreendimentos,
             'abios' => $abios,
             'profissionais' => $profissionais,
+            'campanhaId' => $draft->id, 
+            'draftData' => $draft->toArray(), 
         ]);
     }
+
 }

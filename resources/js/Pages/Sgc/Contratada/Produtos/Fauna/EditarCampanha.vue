@@ -639,7 +639,7 @@ const etapasStatus = computed(() => {
             </ul>
 
             <!-- Alerta para análises rejeitadas -->
-            <div v-if="props.campanha.analises?.some(a => a.status === 'Rejeitada' && etapaMap[activeTab]?.includes(a.etapa))" class="alert alert-warning d-flex align-items-center mb-4">
+            <div v-if="!props.isDraft && props.campanha.analises?.some(a => a.status === 'Rejeitada' && etapaMap[activeTab]?.includes(a.etapa))" class="alert alert-warning d-flex align-items-center mb-4">
               <svg class="bi me-2" width="24" height="24" fill="currentColor">
                 <use xlink:href="/bootstrap-icons.svg#exclamation-triangle" />
               </svg>

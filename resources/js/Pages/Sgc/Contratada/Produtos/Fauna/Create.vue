@@ -5,7 +5,7 @@ import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import InputError from '@/Components/InputError.vue';
 import NavButton from '@/Components/NavButton.vue';
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import DadosGerais from './DadosGerais.vue';
 import ModulosAmostragem from './ModulosAmostrais.vue';
 import QueloniosCrocodilian from './QueloniosCrocodilianos.vue';
@@ -28,20 +28,21 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    campanhaId: [Number, String, null],
+    draftData: Object,
 });
 
 // Log para depurar as props recebidas do backend
-console.log('Create.vue props:', { abios: props.abios, profissionais: props.profissionais });
+console.log('Create.vue props:', { abios: props.abios, profissionais: props.profissionais, campanhaId: props.campanhaId, draftData: props.draftData });
 
-// Estado
+// Estado - Inicializar com dados do draft, se disponíveis
 const activeTab = ref('apresentacao');
 const subStep = ref(1);
 const showModalProfissional = ref(false);
-// const naoSeAplica = ref(false);
-const naoSeAplicaQuelonios = ref(false);
-const naoSeAplicaCavernicola = ref(false);
-const resultadosRecords = ref([]);
-const anexos = ref({
+const naoSeAplicaQuelonios = ref(props.draftData?.nao_se_aplica_quelo ?? false);
+const naoSeAplicaCavernicola = ref(props.draftData?.nao_se_aplica_cavernicola ?? false);
+const resultadosRecords = ref(props.draftData?.resultados ?? []);
+const anexos = ref(props.draftData?.anexos ?? {
     anuencia_proprietarios: null,
     registro_fotografico: null,
     dados_secundarios: null,
@@ -55,15 +56,15 @@ const anexos = ref({
 
 // Formulários
 const form = useForm({
-    cod_emp: '',
-    familia: props.produto === 'Fauna' ? 'Fauna' : '',
+    cod_emp: props.draftData?.cod_emp ?? '',
+    familia: props.produto === 'Fauna' ? 'Fauna' : props.draftData?.subproduto ?? '',
 });
 const formDadosGerais = useForm({
-    id: '',
-    data_campanha_inicial: '',
-    data_campanha_final: '',
-    periodo: '',
-    obs: '',
+    id: props.campanhaId || '',
+    data_campanha_inicial: props.draftData?.data_ini ?? '',
+    data_campanha_final: props.draftData?.data_fim ?? '',
+    periodo: props.draftData?.periodo ?? '',
+    obs: props.draftData?.observacoes ?? '',
 });
 const formAbio = useForm({
     id_abio: null,
@@ -104,7 +105,6 @@ const formModuloAmostral = useForm({
 const formPontosAmostragem = useForm({
     ponto_de_coleta: '',
     nome_curso_hidrico: '',
-    // coordenadas: '',
     latitude: '',
     longitude: '',
     bacia: '',
@@ -133,27 +133,26 @@ const formResultados = useForm({
     produto: props.produto,
 });
 
-// Tabelas
-const abioRecords = ref([]);
-const profissionalRecords = ref([]);
-const moduloRecords = ref([]);
-const pontoRecords = ref([]);
-const pontoCavernicolaRecords = ref([]);
-const metodologiaRecords = ref([]);
+// Tabelas - Inicializar com dados do draft
+const abioRecords = ref(props.draftData?.abios ?? []);
+const profissionalRecords = ref(props.draftData?.profissionais ?? []);
+const moduloRecords = ref(props.draftData?.modulos_amostrais ?? []);
+const pontoRecords = ref(props.draftData?.pontos_quelo_crocod ?? []);
+const pontoCavernicolaRecords = ref(props.draftData?.pontos_cavernicola ?? []);
+const metodologiaRecords = ref(props.draftData?.metodologias ?? []);
 
 // Funções
 const salvarDadosGerais = (consideracoesData = {}) => {
     const formData = new FormData();
-    formData.append('id_campanha', formDadosGerais.id || '');
+    formData.append('id_campanha', formDadosGerais.id || props.campanhaId || '');
     formData.append('data_campanha_inicial', formDadosGerais.data_campanha_inicial || '');
     formData.append('data_campanha_final', formDadosGerais.data_campanha_final || '');
     formData.append('periodo', formDadosGerais.periodo || '');
     formData.append('observacoes', formDadosGerais.obs || '');
     formData.append('cod_emp', form.cod_emp || '');
-    formData.append('subproduto', props.subproduto || '');
-    // formData.append('nao_se_aplica', naoSeAplica.value ? '1' : '0');
-    formData.append('nao_se_aplica_quelo', naoSeAplicaQuelonios.value ? '1' : '0'); 
-    formData.append('nao_se_aplica_cavernicola', naoSeAplicaCavernicola.value ? '1' : '0'); 
+    formData.append('subproduto', props.subproduto || form.familia || '');
+    formData.append('nao_se_aplica_quelo', naoSeAplicaQuelonios.value ? '1' : '0');
+    formData.append('nao_se_aplica_cavernicola', naoSeAplicaCavernicola.value ? '1' : '0');
     formData.append('consideracoes', consideracoesData.consideracoes || '');
     formData.append('status', 'Em análise');
 
@@ -190,7 +189,6 @@ const salvarDadosGerais = (consideracoesData = {}) => {
     pontoRecords.value.forEach((ponto, index) => {
         formData.append(`pontos_quelo_crocod[${index}][ponto_de_coleta]`, ponto.ponto_de_coleta || '');
         formData.append(`pontos_quelo_crocod[${index}][nome_curso_hidrico]`, ponto.nome_curso_hidrico || '');
-        // formData.append(`pontos_quelo_crocod[${index}][coordenadas]`, ponto.coordenadas || '');
         formData.append(`pontos_quelo_crocod[${index}][latitude]`, ponto.latitude || '');
         formData.append(`pontos_quelo_crocod[${index}][longitude]`, ponto.longitude || '');
         formData.append(`pontos_quelo_crocod[${index}][bacia]`, ponto.bacia || '');

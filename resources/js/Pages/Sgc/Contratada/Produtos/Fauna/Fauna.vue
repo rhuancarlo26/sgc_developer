@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
@@ -194,6 +193,10 @@ const editarCampanha = (campanhaId) => {
                               v-else-if="campanha.status === 'Em análise'"
                               class="status-circle status-circle-in-analysis"
                             ></span>
+                            <span
+                              v-else-if="campanha.status === 'Em elaboração'"
+                              class="status-circle status-circle-draft"
+                            ></span>
                             {{ campanha.status || 'N/A' }}
                           </td>
                           <td class="text-center">
@@ -209,7 +212,7 @@ const editarCampanha = (campanhaId) => {
                               @click="analisarCampanha(campanha.id)"
                             />
                             <NavButton
-                              v-if="campanha.status === 'Rejeitada' && (props.auth.user.perfis_id ?? 0) !== 2"
+                              v-if="(campanha.status === 'Rejeitada' || campanha.status === 'Em elaboração') && (props.auth.user.perfis_id ?? 0) !== 2"
                               type-button="warning"
                               title="Editar"
                               @click="editarCampanha(campanha.id)"
@@ -329,5 +332,8 @@ const editarCampanha = (campanhaId) => {
 .status-circle-in-analysis {
   background-color: #fd7e14;
 }
+
+.status-circle-draft {
+  background-color: #6c757d; /* Cor para "Em elaboração" */
+}
 </style>
-```
