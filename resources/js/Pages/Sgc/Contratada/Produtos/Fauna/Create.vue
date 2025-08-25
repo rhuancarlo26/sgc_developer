@@ -153,7 +153,7 @@ const salvarDadosGerais = (consideracoesData = {}) => {
     formData.append('subproduto', props.subproduto || form.familia || '');
     formData.append('nao_se_aplica_quelo', naoSeAplicaQuelonios.value ? '1' : '0');
     formData.append('nao_se_aplica_cavernicola', naoSeAplicaCavernicola.value ? '1' : '0');
-    formData.append('consideracoes', consideracoesData.consideracoes || '');
+    formData.append('consideracoes', formResultados.consideracoes || '');
     formData.append('status', 'Em análise');
 
     // Adicionar ABIOs
