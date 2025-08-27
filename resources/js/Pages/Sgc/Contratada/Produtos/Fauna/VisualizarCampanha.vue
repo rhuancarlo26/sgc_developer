@@ -72,6 +72,14 @@ const salvarAprovacao = () => {
         },
     });
 };
+
+const formatAnexoLabel = (tipo) => {
+    return tipo
+        .replace(/_/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
 </script>
 
 <template>
@@ -215,11 +223,11 @@ const salvarAprovacao = () => {
                                         <tbody>
                                             <tr v-for="anexo in campanha.anexos" :key="anexo.id" class="hover:bg-gray-50">
                                                 <td class="py-2 px-4 border-b">{{ anexo.id || 'Não informado' }}</td>
-                                                <td class="py-2 px-4 border-b">{{ anexo.tipo_anexo ? anexo.tipo_anexo.replace('_', ' ').toUpperCase() : 'Não informado' }}</td>
+                                                <td class="py-2 px-4 border-b">{{ anexo.tipo_anexo ? formatAnexoLabel(anexo.tipo_anexo) : 'Não informado' }}</td>
                                                 <td class="py-2 px-4 border-b">{{ anexo.nome_arquivo || 'Não informado' }}</td>
                                                 <td class="py-2 px-4 border-b">{{ anexo.created_at || 'Não informado' }}</td>
                                                 <td class="py-2 px-4 border-b">
-                                                    <a v-if="anexo.caminho" :href="'/storage/' + anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
+                                                    <a v-if="anexo.caminho" :href="anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
                                                     <span v-else>Nenhum arquivo</span>
                                                 </td>
                                             </tr>

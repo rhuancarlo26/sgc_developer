@@ -588,6 +588,35 @@ const etapasStatus = computed(() => {
   });
   return statusMap;
 });
+
+const updateAnexo = (tipo, file) => {
+    console.log('Atualizando anexo temporário:', tipo, file);
+    form.anexos[tipo] = file || null;
+    console.log('Anexos temporários após atualização:', form.anexos);
+    form.anexos = { ...form.anexos }; // Forçar reatividade
+};
+
+const excluirAnexoTemporario = (tipo) => {
+    console.log('Excluindo anexo temporário:', tipo, form.anexos[tipo]);
+    form.anexos[tipo] = null;
+    console.log('Anexos temporários após exclusão:', form.anexos);
+    form.anexos = { ...form.anexos }; // Forçar reatividade
+};
+
+const excluirAnexo = (anexoId) => {
+    if (!confirm('Tem certeza que deseja excluir este anexo?')) return;
+    console.log('Excluindo anexo salvo:', anexoId);
+    router.delete(route('sgc.contratada.produtos.anexo.destroy', [props.contrato, props.produto, props.campanha.id, anexoId]), {
+        onSuccess: () => {
+            router.reload({ only: ['campanha'] });
+            alert('Anexo excluído com sucesso!');
+        },
+        onError: (errors) => {
+            console.error('Erro ao excluir anexo:', errors);
+            alert('Erro ao excluir anexo: ' + (Object.values(errors).join(', ') || 'Tente novamente.'));
+        },
+    });
+};
 </script>
 
 <template>
@@ -779,72 +808,103 @@ const etapasStatus = computed(() => {
                 </div>
                 <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
                   <h4 class="mb-3" style="text-align: center;">ANEXOS</h4>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div v-for="tipo in anexoTipos" :key="tipo">
-                      <label class="form-label">{{ formatAnexoLabel(tipo) }}</label>
-                      <input
-                        type="file"
-                        @change="form.anexos[tipo] = $event.target.files[0] || null"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        class="form-control"
-                        :disabled="etapasStatus['anexos'] === 'Aprovada'"
-                      />
-                      <InputError :message="form.errors[`anexos.${tipo}`]" />
-                    </div>
-                  </div>
-                  <div v-if="props.campanha.anexos?.length" class="overflow-x-auto mb-6">
-                    <table class="min-w-full bg-white border border-gray-300">
-                      <thead>
-                        <tr class="bg-gray-100">
-                          <th class="py-2 px-4 border-b text-left">ID</th>
-                          <th class="py-2 px-4 border-b text-left">Tipo de Anexo</th>
-                          <th class="py-2 px-4 border-b text-left">Nome do Arquivo</th>
-                          <th class="py-2 px-4 border-b text-left">Data de Criação</th>
-                          <th class="py-2 px-4 border-b text-left">Ação</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="anexo in props.campanha.anexos" :key="anexo.id" class="hover:bg-gray-50">
-                          <td class="py-2 px-4 border-b">{{ anexo.id || 'Não informado' }}</td>
-                          <td class="py-2 px-4 border-b">{{ anexo.tipo_anexo ? anexo.tipo_anexo.replace('_', ' ').toUpperCase() : 'Não informado' }}</td>
-                          <td class="py-2 px-4 border-b">{{ anexo.nome_arquivo || 'Não informado' }}</td>
-                          <td class="py-2 px-4 border-b">{{ anexo.created_at || 'Não informado' }}</td>
-                          <!-- <td class="py-2 px-4 border-b">
-                            <a v-if="anexo.caminho" :href="'/storage/' + anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
-                            <span v-else>Nenhum arquivo</span>
-                          </td> -->
-                          <td class="py-2 px-4 border-b">
-                            <a v-if="anexo.caminho" :href="anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
-                            <span v-else>Nenhum arquivo</span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div v-else class="alert alert-info text-center">
-                    Nenhum anexo disponível.
-                  </div>
-                  <div class="d-flex justify-content-between mt-4">
-                    <NavButton
-                      type="button"
-                      type-button="secondary"
-                      title="Voltar"
-                      @click="setActiveTab('resultados')"
-                    />
-                    <NavButton
-                      type="button"
-                      type-button="secondary"
-                      title="Cancelar"
-                      @click="router.get(route('sgc.contratada.produtos.index', [props.contrato, props.produto.toLowerCase()]))"
-                    />
-                    <NavButton
-                      type="submit"
-                      type-button="primary"
-                      title="Salvar Alterações"
-                      :disabled="form.processing"
-                    />
-                  </div>
-                </div>
+                  <form @submit.prevent="submitForm" enctype="multipart/form-data">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div v-for="tipo in anexoTipos" :key="tipo">
+                              <label class="form-label">{{ formatAnexoLabel(tipo) }}</label>
+                              <input
+                                  type="file"
+                                  @change="updateAnexo(tipo, $event.target.files[0])"
+                                  accept=".pdf,.jpg,.jpeg,.png"
+                                  class="form-control"
+                                  :disabled="etapasStatus['anexos'] === 'Aprovada'"
+                              />
+                              <InputError :message="form.errors[`anexos.${tipo}`]" />
+                              <small v-if="form.anexos[tipo]" class="text-muted">{{ form.anexos[tipo].name }}</small>
+                          </div>
+                      </div>
+                      <!-- Tabela para anexos temporários -->
+                      {{ console.log('Anexos temporários:', form.anexos) }}
+                      <div v-if="Object.keys(form.anexos).some(tipo => form.anexos[tipo])" class="overflow-x-auto mb-6">
+                          <table class="min-w-full bg-white border border-gray-300">
+                              <thead>
+                                  <tr class="bg-gray-100">
+                                      <th class="py-2 px-4 border-b text-left">Tipo de Anexo</th>
+                                      <th class="py-2 px-4 border-b text-left">Nome do Arquivo</th>
+                                      <th class="py-2 px-4 border-b text-left">Ação</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr v-for="(file, tipo) in form.anexos" :key="tipo">
+                                      {{ console.log('Renderizando anexo temporário:', tipo, file) }}
+                                      <td v-if="file" class="py-2 px-4 border-b">{{ formatAnexoLabel(tipo) }}</td>
+                                      <td v-if="file" class="py-2 px-4 border-b">{{ file.name || 'Não informado' }}</td>
+                                      <td v-if="file" class="py-2 px-4 border-b">
+                                          <button class="btn btn-link text-danger" @click="excluirAnexoTemporario(tipo)">Excluir</button>
+                                      </td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </div>
+                      <div v-else class="alert alert-info text-center mb-6">
+                          Nenhum anexo temporário selecionado.
+                      </div>
+                      <!-- Tabela para anexos salvos -->
+                      <div v-if="props.campanha.anexos?.length" class="overflow-x-auto mb-6">
+                          <table class="min-w-full bg-white border border-gray-300">
+                              <thead>
+                                  <tr class="bg-gray-100">
+                                      <th class="py-2 px-4 border-b text-left">ID</th>
+                                      <th class="py-2 px-4 border-b text-left">Tipo de Anexo</th>
+                                      <th class="py-2 px-4 border-b text-left">Nome do Arquivo</th>
+                                      <th class="py-2 px-4 border-b text-left">Data de Criação</th>
+                                      <th class="py-2 px-4 border-b text-left">Ação</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr v-for="anexo in props.campanha.anexos" :key="anexo.id" class="hover:bg-gray-50">
+                                      <td class="py-2 px-4 border-b">{{ anexo.id || 'Não informado' }}</td>
+                                      <td class="py-2 px-4 border-b">{{ anexo.tipo_anexo ? formatAnexoLabel(anexo.tipo_anexo) : 'Não informado' }}</td>
+                                      <td class="py-2 px-4 border-b">{{ anexo.nome_arquivo || 'Não informado' }}</td>
+                                      <td class="py-2 px-4 border-b">{{ anexo.created_at || 'Não informado' }}</td>
+                                      <td class="py-2 px-4 border-b">
+                                          <a v-if="anexo.caminho" :href="anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
+                                          <span v-else>Nenhum arquivo</span>
+                                          <button
+                                              v-if="anexo.id && etapasStatus['anexos'] !== 'Aprovada'"
+                                              class="btn btn-link text-danger"
+                                              @click="excluirAnexo(anexo.id)"
+                                          >Excluir</button>
+                                      </td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </div>
+                      <div v-else class="alert alert-info text-center mb-6">
+                          Nenhum anexo salvo disponível.
+                      </div>
+                      <div class="d-flex justify-content-between mt-4">
+                          <NavButton
+                              type="button"
+                              type-button="secondary"
+                              title="Voltar"
+                              @click="setActiveTab('resultados')"
+                          />
+                          <NavButton
+                              type="button"
+                              type-button="secondary"
+                              title="Cancelar"
+                              @click="router.get(route('sgc.contratada.produtos.index', [props.contrato, props.produto.toLowerCase()]))"
+                          />
+                          <NavButton
+                              type="submit"
+                              type-button="primary"
+                              title="Salvar Alterações"
+                              :disabled="form.processing"
+                          />
+                      </div>
+                  </form>
+              </div>
               </div>
             </form>
 

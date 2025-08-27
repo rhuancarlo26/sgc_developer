@@ -15,6 +15,7 @@ use App\Models\SgcvwEmpreendimentos;
 use App\Models\SgcFaunaAnaliseEtapa;
 use App\Models\SgcFaunaComentarios;
 use App\Models\SgcFaunaProfissionais;
+use App\Models\SgcFaunaAnexo;
 use App\Models\Contrato;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use Inertia\Response;
@@ -1075,10 +1076,6 @@ class FaunaController extends Controller
         }
 
         $campanha = SgcFaunaCampanha::findOrFail($campanhaId);
-        // if ($campanha->status !== 'Rejeitada') {
-        //     return redirect()->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanhaId])
-        //         ->withErrors(['error' => 'Apenas campanhas rejeitadas podem ser atualizadas.']);
-        // }
 
         if (!in_array($campanha->status, ['Rejeitada', 'Em elaboração'])) {
             return redirect()->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanhaId])
@@ -1107,10 +1104,10 @@ class FaunaController extends Controller
                 'modulos_amostrais.*.municipio' => 'nullable|string|max:255',
                 'modulos_amostrais.*.bioma' => 'nullable|string|max:255',
                 'modulos_amostrais.*.fitofisionomia' => 'nullable|string',
-                'modulos_amostrais.*.latitude_inicial' => 'nullable|numeric|between:-90,90',
-                'modulos_amostrais.*.longitude_inicial' => 'nullable|numeric|between:-180,180',
-                'modulos_amostrais.*.latitude_final' => 'nullable|numeric|between:-90,90',
-                'modulos_amostrais.*.longitude_final' => 'nullable|numeric|between:-180,180',
+                'modulos_amostrais.*.latitude_inicial' => 'nullable|numeric',
+                'modulos_amostrais.*.longitude_inicial' => 'nullable|numeric',
+                'modulos_amostrais.*.latitude_final' => 'nullable|numeric',
+                'modulos_amostrais.*.longitude_final' => 'nullable|numeric',
                 'modulos_amostrais.*.obs' => 'nullable|string',
                 'modulos_amostrais.*.arquivo' => 'nullable|file|mimes:shp,zip|max:20480',
                 'pontos_quelo_crocod' => 'nullable|array',
@@ -1196,6 +1193,36 @@ class FaunaController extends Controller
             return redirect()->back()->withErrors(['error' => 'Erro ao atualizar campanha: ' . $e->getMessage()]);
         }
 
+    }
+
+    public function destroyAnexo($contrato, $produto, $campanhaId, $anexoId): RedirectResponse
+    {
+        if (!Auth::check()) {
+            return redirect()->back()->withErrors(['error' => 'Acesso negado. Você precisa estar autenticado.']);
+        }
+        try {
+            $anexo = SgcFaunaAnexo::where('id', $anexoId)
+                ->where('id_contrato', $contrato)
+                ->where('id_campanha', $campanhaId)
+                ->firstOrFail();
+            
+            $campanha = SgcFaunaCampanha::findOrFail($campanhaId);
+            if (!in_array($campanha->status, ['Rejeitada', 'Em elaboração'])) {
+                return redirect()->back()->withErrors(['error' => 'Apenas campanhas rejeitadas ou em elaboração podem ter anexos excluídos.']);
+            }
+            
+            Storage::disk('public')->delete($anexo->caminho);
+            $anexo->delete();
+            return redirect()->back()->with('success', 'Anexo excluído com sucesso!');
+        } catch (\Exception $e) {
+            Log::error('FaunaController: Erro ao excluir anexo', [
+                'contrato_id' => $contrato,
+                'campanha_id' => $campanhaId,
+                'anexo_id' => $anexoId,
+                'erro' => $e->getMessage(),
+            ]);
+            return redirect()->back()->withErrors(['error' => 'Erro ao excluir anexo: ' . $e->getMessage()]);
+        }
     }
 
 

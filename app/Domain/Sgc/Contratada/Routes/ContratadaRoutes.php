@@ -146,4 +146,7 @@ Route::prefix('/contratada')->group(function () {
     
     });
 
+    Route::delete('sgc/contratada/produtos/{contrato}/{produto}/{campanha}/anexo/{anexoId}', [FaunaController::class, 'destroyAnexo'])
+    ->name('sgc.contratada.produtos.anexo.destroy');
+
 });
