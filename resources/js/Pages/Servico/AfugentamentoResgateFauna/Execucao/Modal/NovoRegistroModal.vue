@@ -158,7 +158,7 @@ const formaTipoRegistro = () => {
         tipoRegistro.value.push({ id: 4, nome: 'Vivo sem ferimento' });
         tipoRegistro.value.push({ id: 5, nome: 'Vivo com ferimento' });
         tipoRegistro.value.push({ id: 6, nome: 'Ninho' });
-        tipoRegistro.value.push({ id: 7, nome: 'Colméia' });
+        tipoRegistro.value.push({ id: 7, nome: 'Colmeia' });
     }
     if (form.id_forma_registro == 3) {
         tipoRegistro.value = [];
