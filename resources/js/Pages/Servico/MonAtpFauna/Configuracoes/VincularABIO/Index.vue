@@ -109,10 +109,10 @@ const deleteVinculoAbio = (id) => {
                     <a @click="abrirModalAdicionarRet(item)" href="javascript:void(0);" class="dropdown-item">
                       Adicionar RET
                     </a>
-                    <a @click="deleteVinculoAbio(item.id)" href="javascript:void(0);" class="dropdown-item">
-                      Excluir
-                    </a>
                   </template>
+                  <a @click="deleteVinculoAbio(item.id)" href="javascript:void(0);" class="dropdown-item">
+                    Excluir
+                  </a>
                 </div>
               </td>
             </tr>
