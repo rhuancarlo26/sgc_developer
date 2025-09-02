@@ -49,7 +49,7 @@ const props = defineProps({
       </div>
       <div class="col">
         <InputLabel value="Selecione o ID da Armadilha" for="id_armadilha" />
-        <v-select :options="form.id_modulo?.armadilhas" label="nome_id" v-model="form.id_armadilha">
+        <v-select :options="form.id_modulo?.armadilhas" label="id" v-model="form.id_armadilha">
           <template #no-options="{}">
             Nenhum registro encontrado.
           </template>
