@@ -74,12 +74,14 @@ const excluir = (id) => {
             <tr>
               <td>{{ item.id }}</td>
               <td>
-                <p v-if="item.campanha_abios">
-                  <span v-for="abio in item.campanha_abios" :key="abio" class="badge bg-warning text-white m-1">
-                    {{ abio.abio.id }}
+                <p v-if="servico?.monitora_fauna_modulos?.length">
+                  <span v-for="modulo in servico.monitora_fauna_modulos" :key="modulo.id"
+                    class="badge bg-warning text-white m-1">
+                    {{ modulo.id }}
                   </span>
                 </p>
               </td>
+
               <td>
                 <p v-if="item.campanha_abios">
                   <span v-for="abio in item.campanha_abios" :key="abio.id" class="badge bg-warning text-white m-1">
