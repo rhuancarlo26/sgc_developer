@@ -15,7 +15,7 @@ class PareceresService
         $configuracoes = $this->servicoParecerAfugentamentoConfiguracao::select(
             DB::raw("'Configurações' AS tipo"),
             'fk_status',
-            DB::raw("parecer COLLATE utf8_general_ci AS parecer"),
+            DB::raw("CONVERT(parecer USING utf8mb4) COLLATE utf8mb4_general_ci AS parecer"),
             DB::raw("DATE_FORMAT(created_at, '%d/%m/%Y') AS data_parecer")
         )
             ->whereIn('fk_status', [2, 3, 4])
@@ -24,7 +24,7 @@ class PareceresService
         $relatorios = AfugentFaunaRelatorioModel::select(
             DB::raw("CONCAT('Relatório - ', nome_relatorio) AS tipo"),
             'fk_status',
-            DB::raw("parecer_fiscal COLLATE utf8mb4_general_ci AS parecer"),
+            DB::raw("CONVERT(parecer_fiscal USING utf8mb4) COLLATE utf8mb4_general_ci AS parecer"),
             DB::raw("DATE_FORMAT(created_at, '%d/%m/%Y') AS data_parecer")
         )
             ->whereIn('fk_status', [2, 3, 4])
