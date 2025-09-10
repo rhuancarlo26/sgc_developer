@@ -92,11 +92,11 @@ const excluirABIO = (abio_id) => {
                                         <a v-if="item.abio_ret" class="dropdown-item" target="_blank"
                                             :href="route('contratos.contratada.servicos.passagem_fauna.configuracao.vincular_abio.visualizar_ret', { contrato: contrato.id, servico: servico.id, abio_ret: item.abio_ret?.id })">Visualizar
                                             RET</a>
+                                        </span>
                                         <a @click="excluirABIO(item.id)" class="dropdown-item"
                                             href="javascript:void(0)">
                                             Excluir
                                         </a>
-                                    </span>
                                 </div>
                             </td>
                         </tr>
