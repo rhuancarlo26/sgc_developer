@@ -60,7 +60,7 @@ defineExpose({abrirModal});
 
 <template>
     <form @submit.prevent="save">
-        <Modal ref="modalRef" title="Cadastro Área de Supressão" modal-dialog-class="modal-xl">
+        <Modal ref="modalRef" title="Cadastro de Resultado" modal-dialog-class="modal-xl">
             <template #body>
                 <div class="row row-gap-2 mb-2">
                     <div v-if="form.chave" class="col">
