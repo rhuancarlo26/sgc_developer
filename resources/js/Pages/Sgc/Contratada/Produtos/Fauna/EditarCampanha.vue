@@ -444,7 +444,7 @@ const formatAnexoLabel = (tipo) => {
 
 // Computed para análises rejeitadas ordenadas por número da análise
 const analisesRejeitadas = computed(() => {
-  return props.campanha.analises
+  return (props.campanha.analises || [])
     .filter(a => a.status === 'Rejeitada' && etapaMap[modalEtapa.value]?.includes(a.etapa))
     .sort((a, b) => Number(a.analise) - Number(b.analise));
 });
