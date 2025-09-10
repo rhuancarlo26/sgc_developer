@@ -20,7 +20,8 @@ class FaunaFiscalService
                     'etapa' => $analise->etapa,
                     'analise' => $analise->analise,
                     'status' => $analise->status,
-                    'comentario' => $analise->comentario,
+                    // 'comentario' => $analise->comentario,
+                    'observacoes' => $analise->comentario,
                     'created_at' => $analise->created_at,
                 ];
             })

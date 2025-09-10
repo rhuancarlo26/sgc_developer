@@ -934,7 +934,7 @@ const excluirAnexo = (anexoId) => {
                               <span class="etapa">Análise {{ analise.analise }} - {{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}</span>
                               <span class="analise-date">{{ analise.created_at ? new Date(analise.created_at).toLocaleString('pt-BR') : 'Data não informada' }}</span>
                             </div>
-                            <div class="analise-text">{{ analise.comentario || 'Não informado' }}</div>
+                            <div class="analise-text">{{ analise.observacoes || 'Não informado' }}</div>
                             <div class="comentarios-list mt-2">
                               <h6>Seus Comentários:</h6>
                               <div v-if="comentariosPorAnalise(analise).length">
