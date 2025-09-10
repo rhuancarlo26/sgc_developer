@@ -581,7 +581,8 @@ class CampanhaController extends Controller
                     'analise' => $analise->analise,
                     'etapa' => $analise->etapa,
                     'status' => $analise->status,
-                    'observacoes' => $analise->observacoes,
+                    // 'observacoes' => $analise->observacoes,
+                    'observacoes' => $analise->comentario,
                     'created_at' => $analise->created_at,
                 ];
             })->toArray() : [],
