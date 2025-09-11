@@ -10,6 +10,7 @@ import Table from "@/Components/Table.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import NavButton from "@/Components/NavButton.vue";
 
+
 const props = defineProps({
     servico: { type: Object },
     tipos: { type: Array },
@@ -43,7 +44,7 @@ const form = useForm({
     area_fora_app: null,
     area_total: 0,
     shapefile: null,
-    licenca_id: 8,
+    licenca_id: null,
     observacao: null,
     latitude: null,
     longitude: null,
@@ -175,7 +176,7 @@ const destroyPhoto = (photoId, index) => {
 const decimallimite = (field) => {
     const val = form[field]
     if (val !== null && val !== undefined && !isNaN(val)) {
-        
+
         form[field] = parseFloat(val.toFixed(6))
     }
     geometry()
@@ -210,7 +211,7 @@ defineExpose({ abrirModal });
                                         <input v-model="form.chave" id="nome" class="form-control" disabled />
                                         <InputError :message="form.errors.chave" />
                                     </div>
-                                    <div class="col-lg-4">
+                                    <div class="col-lg-4">                                     
                                         <InputLabel value="Data Início" for="dt_inicial" />
                                         <input v-model="form.dt_inicial" type="date" id="dt_inicial"
                                             class="form-control" />
@@ -289,17 +290,17 @@ defineExpose({ abrirModal });
                                             type="file" class="form-control" accept=".zip">
                                         <InputError :message="form.errors.shapefile" />
                                     </div>
-                                    <!-- <div class="col-lg-6">
-                                        <InputLabel value="Numero da ASV" for="licenca_id" />
+                                    <div class="col-lg-6">
+                                        <InputLabel value="Número da ASV" for="licenca_id" />
+
                                         <v-select v-model="form.licenca_id" :options="licencas"
-                                            :get-option-label='licenca => `${licenca.licenca.numero_licenca} - ${licenca.licenca.emissor} - ${licenca.licenca.tipo.sigla}`'
-                                            :reduce="l => l.licenca.id">
-                                            <template #no-options="{ }">
-                                                Nenhum registro encontrado.
-                                            </template>
+                                            :get-option-label="o => `${o.licenca?.numero_licenca ?? ''} - ${o.licenca?.emissor ?? ''} - ${o.licenca?.tipo_rel?.sigla ?? ''}`"
+                                            :reduce="o => o.licenca?.id" placeholder="Selecione a licença">
+                                            <template #no-options> Nenhum registro encontrado. </template>
                                         </v-select>
                                         <InputError :message="form.errors.licenca_id" />
-                                    </div> -->
+                                    </div>
+
                                     <div class="col-12">
                                         <InputLabel value="Observações" for="observacao" />
                                         <textarea v-model="form.observacao" rows="2" id="observacao"
@@ -392,6 +393,7 @@ defineExpose({ abrirModal });
                                     </li>
                                 </ul>
                             </div>
+
                         </div>
                     </div>
                 </div>

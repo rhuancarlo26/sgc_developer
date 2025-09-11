@@ -27,12 +27,12 @@ const modalDetalheVincularASV = ref();
 const modalAdicionarShapeFile = ref();
 
 const abrirModalDetalheVincularASV = (licenca, servico) => {
-    console.log(servico);
+    
     modalDetalheVincularASV.value.abrirModal(licenca, servico);
 }
 
 const abrirModalAdicionarShapeFile = (licenca) => {
-    console.log(licenca);
+    
     modalAdicionarShapeFile.value.abrirModal(licenca);
 }
 
