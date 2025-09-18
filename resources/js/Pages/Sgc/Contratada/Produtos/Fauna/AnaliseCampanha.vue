@@ -64,13 +64,6 @@ const currentAnalise = computed(() => {
     return props.analises.find(analise => analise.etapa === analiseForms.value[activeTab.value === 'apresentacao' ? etapas.find(e => e.tab === 'apresentacao' && e.subStep === subStep.value)?.value : activeTab.value]?.etapa) || null;
 });
 
-// Função para obter o status de uma etapa
-// const getEtapaStatus = (etapaValue) => {
-//     const analises = Array.isArray(props.analises) ? props.analises : [];
-//     const analise = analises.find(a => a.etapa === etapaValue);
-//     return analise ? analise.status : 'Pendente';
-// };
-
 const getEtapaStatus = (etapaValue) => {
     const analises = Array.isArray(props.analises) ? props.analises : [];
     const analisesEtapa = analises.filter(a => a.etapa === etapaValue);
