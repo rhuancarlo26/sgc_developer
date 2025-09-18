@@ -10,6 +10,8 @@ use App\Models\ServicoMonitoraFaunaExecStatusConservacao;
 use App\Models\Servicos;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Searchable;
+use App\Shared\Utils\ArquivoUtils;
+use App\Shared\Utils\DataManagement;
 use Carbon\Carbon;
 
 class RegistroService extends BaseModelService
@@ -17,6 +19,13 @@ class RegistroService extends BaseModelService
   use Searchable;
 
   protected string $modelClass = ServicoMonitoraFaunaExecRegistro::class;
+
+  public function __construct(
+        DataManagement $dataManagement,
+        private readonly ArquivoUtils $arquivoUtils,
+    ) {
+        parent::__construct($dataManagement); 
+    }
 
   public function index(Servicos $servico, array $searchParams): array
   {
@@ -28,7 +37,6 @@ class RegistroService extends BaseModelService
         ->appends($searchParams)
     ];
   }
-
 
   public function graficos_monitora(Servicos $servico): array
   {
@@ -228,7 +236,17 @@ class RegistroService extends BaseModelService
 
   public function store(array $post)
   {
-    return $this->dataManagement->create($this->modelClass, $post);
+
+    $response = $this->dataManagement->create($this->modelClass, $post);
+
+    $this->arquivoUtils->handleFotos(
+      fotos: $post['fotos'] ?? [],
+      diretorio: 'public/uploads/supressao/mont_fauna/',
+      prefixo: 'AS',
+      afterSave: fn(array $fotosId) => $response['model']?->fotos()->sync($fotosId)
+    );
+
+    return $response;
   }
 
   public function update(array $post)
