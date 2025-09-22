@@ -10,7 +10,6 @@ use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\RelatorioCoordenacaoCont
 use App\Domain\Sgc\Contratada\Comentario\Controller\DestroyComentariosController;
 use App\Domain\Sgc\Contratada\Comentario\Controller\StoreSgcComentarioController;
 use App\Domain\Sgc\Contratada\Comentario\Controller\StoreSgcComentariosController;
-use App\Domain\Sgc\Contratada\Coordenadas\CoordenadasController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StoreUploadRelatorioController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\VisualizarDocxController;;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StatusUpdateController;
@@ -21,7 +20,7 @@ use App\Domain\Sgc\Contratada\Ficha\Controller\FichaController;
 use App\Domain\Sgc\Contratada\Quantitativos\Controller\QuantitativosController;
 use App\Domain\Sgc\Contratada\Produtos\Controller\ProdutosController;
 use App\Domain\Sgc\Contratada\Produtos\Controller\StoreProdutoAbioController;
-use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\FaunaController;
+use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Controller\EspeleoCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\AnexoController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\CampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ComentarioController;
@@ -138,6 +137,13 @@ Route::prefix('/contratada')->group(function () {
         Route::delete('campanha/{campanha}/comentario/{comentario}', [ComentarioController::class, 'destroyComentario'])->name('sgc.contratada.produtos.comentario.destroy');
         Route::post('/campanha/{campanhaId}/update-partial', [CampanhaController::class, 'updatePartial'])->name('sgc.contratada.produtos.updatePartial');
         Route::delete('campanha/{campanha}/anexo/{anexoId}', [AnexoController::class, 'destroyAnexo'])->name('sgc.contratada.produtos.anexo.destroy');
+    
+        // Rota para Espeleologia
+        Route::prefix('espeleologia')->group(function () {
+            Route::post('salvar-campanha', [EspeleoCampanhaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.espeleo.salvar_campanha');
+        });
+    
     });
+
 
 });
