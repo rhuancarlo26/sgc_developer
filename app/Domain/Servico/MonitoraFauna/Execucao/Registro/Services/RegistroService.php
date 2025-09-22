@@ -31,7 +31,7 @@ class RegistroService extends BaseModelService
   {
     return [
       'registros' => $this->searchAllColumns(...$searchParams)
-        ->with(['armadilha', 'grupo_faunistico'])
+        ->with(['armadilha', 'grupo_faunistico','fotos'])
         ->where('id_servico', $servico->id)
         ->paginate()
         ->appends($searchParams)
@@ -230,7 +230,8 @@ class RegistroService extends BaseModelService
       'campanhas' => ServicoMonitoraFaunaExecCampanha::where('id_servico', $servico->id)->get(['id']),
       'modulos' => ServicoMonitoraFaunaConfigModuloAmostral::with('armadilhas')->where('id_servico', $servico->id)->get(['id', 'tamanho_modulo']),
       'grupo_faunisticos' => ServicoMonitoraFaunaExecGrupoFaunistico::all(),
-      'status_conservacao' => ServicoMonitoraFaunaExecStatusConservacao::all()
+      'status_conservacao' => ServicoMonitoraFaunaExecStatusConservacao::all(),
+      'images' => $registro->fotos()->get(),
     ];
   }
 
@@ -251,7 +252,16 @@ class RegistroService extends BaseModelService
 
   public function update(array $post)
   {
-    return $this->dataManagement->update($this->modelClass, $post, $post['id']);
+    $response = $this->dataManagement->update($this->modelClass, $post, $post['id']);
+
+     $this->arquivoUtils->handleFotos(
+      fotos: $post['fotos'] ?? [],
+      diretorio: 'public/uploads/supressao/mont_fauna/',
+      prefixo: 'AS',
+      afterSave: fn(array $fotosId) => $response['model']?->fotos()->syncWithoutDetaching($fotosId)
+    );
+
+    return $response;
   }
 
   public function delete(object $registro)
