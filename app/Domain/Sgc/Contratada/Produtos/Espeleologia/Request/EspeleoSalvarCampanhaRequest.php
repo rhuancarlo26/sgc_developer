@@ -9,7 +9,7 @@ class EspeleoSalvarCampanhaRequest extends FormRequest
     public function rules()
     {
         return [
-            'id_campanha' => 'required|string|in:3|max:50',
+            'id_campanha' => 'required|string|in:3|max:50', 
             'cod_emp' => 'required|string|exists:sgcvw_empreendimentos,cod_emp',
             'subproduto' => 'required|string|max:255',
             'subtrecho' => 'nullable|string|max:255',
@@ -18,6 +18,8 @@ class EspeleoSalvarCampanhaRequest extends FormRequest
             'tipo_de_intervencao' => 'nullable|string|max:255',
             'descricao' => 'nullable|string',
             'bioma' => 'nullable|string|max:255',
+            'profissionais' => 'nullable|array',
+            'profissionais.*.profissional_id' => 'required|exists:sgc_espeleo_profissionais,id',
         ];
     }
 

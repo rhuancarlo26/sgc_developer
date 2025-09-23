@@ -10,6 +10,7 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaService;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoService;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcEspeleoCampanha;
+use App\Models\SgcEspeleoProfissional;
 use Illuminate\Http\Request;
 use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
@@ -51,6 +52,25 @@ class ProdutosController extends Controller
         ]);
     }
 
+    // public function create(Request $request, $contrato, $produto): Response
+    // {
+    //     Log::info('Acessando create', ['contrato' => $contrato, 'produto' => $produto, 'subproduto' => $request->query('subproduto')]);
+    //     $contratoObj = Contrato::findOrFail($contrato);
+    //     $subproduto = $request->query('subproduto');
+
+    //     if (!$subproduto) {
+    //         Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
+    //         return redirect()->route('sgc.contratada.produtos.index', [$contrato, $produto])
+    //             ->with('error', 'Subproduto não selecionado');
+    //     }
+
+    //     if ($produto === 'fauna') {
+    //         return $this->createFauna($request, $contrato, $produto, $contratoObj, $subproduto);
+    //     } else {
+    //         return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
+    //     }
+    // }
+
     public function create(Request $request, $contrato, $produto): Response
     {
         Log::info('Acessando create', ['contrato' => $contrato, 'produto' => $produto, 'subproduto' => $request->query('subproduto')]);
@@ -59,8 +79,17 @@ class ProdutosController extends Controller
 
         if (!$subproduto) {
             Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
-            return redirect()->route('sgc.contratada.produtos.index', [$contrato, $produto])
-                ->with('error', 'Subproduto não selecionado');
+            return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
+                'contrato' => $contrato,
+                'produto' => ucfirst($produto),
+                'contratos' => $contratoObj,
+                'error' => 'Subproduto não selecionado. Por favor, selecione um subproduto.',
+                'subproduto' => null,
+                'empreendimentos' => [],
+                'campanhaId' => null,
+                'draftData' => [],
+                'profissionais' => [],
+            ]);
         }
 
         if ($produto === 'fauna') {
@@ -106,17 +135,38 @@ class ProdutosController extends Controller
         ]);
     }
 
+    private function getCampanhasFauna($contrato)
+    {
+        return SgcFaunaCampanha::where('id_contrato', $contrato)
+            ->get(['id', 'id_campanha', 'cod_emp', 'data_ini', 'data_fim', 'status', 'subproduto'])
+            ->map(function ($campanha) {
+                return [
+                    'id' => $campanha->id,
+                    'id_campanha' => $campanha->id_campanha ?? 'N/A',
+                    'empreendimento' => $campanha->cod_emp ?? 'N/A',
+                    'data_inicial' => $campanha->data_ini ?? 'N/A',
+                    'data_final' => $campanha->data_fim ?? 'N/A',
+                    'status' => $campanha->status ?? 'Em análise',
+                    'subproduto' => $campanha->subproduto ?? 'N/A',
+                ];
+            });
+    }
+
     private function createEspeleologia(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
-        Log::info('Criando draft para Espeleologia', ['contrato' => $contrato, 'subproduto' => $subproduto]);
-        // Sempre cria um novo draft, ignorando drafts existentes
-        $draft = SgcEspeleoCampanha::create([
-            'id_contrato' => $contrato,
-            'id_campanha' => 3,
-            'subproduto' => $subproduto,
-            'status' => 'Em elaboração',
-        ]);
-        Log::info('Novo draft criado para Espeleologia', ['draft_id' => $draft->id, 'id_campanha' => $draft->id_campanha]);
+        $draft = SgcEspeleoCampanha::where('id_contrato', $contrato)
+            ->where('subproduto', $subproduto)
+            ->where('status', 'Em elaboração')
+            ->first();
+
+        if (!$draft) {
+            $draft = SgcEspeleoCampanha::create([
+                'id_contrato' => $contrato,
+                'id_campanha' => '3',
+                'subproduto' => $subproduto,
+                'status' => 'Em elaboração',
+            ]);
+        }
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->select('cod_emp', 'subtrecho_ini', 'subtrecho_fin', 'km_ini', 'km_fin', 'tipo_de_intervencao', 'descricao', 'bioma')
@@ -133,7 +183,10 @@ class ProdutosController extends Controller
                 ];
             });
 
-        Log::info('Empreendimentos carregados', ['empreendimentos' => $empreendimentos->toArray()]);
+        $profissionais = SgcEspeleoProfissional::where('id_contrato', $contrato)->get([
+            'id', 'profissional', 'formacao', 'telefone', 'cpf', 'email', 'curriculum_lattes',
+            'funcao', 'ctf', 'validade', 'conselho_de_classe', 'numero_de_registro', 'status', 'observacao'
+        ])->toArray();
 
         return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
             'contrato' => $contrato,
@@ -143,24 +196,8 @@ class ProdutosController extends Controller
             'empreendimentos' => $empreendimentos,
             'campanhaId' => $draft->id,
             'draftData' => $draft->toArray(),
+            'profissionais' => $profissionais, 
         ]);
-    }
-
-    private function getCampanhasFauna($contrato)
-    {
-        return SgcFaunaCampanha::where('id_contrato', $contrato)
-            ->get(['id', 'id_campanha', 'cod_emp', 'data_ini', 'data_fim', 'status', 'subproduto'])
-            ->map(function ($campanha) {
-                return [
-                    'id' => $campanha->id,
-                    'id_campanha' => $campanha->id_campanha ?? 'N/A',
-                    'empreendimento' => $campanha->cod_emp ?? 'N/A',
-                    'data_inicial' => $campanha->data_ini ?? 'N/A',
-                    'data_final' => $campanha->data_fim ?? 'N/A',
-                    'status' => $campanha->status ?? 'Em análise',
-                    'subproduto' => $campanha->subproduto ?? 'N/A',
-                ];
-            });
     }
 
     private function getCampanhasEspeleologia($contrato)
