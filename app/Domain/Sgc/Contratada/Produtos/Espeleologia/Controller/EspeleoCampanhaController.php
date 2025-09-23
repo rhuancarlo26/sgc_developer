@@ -6,6 +6,7 @@ use App\Shared\Http\Controllers\Controller;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoService;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Request\EspeleoSalvarCampanhaRequest;
 use App\Models\SgcEspeleoProfissional;
+use App\Models\SgcvwEmpreendimentos;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
@@ -60,7 +61,34 @@ class EspeleoCampanhaController extends Controller
         ]);
 
         $profissional = SgcEspeleoProfissional::create($validated);
-        return response()->json(['message' => 'Profissional cadastrado com sucesso', 'profissional' => $profissional]);
+        $profissionais = SgcEspeleoProfissional::where('id_contrato', $contrato)->get()->map(function ($prof) {
+            return [
+                'id' => $prof->id,
+                'profissional' => $prof->profissional,
+                'formacao' => $prof->formacao,
+            ];
+        });
+
+        return Inertia::render('Sgc/Contratada/Produtos/Espeleologia/Create', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'subproduto' => $request->subproduto,
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->get()->map(function ($emp) {
+                return [
+                    'cod_emp' => $emp->cod_emp,
+                    'subtrecho' => $emp->subtrecho_ini && $emp->subtrecho_fin ? $emp->subtrecho_ini . ' - ' . $emp->subtrecho_fin : '',
+                    'segmento' => $emp->km_ini && $emp->km_fin ? $emp->km_ini . ' - ' . $emp->km_fin : '',
+                    'extensao' => $emp->km_fin && $emp->km_ini ? $emp->km_fin - $emp->km_ini : 0,
+                    'tipo_de_intervencao' => $emp->tipo_de_intervencao ?? '',
+                    'descricao' => $emp->descricao ?? '',
+                    'bioma' => $emp->bioma ?? '',
+                ];
+            }),
+            'campanhaId' => $request->session()->get('campanhaId', null),
+            'draftData' => $request->session()->get('draftData', []),
+            'profissionais' => $profissionais,
+            'success' => 'Profissional cadastrado com sucesso',
+        ])->with(['flash' => ['success' => 'Profissional cadastrado com sucesso', 'profissional' => $profissional]]);
     }
 
     public function getProfissionais(Request $request, $contrato, $produto)
@@ -70,3 +98,7 @@ class EspeleoCampanhaController extends Controller
     }
 
 }
+
+
+
+    
