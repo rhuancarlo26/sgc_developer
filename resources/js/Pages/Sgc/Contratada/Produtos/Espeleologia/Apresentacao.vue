@@ -46,7 +46,7 @@
         </div>
         <!-- Seção de Profissionais -->
         <div class="col-md-12 mb-3">
-          <h4>Profissionais</h4>
+          <h4>Equipe</h4>
           <div class="mb-3">
             <select v-model="selectedProfissional" class="form-select" @change="$emit('vincular-profissional', selectedProfissional)">
               <option value="">Selecione um profissional</option>

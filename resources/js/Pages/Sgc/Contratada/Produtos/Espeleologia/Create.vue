@@ -110,7 +110,7 @@ const form = reactive({
 
 const errors = ref({});
 const profissionalRecords = ref(props.draftData?.profissionais ?? []);
-const localProfissionais = ref(Array.isArray(props.profissionais) ? [...props.profissionais] : []); // Inicialização segura
+const localProfissionais = ref(Array.isArray(props.profissionais) ? [...props.profissionais] : []);
 
 const updateForm = (data) => {
     Object.assign(form, data);
@@ -148,18 +148,24 @@ const salvarNovoProfissional = (novoProfissional) => {
         numero_de_registro: novoProfissional.numero_de_registro,
         status: novoProfissional.status,
         observacao: novoProfissional.observacao,
-        subproduto: props.subproduto, // Preserva subproduto
+        subproduto: props.subproduto,
     };
     router.post(route('sgc.contratada.produtos.espeleo.profissional.store', {
         contrato: props.contrato,
         produto: 'espeleologia',
     }), payload, {
-        onSuccess: (response) => {
-            alert('Profissional cadastrado com sucesso!');
-            localProfissionais.value.push(response.profissional);
+        onSuccess: (page) => {
+            const { success, profissional } = page.props.flash || {};
+            if (success && profissional) {
+                alert(success);
+                localProfissionais.value = page.props.profissionais || [];
+            }
             showModal.value = false;
         },
-        onError: (err) => console.error('Erro ao cadastrar profissional:', err),
+        onError: (err) => {
+            console.error('Erro ao cadastrar profissional:', err);
+            showModal.value = false;
+        },
     });
 };
 
@@ -217,4 +223,3 @@ const salvar = () => {
   padding: 20px;
 }
 </style>
-
