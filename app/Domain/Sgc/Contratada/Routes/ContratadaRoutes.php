@@ -138,12 +138,15 @@ Route::prefix('/contratada')->group(function () {
         Route::post('/campanha/{campanhaId}/update-partial', [CampanhaController::class, 'updatePartial'])->name('sgc.contratada.produtos.updatePartial');
         Route::delete('campanha/{campanha}/anexo/{anexoId}', [AnexoController::class, 'destroyAnexo'])->name('sgc.contratada.produtos.anexo.destroy');
     
-        // Rota para Espeleologia
+        // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {
             Route::post('salvar-campanha', [EspeleoCampanhaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.espeleo.salvar_campanha');
+            Route::post('profissional/store', [EspeleoCampanhaController::class, 'storeProfissional'])->name('sgc.contratada.produtos.espeleo.profissional.store');
+            Route::get('profissionais', [EspeleoCampanhaController::class, 'getProfissionais'])->name('sgc.contratada.produtos.espeleo.profissionais');
         });
-    
-    });
 
+    });
+    
+    
 
 });

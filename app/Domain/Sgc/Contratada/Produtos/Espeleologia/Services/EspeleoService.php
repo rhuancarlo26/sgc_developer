@@ -3,6 +3,7 @@
 namespace App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services;
 
 use App\Models\SgcEspeleoCampanha;
+use App\Models\SgcEspeleoCampanhaProfissional;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -26,9 +27,26 @@ class EspeleoService
             $campanha->id_contrato = $contratoId;
             $campanha->versao_analise = $campanha->versao_analise ?? 1;
             $campanha->save();
+
+            // Vincular profissionais
+            if (isset($data['profissionais']) && is_array($data['profissionais'])) {
+                foreach ($data['profissionais'] as $prof) {
+                    Log::info('Tentando vincular profissional', ['prof' => $prof]);
+                    SgcEspeleoCampanhaProfissional::create([
+                        'campanha_id' => $campanha->id,
+                        'id_modulo' => $prof['id_modulo'] ?? null,
+                        'id_contrato' => $contratoId,
+                        'profissional_id' => $prof['profissional_id'],
+                    ]);
+                }
+            } else {
+                Log::warning('Nenhum profissional encontrado no payload', ['data' => $data]);
+            }
             
             Log::info('Campanha salva', ['id' => $campanha->id]);
             return $campanha;
         });
     }
+    
+
 }
