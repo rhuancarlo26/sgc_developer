@@ -58,10 +58,12 @@
                   :profissionais="localProfissionais"
                   :profissional-records="profissionalRecords"
                   :justificativas="justificativas"
+                  :codigo-sei="codigoSei"
                   @update-form="updateForm"
                   @vincular-profissional="vincularProfissional"
                   @salvar-novo-profissional="salvarNovoProfissional"
-                  @update-justificativa="updateJustificativas"
+                  @update-justificativas="updateJustificativas"
+                  @update:codigo-sei="updateCodigoSei"
                 />
               </div>
               <div v-if="activeTab === 'metodologias'" class="tab-pane fade" :class="{ 'show active': activeTab === 'metodologias' }">
@@ -93,7 +95,7 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Apresentacao from './Apresentacao.vue';
 import { reactive, ref, onMounted, watch } from 'vue';
 
-const props = defineProps(['contrato', 'produto', 'subproduto', 'empreendimentos', 'campanhaId', 'draftData', 'contratos', 'profissionais', 'justificativas']);
+const props = defineProps(['contrato', 'produto', 'subproduto', 'empreendimentos', 'campanhaId', 'draftData', 'contratos', 'profissionais', 'justificativas', 'codigoSei']);
 
 const activeTab = ref('apresentacao');
 const showModal = ref(false);
@@ -109,18 +111,28 @@ const form = reactive({
     descricao: props.draftData?.descricao || '',
     bioma: props.draftData?.bioma || '',
 });
+
 const errors = ref({});
 const profissionalRecords = ref(props.draftData?.profissionais ?? []);
 const localProfissionais = ref(Array.isArray(props.profissionais) ? [...props.profissionais] : []);
-const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: 'complementar', titulo: '', codigo_sei: '' }]);
+const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: '' }]);
+const codigoSei = ref(props.codigoSei || '');
 
 const updateForm = (data) => {
     Object.assign(form, data);
 };
 
 const updateJustificativas = (newValue) => {
-    justificativas.value = newValue; // Atualiza o array de justificativas
-    console.log('Justificativas atualizadas no Create.vue:', justificativas.value); // Depuração
+    justificativas.value = newValue;
+    console.log('Justificativas atualizadas:', justificativas.value);
+};
+
+const updateCodigoSei = (newValue) => {
+    codigoSei.value = newValue;
+    console.log('Código SEI atualizado:', codigoSei.value);
+    if (justificativas.value.length > 0) {
+        justificativas.value[0].codigo_sei = newValue;
+    }
 };
 
 const vincularProfissional = (profissional) => {
@@ -194,22 +206,26 @@ const salvar = () => {
             profissional_id: p.profissional_id,
             id_modulo: null,
         })),
-        justificativas: justificativas.value, // Envia o array de justificativas
+        codigo_sei: codigoSei.value,
+        justificativas: justificativas.value.map((j, i) => ({
+            ...j,
+            tipo: i === 0 ? 'citacao' : 'justificativa',
+        })),
     };
-    console.log('Enviando dados para salvar:', JSON.stringify(payload, null, 2)); // Depuração detalhada
-
+    console.log('Enviando dados:', JSON.stringify(payload, null, 2));
     router.post(route('sgc.contratada.produtos.espeleo.salvar_campanha', {
         contrato: props.contrato,
         produto: 'espeleologia',
     }), payload, {
         onError: (err) => {
             errors.value = err;
-            console.error('Erro ao salvar:', err);
+            console.error(err);
         },
         onSuccess: () => {
             errors.value = {};
             alert('Campanha salva com sucesso');
-            justificativas.value = [{ justificativa: '', tipo: 'complementar', titulo: '', codigo_sei: '' }]; // Reseta com um valor padrão
+            justificativas.value = [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: '' }];
+            codigoSei.value = '';
         },
     });
 };

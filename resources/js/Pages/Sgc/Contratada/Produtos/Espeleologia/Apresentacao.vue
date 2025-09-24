@@ -76,29 +76,23 @@
         <!-- Seção de Justificativas -->
         <div class="col-md-12 mb-3">
           <h4>Justificativas</h4>
+          <div class="mb-3">
+            <label>Código SEI-DNIT do TRE do Órgão Licenciador</label>
+            <input v-model="codigoSei" @input="$emit('update:codigo-sei', $event.target.value)" class="form-control" />
+          </div>
           <div v-for="(just, index) in justificativas" :key="index" class="mb-3">
             <div class="row">
-              <div class="col-md-4 mb-2">
-                <label>Tipo</label>
-                <select v-model="justificativas[index].tipo" class="form-select">
-                  <option value="citacao">Citação</option>
-                  <option value="complementar">Complementar</option>
-                </select>
+              <div v-if="index === 0" class="col-md-12 mb-2">
+                <label>Citação</label>
+                <input v-model="justificativas[index].titulo" @input="$emit('update:justificativas', [...justificativas.value.slice(0, index), { ...just, titulo: $event.target.value }, ...justificativas.value.slice(index + 1)])" class="form-control mb-2" placeholder="Título da Citação">
+                <textarea v-model="justificativas[index].justificativa" @input="$emit('update:justificativas', [...justificativas.value.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.value.slice(index + 1)])" class="form-control" placeholder="Texto da Citação"></textarea>
               </div>
-              <div class="col-md-4 mb-2">
-                <label>Código SEI-DNIT</label>
-                <input v-model="justificativas[index].codigo_sei" class="form-control" placeholder="Ex.: SEI-123" />
-              </div>
-              <div class="col-md-4 mb-2">
-                <label>Título</label>
-                <input v-model="justificativas[index].titulo" class="form-control" placeholder="Digite o título" />
-              </div>
-              <div class="col-md-12 mb-2">
+              <div v-else class="col-md-12 mb-2">
                 <label>Justificativa</label>
-                <textarea v-model="justificativas[index].justificativa" class="form-control" placeholder="Digite a justificativa"></textarea>
+                <textarea v-model="justificativas[index].justificativa" @input="$emit('update:justificativas', [...justificativas.value.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.value.slice(index + 1)])" class="form-control" placeholder="Texto da Justificativa"></textarea>
               </div>
               <div class="col-md-12 text-end">
-                <button @click="removerJustificativa(index)" class="btn btn-danger btn-sm">Remover</button>
+                <button @click="removerJustificativa(index)" class="btn btn-danger btn-sm" v-if="index > 0">Remover</button>
               </div>
             </div>
           </div>
@@ -180,11 +174,11 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref, watch } from 'vue'; // Adicionado 'watch' à importação
+import { defineProps, defineEmits, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 
-const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords', 'justificativas']);
-const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional', 'update-justificativa']);
+const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords', 'justificativas', 'codigoSei']);
+const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional', 'update:codigo-sei', 'update:justificativas']);
 
 const showModal = ref(false);
 const selectedProfissional = ref(null);
@@ -204,7 +198,8 @@ const novoProfissional = ref({
     observacao: '',
 });
 
-const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: 'complementar', titulo: '', codigo_sei: '' }]);
+const codigoSei = ref(props.codigoSei || '');
+const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: props.codigoSei || '' }]);
 
 const preencherCamposEmpreendimento = () => {
     const emp = props.empreendimentos.find(e => e.cod_emp === props.campanha.cod_emp);
@@ -257,15 +252,18 @@ const salvarNovoProfissional = () => {
 };
 
 const adicionarJustificativa = () => {
-    justificativas.value.push({ justificativa: '', tipo: 'complementar', titulo: '', codigo_sei: '' });
+    justificativas.value.push({ justificativa: '', tipo: 'justificativa', titulo: '', codigo_sei: '' });
 };
 
 const removerJustificativa = (index) => {
     justificativas.value.splice(index, 1);
 };
 
-// Emitir mudanças em justificativas para o componente pai
-watch(justificativas, (newValue) => {
-    emit('update-justificativa', newValue);
+watch(() => props.codigoSei, (newVal) => {
+    codigoSei.value = newVal || '';
+});
+
+watch(() => props.justificativas, (newVal) => {
+    justificativas.value = newVal || [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: codigoSei.value }];
 }, { deep: true });
 </script>
