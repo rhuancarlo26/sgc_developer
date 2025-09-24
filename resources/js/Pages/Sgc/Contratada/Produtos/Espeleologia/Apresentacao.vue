@@ -44,7 +44,7 @@
           <label>Descrição</label>
           <textarea v-model="campanha.descricao" class="form-control" readonly />
         </div>
-        <!-- Seção de Profissionais -->
+        <!-- Seção de Equipe -->
         <div class="col-md-12 mb-3">
           <h4>Equipe</h4>
           <div class="mb-3">
@@ -72,6 +72,14 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <!-- Seção de Justificativa -->
+        <div class="col-md-12 mb-3">
+          <h4>Justificativa</h4>
+          <div class="mb-3">
+            <label>Título da Justificativa</label>
+            <input v-model="justificativa.titulo" class="form-control" placeholder="Digite o título" />
+          </div>
         </div>
       </div>
     </form>
@@ -152,7 +160,7 @@
 import { defineProps, defineEmits, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 
-const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords']);
+const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords', 'justificativa']);
 const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional']);
 
 const showModal = ref(false);

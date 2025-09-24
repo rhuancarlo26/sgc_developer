@@ -57,6 +57,7 @@
                   :errors="errors"
                   :profissionais="localProfissionais"
                   :profissional-records="profissionalRecords"
+                  :justificativa="justificativa"
                   @update-form="updateForm"
                   @vincular-profissional="vincularProfissional"
                   @salvar-novo-profissional="salvarNovoProfissional"
@@ -94,10 +95,10 @@ import { reactive, ref, onMounted, watch } from 'vue';
 const props = defineProps(['contrato', 'produto', 'subproduto', 'empreendimentos', 'campanhaId', 'draftData', 'contratos', 'profissionais']);
 
 const activeTab = ref('apresentacao');
-const showModal = ref(false); // Controle do modal
+const showModal = ref(false);
 
 const form = reactive({
-    id_campanha: '3', // Fixo como "3"
+    id_campanha: '3',
     cod_emp: props.draftData?.cod_emp || '',
     subproduto: props.subproduto || '',
     subtrecho: props.draftData?.subtrecho || '',
@@ -107,10 +108,10 @@ const form = reactive({
     descricao: props.draftData?.descricao || '',
     bioma: props.draftData?.bioma || '',
 });
-
 const errors = ref({});
 const profissionalRecords = ref(props.draftData?.profissionais ?? []);
 const localProfissionais = ref(Array.isArray(props.profissionais) ? [...props.profissionais] : []);
+const justificativa = ref({ titulo: props.draftData?.justificativa?.titulo || '' }); // Inicializa com valor padrão
 
 const updateForm = (data) => {
     Object.assign(form, data);
@@ -187,8 +188,9 @@ const salvar = () => {
             profissional_id: p.profissional_id,
             id_modulo: null,
         })),
+        justificativa: justificativa.value, // Inclui a justificativa no payload
     };
-    console.log('Enviando dados para salvar:', payload);
+    console.log('Enviando dados para salvar:', payload); // Para depuração
 
     router.post(route('sgc.contratada.produtos.espeleo.salvar_campanha', {
         contrato: props.contrato,
@@ -201,6 +203,7 @@ const salvar = () => {
         onSuccess: () => {
             errors.value = {};
             alert('Campanha salva com sucesso');
+            justificativa.value.titulo = ''; // Reseta o título
         },
     });
 };
