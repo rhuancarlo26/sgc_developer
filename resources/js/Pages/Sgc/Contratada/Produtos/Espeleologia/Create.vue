@@ -57,11 +57,11 @@
                   :errors="errors"
                   :profissionais="localProfissionais"
                   :profissional-records="profissionalRecords"
-                  :justificativa="justificativa"
+                  :justificativas="justificativas"
                   @update-form="updateForm"
                   @vincular-profissional="vincularProfissional"
                   @salvar-novo-profissional="salvarNovoProfissional"
-                  @update-justificativa="updateJustificativa"
+                  @update-justificativa="updateJustificativas"
                 />
               </div>
               <div v-if="activeTab === 'metodologias'" class="tab-pane fade" :class="{ 'show active': activeTab === 'metodologias' }">
@@ -93,7 +93,7 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Apresentacao from './Apresentacao.vue';
 import { reactive, ref, onMounted, watch } from 'vue';
 
-const props = defineProps(['contrato', 'produto', 'subproduto', 'empreendimentos', 'campanhaId', 'draftData', 'contratos', 'profissionais']);
+const props = defineProps(['contrato', 'produto', 'subproduto', 'empreendimentos', 'campanhaId', 'draftData', 'contratos', 'profissionais', 'justificativas']);
 
 const activeTab = ref('apresentacao');
 const showModal = ref(false);
@@ -112,15 +112,15 @@ const form = reactive({
 const errors = ref({});
 const profissionalRecords = ref(props.draftData?.profissionais ?? []);
 const localProfissionais = ref(Array.isArray(props.profissionais) ? [...props.profissionais] : []);
-const justificativa = ref({ titulo: props.draftData?.justificativa?.titulo || '' }); // Estado reativo
+const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: 'complementar', titulo: '', codigo_sei: '' }]);
 
 const updateForm = (data) => {
     Object.assign(form, data);
 };
 
-const updateJustificativa = (newValue) => {
-    justificativa.value = { ...justificativa.value, ...newValue }; // Atualiza o estado justificativa
-    console.log('Justificativa atualizada no Create.vue:', justificativa.value); // Depuração
+const updateJustificativas = (newValue) => {
+    justificativas.value = newValue; // Atualiza o array de justificativas
+    console.log('Justificativas atualizadas no Create.vue:', justificativas.value); // Depuração
 };
 
 const vincularProfissional = (profissional) => {
@@ -194,7 +194,7 @@ const salvar = () => {
             profissional_id: p.profissional_id,
             id_modulo: null,
         })),
-        justificativa: justificativa.value, // Inclui a justificativa no payload
+        justificativas: justificativas.value, // Envia o array de justificativas
     };
     console.log('Enviando dados para salvar:', JSON.stringify(payload, null, 2)); // Depuração detalhada
 
@@ -209,7 +209,7 @@ const salvar = () => {
         onSuccess: () => {
             errors.value = {};
             alert('Campanha salva com sucesso');
-            justificativa.value.titulo = ''; // Reseta o título
+            justificativas.value = [{ justificativa: '', tipo: 'complementar', titulo: '', codigo_sei: '' }]; // Reseta com um valor padrão
         },
     });
 };

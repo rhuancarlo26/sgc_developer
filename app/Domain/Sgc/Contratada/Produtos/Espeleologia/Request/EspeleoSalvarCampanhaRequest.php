@@ -20,8 +20,11 @@ class EspeleoSalvarCampanhaRequest extends FormRequest
             'bioma' => 'nullable|string|max:255',
             'profissionais' => 'nullable|array',
             'profissionais.*.profissional_id' => 'required|exists:sgc_espeleo_profissionais,id',
-            'justificativa' => 'nullable|array', // Adiciona validação para justificativa como array
-            'justificativa.titulo' => 'nullable|string', // Valida o campo titulo dentro de justificativa
+            'justificativas' => 'nullable|array', 
+            'justificativas.*.justificativa' => 'nullable|string', 
+            'justificativas.*.tipo' => 'nullable|string|in:citacao,complementar', 
+            'justificativas.*.titulo' => 'nullable|string',  
+            'justificativas.*.codigo_sei' => 'nullable|string|max:255', 
         ];
     }
 
@@ -33,7 +36,7 @@ class EspeleoSalvarCampanhaRequest extends FormRequest
             'cod_emp.required' => 'O empreendimento é obrigatório.',
             'cod_emp.exists' => 'O empreendimento selecionado não existe.',
             'subproduto.required' => 'O subproduto é obrigatório.',
+            'justificativas.*.tipo.in' => 'O tipo da justificativa deve ser "citacao" ou "complementar".',
         ];
     }
 }
-
