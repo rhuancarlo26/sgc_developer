@@ -40,4 +40,9 @@ class SgcEspeleoCampanha extends Model
     {
         return $this->belongsTo(SgcvwEmpreendimentos::class, 'cod_emp', 'cod_emp');
     }
+
+    public function justificativas()
+    {
+        return $this->hasMany(SgcEspeleoJustificativa::class, 'campanha_id');
+    }
 }

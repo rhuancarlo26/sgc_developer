@@ -48,7 +48,7 @@
         <div class="col-md-12 mb-3">
           <h4>Equipe</h4>
           <div class="mb-3">
-            <select v-model="selectedProfissional" class="form-select" @change="$emit('vincular-profissional', selectedProfissional)">
+            <select v-model="selectedProfissional" class="form-select" @change="vincularProfissional">
               <option value="">Selecione um profissional</option>
               <option v-for="prof in profissionais" :key="prof.id" :value="prof">
                 {{ prof.profissional }}
@@ -73,13 +73,36 @@
             </tbody>
           </table>
         </div>
-        <!-- Seção de Justificativa -->
+        <!-- Seção de Justificativas -->
         <div class="col-md-12 mb-3">
-          <h4>Justificativa</h4>
-          <div class="mb-3">
-            <label>Título da Justificativa</label>
-            <input v-model="justificativa.titulo" @input="$emit('update-justificativa', { titulo: $event.target.value })" class="form-control" placeholder="Digite o título" />
+          <h4>Justificativas</h4>
+          <div v-for="(just, index) in justificativas" :key="index" class="mb-3">
+            <div class="row">
+              <div class="col-md-4 mb-2">
+                <label>Tipo</label>
+                <select v-model="justificativas[index].tipo" class="form-select">
+                  <option value="citacao">Citação</option>
+                  <option value="complementar">Complementar</option>
+                </select>
+              </div>
+              <div class="col-md-4 mb-2">
+                <label>Código SEI-DNIT</label>
+                <input v-model="justificativas[index].codigo_sei" class="form-control" placeholder="Ex.: SEI-123" />
+              </div>
+              <div class="col-md-4 mb-2">
+                <label>Título</label>
+                <input v-model="justificativas[index].titulo" class="form-control" placeholder="Digite o título" />
+              </div>
+              <div class="col-md-12 mb-2">
+                <label>Justificativa</label>
+                <textarea v-model="justificativas[index].justificativa" class="form-control" placeholder="Digite a justificativa"></textarea>
+              </div>
+              <div class="col-md-12 text-end">
+                <button @click="removerJustificativa(index)" class="btn btn-danger btn-sm">Remover</button>
+              </div>
+            </div>
           </div>
+          <button @click="adicionarJustificativa" class="btn btn-secondary mt-2">Adicionar Justificativa</button>
         </div>
       </div>
     </form>
@@ -157,10 +180,10 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue';
+import { defineProps, defineEmits, ref, watch } from 'vue'; // Adicionado 'watch' à importação
 import { router } from '@inertiajs/vue3';
 
-const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords', 'justificativa']);
+const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords', 'justificativas']);
 const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional', 'update-justificativa']);
 
 const showModal = ref(false);
@@ -181,28 +204,36 @@ const novoProfissional = ref({
     observacao: '',
 });
 
+const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: 'complementar', titulo: '', codigo_sei: '' }]);
+
 const preencherCamposEmpreendimento = () => {
     const emp = props.empreendimentos.find(e => e.cod_emp === props.campanha.cod_emp);
     if (emp) {
-        props.campanha.subtrecho = emp.subtrecho || '';
-        props.campanha.segmento = emp.segmento || '';
-        props.campanha.extensao = emp.extensao || '';
-        props.campanha.tipo_de_intervencao = emp.tipo_de_intervencao || '';
-        props.campanha.descricao = emp.descricao || '';
-        props.campanha.bioma = emp.bioma || '';
+        emit('update-form', {
+            subtrecho: emp.subtrecho || '',
+            segmento: emp.segmento || '',
+            extensao: emp.extensao || '',
+            tipo_de_intervencao: emp.tipo_de_intervencao || '',
+            descricao: emp.descricao || '',
+            bioma: emp.bioma || '',
+        });
     } else {
-        props.campanha.subtrecho = '';
-        props.campanha.segmento = '';
-        props.campanha.extensao = '';
-        props.campanha.tipo_de_intervencao = '';
-        props.campanha.descricao = '';
-        props.campanha.bioma = '';
+        emit('update-form', {
+            subtrecho: '',
+            segmento: '',
+            extensao: '',
+            tipo_de_intervencao: '',
+            descricao: '',
+            bioma: '',
+        });
     }
 };
 
-const vincularProfissional = (profissional) => {
-    emit('vincular-profissional', profissional);
-    selectedProfissional.value = null;
+const vincularProfissional = () => {
+    if (selectedProfissional.value) {
+        emit('vincular-profissional', selectedProfissional.value);
+        selectedProfissional.value = null;
+    }
 };
 
 const salvarNovoProfissional = () => {
@@ -222,9 +253,19 @@ const salvarNovoProfissional = () => {
         status: 'Ativo',
         observacao: '',
     };
+    showModal.value = false;
 };
 
-const excluirProfissional = (id) => {
-    props.profissionalRecords = props.profissionalRecords.filter(p => p.id !== id);
+const adicionarJustificativa = () => {
+    justificativas.value.push({ justificativa: '', tipo: 'complementar', titulo: '', codigo_sei: '' });
 };
+
+const removerJustificativa = (index) => {
+    justificativas.value.splice(index, 1);
+};
+
+// Emitir mudanças em justificativas para o componente pai
+watch(justificativas, (newValue) => {
+    emit('update-justificativa', newValue);
+}, { deep: true });
 </script>

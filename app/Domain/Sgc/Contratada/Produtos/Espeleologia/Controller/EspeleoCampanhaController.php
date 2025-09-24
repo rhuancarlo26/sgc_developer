@@ -28,14 +28,24 @@ class EspeleoCampanhaController extends Controller
         }
 
         $data = $request->validated();
-        Log::info('Dados recebidos para salvar campanha', ['data' => $data, 'contrato' => $contrato, 'campanhaId' => $request->id]);
+        Log::info('Dados validados para salvar campanha', [
+            'data' => $data,
+            'contrato' => $contrato,
+            'campanhaId' => $request->id,
+            'codigo_sei' => $data['justificativas'][0]['codigo_sei'] ?? 'Não fornecido', // Log do código SEI (primeira justificativa)
+            'justificativas_count' => count($data['justificativas'] ?? []), // Quantidade de justificativas
+        ]);
 
         try {
             $campanha = $this->espeleoService->salvarCampanha($data, $contrato, $request->id);
             Log::info('Campanha salva com sucesso', ['campanha_id' => $campanha->id]);
             return Inertia::location(route('sgc.contratada.produtos.index', [$contrato, $produto]));
         } catch (\Exception $e) {
-            Log::error('Erro ao salvar campanha', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::error('Erro ao salvar campanha', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $data, // Inclui dados para depuração
+            ]);
             throw $e;
         }
     }
@@ -96,9 +106,4 @@ class EspeleoCampanhaController extends Controller
         $profissionais = SgcEspeleoProfissional::where('id_contrato', $contrato)->get();
         return response()->json(['profissionais' => $profissionais]);
     }
-
 }
-
-
-
-    

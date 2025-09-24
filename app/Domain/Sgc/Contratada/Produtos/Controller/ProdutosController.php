@@ -52,25 +52,6 @@ class ProdutosController extends Controller
         ]);
     }
 
-    // public function create(Request $request, $contrato, $produto): Response
-    // {
-    //     Log::info('Acessando create', ['contrato' => $contrato, 'produto' => $produto, 'subproduto' => $request->query('subproduto')]);
-    //     $contratoObj = Contrato::findOrFail($contrato);
-    //     $subproduto = $request->query('subproduto');
-
-    //     if (!$subproduto) {
-    //         Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
-    //         return redirect()->route('sgc.contratada.produtos.index', [$contrato, $produto])
-    //             ->with('error', 'Subproduto não selecionado');
-    //     }
-
-    //     if ($produto === 'fauna') {
-    //         return $this->createFauna($request, $contrato, $produto, $contratoObj, $subproduto);
-    //     } else {
-    //         return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
-    //     }
-    // }
-
     public function create(Request $request, $contrato, $produto): Response
     {
         Log::info('Acessando create', ['contrato' => $contrato, 'produto' => $produto, 'subproduto' => $request->query('subproduto')]);
@@ -188,6 +169,16 @@ class ProdutosController extends Controller
             'funcao', 'ctf', 'validade', 'conselho_de_classe', 'numero_de_registro', 'status', 'observacao'
         ])->toArray();
 
+        // Carregar justificativas relacionadas, se existirem, ou usar valor padrão
+        $justificativas = $draft->justificativas()->get()->map(function ($just) {
+            return [
+                'justificativa' => $just->justificativa,
+                'tipo' => $just->tipo,
+                'titulo' => $just->titulo,
+                'codigo_sei' => $just->codigo_sei, // Inclui o código SEI
+            ];
+        })->all() ?: [['justificativa' => '', 'tipo' => 'complementar', 'titulo' => '', 'codigo_sei' => '']];
+
         return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
             'contrato' => $contrato,
             'produto' => ucfirst($produto),
@@ -196,7 +187,8 @@ class ProdutosController extends Controller
             'empreendimentos' => $empreendimentos,
             'campanhaId' => $draft->id,
             'draftData' => $draft->toArray(),
-            'profissionais' => $profissionais, 
+            'profissionais' => $profissionais,
+            'justificativas' => $justificativas, // Passa as justificativas com código SEI
         ]);
     }
 

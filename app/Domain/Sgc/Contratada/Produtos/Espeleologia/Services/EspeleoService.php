@@ -55,26 +55,23 @@ class EspeleoService
                 }
             }
 
-            // Depuração e vinculação da justificativa
-            Log::info('Verificando justificativa', ['justificativa' => $data['justificativa'] ?? 'Não encontrado', 'full_data' => $data]);
-            if (isset($data['justificativa']) && is_array($data['justificativa']) && !empty($data['justificativa']['titulo'])) {
-                Log::info('Criando justificativa com valor real', ['titulo' => $data['justificativa']['titulo'], 'id_contrato' => $contratoId]);
-                SgcEspeleoJustificativa::create([
-                    'campanha_id' => $campanha->id,
-                    'titulo' => $data['justificativa']['titulo'],
-                    'justificativa' => '',
-                    'tipo' => 'citacao',
-                    'id_contrato' => $contratoId,
-                ]);
+            // Vincular justificativas
+            if (isset($data['justificativas']) && is_array($data['justificativas'])) {
+                foreach ($data['justificativas'] as $just) {
+                    Log::info('Criando justificativa', ['justificativa' => $just]);
+                    $tipo = $just['tipo'] ?? 'complementar'; // Padrão como complementar
+                    SgcEspeleoJustificativa::create([
+                        'campanha_id' => $campanha->id,
+                        'codigo_sei' => $just['codigo_sei'] ?? null, // Adiciona código SEI da justificativa
+                        'id_contrato' => $contratoId,
+                        'titulo' => $just['titulo'] ?? null,
+                        'justificativa' => $just['justificativa'] ?? '',
+                        'tipo' => $tipo,
+                    ]);
+                }
             } else {
-                Log::warning('Justificativa não encontrada ou título vazio, usando valor fixo', ['justificativa' => $data['justificativa'] ?? 'Não enviado']);
-                SgcEspeleoJustificativa::create([
-                    'campanha_id' => $campanha->id,
-                    'titulo' => 'Título de Teste Fixo',
-                    'justificativa' => '',
-                    'id_contrato' => $contratoId,
-                    'tipo' => 'citacao',
-                ]);
+                // Fallback obsoleto, removido para alinhamento com o novo formato
+                Log::warning('Formato de justificativas não encontrado, esperando array "justificativas"');
             }
 
             Log::info('Campanha salva', ['id' => $campanha->id]);
