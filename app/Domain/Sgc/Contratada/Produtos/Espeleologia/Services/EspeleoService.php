@@ -56,22 +56,23 @@ class EspeleoService
             }
 
             // Depuração e vinculação da justificativa
-            Log::info('Verificando justificativa', ['justificativa' => $data['justificativa'] ?? 'Não encontrado']);
+            Log::info('Verificando justificativa', ['justificativa' => $data['justificativa'] ?? 'Não encontrado', 'full_data' => $data]);
             if (isset($data['justificativa']) && is_array($data['justificativa']) && !empty($data['justificativa']['titulo'])) {
-                Log::info('Criando justificativa', ['titulo' => $data['justificativa']['titulo']]);
+                Log::info('Criando justificativa com valor real', ['titulo' => $data['justificativa']['titulo'], 'id_contrato' => $contratoId]);
                 SgcEspeleoJustificativa::create([
                     'campanha_id' => $campanha->id,
                     'titulo' => $data['justificativa']['titulo'],
                     'justificativa' => '',
                     'tipo' => 'citacao',
+                    'id_contrato' => $contratoId,
                 ]);
             } else {
-                // Teste com valor fixo para isolar o problema
-                Log::info('Teste com valor fixo para justificativa');
+                Log::warning('Justificativa não encontrada ou título vazio, usando valor fixo', ['justificativa' => $data['justificativa'] ?? 'Não enviado']);
                 SgcEspeleoJustificativa::create([
                     'campanha_id' => $campanha->id,
                     'titulo' => 'Título de Teste Fixo',
                     'justificativa' => '',
+                    'id_contrato' => $contratoId,
                     'tipo' => 'citacao',
                 ]);
             }

@@ -61,6 +61,7 @@
                   @update-form="updateForm"
                   @vincular-profissional="vincularProfissional"
                   @salvar-novo-profissional="salvarNovoProfissional"
+                  @update-justificativa="updateJustificativa"
                 />
               </div>
               <div v-if="activeTab === 'metodologias'" class="tab-pane fade" :class="{ 'show active': activeTab === 'metodologias' }">
@@ -111,10 +112,15 @@ const form = reactive({
 const errors = ref({});
 const profissionalRecords = ref(props.draftData?.profissionais ?? []);
 const localProfissionais = ref(Array.isArray(props.profissionais) ? [...props.profissionais] : []);
-const justificativa = ref({ titulo: props.draftData?.justificativa?.titulo || '' }); // Inicializa com valor padrão
+const justificativa = ref({ titulo: props.draftData?.justificativa?.titulo || '' }); // Estado reativo
 
 const updateForm = (data) => {
     Object.assign(form, data);
+};
+
+const updateJustificativa = (newValue) => {
+    justificativa.value = { ...justificativa.value, ...newValue }; // Atualiza o estado justificativa
+    console.log('Justificativa atualizada no Create.vue:', justificativa.value); // Depuração
 };
 
 const vincularProfissional = (profissional) => {
@@ -190,7 +196,7 @@ const salvar = () => {
         })),
         justificativa: justificativa.value, // Inclui a justificativa no payload
     };
-    console.log('Enviando dados para salvar:', payload); // Para depuração
+    console.log('Enviando dados para salvar:', JSON.stringify(payload, null, 2)); // Depuração detalhada
 
     router.post(route('sgc.contratada.produtos.espeleo.salvar_campanha', {
         contrato: props.contrato,

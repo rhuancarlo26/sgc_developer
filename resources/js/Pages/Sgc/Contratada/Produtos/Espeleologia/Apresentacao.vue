@@ -78,7 +78,7 @@
           <h4>Justificativa</h4>
           <div class="mb-3">
             <label>Título da Justificativa</label>
-            <input v-model="justificativa.titulo" class="form-control" placeholder="Digite o título" />
+            <input v-model="justificativa.titulo" @input="$emit('update-justificativa', { titulo: $event.target.value })" class="form-control" placeholder="Digite o título" />
           </div>
         </div>
       </div>
@@ -161,7 +161,7 @@ import { defineProps, defineEmits, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords', 'justificativa']);
-const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional']);
+const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional', 'update-justificativa']);
 
 const showModal = ref(false);
 const selectedProfissional = ref(null);
