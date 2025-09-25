@@ -64,6 +64,7 @@
                   @salvar-novo-profissional="salvarNovoProfissional"
                   @update-justificativas="updateJustificativas"
                   @update:codigo-sei="updateCodigoSei"
+                  @excluir-profissional="excluirProfissional"
                 />
               </div>
               <div v-if="activeTab === 'metodologias'" class="tab-pane fade" :class="{ 'show active': activeTab === 'metodologias' }">
@@ -228,6 +229,11 @@ const salvar = () => {
             codigoSei.value = '';
         },
     });
+};
+
+const excluirProfissional = (id) => {
+    profissionalRecords.value = profissionalRecords.value.filter(p => p.id !== id);
+    console.log('Profissional excluído, nova lista:', profissionalRecords.value);
 };
 </script>
 
