@@ -92,7 +92,7 @@
                 <textarea v-model="justificativas[index].justificativa" @input="$emit('update:justificativas', [...justificativas.value.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.value.slice(index + 1)])" class="form-control" placeholder="Texto da Justificativa"></textarea>
               </div>
               <div class="col-md-12 text-end">
-                <button @click="removerJustificativa(index)" class="btn btn-danger btn-sm" v-if="index > 0">Remover</button>
+                <button @click="excluirJustificativa(index)" class="btn btn-danger btn-sm" v-if="index > 0">Remover</button>
               </div>
             </div>
           </div>
@@ -178,7 +178,7 @@ import { defineProps, defineEmits, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords', 'justificativas', 'codigoSei']);
-const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional', 'update:codigo-sei', 'update:justificativas']);
+const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional', 'update:codigo-sei', 'update:justificativas', 'excluir-profissional']);
 
 const showModal = ref(false);
 const selectedProfissional = ref(null);
@@ -257,6 +257,10 @@ const adicionarJustificativa = () => {
 
 const removerJustificativa = (index) => {
     justificativas.value.splice(index, 1);
+};
+
+const excluirProfissional = (id) => {
+    emit('excluir-profissional', id);
 };
 
 watch(() => props.codigoSei, (newVal) => {
