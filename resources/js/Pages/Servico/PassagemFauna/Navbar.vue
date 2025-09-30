@@ -26,40 +26,54 @@ const props = defineProps({
 								<div class="row flex-fill align-items-center">
 									<div class="col">
 										<ul class="navbar-nav">
-											<NavDropdown prefix="contratos.contratada.servicos.passagem_fauna.configuracao*"
+											<NavDropdown
+												prefix="contratos.contratada.servicos.passagem_fauna.configuracao*"
 												title="Configuração" :icon="IconLayoutDashboard">
 												<NavDropdownLink
 													route-name="contratos.contratada.servicos.passagem_fauna.configuracao.vincular_abio.index"
 													active-on-route-prefix="contratos.contratada.servicos.passagem_fauna.configuracao.vincular_abio*"
-													:route-param="{ contrato: contrato.id, servico: servico.id }" title="Vincular ABIO" />
+													:route-param="{ contrato: contrato.id, servico: servico.id }"
+													title="Vincular ABIO" />
 
 												<NavDropdownLink
 													route-name="contratos.contratada.servicos.passagem_fauna.configuracao.passagem_fauna.index"
 													active-on-route-prefix="contratos.contratada.servicos.passagem_fauna.configuracao.passagem_fauna*"
-													:route-param="{ contrato: contrato.id, servico: servico.id }" title="Passagem fauna" />
+													:route-param="{ contrato: contrato.id, servico: servico.id }"
+													title="Passagem fauna" />
 											</NavDropdown>
 											<template v-if="servico.parecer_passagem_fauna?.fk_status === 3">
-												<NavDropdown prefix="contratos.contratada.servicos.passagem_fauna.execucao*" title="Execução"
-													:icon="IconLayoutDashboard">
+												<NavDropdown
+													prefix="contratos.contratada.servicos.passagem_fauna.execucao*"
+													title="Execução" :icon="IconLayoutDashboard">
 													<NavDropdownLink
 														route-name="contratos.contratada.servicos.passagem_fauna.execucao.campanha.index"
 														active-on-route-prefix="contratos.contratada.servicos.passagem_fauna.execucao.campanha*"
-														:route-param="{ contrato: contrato.id, servico: servico.id }" title="Campanha" />
+														:route-param="{ contrato: contrato.id, servico: servico.id }"
+														title="Campanha" />
 													<NavDropdownLink
 														route-name="contratos.contratada.servicos.passagem_fauna.execucao.registro.index"
 														active-on-route-prefix="contratos.contratada.servicos.passagem_fauna.execucao.registro*"
-														:route-param="{ contrato: contrato.id, servico: servico.id }" title="Registros" />
+														:route-param="{ contrato: contrato.id, servico: servico.id }"
+														title="Registros" />
 												</NavDropdown>
 
-												<NavLink route-name="contratos.contratada.servicos.passagem_fauna.resultado.index"
+												<NavLink
+													route-name="contratos.contratada.servicos.passagem_fauna.resultado.index"
 													active-on-route-prefix="contratos.contratada.servicos.passagem_fauna.resultado*"
-													:param="{ contrato: contrato.id, servico: servico.id }" title="Resultado"
-													:icon="IconLayoutDashboard" />
+													:param="{ contrato: contrato.id, servico: servico.id }"
+													title="Resultado" :icon="IconLayoutDashboard" />
 
-												<NavLink route-name="contratos.contratada.servicos.passagem_fauna.relatorio.index"
+												<NavLink
+													route-name="contratos.contratada.servicos.passagem_fauna.relatorio.index"
 													active-on-route-prefix="contratos.contratada.servicos.passagem_fauna.relatorio*"
-													:param="{ contrato: contrato.id, servico: servico.id }" title="Relatório"
-													:icon="IconLayoutDashboard" />
+													:param="{ contrato: contrato.id, servico: servico.id }"
+													title="Relatório" :icon="IconLayoutDashboard" />
+
+												<NavLink
+													route-name="contratos.contratada.servicos.passagem.fauna.pareceres.index"
+													active-on-route-prefix="contratos.contratada.servicos.passagem.fauna.pareceres.index*"
+													:param="{ contrato: contrato.id, servico: servico.id }"
+													title="Pareceres" :icon="IconLayoutDashboard" />
 											</template>
 										</ul>
 									</div>
