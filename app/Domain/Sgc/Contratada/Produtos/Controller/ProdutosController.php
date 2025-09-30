@@ -24,7 +24,7 @@ class ProdutosController extends Controller
     protected $espeleoService;
 
     public function __construct(
-        ProdutosService $produtosService, 
+        ProdutosService $produtosService,
         FaunaService $faunaService,
         EspeleoService $espeleoService
     ) {
@@ -38,14 +38,20 @@ class ProdutosController extends Controller
         $subprodutos = $this->produtosService->getSubprodutosByContrato($contrato, $produto);
         $contratoObj = Contrato::findOrFail($contrato);
 
-        $campanhas = $produto === 'fauna' 
+        $subproduto_teste = 'Elaboração_do_Relatório_de_Prospecção_Espeleológica_-_Mata_Atlântica';
+
+        $keys = array_keys((array) $request->all());
+        $trecho = $keys[0] ?? null;
+
+        $campanhas = $produto === 'fauna'
             ? $this->getCampanhasFauna($contrato)
-            : $this->getCampanhasEspeleologia($contrato);
+            : $this->getCampanhasEspeleologia($contrato, $this->bota_os_espacos_de_volta($trecho));
 
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
             'contrato' => $contrato,
             'produto' => ucfirst($produto),
+            'requests' => $request,
             'contratos' => $contratoObj,
             'campanhas' => $campanhas,
             'canApprove' => Auth::user()->perfis_id === 2 && count(array_filter($campanhas->toArray(), fn($c) => $c['status'] === 'Em análise')) > 0,
@@ -157,7 +163,7 @@ class ProdutosController extends Controller
                     'cod_emp' => $emp->cod_emp,
                     'subtrecho' => $emp->subtrecho_ini && $emp->subtrecho_fin ? $emp->subtrecho_ini . ' - ' . $emp->subtrecho_fin : '',
                     'segmento' => $emp->km_ini && $emp->km_fin ? $emp->km_ini . ' - ' . $emp->km_fin : '',
-                    'extensao' => $emp->km_fin && $emp->km_ini ? $emp->km_fin - $emp->km_ini : 0,
+                    'extensao' => $emp->km_fin && $emp->km_ini ? $emp->km_fin . ' - ' . $emp->km_ini : 0,
                     'tipo_de_intervencao' => $emp->tipo_de_intervencao ?? '',
                     'descricao' => $emp->descricao ?? '',
                     'bioma' => $emp->bioma ?? '',
@@ -192,9 +198,12 @@ class ProdutosController extends Controller
         ]);
     }
 
-    private function getCampanhasEspeleologia($contrato)
+    private function getCampanhasEspeleologia($contrato, $subproduto)
     {
-        return SgcEspeleoCampanha::where('id_contrato', $contrato)
+        return SgcEspeleoCampanha::where([
+            'id_contrato' => $contrato,
+            'subproduto' => $subproduto
+        ])
             ->get(['id', 'id_campanha', 'cod_emp', 'status', 'subproduto'])
             ->map(function ($campanha) {
                 return [
@@ -209,5 +218,8 @@ class ProdutosController extends Controller
             });
     }
 
-
+    private function bota_os_espacos_de_volta($string)
+    {
+        return str_replace('_', ' ', $string);
+    }
 }

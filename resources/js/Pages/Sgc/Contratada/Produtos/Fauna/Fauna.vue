@@ -8,6 +8,7 @@ import NavButton from '@/Components/NavButton.vue';
 
 const props = defineProps({
     subprodutos: { type: Array, default: () => [] },
+    requests: { type: Array, default: () => [] },
     contrato: { type: [Number, String], required: true },
     produto: { type: String, required: true },
     contratos: { type: Object, required: true },
@@ -17,6 +18,7 @@ const props = defineProps({
 });
 
 console.log('Auth:', props.auth);
+console.log('requests:', props.requests);
 
 // Lista de produtos disponíveis
 const produtos = [
@@ -41,7 +43,7 @@ const selectedSubproduto = ref('');
 // Atualizar a rota quando o produto mudar
 const updateProduto = () => {
   router.get(
-    route('sgc.contratada.produtos.index', [props.contrato, selectedProduto.value]),
+    route('sgc.contratada.produtos.index', [props.contrato, selectedProduto.value, selectedSubproduto.value || '']),
     {},
     {
       preserveState: true,
@@ -135,7 +137,7 @@ const editarCampanha = (campanhaId) => {
                   <div class="col-md-4 mb-4">
                     <div class="block-card block-card-short">
                       <h4 class="text-center mb-2">ESCOLHER SUBPRODUTO</h4>
-                      <select v-model="selectedSubproduto" class="form-select">
+                      <select v-model="selectedSubproduto" @change="updateProduto" class="form-select">
                         <option value="">Todos</option>
                         <option v-for="desc in uniqueSubprodutos" :key="desc" :value="desc">
                           {{ desc }}
