@@ -74,9 +74,15 @@
                   @update-metodologia="updateMetodologia"
                 />
               </div>
-              <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
+              <!-- <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
                 <h3>Resultados - A implementar</h3>
                 <p>Esta aba será preenchida com os resultados da campanha.</p>
+              </div> -->
+              <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
+                <Resultados
+                  :empreendimentos="empreendimentos"
+                  :errors="errors"
+                />
               </div>
               <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
                 <h3>Anexos - A implementar</h3>
@@ -98,6 +104,7 @@ import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Apresentacao from './Apresentacao.vue';
 import Metodologias from './Metodologias.vue';
+import Resultados from './Resultados.vue';
 import { reactive, ref, onMounted, watch } from 'vue';
 
 const props = defineProps(['contrato', 'produto', 'subproduto', 'empreendimentos', 'campanhaId', 'draftData', 'contratos', 'profissionais', 'justificativas', 'codigoSei']);
@@ -115,7 +122,7 @@ const form = reactive({
     tipo_de_intervencao: props.draftData?.tipo_de_intervencao || '',
     descricao: props.draftData?.descricao || '',
     bioma: props.draftData?.bioma || '',
-    metodologia: props.draftData?.metodologia || '', // Novo campo para metodologia
+    metodologia: props.draftData?.metodologia || '', 
 });
 
 const errors = ref({});
@@ -211,7 +218,7 @@ const salvar = () => {
         tipo_de_intervencao: form.tipo_de_intervencao || null,
         descricao: form.descricao || null,
         bioma: form.bioma || null,
-        metodologia: form.metodologia || null, // Adicionado o campo metodologia
+        metodologia: form.metodologia || null, 
         profissionais: profissionalRecords.value.map(p => ({
             campanha_id: props.campanhaId,
             id_contrato: props.contrato,
