@@ -25,6 +25,7 @@ class EspeleoSalvarCampanhaRequest extends FormRequest
             'justificativas.*.tipo' => 'nullable|string|in:citacao,complementar', 
             'justificativas.*.titulo' => 'nullable|string',  
             'justificativas.*.codigo_sei' => 'nullable|string|max:255', 
+            'metodologia' => 'nullable|string|max:8000',
         ];
     }
 

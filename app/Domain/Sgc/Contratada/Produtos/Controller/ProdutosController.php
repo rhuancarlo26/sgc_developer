@@ -175,9 +175,12 @@ class ProdutosController extends Controller
                 'justificativa' => $just->justificativa,
                 'tipo' => $just->tipo,
                 'titulo' => $just->titulo,
-                'codigo_sei' => $just->codigo_sei, // Inclui o código SEI
+                'codigo_sei' => $just->codigo_sei, 
             ];
         })->all() ?: [['justificativa' => '', 'tipo' => 'complementar', 'titulo' => '', 'codigo_sei' => '']];
+
+        // Carregar metodologia relacionada
+        $metodologia = $draft->metodologia ? $draft->metodologia->metodologia : '';
 
         return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
             'contrato' => $contrato,
@@ -188,7 +191,8 @@ class ProdutosController extends Controller
             'campanhaId' => $draft->id,
             'draftData' => $draft->toArray(),
             'profissionais' => $profissionais,
-            'justificativas' => $justificativas, // Passa as justificativas com código SEI
+            'justificativas' => $justificativas, 
+            'metodologia' => $metodologia
         ]);
     }
 

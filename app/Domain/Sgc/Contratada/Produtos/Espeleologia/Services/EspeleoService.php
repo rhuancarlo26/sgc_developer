@@ -5,6 +5,7 @@ namespace App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcEspeleoCampanhaProfissional;
 use App\Models\SgcEspeleoJustificativa;
+use App\Models\SgcEspeleoMetodologia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -59,10 +60,10 @@ class EspeleoService
             if (isset($data['justificativas']) && is_array($data['justificativas'])) {
                 foreach ($data['justificativas'] as $just) {
                     Log::info('Criando justificativa', ['justificativa' => $just]);
-                    $tipo = $just['tipo'] ?? 'complementar'; // Padrão como complementar
+                    $tipo = $just['tipo'] ?? 'complementar'; 
                     SgcEspeleoJustificativa::create([
                         'campanha_id' => $campanha->id,
-                        'codigo_sei' => $just['codigo_sei'] ?? null, // Adiciona código SEI da justificativa
+                        'codigo_sei' => $just['codigo_sei'] ?? null,
                         'id_contrato' => $contratoId,
                         'titulo' => $just['titulo'] ?? null,
                         'justificativa' => $just['justificativa'] ?? '',
@@ -72,6 +73,20 @@ class EspeleoService
             } else {
                 // Fallback obsoleto, removido para alinhamento com o novo formato
                 Log::warning('Formato de justificativas não encontrado, esperando array "justificativas"');
+            }
+
+            // Salvar metodologia se fornecida
+            if (isset($data['metodologia']) && !empty($data['metodologia'])) {
+                // Remove se já existir uma para esta campanha (para update)
+                SgcEspeleoMetodologia::where('campanha_id', $campanha->id)->delete();
+                
+                SgcEspeleoMetodologia::create([
+                    'campanha_id' => $campanha->id,
+                    'id_contrato' => $contratoId,
+                    'titulo' => $data['titulo_metodologia'] ?? null,
+                    'metodologia' => $data['metodologia'],
+                ]);
+                Log::info('Metodologia salva', ['campanha_id' => $campanha->id, 'metodologia_length' => strlen($data['metodologia'])]);
             }
 
             Log::info('Campanha salva', ['id' => $campanha->id]);

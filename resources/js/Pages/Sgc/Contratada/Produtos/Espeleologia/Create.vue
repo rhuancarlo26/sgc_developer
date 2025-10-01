@@ -68,8 +68,11 @@
                 />
               </div>
               <div v-if="activeTab === 'metodologias'" class="tab-pane fade" :class="{ 'show active': activeTab === 'metodologias' }">
-                <h3>Metodologias - A implementar</h3>
-                <p>Esta aba será preenchida com os detalhes das metodologias usadas na campanha.</p>
+                <Metodologias
+                  :metodologia="form.metodologia"
+                  :errors="errors"
+                  @update-metodologia="updateMetodologia"
+                />
               </div>
               <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
                 <h3>Resultados - A implementar</h3>
@@ -94,6 +97,7 @@ import { Head, router } from '@inertiajs/vue3';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Apresentacao from './Apresentacao.vue';
+import Metodologias from './Metodologias.vue';
 import { reactive, ref, onMounted, watch } from 'vue';
 
 const props = defineProps(['contrato', 'produto', 'subproduto', 'empreendimentos', 'campanhaId', 'draftData', 'contratos', 'profissionais', 'justificativas', 'codigoSei']);
@@ -111,6 +115,7 @@ const form = reactive({
     tipo_de_intervencao: props.draftData?.tipo_de_intervencao || '',
     descricao: props.draftData?.descricao || '',
     bioma: props.draftData?.bioma || '',
+    metodologia: props.draftData?.metodologia || '', // Novo campo para metodologia
 });
 
 const errors = ref({});
@@ -136,6 +141,11 @@ const updateCodigoSei = (newValue) => {
     }
 };
 
+const updateMetodologia = (value) => {
+    form.metodologia = value;
+    console.log('Metodologia atualizada:', value);
+};
+
 const vincularProfissional = (profissional) => {
     console.log('Tentando vincular profissional:', profissional);
     if (profissional && profissional.profissional) {
@@ -145,7 +155,7 @@ const vincularProfissional = (profissional) => {
             profissional: profissional.profissional,
             formacao: profissional.formacao,
         });
-        selectedProfissional.value = null;
+       // selectedProfissional.value = null;
         console.log('Profissional vinculado:', profissionalRecords.value);
     } else {
         console.log('Nenhum profissional selecionado ou inválido');
@@ -201,6 +211,7 @@ const salvar = () => {
         tipo_de_intervencao: form.tipo_de_intervencao || null,
         descricao: form.descricao || null,
         bioma: form.bioma || null,
+        metodologia: form.metodologia || null, // Adicionado o campo metodologia
         profissionais: profissionalRecords.value.map(p => ({
             campanha_id: props.campanhaId,
             id_contrato: props.contrato,

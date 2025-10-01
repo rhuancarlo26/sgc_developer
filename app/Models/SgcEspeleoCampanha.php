@@ -45,4 +45,9 @@ class SgcEspeleoCampanha extends Model
     {
         return $this->hasMany(SgcEspeleoJustificativa::class, 'campanha_id');
     }
+
+    public function metodologia()
+    {
+        return $this->hasOne(SgcEspeleoMetodologia::class, 'campanha_id');
+    }
 }
