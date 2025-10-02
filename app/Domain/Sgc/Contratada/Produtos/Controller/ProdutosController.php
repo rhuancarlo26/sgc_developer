@@ -44,7 +44,7 @@ class ProdutosController extends Controller
         $trecho = $keys[0] ?? null;
 
         $campanhas = $produto === 'fauna'
-            ? $this->getCampanhasFauna($contrato)
+            ? $this->getCampanhasFauna($contrato, $this->bota_os_espacos_de_volta($trecho))
             : $this->getCampanhasEspeleologia($contrato, $this->bota_os_espacos_de_volta($trecho));
 
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
@@ -122,9 +122,13 @@ class ProdutosController extends Controller
         ]);
     }
 
-    private function getCampanhasFauna($contrato)
+    private function getCampanhasFauna($contrato, $subproduto)
     {
-        return SgcFaunaCampanha::where('id_contrato', $contrato)
+        $arr_pesquisa = ['id_contrato' => $contrato];
+        if($subproduto) {
+            $arr_pesquisa['subproduto'] = $subproduto;
+        }
+        return SgcFaunaCampanha::where($arr_pesquisa)
             ->get(['id', 'id_campanha', 'cod_emp', 'data_ini', 'data_fim', 'status', 'subproduto'])
             ->map(function ($campanha) {
                 return [
@@ -200,10 +204,11 @@ class ProdutosController extends Controller
 
     private function getCampanhasEspeleologia($contrato, $subproduto)
     {
-        return SgcEspeleoCampanha::where([
-            'id_contrato' => $contrato,
-            'subproduto' => $subproduto
-        ])
+        $arr_pesquisa = ['id_contrato' => $contrato];
+        if($subproduto) {
+            $arr_pesquisa['subproduto'] = $subproduto;
+        }
+        return SgcEspeleoCampanha::where($arr_pesquisa)
             ->get(['id', 'id_campanha', 'cod_emp', 'status', 'subproduto'])
             ->map(function ($campanha) {
                 return [
