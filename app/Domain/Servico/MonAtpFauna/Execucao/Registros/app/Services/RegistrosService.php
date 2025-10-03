@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use App\Models\AtFaunaGrupoAmostradoModel;
 
 class RegistrosService extends BaseModelService
 {
@@ -85,6 +86,7 @@ class RegistrosService extends BaseModelService
             'id_registro' => $idRegistro
         ]);
     }
+   
     public function store_importar(array $post)
     {
         $response = [
@@ -96,31 +98,101 @@ class RegistrosService extends BaseModelService
             ]
         ];
 
+        
         $passagemFaunaImport = new RegistroImport();
         $registros = Excel::toCollection($passagemFaunaImport, $post['arquivo'])->first();
 
         $erros = [];
 
-        foreach ($registros as $i => $registro) {
-            try {
-                if (!isset($registro['data_registro']) || $this->getDateYMD($registro['data_registro']) === null) {
-                    throw new \Exception("Campo 'data_registro' ausente ou não pôde ser convertido");
-                }
-                $uf = Uf::where('nome', $registro['estado'])->orWhere('uf', $registro['estado'])->first();
+      
+        $map = [
+            'Grupo Amostrado'                => 'fk_grupo_amostrado',
+            'Data do Registro'               => 'data_registro',
+            'Hora do Registro'               => 'hora_registro',
+            'UF'                             => 'uf_final',
+            'Km'                             => 'km',
+            'Latitude'                       => 'latitude',
+            'Longitude'                      => 'longitude',
+            'Sentido'                        => 'sentido',
+            'Margem'                         => 'margem',
+            'Pavimentado'                    => 'pavimentado',
+            'Classe'                         => 'classe',
+            'Ordem'                          => 'ordem',
+            'Família'                        => 'familia',
+            'Gênero'                         => 'genero',
+            'Espécie'                        => 'especie',
+            'Nome Comum'                     => 'nome_comum',
+            'Sexo'                           => 'sexo',
+            'Faixa Etária'                   => 'faixa_etaria',
+            'Coletado'                       => 'coletado',
+            'Num de Tombamento'              => 'n_registro_tombamento',
+            'Carcaca Removida'               => 'carcaca_removida',
+            'Redução Biológica'              => 'reducao_biologica',
+            'Qnt de Indivíduos'              => 'n_individuos',
+            'Status Conservação Estadual'    => 'estadual',
+            'Status Conservação Federal'     => 'federal',
+            'Status Conservação IUCN'        => 'iucn',
+        ];
 
+        
+        $normalize = function (?string $s): string {
+            if ($s === null) return '';
+            $s = trim($s);      
+            $s = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+            $s = strtolower($s); 
+            $s = preg_replace('/\s+/', ' ', $s);
+            return $s ?? '';
+        };
+
+        $gruposMap = AtFaunaGrupoAmostradoModel::select('id', 'nome')
+            ->get()
+            ->mapWithKeys(function ($g) use ($normalize) {
+                return [$normalize($g->nome) => (int)$g->id];
+            })
+            ->all();
+
+        foreach ($registros as $i => $registroOld) {
+            try {
+              
+                $registro = [];
+                foreach ($map as $from => $to) {
+                    $registro[$to] = $registroOld[$from] ?? null;
+                }
+
+              
+                $nomeGrupo = $registro['fk_grupo_amostrado'] ?? null;
+                $grupoId = $gruposMap[$normalize($nomeGrupo)] ?? null;
+
+                if (!$grupoId) {
+                    throw new \Exception("Grupo Amostrado '{$nomeGrupo}' não encontrado na base (linha " . ($i + 2) . ").");
+                }
+                $registro['fk_grupo_amostrado'] = $grupoId;
+
+                
+                if (!isset($registro['data_registro']) || $this->getDateYMD($registro['data_registro']) === null) {
+                    throw new \Exception("Campo 'data_registro' ausente ou inválido (linha " . ($i + 2) . ").");
+                }
+
+              
+                $uf = Uf::where('nome', $registro['uf_final'])
+                    ->orWhere('uf', $registro['uf_final'])
+                    ->first();
+
+               
                 $response = $this->dataManagement->create(entity: $this->modelClass, infos: [
                     ...$registro,
-                    'fk_estado' => $uf->id ?? null,
-                    'fk_campanha' => $post['campanha_id'],
-                    'fk_servico' => $post['servico_id'],
-                    'sentido' => strtoupper($registro['sentido'][0] ?? ''),
-                    'margem' => strtoupper($registro['margem'][0] ?? ''),
+                    'fk_estado'     => $uf->id ?? null,
+                    'fk_campanha'   => $post['campanha_id'],
+                    'fk_servico'    => $post['servico_id'],
+                    'sentido'       => strtoupper($registro['sentido'][0] ?? ''),
+                    'margem'        => strtoupper($registro['margem'][0] ?? ''),
                     'data_registro' => $this->getDateYMD($registro['data_registro'] ?? null),
                     'hora_registro' => $this->getHoraHM($registro['hora_registro'] ?? null),
                 ]);
             } catch (\Throwable $e) {
+                $erros[] = "Linha " . ($i + 2) . ": " . $e->getMessage();
                 Log::error("Erro na linha " . ($i + 2) . " da importação de registros de fauna: ", [
-                    'registro' => $registro,
+                    'registro' => $registro ?? [],
                     'erro' => $e->getMessage()
                 ]);
             }
