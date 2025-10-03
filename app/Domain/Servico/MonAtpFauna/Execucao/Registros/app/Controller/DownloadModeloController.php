@@ -10,7 +10,7 @@ class DownloadModeloController
 {
     public function importarModelo(): BinaryFileResponse
     {
-        $path = public_path('file/Servico/MonAtpFauna/ModeloRegistro.xlsx');
+        $path = public_path('file/Servico/MonAtpFauna/MonAtpFaunaModelo.xlsx');
 
         if (!File::exists($path)) {
             abort(404, 'Arquivo modelo não encontrado.');
