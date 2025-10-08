@@ -74,14 +74,14 @@
                   @update-metodologia="updateMetodologia"
                 />
               </div>
-              <!-- <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
-                <h3>Resultados - A implementar</h3>
-                <p>Esta aba será preenchida com os resultados da campanha.</p>
-              </div> -->
               <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
                 <Resultados
                   :empreendimentos="empreendimentos"
                   :errors="errors"
+                  :campanha-id="campanhaId"
+                  :contrato="contrato"
+                  :resultados-anexos="form.resultados_anexos"
+                  @update-resultados-anexos="updateResultadosAnexos"
                 />
               </div>
               <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
@@ -107,22 +107,35 @@ import Metodologias from './Metodologias.vue';
 import Resultados from './Resultados.vue';
 import { reactive, ref, onMounted, watch } from 'vue';
 
-const props = defineProps(['contrato', 'produto', 'subproduto', 'empreendimentos', 'campanhaId', 'draftData', 'contratos', 'profissionais', 'justificativas', 'codigoSei']);
+const props = defineProps([
+  'contrato',
+  'produto',
+  'subproduto',
+  'empreendimentos',
+  'campanhaId',
+  'draftData',
+  'contratos',
+  'profissionais',
+  'justificativas',
+  'codigoSei',
+  'resultadosAnexos', // Novo
+]);
 
 const activeTab = ref('apresentacao');
 const showModal = ref(false);
 
 const form = reactive({
-    id_campanha: '3',
-    cod_emp: props.draftData?.cod_emp || '',
-    subproduto: props.subproduto || '',
-    subtrecho: props.draftData?.subtrecho || '',
-    segmento: props.draftData?.segmento || '',
-    extensao: props.draftData?.extensao || '',
-    tipo_de_intervencao: props.draftData?.tipo_de_intervencao || '',
-    descricao: props.draftData?.descricao || '',
-    bioma: props.draftData?.bioma || '',
-    metodologia: props.draftData?.metodologia || '', 
+  id_campanha: '3',
+  cod_emp: props.draftData?.cod_emp || '',
+  subproduto: props.subproduto || '',
+  subtrecho: props.draftData?.subtrecho || '',
+  segmento: props.draftData?.segmento || '',
+  extensao: props.draftData?.extensao || '',
+  tipo_de_intervencao: props.draftData?.tipo_de_intervencao || '',
+  descricao: props.draftData?.descricao || '',
+  bioma: props.draftData?.bioma || '',
+  metodologia: props.draftData?.metodologia || '',
+  resultados_anexos: props.resultadosAnexos || [], // Novo
 });
 
 const errors = ref({});
@@ -132,126 +145,131 @@ const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: '
 const codigoSei = ref(props.codigoSei || '');
 
 const updateForm = (data) => {
-    Object.assign(form, data);
+  Object.assign(form, data);
 };
 
 const updateJustificativas = (newValue) => {
-    justificativas.value = newValue;
-    console.log('Justificativas atualizadas:', justificativas.value);
+  justificativas.value = newValue;
+  console.log('Justificativas atualizadas:', justificativas.value);
 };
 
 const updateCodigoSei = (newValue) => {
-    codigoSei.value = newValue;
-    console.log('Código SEI atualizado:', codigoSei.value);
-    if (justificativas.value.length > 0) {
-        justificativas.value[0].codigo_sei = newValue;
-    }
+  codigoSei.value = newValue;
+  console.log('Código SEI atualizado:', codigoSei.value);
+  if (justificativas.value.length > 0) {
+    justificativas.value[0].codigo_sei = newValue;
+  }
 };
 
 const updateMetodologia = (value) => {
-    form.metodologia = value;
-    console.log('Metodologia atualizada:', value);
+  form.metodologia = value;
+  console.log('Metodologia atualizada:', value);
+};
+
+const updateResultadosAnexos = (newAnexos) => {
+  form.resultados_anexos = newAnexos;
+  console.log('Anexos de resultados atualizados:', newAnexos);
 };
 
 const vincularProfissional = (profissional) => {
-    console.log('Tentando vincular profissional:', profissional);
-    if (profissional && profissional.profissional) {
-        profissionalRecords.value.push({
-            id: Date.now(),
-            profissional_id: profissional.id,
-            profissional: profissional.profissional,
-            formacao: profissional.formacao,
-        });
-       // selectedProfissional.value = null;
-        console.log('Profissional vinculado:', profissionalRecords.value);
-    } else {
-        console.log('Nenhum profissional selecionado ou inválido');
-    }
+  console.log('Tentando vincular profissional:', profissional);
+  if (profissional && profissional.profissional) {
+    profissionalRecords.value.push({
+      id: Date.now(),
+      profissional_id: profissional.id,
+      profissional: profissional.profissional,
+      formacao: profissional.formacao,
+    });
+    console.log('Profissional vinculado:', profissionalRecords.value);
+  } else {
+    console.log('Nenhum profissional selecionado ou inválido');
+  }
 };
 
 const salvarNovoProfissional = (novoProfissional) => {
-    const payload = {
-        id_contrato: props.contrato,
-        profissional: novoProfissional.profissional,
-        formacao: novoProfissional.formacao,
-        telefone: novoProfissional.telefone,
-        cpf: novoProfissional.cpf,
-        email: novoProfissional.email,
-        curriculum_lattes: novoProfissional.curriculum_lattes,
-        funcao: novoProfissional.funcao,
-        ctf: novoProfissional.ctf,
-        validade: novoProfissional.validade,
-        conselho_de_classe: novoProfissional.conselho_de_classe,
-        numero_de_registro: novoProfissional.numero_de_registro,
-        status: novoProfissional.status,
-        observacao: novoProfissional.observacao,
-        subproduto: props.subproduto,
-    };
-    router.post(route('sgc.contratada.produtos.espeleo.profissional.store', {
-        contrato: props.contrato,
-        produto: 'espeleologia',
-    }), payload, {
-        onSuccess: (page) => {
-            const { success, profissional } = page.props.flash || {};
-            if (success && profissional) {
-                alert(success);
-                localProfissionais.value = page.props.profissionais || [];
-            }
-            showModal.value = false;
-        },
-        onError: (err) => {
-            console.error('Erro ao cadastrar profissional:', err);
-            showModal.value = false;
-        },
-    });
+  const payload = {
+    id_contrato: props.contrato,
+    profissional: novoProfissional.profissional,
+    formacao: novoProfissional.formacao,
+    telefone: novoProfissional.telefone,
+    cpf: novoProfissional.cpf,
+    email: novoProfissional.email,
+    curriculum_lattes: novoProfissional.curriculum_lattes,
+    funcao: novoProfissional.funcao,
+    ctf: novoProfissional.ctf,
+    validade: novoProfissional.validade,
+    conselho_de_classe: novoProfissional.conselho_de_classe,
+    numero_de_registro: novoProfissional.numero_de_registro,
+    status: novoProfissional.status,
+    observacao: novoProfissional.observacao,
+    subproduto: props.subproduto,
+  };
+  router.post(route('sgc.contratada.produtos.espeleo.profissional.store', {
+    contrato: props.contrato,
+    produto: 'espeleologia',
+  }), payload, {
+    onSuccess: (page) => {
+      const { success, profissional } = page.props.flash || {};
+      if (success && profissional) {
+        alert(success);
+        localProfissionais.value = page.props.profissionais || [];
+      }
+      showModal.value = false;
+    },
+    onError: (err) => {
+      console.error('Erro ao cadastrar profissional:', err);
+      showModal.value = false;
+    },
+  });
 };
 
 const salvar = () => {
-    const payload = {
-        id: props.campanhaId,
-        id_campanha: form.id_campanha,
-        cod_emp: form.cod_emp,
-        subproduto: form.subproduto,
-        subtrecho: form.subtrecho || null,
-        segmento: form.segmento || null,
-        extensao: form.extensao || null,
-        tipo_de_intervencao: form.tipo_de_intervencao || null,
-        descricao: form.descricao || null,
-        bioma: form.bioma || null,
-        metodologia: form.metodologia || null, 
-        profissionais: profissionalRecords.value.map(p => ({
-            campanha_id: props.campanhaId,
-            id_contrato: props.contrato,
-            profissional_id: p.profissional_id,
-            id_modulo: null,
-        })),
-        codigo_sei: codigoSei.value,
-        justificativas: justificativas.value.map((j, i) => ({
-            ...j,
-            tipo: i === 0 ? 'citacao' : 'justificativa',
-        })),
-    };
-    console.log('Enviando dados:', JSON.stringify(payload, null, 2));
-    router.post(route('sgc.contratada.produtos.espeleo.salvar_campanha', {
-        contrato: props.contrato,
-        produto: 'espeleologia',
-    }), payload, {
-        onError: (err) => {
-            errors.value = err;
-            console.error(err);
-        },
-        onSuccess: () => {
-            errors.value = {};
-            alert('Campanha salva com sucesso');
-            justificativas.value = [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: '' }];
-            codigoSei.value = '';
-        },
-    });
+  const payload = {
+    id: props.campanhaId,
+    id_campanha: form.id_campanha,
+    cod_emp: form.cod_emp,
+    subproduto: form.subproduto,
+    subtrecho: form.subtrecho || null,
+    segmento: form.segmento || null,
+    extensao: form.extensao || null,
+    tipo_de_intervencao: form.tipo_de_intervencao || null,
+    descricao: form.descricao || null,
+    bioma: form.bioma || null,
+    metodologia: form.metodologia || null,
+    profissionais: profissionalRecords.value.map(p => ({
+      campanha_id: props.campanhaId,
+      id_contrato: props.contrato,
+      profissional_id: p.profissional_id,
+      id_modulo: null,
+    })),
+    codigo_sei: codigoSei.value,
+    justificativas: justificativas.value.map((j, i) => ({
+      ...j,
+      tipo: i === 0 ? 'citacao' : 'justificativa',
+    })),
+    resultados_anexos: form.resultados_anexos, // Novo
+  };
+  console.log('Enviando dados:', JSON.stringify(payload, null, 2));
+  router.post(route('sgc.contratada.produtos.espeleo.salvar_campanha', {
+    contrato: props.contrato,
+    produto: 'espeleologia',
+  }), payload, {
+    onError: (err) => {
+      errors.value = err;
+      console.error(err);
+    },
+    onSuccess: () => {
+      errors.value = {};
+      alert('Campanha salva com sucesso');
+      justificativas.value = [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: '' }];
+      codigoSei.value = '';
+    },
+  });
 };
 
 const excluirProfissional = (id) => {
-    profissionalRecords.value = profissionalRecords.value.filter(p => p.id !== id);
-    console.log('Profissional excluído, nova lista:', profissionalRecords.value);
+  profissionalRecords.value = profissionalRecords.value.filter(p => p.id !== id);
+  console.log('Profissional excluído, nova lista:', profissionalRecords.value);
 };
 </script>
 

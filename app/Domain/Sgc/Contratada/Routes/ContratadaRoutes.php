@@ -145,7 +145,13 @@ Route::prefix('/contratada')->group(function () {
             Route::get('profissionais', [EspeleoCampanhaController::class, 'getProfissionais'])->name('sgc.contratada.produtos.espeleo.profissionais');
         });
 
+        Route::post('/espeleo/resultados/upload', [EspeleoCampanhaController::class, 'uploadResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.upload');
+
     });
+
+    
+
+    
     
     
 

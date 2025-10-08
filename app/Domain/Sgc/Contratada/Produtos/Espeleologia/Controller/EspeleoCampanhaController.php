@@ -7,7 +7,10 @@ use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoService;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Request\EspeleoSalvarCampanhaRequest;
 use App\Models\SgcEspeleoProfissional;
 use App\Models\SgcvwEmpreendimentos;
+use App\Models\SgcEspeleoCampanha;
+use App\Models\SgcEspeleoResultadoAnexo;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
@@ -105,5 +108,45 @@ class EspeleoCampanhaController extends Controller
     {
         $profissionais = SgcEspeleoProfissional::where('id_contrato', $contrato)->get();
         return response()->json(['profissionais' => $profissionais]);
+    }
+
+    public function uploadResultadoAnexo(Request $request, $contrato, $produto)
+    {
+        if ($produto !== 'espeleologia') abort(404, 'Produto inválido');
+
+        $validated = $request->validate([
+            'zip_file' => 'required|file|mimes:zip|max:10240', // 10MB
+            'campanha_id' => 'required|exists:sgc_espeleo_campanhas,id',
+        ]);
+
+        $campanha = SgcEspeleoCampanha::findOrFail($validated['campanha_id']);
+        if ($campanha->id_contrato != $contrato) abort(403, 'Acesso negado');
+
+        $zipFile = $request->file('zip_file');
+        $nomeOriginal = $zipFile->getClientOriginalName();
+        $nomeUnico = 'espeleo_' . $contrato . '_campanha_' . $campanha->id_campanha . '_' . time() . '.zip';
+
+        $caminhoPasta = 'shapefiles/espeleologia/' . $contrato . '/' . $campanha->id_campanha;
+        $caminhoCompleto = $caminhoPasta . '/' . $nomeUnico;
+
+        $zipFile->storeAs($caminhoPasta, $nomeUnico, 'public');
+
+        $anexo = SgcEspeleoResultadoAnexo::create([
+            'campanha_id' => $campanha->id,
+            'id_contrato' => $contrato,
+            'nome_arquivo' => $nomeOriginal,
+            'caminho' => $caminhoCompleto,
+            'tipo' => 'shapefile',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'anexo' => [
+                'id' => $anexo->id,
+                'nome_arquivo' => $anexo->nome_arquivo,
+                'caminho' => $anexo->caminho,
+                'url_publica' => Storage::url($anexo->caminho),
+            ],
+        ]);
     }
 }

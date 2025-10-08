@@ -50,4 +50,9 @@ class SgcEspeleoCampanha extends Model
     {
         return $this->hasOne(SgcEspeleoMetodologia::class, 'campanha_id');
     }
+
+    public function resultadoAnexos()
+    {
+        return $this->hasMany(SgcEspeleoResultadoAnexo::class, 'campanha_id');
+    }
 }
