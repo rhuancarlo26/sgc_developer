@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProdutosController extends Controller
@@ -181,6 +182,14 @@ class ProdutosController extends Controller
 
         // Carregar metodologia relacionada
         $metodologia = $draft->metodologia ? $draft->metodologia->metodologia : '';
+         $resultadosAnexos = $draft->resultadoAnexos()->get()->map(function ($anexo) {
+            return [
+                'id' => $anexo->id,
+                'nome_arquivo' => $anexo->nome_arquivo,
+                'caminho' => $anexo->caminho,
+                'url_publica' => Storage::url($anexo->caminho),
+            ];
+        })->toArray();
 
         return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
             'contrato' => $contrato,
@@ -192,8 +201,10 @@ class ProdutosController extends Controller
             'draftData' => $draft->toArray(),
             'profissionais' => $profissionais,
             'justificativas' => $justificativas, 
-            'metodologia' => $metodologia
+            'metodologia' => $metodologia,
+            'resultados_anexos' => $resultadosAnexos
         ]);
+
     }
 
     private function getCampanhasEspeleologia($contrato)
