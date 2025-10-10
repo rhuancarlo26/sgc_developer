@@ -17,6 +17,7 @@ class SgcEspeleoResultadoAnexo extends Model
         'nome_arquivo',
         'caminho',
         'tipo',
+        'comentario'
     ];
 
     protected $casts = [
