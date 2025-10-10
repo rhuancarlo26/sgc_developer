@@ -115,8 +115,10 @@ class EspeleoCampanhaController extends Controller
         if ($produto !== 'espeleologia') abort(404, 'Produto inválido');
 
         $validated = $request->validate([
-            'zip_file' => 'required|file|mimes:zip|max:10240', // 10MB
+            'zip_file' => 'required|file|mimes:zip|max:10240',
             'campanha_id' => 'required|exists:sgc_espeleo_campanhas,id',
+            'tipo' => 'required|in:geologico,geomorfologico,cavidades',
+            'comentario' => 'nullable|string|max:5000',
         ]);
 
         $campanha = SgcEspeleoCampanha::findOrFail($validated['campanha_id']);
@@ -136,7 +138,8 @@ class EspeleoCampanhaController extends Controller
             'id_contrato' => $contrato,
             'nome_arquivo' => $nomeOriginal,
             'caminho' => $caminhoCompleto,
-            'tipo' => 'shapefile',
+            'tipo' => $validated['tipo'],
+            'comentario' => $validated['comentario'] ?? null,
         ]);
 
         return response()->json([
@@ -145,8 +148,40 @@ class EspeleoCampanhaController extends Controller
                 'id' => $anexo->id,
                 'nome_arquivo' => $anexo->nome_arquivo,
                 'caminho' => $anexo->caminho,
+                'tipo' => $anexo->tipo,
+                'comentario' => $anexo->comentario,
                 'url_publica' => Storage::url($anexo->caminho),
             ],
         ]);
+    }
+
+    public function updateResultadoAnexo(Request $request, $contrato, $produto, $id)
+    {
+        if ($produto !== 'espeleologia') abort(404, 'Produto inválido');
+
+        $validated = $request->validate([
+            'comentario' => 'nullable|string|max:5000',
+        ]);
+
+        $anexo = SgcEspeleoResultadoAnexo::findOrFail($id);
+        if ($anexo->id_contrato != $contrato) abort(403, 'Acesso negado');
+
+        $anexo->update(['comentario' => $validated['comentario']]);
+        
+
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteResultadoAnexo(Request $request, $contrato, $produto, $id)
+    {
+        if ($produto !== 'espeleologia') abort(404, 'Produto inválido');
+
+        $anexo = SgcEspeleoResultadoAnexo::findOrFail($id);
+        if ($anexo->id_contrato != $contrato) abort(403, 'Acesso negado');
+
+        Storage::disk('public')->delete($anexo->caminho);
+        $anexo->delete();
+
+        return response()->json(['success' => true]);
     }
 }
