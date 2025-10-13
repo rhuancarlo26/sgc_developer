@@ -110,50 +110,69 @@ class EspeleoCampanhaController extends Controller
         return response()->json(['profissionais' => $profissionais]);
     }
 
-    public function uploadResultadoAnexo(Request $request, $contrato, $produto)
-    {
-        if ($produto !== 'espeleologia') abort(404, 'Produto inválido');
+public function uploadResultadoAnexo(Request $request, $contrato, $produto)
+{
+    if ($produto !== 'espeleologia') abort(404, 'Produto inválido');
 
-        $validated = $request->validate([
-            'zip_file' => 'required|file|mimes:zip|max:10240',
-            'campanha_id' => 'required|exists:sgc_espeleo_campanhas,id',
-            'tipo' => 'required|in:geologico,geomorfologico,cavidades',
-            'comentario' => 'nullable|string|max:5000',
-        ]);
+    $validated = $request->validate([
+        'zip_file' => 'required|file|mimes:zip|max:10240',
+        'campanha_id' => 'required|exists:sgc_espeleo_campanhas,id',
+        'tipo' => 'required|in:geologico,geomorfologico,cavidades',
+        'comentario' => 'nullable|string|max:5000',
+    ]);
 
-        $campanha = SgcEspeleoCampanha::findOrFail($validated['campanha_id']);
-        if ($campanha->id_contrato != $contrato) abort(403, 'Acesso negado');
+    $campanha = SgcEspeleoCampanha::findOrFail($validated['campanha_id']);
+    if ($campanha->id_contrato != $contrato) abort(403, 'Acesso negado');
 
-        $zipFile = $request->file('zip_file');
-        $nomeOriginal = $zipFile->getClientOriginalName();
-        $nomeUnico = 'espeleo_' . $contrato . '_campanha_' . $campanha->id_campanha . '_' . time() . '.zip';
+    $zipFile = $request->file('zip_file');
+    $nomeOriginal = $zipFile->getClientOriginalName();
+    $nomeUnico = 'espeleo_' . $contrato . '_campanha_' . $campanha->id_campanha . '_' . time() . '.zip';
 
-        $caminhoPasta = 'shapefiles/espeleologia/' . $contrato . '/' . $campanha->id_campanha;
-        $caminhoCompleto = $caminhoPasta . '/' . $nomeUnico;
+    $caminhoPasta = 'shapefiles/espeleologia/' . $contrato . '/' . $campanha->id_campanha;
+    $caminhoCompleto = $caminhoPasta . '/' . $nomeUnico;
 
-        $zipFile->storeAs($caminhoPasta, $nomeUnico, 'public');
+    $zipFile->storeAs($caminhoPasta, $nomeUnico, 'public');
 
-        $anexo = SgcEspeleoResultadoAnexo::create([
-            'campanha_id' => $campanha->id,
-            'id_contrato' => $contrato,
-            'nome_arquivo' => $nomeOriginal,
-            'caminho' => $caminhoCompleto,
-            'tipo' => $validated['tipo'],
-            'comentario' => $validated['comentario'] ?? null,
-        ]);
+    $anexo = SgcEspeleoResultadoAnexo::create([
+        'campanha_id' => $campanha->id,
+        'id_contrato' => $contrato,
+        'nome_arquivo' => $nomeOriginal,
+        'caminho' => $caminhoCompleto,
+        'tipo' => $validated['tipo'],
+        'comentario' => $validated['comentario'] ?? null,
+    ]);
 
-        return response()->json([
-            'success' => true,
-            'anexo' => [
-                'id' => $anexo->id,
-                'nome_arquivo' => $anexo->nome_arquivo,
-                'caminho' => $anexo->caminho,
-                'tipo' => $anexo->tipo,
-                'comentario' => $anexo->comentario,
-                'url_publica' => Storage::url($anexo->caminho),
-            ],
-        ]);
-    }
+    // Busca todos os anexos atualizados
+    $resultadosAnexos = SgcEspeleoResultadoAnexo::where('id_contrato', $contrato)
+        ->where('campanha_id', $campanha->id)
+        ->get()
+        ->map(function ($a) {
+            return [
+                'id' => $a->id,
+                'nome_arquivo' => $a->nome_arquivo,
+                'caminho' => $a->caminho,
+                'tipo' => $a->tipo,
+                'comentario' => $a->comentario,
+                'url_publica' => Storage::url($a->caminho),
+            ];
+        });
+
+    // 🔄 Retorna um JSON simples, não Inertia
+    return response()->json([
+        'success' => true,
+        'message' => 'Arquivo vinculado com sucesso.',
+        'anexo' => [
+            'id' => $anexo->id,
+            'nome_arquivo' => $anexo->nome_arquivo,
+            'caminho' => $anexo->caminho,
+            'tipo' => $anexo->tipo,
+            'comentario' => $anexo->comentario,
+            'url_publica' => Storage::url($anexo->caminho),
+        ],
+        'resultadosAnexos' => $resultadosAnexos,
+    ]);
+}
+
 
     public function updateResultadoAnexo(Request $request, $contrato, $produto, $id)
     {
@@ -182,6 +201,7 @@ class EspeleoCampanhaController extends Controller
         Storage::disk('public')->delete($anexo->caminho);
         $anexo->delete();
 
-        return response()->json(['success' => true]);
+        return back();
     }
+
 }
