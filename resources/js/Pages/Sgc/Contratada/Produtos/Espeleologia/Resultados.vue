@@ -5,36 +5,33 @@
       Carregue shapefiles (ZIP) para cada tipo de mapa, vincule-os e adicione observações.
     </p>
 
-    <!-- Sub-menu de abas -->
-    <ul class="nav nav-tabs mb-4">
-      <li class="nav-item" v-for="tipo in ['geologico','geomorfologico','cavidades']" :key="tipo">
+    <ul class="nav nav-tabs mb-4 flex-wrap">
+      <li class="nav-item" v-for="tipo in tipos" :key="tipo">
         <a
           class="nav-link"
           :class="{ active: activeSubTab === tipo }"
           @click.prevent="activeSubTab = tipo"
         >
-          {{ tipo === 'geologico' ? 'Geológico' : tipo === 'geomorfologico' ? 'Geomorfológico' : 'Cavidades CECAV/SBE' }}
+          {{ nomesTipos[tipo] }}
+          <i
+            v-if="anexos.find(a => a.tipo === tipo)"
+            class="fas fa-check-circle text-success ms-1"
+          ></i>
         </a>
       </li>
     </ul>
 
-    <!-- Conteúdo das abas -->
     <div class="tab-content">
       <div
-        v-for="tipo in ['geologico', 'geomorfologico', 'cavidades']"
+        v-for="tipo in tipos"
         :key="tipo"
         class="tab-pane fade"
         :class="{ 'show active': activeSubTab === tipo }"
         v-show="activeSubTab === tipo"
       >
         <div class="mb-5">
-          <h4>
-            {{ tipo === 'geologico' ? 'Mapa Geológico' :
-               tipo === 'geomorfologico' ? 'Mapa Geomorfológico' :
-               'Cavidades do Banco CECAV e SBE' }}
-          </h4>
+          <h4>{{ nomesTipos[tipo] }}</h4>
 
-          <!-- Dropzone só aparece se não houver anexo vinculado -->
           <div
             v-if="!anexos.find(a => a.tipo === tipo)"
             @drop="onDrop($event, tipo)"
@@ -46,14 +43,14 @@
           >
             <p>
               Arraste .zip do shapefile aqui ou
-              <button @click="triggerFileInput(tipo)" class="btn btn-link p-0">clique para selecionar</button>.
+              <button type="button" @click.prevent="triggerFileInput(tipo)" class="btn btn-link p-0">clique para selecionar</button>.
             </p>
             <input
+              :id="'fileInput-' + tipo"
               type="file"
               @change="onFileChange($event, tipo)"
               multiple
               accept=".zip,.shp,.shx,.dbf"
-              :ref="'fileInput-' + tipo"
               style="display: none;"
             />
             <div v-if="uploadedFiles[tipo].length > 0" class="mt-2 text-success">
@@ -62,29 +59,29 @@
             <small v-if="errors[tipo]" class="text-danger d-block">{{ errors[tipo] }}</small>
           </div>
 
-          <!-- Botão Vincular Mapa -->
           <button
             v-if="features[tipo].length > 0 && !anexos.find(a => a.tipo === tipo)"
             @click="vincularMapa(tipo)"
             class="btn btn-primary mb-3"
+            type="button"
           >
             Vincular Mapa
           </button>
 
-          <!-- Indicador de arquivo vinculado -->
           <div
             v-if="anexos.find(a => a.tipo === tipo)"
             class="alert alert-info mb-3 d-flex align-items-center justify-content-between"
           >
             <span>Arquivo vinculado: {{ anexos.find(a => a.tipo === tipo).nome_arquivo }}</span>
             <div>
-              <button @click="toggleRender(tipo)" class="btn btn-sm btn-outline-secondary me-1">
+              <button @click="toggleRender(tipo)" class="btn btn-sm btn-outline-secondary me-1" type="button">
                 <i :class="rendered[tipo] ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 {{ rendered[tipo] ? 'Esconder Mapa' : 'Ver Mapa' }}
               </button>
               <button
                 @click="removerAnexo(anexos.find(a => a.tipo === tipo).id)"
                 class="btn btn-sm btn-outline-danger"
+                type="button"
               >
                 <i class="fas fa-trash-alt"></i> Excluir
               </button>
@@ -112,7 +109,7 @@
               v-model="observacoes[tipo]"
               class="form-control"
               rows="4"
-              :placeholder="'Descreva observações sobre o ' + (tipo === 'geologico' ? 'mapa geológico' : tipo === 'geomorfologico' ? 'mapa geomorfológico' : 'mapa de cavidades')"
+              :placeholder="'Descreva observações sobre o ' + nomesTipos[tipo].toLowerCase()"
               @input="updateObservacao(tipo)"
             ></textarea>
           </div>
@@ -156,14 +153,43 @@ const props = defineProps({
 
 const emit = defineEmits(['update-resultados-anexos']);
 
+const tipos = [
+  'geologico', 'geomorfologico', 'cavidades',
+  'hidrologico', 'hipsometrico', 'limites_areas',
+  'potencial_inicial', 'potencial_reclassificado',
+  'projeto_engenharia', 'estudos_posteriores'
+];
+
+const nomesTipos = {
+  geologico: 'Mapa Geológico',
+  geomorfologico: 'Mapa Geomorfológico',
+  cavidades: 'Cavidades CECAV/SBE',
+  hidrologico: 'Mapa Hidrológico',
+  hipsometrico: 'Mapa Hipsométrico/Declividade',
+  limites_areas: 'Limites de Áreas',
+  potencial_inicial: 'Mapa de Potencial Espeleológico - Inicial',
+  potencial_reclassificado: 'Mapa de Potencial Espeleológico - Reclassificado',
+  projeto_engenharia: 'Projeto de Engenharia',
+  estudos_posteriores: 'Estudos Posteriores'
+};
+
 const activeSubTab = ref('geologico');
-const uploadedFiles = ref({ geologico: [], geomorfologico: [], cavidades: [] });
-const features = ref({ geologico: [], geomorfologico: [], cavidades: [] });
-const observacoes = ref({ geologico: '', geomorfologico: '', cavidades: '' });
+const uploadedFiles = ref({});
+const features = ref({});
+const observacoes = ref({});
 const anexos = ref(props.resultadosAnexos || []);
-const rendered = ref({ geologico: false, geomorfologico: false, cavidades: false });
-const zipFiles = ref({ geologico: null, geomorfologico: null, cavidades: null });
+const rendered = ref({});
+const zipFiles = ref({});
 const maps = ref({});
+
+// Inicializa objetos reativos para todas as abas
+tipos.forEach(t => {
+  uploadedFiles.value[t] = [];
+  features.value[t] = [];
+  observacoes.value[t] = '';
+  rendered.value[t] = false;
+  zipFiles.value[t] = null;
+});
 
 // Mantém anexos sincronizados com o backend
 watch(
@@ -173,7 +199,8 @@ watch(
 );
 
 const triggerFileInput = (tipo) => {
-  document.querySelector(`input[ref='fileInput-${tipo}']`)?.click();
+  const el = document.getElementById(`fileInput-${tipo}`);
+  if (el) el.click();
 };
 
 const onFileChange = (event, tipo) => {
@@ -209,7 +236,6 @@ const processFiles = async (files, tipo) => {
   }
 };
 
-// Vincular mapa: mapa fica oculto automaticamente
 const vincularMapa = async (tipo) => {
   const zipFile = zipFiles.value[tipo];
   if (!zipFile) return;
@@ -234,14 +260,13 @@ const vincularMapa = async (tipo) => {
       anexos.value = response.data.resultadosAnexos || [];
       emit('update-resultados-anexos', anexos.value);
       uploadedFiles.value[tipo] = [];
-      rendered.value[tipo] = false; // mapa oculto
+      rendered.value[tipo] = false;
     }
   } catch (error) {
     console.error('Erro ao vincular mapa:', error);
   }
 };
 
-// Alternar visualização do mapa
 const toggleRender = (tipo) => {
   rendered.value[tipo] = !rendered.value[tipo];
   if (rendered.value[tipo]) {
@@ -285,7 +310,6 @@ const updateObservacao = (tipo) => {
   }), { comentario: observacoes.value[tipo] });
 };
 
-// Remover anexo + limpar observações, features e liberar dropzone
 const removerAnexo = (id) => {
   router.delete(route('sgc.contratada.produtos.espeleo.resultados.delete', {
     contrato: props.contrato,
@@ -298,7 +322,7 @@ const removerAnexo = (id) => {
       anexos.value = anexos.value.filter(a => a.id !== id);
       emit('update-resultados-anexos', anexos.value);
 
-      Object.keys(observacoes.value).forEach(t => {
+      tipos.forEach(t => {
         if (!anexos.value.find(a => a.tipo === t)) {
           observacoes.value[t] = '';
           features.value[t] = [];
