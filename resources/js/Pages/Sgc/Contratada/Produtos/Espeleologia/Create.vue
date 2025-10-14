@@ -85,8 +85,13 @@
                 />
               </div>
               <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
-                <h3>Anexos - A implementar</h3>
-                <p>Esta aba será preenchida com os anexos da campanha.</p>
+                <Anexos
+                  :campanha-id="campanhaId"
+                  :contrato="contrato"
+                  :anexos="anexos"
+                  :errors="errors"
+                  @update-anexos="anexos = $event"    
+                />
               </div>
             </div>
             <button @click="salvar" class="btn btn-primary mt-3">Salvar</button>
@@ -105,6 +110,7 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Apresentacao from './Apresentacao.vue';
 import Metodologias from './Metodologias.vue';
 import Resultados from './Resultados.vue';
+import Anexos from './Anexos.vue';
 import { reactive, ref, onMounted, watch } from 'vue';
 
 const props = defineProps([
@@ -135,7 +141,8 @@ const form = reactive({
   descricao: props.draftData?.descricao || '',
   bioma: props.draftData?.bioma || '',
   metodologia: props.draftData?.metodologia || '',
-  resultados_anexos: props.resultadosAnexos || [], // Novo
+  resultados_anexos: props.resultadosAnexos || [],
+  anexos_fotos: props.draftData?.anexos_fotos || [],
 });
 
 const errors = ref({});
@@ -164,6 +171,11 @@ const updateCodigoSei = (newValue) => {
 const updateMetodologia = (value) => {
   form.metodologia = value;
   console.log('Metodologia atualizada:', value);
+};
+
+const updateAnexosFotos = (newAnexos) => {
+  form.anexos_fotos = newAnexos;
+  console.log('Anexos de fotos atualizados:', newAnexos);
 };
 
 const updateResultadosAnexos = (newAnexos) => {
@@ -236,6 +248,7 @@ const salvar = () => {
     descricao: form.descricao || null,
     bioma: form.bioma || null,
     metodologia: form.metodologia || null,
+    anexos_fotos: form.anexos_fotos,
     profissionais: profissionalRecords.value.map(p => ({
       campanha_id: props.campanhaId,
       id_contrato: props.contrato,

@@ -151,9 +151,14 @@ Route::prefix('/contratada')->group(function () {
         Route::post('/espeleo/resultados/{id}/update', [EspeleoCampanhaController::class, 'updateResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.update');
         Route::delete('/espeleo/resultados/{id}/delete', [EspeleoCampanhaController::class, 'deleteResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.delete');
 
+        // Novas rotas para anexos
+        Route::post('/espeleologia/anexos/upload', [EspeleoCampanhaController::class, 'uploadAnexo'])->name('sgc.contratada.produtos.espeleo.anexos.upload');
+        Route::post('/espeleologia/anexos/{id}/update', [EspeleoCampanhaController::class, 'updateAnexo'])->name('sgc.contratada.produtos.espeleo.anexos.update');
+        Route::delete('/espeleologia/anexos/{id}/delete', [EspeleoCampanhaController::class, 'deleteAnexo'])->name('sgc.contratada.produtos.espeleo.anexos.delete');
+
     });
 
-    
+
 
     
     
