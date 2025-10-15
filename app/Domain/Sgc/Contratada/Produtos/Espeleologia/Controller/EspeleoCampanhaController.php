@@ -102,6 +102,7 @@ class EspeleoCampanhaController extends Controller
                     'tipo_de_intervencao' => $emp->tipo_de_intervencao ?? '',
                     'descricao' => $emp->descricao ?? '',
                     'bioma' => $emp->bioma ?? '',
+                    'coordenadas' => $emp->coordenadas ? json_decode($emp->coordenadas, true) : null,
                 ];
             }),
             'campanhaId' => $request->session()->get('campanhaId', null),

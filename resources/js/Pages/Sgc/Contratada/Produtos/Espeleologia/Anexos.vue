@@ -76,15 +76,24 @@
           </div>
         </div>
 
-        <div class="mt-2">
-          <label class="form-label small">Legenda</label>
-          <textarea
-            v-model="legendas[anexo.id]"
-            class="form-control"
-            rows="2"
-            placeholder="Adicione uma legenda para a imagem"
-            @input="updateLegenda(anexo.id)"
-          ></textarea>
+        <div class="mt-2 d-flex align-items-end gap-2">
+          <div class="flex-grow-1">
+            <label class="form-label small">Legenda</label>
+            <textarea
+              v-model="legendas[anexo.id]"
+              class="form-control"
+              rows="2"
+              placeholder="Adicione uma legenda para a imagem"
+              @keyup.enter="updateLegenda(anexo.id)"
+            ></textarea>
+          </div>
+          <button
+            @click="updateLegenda(anexo.id)"
+            class="btn btn-sm btn-primary"
+            type="button"
+          >
+            Salvar
+          </button>
         </div>
       </div>
     </div>
@@ -211,6 +220,9 @@ const updateLegenda = (id) => {
     {
       preserveState: true,
       preserveScroll: true,
+      onSuccess: () => {
+        alert('Legenda salva com sucesso!');
+      },
       onError: (err) => {
         console.error('Erro ao atualizar legenda:', err);
         alert('Erro ao atualizar a legenda. Tente novamente.');
@@ -274,4 +286,3 @@ const formatFileSize = (bytes) => {
   margin-right: 4px;
 }
 </style>
-```

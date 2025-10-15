@@ -90,7 +90,7 @@
                   :contrato="contrato"
                   :anexos="anexos"
                   :errors="errors"
-                  @update-anexos="anexos = $event"    
+                  @update-anexos="anexos = $event"
                 />
               </div>
             </div>
@@ -111,7 +111,7 @@ import Apresentacao from './Apresentacao.vue';
 import Metodologias from './Metodologias.vue';
 import Resultados from './Resultados.vue';
 import Anexos from './Anexos.vue';
-import { reactive, ref, onMounted, watch } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 
 const props = defineProps([
   'contrato',
@@ -124,11 +124,12 @@ const props = defineProps([
   'profissionais',
   'justificativas',
   'codigoSei',
-  'resultadosAnexos', // Novo
+  'resultadosAnexos',
 ]);
 
 const activeTab = ref('apresentacao');
 const showModal = ref(false);
+const anexos = ref([]); // Inicializa anexos como array vazio
 
 const form = reactive({
   id_campanha: '3',
@@ -140,6 +141,7 @@ const form = reactive({
   tipo_de_intervencao: props.draftData?.tipo_de_intervencao || '',
   descricao: props.draftData?.descricao || '',
   bioma: props.draftData?.bioma || '',
+  coordenadas: props.draftData?.coordenadas || null, // Adiciona coordenadas
   metodologia: props.draftData?.metodologia || '',
   resultados_anexos: props.resultadosAnexos || [],
   anexos_fotos: props.draftData?.anexos_fotos || [],
@@ -153,6 +155,7 @@ const codigoSei = ref(props.codigoSei || '');
 
 const updateForm = (data) => {
   Object.assign(form, data);
+  console.log('Form atualizado:', form); // Debug
 };
 
 const updateJustificativas = (newValue) => {
@@ -247,6 +250,7 @@ const salvar = () => {
     tipo_de_intervencao: form.tipo_de_intervencao || null,
     descricao: form.descricao || null,
     bioma: form.bioma || null,
+    coordenadas: form.coordenadas || null, // Inclui coordenadas
     metodologia: form.metodologia || null,
     anexos_fotos: form.anexos_fotos,
     profissionais: profissionalRecords.value.map(p => ({
@@ -260,7 +264,7 @@ const salvar = () => {
       ...j,
       tipo: i === 0 ? 'citacao' : 'justificativa',
     })),
-    resultados_anexos: form.resultados_anexos, // Novo
+    resultados_anexos: form.resultados_anexos,
   };
   console.log('Enviando dados:', JSON.stringify(payload, null, 2));
   router.post(route('sgc.contratada.produtos.espeleo.salvar_campanha', {
@@ -269,7 +273,7 @@ const salvar = () => {
   }), payload, {
     onError: (err) => {
       errors.value = err;
-      console.error(err);
+      console.error('Erro ao salvar campanha:', err);
     },
     onSuccess: () => {
       errors.value = {};
@@ -284,6 +288,10 @@ const excluirProfissional = (id) => {
   profissionalRecords.value = profissionalRecords.value.filter(p => p.id !== id);
   console.log('Profissional excluído, nova lista:', profissionalRecords.value);
 };
+
+onMounted(() => {
+  console.log('Props recebidas em Create.vue:', props); // Debug
+});
 </script>
 
 <style scoped>

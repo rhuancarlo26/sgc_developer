@@ -9,11 +9,21 @@
         </div>
         <div class="col-md-6 mb-3">
           <label>Empreendimento</label>
-          <select v-model="campanha.cod_emp" @change="preencherCamposEmpreendimento" class="form-select" required>
+          <select
+            v-model="campanha.cod_emp"
+            @change="preencherCamposEmpreendimento"
+            class="form-select"
+            required
+            :disabled="loading"
+          >
             <option value="">Selecione um empreendimento</option>
-            <option v-for="emp in empreendimentos" :key="emp.cod_emp" :value="emp.cod_emp">{{ emp.cod_emp }}</option>
+            <option v-for="emp in empreendimentos" :key="emp.cod_emp" :value="emp.cod_emp">
+              {{ emp.cod_emp }}
+            </option>
           </select>
           <small v-if="errors.cod_emp" class="text-danger">{{ errors.cod_emp }}</small>
+          <small v-if="loading" class="text-muted">Carregando dados...</small>
+          <small v-if="noMapData" class="text-danger">Nenhuma coordenada disponível para o empreendimento.</small>
         </div>
         <div class="col-md-6 mb-3">
           <label>Subproduto</label>
@@ -43,6 +53,19 @@
         <div class="col-md-12 mb-3">
           <label>Descrição</label>
           <textarea v-model="campanha.descricao" class="form-control" readonly />
+        </div>
+        <!-- Mapa -->
+        <div class="col-md-12 mb-3">
+          <h4>Traçado do Empreendimento</h4>
+          <div v-if="mapVisible">
+            <MapSgc
+              ref="mapaVisualizarTrecho"
+              height="400px"
+              width="100%"
+              :geojson="selectedGeoJson"
+            />
+          </div>
+          <div v-else class="text-muted text-center">Selecione um empreendimento para visualizar o traçado.</div>
         </div>
         <!-- Seção de Equipe -->
         <div class="col-md-12 mb-3">
@@ -84,12 +107,12 @@
             <div class="row">
               <div v-if="index === 0" class="col-md-12 mb-2">
                 <label>Citação</label>
-                <input v-model="justificativas[index].titulo" @input="$emit('update:justificativas', [...justificativas.value.slice(0, index), { ...just, titulo: $event.target.value }, ...justificativas.value.slice(index + 1)])" class="form-control mb-2" placeholder="Título da Citação">
-                <textarea v-model="justificativas[index].justificativa" @input="$emit('update:justificativas', [...justificativas.value.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.value.slice(index + 1)])" class="form-control" placeholder="Texto da Citação"></textarea>
+                <input v-model="justificativas[index].titulo" @input="$emit('update:justificativas', [...justificativas.slice(0, index), { ...just, titulo: $event.target.value }, ...justificativas.slice(index + 1)])" class="form-control mb-2" placeholder="Título da Citação" />
+                <textarea v-model="justificativas[index].justificativa" @input="$emit('update:justificativas', [...justificativas.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.slice(index + 1)])" class="form-control" placeholder="Texto da Citação"></textarea>
               </div>
               <div v-else class="col-md-12 mb-2">
                 <label>Justificativa</label>
-                <textarea v-model="justificativas[index].justificativa" @input="$emit('update:justificativas', [...justificativas.value.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.value.slice(index + 1)])" class="form-control" placeholder="Texto da Justificativa"></textarea>
+                <textarea v-model="justificativas[index].justificativa" @input="$emit('update:justificativas', [...justificativas.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.slice(index + 1)])" class="form-control" placeholder="Texto da Justificativa"></textarea>
               </div>
               <div class="col-md-12 text-end">
                 <button @click="excluirJustificativa(index)" class="btn btn-danger btn-sm" v-if="index > 0">Remover</button>
@@ -174,15 +197,106 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref, watch } from 'vue';
+import { defineProps, defineEmits, ref, watch, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import MapSgc from '@/Components/MapSgc.vue';
 
 const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords', 'justificativas', 'codigoSei']);
 const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional', 'update:codigo-sei', 'update:justificativas', 'excluir-profissional']);
 
 const showModal = ref(false);
 const selectedProfissional = ref(null);
+const loading = ref(false);
+const noMapData = ref(false);
+const mapVisible = ref(false);
+const mapaVisualizarTrecho = ref(null);
+const selectedGeoJson = ref(null);
+
 const novoProfissional = ref({
+  profissional: '',
+  formacao: '',
+  telefone: '',
+  cpf: '',
+  email: '',
+  curriculum_lattes: '',
+  funcao: '',
+  ctf: '',
+  validade: '',
+  conselho_de_classe: '',
+  numero_de_registro: '',
+  status: 'Ativo',
+  observacao: '',
+});
+
+const codigoSei = ref(props.codigoSei || '');
+const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: props.codigoSei || '' }]);
+
+const preencherCamposEmpreendimento = () => {
+  loading.value = true;
+  noMapData.value = false;
+  mapVisible.value = false;
+  selectedGeoJson.value = null;
+
+  console.log('Empreendimentos disponíveis:', props.empreendimentos); // Debug
+  console.log('Cod_emp selecionado:', props.campanha.cod_emp); // Debug
+  const emp = props.empreendimentos.find(e => e.cod_emp === props.campanha.cod_emp);
+  console.log('Empreendimento selecionado:', emp); // Debug
+
+  if (emp) {
+    const formData = {
+      subtrecho: emp.subtrecho || '',
+      segmento: emp.segmento || '',
+      extensao: emp.extensao || '',
+      tipo_de_intervencao: emp.tipo_de_intervencao || '',
+      descricao: emp.descricao || '',
+      bioma: emp.bioma || '',
+      coordenadas: emp.coordenadas || null,
+    };
+    emit('update-form', formData);
+    console.log('Form data emitido:', formData); // Debug
+
+    if (emp.coordenadas) {
+      selectedGeoJson.value = emp.coordenadas;
+      console.log('Coordenadas selecionadas:', selectedGeoJson.value); // Debug
+      mapVisible.value = true;
+      setTimeout(() => {
+        if (mapaVisualizarTrecho.value) {
+          mapaVisualizarTrecho.value.renderMapa();
+          mapaVisualizarTrecho.value.setGeoJson(selectedGeoJson.value);
+        } else {
+          console.error('Mapa ref não disponível');
+        }
+      }, 500);
+    } else {
+      console.log('Coordenadas ausentes para o empreendimento:', emp.cod_emp); // Debug
+      noMapData.value = true;
+    }
+  } else {
+    emit('update-form', {
+      subtrecho: '',
+      segmento: '',
+      extensao: '',
+      tipo_de_intervencao: '',
+      descricao: '',
+      bioma: '',
+      coordenadas: null,
+    });
+    console.log('Nenhum empreendimento encontrado para cod_emp:', props.campanha.cod_emp); // Debug
+    noMapData.value = true;
+  }
+  loading.value = false;
+};
+
+const vincularProfissional = () => {
+  if (selectedProfissional.value) {
+    emit('vincular-profissional', selectedProfissional.value);
+    selectedProfissional.value = null;
+  }
+};
+
+const salvarNovoProfissional = () => {
+  emit('salvar-novo-profissional', { ...novoProfissional.value });
+  novoProfissional.value = {
     profissional: '',
     formacao: '',
     telefone: '',
@@ -196,78 +310,34 @@ const novoProfissional = ref({
     numero_de_registro: '',
     status: 'Ativo',
     observacao: '',
-});
-
-const codigoSei = ref(props.codigoSei || '');
-const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: props.codigoSei || '' }]);
-
-const preencherCamposEmpreendimento = () => {
-    const emp = props.empreendimentos.find(e => e.cod_emp === props.campanha.cod_emp);
-    if (emp) {
-        emit('update-form', {
-            subtrecho: emp.subtrecho || '',
-            segmento: emp.segmento || '',
-            extensao: emp.extensao || '',
-            tipo_de_intervencao: emp.tipo_de_intervencao || '',
-            descricao: emp.descricao || '',
-            bioma: emp.bioma || '',
-        });
-    } else {
-        emit('update-form', {
-            subtrecho: '',
-            segmento: '',
-            extensao: '',
-            tipo_de_intervencao: '',
-            descricao: '',
-            bioma: '',
-        });
-    }
-};
-
-const vincularProfissional = () => {
-    if (selectedProfissional.value) {
-        emit('vincular-profissional', selectedProfissional.value);
-        selectedProfissional.value = null;
-    }
-};
-
-const salvarNovoProfissional = () => {
-    emit('salvar-novo-profissional', { ...novoProfissional.value });
-    novoProfissional.value = {
-        profissional: '',
-        formacao: '',
-        telefone: '',
-        cpf: '',
-        email: '',
-        curriculum_lattes: '',
-        funcao: '',
-        ctf: '',
-        validade: '',
-        conselho_de_classe: '',
-        numero_de_registro: '',
-        status: 'Ativo',
-        observacao: '',
-    };
-    showModal.value = false;
+  };
+  showModal.value = false;
 };
 
 const adicionarJustificativa = () => {
-    justificativas.value.push({ justificativa: '', tipo: 'justificativa', titulo: '', codigo_sei: '' });
+  justificativas.value.push({ justificativa: '', tipo: 'justificativa', titulo: '', codigo_sei: '' });
 };
 
-const removerJustificativa = (index) => {
-    justificativas.value.splice(index, 1);
+const excluirJustificativa = (index) => {
+  justificativas.value.splice(index, 1);
 };
 
 const excluirProfissional = (id) => {
-    emit('excluir-profissional', id);
+  emit('excluir-profissional', id);
 };
 
 watch(() => props.codigoSei, (newVal) => {
-    codigoSei.value = newVal || '';
+  codigoSei.value = newVal || '';
 });
 
 watch(() => props.justificativas, (newVal) => {
-    justificativas.value = newVal || [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: codigoSei.value }];
+  justificativas.value = newVal || [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: codigoSei.value }];
 }, { deep: true });
+
+onMounted(() => {
+  console.log('Props recebidas em Apresentacao.vue:', props); // Debug
+  if (props.campanha.cod_emp) {
+    preencherCamposEmpreendimento();
+  }
+});
 </script>

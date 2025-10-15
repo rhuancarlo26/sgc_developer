@@ -151,7 +151,7 @@ class ProdutosController extends Controller
         }
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
-            ->select('cod_emp', 'subtrecho_ini', 'subtrecho_fin', 'km_ini', 'km_fin', 'tipo_de_intervencao', 'descricao', 'bioma')
+            ->select('cod_emp', 'subtrecho_ini', 'subtrecho_fin', 'km_ini', 'km_fin', 'tipo_de_intervencao', 'descricao', 'bioma', 'coordenadas')
             ->get()
             ->map(function ($emp) {
                 return [
@@ -162,6 +162,7 @@ class ProdutosController extends Controller
                     'tipo_de_intervencao' => $emp->tipo_de_intervencao ?? '',
                     'descricao' => $emp->descricao ?? '',
                     'bioma' => $emp->bioma ?? '',
+                    'coordenadas' => $emp->coordenadas
                 ];
             });
 
