@@ -1,11 +1,11 @@
 <template>
   <div>
     <form>
-      <div class="row">
+      <div class="row mb-4">
         <div class="col-md-6 mb-3">
-          <label>ID Campanha</label>
-          <input v-model="campanha.id_campanha" class="form-control" readonly />
-          <small v-if="errors.id_campanha" class="text-danger">{{ errors.id_campanha }}</small>
+          <label>Subproduto</label>
+          <input v-model="campanha.subproduto" class="form-control" readonly />
+          <small v-if="errors.subproduto" class="text-danger">{{ errors.subproduto }}</small>
         </div>
         <div class="col-md-6 mb-3">
           <label>Empreendimento</label>
@@ -25,39 +25,12 @@
           <small v-if="loading" class="text-muted">Carregando dados...</small>
           <small v-if="noMapData" class="text-danger">Nenhuma coordenada disponível para o empreendimento.</small>
         </div>
-        <div class="col-md-6 mb-3">
-          <label>Subproduto</label>
-          <input v-model="campanha.subproduto" class="form-control" readonly />
-          <small v-if="errors.subproduto" class="text-danger">{{ errors.subproduto }}</small>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label>Subtrecho</label>
-          <input v-model="campanha.subtrecho" class="form-control" readonly />
-        </div>
-        <div class="col-md-6 mb-3">
-          <label>Segmento</label>
-          <input v-model="campanha.segmento" class="form-control" readonly />
-        </div>
-        <div class="col-md-6 mb-3">
-          <label>Extensão (km)</label>
-          <input v-model="campanha.extensao" class="form-control" readonly />
-        </div>
-        <div class="col-md-6 mb-3">
-          <label>Tipo de Intervenção</label>
-          <input v-model="campanha.tipo_de_intervencao" class="form-control" readonly />
-        </div>
-        <div class="col-md-6 mb-3">
-          <label>Bioma</label>
-          <input v-model="campanha.bioma" class="form-control" readonly />
-        </div>
-        <div class="col-md-12 mb-3">
-          <label>Descrição</label>
-          <textarea v-model="campanha.descricao" class="form-control" readonly />
-        </div>
-        <!-- Mapa -->
-        <div class="col-md-12 mb-3">
-          <h4>Traçado do Empreendimento</h4>
-          <div v-if="mapVisible">
+      </div>
+
+      <!-- Seção de Traçado -->
+      <div class="row mb-5 align-items-stretch">
+        <div class="col-md-7 mb-3">
+          <div v-if="mapVisible && selectedGeoJson" class="map-container">
             <MapSgc
               ref="mapaVisualizarTrecho"
               height="400px"
@@ -65,10 +38,56 @@
               :geojson="selectedGeoJson"
             />
           </div>
-          <div v-else class="text-muted text-center">Selecione um empreendimento para visualizar o traçado.</div>
+          <div v-else class="text-muted text-center p-4 map-placeholder">
+            {{ noMapData ? 'Nenhuma coordenada disponível para o empreendimento.' : 'Selecione um empreendimento para visualizar o traçado.' }}
+          </div>
         </div>
-        <!-- Seção de Equipe -->
-        <div class="col-md-12 mb-3">
+        <div class="col-md-5 mb-3">
+          <div class="card info-card">
+            <div class="card-body">
+              <h5 class="card-title">Informações do Empreendimento</h5>
+              <div class="table-container">
+                <table class="table table-bordered">
+                  <tbody>
+                    <tr>
+                      <th scope="row">BR</th>
+                      <td>{{ campanha.cod_emp || 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Subtrecho</th>
+                      <td>{{ campanha.subtrecho || 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Segmento</th>
+                      <td>{{ campanha.segmento || 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Extensão (km)</th>
+                      <td>{{ campanha.extensao || 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Tipo de Intervenção</th>
+                      <td>{{ campanha.tipo_de_intervencao || 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Bioma</th>
+                      <td>{{ campanha.bioma || 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Descrição</th>
+                      <td>{{ campanha.descricao || 'N/A' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção de Equipe -->
+      <div class="card section-card mb-5">
+        <div class="card-body">
           <h4>Equipe</h4>
           <div class="mb-3">
             <select v-model="selectedProfissional" class="form-select" @change="vincularProfissional">
@@ -96,8 +115,11 @@
             </tbody>
           </table>
         </div>
-        <!-- Seção de Justificativas -->
-        <div class="col-md-12 mb-3">
+      </div>
+
+      <!-- Seção de Justificativas -->
+      <div class="card section-card mb-5">
+        <div class="card-body">
           <h4>Justificativas</h4>
           <div class="mb-3">
             <label>Código SEI-DNIT do TRE do Órgão Licenciador</label>
@@ -107,12 +129,27 @@
             <div class="row">
               <div v-if="index === 0" class="col-md-12 mb-2">
                 <label>Citação</label>
-                <input v-model="justificativas[index].titulo" @input="$emit('update:justificativas', [...justificativas.slice(0, index), { ...just, titulo: $event.target.value }, ...justificativas.slice(index + 1)])" class="form-control mb-2" placeholder="Título da Citação" />
-                <textarea v-model="justificativas[index].justificativa" @input="$emit('update:justificativas', [...justificativas.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.slice(index + 1)])" class="form-control" placeholder="Texto da Citação"></textarea>
+                <input
+                  v-model="justificativas[index].titulo"
+                  @input="$emit('update:justificativas', [...justificativas.slice(0, index), { ...just, titulo: $event.target.value }, ...justificativas.slice(index + 1)])"
+                  class="form-control mb-2"
+                  placeholder="Título da Citação"
+                />
+                <textarea
+                  v-model="justificativas[index].justificativa"
+                  @input="$emit('update:justificativas', [...justificativas.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.slice(index + 1)])"
+                  class="form-control"
+                  placeholder="Texto da Citação"
+                ></textarea>
               </div>
               <div v-else class="col-md-12 mb-2">
                 <label>Justificativa</label>
-                <textarea v-model="justificativas[index].justificativa" @input="$emit('update:justificativas', [...justificativas.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.slice(index + 1)])" class="form-control" placeholder="Texto da Justificativa"></textarea>
+                <textarea
+                  v-model="justificativas[index].justificativa"
+                  @input="$emit('update:justificativas', [...justificativas.slice(0, index), { ...just, justificativa: $event.target.value }, ...justificativas.slice(index + 1)])"
+                  class="form-control"
+                  placeholder="Texto da Justificativa"
+                ></textarea>
               </div>
               <div class="col-md-12 text-end">
                 <button @click="excluirJustificativa(index)" class="btn btn-danger btn-sm" v-if="index > 0">Remover</button>
@@ -122,77 +159,77 @@
           <button @click="adicionarJustificativa" class="btn btn-secondary mt-2">Adicionar Justificativa</button>
         </div>
       </div>
-    </form>
 
-    <!-- Modal para Cadastrar Novo Profissional -->
-    <div v-if="showModal" class="modal" tabindex="-1" style="display: block;">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Cadastrar Profissional</h5>
-            <button type="button" class="btn-close" @click="showModal = false"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label>Profissional</label>
-              <input v-model="novoProfissional.profissional" class="form-control" required />
+      <!-- Modal para Cadastrar Novo Profissional -->
+      <div v-if="showModal" class="modal" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Cadastrar Profissional</h5>
+              <button type="button" class="btn-close" @click="showModal = false"></button>
             </div>
-            <div class="mb-3">
-              <label>Formação</label>
-              <input v-model="novoProfissional.formacao" class="form-control" />
+            <div class="modal-body">
+              <div class="mb-3">
+                <label>Profissional</label>
+                <input v-model="novoProfissional.profissional" class="form-control" required />
+              </div>
+              <div class="mb-3">
+                <label>Formação</label>
+                <input v-model="novoProfissional.formacao" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>Telefone</label>
+                <input v-model="novoProfissional.telefone" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>CPF</label>
+                <input v-model="novoProfissional.cpf" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>Email</label>
+                <input v-model="novoProfissional.email" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>Currículo Lattes</label>
+                <input v-model="novoProfissional.curriculum_lattes" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>Função</label>
+                <input v-model="novoProfissional.funcao" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>CTF</label>
+                <input v-model="novoProfissional.ctf" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>Validade</label>
+                <input v-model="novoProfissional.validade" type="date" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>Conselho de Classe</label>
+                <input v-model="novoProfissional.conselho_de_classe" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>Número de Registro</label>
+                <input v-model="novoProfissional.numero_de_registro" type="number" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>Status</label>
+                <input v-model="novoProfissional.status" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label>Observação</label>
+                <textarea v-model="novoProfissional.observacao" class="form-control"></textarea>
+              </div>
             </div>
-            <div class="mb-3">
-              <label>Telefone</label>
-              <input v-model="novoProfissional.telefone" class="form-control" />
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" @click="showModal = false">Fechar</button>
+              <button @click="salvarNovoProfissional" class="btn btn-primary">Salvar</button>
             </div>
-            <div class="mb-3">
-              <label>CPF</label>
-              <input v-model="novoProfissional.cpf" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label>Email</label>
-              <input v-model="novoProfissional.email" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label>Currículo Lattes</label>
-              <input v-model="novoProfissional.curriculum_lattes" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label>Função</label>
-              <input v-model="novoProfissional.funcao" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label>CTF</label>
-              <input v-model="novoProfissional.ctf" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label>Validade</label>
-              <input v-model="novoProfissional.validade" type="date" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label>Conselho de Classe</label>
-              <input v-model="novoProfissional.conselho_de_classe" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label>Número de Registro</label>
-              <input v-model="novoProfissional.numero_de_registro" type="number" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label>Status</label>
-              <input v-model="novoProfissional.status" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label>Observação</label>
-              <textarea v-model="novoProfissional.observacao" class="form-control"></textarea>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="showModal = false">Fechar</button>
-            <button @click="salvarNovoProfissional" class="btn btn-primary">Salvar</button>
           </div>
         </div>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
@@ -200,6 +237,9 @@
 import { defineProps, defineEmits, ref, watch, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 import MapSgc from '@/Components/MapSgc.vue';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
 
 const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords', 'justificativas', 'codigoSei']);
 const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional', 'update:codigo-sei', 'update:justificativas', 'excluir-profissional']);
@@ -237,10 +277,10 @@ const preencherCamposEmpreendimento = () => {
   mapVisible.value = false;
   selectedGeoJson.value = null;
 
-  console.log('Empreendimentos disponíveis:', props.empreendimentos); // Debug
-  console.log('Cod_emp selecionado:', props.campanha.cod_emp); // Debug
+  console.log('Empreendimentos disponíveis:', props.empreendimentos);
+  console.log('Cod_emp selecionado:', props.campanha.cod_emp);
   const emp = props.empreendimentos.find(e => e.cod_emp === props.campanha.cod_emp);
-  console.log('Empreendimento selecionado:', emp); // Debug
+  console.log('Empreendimento selecionado:', emp);
 
   if (emp) {
     const formData = {
@@ -253,22 +293,30 @@ const preencherCamposEmpreendimento = () => {
       coordenadas: emp.coordenadas || null,
     };
     emit('update-form', formData);
-    console.log('Form data emitido:', formData); // Debug
+    console.log('Form data emitido:', formData);
 
     if (emp.coordenadas) {
-      selectedGeoJson.value = emp.coordenadas;
-      console.log('Coordenadas selecionadas:', selectedGeoJson.value); // Debug
-      mapVisible.value = true;
-      setTimeout(() => {
-        if (mapaVisualizarTrecho.value) {
-          mapaVisualizarTrecho.value.renderMapa();
-          mapaVisualizarTrecho.value.setGeoJson(selectedGeoJson.value);
-        } else {
-          console.error('Mapa ref não disponível');
-        }
-      }, 500);
+      try {
+        JSON.parse(emp.coordenadas);
+        selectedGeoJson.value = emp.coordenadas;
+        console.log('Coordenadas selecionadas:', selectedGeoJson.value);
+        mapVisible.value = true;
+        setTimeout(() => {
+          if (mapaVisualizarTrecho.value) {
+            mapaVisualizarTrecho.value.renderMapa();
+            mapaVisualizarTrecho.value.setGeoJson(selectedGeoJson.value);
+          } else {
+            console.error('Mapa ref não disponível');
+            toast.error('Erro ao inicializar o mapa.');
+          }
+        }, 500);
+      } catch (e) {
+        console.error('Erro ao parsear GeoJSON:', e);
+        noMapData.value = true;
+        toast.error('GeoJSON inválido para o empreendimento.');
+      }
     } else {
-      console.log('Coordenadas ausentes para o empreendimento:', emp.cod_emp); // Debug
+      console.log('Coordenadas ausentes para o empreendimento:', emp.cod_emp);
       noMapData.value = true;
     }
   } else {
@@ -281,7 +329,7 @@ const preencherCamposEmpreendimento = () => {
       bioma: '',
       coordenadas: null,
     });
-    console.log('Nenhum empreendimento encontrado para cod_emp:', props.campanha.cod_emp); // Debug
+    console.log('Nenhum empreendimento encontrado para cod_emp:', props.campanha.cod_emp);
     noMapData.value = true;
   }
   loading.value = false;
@@ -335,9 +383,104 @@ watch(() => props.justificativas, (newVal) => {
 }, { deep: true });
 
 onMounted(() => {
-  console.log('Props recebidas em Apresentacao.vue:', props); // Debug
+  console.log('Props recebidas em Apresentacao.vue:', props);
   if (props.campanha.cod_emp) {
     preencherCamposEmpreendimento();
   }
 });
 </script>
+
+<style scoped>
+.map-container, .map-placeholder {
+  height: 400px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.info-card {
+  height: 400px;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.card-body {
+  flex: 1;
+  padding: 1rem;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #343a40;
+}
+
+.table-container {
+  flex: 1;
+  overflow-y: auto;
+  max-width: 100%;
+}
+
+.table {
+  table-layout: fixed;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.table th {
+  width: 40%;
+  font-weight: 500;
+  text-align: left;
+  vertical-align: middle;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+}
+
+.table td {
+  width: 60%;
+  vertical-align: middle;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  max-width: 100%;
+}
+
+.section-card {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.align-items-stretch {
+  display: flex;
+  align-items: stretch;
+}
+
+@media (max-width: 767.98px) {
+  .align-items-stretch {
+    flex-direction: column;
+  }
+  .map-container, .map-placeholder, .info-card {
+    height: 300px;
+  }
+  .section-card {
+    padding: 1rem;
+    margin-top: 1.5rem;
+  }
+  .table th, .table td {
+    padding: 0.4rem;
+  }
+}
+</style>
