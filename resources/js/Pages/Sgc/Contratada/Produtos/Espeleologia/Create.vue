@@ -75,11 +75,13 @@
                 />
               </div>
               <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
+                <!-- request aqui: {{ form.subproduto }} -->
                 <Resultados
                   :empreendimentos="empreendimentos"
                   :errors="errors"
                   :campanha-id="campanhaId"
                   :contrato="contrato"
+                  :categoria_subproduto="definecategoriaSubproduto(form.subproduto)"
                   :resultados-anexos="form.resultados_anexos"
                   @update-resultados-anexos="updateResultadosAnexos"
                 />
@@ -90,7 +92,7 @@
                   :contrato="contrato"
                   :anexos="anexos"
                   :errors="errors"
-                  @update-anexos="anexos = $event"    
+                  @update-anexos="anexos = $event"
                 />
               </div>
             </div>
@@ -144,6 +146,21 @@ const form = reactive({
   resultados_anexos: props.resultadosAnexos || [],
   anexos_fotos: props.draftData?.anexos_fotos || [],
 });
+
+// função que captura o trecho selecionado duma string e retorna true ou false
+const definecategoriaSubproduto = (subproduto) => {
+  const categorias = ['Prospecção', 'Potencial'];
+    // return categorias.some(categoria => subproduto.toLowerCase().includes(categoria));
+    // retorna o nome da categoria pelo nome do subproduto
+    // se não encontrar, retorna 'Outro tipo'
+    for (const categoria of categorias) {
+        if (subproduto.toLowerCase().includes(categoria.toLowerCase())) {
+            return categoria;
+        }
+    }
+    return 'Outro tipo';
+};
+console.log('Categoria do subproduto:', definecategoriaSubproduto(props.subproduto));
 
 const errors = ref({});
 const profissionalRecords = ref(props.draftData?.profissionais ?? []);

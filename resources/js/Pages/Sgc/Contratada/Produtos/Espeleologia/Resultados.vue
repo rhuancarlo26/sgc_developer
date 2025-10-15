@@ -1,6 +1,7 @@
 <template>
   <div>
     <h3>Resultados - Visualização de Shapefiles</h3>
+    Categoria do Subproduto: <strong>{{ categoria_subproduto }}</strong>
     <p class="text-muted mb-4">
       Carregue shapefiles (ZIP) para cada tipo de mapa, vincule-os e adicione observações.
     </p>
@@ -149,29 +150,73 @@ const props = defineProps({
   campanhaId: Number,
   contrato: Number,
   resultadosAnexos: Array,
+  categoria_subproduto: String,
 });
 
 const emit = defineEmits(['update-resultados-anexos']);
 
-const tipos = [
-  'geologico', 'geomorfologico', 'cavidades',
-  'hidrologico', 'hipsometrico', 'limites_areas',
-  'potencial_inicial', 'potencial_reclassificado',
-  'projeto_engenharia', 'estudos_posteriores'
-];
+//se a categoria do subproduto for prospeccao, entao o tipo prospeccao é acresentado
+const tipos = props.categoria_subproduto === 'Prospecção'
+  ? [
+      'prospeccao', 'geologico', 'geomorfologico', 'cavidades',
+      'hidrologico', 'hipsometrico', 'limites_areas',
+      'potencial_inicial', 'potencial_reclassificado',
+      'projeto_engenharia', 'estudos_posteriores'
+    ]
+  : [
+      'geologico', 'geomorfologico', 'cavidades',
+      'hidrologico', 'hipsometrico', 'limites_areas',
+      'potencial_inicial', 'potencial_reclassificado',
+      'projeto_engenharia', 'estudos_posteriores'
+    ];
 
-const nomesTipos = {
-  geologico: 'Mapa Geológico',
-  geomorfologico: 'Mapa Geomorfológico',
-  cavidades: 'Cavidades CECAV/SBE',
-  hidrologico: 'Mapa Hidrológico',
-  hipsometrico: 'Mapa Hipsométrico/Declividade',
-  limites_areas: 'Limites de Áreas',
-  potencial_inicial: 'Mapa de Potencial Espeleológico - Inicial',
-  potencial_reclassificado: 'Mapa de Potencial Espeleológico - Reclassificado',
-  projeto_engenharia: 'Projeto de Engenharia',
-  estudos_posteriores: 'Estudos Posteriores'
-};
+// const tipos = [
+//   'prospeccao', 'geologico', 'geomorfologico', 'cavidades',
+//   'hidrologico', 'hipsometrico', 'limites_areas',
+//   'potencial_inicial', 'potencial_reclassificado',
+//   'projeto_engenharia', 'estudos_posteriores'
+// ];
+// Se a categoria do subproduto for prospeccao, entao o tipo prospeccao é acresentado
+const nomesTipos = props.categoria_subproduto === 'Prospecção'
+  ? {
+      prospeccao: 'Prospecção',
+      geologico: 'Mapa Geológico',
+      geomorfologico: 'Mapa Geomorfológico',
+      cavidades: 'Cavidades CECAV/SBE',
+      hidrologico: 'Mapa Hidrológico',
+      hipsometrico: 'Mapa Hipsométrico/Declividade',
+      limites_areas: 'Limites de Áreas',
+      potencial_inicial: 'Mapa de Potencial Espeleológico - Inicial',
+      potencial_reclassificado: 'Mapa de Potencial Espeleológico - Reclassificado',
+      projeto_engenharia: 'Projeto de Engenharia',
+      estudos_posteriores: 'Estudos Posteriores'
+    }
+  : {
+      geologico: 'Mapa Geológico',
+      geomorfologico: 'Mapa Geomorfológico',
+      cavidades: 'Cavidades CECAV/SBE',
+      hidrologico: 'Mapa Hidrológico',
+      hipsometrico: 'Mapa Hipsométrico/Declividade',
+      limites_areas: 'Limites de Áreas',
+      potencial_inicial: 'Mapa de Potencial Espeleológico - Inicial',
+      potencial_reclassificado: 'Mapa de Potencial Espeleológico - Reclassificado',
+      projeto_engenharia: 'Projeto de Engenharia',
+      estudos_posteriores: 'Estudos Posteriores'
+    };
+
+// const nomesTipos = {
+//   prospeccao: 'Prospecção',
+//   geologico: 'Mapa Geológico',
+//   geomorfologico: 'Mapa Geomorfológico',
+//   cavidades: 'Cavidades CECAV/SBE',
+//   hidrologico: 'Mapa Hidrológico',
+//   hipsometrico: 'Mapa Hipsométrico/Declividade',
+//   limites_areas: 'Limites de Áreas',
+//   potencial_inicial: 'Mapa de Potencial Espeleológico - Inicial',
+//   potencial_reclassificado: 'Mapa de Potencial Espeleológico - Reclassificado',
+//   projeto_engenharia: 'Projeto de Engenharia',
+//   estudos_posteriores: 'Estudos Posteriores'
+// };
 
 const activeSubTab = ref('geologico');
 const uploadedFiles = ref({});
