@@ -25,7 +25,7 @@ class ProdutosController extends Controller
     protected $espeleoService;
 
     public function __construct(
-        ProdutosService $produtosService, 
+        ProdutosService $produtosService,
         FaunaService $faunaService,
         EspeleoService $espeleoService
     ) {
@@ -39,7 +39,7 @@ class ProdutosController extends Controller
         $subprodutos = $this->produtosService->getSubprodutosByContrato($contrato, $produto);
         $contratoObj = Contrato::findOrFail($contrato);
 
-        $campanhas = $produto === 'fauna' 
+        $campanhas = $produto === 'fauna'
             ? $this->getCampanhasFauna($contrato)
             : $this->getCampanhasEspeleologia($contrato);
 
@@ -158,7 +158,7 @@ class ProdutosController extends Controller
                     'cod_emp' => $emp->cod_emp,
                     'subtrecho' => $emp->subtrecho_ini && $emp->subtrecho_fin ? $emp->subtrecho_ini . ' - ' . $emp->subtrecho_fin : '',
                     'segmento' => $emp->km_ini && $emp->km_fin ? $emp->km_ini . ' - ' . $emp->km_fin : '',
-                    'extensao' => $emp->km_fin && $emp->km_ini ? $emp->km_fin - $emp->km_ini : 0,
+                    'extensao' => $emp->km_fin && $emp->km_ini ? $emp->km_fin . ' - ' . $emp->km_ini : 0,
                     'tipo_de_intervencao' => $emp->tipo_de_intervencao ?? '',
                     'descricao' => $emp->descricao ?? '',
                     'bioma' => $emp->bioma ?? '',
@@ -176,7 +176,7 @@ class ProdutosController extends Controller
                 'justificativa' => $just->justificativa,
                 'tipo' => $just->tipo,
                 'titulo' => $just->titulo,
-                'codigo_sei' => $just->codigo_sei, 
+                'codigo_sei' => $just->codigo_sei,
             ];
         })->all() ?: [['justificativa' => '', 'tipo' => 'complementar', 'titulo' => '', 'codigo_sei' => '']];
 
@@ -200,7 +200,7 @@ class ProdutosController extends Controller
             'campanhaId' => $draft->id,
             'draftData' => $draft->toArray(),
             'profissionais' => $profissionais,
-            'justificativas' => $justificativas, 
+            'justificativas' => $justificativas,
             'metodologia' => $metodologia,
             'resultados_anexos' => $resultadosAnexos
         ]);
