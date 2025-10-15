@@ -4,20 +4,30 @@ namespace App\Domain\Sgc\Contratada\Produtos\Espeleologia\Controller;
 
 use App\Shared\Http\Controllers\Controller;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoService;
+use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoAnexoService;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Request\EspeleoSalvarCampanhaRequest;
 use App\Models\SgcEspeleoProfissional;
 use App\Models\SgcvwEmpreendimentos;
+use App\Models\SgcEspeleoCampanha;
+use App\Models\SgcEspeleoResultadoAnexo;
+use App\Models\SgcEspeleoAnexo;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
 class EspeleoCampanhaController extends Controller
 {
+
+    protected $anexoService;
+
+
     protected $espeleoService;
 
-    public function __construct(EspeleoService $espeleoService)
+    public function __construct(EspeleoService $espeleoService, EspeleoAnexoService $anexoService)
     {
         $this->espeleoService = $espeleoService;
+        $this->anexoService = $anexoService;
     }
 
     public function salvarCampanha(EspeleoSalvarCampanhaRequest $request, $contrato, $produto)
@@ -105,5 +115,116 @@ class EspeleoCampanhaController extends Controller
     {
         $profissionais = SgcEspeleoProfissional::where('id_contrato', $contrato)->get();
         return response()->json(['profissionais' => $profissionais]);
+    }
+
+    public function uploadResultadoAnexo(Request $request, $contrato, $produto)
+    {
+        if ($produto !== 'espeleologia') abort(404, 'Produto inválido');
+
+        $validated = $request->validate([
+            'zip_file' => 'required|file|mimes:zip|max:10240',
+            'campanha_id' => 'required|exists:sgc_espeleo_campanhas,id',
+            'tipo' => 'required|in:geologico,geomorfologico,cavidades,hidrologico,hipsometrico,limites_areas,potencial_inicial,potencial_reclassificado,projeto_engenharia,estudos_posteriores',
+            'comentario' => 'nullable|string|max:5000',
+        ]);
+
+        $campanha = SgcEspeleoCampanha::findOrFail($validated['campanha_id']);
+        if ($campanha->id_contrato != $contrato) abort(403, 'Acesso negado');
+
+        $zipFile = $request->file('zip_file');
+        $nomeOriginal = $zipFile->getClientOriginalName();
+        $nomeUnico = 'espeleo_' . $contrato . '_campanha_' . $campanha->id_campanha . '_' . time() . '.zip';
+
+        $caminhoPasta = 'shapefiles/espeleologia/' . $contrato . '/' . $campanha->id_campanha;
+        $caminhoCompleto = $caminhoPasta . '/' . $nomeUnico;
+
+        $zipFile->storeAs($caminhoPasta, $nomeUnico, 'public');
+
+        $anexo = SgcEspeleoResultadoAnexo::create([
+            'campanha_id' => $campanha->id,
+            'id_contrato' => $contrato,
+            'nome_arquivo' => $nomeOriginal,
+            'caminho' => $caminhoCompleto,
+            'tipo' => $validated['tipo'],
+            'comentario' => $validated['comentario'] ?? null,
+        ]);
+
+        // Busca todos os anexos atualizados
+        $resultadosAnexos = SgcEspeleoResultadoAnexo::where('id_contrato', $contrato)
+            ->where('campanha_id', $campanha->id)
+            ->get()
+            ->map(function ($a) {
+                return [
+                    'id' => $a->id,
+                    'nome_arquivo' => $a->nome_arquivo,
+                    'caminho' => $a->caminho,
+                    'tipo' => $a->tipo,
+                    'comentario' => $a->comentario,
+                    'url_publica' => Storage::url($a->caminho),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Arquivo vinculado com sucesso.',
+            'anexo' => [
+                'id' => $anexo->id,
+                'nome_arquivo' => $anexo->nome_arquivo,
+                'caminho' => $anexo->caminho,
+                'tipo' => $anexo->tipo,
+                'comentario' => $anexo->comentario,
+                'url_publica' => Storage::url($anexo->caminho),
+            ],
+            'resultadosAnexos' => $resultadosAnexos,
+        ]);
+    }
+
+
+    public function uploadAnexo(Request $request, $contrato, $produto)
+    {
+        try {
+            $anexos = $this->anexoService->uploadAnexo($request, $contrato, $produto);
+            return response()->json([
+                'success' => true,
+                'message' => 'Imagens vinculadas com sucesso.',
+                'anexos' => $anexos,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erro ao vincular imagens', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao vincular imagens: ' . $e->getMessage(),
+            ], $e->getCode() ?: 500);
+        }
+    }
+
+    public function updateAnexo(Request $request, $contrato, $produto, $id)
+    {
+        try {
+            $this->anexoService->updateAnexo($request, $contrato, $produto, $id);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao atualizar anexo: ' . $e->getMessage(),
+            ], $e->getCode() ?: 500);
+        }
+    }
+
+    public function deleteAnexo(Request $request, $contrato, $produto, $id)
+    {
+        try {
+            $this->anexoService->deleteAnexo($contrato, $produto, $id);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao excluir anexo: ' . $e->getMessage(),
+            ], $e->getCode() ?: 500);
+        }
     }
 }
