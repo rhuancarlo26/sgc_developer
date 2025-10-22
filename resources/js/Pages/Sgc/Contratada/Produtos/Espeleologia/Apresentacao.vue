@@ -162,64 +162,66 @@
 
       <!-- Modal para Cadastrar Novo Profissional -->
       <div v-if="showModal" class="modal" tabindex="-1" style="display: block;">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Cadastrar Profissional</h5>
+              <h5 class="modal-title">CADASTRAR PROFISSIONAL</h5>
               <button type="button" class="btn-close" @click="showModal = false"></button>
             </div>
             <div class="modal-body">
-              <div class="mb-3">
-                <label>Profissional</label>
-                <input v-model="novoProfissional.profissional" class="form-control" required />
-              </div>
-              <div class="mb-3">
-                <label>Formação</label>
-                <input v-model="novoProfissional.formacao" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>Telefone</label>
-                <input v-model="novoProfissional.telefone" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>CPF</label>
-                <input v-model="novoProfissional.cpf" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>Email</label>
-                <input v-model="novoProfissional.email" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>Currículo Lattes</label>
-                <input v-model="novoProfissional.curriculum_lattes" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>Função</label>
-                <input v-model="novoProfissional.funcao" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>CTF</label>
-                <input v-model="novoProfissional.ctf" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>Validade</label>
-                <input v-model="novoProfissional.validade" type="date" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>Conselho de Classe</label>
-                <input v-model="novoProfissional.conselho_de_classe" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>Número de Registro</label>
-                <input v-model="novoProfissional.numero_de_registro" type="number" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>Status</label>
-                <input v-model="novoProfissional.status" class="form-control" />
-              </div>
-              <div class="mb-3">
-                <label>Observação</label>
-                <textarea v-model="novoProfissional.observacao" class="form-control"></textarea>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Profissional</label>
+                  <input v-model="novoProfissional.profissional" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Formação</label>
+                  <input v-model="novoProfissional.formacao" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Telefone</label>
+                  <input v-model="novoProfissional.telefone" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">CPF</label>
+                  <input v-model="novoProfissional.cpf" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Email</label>
+                  <input v-model="novoProfissional.email" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Currículo Lattes</label>
+                  <input v-model="novoProfissional.curriculum_lattes" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Função</label>
+                  <input v-model="novoProfissional.funcao" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">CTF</label>
+                  <input v-model="novoProfissional.ctf" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Validade</label>
+                  <input v-model="novoProfissional.validade" type="date" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Conselho de Classe</label>
+                  <input v-model="novoProfissional.conselho_de_classe" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Número de Registro</label>
+                  <input v-model="novoProfissional.numero_de_registro" type="number" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Status</label>
+                  <input v-model="novoProfissional.status" class="form-control" />
+                </div>
+                <div class="col-md-12 mb-2">
+                  <label class="form-label">Observação</label>
+                  <textarea v-model="novoProfissional.observacao" class="form-control"></textarea>
+                </div>
               </div>
             </div>
             <div class="modal-footer">
@@ -362,6 +364,7 @@ const salvarNovoProfissional = () => {
   showModal.value = false;
 };
 
+
 const adicionarJustificativa = () => {
   justificativas.value.push({ justificativa: '', tipo: 'justificativa', titulo: '', codigo_sei: '' });
 };
@@ -468,6 +471,81 @@ onMounted(() => {
   align-items: stretch;
 }
 
+/* Estilização do Modal */
+.modal {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-dialog {
+  max-width: 1100px;
+}
+
+.modal-content {
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.modal-header {
+  background-color: #467cb7;
+  padding: 0.75rem 1rem;
+  border-bottom: none;
+}
+
+.modal-header {
+  background-color: #467cb7;
+  padding: 0.75rem 1rem;
+  border-bottom: none;
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.btn-close {
+  background: none;
+  color: #fff;
+  opacity: 0.7;
+}
+
+.btn-close:hover {
+  opacity: 1;
+}
+
+.modal-body {
+  padding: 1rem;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  color: #343a40;
+}
+
+.form-control {
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.2);
+}
+
+.modal-footer {
+  padding: 0.75rem 1rem;
+  border-top: none;
+}
+
+.btn-secondary, .btn-primary {
+  border-radius: 4px;
+  padding: 0.4rem 1rem;
+}
+
 @media (max-width: 767.98px) {
   .align-items-stretch {
     flex-direction: column;
@@ -481,6 +559,9 @@ onMounted(() => {
   }
   .table th, .table td {
     padding: 0.4rem;
+  }
+  .modal-dialog {
+    margin: 0.5rem;
   }
 }
 </style>
