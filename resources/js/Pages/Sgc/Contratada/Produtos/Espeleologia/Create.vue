@@ -20,7 +20,7 @@
                 <a
                   class="nav-link"
                   :class="{ active: activeTab === 'apresentacao' }"
-                  @click.prevent="activeTab = 'apresentacao'"
+                  @click.prevent="changeTab('apresentacao')"
                   >Apresentação</a
                 >
               </li>
@@ -28,7 +28,7 @@
                 <a
                   class="nav-link"
                   :class="{ active: activeTab === 'metodologias' }"
-                  @click.prevent="activeTab = 'metodologias'"
+                  @click.prevent="changeTab('metodologias')"
                   >Metodologias</a
                 >
               </li>
@@ -36,7 +36,7 @@
                 <a
                   class="nav-link"
                   :class="{ active: activeTab === 'resultados' }"
-                  @click.prevent="activeTab = 'resultados'"
+                  @click.prevent="changeTab('resultados')"
                   >Resultados</a
                 >
               </li>
@@ -44,7 +44,7 @@
                 <a
                   class="nav-link"
                   :class="{ active: activeTab === 'anexos' }"
-                  @click.prevent="activeTab = 'anexos'"
+                  @click.prevent="changeTab('anexos')"
                   >Anexos</a
                 >
               </li>
@@ -59,10 +59,12 @@
                   :profissional-records="profissionalRecords"
                   :justificativas="justificativas"
                   :codigo-sei="codigoSei"
+                  :contrato="contrato"
+                  :subproduto="subproduto"
                   @update-form="updateForm"
                   @vincular-profissional="vincularProfissional"
                   @salvar-novo-profissional="salvarNovoProfissional"
-                  @update-justificativas="updateJustificativas"
+                  @update:justificativas="updateJustificativas"
                   @update:codigo-sei="updateCodigoSei"
                   @excluir-profissional="excluirProfissional"
                 />
@@ -112,25 +114,26 @@ import Metodologias from './Metodologias.vue';
 import Resultados from './Resultados.vue';
 import Anexos from './Anexos.vue';
 import { reactive, ref, onMounted } from 'vue';
+import { useToast } from 'vue-toastification';
 
-const props = defineProps([
-  'contrato',
-  'produto',
-  'subproduto',
-  'empreendimentos',
-  'campanhaId',
-  'draftData',
-  'contratos',
-  'profissionais',
-  'justificativas',
-  'codigoSei',
-  'resultadosAnexos',
-]);
+const toast = useToast();
+
+const props = defineProps({
+  contrato: [String, Number],
+  produto: String,
+  subproduto: String,
+  empreendimentos: Array,
+  campanhaId: [String, Number],
+  draftData: Object,
+  contratos: Object,
+  profissionais: Array,
+  justificativas: Array,
+  codigoSei: String,
+  resultadosAnexos: Array,
+});
 
 const activeTab = ref('apresentacao');
-const showModal = ref(false);
-const anexos = ref([]); 
-
+const anexos = ref([]);
 const form = reactive({
   id_campanha: '3',
   cod_emp: props.draftData?.cod_emp || '',
@@ -141,7 +144,7 @@ const form = reactive({
   tipo_de_intervencao: props.draftData?.tipo_de_intervencao || '',
   descricao: props.draftData?.descricao || '',
   bioma: props.draftData?.bioma || '',
-  coordenadas: props.draftData?.coordenadas || null, 
+  coordenadas: props.draftData?.coordenadas || null,
   metodologia: props.draftData?.metodologia || '',
   resultados_anexos: props.resultadosAnexos || [],
   anexos_fotos: props.draftData?.anexos_fotos || [],
@@ -150,12 +153,21 @@ const form = reactive({
 const errors = ref({});
 const profissionalRecords = ref(props.draftData?.profissionais ?? []);
 const localProfissionais = ref(Array.isArray(props.profissionais) ? [...props.profissionais] : []);
-const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: '' }]);
+const justificativas = ref(props.justificativas || [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: props.codigoSei || '' }]);
 const codigoSei = ref(props.codigoSei || '');
+
+onMounted(() => {
+  console.log('Props recebidas em Create.vue:', {
+    subproduto: props.subproduto,
+    campanhaId: props.campanhaId,
+    profissionais: props.profissionais,
+    currentUrl: window.location.href,
+  });
+});
 
 const updateForm = (data) => {
   Object.assign(form, data);
-  console.log('Form atualizado:', form); 
+  console.log('Form atualizado:', form);
 };
 
 const updateJustificativas = (newValue) => {
@@ -174,11 +186,6 @@ const updateCodigoSei = (newValue) => {
 const updateMetodologia = (value) => {
   form.metodologia = value;
   console.log('Metodologia atualizada:', value);
-};
-
-const updateAnexosFotos = (newAnexos) => {
-  form.anexos_fotos = newAnexos;
-  console.log('Anexos de fotos atualizados:', newAnexos);
 };
 
 const updateResultadosAnexos = (newAnexos) => {
@@ -220,6 +227,15 @@ const salvarNovoProfissional = (novoProfissional) => {
     subproduto: props.subproduto,
   };
 
+  console.log('Enviando POST para salvar profissional:', {
+    url: route('sgc.contratada.produtos.espeleo.profissional.store', {
+      contrato: props.contrato,
+      produto: 'espeleologia',
+    }) + (props.subproduto ? `?subproduto=${encodeURIComponent(props.subproduto)}` : ''),
+    payload,
+    currentUrl: window.location.href,
+  });
+
   router.post(
     route('sgc.contratada.produtos.espeleo.profissional.store', {
       contrato: props.contrato,
@@ -229,15 +245,27 @@ const salvarNovoProfissional = (novoProfissional) => {
     {
       preserveState: true,
       preserveScroll: true,
+      replace: true,
       onSuccess: (page) => {
-        console.log('Resposta do POST:', page);
+        console.log('Resposta do POST salvar profissional:', {
+          page,
+          currentUrl: window.location.href,
+          flash: page.props.flash,
+        });
         const { success, profissional } = page.props.flash || {};
         if (success && profissional) {
           localProfissionais.value = [...localProfissionais.value, profissional];
+          console.log('localProfissionais atualizado:', localProfissionais.value);
           toast.success(success || 'Profissional cadastrado com sucesso');
         } else {
           toast.success('Profissional cadastrado com sucesso');
         }
+        const url = route('sgc.contratada.produtos.create', {
+          contrato: props.contrato,
+          produto: props.produto,
+        }) + (props.subproduto ? `?subproduto=${encodeURIComponent(props.subproduto)}` : '');
+        console.log('Forçando navegação para:', url);
+        router.visit(url, { preserveState: true, preserveScroll: true, replace: true });
       },
       onError: (err) => {
         console.error('Erro ao cadastrar profissional:', err);
@@ -259,7 +287,7 @@ const salvar = () => {
     tipo_de_intervencao: form.tipo_de_intervencao || null,
     descricao: form.descricao || null,
     bioma: form.bioma || null,
-    coordenadas: form.coordenadas || null, 
+    coordenadas: form.coordenadas || null,
     metodologia: form.metodologia || null,
     anexos_fotos: form.anexos_fotos,
     profissionais: profissionalRecords.value.map(p => ({
@@ -275,22 +303,44 @@ const salvar = () => {
     })),
     resultados_anexos: form.resultados_anexos,
   };
-  console.log('Enviando dados:', JSON.stringify(payload, null, 2));
-  router.post(route('sgc.contratada.produtos.espeleo.salvar_campanha', {
-    contrato: props.contrato,
-    produto: 'espeleologia',
-  }), payload, {
-    onError: (err) => {
-      errors.value = err;
-      console.error('Erro ao salvar campanha:', err);
-    },
-    onSuccess: () => {
-      errors.value = {};
-      alert('Campanha salva com sucesso');
-      justificativas.value = [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: '' }];
-      codigoSei.value = '';
-    },
+
+  console.log('Enviando POST para salvar campanha:', {
+    url: route('sgc.contratada.produtos.espeleo.salvar_campanha', {
+      contrato: props.contrato,
+      produto: 'espeleologia',
+    }) + (props.subproduto ? `?subproduto=${encodeURIComponent(props.subproduto)}` : ''),
+    payload: JSON.stringify(payload, null, 2),
+    currentUrl: window.location.href,
   });
+
+  router.post(
+    route('sgc.contratada.produtos.espeleo.salvar_campanha', {
+      contrato: props.contrato,
+      produto: 'espeleologia',
+    }) + (props.subproduto ? `?subproduto=${encodeURIComponent(props.subproduto)}` : ''),
+    payload,
+    {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+      onSuccess: (page) => {
+        console.log('Resposta do POST salvar campanha:', {
+          page,
+          currentUrl: window.location.href,
+          flash: page.props.flash,
+        });
+        errors.value = {};
+        toast.success('Campanha salva com sucesso');
+        justificativas.value = [{ justificativa: '', tipo: 'citacao', titulo: '', codigo_sei: '' }];
+        codigoSei.value = '';
+      },
+      onError: (err) => {
+        errors.value = err;
+        console.error('Erro ao salvar campanha:', err);
+        toast.error('Erro ao salvar campanha: ' + Object.values(err)[0]);
+      },
+    }
+  );
 };
 
 const excluirProfissional = (id) => {
@@ -298,9 +348,15 @@ const excluirProfissional = (id) => {
   console.log('Profissional excluído, nova lista:', profissionalRecords.value);
 };
 
-onMounted(() => {
-  console.log('Props recebidas em Create.vue:', props); 
-});
+const changeTab = (tab) => {
+  activeTab.value = tab;
+  const url = route('sgc.contratada.produtos.create', {
+    contrato: props.contrato,
+    produto: props.produto,
+  }) + (props.subproduto ? `?subproduto=${encodeURIComponent(props.subproduto)}` : '');
+  console.log('Mudando para aba:', { tab, url, currentUrl: window.location.href });
+  router.get(url, {}, { preserveState: true, preserveScroll: true, replace: true });
+};
 </script>
 
 <style scoped>
