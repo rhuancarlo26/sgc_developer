@@ -129,7 +129,7 @@ const props = defineProps([
 
 const activeTab = ref('apresentacao');
 const showModal = ref(false);
-const anexos = ref([]); // Inicializa anexos como array vazio
+const anexos = ref([]); 
 
 const form = reactive({
   id_campanha: '3',
@@ -141,7 +141,7 @@ const form = reactive({
   tipo_de_intervencao: props.draftData?.tipo_de_intervencao || '',
   descricao: props.draftData?.descricao || '',
   bioma: props.draftData?.bioma || '',
-  coordenadas: props.draftData?.coordenadas || null, // Adiciona coordenadas
+  coordenadas: props.draftData?.coordenadas || null, 
   metodologia: props.draftData?.metodologia || '',
   resultados_anexos: props.resultadosAnexos || [],
   anexos_fotos: props.draftData?.anexos_fotos || [],
@@ -155,7 +155,7 @@ const codigoSei = ref(props.codigoSei || '');
 
 const updateForm = (data) => {
   Object.assign(form, data);
-  console.log('Form atualizado:', form); // Debug
+  console.log('Form atualizado:', form); 
 };
 
 const updateJustificativas = (newValue) => {
@@ -219,23 +219,32 @@ const salvarNovoProfissional = (novoProfissional) => {
     observacao: novoProfissional.observacao,
     subproduto: props.subproduto,
   };
-  router.post(route('sgc.contratada.produtos.espeleo.profissional.store', {
-    contrato: props.contrato,
-    produto: 'espeleologia',
-  }), payload, {
-    onSuccess: (page) => {
-      const { success, profissional } = page.props.flash || {};
-      if (success && profissional) {
-        alert(success);
-        localProfissionais.value = page.props.profissionais || [];
-      }
-      showModal.value = false;
-    },
-    onError: (err) => {
-      console.error('Erro ao cadastrar profissional:', err);
-      showModal.value = false;
-    },
-  });
+
+  router.post(
+    route('sgc.contratada.produtos.espeleo.profissional.store', {
+      contrato: props.contrato,
+      produto: 'espeleologia',
+    }) + (props.subproduto ? `?subproduto=${encodeURIComponent(props.subproduto)}` : ''),
+    payload,
+    {
+      preserveState: true,
+      preserveScroll: true,
+      onSuccess: (page) => {
+        console.log('Resposta do POST:', page);
+        const { success, profissional } = page.props.flash || {};
+        if (success && profissional) {
+          localProfissionais.value = [...localProfissionais.value, profissional];
+          toast.success(success || 'Profissional cadastrado com sucesso');
+        } else {
+          toast.success('Profissional cadastrado com sucesso');
+        }
+      },
+      onError: (err) => {
+        console.error('Erro ao cadastrar profissional:', err);
+        toast.error('Erro ao cadastrar profissional: ' + Object.values(err)[0]);
+      },
+    }
+  );
 };
 
 const salvar = () => {
@@ -250,7 +259,7 @@ const salvar = () => {
     tipo_de_intervencao: form.tipo_de_intervencao || null,
     descricao: form.descricao || null,
     bioma: form.bioma || null,
-    coordenadas: form.coordenadas || null, // Inclui coordenadas
+    coordenadas: form.coordenadas || null, 
     metodologia: form.metodologia || null,
     anexos_fotos: form.anexos_fotos,
     profissionais: profissionalRecords.value.map(p => ({
@@ -290,7 +299,7 @@ const excluirProfissional = (id) => {
 };
 
 onMounted(() => {
-  console.log('Props recebidas em Create.vue:', props); // Debug
+  console.log('Props recebidas em Create.vue:', props); 
 });
 </script>
 

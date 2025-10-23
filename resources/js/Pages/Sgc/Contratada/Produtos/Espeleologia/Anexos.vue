@@ -1,4 +1,3 @@
-```vue
 <template>
   <div>
     <h3>Anexos - Upload de Imagens</h3>
@@ -64,7 +63,7 @@
           </div>
           <div class="d-flex align-items-center gap-2">
             <a :href="anexo.url_publica" target="_blank" class="text-blue-600 hover:underline">
-              Download
+              Abrir imagem
             </a>
             <button
               @click="confirmarExclusao(anexo.id)"
