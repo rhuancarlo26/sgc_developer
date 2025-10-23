@@ -226,7 +226,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" @click="showModal = false">Fechar</button>
-              <button @click="salvarNovoProfissional" class="btn btn-primary">Salvar</button>
+              <button @click="emitSalvarNovoProfissional" class="btn btn-primary">Salvar</button>
             </div>
           </div>
         </div>
@@ -237,14 +237,24 @@
 
 <script setup>
 import { defineProps, defineEmits, ref, watch, onMounted } from 'vue';
-import { router } from '@inertiajs/vue3';
 import MapSgc from '@/Components/MapSgc.vue';
 import { useToast } from 'vue-toastification';
 
 const toast = useToast();
 
-const props = defineProps(['campanha', 'empreendimentos', 'errors', 'profissionais', 'profissionalRecords', 'justificativas', 'codigoSei']);
-const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional', 'update:codigo-sei', 'update:justificativas', 'excluir-profissional']);
+const props = defineProps({
+  campanha: Object,
+  empreendimentos: Array,
+  errors: Object,
+  profissionais: Array,
+  profissionalRecords: Array,
+  justificativas: Array,
+  codigoSei: String,
+  contrato: [String, Number],
+  subproduto: String,
+});
+
+const emit = defineEmits(['update-form', 'vincular-profissional', 'salvar-novo-profissional', 'update:justificativas', 'update:codigo-sei', 'excluir-profissional']);
 
 const showModal = ref(false);
 const selectedProfissional = ref(null);
@@ -279,11 +289,7 @@ const preencherCamposEmpreendimento = () => {
   mapVisible.value = false;
   selectedGeoJson.value = null;
 
-  console.log('Empreendimentos disponíveis:', props.empreendimentos);
-  console.log('Cod_emp selecionado:', props.campanha.cod_emp);
   const emp = props.empreendimentos.find(e => e.cod_emp === props.campanha.cod_emp);
-  console.log('Empreendimento selecionado:', emp);
-
   if (emp) {
     const formData = {
       subtrecho: emp.subtrecho || '',
@@ -295,30 +301,25 @@ const preencherCamposEmpreendimento = () => {
       coordenadas: emp.coordenadas || null,
     };
     emit('update-form', formData);
-    console.log('Form data emitido:', formData);
 
     if (emp.coordenadas) {
       try {
         JSON.parse(emp.coordenadas);
         selectedGeoJson.value = emp.coordenadas;
-        console.log('Coordenadas selecionadas:', selectedGeoJson.value);
         mapVisible.value = true;
         setTimeout(() => {
           if (mapaVisualizarTrecho.value) {
             mapaVisualizarTrecho.value.renderMapa();
             mapaVisualizarTrecho.value.setGeoJson(selectedGeoJson.value);
           } else {
-            console.error('Mapa ref não disponível');
             toast.error('Erro ao inicializar o mapa.');
           }
         }, 500);
       } catch (e) {
-        console.error('Erro ao parsear GeoJSON:', e);
         noMapData.value = true;
         toast.error('GeoJSON inválido para o empreendimento.');
       }
     } else {
-      console.log('Coordenadas ausentes para o empreendimento:', emp.cod_emp);
       noMapData.value = true;
     }
   } else {
@@ -331,7 +332,6 @@ const preencherCamposEmpreendimento = () => {
       bioma: '',
       coordenadas: null,
     });
-    console.log('Nenhum empreendimento encontrado para cod_emp:', props.campanha.cod_emp);
     noMapData.value = true;
   }
   loading.value = false;
@@ -344,8 +344,13 @@ const vincularProfissional = () => {
   }
 };
 
-const salvarNovoProfissional = () => {
-  emit('salvar-novo-profissional', { ...novoProfissional.value });
+const emitSalvarNovoProfissional = () => {
+  if (!novoProfissional.value.profissional) {
+    toast.error('O campo Profissional é obrigatório.');
+    return;
+  }
+  emit('salvar-novo-profissional', novoProfissional.value);
+  showModal.value = false;
   novoProfissional.value = {
     profissional: '',
     formacao: '',
@@ -361,9 +366,7 @@ const salvarNovoProfissional = () => {
     status: 'Ativo',
     observacao: '',
   };
-  showModal.value = false;
 };
-
 
 const adicionarJustificativa = () => {
   justificativas.value.push({ justificativa: '', tipo: 'justificativa', titulo: '', codigo_sei: '' });
@@ -386,7 +389,11 @@ watch(() => props.justificativas, (newVal) => {
 }, { deep: true });
 
 onMounted(() => {
-  console.log('Props recebidas em Apresentacao.vue:', props);
+  console.log('Props recebidas em Apresentacao.vue:', {
+    subproduto: props.subproduto,
+    profissionais: props.profissionais,
+    campanha: props.campanha,
+  });
   if (props.campanha.cod_emp) {
     preencherCamposEmpreendimento();
   }
@@ -471,7 +478,6 @@ onMounted(() => {
   align-items: stretch;
 }
 
-/* Estilização do Modal */
 .modal {
   background-color: rgba(0, 0, 0, 0.4);
 }
@@ -490,15 +496,9 @@ onMounted(() => {
   background-color: #467cb7;
   padding: 0.75rem 1rem;
   border-bottom: none;
-}
-
-.modal-header {
-  background-color: #467cb7;
-  padding: 0.75rem 1rem;
-  border-bottom: none;
   display: flex;
-  justify-content: center; 
-  align-items: center; 
+  justify-content: center;
+  align-items: center;
 }
 
 .modal-title {
