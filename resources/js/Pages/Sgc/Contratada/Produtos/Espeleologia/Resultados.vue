@@ -29,8 +29,28 @@
         class="tab-pane fade"
         :class="{ 'show active': activeSubTab === tipo }"
         v-show="activeSubTab === tipo"
-      >
-        <div class="mb-5">
+          >
+        <div class="mb-5" v-if="tipo == 'prospeccao'">
+            <div class="alert alert-info">
+            <strong>Atenção:</strong> Para o tipo <em>Prospecção</em>, utilize a planilha de feições cársticas para registrar as feições identificadas durante a prospecção de campo.
+            </div>
+            <!-- Download da planilha modelo e upload da planilha preenchida -->
+            <div class="d-flex gap-3 align-items-center mb-3">
+              <a href="#" class="btn btn-success">Baixar Planilha Modelo</a>
+            </div>
+            <div class="upload-section">
+                <input
+                type="file"
+                id="planilha-upload"
+                class="form-control"
+                accept=".xlsx,.xls"
+                @change="onPlanilhaUpload"
+                />
+                <small class="text-muted">Upload da planilha preenchida</small>
+              </div>
+            <hr>
+        </div>
+        <div class="mb-5" v-else>
           <h4>{{ nomesTipos[tipo] }}</h4>
 
           <div
@@ -158,10 +178,12 @@ const emit = defineEmits(['update-resultados-anexos']);
 //se a categoria do subproduto for prospeccao, entao o tipo prospeccao é acresentado
 const tipos = props.categoria_subproduto === 'Prospecção'
   ? [
-      'prospeccao', 'geologico', 'geomorfologico', 'cavidades',
-      'hidrologico', 'hipsometrico', 'limites_areas',
-      'potencial_inicial', 'potencial_reclassificado',
-      'projeto_engenharia', 'estudos_posteriores'
+      'prospeccao', 'feicoes_carsticas',
+        'cavidades_nao_encontradas',
+        'cavidades_cecav_canie',
+        'caminhamento',
+        'raio_250m',
+        'curvas_de_nivel'
     ]
   : [
       'geologico', 'geomorfologico', 'cavidades',
@@ -179,17 +201,13 @@ const tipos = props.categoria_subproduto === 'Prospecção'
 // Se a categoria do subproduto for prospeccao, entao o tipo prospeccao é acresentado
 const nomesTipos = props.categoria_subproduto === 'Prospecção'
   ? {
-      prospeccao: 'Prospecção',
-      geologico: 'Mapa Geológico',
-      geomorfologico: 'Mapa Geomorfológico',
-      cavidades: 'Cavidades CECAV/SBE',
-      hidrologico: 'Mapa Hidrológico',
-      hipsometrico: 'Mapa Hipsométrico/Declividade',
-      limites_areas: 'Limites de Áreas',
-      potencial_inicial: 'Mapa de Potencial Espeleológico - Inicial',
-      potencial_reclassificado: 'Mapa de Potencial Espeleológico - Reclassificado',
-      projeto_engenharia: 'Projeto de Engenharia',
-      estudos_posteriores: 'Estudos Posteriores'
+      prospeccao: 'Panilha: Feições Cárticas',
+      feicoes_carsticas: 'Feições Cársticas Indentificadas',
+      cavidades_nao_encontradas: 'Cavidades Não Encontradas',
+      cavidades_cecav_canie: 'Cavidades CECAV/CANIE',
+      caminhamento: 'Caminhamento',
+      raio_250m: 'Raio de 250m de cavidades',
+      curvas_de_nivel: 'Curvas de Nível',
     }
   : {
       geologico: 'Mapa Geológico',
