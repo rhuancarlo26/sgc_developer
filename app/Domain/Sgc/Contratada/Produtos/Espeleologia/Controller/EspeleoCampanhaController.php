@@ -10,7 +10,7 @@ use App\Models\SgcEspeleoProfissional;
 use App\Models\SgcvwEmpreendimentos;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcEspeleoResultadoAnexo;
-use App\Models\SgcEspeleoAnexo;
+use App\Models\SgcEspeleoEstudosPosteriores;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -125,7 +125,7 @@ class EspeleoCampanhaController extends Controller
         $validated = $request->validate([
             'zip_file' => 'required|file|mimes:zip|max:10240',
             'campanha_id' => 'required|exists:sgc_espeleo_campanhas,id',
-            'tipo' => 'required|in:geologico,geomorfologico,cavidades,hidrologico,hipsometrico,limites_areas,potencial_inicial,potencial_reclassificado,projeto_engenharia,estudos_posteriores',
+            'tipo' => 'required|in:geologico,geomorfologico,cavidades,hidrografico,hipsometrico,declividades,limites_areas,potencial_inicial,potencial_reclassificado,projeto_engenharia,estudos_posteriores',
             'comentario' => 'nullable|string|max:5000',
         ]);
 
@@ -180,6 +180,26 @@ class EspeleoCampanhaController extends Controller
         ]);
     }
 
+    public function updateResultadoAnexo(Request $request, $contrato, $produto, $id)
+    {
+        if ($produto !== 'espeleologia') abort(404, 'Produto inválido');
+
+        $validated = $request->validate([
+            'comentario' => 'nullable|string|max:5000',
+        ]);
+
+        $anexo = SgcEspeleoResultadoAnexo::findOrFail($id);
+        if ($anexo->id_contrato != $contrato) abort(403, 'Acesso negado');
+
+        $anexo->comentario = $validated['comentario'] ?? '';
+        $anexo->save();
+
+        // Nada de JSON. Redireciona (303) para satisfazer o Inertia.
+        return back(303);
+        // Se quiser flash: return back(303)->with('flash', ['success' => 'Observação salva.']);
+    }
+
+
 
     public function uploadAnexo(Request $request, $contrato, $produto)
     {
@@ -228,4 +248,45 @@ class EspeleoCampanhaController extends Controller
             ], $e->getCode() ?: 500);
         }
     }
+
+
+    public function storeEstudosPosteriores(Request $request, $contrato, $produto)
+    {
+        if ($produto !== 'espeleologia') abort(404, 'Produto inválido');
+
+        $validated = $request->validate([
+            'campanha_id' => 'required|exists:sgc_espeleo_campanhas,id',
+            'necessario' => 'required|boolean',
+            'estudos' => 'array',
+            'estudos.*.subproduto_id' => 'required_if:necessario,1|integer',
+            'estudos.*.quantidade' => 'nullable|string|max:50',
+            'estudos.*.coordenadas' => 'array',
+            'estudos.*.coordenadas.*.lat' => 'nullable|string|max:50',
+            'estudos.*.coordenadas.*.lng' => 'nullable|string|max:50',
+        ]);
+
+        $campanha = SgcEspeleoCampanha::findOrFail($validated['campanha_id']);
+        if ($campanha->id_contrato != $contrato) abort(403, 'Acesso negado');
+
+        // ✅ Apagar todos registros anteriores
+        SgcEspeleoEstudosPosteriores::where('campanha_id', $campanha->id)->delete();
+
+        if ($validated['necessario']) {
+            foreach ($validated['estudos'] as $e) {
+                SgcEspeleoEstudosPosteriores::create([
+                    'id_contrato' => $contrato,
+                    'campanha_id' => $campanha->id,
+                    'subproduto_id' => $e['subproduto_id'],
+                    'quantidade' => $e['quantidade'] ?? null,
+                    'coordenadas' => json_encode($e['coordenadas'] ?? []),
+                    'necessario' => true,
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Estudos posteriores atualizados.');
+    }
+
+
+
 }

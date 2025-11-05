@@ -84,6 +84,8 @@
                   :contrato="contrato"
                   :resultados-anexos="form.resultados_anexos"
                   @update-resultados-anexos="updateResultadosAnexos"
+                  :subprodutos-espeleologia="subprodutosEspeleologia"
+                  :estudos-posteriores="draftData.estudosPosteriores ?? []"
                 />
               </div>
               <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
@@ -96,7 +98,21 @@
                 />
               </div>
             </div>
-            <button @click="salvar" class="btn btn-primary mt-3">Salvar</button>
+            <div class="d-flex justify-content-between mt-4">
+              <button v-if="activeTab !== 'apresentacao'" class="btn btn-outline-secondary" @click="previousTab">
+                ← Voltar
+              </button>
+
+              <button v-if="activeTab !== 'anexos'" class="btn btn-primary" @click="nextTab">
+                Avançar →
+              </button>
+
+              <button v-if="activeTab === 'anexos'" class="btn btn-success" @click="salvar">
+                ✅ Salvar Campanha
+              </button>
+            </div>
+
+            <!-- <button @click="salvar" class="btn btn-primary mt-3">Salvar</button> -->
           </div>
         </div>
       </template>
@@ -130,6 +146,8 @@ const props = defineProps({
   justificativas: Array,
   codigoSei: String,
   resultadosAnexos: Array,
+  subprodutosEspeleologia: Array,
+  estudosPosteriores: Array,
 });
 
 const activeTab = ref('apresentacao');
@@ -357,6 +375,23 @@ const changeTab = (tab) => {
   console.log('Mudando para aba:', { tab, url, currentUrl: window.location.href });
   router.get(url, {}, { preserveState: true, preserveScroll: true, replace: true });
 };
+
+const nextTab = () => {
+  const order = ['apresentacao', 'metodologias', 'resultados', 'anexos'];
+  const i = order.indexOf(activeTab.value);
+  if (i < order.length - 1) {
+    changeTab(order[i + 1]);
+  }
+};
+
+const previousTab = () => {
+  const order = ['apresentacao', 'metodologias', 'resultados', 'anexos'];
+  const i = order.indexOf(activeTab.value);
+  if (i > 0) {
+    changeTab(order[i - 1]);
+  }
+};
+
 </script>
 
 <style scoped>
