@@ -3,17 +3,47 @@
 namespace App\Domain\Sgc\Contratada\Produtos\Services;
 
 use App\Models\SgcvwSubprodutos;
+use App\Models\ServicoMonitoraFaunaConfigAbio;
+use App\Models\SgcProdutoAbio;
+use App\Models\Licenca;
+use Illuminate\Support\Facades\Log;
 
 class ProdutosService
 {
-    public function getSubprodutosByContrato($contratoId, $produto = null)
+    public function getSubprodutosByContrato($contrato, $produto)
     {
-        $query = SgcvwSubprodutos::where('contrato_id', $contratoId);
-        
-        if ($produto === 'fauna') {
-            $query->where('familia', 'Fauna');
-        }
+        return SgcvwSubprodutos::where('contrato_id', $contrato)
+            ->where('familia', ucfirst($produto))
+            ->get()
+            ->toArray();
+    }
 
-        return $query->get();
+    public function getAbios()
+    {
+        return Licenca::where('tipo', 12)
+            ->get(['id', 'numero_licenca'])
+            ->map(function ($licenca) {
+                return [
+                    'id' => $licenca->id,
+                    'licenca' => [
+                        'id' => $licenca->id,
+                        'numero_licenca' => $licenca->numero_licenca
+                    ]
+                ];
+            });
+    }
+
+    public function store_abio(array $post)
+    {
+        return SgcProdutoAbio::create([
+            'id_abio' => $post['id_abio'],
+        ]);
+    }
+
+    public function delete_abio($produto_abio)
+    {
+        $abio = SgcProdutoAbio::findOrFail($produto_abio);
+        $abio->delete();
+        return ['request' => 'ABIO removido com sucesso'];
     }
 }
