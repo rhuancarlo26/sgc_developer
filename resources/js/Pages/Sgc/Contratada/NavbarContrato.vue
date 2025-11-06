@@ -20,11 +20,6 @@ const props = defineProps({
 
 const contratoId = computed(() => props.tipo?.id || null);
 
-onMounted(() => {
-  console.log('Props tipo (onMounted):', props.tipo);
-  console.log('Contrato ID (onMounted):', contratoId.value);
-});
-
 watch(() => props.tipo, (newTipo) => {
   console.log('Props tipo (watch):', newTipo);
   console.log('Contrato ID (watch):', contratoId.value);

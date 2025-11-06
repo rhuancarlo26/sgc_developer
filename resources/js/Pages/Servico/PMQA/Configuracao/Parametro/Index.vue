@@ -22,6 +22,8 @@ const props = defineProps({
     aprovacao: {type: Object}
 });
 
+console.log(props.listas)
+
 const abrirModalParametros = () => {
     modalParametros.value.abrirModal();
 }

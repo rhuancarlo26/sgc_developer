@@ -32,6 +32,7 @@ const props = defineProps({
     draftData: Object,
 });
 
+console.log(props.draftData)
 // Log para depurar as props recebidas do backend
 console.log('Create.vue props:', { abios: props.abios, profissionais: props.profissionais, campanhaId: props.campanhaId, draftData: props.draftData });
 
@@ -499,14 +500,14 @@ const excluirAnexo = (tipo) => {
     console.log('Excluindo anexo:', tipo, anexos.value[tipo]);
     anexos.value[tipo] = null;
     console.log('Anexos após exclusão:', anexos.value);
-    anexos.value = { ...anexos.value }; 
+    anexos.value = { ...anexos.value };
 };
 
 const updateAnexo = (tipo, file) => {
     console.log('Atualizando anexo:', tipo, file);
     anexos.value[tipo] = file || null;
     console.log('Anexos após atualização:', anexos.value);
-    anexos.value = { ...anexos.value }; 
+    anexos.value = { ...anexos.value };
 };
 </script>
 

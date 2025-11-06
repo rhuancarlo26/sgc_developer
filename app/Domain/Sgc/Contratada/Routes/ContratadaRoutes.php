@@ -25,7 +25,7 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\AnexoController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\CampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ComentarioController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ProfissionalController;
-
+use App\Domain\Sgc\Contratada\Produtos\Pmqa\Controller\PmqaCampanhaController;
 use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
 
@@ -120,11 +120,11 @@ Route::prefix('/contratada')->group(function () {
     // PDF Consolidado
     // Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');
 
-    // Produtos - Criação/Analise/Visualização    
+    // Produtos - Criação/Analise/Visualização
     Route::get('/{contrato}/produtos/{produto}', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
     Route::get('/{contrato}/produtos/{produto}/create', [ProdutosController::class, 'create'])->name('sgc.contratada.produtos.create');
     Route::post('/{contrato}/produtos/{produto}', [ProdutosController::class, 'store'])->name('sgc.contratada.produtos.store');
-  
+
     Route::post('produtos/{produto}/abio', [StoreProdutoAbioController::class, 'store'])->name('sgc.contratada.produtos.abio.store');
     Route::delete('produtos/{produto}/abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.delete');
 
@@ -147,13 +147,25 @@ Route::prefix('/contratada')->group(function () {
         Route::delete('campanha/{campanha}/comentario/{comentario}', [ComentarioController::class, 'destroyComentario'])->name('sgc.contratada.produtos.comentario.destroy');
         Route::post('/campanha/{campanhaId}/update-partial', [CampanhaController::class, 'updatePartial'])->name('sgc.contratada.produtos.updatePartial');
         Route::delete('campanha/{campanha}/anexo/{anexoId}', [AnexoController::class, 'destroyAnexo'])->name('sgc.contratada.produtos.anexo.destroy');
-    
+
         // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {
             Route::post('salvar-campanha', [EspeleoCampanhaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.espeleo.salvar_campanha');
             Route::post('profissional/store', [EspeleoCampanhaController::class, 'storeProfissional'])->name('sgc.contratada.produtos.espeleo.profissional.store');
             Route::get('profissionais', [EspeleoCampanhaController::class, 'getProfissionais'])->name('sgc.contratada.produtos.espeleo.profissionais');
         });
+
+
+        Route::prefix('pmqa')->group(function () {
+            Route::post('salvar-campanha', [PmqaCampanhaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.pmqa.salvar_campanha');
+            Route::post('importar-pontos', [PmqaCampanhaController::class, 'importarPontos'])->name('sgc.contratada.produtos.pmqa.importar_pontos');
+            Route::post('criar-parametros', [PmqaCampanhaController::class, 'criarListaParametros'])->name('sgc.contratada.produtos.pmqa.criar_parametros');
+            Route::post('vincular-parametros', [PmqaCampanhaController::class, 'vincularParametrosPontos'])->name('sgc.contratada.produtos.pmqa.vincular_parametros');
+            Route::get('pontos/{campanhaId}', [PmqaCampanhaController::class, 'getPontos'])->name('sgc.contratada.produtos.pmqa.get_pontos');
+            Route::get('parametros/{campanhaId}', [PmqaCampanhaController::class, 'getParametros'])->name('sgc.contratada.produtos.pmqa.get_parametros');
+        });
+
+    });
 
         Route::post('/espeleo/resultados/upload', [EspeleoCampanhaController::class, 'uploadResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.upload');
 
@@ -175,8 +187,6 @@ Route::prefix('/contratada')->group(function () {
 
 
 
-    
-    
-    
+  
 
 });
