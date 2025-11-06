@@ -183,7 +183,7 @@ Route::prefix('/contratada')->group(function () {
         Route::post('/espeleologia/estudos/store', [EspeleoCampanhaController::class, 'storeEstudosPosteriores'])->name('sgc.contratada.produtos.espeleo.estudos.store');
 
 
-    });
+ 
 
 
 
