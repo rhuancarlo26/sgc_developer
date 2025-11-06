@@ -79,7 +79,7 @@ const ap = (ap) => {
         <Navbar :contrato="contrato" :servico="servico">
             <template #body>
 
-                <div class="row justify-content-between align-items-center" v-if="ap(aprovacao)">
+                <div class="row justify-content-between align-items-center" >
                     <div class="col-5 mb-2">
                         <v-select :options="licencas" label="numero_licenca" v-model="form.licenca_id"
                             :reduce="r => r.id">
@@ -117,7 +117,7 @@ const ap = (ap) => {
                                     <a v-else class="btn btn-primary btn-icon me-1" :href="item.documento?.caminho">
                                         <IconFile />
                                     </a>
-                                    <LinkConfirmation v-if="ap(aprovacao)" v-slot="confirmation"
+                                    <LinkConfirmation v-slot="confirmation"
                                         :options="{ text: 'Você deseja remover o vínculo?' }">
                                         <Link :onBefore="confirmation.show"
                                             :href="route('contratos.contratada.servicos.supressao-vegetacao.configuracao.vincular-asv.delete', { contrato: contrato.id, servico: servico.id, licenca: item.id })"

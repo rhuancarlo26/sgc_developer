@@ -15,14 +15,15 @@ class UpdateController extends Controller
 
   public function index(Contrato $contrato, Servicos $servico, Request $request): RedirectResponse
   {
+   
     $post = [
       ...$request->all(),
       'id_servico' => $servico->id,
-      'id_modulo' => $request['id_modulo']['id'],
-      'id_armadilha' => $request['id_armadilha']['id']
+      'id_modulo' => $request['id_modulo'],
+      'id_armadilha' => $request['id_armadilha']
     ];
 
-    $post['nome_id'] = $this->nameIdCustom($request['id_grupo'], $request['id_tipo'], $request['id'], $request['id_armadilha']['nome_id']);
+    $post['nome_id'] = $this->nameIdCustom($request['id_grupo'], $request['id_tipo'], $request['id'], $request['nome_id']);
     $response = $this->registroService->update(post: $post);
 
     return to_route('contratos.contratada.servicos.monitora_fauna.execucao.registro.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'registro' => $request->id])->with('message', $response['request']);

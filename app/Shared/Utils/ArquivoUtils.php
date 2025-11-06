@@ -23,21 +23,27 @@ class ArquivoUtils
             return null;
         }
 
-        $nomeArquivo = $prefixo . rand() . '.' . $arquivo->clientExtension();
-        $diretorio = $arquivo->storeAs(
-            $diretorio,
-            $nomeArquivo,
-            'public'
-        );
+        $diretorio = str_starts_with($diretorio, 'public/') ? substr($diretorio, 7) : $diretorio;
 
 
-        /** @var Arquivo */
+        $nomeArquivo = ($prefixo ?? '') . uniqid() . '.' . $arquivo->getClientOriginalExtension();
+
+        $caminhoWeb = '/' . trim($diretorio, '/') . '/' . $nomeArquivo;
+
+        $caminhoDestino = public_path($diretorio);
+        if (!is_dir($caminhoDestino)) {
+            mkdir($caminhoDestino, 0775, true);
+        }
+
+        $arquivo->move($caminhoDestino, $nomeArquivo);
+
         $model = new Arquivo([
-            'chave'        => md5(uniqid(rand(), true)),
-            'arquivo'      => $nomeArquivo,
-            'extensao'     => $arquivo->clientExtension(),
-            'diretorio'    => $diretorio,
-            'nome_arquivo' => $arquivo->getClientOriginalName(),
+            'chave'         => md5(uniqid(rand(), true)),
+            'arquivo'       => $nomeArquivo,
+            'extensao'      => $arquivo->getClientOriginalExtension(),
+            'diretorio'     => $diretorio,
+            'nome_arquivo'  => $arquivo->getClientOriginalName(),
+            'caminho'       => $caminhoWeb,
         ]);
 
         if ($createModel) {
@@ -55,19 +61,24 @@ class ArquivoUtils
         return false;
     }
 
-    /**
-     * @param UploadedFile[] $fotos
-     * @param string $diretorio
-     * @param string $prefixo
-     * @param ?callable $afterSave
-     */
-    public function handleFotos(array $fotos, string $diretorio, string $prefixo, ?callable $afterSave = null): void
+    public function handleFotos(array $fotos, string $diretorio, string $prefixo, ?callable $afterSave = null): array
     {
-        if (!count($fotos)) return;
-        $fotosId = array_map(function ($foto) use ($diretorio, $prefixo) {
-            $arquivo = $this->salvar(arquivo: $foto, diretorio: $diretorio, prefixo: $prefixo);
+        if (!count($fotos)) return [];
+
+        $fotosId = array_filter(array_map(function ($foto) use ($diretorio, $prefixo) {
+            if (!$foto instanceof UploadedFile) {
+                logger()->error('Arquivo inválido recebido em handleFotos', ['tipo' => gettype($foto)]);
+                return null;
+            }
+
+            $arquivo = $this->salvar($foto, $diretorio, $prefixo);
             return $arquivo?->id;
-        }, $fotos);
-        if ($afterSave !== null) $afterSave($fotosId);
+        }, $fotos));
+
+        if ($afterSave !== null) {
+            $afterSave($fotosId);
+        }
+
+        return $fotosId;
     }
 }

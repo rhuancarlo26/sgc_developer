@@ -103,7 +103,7 @@ defineExpose({abrirModal});
 
 <template>
     <form @submit.prevent="save">
-        <Modal ref="modalRef" title="Cadastro de Destinação de Pilhas" modal-dialog-class="modal-xl">
+        <Modal ref="modalRef" title="Cadastro de Relatório" modal-dialog-class="modal-xl">
             <template #body>
                 <div class="row row-gap-2 mb-2">
                     <div class="col-lg-8">

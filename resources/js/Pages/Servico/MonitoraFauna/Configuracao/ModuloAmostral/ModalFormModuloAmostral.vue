@@ -9,6 +9,7 @@ import Table from "@/Components/Table.vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import NavButton from "@/Components/NavButton.vue";
 import InputError from "@/Components/InputError.vue";
+import { usePage } from '@inertiajs/vue3'
 
 const props = defineProps({
   contrato: { type: Object },
@@ -18,6 +19,8 @@ const props = defineProps({
 
 const modalRef = ref({});
 const municipios = ref([]);
+const fileInput = ref(null);
+const { modeloUrl } = usePage().props
 
 const biomas = [
   "Caatinga",
@@ -45,7 +48,9 @@ const form = useForm({
   latitude_final: null,
   longitude_final: null,
   obs: null,
-  arquivo: null
+  arquivo: null,
+  arquivoArmadilha: null,
+  armadilhas: null
 });
 
 const abrirModal = (item) => {
@@ -78,6 +83,28 @@ const save = () => {
   form.post(route('contratos.contratada.servicos.monitora_fauna.configuracoes.modulo_amostral.' + url, { contrato: props.contrato.id, servico: props.servico.id }), {
     onSuccess: () => modalRef.value.getBsModal().hide()
   });
+}
+
+function deleteArmadilha(id) {
+  if (!confirm('Tem certeza que deseja excluir esta armadilha?')) return;
+
+  const url = route(
+    'contratos.contratada.servicos.monitora_fauna.configuracoes.modulo_amostral.armadilhas.destroy',
+    {
+      contrato:  props.contrato.id,
+      servico:   props.servico.id,
+      armadilha: id,
+    }
+  );
+
+  axios
+    .delete(url)
+    .then(({ data }) => {
+      form.armadilhas = form.armadilhas.filter(a => a.id !== id);
+    })
+    .catch((error) => {
+      alert(error.response?.data?.content || 'Erro ao excluir');
+    });
 }
 
 defineExpose({ abrirModal });
@@ -149,7 +176,7 @@ defineExpose({ abrirModal });
               <InputLabel value="UF" for="uf" />
               <v-select @option:selected="getLocalizacao()" :options="ufs" label="uf" v-model="form.uf"
                 :reduce="uf => uf.uf">
-                <template #no-options="{}">
+                <template #no-options="{ }">
                   Nenhum registro encontrado.
                 </template>
               </v-select>
@@ -160,7 +187,7 @@ defineExpose({ abrirModal });
             <div class="group-control">
               <InputLabel value="Municípios" for="municipio" />
               <v-select :options="municipios" v-model="form.municipio">
-                <template #no-options="{}">
+                <template #no-options="{ }">
                   Nenhum registro encontrado.
                 </template>
               </v-select>
@@ -171,7 +198,7 @@ defineExpose({ abrirModal });
             <div class="group-control">
               <InputLabel value="Bioma" for="bioma" />
               <v-select :options="biomas" v-model="form.bioma">
-                <template #no-options="{}">
+                <template #no-options="{ }">
                   Nenhum registro encontrado.
                 </template>
               </v-select>
@@ -244,14 +271,108 @@ defineExpose({ abrirModal });
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col d-flex justify-content-end">
-            <button type="submit" class="btn btn-success" :disabled="form.processing">
-              Salvar
-            </button>
+           <div class="row mb-3">
+        <div class="col">
+          <a
+            :href="modeloUrl"
+            class="btn btn-outline-primary"
+            download
+          >
+            <IconDownload class="me-1" />
+            Baixar Planilha Modelo
+          </a>
+        </div>
+      </div>
+         <div class="row mb-4">
+          <div class="col">
+            <div class="group-control">
+              <InputLabel value="Upload de Armadilhas" for="arquivoArmadilha" />
+              <input @input="form.arquivoArmadilha = $event.target.files[0]" type="file" class="form-control" name="arquivoArmadilha"
+                id="arquivoArmadilha" />
+              <InputError :message="form.errors.arquivoArmadilha" />
+            </div>
           </div>
         </div>
-      </form>
+          <div class="row">
+            <div class="col d-flex justify-content-end">
+              <button type="submit" class="btn btn-success" :disabled="form.processing">
+                Salvar
+              </button>
+            </div>
+          </div>
+        </form>
+      
+     <div class="accordion" id="armadilhasAccordion">
+        <div class="accordion-item mt-5">
+          <h2 class="accordion-header" id="headingArmadilhas">
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseArmadilhas"
+              aria-expanded="false"
+              aria-controls="collapseArmadilhas"
+            >
+              Armadilhas ({{ form?.armadilhas?.length }})
+            </button>
+          </h2>
+          <div
+            id="collapseArmadilhas"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingArmadilhas"
+            data-bs-parent="#armadilhasAccordion"
+          >
+            <div class="accordion-body p-0">
+              <!-- TABELA DE ARMADILHAS -->
+              <div class="row" v-if="form?.armadilhas?.length">
+                <div class="col-12">
+                  <table class="table table-bordered mb-0">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Parcela</th>
+                        <th>Forma</th>
+                        <th>Tipo</th>
+                        <th>Nº Armadilha</th>
+                        <th>Lat.</th>
+                        <th>Long.</th>
+                        <th>Zona</th>
+                        <th>Observação</th>
+                        <th>Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="arm in form.armadilhas" :key="arm.id">
+                        <td>{{ arm.id }}</td>
+                        <td>{{ arm.parcela }}</td>
+                        <td>{{ arm.forma }}</td>
+                        <td>{{ arm.tipo }}</td>
+                        <td>{{ arm.numero_armadilha_metodo }}</td>
+                        <td>{{ arm.latitude }}</td>
+                        <td>{{ arm.longitude }}</td>
+                        <td>{{ arm.zona }}</td>
+                        <td>{{ arm.observacao }}</td>
+                        <td>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-danger"
+                          @click="deleteArmadilha(arm.id)"
+                        >
+                          <IconTrash size="18" />
+                        </button>
+                      </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div v-else class="p-3">
+                Nenhuma armadilha cadastrada.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </template>
   </Modal>
 </template>

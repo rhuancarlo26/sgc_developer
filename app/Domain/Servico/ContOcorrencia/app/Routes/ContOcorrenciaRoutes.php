@@ -28,4 +28,8 @@ Route::prefix('/cont_ocorrencia')->group(function () {
     Route::prefix('/relatorio')->group(function () {
         require __DIR__ . '/../../Relatorio/Routes/RelatorioRoutes.php';
     });
+
+    Route::prefix('/pareceres')->group(function () {
+        require __DIR__ . '/../../Pareceres/Routes/PareceresRoutes.php';
+    });
 });

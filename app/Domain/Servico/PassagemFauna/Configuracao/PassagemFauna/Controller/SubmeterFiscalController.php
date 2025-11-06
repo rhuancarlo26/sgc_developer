@@ -17,7 +17,7 @@ class SubmeterFiscalController extends Controller
     {
         $post = [
             'fk_servico' => $servico->id,
-            'fk_status' => 3
+            'fk_status' => 1
         ];
 
         $response = $this->passagemFaunaService->submeterFiscal($post);

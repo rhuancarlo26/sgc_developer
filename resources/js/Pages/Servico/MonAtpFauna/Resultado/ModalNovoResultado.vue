@@ -33,25 +33,39 @@ const save = () => {
         fk_servico: props.servico.id
     }));
 
+    const onSuccessSave = (page) => {
+    const items = page.props?.data?.data ?? []
+    const ultimo = items.length ? items[items.length - 1] : null
+
+    const resultadoId =  form.id ?? ultimo?.id 
+
+    if (resultadoId) {
+        saveResultadoCampanha(resultadoId)
+    }
+
+    onSuccess()
+}
+
     if (form.id !== null) {
         form.patch(route('contratos.contratada.servicos.mon_atp_fauna.resultado.update'), {
             preserveState: true,
-            onSuccess
+            onSuccess: onSuccessSave
         })
         return
     }
 
     form.post(route('contratos.contratada.servicos.mon_atp_fauna.resultado.store'), {
         preserveState: true,
-        onSuccess
+        onSuccess: onSuccessSave
     })
 }
 
-const saveResultadoCampanha = () => {
+const saveResultadoCampanha = (resultadoId) => {
     form.transform((data) => ({
         ...data,
-        fk_resultado: form.id,
+        fk_resultado: resultadoId,
     }));
+
     form.post(route('contratos.contratada.servicos.mon_atp_fauna.resultado.store-campanha'), {
         preserveState: true,
         preserveScroll: true,
@@ -60,13 +74,15 @@ const saveResultadoCampanha = () => {
 }
 
 const resultadosCampanha = ref([])
+
 const abrirModal = async (item = null) => {
     form.reset()
     resultadosCampanha.value = [];
     if (item !== null) {
         Object.assign(form, item)
-        const { data } = await axios.get(route('contratos.contratada.servicos.mon_atp_fauna.resultado.get-campanhas', form.id))
-        resultadosCampanha.value = data;
+        resultadosCampanha.value = item.campanhas;
+
+        console.log(resultadosCampanha);
     }
     modalRef.value.getBsModal().show();
 }
@@ -113,25 +129,23 @@ defineExpose({ abrirModal });
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6">
-
-                        <div v-if="form.id" class="row row-gap-2 mb-2">
+                    <div class="col-lg-6">                                   
+                        <div class="row row-gap-2 mb-2">
                             <div class="col-lg-12">
                                 <InputLabel value="Selecionar campanha" for="fk_campanha" />
-                                <v-select @option:selected="saveResultadoCampanha" v-model="form.fk_campanha"
-                                    :options="campanhas" label="id" :reduce="t => t.id">
-                                    <template #no-options="{}">
+                                <v-select v-model="form.fk_campanha" :options="campanhas" label="id"
+                                    :reduce="t => t.id">
+                                    <template #no-options="{ }">
                                         Nenhum registro encontrado.
                                     </template>
                                 </v-select>
                             </div>
                             <div class="col-lg-12">
-                                <Table :columns="['ID', 'Campanha', 'Ação']"
-                                    :records="{ data: resultadosCampanha, links: [] }" table-class="table-hover">
-                                    <template #body="{ item }">
+                                <Table :columns="['Campanha', 'Ação']"
+                                :records="{ data: resultadosCampanha, links: [] }" table-class="table-hover">
+                                <template #body="{ item }">                                                                                           
                                         <tr>
-                                            <td>{{ item.id }}</td>
-                                            <td>{{ item.id_campanha }}</td>
+                                            <td>{{ item.campanha.id }}</td>
                                             <td v-if="showAction">
                                                 <LinkConfirmation v-slot="confirmation"
                                                     :options="{ text: 'Excluir registro?' }">
@@ -140,7 +154,7 @@ defineExpose({ abrirModal });
                                                         onSuccess: () => {
                                                             modalRef.getBsModal().hide();
                                                         }
-                                                    })" :href="route('contratos.contratada.servicos.mon_atp_fauna.resultado.delete-campanha', item.id)"
+                                                    })" :href="route('contratos.contratada.servicos.mon_atp_fauna.resultado.delete-campanha', item.id )"
                                                         as="button" method="delete" type="button"
                                                         class="btn btn-icon btn-danger">
                                                     <IconTrash />
