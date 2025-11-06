@@ -18,9 +18,9 @@ class FrenteSupressaoService
     {
         $frente->update([
             ...$request,
-            'rodovia' => $request['rodovia']['id'],
-            'uf_inicial' => $request['uf_inicial']['id'],
-            'uf_final' => $request['uf_final']['id'],
+            'rodovia' => $request['rodovia'],
+            'uf_inicial' => $request['uf_inicial'],
+            'uf_final' => $request['uf_final'],
         ]);
     }
 

@@ -9,68 +9,69 @@ import { ref } from "vue";
 
 const modal = ref();
 const props = defineProps({
-  servico: { type: Object },
-  campanhas: { type: Array }
+    servico: { type: Object },
+    campanhas: { type: Array }
 });
 
 const form = useForm({
-  servico_id: null,
-  campanha_id: null,
-  arquivo: null
+    servico_id: null,
+    campanha_id: null,
+    arquivo: null
 });
 
 const abrirModal = () => {
-
-  modal.value.getBsModal().show();
+    modal.value.getBsModal().show();
 }
 
 const importar = () => {
-  form.servico_id = props.servico.id;
-
-  form.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.store_importar'));
+    if (!form.arquivo) return;
+    form.servico_id = props.servico.id;
+    form.post(route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.store_importar'));
 }
 
 defineExpose({ abrirModal });
 </script>
 
 <template>
-  <Modal ref="modal" title="Importar Tabela de Registros" modal-dialog-class="modal-xl">
-    <template #body>
-      <div class="card-body">
-        <div class="row">
-          <div class="col">
-            <div class="d-flex justify-content-end">
-              <a class="btn btn-info" target="_blank"
-                :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.modelo_importar')">Modelo</a>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <InputLabel value="Selecionar Campanha" for="campanha_id" />
-            <select name="campanha_id" id="campanha_id" class="form-select" v-model="form.campanha_id">
-              <option v-for="campanha in campanhas" :key="campanha.id" :value="campanha.id">{{ campanha.id }}</option>
-            </select>
-            <InputError :message="form.errors.campanha_id" />
-          </div>
-          <div class="col">
-            <InputLabel value="Selecionar Arquivo" for="arquivo" />
+    <Modal ref="modal" title="Importar Tabela de Registros" modal-dialog-class="modal-xl">
+        <template #body>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <div class="d-flex justify-content-end">
+                            <a class="btn btn-info" target="_blank"
+                                :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.registros.importar-modelo')">Modelo</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <InputLabel value="Selecionar Campanha" for="campanha_id" />
+                        <select name="campanha_id" id="campanha_id" class="form-select" v-model="form.campanha_id">
+                            <option v-for="campanha in campanhas" :key="campanha.id" :value="campanha.id">{{ campanha.id
+                                }}</option>
+                        </select>
+                        <InputError :message="form.errors.campanha_id" />
+                    </div>
+                    <div class="col">
+                        <InputLabel value="Selecionar Arquivo" for="arquivo" />
 
-            <div class="row g-2">
-              <div class="col">
-                <input type="file" name="arquivo" id="arquivo" class="form-control"
-                  @input="form.arquivo = $event.target.files[0]">
-              </div>
-              <div class="col-auto">
-                <NavButton @click="importar()" title="Salvar" type-button="success" />
-              </div>
+                        <div class="row g-2">
+                            <div class="col">
+                                <input type="file" name="arquivo" id="arquivo" class="form-control"
+                                    @input="form.arquivo = $event.target.files[0]">
+                            </div>
+                            <div class="col-auto">
+                                <NavButton @click="importar()" title="Salvar" type-button="success"
+                                    :disabled="!form.arquivo" />
+                            </div>
+                        </div>
+                        <InputError :message="form.errors.arquivo" />
+                    </div>
+                </div>
             </div>
-            <InputError :message="form.errors.arquivo" />
-          </div>
-        </div>
-      </div>
-    </template>
-    <template #footer>
-    </template>
-  </Modal>
+        </template>
+        <template #footer>
+        </template>
+    </Modal>
 </template>

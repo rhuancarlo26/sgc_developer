@@ -9,11 +9,11 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required',
+            'id' => 'nullable',
             'arquivo' => 'nullable|file',
-            'fk_servico' => 'required',
+            'fk_servico' => 'nullable',
             'fk_campanha' => 'nullable',
-            'fk_grupo_amostrado' => 'required',
+            'fk_grupo_amostrado' => 'nullable',
             'data_registro' => 'nullable',
             'fk_estado' => 'nullable',
             'km' => 'nullable',

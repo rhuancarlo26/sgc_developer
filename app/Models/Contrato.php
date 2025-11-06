@@ -19,6 +19,7 @@ class Contrato extends Model
 
     protected $appends = ['ufs', 'brs'];
 
+
     public function tipo(): BelongsTo
     {
         return $this->belongsTo(ContratoTipo::class, 'tipo_contrato');
@@ -38,11 +39,6 @@ class Contrato extends Model
     {
         return $this->hasMany(contratoTrecho::class, 'contrato_id');
     }
-
-//    public function empreendimento_trechos(): HasMany
-//    {
-//        return $this->hasMany(ContratoEmpreendimentoTrecho::class, 'contrato_id');
-//    }
 
     public function introducao(): HasOne
     {
@@ -103,5 +99,8 @@ class Contrato extends Model
         );
     }
 
-    
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'contratos_usuarios', 'id_contrato', 'id_usuario');
+    }
 }

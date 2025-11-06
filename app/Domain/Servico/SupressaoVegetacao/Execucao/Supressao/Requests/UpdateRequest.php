@@ -26,14 +26,18 @@ class UpdateRequest extends FormRequest
             'local_shape' => 'nullable',
             'fotos' => 'nullable|array',
             'corte_especies' => 'nullable|array',
+            'latitude'  => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'geometry' =>  'nullable',
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
             'numeric' => 'O campo deve ser um número válido.',
             'required' => 'O campo é obrigatório.',
+            'date' => 'O campo deve ser uma data válido.',
         ];
     }
 }

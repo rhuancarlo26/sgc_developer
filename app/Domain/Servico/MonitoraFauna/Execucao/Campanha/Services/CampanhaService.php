@@ -50,10 +50,76 @@ class CampanhaService extends BaseModelService
     ];
   }
 
+
   public function store(array $post)
   {
-    return $this->dataManagement->create($this->modelClass, $post);
+    
+    $idCampanha     = $post['id'] ?? null;
+    $idAbio         = $post['id_abio'] ?? null;
+    $idProfissional = $post['id_profissional'] ?? null;
+    $idGrupo        = $post['id_grupo_faunistico'] ?? null;
+
+    
+    $dataCampanha = $post;
+    unset(
+      $dataCampanha['id'],
+      $dataCampanha['id_abio'],
+      $dataCampanha['id_profissional'],
+      $dataCampanha['id_grupo_faunistico']
+    );
+
+    
+    if ($idCampanha) {
+      $campanha = ServicoMonitoraFaunaExecCampanha::findOrFail($idCampanha);
+      $campanha->update($dataCampanha);
+    } else {
+      $response  = $this->dataManagement->create($this->modelClass, $dataCampanha);
+      $campanha  = $response['model'];
+    }
+
+    
+    $type    = 'success';
+    $content = 'Atualizado com sucesso';
+
+ 
+    if ($idAbio) {
+      $abio = ServicoMonitoraFaunaExecCampanhaAbio::firstOrCreate([
+        'id_campanha' => $campanha->id,
+        'id_abio'     => $idAbio,
+      ]);
+      
+    }
+
+   
+    if ($idProfissional && $idGrupo) {
+      $prof = ServicoMonitoraFaunaExecCampanhaProfissGrupo::firstOrCreate([
+        'id_campanha'        => $campanha->id,
+        'id_profissional'    => $idProfissional,
+        'id_grupo_faunistico' => $idGrupo,
+      ]);
+      
+    }
+
+    
+    $campanha = $campanha->load([
+      'campanha_abios.abio.licenca',
+      'profiss_grupo.rh.rh',
+      'profiss_grupo.grupo_faunistico',
+    ]);
+
+    
+    return [
+      'model'   => $campanha,
+      'request' => [
+        'type'    => $type,
+        'content' => $content,
+      ],
+    ];
   }
+
+
+
+
 
   public function delete(object $campanha)
   {

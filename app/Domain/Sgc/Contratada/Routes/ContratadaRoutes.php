@@ -107,8 +107,18 @@ Route::prefix('/contratada')->group(function () {
     Route::post('/updatecampoestudos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoestudos'])->name('sgc.contratada.updatecampoestudos');
     Route::post('/updatecampoprodutos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoprodutos'])->name('sgc.contratada.updatecampoprodutos');
 
+    Route::get('{tipo}/empreendimentos-export',                 [EmpreendimentosController::class,                       'export'])->name('sgc.contratada.empreendimentos.export');
+    Route::get('{tipo}/estudos-export',                         [EmpreendimentosController::class,                       'estudosexport'])->name('sgc.contratada.estudos.export');
+    Route::get('{tipo}/subprodutos-export',                     [EmpreendimentosController::class,                       'subprodutosexport'])->name('sgc.contratada.subprodutos.export');
+    Route::post('/updatecampo/{corretor}',                      [EmpreendimentosController::class,                       'updatecampo'])->name('sgc.contratada.updatecampo');
+    Route::post('/updatecampoestudos/{corretor}',               [EmpreendimentosController::class,                       'updatecampoestudos'])->name('sgc.contratada.updatecampoestudos');
+    Route::post('/updatecampoprodutos/{corretor}',              [EmpreendimentosController::class,                       'updatecampoprodutos'])->name('sgc.contratada.updatecampoprodutos');
+    Route::post('/cadastrarempreendimento/{corretor}',          [EmpreendimentosController::class,                       'cadastrarempreendimento'])->name('sgc.contratada.cadastrarempreendimento');
+    Route::post('/cadastrarestudo/{corretor}',                  [EmpreendimentosController::class,                       'cadastrarestudo'])->name('sgc.contratada.cadastrarestudo');
+    Route::post('/cadastrarsubproduto/{corretor}',              [EmpreendimentosController::class,                       'cadastrarsubproduto'])->name('sgc.contratada.cadastrarsubproduto');
+
     // PDF Consolidado
-    Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');
+    // Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');
 
     // Produtos - Criação/Analise/Visualização
     Route::get('/{contrato}/produtos/{produto}', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
@@ -145,6 +155,7 @@ Route::prefix('/contratada')->group(function () {
             Route::get('profissionais', [EspeleoCampanhaController::class, 'getProfissionais'])->name('sgc.contratada.produtos.espeleo.profissionais');
         });
 
+
         Route::prefix('pmqa')->group(function () {
             Route::post('salvar-campanha', [PmqaCampanhaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.pmqa.salvar_campanha');
             Route::post('importar-pontos', [PmqaCampanhaController::class, 'importarPontos'])->name('sgc.contratada.produtos.pmqa.importar_pontos');
@@ -156,6 +167,26 @@ Route::prefix('/contratada')->group(function () {
 
     });
 
+        Route::post('/espeleo/resultados/upload', [EspeleoCampanhaController::class, 'uploadResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.upload');
 
+      
+        Route::post('/espeleo/resultados/{id}/update', [EspeleoCampanhaController::class, 'updateResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.update');
+        Route::delete('/espeleo/resultados/{id}/delete', [EspeleoCampanhaController::class, 'deleteResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.delete');
+
+        // Novas rotas para anexos
+        Route::post('/espeleologia/anexos/upload', [EspeleoCampanhaController::class, 'uploadAnexo'])->name('sgc.contratada.produtos.espeleo.anexos.upload');
+        Route::post('/espeleologia/anexos/{id}/update', [EspeleoCampanhaController::class, 'updateAnexo'])->name('sgc.contratada.produtos.espeleo.anexos.update');
+        Route::delete('/espeleologia/anexos/{id}/delete', [EspeleoCampanhaController::class, 'deleteAnexo'])->name('sgc.contratada.produtos.espeleo.anexos.delete');
+
+        Route::post('/espeleologia/resultados/{id}/update', [EspeleoCampanhaController::class, 'updateResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.update');
+
+        Route::post('/espeleologia/estudos/store', [EspeleoCampanhaController::class, 'storeEstudosPosteriores'])->name('sgc.contratada.produtos.espeleo.estudos.store');
+
+
+    });
+
+
+
+  
 
 });

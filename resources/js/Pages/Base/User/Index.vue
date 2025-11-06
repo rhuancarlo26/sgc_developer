@@ -6,10 +6,17 @@ import { dateTimeFormat } from '@/Utils/DateTimeUtils.js'
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import ModelSearchForm from "@/Components/ModelSearchForm.vue";
 import { IconCirclePlus, IconSearch, IconEraser, IconFilter } from '@tabler/icons-vue';
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 defineProps({
     users: Object
 })
+
+const formatarData = (data) => {
+    if (!data) return '-'
+    return format(new Date(data), 'dd/MM/yyyy', { locale: ptBR })
+}
 
 </script>
 
@@ -47,17 +54,15 @@ defineProps({
             </div>
 
             <!-- Listagem-->
-            <Table :columns="['Name', 'Email', 'Perfis', 'Cadastrado em', 'Atualizado em']" :records="users"
+            <Table :columns="['Nome', 'Email', 'Perfil', 'Cadastrado em', 'Atualizado em']" :records="users"
                 table-class="table-hover">
                 <template #body="{ item }">
                     <tr class="cursor-pointer" @click="router.get(route('cadastros.usuarios.formulario', item.id))">
                         <td>{{ item?.name }}</td>
                         <td>{{ item?.email }}</td>
                         <td>{{item?.roles.map(r => r?.name).join(', ')}}</td>
-                        <td>{{ dateTimeFormat(item.created_at, { dateStyle: 'short', timeStyle: 'short' }) ?? '-' }}
-                        </td>
-                        <td>{{ dateTimeFormat(item.updated_at, { dateStyle: 'short', timeStyle: 'short' }) ?? '-' }}
-                        </td>
+                        <td>{{ formatarData(item.created_at) }}</td>
+                        <td>{{ formatarData(item.updated_at) }}</td>
                     </tr>
                 </template>
             </Table>

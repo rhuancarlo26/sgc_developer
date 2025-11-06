@@ -51,6 +51,7 @@ const form = useForm({
   num_individuos: null,
   status_conserv_federal: null,
   status_conserv_iucn: null,
+  fotos: [],
   ...props.registro
 });
 
@@ -66,6 +67,21 @@ const save = () => {
   form.post(route('contratos.contratada.servicos.monitora_fauna.execucao.registro.' + url, { contrato: props.contrato.id, servico: props.servico.id }), {
     onSuccess: () => Object.assign(form, props.registro)
   });
+}
+
+// const destroyPhoto = (photoId, index) => {
+//   if (photoId !== null) {
+//     router.delete(route('contratos.contratada.servicos.supressao-vegetacao.execucao.supressao.fotos.delete', { arquivo: photoId, area: form.id }), {
+//       preserveState: true,
+//     })
+//   }
+//   form.fotos.splice(index, 1)
+// }
+
+const fileRef = ref()
+const onChangeFotos = (event) => {
+  form.fotos.push(...Array.from(event.target.files));
+  fileRef.value.value = '';
 }
 
 </script>
@@ -136,7 +152,19 @@ const save = () => {
                 <TabStatusConservacao :status_conservacao="status_conservacao" :form="form" />
               </div>
               <div class="tab-pane" id="registro_fotografico" role="tabpanel">
-                5
+                <InputLabel value="Anexar fotos" for="fotos" />
+                <input ref="fileRef" @input="onChangeFotos" id="fotos" type="file" class="form-control"
+                  accept=".jpg, .jpeg, .png" multiple>
+                <InputError :message="form.errors.fotos" />
+                <ul class="list-unstyled d-flex gap-2 flex-wrap mt-3">
+                  <li v-for="img in images" class="d-flex flex-column mt-3">
+                    <span class="avatar avatar-xl">
+                      <img :src="img.path" alt />
+                    </span>
+                    <!-- <button @click="destroyPhoto(img.id, img.index)" type="button"
+                      class="btn btn-sm btn-danger">Remover</button> -->
+                  </li>
+                </ul>
               </div>
               <div class="tab-pane" id="observacao" role="tabpanel">
                 <TabObservacao :form="form" />

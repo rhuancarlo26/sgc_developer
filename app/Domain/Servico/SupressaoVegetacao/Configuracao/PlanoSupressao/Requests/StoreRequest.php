@@ -9,14 +9,17 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'servico_id' => 'required',
-            'area_em_app' => 'numeric|required',
-            'area_fora_app' => 'numeric|required',
+            'id' => 'nullable|exists:plano_supressao,id',
+            'servico_id' => $this->isMethod('post') ? 'required|exists:servicos,id' : 'nullable',
+            'area_em_app' => 'nullable|numeric',
+            'area_fora_app' => 'nullable|numeric',
+            'tipo_bioma_id' => 'required',
+            'area_total' => 'required|numeric',
             'dt_final' => 'date|nullable',
             'dt_inicial' => 'date|nullable',
             'local_shape_em_app' => 'file|nullable',
             'local_shape_fora_app' => 'file|nullable',
-            'doc' => 'file|required',
+            'doc' => $this->isMethod('post') && !$this->id ? 'required|file|mimes:pdf' : 'nullable|file|mimes:pdf',
         ];
     }
 

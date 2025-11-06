@@ -16,6 +16,11 @@ class AreaSupressao extends Model
 
     protected $guarded = ['id', 'created_at'];
 
+    protected $casts = [
+        'dt_inicial' => 'date:Y-m-d',
+        'dt_final'   => 'date:Y-m-d',
+    ];
+
     public function corteEspecies(): HasMany
     {
         return $this->hasMany(CorteEspecie::class, 'area_supressao_id');

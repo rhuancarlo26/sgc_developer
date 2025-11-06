@@ -66,9 +66,10 @@ class RegistrosService
             ->leftJoin('afugent_fauna_tipo_registro', 'afugent_fauna_exec_registro.id_tipo_registro', '=', 'afugent_fauna_tipo_registro.id')
             ->leftJoin('afugent_fauna_destinacao_registro', 'afugent_fauna_exec_registro.id_destinacao_registro', '=', 'afugent_fauna_destinacao_registro.id')
             ->leftJoin('estados', 'afugent_fauna_exec_registro.id_estado', '=', 'estados.id')
+            ->leftJoin('base_rodovia', 'afugent_fauna_exec_frente.rodovia', '=', 'base_rodovia.id')
             ->select(
                 'afugent_fauna_exec_registro.*',
-                'afugent_fauna_exec_frente.rodovia',
+                'base_rodovia.rodovia',
                 'afugent_fauna_forma_registro.nome as nome_forma_registro',
                 'afugent_fauna_tipo_registro.nome as nome_tipo_registro',
                 'afugent_fauna_destinacao_registro.nome as nome_destinacao_registro',
@@ -173,47 +174,42 @@ class RegistrosService
             return $grupo->count();
         });
 
-        $total_intividuos = 0;
-        foreach ($allRegistros as $item) {
-            $total_intividuos += $item->n_individuos;
-        }
+        $total_individuos = $allRegistros->sum('n_individuos');
+     
         return [
-            'totalRegistros' => $total_intividuos,
+            'totalRegistros' => $total_individuos,
             'especiesGroup' => $sortedEspeciesGroup,
             'chartDataPieAbundancia'  => $this->getChartDataPieAbundancia($allRegistros),
             'chartDataPieDiversidade' => $this->getChartDataPieDiversidade($allRegistros),
             'getChartDataPieTipoRegistro' => $this->getChartDataPieTipoRegistro($allRegistros),
-            'getChartDataPieFormaRegistro' => $this->getChartDataPieFormaRegistro($allRegistros),
+            'taxaDeMortalidade' => $this->taxaDeMortalidade($allRegistros),
             'getChartDataPieFormaRegistroGrafico' => $this->getChartDataPieFormaRegistroGrafico($allRegistros),
             'chartDataBar2'           => $this->getChartDataBar2($especiesGroup)
         ];
     }
 
-    private function getChartDataPieFormaRegistro($allRegistros): array
+    private function taxaDeMortalidade($allRegistros): array
     {
+        $idMortos = 3;
 
-        $idForma = 3;
+       $totalIndividuos = $allRegistros
+        ->sum(fn($r) => (int) $r->n_individuos);
+              
+        $mortos = $allRegistros
+            ->filter(fn($r) => optional($r->tipoRegistro)->id === $idMortos)
+            ->count();
 
-        $totalRegistros = $allRegistros->count();
-
-        $remocaoGroup = $allRegistros
-            ->filter(fn($registro) => optional($registro->formaRegistro)->id === $idForma);
-
-        $remocaoCount = $remocaoGroup->count();
-
-        $remocaoNome = $remocaoGroup->first()->formaRegistro->nome
-            ?? 'Remoção';
-
-        $percentage = $totalRegistros > 0
-            ? ($remocaoCount * 100) / $totalRegistros
+        $taxa = $totalIndividuos > 0
+            ? ($mortos * 100) / $totalIndividuos
             : 0;
 
         return [[
-            'id'    => $idForma,
-            'nome'  => $remocaoNome,
-            'total' => round($percentage, 2),
+            'id'    => $idMortos,
+            'nome'  => 'Taxa de Mortalidade',
+            'total' => round($taxa, 2),
         ]];
     }
+
 
     private function getChartDataPieAbundancia($allRegistros): array
     {

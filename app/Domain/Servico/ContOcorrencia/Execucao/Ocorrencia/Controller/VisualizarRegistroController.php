@@ -23,6 +23,14 @@ class VisualizarRegistroController extends Controller
 {
     public function index(Contrato $contrato, Servicos $servico, ServicoConOcorrSupervicaoExecOcorrenciaRegistro $registro): BinaryFileResponse
     {
-        return response()->file(storage_path('app') . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $registro->caminho_arquivo);
+        $caminhoRelativo = ltrim(preg_replace('/^public[\/\\\\]/', '', $registro->caminho_arquivo), '/\\');
+
+        $caminho = storage_path('app/public/' . $caminhoRelativo);
+
+        if (!file_exists($caminho)) {
+            abort(404, 'Arquivo não encontrado.');
+        }
+
+        return response()->file($caminho);
     }
 }

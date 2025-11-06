@@ -27,4 +27,16 @@ class SgcvwEmpreendimentos extends Model
     {
         return $this->estudos()->count();
     }
+    public function getDataUltimaAlteracaoAttribute()
+    {
+        $logs = $this->changelogs;
+
+        // Se for array de logs, pega a data mais recente
+        if (is_array($logs) && !empty($logs)) {
+            $datas = array_column($logs, 'created_at');
+            return max($datas);
+        }
+
+        return null;
+    }
 }

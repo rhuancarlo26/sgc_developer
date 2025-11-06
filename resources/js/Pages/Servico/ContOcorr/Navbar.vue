@@ -2,13 +2,13 @@
 import NavDropdownLink from '@/Components/NavDropdownLink.vue';
 import NavDropdown from '@/Components/NavDropdown.vue';
 import Navbar from '@/Pages/Contrato/Contratada/Navbar.vue';
-import {IconLayoutDashboard} from '@tabler/icons-vue';
+import { IconLayoutDashboard } from '@tabler/icons-vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import NavLink from '@/Components/NavLink.vue';
 
 const porps = defineProps({
-    contrato: {type: Object},
-    servico: {type: Object}
+    contrato: { type: Object },
+    servico: { type: Object }
 });
 </script>
 <template>
@@ -16,7 +16,7 @@ const porps = defineProps({
         <template #body>
             <div class="mb-4">
                 <Breadcrumb
-                    :links="[{ route: route('contratos.contratada.servicos.index', { contrato: contrato.id, servico: servico.id }), label: 'Serviços' }, { route: '#', label: servico?.tipo?.nome }]"/>
+                    :links="[{ route: route('contratos.contratada.servicos.index', { contrato: contrato.id, servico: servico.id }), label: 'Serviços' }, { route: '#', label: servico?.tipo?.nome }]" />
             </div>
             <div class="card card-body p-0 space-y-3">
                 <header class="navbar-expand-md">
@@ -27,50 +27,54 @@ const porps = defineProps({
                                     <div class="col">
                                         <ul class="navbar-nav">
                                             <NavDropdown prefix="contratos.contratada.servicos.pmqa.configuracao*"
-                                                         title="Configurações"
-                                                         :icon="IconLayoutDashboard">
+                                                title="Configurações" :icon="IconLayoutDashboard">
                                                 <NavDropdownLink
                                                     route-name="contratos.contratada.servicos.cont_ocorrencia.configuracao.empreendimento.index"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Empreendimento"/>
+                                                    title="Empreendimento" />
                                                 <NavDropdownLink
                                                     route-name="contratos.contratada.servicos.cont_ocorrencia.configuracao.lote_obra.index"
                                                     :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Lote de obra"/>
+                                                    title="Lote de obra" />
                                             </NavDropdown>
 
-                                            <template
-                                                v-if="servico.cont_ocorr_parecer_configuracao?.fk_status === 3">
+                                            <template v-if="servico.cont_ocorr_parecer_configuracao?.fk_status === 3">
                                                 <NavDropdown
                                                     prefix="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia*"
                                                     title="Execução" :icon="IconLayoutDashboard">
                                                     <NavDropdownLink
                                                         route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.ocorrencia.index"
                                                         :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                        title="Ocorrência"/>
+                                                        title="Ocorrência" />
                                                     <NavDropdownLink
                                                         route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.controle_rnc.index"
                                                         :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                        title="Controle RNC"/>
+                                                        title="Controle RNC" />
                                                     <NavDropdownLink
                                                         route-name="contratos.contratada.servicos.cont_ocorrencia.execucao.aca.index"
                                                         :route-param="{ contrato: contrato.id, servico: servico.id }"
-                                                        title="ACA"/>
+                                                        title="ACA" />
                                                 </NavDropdown>
 
                                                 <NavLink
                                                     route-name="contratos.contratada.servicos.cont_ocorrencia.resultado.index"
                                                     active-on-route-prefix="contratos.contratada.servicos.cont_ocorrencia.resultado*"
                                                     :param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Resultado"
-                                                    :icon="IconLayoutDashboard"/>
+                                                    title="Resultado" :icon="IconLayoutDashboard" />
 
                                                 <NavLink
                                                     route-name="contratos.contratada.servicos.cont_ocorrencia.relatorio.index"
                                                     active-on-route-prefix="contratos.contratada.servicos.cont_ocorrencia.relatorio*"
                                                     :param="{ contrato: contrato.id, servico: servico.id }"
-                                                    title="Relatorio"
-                                                    :icon="IconLayoutDashboard"/>
+                                                    title="Relatorio" :icon="IconLayoutDashboard" />
+
+                                                <!-- Pareceres -->
+                                                <NavLink
+                                                    route-name="contratos.contratada.servicos.cont_ocorrencia.pareceres.index"
+                                                    active-on-route-prefix="contratos.contratada.servicos.cont_ocorrencia.pareceres*"
+                                                    :param="{ contrato: contrato.id, servico: servico.id }"
+                                                    title="Pareceres" :icon="IconLayoutDashboard" />
+
                                             </template>
                                         </ul>
                                     </div>
@@ -80,7 +84,7 @@ const porps = defineProps({
                     </div>
                 </header>
                 <div class="mt-2 card card-body">
-                    <slot name="body"/>
+                    <slot name="body" />
                 </div>
             </div>
         </template>

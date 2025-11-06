@@ -84,7 +84,7 @@ defineExpose({ abrirModal });
             <InputError :massage="form.errors.nome" />
           </div>
           <div class="col">
-            <InputLabel value="Nome Resultado" />
+            <InputLabel value="Campanha" />
             <div class="row g-2">
               <div class="col">
                 <select name="campanha" id="campanha" class="form-select" v-model="form.campanha">

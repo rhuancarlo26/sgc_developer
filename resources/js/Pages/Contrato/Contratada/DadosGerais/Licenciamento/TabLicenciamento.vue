@@ -129,7 +129,7 @@ const dtAlerta = (data) => {
             <IconTrain v-if="licenca.modal == 3" />
           </td>
           <td>
-            {{ licenca.tipo?.sigla }} - {{ licenca.tipo?.nome }}
+            {{ licenca.tipo_rel?.sigla }} - {{ licenca.tipo_rel?.nome }}
           </td>
           <td>
             {{ licenca.numero_licenca }}

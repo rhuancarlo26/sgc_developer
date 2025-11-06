@@ -2,13 +2,11 @@
 
 namespace App\Domain\Servico\ContOcorrencia\Configuracao\LoteObra\Controller;
 
-use App\Domain\Servico\ContOcorrencia\Configuracao\Empreendimento\Services\EmpreendimentoService;
 use App\Domain\Servico\ContOcorrencia\Configuracao\LoteObra\Services\LoteObraService;
 use App\Models\Contrato;
 use App\Models\ServicoContOcorrSupervisaoConfigLote;
 use App\Models\Servicos;
 use App\Shared\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 

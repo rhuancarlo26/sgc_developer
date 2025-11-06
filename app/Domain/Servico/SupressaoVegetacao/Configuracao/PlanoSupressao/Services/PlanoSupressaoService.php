@@ -12,7 +12,9 @@ use App\Shared\Traits\Searchable;
 use App\Shared\Utils\ArquivoUtils;
 use App\Shared\Utils\DataManagement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PlanoSupressaoService extends BaseModelService
 {
@@ -24,42 +26,112 @@ class PlanoSupressaoService extends BaseModelService
         DataManagement $dataManagement,
         private readonly LicencaShapefileService $licencaShapefileService,
         private readonly ArquivoUtils $arquivoUtils,
-    )
-    {
+    ) {
         parent::__construct($dataManagement);
     }
 
     public function index(Servicos $servico): LengthAwarePaginator
     {
-        return $this->model->query()
+        return PlanoSupressao::query()
+            ->select([
+                'id',
+                'servico_id',
+                'chave',
+                'area_em_app',
+                'area_fora_app',
+                'dt_inicial',
+                'dt_final',
+                'local_shape_em_app',
+                'local_shape_fora_app',
+                'arquivo_id'
+            ])
             ->with(['arquivo'])
             ->where('servico_id', $servico->id)
             ->paginate();
     }
 
-    public function store(array $request): array
+    public function store(Request $request): array
     {
-        $shapeEmApp = $request['local_shape_em_app'];
-        if ($shapeEmApp) {
-            $request['local_shape_em_app'] = $this->licencaShapefileService->getFeatureCollection(file: $shapeEmApp);
-        }
+        try {
+            $dados = $request->all();
 
-        $shapeForaApp = $request['local_shape_fora_app'];
-        if ($shapeForaApp) {
-            $request['local_shape_fora_app'] = $this->licencaShapefileService->getFeatureCollection(file: $shapeForaApp);
-        }
+            if (!empty($dados['id'])) {
+                $plano = PlanoSupressao::findOrFail($dados['id']);
 
-        $doc = $request['doc'];
-        if ($doc) {
-            $arquivo = $this->arquivoUtils->salvar(arquivo: $doc, diretorio: 'public/uploads/supressao/plano/', prefixo: 'PS');
-            $request['arquivo_id'] = $arquivo?->id;
-            unset($request['doc']);
-        }
+                if ($request->hasFile('local_shape_em_app')) {
+                    $geoJson = $this->licencaShapefileService->getFeatureCollection($request->file('local_shape_em_app'));
+                    if (!$geoJson) {
+                        abort(422, 'Erro ao processar o shapefile da área em APP.');
+                    }
+                    $dados['local_shape_em_app'] = json_decode($geoJson, true);
+                } else {
+                    unset($dados['local_shape_em_app']);
+                }
 
-        return $this->dataManagement->create(entity: $this->modelClass, infos: [
-            ...$request,
-            'chave' => $this->getCodigo(prefix: 'PS'),
-        ]);
+                if ($request->hasFile('local_shape_fora_app')) {
+                    $geoJson = $this->licencaShapefileService->getFeatureCollection($request->file('local_shape_fora_app'));
+                    if (!$geoJson) {
+                        abort(422, 'Erro ao processar o shapefile da área fora de APP.');
+                    }
+                    $dados['local_shape_fora_app'] = json_decode($geoJson, true);
+                } else {
+                    unset($dados['local_shape_fora_app']);
+                }
+
+                if ($request->hasFile('doc')) {
+                    $arquivo = $this->arquivoUtils->salvar(
+                        arquivo: $request->file('doc'),
+                        diretorio: 'public/uploads/supressao/plano/',
+                        prefixo: 'PS'
+                    );
+                    $dados['arquivo_id'] = $arquivo?->id;
+                } else {
+                    unset($dados['arquivo_id']);
+                }
+
+                unset($dados['id'], $dados['doc']);
+                $plano->update($dados);
+
+                return ['request' => 'Atualizado com sucesso!'];
+            }
+
+            if ($request->hasFile('local_shape_em_app')) {
+                $geoJson = $this->licencaShapefileService->getFeatureCollection($request->file('local_shape_em_app'));
+                if (!$geoJson) {
+                    abort(422, 'Erro ao processar o shapefile da área em APP.');
+                }
+                $dados['local_shape_em_app'] = json_decode($geoJson, true);
+            }
+
+            if ($request->hasFile('local_shape_fora_app')) {
+                $geoJson = $this->licencaShapefileService->getFeatureCollection($request->file('local_shape_fora_app'));
+                if (!$geoJson) {
+                    abort(422, 'Erro ao processar o shapefile da área fora de APP.');
+                }
+                $dados['local_shape_fora_app'] = json_decode($geoJson, true);
+            }
+
+            if ($request->hasFile('doc')) {
+                $arquivo = $this->arquivoUtils->salvar(
+                    arquivo: $request->file('doc'),
+                    diretorio: 'public/uploads/supressao/plano/',
+                    prefixo: 'PS'
+                );
+                $dados['arquivo_id'] = $arquivo?->id;
+            }
+
+            $dados['chave'] = $this->getCodigo(prefix: 'PS');
+            unset($dados['doc']);
+
+            $registroCriado = $this->dataManagement->create(entity: $this->modelClass, infos: $dados);
+            return $registroCriado;
+        } catch (\Throwable $e) {
+            Log::error('Erro ao cadastrar/atualizar plano de supressão', [
+                'mensagem' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            abort(500, 'Erro interno. Verifique os dados e tente novamente.');
+        }
     }
 
     public function getSumAreaByServico(int $id)
@@ -81,5 +153,57 @@ class PlanoSupressaoService extends BaseModelService
             ->leftJoin('arquivos as a', 'plano_supressao.arquivo_id', '=', 'a.id')
             ->where('plano_supressao.servico_id', $servicoId)
             ->get();
+    }
+
+
+    public function graficos_monitora_plano_supressao(Servicos $servico): array
+    {
+
+
+        $allRegistros = PlanoSupressao::select(
+            'plano_supressao.*',
+            'tipo_biomas.nome as bioma_nome'
+        )
+            ->join('tipo_biomas', 'plano_supressao.tipo_bioma_id', '=', 'tipo_biomas.id')
+            ->where('plano_supressao.servico_id', $servico->id)
+            ->get();
+
+
+        return [
+            'totalRegistros' => $allRegistros->count(),
+            'getChartDataPieAreas'   => $this->getChartDataPieAreas($allRegistros),
+            'getChartDataBarPorBiomaPlano'   => $this->getChartDataBarPorBiomaPlano($allRegistros),
+        ];
+    }
+
+    private function getChartDataPieAreas($allRegistros): array
+    {
+        $somaEmApp   = $allRegistros->sum('area_em_app');
+        $somaForaApp = $allRegistros->sum('area_fora_app');
+
+        return [
+            'labels'   => ['Área em APP', 'Área fora APP'],
+            'datasets' => [[
+                'data'            => [$somaEmApp, $somaForaApp],
+                'backgroundColor' => ['#4e73df', '#e74a3b'],
+                'borderColor'     => '#ffffff',
+                'borderWidth'     => 2,
+            ]],
+        ];
+    }
+
+    private function getChartDataBarPorBiomaPlano($allRegistros): array
+    {
+        $groupByBioma = $allRegistros->groupBy('bioma_nome');
+
+        return [
+            'labels'   => $groupByBioma->keys()->toArray(),
+            'datasets' => [[
+                'label'           => 'Área Total (m²)',
+                'data'            => $groupByBioma->map(fn($g) => $g->sum('area_total'))->values()->toArray(),
+                'backgroundColor' => "#28a745",
+                'borderRadius'    => 5,
+            ]],
+        ];
     }
 }

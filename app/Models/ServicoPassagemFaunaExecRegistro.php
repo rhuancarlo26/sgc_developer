@@ -19,6 +19,11 @@ class ServicoPassagemFaunaExecRegistro extends Model
         return $this->belongsTo(ServicoPassagemFaunaConfigPassagem::class, 'id_passagem');
     }
 
+    public function campanha(): BelongsTo
+    {
+        return $this->belongsTo(ServicoPassagemFaunaExecCampanha::class, 'id_campanha');
+    }
+
     public function imagem(): HasOne
     {
         return $this->hasOne(ServicoPassagemFaunaExecRegistroImagem::class, 'id_registro');
@@ -32,5 +37,10 @@ class ServicoPassagemFaunaExecRegistro extends Model
     public function status_iunc(): BelongsTo
     {
         return $this->belongsTo(ServicoPassagemFaunaExecStatusConservacao::class, 'id_status_conservacao_iucn');
+    }
+
+    public function grupo_faunistico()
+    {
+        return $this->belongsTo(ServicoMonitoraFaunaExecGrupoFaunistico::class, 'id_grupo');
     }
 }

@@ -20,7 +20,7 @@ class EmpreendimentoService extends BaseModelService
             'empreendimentos' => $this->searchAllColumns(...$searchParams)
                 ->with([
                     'licenca.tipo_rel',
-                    'licenca.segmentos',
+                    'licenca.segmentos.rodovias',
                     'condicionante'
                 ])
                 ->where('id_servico', $servico->id)
