@@ -21,7 +21,7 @@ class Servicos extends Model
     //        return $this->belongsTo(ServicoStatus::class, 'status_aprovacao');
     //    }
 
-   
+
 
     public function contrato(): BelongsTo
     {
@@ -126,7 +126,7 @@ class Servicos extends Model
     {
         return $this->hasMany(ServicoPmqaCampanha::class, 'fk_servico');
     }
-    
+
 
     public function parametros(): HasMany
     {
@@ -178,6 +178,11 @@ class Servicos extends Model
         return $this->hasMany(ServicoPassagemFaunaConfigAbio::class, 'id_servico');
     }
 
+    public function passagem_fauna_registros()
+    {
+        return $this->hasMany(ServicoPassagemFaunaExecRegistro::class, 'id_servico');
+    }
+
     public function passagem_fauna_passagens()
     {
         return $this->hasMany(ServicoPassagemFaunaConfigPassagem::class, 'id_servico');
@@ -198,7 +203,7 @@ class Servicos extends Model
         return $this->hasMany(ServicoMonitoraFaunaConfigModuloAmostral::class, 'id_servico');
     }
 
-     public function monitora_atp_fauna()
+    public function monitora_atp_fauna()
     {
         return $this->hasMany(AtFaunaExecucaoRegistro::class, 'fk_servico');
     }
@@ -211,5 +216,20 @@ class Servicos extends Model
     public function monitora_supervisao_ambiental()
     {
         return $this->hasMany(SupervisaoAmbientalModel::class, 'id_servico');
+    }
+
+    public function area_supressao()
+    {
+        return $this->hasMany(AreaSupressao::class, 'servico_id');
+    }
+
+    public function plano_supressao()
+    {
+        return $this->hasMany(PlanoSupressao::class, 'servico_id');
+    }
+
+    public function destinacoes()
+    {
+        return $this->hasMany(Destinacao::class, 'servico_id');
     }
 }

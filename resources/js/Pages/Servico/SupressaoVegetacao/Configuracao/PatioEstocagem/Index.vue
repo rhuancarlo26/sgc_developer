@@ -94,7 +94,7 @@ const enviaFiscal = (aprovacao) => {
                     <NavButton @click="abrirModalCadastro(null)"
                        route-name="contratos.contratada.servicos.pmqa.configuracao.ponto.importar"
                        :param="{ contrato: props.contrato.id, servico: props.servico.id }" type-button="success"
-                       title="Cadastrar pátio de estocagem" v-if="ap(aprovacao)"/>
+                       title="Cadastrar pátio de estocagem" />
                 </div>
                 <Table
                     :columns="['ID Código', 'Data do Cadastro', 'Nº ASV', 'Tipo de Pátio', 'Shapefile Pátio', 'Observação', 'Ação']"

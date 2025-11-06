@@ -16,5 +16,5 @@ Route::post('/store', StoreController::class)->name('contratos.contratada.servic
 Route::patch('/update', UpdateController::class)->name('contratos.contratada.servicos.mon_atp_fauna.resultado.update');
 Route::post('/store-campanha', StoreCampanhaController::class)->name('contratos.contratada.servicos.mon_atp_fauna.resultado.store-campanha');
 Route::get('/get/{id}/campanhas', GetCampanhaController::class)->name('contratos.contratada.servicos.mon_atp_fauna.resultado.get-campanhas');
-Route::delete('/{id}/campanhas', DeleteCampanhaController::class)->name('contratos.contratada.servicos.mon_atp_fauna.resultado.delete-campanha');
+Route::delete('/{id}/campanhasCampanhaResultado', DeleteCampanhaController::class)->name('contratos.contratada.servicos.mon_atp_fauna.resultado.delete-campanha');
 Route::delete('/{id}/campanhas', DeleteController::class)->name('contratos.contratada.servicos.mon_atp_fauna.resultado.delete');

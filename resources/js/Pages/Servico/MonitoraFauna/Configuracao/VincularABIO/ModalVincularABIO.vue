@@ -48,8 +48,10 @@ defineExpose({ abrirModal });
         <InputLabel value="N° da licença" />
         <div class="row">
           <div class="col">
-            <v-select :options="[...licencas?.map(l => { return { ...l, label: `${l.tipo_rel?.sigla} - ${l.numero_licenca}` } })]" v-model="numero_licenca">
-              <template #no-options="{}">
+            <v-select
+              :options="[...licencas?.map(l => { return { ...l, label: `${l.tipo_rel?.sigla} - ${l.numero_licenca}` } })]"
+              v-model="numero_licenca">
+              <template #no-options="{ }">
                 Nenhum registro encontrado.
               </template>
             </v-select>
@@ -127,9 +129,12 @@ defineExpose({ abrirModal });
                   <td>{{ licenca.fim_subtrecho }}</td>
                 </tr>
                 <tr>
-                  <th>Visualizar PDF</th>
                   <td>
-                    <IconEye />
+                    <a v-if="licenca.arquivo_licenca" class="dropdown-item" target="_blank"
+                      :href="route('licenca.documento.visualizar', licenca.id)">
+                      Visualizar PDF
+                      <IconEye />
+                    </a>
                   </td>
                 </tr>
               </table>

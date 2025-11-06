@@ -23,7 +23,7 @@ class Destinacao extends Model
 
     public function arquivos(): BelongsToMany
     {
-        return $this->belongsToMany(Arquivo::class, 'arquivo_destinacao_pilha', 'destinacaos_id', 'arquivo_id');
+        return $this->belongsToMany(Arquivo::class, 'arquivo_destinacao_pilha', 'destinacaos_id', 'arquivo_id')
+            ->withTimestamps();
     }
-
 }

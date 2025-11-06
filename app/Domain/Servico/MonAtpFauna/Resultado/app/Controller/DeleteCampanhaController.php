@@ -9,18 +9,14 @@ use Illuminate\Http\RedirectResponse;
 
 class DeleteCampanhaController extends Controller
 {
-    public function __construct(private readonly ResultadoCampanhaService $resultadoService)
-    {
-    }
-
     public function __invoke(AtFaunaResultadoCampanha $id): RedirectResponse
     {
+        $id->delete(); 
 
-        $this->resultadoService->delete(model: $id);
-
-        return redirect()->back()->with('message', [
+        return back(303)->with('message', [
             'type' => 'success',
             'content' => 'Deletado com sucesso!',
         ]);
     }
 }
+

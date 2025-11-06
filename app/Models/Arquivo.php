@@ -18,7 +18,7 @@ class Arquivo extends Model
     public function caminho(): Attribute
     {
         return Attribute::make(
-            get: fn () => asset('storage/' . $this->diretorio . $this->arquivo)
+            get: fn() => $this->attributes['caminho'] ?? '/' . trim($this->diretorio, '/') . '/' . $this->arquivo
         );
     }
 }

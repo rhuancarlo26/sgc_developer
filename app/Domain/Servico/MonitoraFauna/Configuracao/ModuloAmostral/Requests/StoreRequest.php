@@ -21,7 +21,8 @@ class StoreRequest extends FormRequest
       'latitude_final' => ['required'],
       'longitude_final' => ['required'],
       'obs' => ['required'],
-      'arquivo' => ['nullable']
+      'arquivo' => ['nullable','mimes:zip'],
+      'arquivoArmadilha' => ['nullable','file', 'mimes:xlsx,xls']
     ];
   }
 

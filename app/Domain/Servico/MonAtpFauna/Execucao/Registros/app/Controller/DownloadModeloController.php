@@ -8,15 +8,14 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DownloadModeloController
 {
-  public function index(): BinaryFileResponse
-  {
-    $path = public_path('file\Servico\MonAtpFauna\Registro.xlsx');
+    public function importarModelo(): BinaryFileResponse
+    {
+        $path = public_path('file/Servico/MonAtpFauna/MonAtpFaunaModelo.xlsx');
 
+        if (!File::exists($path)) {
+            abort(404, 'Arquivo modelo não encontrado.');
+        }
 
-    if (!File::exists($path)) {
-      abort(404);
+        return Response::download($path);
     }
-
-    return Response::download($path);
-  }
 }
