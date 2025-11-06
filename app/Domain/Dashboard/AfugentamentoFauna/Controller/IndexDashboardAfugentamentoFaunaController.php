@@ -31,7 +31,7 @@ class IndexDashboardAfugentamentoFaunaController extends Controller
       'chartDataPieAbundancia' => $charts["chartDataPieAbundancia"],
       'chartDataPieDiversidade' => $charts["chartDataPieDiversidade"],
       'getChartDataPieTipoRegistro' => $charts["getChartDataPieTipoRegistro"],
-      'getChartDataPieFormaRegistro' => $charts["getChartDataPieFormaRegistro"],
+      'taxaDeMortalidade' => $charts["taxaDeMortalidade"],
       'getChartDataPieFormaRegistroGrafico' => $charts["getChartDataPieFormaRegistroGrafico"],
       'chartDataBar2' => $charts["chartDataBar2"]
     ]);

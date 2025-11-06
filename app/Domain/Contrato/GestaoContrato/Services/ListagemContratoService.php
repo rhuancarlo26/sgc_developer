@@ -10,7 +10,9 @@ use App\Models\Uf;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class ListagemContratoService extends BaseModelService
 {
@@ -20,22 +22,37 @@ class ListagemContratoService extends BaseModelService
 
     public function ListagemContratos($tipo, $searchParams): array
     {
+        $query = $this->searchAllColumns(...$searchParams)
+            ->with(['aditivos'])
+            ->where('tipo_contrato', $tipo->id);
+
+        $user = Auth::user();
+
+        if ($user->hasRole('Contratada') || $user->hasRole('Fiscal')) {
+            $contratoIds = $user->contratos()->pluck('contratos.id')->toArray();
+
+            Log::info('Usuário logado:', ['id' => $user->id, 'nome' => $user->name]);
+            Log::info('Contratos vinculados:', $contratoIds);
+
+            if (empty($contratoIds)) {
+                return ['contratos' => collect([])->paginate()];
+            }
+
+            $query->whereIn('id', $contratoIds);
+        }
+
         return [
-            'contratos' => $this->searchAllColumns(...$searchParams)
-                ->with(['aditivos'])
-                ->where('tipo_contrato', $tipo->id)
-                ->paginate()
-                ->appends($searchParams)
+            'contratos' => $query->paginate()->appends($searchParams)
         ];
     }
 
-   public function getServicos($contrato)
-{
-    return Servicos::with('tipo')
-                   ->where('id_contrato', $contrato->id)
-                   ->where('deleted_at', null)
-                   ->get();
-}
+    public function getServicos($contrato)
+    {
+        return Servicos::with('tipo')
+            ->where('id_contrato', $contrato->id)
+            ->where('deleted_at', null)
+            ->get();
+    }
 
     public function create($contrato): array
     {

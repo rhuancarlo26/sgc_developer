@@ -14,12 +14,16 @@ use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcEspeleoProfissional;
 use App\Models\SgcPmqaCampanha;
 use App\Models\SgcPmqaPonto;
+use App\Models\SgcvwSubprodutos;
+use App\Models\SgcEspeleoEstudosPosteriores;
+
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProdutosController extends Controller
@@ -167,7 +171,7 @@ class ProdutosController extends Controller
         }
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
-            ->select('cod_emp', 'subtrecho_ini', 'subtrecho_fin', 'km_ini', 'km_fin', 'tipo_de_intervencao', 'descricao', 'bioma')
+            ->select('cod_emp', 'subtrecho_ini', 'subtrecho_fin', 'km_ini', 'km_fin', 'tipo_de_intervencao', 'descricao', 'bioma', 'coordenadas')
             ->get()
             ->map(function ($emp) {
                 return [
@@ -178,6 +182,7 @@ class ProdutosController extends Controller
                     'tipo_de_intervencao' => $emp->tipo_de_intervencao ?? '',
                     'descricao' => $emp->descricao ?? '',
                     'bioma' => $emp->bioma ?? '',
+                    'coordenadas' => $emp->coordenadas
                 ];
             });
 
@@ -210,6 +215,34 @@ class ProdutosController extends Controller
 
         // Carregar metodologia relacionada
         $metodologia = $draft->metodologia ? $draft->metodologia->metodologia : '';
+         $resultadosAnexos = $draft->resultadoAnexos()->get()->map(function ($anexo) {
+            return [
+                'id' => $anexo->id,
+                'nome_arquivo' => $anexo->nome_arquivo,
+                'caminho' => $anexo->caminho,
+                'url_publica' => Storage::url($anexo->caminho),
+            ];
+        })->toArray();
+
+         // Carregar estudos posteriores já salvos para essa campanha
+        $estudosPosteriores = SgcEspeleoEstudosPosteriores::where('campanha_id', $draft->id)
+            ->get(['id', 'subproduto_id', 'quantidade', 'coordenadas', 'necessario'])
+            ->toArray();
+
+        // Buscar subprodutos da família Espeleologia
+        $subprodutosEspeleologia = SgcvwSubprodutos::where('familia', 'Espeleologia')
+            ->where('contrato_id', $contrato)
+            ->orderBy('descricao_revisada')
+            ->get(['id', 'descricao_revisada']) 
+            ->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'descricao_revisada' => $s->descricao_revisada
+                ];
+            })
+            ->values() 
+            ->toArray(); 
+
 
         return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
             'contrato' => $contrato,
@@ -220,9 +253,13 @@ class ProdutosController extends Controller
             'campanhaId' => $draft->id,
             'draftData' => $draft->toArray(),
             'profissionais' => $profissionais,
-            'justificativas' => $justificativas,
-            'metodologia' => $metodologia
+            'justificativas' => $justificativas, 
+            'metodologia' => $metodologia,
+            'resultados_anexos' => $resultadosAnexos,
+            'subprodutosEspeleologia' => $subprodutosEspeleologia,
+            'estudosPosteriores' => $estudosPosteriores,
         ]);
+
     }
 
     private function getCampanhasEspeleologia($contrato)

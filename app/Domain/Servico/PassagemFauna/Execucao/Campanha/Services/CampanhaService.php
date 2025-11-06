@@ -23,16 +23,24 @@ class CampanhaService extends BaseModelService
 
     public function index($servico, array $searchParams): array
     {
+        $query = $this->searchAllColumns(...$searchParams)
+            ->with([
+                'abios.abio.licenca',
+                'rhs.servico_rh.rh',
+                'rets.ret.abio.licenca'
+            ])
+            ->where('id_servico', '=', $servico->id);
+
+        if (!empty($searchParams['value'])) {
+            $valor = $searchParams['value'];
+            
+            $query->orWhereHas('abios.abio.licenca', function ($q) use ($valor) {
+                $q->where('numero_licenca', 'like', "%$valor%");
+            });
+        }
+
         return [
-            'campanhas' => $this->searchAllColumns(...$searchParams)
-                ->with([
-                    'abios.abio.licenca',
-                    'rhs.servico_rh.rh',
-                    'rets.ret.abio.licenca'
-                ])
-                ->where('id_servico', '=', $servico->id)
-                ->paginate()
-                ->appends($searchParams)
+            'campanhas' => $query->paginate()->appends($searchParams)
         ];
     }
 
@@ -73,6 +81,12 @@ class CampanhaService extends BaseModelService
 
     public function destroy(object $campanha)
     {
+        $this->modelClassAbio::where('id_campanha', $campanha->id)->delete();
+
+        $this->modelClassRh::where('id_campanha', $campanha->id)->delete();
+
+        $this->modelClassRet::where('id_campanha', $campanha->id)->delete();
+
         return $this->dataManagement->delete(entity: $this->modelClass, id: $campanha->id);
     }
 

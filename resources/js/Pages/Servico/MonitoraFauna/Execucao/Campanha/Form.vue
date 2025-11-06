@@ -32,21 +32,24 @@ const form = useForm({
   data_campanha_final: null,
   periodo: null,
   obs: null,
+  id_abio: null,
+  id_profissional: null,
+  id_grupo_faunistico: null,
   ...props.campanha
 });
 
-const form_abio = useForm({
-  id: null,
-  id_campanha: props.campanha.id,
-  id_abio: null
-});
+// const form_abio = useForm({
+//   id: null,
+//   id_campanha: props.campanha.id,
+//   id_abio: null
+// });
 
-const form_profissional = useForm({
-  id: null,
-  id_campanha: props.campanha.id,
-  id_profissional: null,
-  id_grupo_faunistico: null
-});
+// const form_profissional = useForm({
+//   id: null,
+//   id_campanha: props.campanha.id,
+//   id_profissional: null,
+//   id_grupo_faunistico: null
+// });
 
 const save = () => {
   form.post(route('contratos.contratada.servicos.monitora_fauna.execucao.campanha.store', { contrato: props.contrato.id, servico: props.servico.id }), {
@@ -159,32 +162,23 @@ const excluirProfissional = (id) => {
                 <textarea name="obs" id="obs" class="form-control" v-model="form.obs" rows="5"></textarea>
               </div>
             </div>
-            <div class="row">
-              <div class="col d-flex justify-content-end">
-                <NavButton type="submit" type-button="success" title="Salvar" />
-              </div>
-            </div>
-          </form>
 
-          <h4>VINCULAR ABIO</h4>
-          <form @submit.prevent="saveABIO()" class="mb-4">
+            <h4>VINCULAR ABIO</h4>
+
             <div class="row mb-4">
               <div class="col">
                 <InputLabel value="N° ABIO Vigente" for="abio" />
                 <div class="row g-2">
                   <div class="col">
                     <v-select :options="[...abios.map(c => { return { ...c, label: `${c.licenca.numero_licenca}` } })]"
-                      :reduce="a => a.id" v-model="form_abio.id_abio">
-                      <template #no-options="{}">
+                      :reduce="a => a.id" v-model="form.id_abio">
+                      <template #no-options="{ }">
                         Nenhum registro encontrado.
                       </template>
                     </v-select>
                   </div>
-                  <div class="col-auto">
-                    <NavButton type="submit" type-button="success" title="Salvar" />
-                  </div>
                 </div>
-                <InputError :message="form_abio.errors.id_abio" />
+                <InputError :message="form.errors.id_abio" />
               </div>
             </div>
 
@@ -198,41 +192,35 @@ const excluirProfissional = (id) => {
                 </tr>
               </template>
             </Table>
-          </form>
 
+            <h4>VINCULAR PROFISSIONAIS</h4>
 
-          <h4>VINCULAR PROFISSIONAIS</h4>
-          <form @submit.prevent="saveProfissional()">
             <div class="row mb-4">
               <div class="col">
                 <InputLabel value="Selecionar Profissional" for="abio" />
                 <v-select :options="[...rhs.map(c => { return { ...c, label: `${c.rh.nome}` } })]" :reduce="a => a.id"
-                  v-model="form_profissional.id_profissional">
-                  <template #no-options="{}">
+                  v-model="form.id_profissional">
+                  <template #no-options="{ }">
                     Nenhum registro encontrado.
                   </template>
                 </v-select>
-                <InputError :message="form_profissional.errors.id_profissional" />
+                <InputError :message="form.errors.id_profissional" />
               </div>
               <div class="col">
                 <InputLabel value="Grupo Responsável" for="id_grupo_faunistico" />
                 <div class="row g-2">
                   <div class="col">
                     <v-select :options="grupo_faunisticos" label="grupo_faunistico" :reduce="a => a.id"
-                      v-model="form_profissional.id_grupo_faunistico">
-                      <template #no-options="{}">
+                      v-model="form.id_grupo_faunistico">
+                      <template #no-options="{ }">
                         Nenhum registro encontrado.
                       </template>
                     </v-select>
                   </div>
-                  <div class="col-auto">
-                    <NavButton type="submit" type-button="success" title="Salvar" />
-                  </div>
                 </div>
-                <InputError :message="form_profissional.errors.id_grupo_faunistico" />
+                <InputError :message="form.errors.id_grupo_faunistico" />
               </div>
             </div>
-
             <Table :columns="['Equipe Técnica', 'Grupo Responsável', 'Ação']"
               :records="{ data: campanha.profiss_grupo, links: [] }">
               <template #body="{ item }">
@@ -245,7 +233,14 @@ const excluirProfissional = (id) => {
                 </tr>
               </template>
             </Table>
+            <div class="row mt-5">
+              <div class="col d-flex justify-content-end">
+                <NavButton type="submit" type-button="success" title="Salvar" />
+              </div>
+            </div>
           </form>
+
+
         </div>
       </template>
     </Navbar>

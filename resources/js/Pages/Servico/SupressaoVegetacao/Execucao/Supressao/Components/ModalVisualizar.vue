@@ -1,8 +1,10 @@
 <script setup>
-import {ref} from "vue";
+import { ref } from "vue";
 import Modal from "@/Components/Modal.vue";
-import {dateTimeFormat} from "@/Utils/DateTimeUtils.js";
+import { dateTimeFormat } from "@/Utils/DateTimeUtils.js";
 import Table from "@/Components/Table.vue";
+import { usePage } from '@inertiajs/vue3'; 
+
 
 const modalRef = ref();
 const supressao = ref(null);
@@ -10,8 +12,10 @@ const abrirModal = (item) => {
     supressao.value = item;
     modalRef.value.getBsModal().show();
 }
+const page = usePage();
+const appUrl = page.props.app_url; 
 
-defineExpose({abrirModal});
+defineExpose({ abrirModal });
 </script>
 
 <template>
@@ -34,10 +38,8 @@ defineExpose({abrirModal});
                 <p>Nº ASV: <span class="fw-bold">{{ supressao.licenca.numero_licenca }}</span></p>
                 <p>Observação: <span class="fw-bold">{{ supressao.observacao }}</span></p>
 
-                <Table
-                    :columns="['Nome científica', 'Nome popular', 'N° de Indivíduos', 'Compensação', 'Legislação']"
-                    :records="{ data: supressao.corte_especies, links: [] }"
-                    table-class="table-hover">
+                <Table :columns="['Nome científica', 'Nome popular', 'N° de Indivíduos', 'Compensação', 'Legislação']"
+                    :records="{ data: supressao.corte_especies, links: [] }" table-class="table-hover">
                     <template #body="{ item, key }">
                         <tr>
                             <td>{{ item.nome }}</td>
@@ -48,7 +50,18 @@ defineExpose({abrirModal});
                         </tr>
                     </template>
                 </Table>
-
+                <div v-if="supressao.fotos?.length" class="mt-4">
+                    <h5>Fotos da Área</h5>
+                    <div class="d-flex flex-wrap gap-3">
+                        <div v-for="foto in supressao.fotos" :key="foto.id" class="border rounded p-2">
+                            <a :href="appUrl + foto.caminho"  target="_blank">
+                                <img :src="appUrl + foto.caminho" :alt="foto.nome_arquivo"
+                                    style="max-width: 200px; max-height: 200px; object-fit: cover;" />
+                            </a>
+                            <p class="text-center small mt-2">{{ foto.nome_arquivo }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </template>
         <template #footer>

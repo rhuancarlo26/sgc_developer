@@ -91,7 +91,6 @@ const deleteVinculoAbio = (id) => {
               <td>{{ item.licenca?.fiscal }}</td>
               <td>{{ item.licenca?.processo_dnit }}</td>
               <td>
-                {{ item.rets[0].caminho_arquivo }}
                 <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2" data-bs-boundary="viewport"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   <IconDots />
@@ -110,10 +109,10 @@ const deleteVinculoAbio = (id) => {
                     <a @click="abrirModalAdicionarRet(item)" href="javascript:void(0);" class="dropdown-item">
                       Adicionar RET
                     </a>
-                    <a @click="deleteVinculoAbio(item.id)" href="javascript:void(0);" class="dropdown-item">
-                      Excluir
-                    </a>
                   </template>
+                  <a @click="deleteVinculoAbio(item.id)" href="javascript:void(0);" class="dropdown-item">
+                    Excluir
+                  </a>
                 </div>
               </td>
             </tr>

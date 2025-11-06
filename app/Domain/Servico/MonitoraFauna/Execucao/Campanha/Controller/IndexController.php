@@ -21,9 +21,10 @@ class IndexController extends Controller
 
     $response = $this->campanhaService->index($servico, $searchParams);
 
+   
     return Inertia::render('Servico/MonitoraFauna/Execucao/Campanha/Index', [
       'contrato' => $contrato,
-      'servico' => $servico->load(['tipo']),
+      'servico' => $servico->load(['tipo','monitora_fauna_modulos']),
       ...$response
     ]);
   }

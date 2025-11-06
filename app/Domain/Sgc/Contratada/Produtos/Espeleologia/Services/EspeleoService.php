@@ -6,6 +6,7 @@ use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcEspeleoCampanhaProfissional;
 use App\Models\SgcEspeleoJustificativa;
 use App\Models\SgcEspeleoMetodologia;
+use App\Models\SgcEspeleoResultadoAnexo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -87,6 +88,21 @@ class EspeleoService
                     'metodologia' => $data['metodologia'],
                 ]);
                 Log::info('Metodologia salva', ['campanha_id' => $campanha->id, 'metodologia_length' => strlen($data['metodologia'])]);
+            }
+
+            if (isset($data['resultados_anexos']) && is_array($data['resultados_anexos'])) {
+                foreach ($data['resultados_anexos'] as $anexoData) {
+                    SgcEspeleoResultadoAnexo::updateOrCreate(
+                        ['id' => $anexoData['id'] ?? null],
+                        [
+                            'campanha_id' => $campanha->id,
+                            'id_contrato' => $contratoId,
+                            'nome_arquivo' => $anexoData['nome_arquivo'],
+                            'caminho' => $anexoData['caminho'],
+                            'tipo' => 'shapefile',
+                        ]
+                    );
+                }
             }
 
             Log::info('Campanha salva', ['id' => $campanha->id]);
