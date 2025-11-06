@@ -77,7 +77,7 @@
                 </div>
 
                 <button class="btn btn-sm btn-outline-secondary mb-2" @click="addPar(index)">
-                  + Adicionar Par
+                  + Adicionar KM
                 </button>
 
                 <button class="btn btn-sm btn-outline-danger" @click="removeEstudo(index)">
