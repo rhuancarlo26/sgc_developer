@@ -12,6 +12,7 @@ import QueloniosCrocodilianosVisualizar from './Componentes/QueloniosCrocodilian
 import FaunaCavernicolaVisualizar from './Componentes/FaunaCavernicolaVisualizar.vue';
 import MetodologiaVisualizar from './Componentes/MetodologiaVisualizar.vue';
 import FaunaResultadosVisualizar from './Componentes/FaunaResultadosVisualizar.vue';
+import VisualizarMapa from './VisualizarMapa.vue';
 
 defineProps({
     campanha: {
@@ -24,7 +25,8 @@ defineProps({
     canApprove: Boolean,
 });
 
-const activeTab = ref('apresentacao');
+// const activeTab = ref('apresentacao');
+const activeTab = ref('levantamento');
 const subStep = ref(1);
 const formAprovacao = useForm({
     status: '',
@@ -33,7 +35,8 @@ const formAprovacao = useForm({
 
 const setActiveTab = (tab) => {
     activeTab.value = tab;
-    if (tab === 'apresentacao') {
+    // if (tab === 'apresentacao') {
+    if (tab === 'levantamento') {
         subStep.value = 1;
     }
 };
@@ -103,6 +106,14 @@ const formatAnexoLabel = (tipo) => {
                             <li class="nav-item">
                                 <a
                                     class="nav-link"
+                                    :class="{ active: activeTab === 'levantamento' }"
+                                    @click.prevent="setActiveTab('levantamento')"
+                                    >Mapas do Levantamento</a
+                                >
+                            </li>
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link"
                                     :class="{ active: activeTab === 'apresentacao' }"
                                     @click.prevent="setActiveTab('apresentacao')"
                                     >Apresentação</a
@@ -134,6 +145,25 @@ const formatAnexoLabel = (tipo) => {
                             </li>
                         </ul>
                         <div class="tab-content">
+                            <!-- {{ campanha }} -->
+                            <div v-if="activeTab === 'levantamento'" class="tab-pane fade" :class="{ 'show active': activeTab === 'levantamento' }">
+                                <h4 class="text-center mb-3" style="font-weight: bold;">MAPAS DO LEVANTAMENTO ANTERIOR</h4>
+                                <!-- <div v-if="campanha.mapas_levantamento && campanha.mapas_levantamento.length > 0" class="mb-4">
+                                    <div
+                                        v-for="(mapa, index) in campanha.mapas_levantamento"
+                                        :key="index"
+                                        class="mb-5"
+                                    >
+                                        <h5 class="mb-2">Mapa {{ index + 1 }}: {{ mapa.descricao || 'Sem descrição' }}</h5>
+                                        <VisualizarMapa :file-path="mapa.caminho_arquivo" />
+                                    </div>
+                                </div> -->
+                                <VisualizarMapa :file-paths="[
+                                    '/storage/bacias_nivel_2.zip',
+                                    '/storage/Relevo_v2017.zip',
+                                    '/storage/ide_2002_mg_potencialidade_cavidades_pol.zip'
+                                ]" />
+                            </div>
                             <div v-if="activeTab === 'apresentacao'" class="tab-pane fade" :class="{ 'show active': activeTab === 'apresentacao' }">
                                 <div v-if="subStep === 1">
                                     <h4 class="text-center mb-3" style="font-weight: bold;">APRESENTAÇÃO</h4>

@@ -3,7 +3,9 @@
     <h3>Resultados - Visualização de Shapefiles</h3>
     Categoria do Subproduto: <strong>{{ categoria_subproduto }}</strong>
     <p class="text-muted mb-4">
-      Carregue shapefiles (ZIP) para cada tipo de mapa, vincule-os e adicione observações.
+      Carregue shapefiles (ZIP) para cada tipo de mapa, vincule-os e adicione
+      observações.
+      {{ subprodutos_potencial_espeleologico }}
     </p>
 
     <ul class="nav nav-tabs mb-4 flex-wrap">
@@ -15,7 +17,7 @@
         >
           {{ nomesTipos[tipo] }}
           <i
-            v-if="anexos.find(a => a.tipo === tipo)"
+            v-if="anexos.find((a) => a.tipo === tipo)"
             class="fas fa-check-circle text-success ms-1"
           ></i>
         </a>
@@ -29,42 +31,92 @@
         class="tab-pane fade"
         :class="{ 'show active': activeSubTab === tipo }"
         v-show="activeSubTab === tipo"
-          >
-        <div class="mb-5" v-if="tipo == 'prospeccao'">
-            <div class="alert alert-info">
-            <strong>Atenção:</strong> Para o tipo <em>Prospecção</em>, utilize a planilha de feições cársticas para registrar as feições identificadas durante a prospecção de campo.
+      >
+        <div class="mb-5" v-if="tipo == 'vincular'">
+          <!-- Seleção de registros de potencial espeleológico para vincular à prospecção -->
+          <h4>{{ nomesTipos[tipo] }}</h4>
+          <div class="alert alert-info">
+            <strong>Atenção:</strong> Selecione um registro de potencial
+            espeleológico existente para vincular à esta campanha de prospecção.
+          </div>
+          <div class="row">
+            <div class="mb-3 col-md-6">
+                <label class="form-label">Potencial Espeleológico</label>
+                <select class="form-select" v-model="selectedPotencial">
+                <option value="">-- Selecione uma Avaliação de Potencial --</option>
+                <option
+                    v-for="emp in subprodutos_potencial_espeleologico"
+                    :key="emp"
+                    :value="emp"
+                >
+                    {{ emp }}
+                </option>
+                </select>
+                <div class="my-2 text-danger">
+                    <button
+                    @click="vincularPotencial"
+                    class="btn btn-primary"
+                    type="button"
+                    @change="selectedPotencial = true"
+                    >
+                        Vincular Potencial
+                    </button>
+                </div>
             </div>
-            <!-- Download da planilha modelo e upload da planilha preenchida -->
-            <div class="d-flex gap-3 align-items-center mb-3">
-              <a href="#" class="btn btn-success">Baixar Planilha Modelo</a>
+            <div class="col-md-6">
+                <VisualizarMapa v-if="selectedPotencial" :file-paths="[
+                    '/storage/Relevo_v2017.zip',
+                    '/storage/bacias_nivel_2.zip',
+                    '/storage/ide_2002_mg_potencialidade_cavidades_pol.zip'
+                ]" />
+                <button class="btn btn-primary my-2"><i class="fas fa-map"></i> | Vincular Mapa</button>
             </div>
-            <div class="upload-section">
-                <input
-                type="file"
-                id="planilha-upload"
-                class="form-control"
-                accept=".xlsx,.xls"
-                @change="onPlanilhaUpload"
-                />
-                <small class="text-muted">Upload da planilha preenchida</small>
-              </div>
-            <hr>
+          </div>
+        </div>
+        <div class="mb-5" v-else-if="tipo == 'prospeccao'">
+          <h4>{{ nomesTipos[tipo] }}</h4>
+          <div class="alert alert-info">
+            <strong>Atenção:</strong> Para o tipo <em>Prospecção</em>, utilize a
+            planilha de feições cársticas para registrar as feições
+            identificadas durante a prospecção de campo.
+          </div>
+          <!-- Download da planilha modelo e upload da planilha preenchida -->
+          <div class="d-flex gap-3 align-items-center mb-3">
+            <a href="#" class="btn btn-success">Baixar Planilha Modelo</a>
+          </div>
+          <div class="upload-section">
+            <input
+              type="file"
+              id="planilha-upload"
+              class="form-control"
+              accept=".xlsx,.xls"
+              @change="onPlanilhaUpload"
+            />
+            <small class="text-muted">Upload da planilha preenchida</small>
+          </div>
+          <hr />
         </div>
         <div class="mb-5" v-else>
           <h4>{{ nomesTipos[tipo] }}</h4>
 
           <div
-            v-if="!anexos.find(a => a.tipo === tipo)"
+            v-if="!anexos.find((a) => a.tipo === tipo)"
             @drop="onDrop($event, tipo)"
             @dragover.prevent
             @dragenter.prevent
             class="border p-4 rounded bg-light mb-3 text-center"
             :class="{ 'border-danger': errors[tipo] }"
-            style="min-height: 100px;"
+            style="min-height: 100px"
           >
             <p>
               Arraste .zip do shapefile aqui ou
-              <button type="button" @click.prevent="triggerFileInput(tipo)" class="btn btn-link p-0">clique para selecionar</button>.
+              <button
+                type="button"
+                @click.prevent="triggerFileInput(tipo)"
+                class="btn btn-link p-0"
+              >
+                clique para selecionar</button
+              >.
             </p>
             <input
               :id="'fileInput-' + tipo"
@@ -72,16 +124,26 @@
               @change="onFileChange($event, tipo)"
               multiple
               accept=".zip,.shp,.shx,.dbf"
-              style="display: none;"
+              style="display: none"
             />
-            <div v-if="uploadedFiles[tipo].length > 0" class="mt-2 text-success">
-              <small>Carregado: {{ uploadedFiles[tipo].map(f => f.name).join(', ') }}</small>
+            <div
+              v-if="uploadedFiles[tipo].length > 0"
+              class="mt-2 text-success"
+            >
+              <small
+                >Carregado:
+                {{ uploadedFiles[tipo].map((f) => f.name).join(", ") }}</small
+              >
             </div>
-            <small v-if="errors[tipo]" class="text-danger d-block">{{ errors[tipo] }}</small>
+            <small v-if="errors[tipo]" class="text-danger d-block">{{
+              errors[tipo]
+            }}</small>
           </div>
 
           <button
-            v-if="features[tipo].length > 0 && !anexos.find(a => a.tipo === tipo)"
+            v-if="
+              features[tipo].length > 0 && !anexos.find((a) => a.tipo === tipo)
+            "
             @click="vincularMapa(tipo)"
             class="btn btn-primary mb-3"
             type="button"
@@ -90,17 +152,26 @@
           </button>
 
           <div
-            v-if="anexos.find(a => a.tipo === tipo)"
+            v-if="anexos.find((a) => a.tipo === tipo)"
             class="alert alert-info mb-3 d-flex align-items-center justify-content-between"
           >
-            <span>Arquivo vinculado: {{ anexos.find(a => a.tipo === tipo).nome_arquivo }}</span>
+            <span
+              >Arquivo vinculado:
+              {{ anexos.find((a) => a.tipo === tipo).nome_arquivo }}</span
+            >
             <div>
-              <button @click="toggleRender(tipo)" class="btn btn-sm btn-outline-secondary me-1" type="button">
-                <i :class="rendered[tipo] ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                {{ rendered[tipo] ? 'Esconder Mapa' : 'Ver Mapa' }}
+              <button
+                @click="toggleRender(tipo)"
+                class="btn btn-sm btn-outline-secondary me-1"
+                type="button"
+              >
+                <i
+                  :class="rendered[tipo] ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                ></i>
+                {{ rendered[tipo] ? "Esconder Mapa" : "Ver Mapa" }}
               </button>
               <button
-                @click="removerAnexo(anexos.find(a => a.tipo === tipo).id)"
+                @click="removerAnexo(anexos.find((a) => a.tipo === tipo).id)"
                 class="btn btn-sm btn-outline-danger"
                 type="button"
               >
@@ -113,10 +184,10 @@
           <div
             v-if="rendered[tipo]"
             :id="'map-' + tipo"
-            style="height: 600px; border: 1px solid #ddd; border-radius: 4px;"
+            style="height: 600px; border: 1px solid #ddd; border-radius: 4px"
             class="mb-3"
           ></div>
-          <p v-else-if="anexos.find(a => a.tipo === tipo)" class="text-muted">
+          <p v-else-if="anexos.find((a) => a.tipo === tipo)" class="text-muted">
             Mapa vinculado, clique no olho para visualizar.
           </p>
           <p v-else-if="!features[tipo].length" class="text-muted">
@@ -130,7 +201,9 @@
               v-model="observacoes[tipo]"
               class="form-control"
               rows="4"
-              :placeholder="'Descreva observações sobre o ' + nomesTipos[tipo].toLowerCase()"
+              :placeholder="
+                'Descreva observações sobre o ' + nomesTipos[tipo].toLowerCase()
+              "
               @input="updateObservacao(tipo)"
             ></textarea>
           </div>
@@ -141,56 +214,71 @@
     <!-- Lista de Anexos -->
     <div v-if="anexos.length > 0" class="mt-3">
       <div
-        v-for="anexo in anexos.filter(a => a.tipo === activeSubTab)"
+        v-for="anexo in anexos.filter((a) => a.tipo === activeSubTab)"
         :key="anexo.id"
         class="flex items-center justify-between border rounded-lg p-2 mb-2"
       >
         <div class="text-sm font-medium">{{ anexo.nome_arquivo }}</div>
         <div class="flex items-center gap-2">
-          <a :href="anexo.url_publica" target="_blank" class="text-blue-600 hover:underline">
+          <a
+            :href="anexo.url_publica"
+            target="_blank"
+            class="text-blue-600 hover:underline"
+          >
             Download
           </a>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, watch } from 'vue';
-import { router } from '@inertiajs/vue3';
-import L from 'leaflet';
-import * as shapefile from 'shapefile';
-import JSZip from 'jszip';
+import { ref, nextTick, watch } from "vue";
+import { router } from "@inertiajs/vue3";
+import L, { icon } from "leaflet";
+import * as shapefile from "shapefile";
+import JSZip from "jszip";
+import VisualizarMapa from "../Fauna/VisualizarMapa.vue";
 
 const props = defineProps({
   empreendimentos: Array,
+  subproduto: String,
   errors: Object,
   campanhaId: Number,
   contrato: Number,
   resultadosAnexos: Array,
   categoria_subproduto: String,
+  subprodutos_potencial_espeleologico: Array
 });
 
-const emit = defineEmits(['update-resultados-anexos']);
+const emit = defineEmits(["update-resultados-anexos"]);
 
 //se a categoria do subproduto for prospeccao, entao o tipo prospeccao é acresentado
-const tipos = props.categoria_subproduto === 'Prospecção'
-  ? [
-      'prospeccao', 'feicoes_carsticas',
-        'cavidades_nao_encontradas',
-        'cavidades_cecav_canie',
-        'caminhamento',
-        'raio_250m',
-        'curvas_de_nivel'
-    ]
-  : [
-      'geologico', 'geomorfologico', 'cavidades',
-      'hidrologico', 'hipsometrico', 'limites_areas',
-      'potencial_inicial', 'potencial_reclassificado',
-      'projeto_engenharia', 'estudos_posteriores'
-    ];
+const tipos =
+  props.categoria_subproduto === "Prospecção"
+    ? [
+        "vincular",
+        "prospeccao",
+        "feicoes_carsticas",
+        "cavidades_nao_encontradas",
+        "cavidades_cecav_canie",
+        "caminhamento",
+        "raio_250m",
+        "curvas_de_nivel",
+      ]
+    : [
+        "geologico",
+        "geomorfologico",
+        "cavidades",
+        "hidrologico",
+        "hipsometrico",
+        "limites_areas",
+        "potencial_inicial",
+        "potencial_reclassificado",
+        "projeto_engenharia",
+        "estudos_posteriores",
+      ];
 
 // const tipos = [
 //   'prospeccao', 'geologico', 'geomorfologico', 'cavidades',
@@ -199,28 +287,31 @@ const tipos = props.categoria_subproduto === 'Prospecção'
 //   'projeto_engenharia', 'estudos_posteriores'
 // ];
 // Se a categoria do subproduto for prospeccao, entao o tipo prospeccao é acresentado
-const nomesTipos = props.categoria_subproduto === 'Prospecção'
-  ? {
-      prospeccao: 'Panilha: Feições Cárticas',
-      feicoes_carsticas: 'Feições Cársticas Indentificadas',
-      cavidades_nao_encontradas: 'Cavidades Não Encontradas',
-      cavidades_cecav_canie: 'Cavidades CECAV/CANIE',
-      caminhamento: 'Caminhamento',
-      raio_250m: 'Raio de 250m de cavidades',
-      curvas_de_nivel: 'Curvas de Nível',
-    }
-  : {
-      geologico: 'Mapa Geológico',
-      geomorfologico: 'Mapa Geomorfológico',
-      cavidades: 'Cavidades CECAV/SBE',
-      hidrologico: 'Mapa Hidrológico',
-      hipsometrico: 'Mapa Hipsométrico/Declividade',
-      limites_areas: 'Limites de Áreas',
-      potencial_inicial: 'Mapa de Potencial Espeleológico - Inicial',
-      potencial_reclassificado: 'Mapa de Potencial Espeleológico - Reclassificado',
-      projeto_engenharia: 'Projeto de Engenharia',
-      estudos_posteriores: 'Estudos Posteriores'
-    };
+const nomesTipos =
+  props.categoria_subproduto === "Prospecção"
+    ? {
+        vincular: "Vincular Potencial Espeleológico",
+        prospeccao: "Panilha: Feições Cárticas",
+        feicoes_carsticas: "Feições Cársticas Indentificadas",
+        cavidades_nao_encontradas: "Cavidades Não Encontradas",
+        cavidades_cecav_canie: "Cavidades CECAV/CANIE",
+        caminhamento: "Caminhamento",
+        raio_250m: "Raio de 250m de cavidades",
+        curvas_de_nivel: "Curvas de Nível",
+      }
+    : {
+        geologico: "Mapa Geológico",
+        geomorfologico: "Mapa Geomorfológico",
+        cavidades: "Cavidades CECAV/SBE",
+        hidrologico: "Mapa Hidrológico",
+        hipsometrico: "Mapa Hipsométrico/Declividade",
+        limites_areas: "Limites de Áreas",
+        potencial_inicial: "Mapa de Potencial Espeleológico - Inicial",
+        potencial_reclassificado:
+          "Mapa de Potencial Espeleológico - Reclassificado",
+        projeto_engenharia: "Projeto de Engenharia",
+        estudos_posteriores: "Estudos Posteriores",
+      };
 
 // const nomesTipos = {
 //   prospeccao: 'Prospecção',
@@ -236,7 +327,7 @@ const nomesTipos = props.categoria_subproduto === 'Prospecção'
 //   estudos_posteriores: 'Estudos Posteriores'
 // };
 
-const activeSubTab = ref('geologico');
+const activeSubTab = ref("vincular");
 const uploadedFiles = ref({});
 const features = ref({});
 const observacoes = ref({});
@@ -245,11 +336,13 @@ const rendered = ref({});
 const zipFiles = ref({});
 const maps = ref({});
 
+const selectedPotencial = ref(null);
+
 // Inicializa objetos reativos para todas as abas
-tipos.forEach(t => {
+tipos.forEach((t) => {
   uploadedFiles.value[t] = [];
   features.value[t] = [];
-  observacoes.value[t] = '';
+  observacoes.value[t] = "";
   rendered.value[t] = false;
   zipFiles.value[t] = null;
 });
@@ -257,7 +350,9 @@ tipos.forEach(t => {
 // Mantém anexos sincronizados com o backend
 watch(
   () => props.resultadosAnexos,
-  (newVal) => { anexos.value = [...newVal]; },
+  (newVal) => {
+    anexos.value = [...newVal];
+  },
   { deep: true, immediate: true }
 );
 
@@ -280,16 +375,16 @@ const onDrop = (event, tipo) => {
 const processFiles = async (files, tipo) => {
   uploadedFiles.value[tipo] = files;
   features.value[tipo] = [];
-  const zipFile = files.find(f => f.name.endsWith('.zip'));
+  const zipFile = files.find((f) => f.name.endsWith(".zip"));
   if (!zipFile) return;
 
   zipFiles.value[tipo] = zipFile;
   try {
     const zip = await JSZip.loadAsync(zipFile);
-    const shpName = Object.keys(zip.files).find(n => n.endsWith('.shp'));
+    const shpName = Object.keys(zip.files).find((n) => n.endsWith(".shp"));
     if (!shpName) return;
-    const shpBuffer = await zip.file(shpName).async('arraybuffer');
-    const geojson = await shapefile.read(shpBuffer, null, { name: 'features' });
+    const shpBuffer = await zip.file(shpName).async("arraybuffer");
+    const geojson = await shapefile.read(shpBuffer, null, { name: "features" });
     features.value[tipo] = geojson.features || [];
     rendered.value[tipo] = true;
     await nextTick();
@@ -304,29 +399,29 @@ const vincularMapa = async (tipo) => {
   if (!zipFile) return;
 
   const formData = new FormData();
-  formData.append('zip_file', zipFile);
-  formData.append('campanha_id', props.campanhaId);
-  formData.append('tipo', tipo);
-  formData.append('comentario', observacoes.value[tipo] || '');
+  formData.append("zip_file", zipFile);
+  formData.append("campanha_id", props.campanhaId);
+  formData.append("tipo", tipo);
+  formData.append("comentario", observacoes.value[tipo] || "");
 
   try {
     const response = await axios.post(
-      route('sgc.contratada.produtos.espeleo.resultados.upload', {
+      route("sgc.contratada.produtos.espeleo.resultados.upload", {
         contrato: props.contrato,
-        produto: 'espeleologia',
+        produto: "espeleologia",
       }),
       formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      { headers: { "Content-Type": "multipart/form-data" } }
     );
 
     if (response.data.success) {
       anexos.value = response.data.resultadosAnexos || [];
-      emit('update-resultados-anexos', anexos.value);
+      emit("update-resultados-anexos", anexos.value);
       uploadedFiles.value[tipo] = [];
       rendered.value[tipo] = false;
     }
   } catch (error) {
-    console.error('Erro ao vincular mapa:', error);
+    console.error("Erro ao vincular mapa:", error);
   }
 };
 
@@ -335,10 +430,16 @@ const toggleRender = (tipo) => {
   if (rendered.value[tipo]) {
     nextTick(() => {
       if (maps.value[tipo]) {
-        try { maps.value[tipo].remove(); } catch(e){ console.warn(e); }
+        try {
+          maps.value[tipo].remove();
+        } catch (e) {
+          console.warn(e);
+        }
         maps.value[tipo] = null;
       }
-      setTimeout(() => { renderMap(tipo); }, 100);
+      setTimeout(() => {
+        renderMap(tipo);
+      }, 100);
     });
   }
 };
@@ -351,8 +452,8 @@ const renderMap = async (tipo) => {
   const map = L.map(container).setView([-14.235, -51.925], 6);
   maps.value[tipo] = map;
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors",
   }).addTo(map);
 
   if (features.value[tipo] && features.value[tipo].length > 0) {
@@ -364,43 +465,49 @@ const renderMap = async (tipo) => {
 };
 
 const updateObservacao = (tipo) => {
-  const anexo = anexos.value.find(a => a.tipo === tipo);
+  const anexo = anexos.value.find((a) => a.tipo === tipo);
   if (!anexo) return;
-  router.post(route('sgc.contratada.produtos.espeleo.resultados.update', {
-    contrato: props.contrato,
-    produto: 'espeleologia',
-    id: anexo.id,
-  }), { comentario: observacoes.value[tipo] });
+  router.post(
+    route("sgc.contratada.produtos.espeleo.resultados.update", {
+      contrato: props.contrato,
+      produto: "espeleologia",
+      id: anexo.id,
+    }),
+    { comentario: observacoes.value[tipo] }
+  );
 };
 
 const removerAnexo = (id) => {
-  router.delete(route('sgc.contratada.produtos.espeleo.resultados.delete', {
-    contrato: props.contrato,
-    produto: 'espeleologia',
-    id,
-  }), {
-    preserveState: true,
-    preserveScroll: true,
-    onSuccess: () => {
-      anexos.value = anexos.value.filter(a => a.id !== id);
-      emit('update-resultados-anexos', anexos.value);
+  router.delete(
+    route("sgc.contratada.produtos.espeleo.resultados.delete", {
+      contrato: props.contrato,
+      produto: "espeleologia",
+      id,
+    }),
+    {
+      preserveState: true,
+      preserveScroll: true,
+      onSuccess: () => {
+        anexos.value = anexos.value.filter((a) => a.id !== id);
+        emit("update-resultados-anexos", anexos.value);
 
-      tipos.forEach(t => {
-        if (!anexos.value.find(a => a.tipo === t)) {
-          observacoes.value[t] = '';
-          features.value[t] = [];
-          rendered.value[t] = false;
-          uploadedFiles.value[t] = [];
-        }
-      });
-    },
-  });
+        tipos.forEach((t) => {
+          if (!anexos.value.find((a) => a.tipo === t)) {
+            observacoes.value[t] = "";
+            features.value[t] = [];
+            rendered.value[t] = false;
+            uploadedFiles.value[t] = [];
+          }
+        });
+      },
+    }
+  );
 };
 </script>
 
 <style scoped>
-@import 'leaflet/dist/leaflet.css';
-@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import "leaflet/dist/leaflet.css";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
 
 .nav-tabs .nav-link {
   color: #6c757d;

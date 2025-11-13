@@ -39,7 +39,6 @@ class ProdutosController extends Controller
         $subprodutos = $this->produtosService->getSubprodutosByContrato($contrato, $produto);
         $contratoObj = Contrato::findOrFail($contrato);
 
-        $subproduto_teste = 'Elaboração_do_Relatório_de_Prospecção_Espeleológica_-_Mata_Atlântica';
 
         $keys = array_keys((array) $request->all());
         $trecho = $keys[0] ?? null;
@@ -200,6 +199,9 @@ class ProdutosController extends Controller
                 'url_publica' => Storage::url($anexo->caminho),
             ];
         })->toArray();
+        // Carregar todos os subprodutos de Pontencial Espeleológico, filtrando pela palavra "potencial" e "espeleológico"
+        $subprodutos_potencial_espeleologico = $this->getSubprodutosPotencialEspeleologico($contrato);
+
 
         return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
             'contrato' => $contrato,
@@ -212,9 +214,21 @@ class ProdutosController extends Controller
             'profissionais' => $profissionais,
             'justificativas' => $justificativas,
             'metodologia' => $metodologia,
-            'resultados_anexos' => $resultadosAnexos
+            'resultados_anexos' => $resultadosAnexos,
+            'subprodutos_potencial_espeleologico' => $subprodutos_potencial_espeleologico,
         ]);
 
+    }
+    private function getSubprodutosPotencialEspeleologico($contrato)
+    {
+        // Lógica para buscar os subprodutos de potencial espeleológico
+        // Exemplo fictício:
+        return SgcEspeleoCampanha::where('id_contrato', $contrato)
+            ->where('subproduto', 'like', '%potencial%')
+            ->where('subproduto', 'like', '%espeleológico%')
+            ->pluck('subproduto')
+            ->unique()
+            ->toArray();
     }
 
     private function getCampanhasEspeleologia($contrato, $subproduto)

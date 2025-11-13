@@ -43,6 +43,7 @@
         "leaflet.heat": "^0.2.0",
         "maska": "^2.1.11",
         "shapefile": "^0.6.6",
+        "shpjs": "^6.2.0",
         "sweetalert2": "^11.10.1",
         "v-calendar": "^3.1.2",
         "v-mask": "^2.3.0",

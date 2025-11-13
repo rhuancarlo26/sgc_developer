@@ -84,6 +84,7 @@
                   :categoria_subproduto="definecategoriaSubproduto(form.subproduto)"
                   :resultados-anexos="form.resultados_anexos"
                   @update-resultados-anexos="updateResultadosAnexos"
+                  :subprodutos_potencial_espeleologico="subprodutos_potencial_espeleologico"
                 />
               </div>
               <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
@@ -127,6 +128,7 @@ const props = defineProps([
   'justificativas',
   'codigoSei',
   'resultadosAnexos', // Novo
+  'subprodutos_potencial_espeleologico' // Novo
 ]);
 
 const activeTab = ref('apresentacao');
