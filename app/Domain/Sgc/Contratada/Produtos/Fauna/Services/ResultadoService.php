@@ -2,171 +2,432 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\Fauna\Services;
 
-use App\Models\SgcFaunaResultados;
 use App\Models\SgcFaunaResultadosConsideracoes;
+use App\Models\SgcFaunaResultadosTerrestre;
+use App\Models\SgcFaunaResultadosAquatica;
+use App\Models\SgcFaunaResultadosCavernicola;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ResultadoService
 {
-    public function salvarResultados($contratoId, $file, $campanhaId = null, $consideracoes = null)
+    /**
+     * Salva resultados a partir dos 3 modelos padrão (Terrestre, Aquática, Cavernícola).
+     * $tipoPlanilha deve ser: 'terrestre' | 'aquatica' | 'cavernicola'
+     */
+    public function salvarResultados(int $contratoId, $file, ?int $campanhaId = null, ?string $consideracoes = null, ?string $tipoPlanilha = null)
     {
-        try {
-            $recordsSaved = 0;
-            $recordsSkipped = 0;
-
-            if ($file && $file->isValid()) {
-                if ($campanhaId) {
-                    SgcFaunaResultados::where('id_campanha', $campanhaId)->delete();
-                }
-
-                $spreadsheet = IOFactory::load($file->getRealPath());
-                $worksheet = $spreadsheet->getActiveSheet();
-                $rows = $worksheet->toArray();
-
-                $expectedHeaders = [
-                    'ID Campanha', 'Módulo', 'Parcela', 'ID Armadilha', 'Grupo Amostrado', 'Data do Registro', 'Hora do Registro',
-                    'Categoria', 'Classe', 'Ordem', 'Família', 'Gênero', 'Espécie', 'Nome Comum', 'Sexo', 'Faixa Etária',
-                    'Qnt de Indivíduos', 'Num Marcação', 'Coletado', 'Num de Tombamento', 'Dados Biométricos', 'Comp total',
-                    'Cabeça', 'Cauda', 'Fêmur', 'Orelha', 'Peso', 'Status Conservação Federal', 'Status Conservação IUCN',
-                    'Espécies Bioindicadoras', 'Espécies Alvo de Monitoramento'
-                ];
-
-                $headerRow = array_map('trim', array_shift($rows));
-                if ($headerRow !== $expectedHeaders) {
-                    Log::error('ResultadoService: Cabeçalho da planilha inválido', [
-                        'contrato_id' => $contratoId,
-                        'header_row' => $headerRow,
-                        'expected_headers' => $expectedHeaders,
-                    ]);
-                    throw new \Exception('Cabeçalho da planilha inválido. Use o modelo fornecido.');
-                }
-
-                if ($campanhaId) {
-                    $tempDir = storage_path('app/temp');
-                    if (!file_exists($tempDir)) {
-                        mkdir($tempDir, 0755, true);
-                    }
-                    $tempPath = $tempDir . '/updated_planilha_' . time() . '.xlsx';
-                    $highestRow = $worksheet->getHighestRow();
-                    for ($row = 2; $row <= $highestRow; $row++) {
-                        $worksheet->setCellValue('A' . $row, $campanhaId);
-                    }
-                    $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-                    $writer->save($tempPath);
-                    $spreadsheet = IOFactory::load($tempPath);
-                    $worksheet = $spreadsheet->getActiveSheet();
-                    $rows = $worksheet->toArray();
-                    array_shift($rows);
-                    unlink($tempPath);
-                }
-
-                foreach ($rows as $index => $row) {
-                    $dataRegistro = null;
-                    if (!empty($row[5])) {
-                        try {
-                            $dateTime = \DateTime::createFromFormat('d/m/Y', trim($row[5]));
-                            if (!$dateTime) {
-                                Log::warning('ResultadoService: Formato de data inválido na linha ' . ($index + 2), [
-                                    'contrato_id' => $contratoId,
-                                    'data' => $row[5],
-                                ]);
-                                throw new \Exception('Formato de data inválido na linha ' . ($index + 2) . ': ' . $row[5]);
-                            }
-                            $dataRegistro = $dateTime->format('Y-m-d');
-                        } catch (\Exception $e) {
-                            Log::error('ResultadoService: Erro ao converter data na linha ' . ($index + 2), [
-                                'contrato_id' => $contratoId,
-                                'data' => $row[5],
-                                'erro' => $e->getMessage(),
-                            ]);
-                            throw $e;
-                        }
-                    }
-
-                    $horaRegistro = null;
-                    if (!empty($row[6])) {
-                        try {
-                            $dateTime = \DateTime::createFromFormat('H:i', trim($row[6]));
-                            if (!$dateTime) {
-                                Log::warning('ResultadoService: Formato de hora inválido na linha ' . ($index + 2), [
-                                    'contrato_id' => $contratoId,
-                                    'hora' => $row[6],
-                                ]);
-                                throw new \Exception('Formato de hora inválido na linha ' . ($index + 2) . ': ' . $row[6]);
-                            }
-                            $horaRegistro = $dateTime->format('H:i:s');
-                        } catch (\Exception $e) {
-                            Log::error('ResultadoService: Erro ao converter hora na linha ' . ($index + 2), [
-                                'contrato_id' => $contratoId,
-                                'hora' => $row[6],
-                                'erro' => $e->getMessage(),
-                            ]);
-                            throw $e;
-                        }
-                    }
-
-                    $data = [
-                        'id_contrato' => $contratoId,
-                        'id_campanha' => $row[0] ?? $campanhaId,
-                        'modulo' => $row[1] ?? null,
-                        'parcela' => $row[2] ?? null,
-                        'id_armadilha' => $row[3] ?? null,
-                        'grupo_amostrado' => $row[4] ?? null,
-                        'data_registro' => $dataRegistro,
-                        'hora_registro' => $horaRegistro,
-                        'categoria' => $row[7] ?? null,
-                        'classe' => $row[8] ?? null,
-                        'ordem' => $row[9] ?? null,
-                        'familia' => $row[10] ?? null,
-                        'genero' => $row[11] ?? null,
-                        'especie' => $row[12] ?? null,
-                        'nome_comum' => $row[13] ?? null,
-                        'sexo' => $row[14] ?? null,
-                        'faixa_etaria' => $row[15] ?? null,
-                        'qnt_individuos' => $row[16] ? (int)$row[16] : 0,
-                        'num_marcacao' => $row[17] ?? null,
-                        'coletado' => $row[18] ?? null,
-                        'num_tombamento' => $row[19] ?? null,
-                        'dados_biometricos' => $row[20] ?? null,
-                        'comp_total' => $row[21] ? (float)$row[21] : null,
-                        'cabeca' => $row[22] ? (float)$row[22] : null,
-                        'cauda' => $row[23] ? (float)$row[23] : null,
-                        'femur' => $row[24] ? (float)$row[24] : null,
-                        'orelha' => $row[25] ? (float)$row[25] : null,
-                        'peso' => $row[26] ? (float)$row[26] : null,
-                        'status_conservacao_federal' => $row[27] ?? null,
-                        'status_conservacao_iucn' => $row[28] ?? null,
-                        'especies_bioindicadoras' => $row[29] ?? null,
-                        'especies_alvo_monitoramento' => $row[30] ?? null,
-                    ];
-
-                    SgcFaunaResultados::create($data);
-                    $recordsSaved++;
-                }
-            }
-
-            if ($campanhaId && $consideracoes) {
-                SgcFaunaResultadosConsideracoes::updateOrCreate(
-                    ['id_campanha' => $campanhaId, 'id_contrato' => $contratoId],
-                    ['consideracoes' => $consideracoes]
-                );
-            }
-
-            return [
-                'success' => true,
-                'message' => 'Resultados salvos com sucesso. ' . $recordsSaved . ' registros salvos, ' . $recordsSkipped . ' registros ignorados.',
-            ];
-        } catch (\Exception $e) {
-            Log::error('ResultadoService: Erro ao processar planilha de resultados', [
-                'contrato_id' => $contratoId,
-                'campanha_id' => $campanhaId ?? 'não fornecido',
-                'consideracoes' => $consideracoes ?? 'não fornecido',
-                'erro' => $e->getMessage(),
-                'linha' => $e->getLine(),
-                'arquivo' => $e->getFile(),
-            ]);
-            throw new \Exception($e->getMessage());
+        if (!$file || !$file->isValid()) {
+            throw new \Exception('Arquivo de planilha inválido.');
         }
+
+        // Carrega planilha
+        $spreadsheet = IOFactory::load($file->getRealPath());
+        $worksheet   = $spreadsheet->getActiveSheet();
+        $rows        = $worksheet->toArray(null, true, true, true); // preserva vazios
+
+        if (empty($rows) || count($rows) < 2) {
+            throw new \Exception('Planilha vazia ou sem dados.');
+        }
+
+        // 1) Descobrir a linha de cabeçalho (pega a primeira com >= 3 células não vazias)
+        $headerIdx = null;
+        foreach ($rows as $i => $row) {
+            $nonEmpty = 0;
+            foreach ($row as $cell) {
+                if (trim((string)$cell) !== '') $nonEmpty++;
+            }
+            if ($nonEmpty >= 3) { $headerIdx = $i; break; }
+        }
+        if ($headerIdx === null) {
+            throw new \Exception('Não foi possível identificar o cabeçalho.');
+        }
+
+        // 2) Array com os títulos do cabeçalho (com normalização)
+        $headerRaw = array_values($rows[$headerIdx]); // zera chaves
+        $headerMap = $this->buildHeaderIndexMap($headerRaw); // normalizado => índice
+
+        // 3) Se não veio $tipoPlanilha do front, tenta inferir pelos campos obrigatórios
+        if (!$tipoPlanilha) {
+            $tipoPlanilha = $this->inferirTipoPlanilhaPelosHeaders($headerMap);
+        }
+
+        // 4) Validar cabeçalho mínimo por tipo
+        $this->validarHeadersObrigatorios($tipoPlanilha, $headerMap, $headerRaw);
+
+        // 5) Apagar registros anteriores (se campanhaId fornecido)
+        if ($campanhaId) {
+            $this->deleteByCampanha($tipoPlanilha, $campanhaId);
+        }
+
+        // 6) Percorrer as linhas de dados (tudo depois do cabeçalho)
+        $recordsSaved = 0;
+        for ($r = $headerIdx + 1; $r <= count($rows); $r++) {
+            $row = array_values($rows[$r] ?? []);
+            if ($this->linhaVazia($row)) continue;
+
+            // Mapeia a linha conforme o tipo escolhido
+            switch ($tipoPlanilha) {
+                case 'terrestre':
+                    $payload = $this->mapRowTerrestre($row, $headerMap, $contratoId, $campanhaId);
+                    if ($payload) { SgcFaunaResultadosTerrestre::create($payload); $recordsSaved++; }
+                    break;
+
+                case 'aquatica':
+                    $payload = $this->mapRowAquatica($row, $headerMap, $contratoId, $campanhaId);
+                    if ($payload) { SgcFaunaResultadosAquatica::create($payload); $recordsSaved++; }
+                    break;
+
+                case 'cavernicola':
+                    $payload = $this->mapRowCavernicola($row, $headerMap, $contratoId, $campanhaId);
+                    if ($payload) { SgcFaunaResultadosCavernicola::create($payload); $recordsSaved++; }
+                    break;
+            }
+        }
+
+        // 7) Considerações
+        if ($campanhaId && $consideracoes !== null) {
+            SgcFaunaResultadosConsideracoes::updateOrCreate(
+                ['id_campanha' => $campanhaId, 'id_contrato' => $contratoId],
+                ['consideracoes' => $consideracoes]
+            );
+        }
+
+        return [
+            'success' => true,
+            'message' => "Resultados salvos com sucesso. {$recordsSaved} registros importados."
+        ];
+    }
+
+    /* =========================
+     * VALIDADORES E HELPERS
+     * ========================= */
+
+    private function deleteByCampanha(string $tipo, int $campanhaId): void
+    {
+        if ($tipo === 'terrestre') {
+            SgcFaunaResultadosTerrestre::where('id_campanha', $campanhaId)->delete();
+        } elseif ($tipo === 'aquatica') {
+            SgcFaunaResultadosAquatica::where('id_campanha', $campanhaId)->delete();
+        } else {
+            SgcFaunaResultadosCavernicola::where('id_campanha', $campanhaId)->delete();
+        }
+    }
+
+    private function buildHeaderIndexMap(array $headerRow): array
+    {
+        $map = [];
+        foreach ($headerRow as $idx => $label) {
+            $norm = $this->norm((string)$label);
+            if ($norm !== '') $map[$norm] = $idx;
+        }
+        return $map;
+    }
+
+    private function norm(string $s): string
+    {
+        $s = mb_strtolower(trim($s));
+        // remover acentos
+        $s = iconv('UTF-8','ASCII//TRANSLIT//IGNORE',$s);
+        // normalizações comuns
+        $s = str_replace(
+            ['  ',' (ua)',' (pa)','/','-','  '],
+            [' ','','',' ',' ',' '],
+            $s
+        );
+        $s = preg_replace('/\s+/', ' ', $s);
+        return $s;
+    }
+
+    private function linhaVazia(array $row): bool
+    {
+        foreach ($row as $cell) {
+            if (trim((string)$cell) !== '') return false;
+        }
+        return true;
+    }
+
+    private function getCell(array $row, array $headerMap, string $headerNorm): ?string
+    {
+        if (!array_key_exists($headerNorm, $headerMap)) return null;
+        $idx = $headerMap[$headerNorm];
+        return isset($row[$idx]) ? trim((string)$row[$idx]) : null;
+    }
+
+    private function toDateYmd(?string $value): ?string
+    {
+        if ($value === null || $value === '') return null;
+
+        // Excel serial?
+        if (is_numeric($value)) {
+            try {
+                $base = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float)$value);
+                return $base->format('Y-m-d');
+            } catch (\Throwable $e) {}
+        }
+
+        // d/m/Y ou d-m-Y
+        foreach (['d/m/Y','d-m-Y','Y-m-d','Y/m/d'] as $fmt) {
+            $dt = \DateTime::createFromFormat($fmt, $value);
+            if ($dt) return $dt->format('Y-m-d');
+        }
+        return null;
+    }
+
+    private function toTimeHis(?string $value): ?string
+    {
+        if ($value === null || $value === '') return null;
+
+        if (is_numeric($value)) {
+            // Excel time serial
+            try {
+                $secs = (float)$value * 24 * 3600;
+                return gmdate('H:i:s', (int)$secs);
+            } catch (\Throwable $e) {}
+        }
+        // H:i ou H:i:s
+        foreach (['H:i:s','H:i'] as $fmt) {
+            $dt = \DateTime::createFromFormat($fmt, $value);
+            if ($dt) return $dt->format('H:i:s');
+        }
+        return null;
+    }
+
+    private function toDecimal(?string $value): ?float
+    {
+        if ($value === null || $value === '') return null;
+        // aceita "12,34" e "12.34"
+        $v = str_replace(['.', ','], ['', '.'], trim($value)); // remove milhar e usa ponto como decimal
+        if (!is_numeric($v)) return null;
+        return (float)$v;
+    }
+
+    private function toInt(?string $value): ?int
+    {
+        if ($value === null || $value === '') return null;
+        if (!is_numeric($value)) return null;
+        return (int)$value;
+    }
+
+    private function validarHeadersObrigatorios(string $tipo, array $headerMap, array $headerRaw): void
+    {
+        $obrigatorios = [];
+        if ($tipo === 'terrestre') {
+            $obrigatorios = [
+                'campanha','estacao do ano','data','horario','municipio',
+                'unidade amostral','ponto amostral','latitude','longitude',
+                'classe','ordem','familia','genero','especie','abundancia'
+            ];
+        } elseif ($tipo === 'aquatica') {
+            $obrigatorios = [
+                'campanha','estacao do ano','data','horario','municipio',
+                'unidade amostral','ponto amostral','latitude','longitude',
+                'tipo de ambiente','largura media (rio)','profundidade media',
+                'classe','ordem','familia','genero','especie','abundancia'
+            ];
+        } else { // cavernicola
+            $obrigatorios = [
+                'caverna','campanha','estacao do ano','data','horario','municipio',
+                'unidade amostral','ponto amostral','latitude','longitude',
+                'classe','ordem','familia','genero','especie','abundancia'
+            ];
+        }
+
+        $faltando = [];
+        foreach ($obrigatorios as $h) {
+            if (!array_key_exists($h, $headerMap)) $faltando[] = $h;
+        }
+        if ($faltando) {
+            // Ajuda debug: devolve o cabeçalho lido
+            throw new \Exception(
+                'Cabeçalho inválido para o modelo ' . strtoupper($tipo) .
+                '. Faltando: ' . implode(', ', $faltando) .
+                '. Verifique se usou o modelo correto.'
+            );
+        }
+    }
+
+    private function inferirTipoPlanilhaPelosHeaders(array $headerMap): string
+    {
+        $hasTerrestre = array_key_exists('habitat', $headerMap) || array_key_exists('fitofisionomia', $headerMap);
+        $hasAquatica  = array_key_exists('tipo de ambiente', $headerMap) || array_key_exists('largura media (rio)', $headerMap);
+        $hasCaverna   = array_key_exists('caverna', $headerMap) || array_key_exists('substrato amostrado', $headerMap);
+
+        if ($hasCaverna) return 'cavernicola';
+        if ($hasAquatica) return 'aquatica';
+        if ($hasTerrestre) return 'terrestre';
+
+        // fallback
+        return 'terrestre';
+    }
+
+    /* =========================
+     * MAPEAMENTOS POR MODELO
+     * ========================= */
+
+    private function mapRowTerrestre(array $row, array $H, int $contratoId, ?int $campanhaId): ?array
+    {
+        // Nomes conforme planilha Terrestre
+        $get = fn($label) => $this->getCell($row, $H, $label);
+
+        $data = [
+            'id_contrato'           => $contratoId,
+            'id_campanha'           => $campanhaId ?? null,
+
+            'campanha'              => $get('campanha'),
+            'estacao_do_ano'        => $get('estacao do ano'),
+            'data'                  => $this->toDateYmd($get('data')),
+            'horario'               => $this->toTimeHis($get('horario')),
+            'condicao_climatica'    => $get('condicao climatica'),
+            'temperatura'           => $this->toDecimal($get('temperatura')),
+            'pluviosidade'          => $this->toDecimal($get('pluviosidade')),
+            'municipio'             => $get('municipio'),
+            'unidade_amostral'      => $get('unidade amostral'),
+            'ponto_amostral'        => $get('ponto amostral'),
+            'datum'                 => $get('datum'),
+            'latitude'              => $this->toDecimal($get('latitude')),
+            'longitude'             => $this->toDecimal($get('longitude')),
+            'metodologia'           => $get('metodologia'),
+            'tipo_metodologia'      => $get('tipo de metodologia'),
+            'fitofisionomia'        => $get('fitofisionomia'),
+            'habitat'               => $get('habitat'),
+            'caracteristicas_ponto' => $get('caracteristicas do ponto amostral'),
+
+            'classe'                => $get('classe'),
+            'ordem'                 => $get('ordem'),
+            'familia'               => $get('familia'),
+            'genero'                => $get('genero'),
+            'especie'               => $get('especie'),
+            'nome_comum'            => $get('nome comum'),
+            'abundancia'            => $this->toInt($get('abundancia')),
+            'sensibilidade'         => $get('sensibilidade'),
+            'endemismo'             => $get('endemismo'),
+            'observacao'            => $get('observacao'),
+            'iucn'                  => $get('iucn'),
+            'mma'                   => $get('mma'),
+            'salve'                 => $get('salve'),
+            'estado'                => $get('estado'),
+            'registro_fotografico'  => $get('registro fotografico'),
+            'coletado'              => $get('coletadato') ?? $get('coletado'),
+            'numero_tombo'          => $get('numero tombo (colecao)'),
+        ];
+
+        // linha toda vazia?
+        $verifica = array_filter($data, fn($v) => $v !== null && $v !== '');
+        return $verifica ? $data : null;
+    }
+
+    private function mapRowAquatica(array $row, array $H, int $contratoId, ?int $campanhaId): ?array
+    {
+        $get = fn($label) => $this->getCell($row, $H, $label);
+
+        $data = [
+            'id_contrato'                  => $contratoId,
+            'id_campanha'                  => $campanhaId ?? null,
+
+            'campanha'                     => $get('campanha'),
+            'estacao_do_ano'               => $get('estacao do ano'),
+            'data'                         => $this->toDateYmd($get('data')),
+            'horario'                      => $this->toTimeHis($get('horario')),
+            'condicao_climatica'           => $get('condicao climatica'),
+            'temperatura'                  => $this->toDecimal($get('temperatura')),
+            'pluviosidade'                 => $this->toDecimal($get('pluviosidade')),
+            'municipio'                    => $get('municipio'),
+            'unidade_amostral'             => $get('unidade amostral'),
+            'ponto_amostral'               => $get('ponto amostral'),
+            'datum'                        => $get('datum'),
+            'latitude'                     => $this->toDecimal($get('latitude')),
+            'longitude'                    => $this->toDecimal($get('longitude')),
+            'metodologia'                  => $get('metodologia'),
+            'tipo_metodologia'             => $get('tipo de metodologia'),
+            'fitofisionomia'               => $get('fitofisionomia'),
+            'habitat_preferencial'         => $get('habitat preferencial'),
+            'tipo_de_ambiente'             => $get('tipo de ambiente'),
+            'largura_media_rio'            => $this->toDecimal($get('largura media (rio)')),
+            'profundidade_media'           => $this->toDecimal($get('profundidade media')),
+            'tipo_de_substrato'            => $get('tipo de substrato'),
+            'caracteristicas_da_agua'      => $get('caracteristicas da agua'),
+            'caracteristicas_entorno_pa'   => $get('caracteristicas de entorno do ponto amostral'),
+
+            'classe'                       => $get('classe'),
+            'ordem'                        => $get('ordem'),
+            'familia'                      => $get('familia'),
+            'genero'                       => $get('genero'),
+            'especie'                      => $get('especie'),
+            'nome_comum'                   => $get('nome comum'),
+            'abundancia'                   => $this->toInt($get('abundancia')),
+            'sensibilidade'                => $get('sensibilidade'),
+            'endemismo'                    => $get('endemismo'),
+            'observacao'                   => $get('observacao'),
+            'iucn'                         => $get('iucn'),
+            'mma'                          => $get('mma'),
+            'salve'                        => $get('salve'),
+            'estado'                       => $get('estado'),
+            'registro_fotografico'         => $get('registro fotografico'),
+            'coletado'                     => $get('coletadato') ?? $get('coletado'),
+            'numero_tombo'                 => $get('numero tombo (colecao)'),
+        ];
+
+        $verifica = array_filter($data, fn($v) => $v !== null && $v !== '');
+        return $verifica ? $data : null;
+    }
+
+    private function mapRowCavernicola(array $row, array $H, int $contratoId, ?int $campanhaId): ?array
+    {
+        $get = fn($label) => $this->getCell($row, $H, $label);
+
+        $data = [
+            'id_contrato'                   => $contratoId,
+            'id_campanha'                   => $campanhaId ?? null,
+
+            'caverna'                       => $get('caverna'),
+            'campanha'                      => $get('campanha'),
+            'estacao_do_ano'                => $get('estacao do ano'),
+            'data'                          => $this->toDateYmd($get('data')),
+            'horario'                       => $this->toTimeHis($get('horario')),
+            'condicao_climatica'            => $get('condicao climatica'),
+            'temperatura'                   => $this->toDecimal($get('temperatura')),
+            'pluviosidade'                  => $this->toDecimal($get('pluviosidade')),
+            'municipio'                     => $get('municipio'),
+            'unidade_amostral'              => $get('unidade amostral'),
+            'ponto_amostral'                => $get('ponto amostral'),
+            'datum'                         => $get('datum'),
+            'latitude'                      => $this->toDecimal($get('latitude')),
+            'longitude'                     => $this->toDecimal($get('longitude')),
+            'metodologia'                   => $get('metodologia'),
+            'tipo_metodologia'              => $get('tipo de metodologia'),
+            'fitofisionomia'                => $get('fitofisionomia'),
+
+            'substrato_amostrado'           => $get('substrato amostrado'),
+            'caracteristicas_entorno_pa'    => $get('caracteristicas de entorno do ponto amostral'),
+
+            'classe'                        => $get('classe'),
+            'ordem'                         => $get('ordem'),
+            'familia'                       => $get('familia'),
+            'genero'                        => $get('genero'),
+            'especie'                       => $get('especie'),
+            'nome_comum'                    => $get('nome comum'),
+            'abundancia'                    => $this->toInt($get('abundancia')),
+            'categoria_ecologica'           => $get('categoria ecologica'),
+            'sensibilidade'                 => $get('sensibilidade'),
+            'endemismo'                     => $get('endemismo'),
+            'observacao'                    => $get('observacao'),
+
+            'presenca_de_guano'             => $get('presenca de guano'),
+            'presenca_de_agua'              => $get('presenca de agua'),
+            'conectividade_externa'         => $get('conectividade externa'),
+            'perturbacao_antropica'         => $get('perturbacao antropica'),
+
+            'iucn'                          => $get('iucn'),
+            'mma'                           => $get('mma'),
+            'salve'                         => $get('salve'),
+            'estado'                        => $get('estado'),
+            'registro_fotografico'          => $get('registro fotografico'),
+            'coletado'                      => $get('coletadato') ?? $get('coletado'),
+            'numero_tombo'                  => $get('numero tombo (colecao)'),
+        ];
+
+        $verifica = array_filter($data, fn($v) => $v !== null && $v !== '');
+        return $verifica ? $data : null;
     }
 }
