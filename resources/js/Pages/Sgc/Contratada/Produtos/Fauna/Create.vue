@@ -217,10 +217,17 @@ const salvarDadosGerais = (consideracoesData = {}) => {
         formData.append(`metodologias[${index}][metodologia]`, metodo.metodologia || '');
     });
 
-    // Adicionar Resultados (planilha)
-    if (formResultados.planilha) {
-        formData.append('planilha', formResultados.planilha);
+    // Enviar até 3 planilhas separadas
+    if (formResultados.planilha_terrestre) {
+        formData.append('planilha_terrestre', formResultados.planilha_terrestre);
     }
+    if (formResultados.planilha_aquatica) {
+        formData.append('planilha_aquatica', formResultados.planilha_aquatica);
+    }
+    if (formResultados.planilha_cavernicola) {
+        formData.append('planilha_cavernicola', formResultados.planilha_cavernicola);
+    }
+
 
     // Adicionar Anexos
     Object.entries(anexos.value).forEach(([key, file]) => {

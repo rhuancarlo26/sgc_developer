@@ -38,7 +38,10 @@ class CampanhaController extends Controller
     {
         $validated = $request->validated();
         $validated['anexos'] = $request->file('anexos') ?? [];
-        $validated['planilha'] = $request->file('planilha');
+        $validated['planilha_terrestre']   = $request->file('planilha_terrestre');
+        $validated['planilha_aquatica']    = $request->file('planilha_aquatica');
+        $validated['planilha_cavernicola'] = $request->file('planilha_cavernicola');
+
 
         try {
             DB::beginTransaction();
@@ -95,7 +98,11 @@ class CampanhaController extends Controller
                 ];
             }, (array) $request->input('profissionais', []));
             $validated['anexos'] = $request->file('anexos') ?? [];
-            $validated['planilha'] = $request->file('planilha');
+            // $validated['planilha'] = $request->file('planilha');
+            $validated['planilha_terrestre']   = $request->file('planilha_terrestre');
+            $validated['planilha_aquatica']    = $request->file('planilha_aquatica');
+            $validated['planilha_cavernicola'] = $request->file('planilha_cavernicola');
+
 
             DB::beginTransaction();
             $campanhaId = $this->campanhaService->atualizarCampanha($contrato, $campanhaId, $validated);
