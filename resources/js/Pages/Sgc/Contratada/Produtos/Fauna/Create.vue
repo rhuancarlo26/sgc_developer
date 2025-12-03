@@ -12,6 +12,7 @@ import QueloniosCrocodilian from './QueloniosCrocodilianos.vue';
 import FaunaCavernic from './FaunaCavernicola.vue';
 import Metodologia from './Metodologia.vue';
 import FaunaResultados from './FaunaResultados.vue';
+import { IconScanEye, IconTrash } from "@tabler/icons-vue";
 
 // Props
 const props = defineProps({
@@ -516,6 +517,45 @@ const updateAnexo = (tipo, file) => {
     console.log('Anexos após atualização:', anexos.value);
     anexos.value = { ...anexos.value };
 };
+
+const anexosLabels = {
+    anuencia_proprietarios: 'Anuência dos Proprietários',
+    registro_fotografico: 'Registro Fotográfico',
+    dados_secundarios: 'Dados Secundários',
+    art: 'ART',
+    ret: 'RET',
+    cr: 'CR',
+    ctf: 'CTF',
+    anuencia_colecoes: 'Anuência de Coleções',
+    oficio_atividades_campo: 'Ofício de Atividades de Campo'
+};
+
+// MODAL DE PREVIEW
+const previewFile = ref(null);
+const previewUrl = ref(null);
+const previewType = ref(null);
+
+const openPreview = (tipo) => {
+    const file = anexos.value[tipo];
+    if (!file) return;
+
+    previewFile.value = file;
+
+    if (file.type.includes("image")) {
+        previewType.value = "image";
+        previewUrl.value = URL.createObjectURL(file);
+    } else if (file.type === "application/pdf") {
+        previewType.value = "pdf";
+        previewUrl.value = URL.createObjectURL(file);
+    }
+};
+
+const closePreview = () => {
+    previewFile.value = null;
+    previewUrl.value = null;
+    previewType.value = null;
+};
+
 </script>
 
 <template>
@@ -696,151 +736,98 @@ const updateAnexo = (tipo, file) => {
                                     @next="setActiveTab('anexos')"
                                 />
                             </div>
-                            <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
-                                <h4 class="mb-3" style="text-align: center;">ANEXOS</h4>
+                            <div v-if="activeTab === 'anexos'" class="tab-pane fade show active">
+                                <h3 class="text-center mb-4 fw-bold">Anexos</h3>
+
                                 <form @submit.prevent="salvarAnexos">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="anuencia_proprietarios" class="form-label">Anuência dos Proprietários</label>
-                                            <input
-                                                type="file"
-                                                class="form-control"
-                                                id="anuencia_proprietarios"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                @change="updateAnexo('anuencia_proprietarios', $event.target.files[0])"
-                                            />
-                                            <InputError :message="form.errors['anexos.anuencia_proprietarios']" />
-                                            <small v-if="anexos.anuencia_proprietarios" class="text-muted">{{ anexos.anuencia_proprietarios.name }}</small>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="registro_fotografico" class="form-label">Registro Fotográfico</label>
-                                            <input
-                                                type="file"
-                                                class="form-control"
-                                                id="registro_fotografico"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                @change="updateAnexo('registro_fotografico', $event.target.files[0])"
-                                            />
-                                            <InputError :message="form.errors['anexos.registro_fotografico']" />
-                                            <small v-if="anexos.registro_fotografico" class="text-muted">{{ anexos.registro_fotografico.name }}</small>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="dados_secundarios" class="form-label">Dados Secundários</label>
-                                            <input
-                                                type="file"
-                                                class="form-control"
-                                                id="dados_secundarios"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                @change="updateAnexo('dados_secundarios', $event.target.files[0])"
-                                            />
-                                            <InputError :message="form.errors['anexos.dados_secundarios']" />
-                                            <small v-if="anexos.dados_secundarios" class="text-muted">{{ anexos.dados_secundarios.name }}</small>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="art" class="form-label">ART</label>
-                                            <input
-                                                type="file"
-                                                class="form-control"
-                                                id="art"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                @change="updateAnexo('art', $event.target.files[0])"
-                                            />
-                                            <InputError :message="form.errors['anexos.art']" />
-                                            <small v-if="anexos.art" class="text-muted">{{ anexos.art.name }}</small>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="ret" class="form-label">RET</label>
-                                            <input
-                                                type="file"
-                                                class="form-control"
-                                                id="ret"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                @change="updateAnexo('ret', $event.target.files[0])"
-                                            />
-                                            <InputError :message="form.errors['anexos.ret']" />
-                                            <small v-if="anexos.ret" class="text-muted">{{ anexos.ret.name }}</small>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="cr" class="form-label">CR</label>
-                                            <input
-                                                type="file"
-                                                class="form-control"
-                                                id="cr"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                @change="updateAnexo('cr', $event.target.files[0])"
-                                            />
-                                            <InputError :message="form.errors['anexos.cr']" />
-                                            <small v-if="anexos.cr" class="text-muted">{{ anexos.cr.name }}</small>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="ctf" class="form-label">CTF</label>
-                                            <input
-                                                type="file"
-                                                class="form-control"
-                                                id="ctf"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                @change="updateAnexo('ctf', $event.target.files[0])"
-                                            />
-                                            <InputError :message="form.errors['anexos.ctf']" />
-                                            <small v-if="anexos.ctf" class="text-muted">{{ anexos.ctf.name }}</small>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="anuencia_colecoes" class="form-label">Anuência de Coleções</label>
-                                            <input
-                                                type="file"
-                                                class="form-control"
-                                                id="anuencia_colecoes"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                @change="updateAnexo('anuencia_colecoes', $event.target.files[0])"
-                                            />
-                                            <InputError :message="form.errors['anexos.anuencia_colecoes']" />
-                                            <small v-if="anexos.anuencia_colecoes" class="text-muted">{{ anexos.anuencia_colecoes.name }}</small>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="oficio_atividades_campo" class="form-label">Ofício de Atividades de Campo</label>
-                                            <input
-                                                type="file"
-                                                class="form-control"
-                                                id="oficio_atividades_campo"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                @change="updateAnexo('oficio_atividades_campo', $event.target.files[0])"
-                                            />
-                                            <InputError :message="form.errors['anexos.oficio_atividades_campo']" />
-                                            <small v-if="anexos.oficio_atividades_campo" class="text-muted">{{ anexos.oficio_atividades_campo.name }}</small>
+                                    <div class="row g-4">
+
+                                        <!-- CARD DE UPLOAD PROFISSIONAL -->
+                                        <div v-for="(label, tipo) in anexosLabels" :key="tipo" class="col-md-6">
+                                            <div class="anexo-card shadow-sm p-3 rounded bg-white">
+
+                                                <!-- Título -->
+                                                <label class="form-label fw-semibold">{{ label }}</label>
+
+                                                <!-- INPUT -->
+                                                <input
+                                                    type="file"
+                                                    class="form-control"
+                                                    :id="tipo"
+                                                    accept=".pdf,.jpg,.jpeg,.png"
+                                                    @change="updateAnexo(tipo, $event.target.files[0])"
+                                                />
+
+                                                <InputError :message="form.errors[`anexos.${tipo}`]" />
+
+                                                <!-- SELECIONADO -->
+                                                <div v-if="anexos[tipo]" class="mt-3 selected-box">
+
+                                                    <!-- Header -->
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="small fw-semibold">{{ anexos[tipo]?.name }}</span>
+
+                                                        <div class="actions-icons">
+                                                            <button
+                                                                type="button"
+                                                                class="icon-btn"
+                                                                @click="openPreview(tipo)"
+                                                                title="Visualizar"
+                                                            >
+                                                                <IconScanEye />
+                                                            </button>
+
+                                                            <button
+                                                                type="button"
+                                                                class="icon-btn text-danger"
+                                                                @click="excluirAnexo(tipo)"
+                                                                title="Excluir"
+                                                            >
+                                                                <IconTrash />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
                                         </div>
                                     </div>
-                                    <!-- Log para depuração -->
-                                    {{ console.log('Anexos antes da tabela:', anexos) }}
-                                    <div v-if="Object.keys(anexos).some(tipo => anexos[tipo])" class="overflow-x-auto mb-6">
-                                        <table class="min-w-full bg-white border border-gray-300">
-                                            <thead>
-                                                <tr class="bg-gray-100">
-                                                    <th class="py-2 px-4 border-b text-left">Tipo de Anexo</th>
-                                                    <th class="py-2 px-4 border-b text-left">Nome do Arquivo</th>
-                                                    <th class="py-2 px-4 border-b text-left">Ação</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr v-for="(file, tipo) in anexos" :key="tipo">
-                                                    <!-- Log para cada iteração -->
-                                                    {{ console.log('Renderizando item:', tipo, file) }}
-                                                    <td v-if="file" class="py-2 px-4 border-b">{{ formatAnexoLabel(tipo) }}</td>
-                                                    <td v-if="file" class="py-2 px-4 border-b">{{ file.name || 'Não informado' }}</td>
-                                                    <td v-if="file" class="py-2 px-4 border-b">
-                                                        <button class="btn btn-link text-danger" @click="excluirAnexo(tipo)">Excluir</button>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div v-else class="alert alert-info text-center">
+
+                                    <div v-if="!Object.keys(anexos).some(k => anexos[k])"
+                                        class="alert alert-info text-center mt-4">
                                         Nenhum anexo selecionado.
                                     </div>
+
                                     <div class="d-flex justify-content-between mt-4">
-                                        <NavButton type="button" type-button="secondary" title="Voltar" @click="setActiveTab('resultados')" />
-                                        <NavButton type="submit" type-button="primary" title="Salvar" />
+                                        <button class="btn btn-outline-secondary px-4" @click="setActiveTab('resultados')">
+                                            Voltar
+                                        </button>
+                                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                                            Salvar
+                                        </button>
                                     </div>
                                 </form>
+
+                                <!-- MODAL DE PREVIEW -->
+                                <div v-if="previewFile" class="preview-modal" @click="closePreview">
+                                    <div class="preview-content" @click.stop>
+                                        <button class="btn-close preview-close" @click="closePreview"></button>
+
+                                        <!-- IMG -->
+                                        <img
+                                            v-if="previewType === 'image'"
+                                            :src="previewUrl"
+                                            class="preview-image"
+                                        />
+
+                                        <!-- PDF -->
+                                        <iframe
+                                            v-if="previewType === 'pdf'"
+                                            :src="previewUrl"
+                                            class="preview-pdf"
+                                        ></iframe>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
@@ -867,4 +854,97 @@ const updateAnexo = (tipo, file) => {
 .tab-content {
     padding: 20px;
 }
+
+.anexo-card {
+    border: 1px solid #f1f1f1;
+    transition: 0.2s ease-in-out;
+}
+.anexo-card:hover {
+    border-color: #dedede;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+.selected-box {
+    background: #fafafa;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.preview-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    padding: 20px;
+}
+
+.preview-content {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.preview-image {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+.preview-pdf {
+    width: 80vw;
+    height: 80vh;
+    border: none;
+}
+
+.preview-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.actions-icons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon-btn {
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn i {
+    font-size: 16px;
+    color: #555;
+}
+
+.icon-btn:hover {
+    background: #f2f2f2;
+    border-color: #bbbbbb;
+}
+
+.icon-btn.text-danger i {
+    color: #c0392b;
+}
+
+.icon-btn.text-danger:hover {
+    background: #ffe9e9;
+    border-color: #ffb3b3;
+}
+
+
 </style>

@@ -201,7 +201,9 @@ const formatAnexoLabel = (tipo) => {
                             </div>
                             <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
                                 <FaunaResultadosVisualizar
-                                    :resultados="campanha.resultados || []"
+                                    :resultadosTerrestre="campanha.resultadosTerrestre || []"
+                                    :resultadosAquatica="campanha.resultadosAquatica || []"
+                                    :resultadosCavernicola="campanha.resultadosCavernicola || []"
                                     :consideracoes="campanha.consideracoes"
                                     @prev="setActiveTab('metodologia')"
                                     @next="setActiveTab('anexos')"

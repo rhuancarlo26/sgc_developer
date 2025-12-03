@@ -216,20 +216,20 @@ class ResultadoService
             $obrigatorios = [
                 'campanha','estacao do ano','data','horario','municipio',
                 'unidade amostral','ponto amostral','latitude','longitude',
-                'classe','ordem','familia','genero','especie','abundancia'
+                'classe','ordem','familia','genero','especie', 'abundancia'
             ];
         } elseif ($tipo === 'aquatica') {
             $obrigatorios = [
                 'campanha','estacao do ano','data','horario','municipio',
                 'unidade amostral','ponto amostral','latitude','longitude',
                 'tipo de ambiente','largura media (rio)','profundidade media',
-                'classe','ordem','familia','genero','especie','abundancia'
+                'classe','ordem','familia','genero','especie', 'abundancia'
             ];
         } else { // cavernicola
             $obrigatorios = [
                 'caverna','campanha','estacao do ano','data','horario','municipio',
                 'unidade amostral','ponto amostral','latitude','longitude',
-                'classe','ordem','familia','genero','especie','abundancia'
+                'classe','ordem','familia','genero','especie', 'abundancia'
             ];
         }
 
@@ -298,6 +298,7 @@ class ResultadoService
             'familia'               => $get('familia'),
             'genero'                => $get('genero'),
             'especie'               => $get('especie'),
+            'nome_cientifico'       => $get('nome cientifico'),
             'nome_comum'            => $get('nome comum'),
             'abundancia'            => $this->toInt($get('abundancia')),
             'sensibilidade'         => $get('sensibilidade'),
@@ -354,6 +355,7 @@ class ResultadoService
             'familia'                      => $get('familia'),
             'genero'                       => $get('genero'),
             'especie'                      => $get('especie'),
+            'nome_cientifico'              => $get('nome cientifico'),
             'nome_comum'                   => $get('nome comum'),
             'abundancia'                   => $this->toInt($get('abundancia')),
             'sensibilidade'                => $get('sensibilidade'),
@@ -406,6 +408,7 @@ class ResultadoService
             'familia'                       => $get('familia'),
             'genero'                        => $get('genero'),
             'especie'                       => $get('especie'),
+            'nome_cientifico'               => $get('nome cientifico'),
             'nome_comum'                    => $get('nome comum'),
             'abundancia'                    => $this->toInt($get('abundancia')),
             'categoria_ecologica'           => $get('categoria ecologica'),

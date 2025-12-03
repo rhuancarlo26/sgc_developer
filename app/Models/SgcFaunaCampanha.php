@@ -76,4 +76,22 @@ class SgcFaunaCampanha extends Model
     {
         return $this->hasMany(SgcFaunaAnaliseEtapa::class, 'id_campanha'); 
     }
+
+    public function resultadosTerrestre()
+    {
+        return $this->hasMany(SgcFaunaResultadosTerrestre::class, 'id_campanha', 'id');
+    }
+
+    public function resultadosAquatica()
+    {
+        return $this->hasMany(SgcFaunaResultadosAquatica::class, 'id_campanha', 'id');
+    }
+
+    public function resultadosCavernicola()
+    {
+        return $this->hasMany(SgcFaunaResultadosCavernicola::class, 'id_campanha', 'id');
+    }
+
+
+
 }

@@ -9,4 +9,10 @@ class SgcFaunaResultadosCavernicola extends Model
     protected $table = 'sgc_fauna_resultados_cavernicola';
     protected $guarded = ['id'];
     public $timestamps = true;
+
+    public function campanha()
+    {
+        return $this->belongsTo(SgcFaunaCampanha::class, 'id_campanha', 'id');
+    }
+
 }
