@@ -29,10 +29,16 @@ use App\Domain\Sgc\Contratada\Produtos\Pmqa\Controller\PmqaCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ResultadoController;
 use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
+use App\Domain\Sgc\Contratada\app\Controller\LayerController;
 
 
 
 Route::prefix('/contratada')->group(function () {
+    //Caminhos do Mapa Layer Aqui: -------------------------------------------------------------------------------------------------
+    Route::get('layers', [LayerController::class, 'index'])->name('sgc.contratada.layers.index');
+    Route::post('layers', [LayerController::class, 'store'])->name('sgc.contratada.layers.store');
+    Route::get('layers/mapa', [LayerController::class, 'mapa'])->name('sgc.contratada.layers.mapa');
+    // -----------------------------------------------------------------------------------------------------------------------------
     Route::get('{contrato}/',                                             [ContratoSgcController::class,                           'index'])->name('sgc.contratada.index');
     Route::get('{contrato}/relatorio',                                    [RelatorioCoordenacaoController::class,                  'index'])->name('sgc.contratada.relatorio.index');
     Route::get('{contrato}/relatorios',                                   [RelatorioCoordenacaoController::class,                  'relatorios'])->name('sgc.contratada.relatorios.index');
@@ -170,7 +176,7 @@ Route::prefix('/contratada')->group(function () {
 
         Route::post('/espeleo/resultados/upload', [EspeleoCampanhaController::class, 'uploadResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.upload');
 
-      
+
         Route::post('/espeleo/resultados/{id}/update', [EspeleoCampanhaController::class, 'updateResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.update');
         Route::delete('/espeleo/resultados/{id}/delete', [EspeleoCampanhaController::class, 'deleteResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.delete');
 
@@ -184,11 +190,11 @@ Route::prefix('/contratada')->group(function () {
         Route::post('/espeleologia/estudos/store', [EspeleoCampanhaController::class, 'storeEstudosPosteriores'])->name('sgc.contratada.produtos.espeleo.estudos.store');
 
 
- 
+
 
          Route::post('/{contrato}/produtos/{produto}/resultados/upload', [ResultadoController::class, 'upload'])->name('sgc.contratada.produtos.fauna.resultados.upload');
 
 
-  
+
 
 });
