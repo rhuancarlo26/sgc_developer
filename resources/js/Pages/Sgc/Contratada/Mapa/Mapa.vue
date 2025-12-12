@@ -7,6 +7,10 @@ import { onMounted, ref } from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.vectorgrid';
+import 'leaflet-draw/dist/leaflet.draw.css';  // Novo: CSS para desenho
+import 'leaflet-measure/dist/leaflet-measure.css';  // Novo: CSS para medição
+import 'leaflet-draw';  // Novo: Plugin de desenho
+import 'leaflet-measure';  // Novo: Plugin de medição
 
 const props = defineProps({
   layers: Array,
@@ -150,6 +154,46 @@ onMounted(() => {
   });
 
   L.control.layers(baseLayers, overlays).addTo(map);
+
+  // Novo: Adicionar controle de desenho (polígonos, círculos, etc.)
+  const drawnItems = new L.FeatureGroup();  // Grupo para armazenar os desenhos
+  map.addLayer(drawnItems);
+
+  const drawControl = new L.Control.Draw({
+    position: 'topleft',  // Posição do toolbar
+    draw: {
+      polygon: true,  // Ativa polígonos
+      circle: true,   // Ativa círculos de seleção
+      rectangle: true,  // Opcional: retângulos
+      polyline: true,   // Opcional: linhas
+      marker: true,     // Opcional: marcadores
+      circlemarker: false  // Desativa se não precisar
+    },
+    edit: {
+      featureGroup: drawnItems,  // Permite editar/remover desenhos
+      remove: true
+    }
+  });
+  map.addControl(drawControl);
+
+  // Evento para quando um desenho é criado (exemplo: adicionar ao mapa)
+  map.on(L.Draw.Event.CREATED, (e) => {
+    const layer = e.layer;
+    drawnItems.addLayer(layer);  // Adiciona o desenho ao grupo
+    // Aqui você pode adicionar lógica extra, como calcular área ou exportar GeoJSON: console.log(layer.toGeoJSON());
+  });
+
+  // Novo: Adicionar régua de medição (distâncias em km)
+  const measureControl = new L.Control.Measure({
+    position: 'topleft',  // Posição do toolbar
+    primaryLengthUnit: 'kilometers',  // Unidade principal: km
+    secondaryLengthUnit: 'meters',    // Secundária: m
+    primaryAreaUnit: 'sqkilometers',  // Para áreas: km²
+    secondaryAreaUnit: 'sqmeters',
+    activeColor: '#FF0000',  // Cor da linha de medição
+    completedColor: '#00FF00'  // Cor quando finalizado
+  });
+  map.addControl(measureControl);
 });
 
 // Função auxiliar para gerar tabela HTML (igual ao original)
