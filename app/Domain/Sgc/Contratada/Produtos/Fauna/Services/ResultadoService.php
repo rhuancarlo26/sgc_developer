@@ -193,14 +193,44 @@ class ResultadoService
         return null;
     }
 
+    // private function toDecimal(?string $value): ?float
+    // {
+    //     if ($value === null || $value === '') return null;
+    //     // aceita "12,34" e "12.34"
+    //     $v = str_replace(['.', ','], ['', '.'], trim($value)); // remove milhar e usa ponto como decimal
+    //     if (!is_numeric($v)) return null;
+    //     return (float)$v;
+    // }
+
     private function toDecimal(?string $value): ?float
     {
-        if ($value === null || $value === '') return null;
-        // aceita "12,34" e "12.34"
-        $v = str_replace(['.', ','], ['', '.'], trim($value)); // remove milhar e usa ponto como decimal
-        if (!is_numeric($v)) return null;
-        return (float)$v;
+        if ($value === null) return null;
+
+        // Se já for número (Excel às vezes envia float puro)
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
+
+        $value = trim($value);
+        if ($value === '') return null;
+
+        // Remove espaços
+        $value = str_replace(' ', '', $value);
+
+        // Caso padrão brasileiro:  -4,801393727
+        // Se tiver vírgula E não tiver ponto → troca vírgula por ponto
+        if (str_contains($value, ',') && !str_contains($value, '.')) {
+            $value = str_replace(',', '.', $value);
+        }
+
+        // Agora só aceita se for numérico
+        if (!is_numeric($value)) {
+            return null;
+        }
+
+        return (float) $value;
     }
+
 
     private function toInt(?string $value): ?int
     {
@@ -277,6 +307,7 @@ class ResultadoService
             'campanha'              => $get('campanha'),
             'estacao_do_ano'        => $get('estacao do ano'),
             'data'                  => $this->toDateYmd($get('data')),
+            'periodo'               => $get('periodo'),
             'horario'               => $this->toTimeHis($get('horario')),
             'condicao_climatica'    => $get('condicao climatica'),
             'temperatura'           => $this->toDecimal($get('temperatura')),
@@ -290,7 +321,7 @@ class ResultadoService
             'metodologia'           => $get('metodologia'),
             'tipo_metodologia'      => $get('tipo de metodologia'),
             'fitofisionomia'        => $get('fitofisionomia'),
-            'habitat'               => $get('habitat'),
+            'habitat'               => $get('habitat preferencial'),
             'caracteristicas_ponto' => $get('caracteristicas do ponto amostral'),
 
             'classe'                => $get('classe'),
@@ -301,6 +332,7 @@ class ResultadoService
             'nome_cientifico'       => $get('nome cientifico'),
             'nome_comum'            => $get('nome comum'),
             'abundancia'            => $this->toInt($get('abundancia')),
+            'numero_de_registros'   => $this->toInt($get('numero de registros')),
             'sensibilidade'         => $get('sensibilidade'),
             'endemismo'             => $get('endemismo'),
             'observacao'            => $get('observacao'),
@@ -308,9 +340,10 @@ class ResultadoService
             'mma'                   => $get('mma'),
             'salve'                 => $get('salve'),
             'estado'                => $get('estado'),
+            'pan_prim'              => $get('pan'),
             'registro_fotografico'  => $get('registro fotografico'),
             'coletado'              => $get('coletadato') ?? $get('coletado'),
-            'numero_tombo'          => $get('numero tombo (colecao)'),
+            'numero_tombo'          => $get('numero tombo'),
         ];
 
         // linha toda vazia?
@@ -329,6 +362,7 @@ class ResultadoService
             'campanha'                     => $get('campanha'),
             'estacao_do_ano'               => $get('estacao do ano'),
             'data'                         => $this->toDateYmd($get('data')),
+            'periodo'                      => $get('periodo'),
             'horario'                      => $this->toTimeHis($get('horario')),
             'condicao_climatica'           => $get('condicao climatica'),
             'temperatura'                  => $this->toDecimal($get('temperatura')),
@@ -343,12 +377,12 @@ class ResultadoService
             'tipo_metodologia'             => $get('tipo de metodologia'),
             'fitofisionomia'               => $get('fitofisionomia'),
             'habitat_preferencial'         => $get('habitat preferencial'),
-            'tipo_de_ambiente'             => $get('tipo de ambiente'),
+            'tipo_ambiente'                => $get('tipo de ambiente'),
             'largura_media_rio'            => $this->toDecimal($get('largura media (rio)')),
             'profundidade_media'           => $this->toDecimal($get('profundidade media')),
-            'tipo_de_substrato'            => $get('tipo de substrato'),
-            'caracteristicas_da_agua'      => $get('caracteristicas da agua'),
-            'caracteristicas_entorno_pa'   => $get('caracteristicas de entorno do ponto amostral'),
+            'tipo_substrato'               => $get('tipo de substrato'),
+            'caracteristicas_agua'         => $get('caracteristicas da agua'),
+            'caracteristicas_entorno_ponto'   => $get('caracteristicas do ponto amostral'),
 
             'classe'                       => $get('classe'),
             'ordem'                        => $get('ordem'),
@@ -358,6 +392,7 @@ class ResultadoService
             'nome_cientifico'              => $get('nome cientifico'),
             'nome_comum'                   => $get('nome comum'),
             'abundancia'                   => $this->toInt($get('abundancia')),
+            'numero_de_registros'          => $this->toInt($get('numero de registros')),
             'sensibilidade'                => $get('sensibilidade'),
             'endemismo'                    => $get('endemismo'),
             'observacao'                   => $get('observacao'),
@@ -365,6 +400,7 @@ class ResultadoService
             'mma'                          => $get('mma'),
             'salve'                        => $get('salve'),
             'estado'                       => $get('estado'),
+            'pan_prim'                     => $get('pan'),
             'registro_fotografico'         => $get('registro fotografico'),
             'coletado'                     => $get('coletadato') ?? $get('coletado'),
             'numero_tombo'                 => $get('numero tombo (colecao)'),
@@ -386,6 +422,7 @@ class ResultadoService
             'campanha'                      => $get('campanha'),
             'estacao_do_ano'                => $get('estacao do ano'),
             'data'                          => $this->toDateYmd($get('data')),
+            'periodo'                       => $get('periodo'),
             'horario'                       => $this->toTimeHis($get('horario')),
             'condicao_climatica'            => $get('condicao climatica'),
             'temperatura'                   => $this->toDecimal($get('temperatura')),
@@ -401,7 +438,7 @@ class ResultadoService
             'fitofisionomia'                => $get('fitofisionomia'),
 
             'substrato_amostrado'           => $get('substrato amostrado'),
-            'caracteristicas_entorno_pa'    => $get('caracteristicas de entorno do ponto amostral'),
+            'caracteristicas_entorno_ponto'    => $get('caracteristicas de entorno do ponto amostral'),
 
             'classe'                        => $get('classe'),
             'ordem'                         => $get('ordem'),
@@ -411,13 +448,14 @@ class ResultadoService
             'nome_cientifico'               => $get('nome cientifico'),
             'nome_comum'                    => $get('nome comum'),
             'abundancia'                    => $this->toInt($get('abundancia')),
+            'numero_de_registros'           => $this->toInt($get('numero de registros')),
             'categoria_ecologica'           => $get('categoria ecologica'),
             'sensibilidade'                 => $get('sensibilidade'),
             'endemismo'                     => $get('endemismo'),
             'observacao'                    => $get('observacao'),
 
-            'presenca_de_guano'             => $get('presenca de guano'),
-            'presenca_de_agua'              => $get('presenca de agua'),
+            'presenca_guano'                => $get('presenca de guano'),
+            'presenca_agua'                 => $get('presenca de agua'),
             'conectividade_externa'         => $get('conectividade externa'),
             'perturbacao_antropica'         => $get('perturbacao antropica'),
 
@@ -425,6 +463,7 @@ class ResultadoService
             'mma'                           => $get('mma'),
             'salve'                         => $get('salve'),
             'estado'                        => $get('estado'),
+            'pan_prim'                      => $get('pan'),
             'registro_fotografico'          => $get('registro fotografico'),
             'coletado'                      => $get('coletadato') ?? $get('coletado'),
             'numero_tombo'                  => $get('numero tombo (colecao)'),

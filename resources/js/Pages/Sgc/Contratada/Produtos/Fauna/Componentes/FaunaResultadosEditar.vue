@@ -1,317 +1,507 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
 import NavButton from '@/Components/NavButton.vue';
-import { ref, watch } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import * as XLSX from 'xlsx';
+import Highcharts from 'highcharts';
 
-// Props
 const props = defineProps({
-  form: {
-    type: Object,
-    required: true,
-  },
-  resultadosRecords: {
-    type: Array,
-    default: () => [],
-  },
-  idCampanha: {
-    type: [String, Number],
-    required: true,
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
+    form: { type: Object, required: true },
+    resultadosRecords: { type: Object, default: () => ({}) },
+    idCampanha: { type: [String, Number], required: true },
+    disabled: { type: Boolean, default: false },
 });
 
-// Emits
 const emit = defineEmits(['update:resultadosRecords', 'prev', 'next']);
 
-// Dados
-const consideracoes = ref(props.form.consideracoes || '');
-const resultadosRecords = ref(props.resultadosRecords);
+// ===================== ESTADOS PRINCIPAIS =====================
 
-// Sincronizar considerações com o form pai
-watch(consideracoes, (newValue) => {
-  if (!props.disabled) {
-    props.form.consideracoes = newValue;
-  }
+const consideracoes = ref(props.form.consideracoes ?? '');
+
+const initial = props.resultadosRecords || {};
+const resultados = ref({
+    terrestre: Array.isArray(initial.terrestre) ? initial.terrestre : [],
+    aquatica: Array.isArray(initial.aquatica) ? initial.aquatica : [],
+    cavernicola: Array.isArray(initial.cavernicola) ? initial.cavernicola : [],
 });
 
-// Download do modelo de planilha
-const downloadModelo = () => {
-  const headers = [
-    'ID Campanha', 'Módulo', 'Parcela', 'ID Armadilha', 'Grupo Amostrado', 'Data do Registro', 'Hora do Registro',
-    'Categoria', 'Classe', 'Ordem', 'Família', 'Gênero', 'Espécie', 'Nome Comum', 'Sexo', 'Faixa Etária',
-    'Qnt de Indivíduos', 'Num Marcação', 'Coletado', 'Num de Tombamento', 'Dados Biométricos', 'Comp total',
-    'Cabeça', 'Cauda', 'Fêmur', 'Orelha', 'Peso', 'Status Conservação Federal', 'Status Conservação IUCN',
-    'Espécies Bioindicadoras', 'Espécies Alvo de Monitoramento'
-  ];
-  const ws = XLSX.utils.json_to_sheet([{}], { header: headers });
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Resultados');
-  
-  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-  const blob = new Blob([wbout], { type: 'application/octet-stream' });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'modelo_resultados.xlsx';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
-};
+// Abas
+const activeTipo = ref('terrestre');
 
-// Processar upload da planilha
-const processarPlanilha = (event) => {
-  if (props.disabled) return;
-  const file = event.target.files[0];
-  if (!file) return;
+const tipos = [
+    { key: 'terrestre', label: 'Fauna Terrestre' },
+    { key: 'aquatica', label: 'Fauna Aquática' },
+    { key: 'cavernicola', label: 'Fauna Cavernícola' },
+];
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: 'array', cellDates: false });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(sheet);
+const labelTipoAtivo = computed(
+    () => tipos.find(t => t.key === activeTipo.value)?.label || ''
+);
 
-    const novosResultados = json.map(row => ({
-      id: null, // ID será gerado pelo backend
-      id_campanha: row['ID Campanha'] || props.idCampanha,
-      modulo: row['Módulo'] || 0,
-      parcela: row['Parcela'] || 0,
-      id_armadilha: row['ID Armadilha'] || 0,
-      grupo_amostrado: row['Grupo Amostrado'] || '',
-      data_registro: row['Data do Registro'] || '',
-      hora_registro: row['Hora do Registro'] || null,
-      categoria: row['Categoria'] || null,
-      classe: row['Classe'] || null,
-      ordem: row['Ordem'] || null,
-      familia: row['Família'] || null,
-      genero: row['Gênero'] || null,
-      especie: row['Espécie'] || '',
-      nome_comum: row['Nome Comum'] || null,
-      sexo: row['Sexo'] || null,
-      faixa_etaria: row['Faixa Etária'] || null,
-      qnt_individuos: row['Qnt de Indivíduos'] || 0,
-      num_marcacao: row['Num Marcação'] || null,
-      coletado: row['Coletado'] || null,
-      num_tombamento: row['Num de Tombamento'] || null,
-      dados_biometricos: row['Dados Biométricos'] || null,
-      comp_total: row['Comp total'] || 0,
-      cabeca: row['Cabeça'] || 0,
-      cauda: row['Cauda'] || 0,
-      femur: row['Fêmur'] || 0,
-      orelha: row['Orelha'] || 0,
-      peso: row['Peso'] || 0,
-      status_conservacao_federal: row['Status Conservação Federal'] || null,
-      status_conservacao_iucn: row['Status Conservação IUCN'] || null,
-      especies_bioindicadoras: row['Espécies Bioindicadoras'] || null,
-      especies_alvo_monitoramento: row['Espécies Alvo de Monitoramento'] || null,
+const previewAtivo = computed(
+    () => resultados.value[activeTipo.value] || []
+);
+
+// Quando resultadosRecords vindo do pai mudar (ex: carregou do banco), sincroniza
+watch(
+    () => props.resultadosRecords,
+    (val) => {
+        const v = val || {};
+        resultados.value.terrestre   = Array.isArray(v.terrestre)   ? v.terrestre   : [];
+        resultados.value.aquatica    = Array.isArray(v.aquatica)    ? v.aquatica    : [];
+        resultados.value.cavernicola = Array.isArray(v.cavernicola) ? v.cavernicola : [];
+        emit('update:resultadosRecords', { ...resultados.value });
+        updateCharts();
+    },
+    { deep: true, immediate: true }
+);
+
+// Sincronizar considerações com o form pai
+watch(consideracoes, (val) => {
+    if (!props.disabled) {
+        props.form.consideracoes = val;
+    }
+});
+
+// ===================== CORES / AGRUPAMENTO =====================
+
+// Gerador de cores pastel
+function pastelColor() {
+    const grupo = Math.floor(Math.random() * 3);
+    let hue;
+
+    if (grupo === 0) {
+        // Azul discreto
+        hue = 190 + Math.random() * 40;
+    } else if (grupo === 1) {
+        // Verde suave
+        hue = 90 + Math.random() * 50;
+    } else {
+        // Amarelo pastel
+        hue = 40 + Math.random() * 20;
+    }
+
+    const saturation = 35 + Math.random() * 20;
+    const lightness  = 65 + Math.random() * 10;
+
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
+
+const classColorMap = {};
+
+function colorByClass(classe) {
+    const key = String(classe || '').trim().toLowerCase();
+    if (!key) return '#cccccc';
+
+    if (!classColorMap[key]) {
+        classColorMap[key] = pastelColor();
+    }
+    return classColorMap[key];
+}
+
+// Mapeamento de Classe -> Grupo (para TERRESTRE)
+function mapClasseToGrupo(classeRaw) {
+    // Aquática e Cavernícola → usa a Classe direto
+    if (activeTipo.value !== 'terrestre') {
+        return String(classeRaw || '').trim() || 'Não classificado';
+    }
+
+    const c = String(classeRaw || '').trim().toLowerCase();
+    if (c === 'aves') return 'Avifauna';
+    if (c === 'mammalia') return 'Mastofauna';
+    if (c === 'reptilia' || c === 'amphibia') return 'Herpetofauna';
+    return 'Não classificado';
+}
+
+// Pega nome da espécie (diferentes cabeçalhos possíveis)
+function getEspecieFromLinha(linha) {
+    return (
+        linha['Especie'] ||
+        linha['Espécie'] ||
+        linha['Nome cientifico'] ||
+        linha['Nome científico'] ||
+        linha['Nome Cientifico'] ||
+        ''
+    );
+}
+
+// ===================== CÁLCULOS (RIQUEZA / ABUNDÂNCIA) =====================
+
+const riquezaPorGrupo = computed(() => {
+    const data = previewAtivo.value;
+    const grupos = {};
+
+    data.forEach(linha => {
+        const grupo = mapClasseToGrupo(linha['Classe']);
+        const especie = String(getEspecieFromLinha(linha)).trim();
+        if (!especie) return;
+
+        if (!grupos[grupo]) grupos[grupo] = new Set();
+        grupos[grupo].add(especie);
+    });
+
+    return Object.entries(grupos).map(([grupo, set]) => ({
+        grupo,
+        valor: set.size,
     }));
+});
 
-    resultadosRecords.value = novosResultados;
-    emit('update:resultadosRecords', novosResultados);
-    props.form.planilha = file;
-    props.form.resultados = novosResultados;
-  };
-  reader.readAsArrayBuffer(file);
+const abundanciaPorClasse = computed(() => {
+    const data = previewAtivo.value;
+    const grupos = {};
+
+    data.forEach(linha => {
+        const grupo = mapClasseToGrupo(linha['Classe']);
+        const abund = Number(linha['Abundancia'] ?? linha['Abundância'] ?? 0);
+        if (!grupos[grupo]) grupos[grupo] = 0;
+        grupos[grupo] += abund;
+    });
+
+    return Object.entries(grupos)
+        .map(([grupo, valor]) => ({ grupo, valor }))
+        .sort((a, b) => b.valor - a.valor);
+});
+
+// ===================== HIGHCHARTS =====================
+
+const chartRiquezaRef = ref(null);
+const chartAbundanciaRef = ref(null);
+
+let chartRiqueza = null;
+let chartAbundancia = null;
+
+function createChart(container, options) {
+    if (!container) return null;
+    return Highcharts.chart({
+        ...options,
+        chart: { ...options.chart, renderTo: container },
+    });
+}
+
+function destroyCharts() {
+    chartRiqueza?.destroy();
+    chartAbundancia?.destroy();
+    chartRiqueza = null;
+    chartAbundancia = null;
+}
+
+function updateCharts() {
+    nextTick(() => {
+        destroyCharts();
+
+        const riqueza = riquezaPorGrupo.value;
+        const abundanciaClasse = abundanciaPorClasse.value;
+
+        if (!chartRiquezaRef.value || !chartAbundanciaRef.value) return;
+
+        // Riqueza
+        chartRiqueza = createChart(chartRiquezaRef.value, {
+            chart: { type: 'pie' },
+            title: { text: 'Riqueza' },
+            subtitle: { text: labelTipoAtivo.value },
+            tooltip: {
+                pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y} espécies)',
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f}%',
+                    },
+                },
+            },
+            series: [
+                {
+                    name: 'Riqueza',
+                    data: riqueza.map(r => ({
+                        name: r.grupo,
+                        y: r.valor,
+                        color: colorByClass(r.grupo),
+                    })),
+                },
+            ],
+            credits: { enabled: false },
+        });
+
+        // Abundância
+        chartAbundancia = createChart(chartAbundanciaRef.value, {
+            chart: { type: 'pie' },
+            title: { text: 'Abundância' },
+            subtitle: { text: labelTipoAtivo.value },
+            tooltip: {
+                pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y} registros)',
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f}%',
+                    },
+                },
+            },
+            series: [
+                {
+                    name: 'Classes',
+                    data: abundanciaClasse.map(c => ({
+                        name: c.grupo,
+                        y: c.valor,
+                        color: colorByClass(c.grupo),
+                    })),
+                },
+            ],
+            credits: { enabled: false },
+        });
+    });
+}
+
+onMounted(updateCharts);
+watch(previewAtivo, updateCharts, { deep: true });
+watch(activeTipo, updateCharts);
+
+// ===================== PROCESSAMENTO DE PLANILHAS =====================
+
+const processarPlanilha = (tipo, event) => {
+    if (props.disabled) return;
+
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Mapeia o campo de file correto no form (igual ao de criar)
+    const map = {
+        terrestre: 'planilha_terrestre',
+        aquatica: 'planilha_aquatica',
+        cavernicola: 'planilha_cavernicola',
+    };
+
+    props.form[map[tipo]] = file;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+        // Aqui cada tipo usa SUAS PRÓPRIAS COLUNAS da planilha
+        resultados.value[tipo] = json;
+
+        emit('update:resultadosRecords', { ...resultados.value });
+        updateCharts();
+    };
+    reader.readAsArrayBuffer(file);
 };
 
-// Excluir resultado
-const excluirResultado = (id) => {
-  if (props.disabled) return;
-  const novosResultados = resultadosRecords.value.filter(item => item.id !== id);
-  resultadosRecords.value = novosResultados;
-  emit('update:resultadosRecords', novosResultados);
-  props.form.resultados = novosResultados;
+const excluirResultado = (tipo, index) => {
+    if (props.disabled) return;
+
+    resultados.value[tipo].splice(index, 1);
+    emit('update:resultadosRecords', { ...resultados.value });
+    updateCharts();
 };
 
-// Avançar
+// ===================== NAVEGAÇÃO / BOTÕES =====================
+
+const downloadModelo = () => {
+    alert('Os modelos oficiais estão na área de Modelos dentro do sistema.');
+};
+
 const avancar = () => {
-  emit('next');
+    props.form.consideracoes = consideracoes.value;
+    emit('next');
 };
+
 </script>
 
 <template>
-  <div class="card">
-    <div class="card-body">
-      <h4 class="mb-3" style="text-align: center;">RESULTADOS</h4>
-      
-      <!-- Upload da Planilha -->
-      <div class="mb-3">
-        <button class="btn btn-primary" @click="downloadModelo" :disabled="disabled">Baixar Planilha Modelo</button>
-      </div>
-      <div class="mb-3">
-        <InputLabel for="planilha" value="Upload da Planilha Preenchida" />
-        <input
-          type="file"
-          class="form-control"
-          id="planilha"
-          accept=".xlsx,.xls"
-          @change="processarPlanilha"
-          :disabled="disabled"
-        />
-        <InputError :message="form.errors.planilha" />
-      </div>
-      
-      <!-- Considerações -->
-      <div class="mb-3">
-        <InputLabel for="consideracoes" value="CONSIDERAÇÕES" />
-        <textarea
-          v-model="consideracoes"
-          class="form-control"
-          id="consideracoes"
-          rows="4"
-          placeholder="Digite suas considerações aqui..."
-          :disabled="disabled"
-        ></textarea>
-        <InputError :message="form.errors.consideracoes" />
-      </div>
-      
-      <!-- Tabela de Resultados -->
-      <div v-if="resultadosRecords.length" class="overflow-x-auto mb-6">
-        <table class="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr>
-              <th>ID Campanha</th>
-              <th>Módulo</th>
-              <th>Parcela</th>
-              <th>ID Armadilha</th>
-              <th>Grupo Amostrado</th>
-              <th>Data do Registro</th>
-              <th>Hora do Registro</th>
-              <th>Categoria</th>
-              <th>Classe</th>
-              <th>Ordem</th>
-              <th>Família</th>
-              <th>Gênero</th>
-              <th>Espécie</th>
-              <th>Nome Comum</th>
-              <th>Sexo</th>
-              <th>Faixa Etária</th>
-              <th>Qnt de Indivíduos</th>
-              <th>Num Marcação</th>
-              <th>Coletado</th>
-              <th>Num de Tombamento</th>
-              <th>Dados Biométricos</th>
-              <th>Comp total</th>
-              <th>Cabeça</th>
-              <th>Cauda</th>
-              <th>Fêmur</th>
-              <th>Orelha</th>
-              <th>Peso</th>
-              <th>Status Conservação Federal</th>
-              <th>Status Conservação IUCN</th>
-              <th>Espécies Bioindicadoras</th>
-              <th>Espécies Alvo de Monitoramento</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="resultado in resultadosRecords" :key="resultado.id || Math.random()" class="hover:bg-gray-50">
-              <td>{{ resultado.id_campanha }}</td>
-              <td>{{ resultado.modulo }}</td>
-              <td>{{ resultado.parcela }}</td>
-              <td>{{ resultado.id_armadilha }}</td>
-              <td>{{ resultado.grupo_amostrado }}</td>
-              <td>{{ resultado.data_registro }}</td>
-              <td>{{ resultado.hora_registro }}</td>
-              <td>{{ resultado.categoria }}</td>
-              <td>{{ resultado.classe }}</td>
-              <td>{{ resultado.ordem }}</td>
-              <td>{{ resultado.familia }}</td>
-              <td>{{ resultado.genero }}</td>
-              <td>{{ resultado.especie }}</td>
-              <td>{{ resultado.nome_comum }}</td>
-              <td>{{ resultado.sexo }}</td>
-              <td>{{ resultado.faixa_etaria }}</td>
-              <td>{{ resultado.qnt_individuos }}</td>
-              <td>{{ resultado.num_marcacao }}</td>
-              <td>{{ resultado.coletado }}</td>
-              <td>{{ resultado.num_tombamento }}</td>
-              <td>{{ resultado.dados_biometricos }}</td>
-              <td>{{ resultado.comp_total }}</td>
-              <td>{{ resultado.cabeca }}</td>
-              <td>{{ resultado.cauda }}</td>
-              <td>{{ resultado.femur }}</td>
-              <td>{{ resultado.orelha }}</td>
-              <td>{{ resultado.peso }}</td>
-              <td>{{ resultado.status_conservacao_federal }}</td>
-              <td>{{ resultado.status_conservacao_iucn }}</td>
-              <td>{{ resultado.especies_bioindicadoras }}</td>
-              <td>{{ resultado.especies_alvo_monitoramento }}</td>
-              <td class="py-2 px-4 border-b">
+    <div>
+        <h4 class="mb-3">RESULTADOS</h4>
+
+        <!-- Botão Modelos -->
+        <div class="mb-3">
+            <button class="btn btn-secondary" type="button" @click="downloadModelo">
+                Ver Modelos Disponíveis
+            </button>
+        </div>
+
+        <!-- Abas -->
+        <ul class="nav nav-tabs mb-3">
+            <li v-for="tipo in tipos" :key="tipo.key" class="nav-item">
                 <button
-                  class="btn btn-danger btn-sm"
-                  @click="excluirResultado(resultado.id)"
-                  :disabled="disabled"
-                >Excluir</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div v-else class="alert alert-info text-center">
-        Nenhum resultado disponível. Faça o upload de uma planilha para visualizar os dados.
-      </div>
-      
-      <!-- Navegação -->
-      <div class="d-flex justify-content-between mt-4">
-        <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
-        <NavButton type="button" type-button="primary" title="Avançar" @click="avancar" />
-      </div>
+                    type="button"
+                    class="nav-link"
+                    :class="{ active: activeTipo === tipo.key }"
+                    @click="activeTipo = tipo.key"
+                >
+                    {{ tipo.label }}
+                </button>
+            </li>
+        </ul>
+
+        <!-- GRÁFICOS -->
+        <div v-if="previewAtivo.length" class="mt-3 mb-4">
+            <h5>Gráficos — {{ labelTipoAtivo }}</h5>
+
+            <div class="row mt-3">
+                <div class="col-md-6 mb-4">
+                    <div ref="chartRiquezaRef" style="width: 100%; height: 400px;"></div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div ref="chartAbundanciaRef" style="width: 100%; height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO DAS ABAS -->
+        <div class="tab-content mb-4">
+            <!-- TERRESTRE -->
+            <div v-if="activeTipo === 'terrestre'">
+                <h5>Planilha - Fauna Terrestre</h5>
+
+                <div class="mb-3">
+                    <input
+                        type="file"
+                        class="form-control"
+                        accept=".xlsx,.xls"
+                        @change="(e) => processarPlanilha('terrestre', e)"
+                        :disabled="disabled"
+                    />
+                    <InputError :message="form.errors?.planilha_terrestre" />
+                </div>
+
+                <div v-if="resultados.terrestre.length" class="table-responsive">
+                    <table class="table table-bordered table-sm small">
+                        <thead>
+                            <tr>
+                                <th v-for="(v, k) in resultados.terrestre[0]" :key="k">{{ k }}</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(linha, idx) in resultados.terrestre" :key="idx">
+                                <td v-for="(v, k) in linha" :key="k">{{ v }}</td>
+                                <td>
+                                    <button
+                                        class="btn btn-danger btn-sm"
+                                        @click="excluirResultado('terrestre', idx)"
+                                        :disabled="disabled"
+                                    >
+                                        Excluir
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- AQUÁTICA -->
+            <div v-if="activeTipo === 'aquatica'">
+                <h5>Planilha - Fauna Aquática</h5>
+
+                <div class="mb-3">
+                    <input
+                        type="file"
+                        class="form-control"
+                        accept=".xlsx,.xls"
+                        @change="(e) => processarPlanilha('aquatica', e)"
+                        :disabled="disabled"
+                    />
+                    <InputError :message="form.errors?.planilha_aquatica" />
+                </div>
+
+                <div v-if="resultados.aquatica.length" class="table-responsive">
+                    <table class="table table-bordered table-sm small">
+                        <thead>
+                            <tr>
+                                <th v-for="(v, k) in resultados.aquatica[0]" :key="k">{{ k }}</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(linha, idx) in resultados.aquatica" :key="idx">
+                                <td v-for="(v, k) in linha" :key="k">{{ v }}</td>
+                                <td>
+                                    <button
+                                        class="btn btn-danger btn-sm"
+                                        @click="excluirResultado('aquatica', idx)"
+                                        :disabled="disabled"
+                                    >
+                                        Excluir
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CAVERNÍCOLA -->
+            <div v-if="activeTipo === 'cavernicola'">
+                <h5>Planilha - Fauna Cavernícola</h5>
+
+                <div class="mb-3">
+                    <input
+                        type="file"
+                        class="form-control"
+                        accept=".xlsx,.xls"
+                        @change="(e) => processarPlanilha('cavernicola', e)"
+                        :disabled="disabled"
+                    />
+                    <InputError :message="form.errors?.planilha_cavernicola" />
+                </div>
+
+                <div v-if="resultados.cavernicola.length" class="table-responsive">
+                    <table class="table table-bordered table-sm small">
+                        <thead>
+                            <tr>
+                                <th v-for="(v, k) in resultados.cavernicola[0]" :key="k">{{ k }}</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(linha, idx) in resultados.cavernicola" :key="idx">
+                                <td v-for="(v, k) in linha" :key="k">{{ v }}</td>
+                                <td>
+                                    <button
+                                        class="btn btn-danger btn-sm"
+                                        @click="excluirResultado('cavernicola', idx)"
+                                        :disabled="disabled"
+                                    >
+                                        Excluir
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONSIDERAÇÕES -->
+        <div class="mb-3 mt-4">
+            <label for="consideracoes" class="form-label fw-bold">Considerações</label>
+            <textarea
+                v-model="consideracoes"
+                class="form-control"
+                rows="4"
+                :disabled="disabled"
+            ></textarea>
+            <InputError :message="form.errors?.consideracoes" />
+        </div>
+
+        <!-- NAVEGAÇÃO -->
+        <div class="d-flex justify-content-between">
+            <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
+            <NavButton type-button="primary" title="Avançar" @click="avancar" />
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
-.card {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
-  margin: 1.5rem;
-}
-.card-body {
-  padding: 2rem;
-}
-.form-control {
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  padding: 0.375rem 0.75rem;
-  width: 100%;
-}
-textarea.form-control {
-  resize: vertical;
-  min-height: 100px;
-}
-.alert-info {
-  font-size: 1rem;
-  padding: 1rem;
-  border-radius: 6px;
-  background-color: #e7f1ff;
-  color: #084298;
-}
-table {
-  border-collapse: collapse;
-}
-th, td {
-  padding: 0.5rem 1rem;
-  border: 1px solid #dee2e6;
-}
-thead {
-  background-color: #f8f9fa;
-}
-tr:hover {
-  background-color: #f1f5f9;
-}
-input:disabled,
-textarea:disabled,
-button:disabled {
-  background-color: #f5f5f5;
-  color: #999;
-  cursor: not-allowed;
+.table-responsive {
+    margin-bottom: 1rem;
 }
 </style>
