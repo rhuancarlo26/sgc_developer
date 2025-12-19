@@ -15,28 +15,24 @@ class Dav extends Model
 
   protected $fillable = [
     'contrato_id',
+    'seq_dav',
     'empreendimento',
     'coordenador',
-    'finalidade',
-    'escopo',
     'dataInicio',
     'dataFinal',
     'produto',
     'subproduto',
-    'origem',
-    'destino',
     'profissionais',
     'transporte',
     'status',
     'aereo_valor',
     'terrestre_tipo',
     'terrestre_valor',
-    'aquatico_valor'
+    'aquatico_valor',
+    'origem_sei'
   ];
 
   protected $casts = [
-    'origem'         => 'array',
-    'destino'        => 'array',
     'profissionais'  => 'array',
     'transporte'     => 'array',
     'terrestre_tipo' => 'array'

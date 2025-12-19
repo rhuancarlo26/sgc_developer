@@ -414,12 +414,35 @@ class CampanhaController extends Controller
                 'resultadosCavernicola' => $campanha->resultadosCavernicola->toArray(),
 
             'consideracoes' => $campanha->resultados_consideracoes ? $campanha->resultados_consideracoes->consideracoes : null,
-            'abios' => $campanha->abios && $campanha->abios->isNotEmpty() ? $campanha->abios->map(function ($abio) {
+            'abios' => $campanha->abios->map(function ($abio) {
                 return [
-                    'id' => $abio->n_abio,
-                    'abio' => ['numero_licenca' => $abio->abio->numero_licenca ?? 'N/A'],
+                    'id' => $abio->id,
+                    'n_abio' => $abio->n_abio,
+                    'abio' => $abio->abio ? [
+                        'id' => $abio->abio->id,
+                        'numero_licenca' => $abio->abio->numero_licenca,
+                        'tipo' => $abio->abio->tipo,
+                        'data_emissao' => $abio->abio->data_emissao,
+                        'vencimento' => $abio->abio->vencimento,
+                        'numero_sei' => $abio->abio->numero_sei,
+                        'processo_dnit' => $abio->abio->processo_dnit,
+                        'inicio_subtrecho' => $abio->abio->inicio_subtrecho,
+                        'fim_subtrecho' => $abio->abio->fim_subtrecho,
+                        'extensao' => $abio->abio->extensao,
+                        'emissor' => $abio->abio->emissor,
+                        'empreendimento' => $abio->abio->empreendimento,
+                        'dias_renovacao' => $abio->abio->dias_renovacao,
+                        'renovacao' => $abio->abio->renovacao,
+                        'requerimento' => $abio->abio->requerimento,
+                        'fiscal' => $abio->abio->fiscal,
+                        'obs_renovacao' => $abio->abio->obs_renovacao,
+                        'data_publicacao' => $abio->abio->data_publicacao,
+                        // futuramente:
+                        // 'orgao_emissor' => $abio->abio->orgao_emissor,
+                        // 'validade' => $abio->abio->validade,
+                    ] : null,
                 ];
-            })->toArray() : [],
+            })->toArray(),
             'profissionais' => $campanha->profissionais && $campanha->profissionais->isNotEmpty() ? $campanha->profissionais->map(function ($prof) {
                 return [
                     'id' => $prof->id,

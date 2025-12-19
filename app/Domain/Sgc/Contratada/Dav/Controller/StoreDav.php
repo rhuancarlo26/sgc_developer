@@ -17,25 +17,21 @@ class StoreDav extends Controller
     try {
       $dados = $request->validate([
         'contrato_id'    => 'required|int',
+        'seq_dav'         => 'required|string',
         'empreendimento' => 'required|string',
         'coordenador'    => 'required|string',
-        'finalidade'     => 'required|string',
-        'escopo'         => 'required|string',
         'dataInicio'     => 'required|date',
         'dataFinal'      => 'required|date',
         'produto'        => 'required|string',
         'subproduto'     => 'required|string',
-        'origem'         => 'required|array',
-        'origem.*'       => 'string',
-        'destino'        => 'required|array',
-        'destino.*'      => 'string',
         'profissionais'  => 'array',
         'transporte'     => 'array',
         'status'         => 'required|string',
         'aereo_valor'     => 'integer',
         'terrestre_tipo'  => 'array',
         'terrestre_valor' => 'integer',
-        'aquatico_valor'  => 'integer'
+        'aquatico_valor'  => 'integer',
+        'origem_sei'      => 'string'
       ]);
 
       $this->davService->salvarDav($dados);

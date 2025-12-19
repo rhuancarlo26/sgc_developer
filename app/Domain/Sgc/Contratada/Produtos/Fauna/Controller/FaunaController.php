@@ -729,6 +729,7 @@ public function show($contrato, $produto, $campanhaId)
 
                         // ATRIBUTOS
                         'abundancia'             => $r->abundancia,
+                        'migratoria'             => $r->migratoria,
                         'sensibilidade'          => $r->sensibilidade,
                         'endemismo'              => $r->endemismo,
                         'observacao'             => $r->observacao,
@@ -788,6 +789,7 @@ public function show($contrato, $produto, $campanhaId)
                         'nome_comum'                  => $r->nome_comum,
 
                         'abundancia'                  => $r->abundancia,
+                        'migratoria'                  => $r->migratoria,
                         'sensibilidade'               => $r->sensibilidade,
                         'endemismo'                   => $r->endemismo,
                         'observacao'                  => $r->observacao,
@@ -841,6 +843,7 @@ public function show($contrato, $produto, $campanhaId)
 
                         'abundancia'                 => $r->abundancia,
                         'categoria_ecologica'        => $r->categoria_ecologica,
+                        'migratoria'                 => $r->migratoria,
                         'sensibilidade'              => $r->sensibilidade,
                         'endemismo'                  => $r->endemismo,
                         'observacao'                 => $r->observacao,

@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import { defineProps, defineEmits } from 'vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -102,11 +101,13 @@ defineEmits(['next', 'prev']);
           <thead>
             <tr>
               <th>Número da Licença</th>
+              <th>Número SEI</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="abio in abioRecords" :key="abio.id">
               <td>{{ abio.abio?.numero_licenca || 'Não informado' }}</td>
+              <td>{{ abio.abio?.numero_sei || 'Não informado' }}</td>
             </tr>
           </tbody>
         </table>
