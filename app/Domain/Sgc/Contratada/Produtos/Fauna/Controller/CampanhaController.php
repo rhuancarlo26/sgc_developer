@@ -437,9 +437,6 @@ class CampanhaController extends Controller
                         'fiscal' => $abio->abio->fiscal,
                         'obs_renovacao' => $abio->abio->obs_renovacao,
                         'data_publicacao' => $abio->abio->data_publicacao,
-                        // futuramente:
-                        // 'orgao_emissor' => $abio->abio->orgao_emissor,
-                        // 'validade' => $abio->abio->validade,
                     ] : null,
                 ];
             })->toArray(),
