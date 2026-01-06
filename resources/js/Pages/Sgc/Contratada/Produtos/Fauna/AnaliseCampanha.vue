@@ -624,7 +624,9 @@ const finalizarAvaliacao = () => {
                                     <span class="badge bg-warning text-white">Pendente</span>
                                 </div>
                                 <FaunaResultadosVisualizar
-                                    :resultados="props.campanha?.resultados || []"
+                                    :resultados-terrestre="props.campanha?.resultadosTerrestre || []"
+                                    :resultados-aquatica="props.campanha?.resultadosAquatica || []"
+                                    :resultados-cavernicola="props.campanha?.resultadosCavernicola || []"
                                     :consideracoes="props.campanha?.consideracoes"
                                     @prev="setActiveTab('metodologia')"
                                     @next="setActiveTab('anexos')"
@@ -750,7 +752,7 @@ const finalizarAvaliacao = () => {
                                             <th class="py-2 px-4 border-b text-center font-semibold">Etapa</th>
                                             <th class="py-2 px-4 border-b text-center font-semibold">Análise</th>
                                             <th class="py-2 px-4 border-b text-center font-semibold">Status</th>
-                                            <th class="py-2 px-4 border-b text-center font-semibold">Observações</th>
+                                            <!-- <th class="py-2 px-4 border-b text-center font-semibold">Observações</th> -->
                                             <th class="py-2 px-4 border-b text-center font-semibold">Data</th>
                                         </tr>
                                     </thead>
@@ -767,7 +769,7 @@ const finalizarAvaliacao = () => {
                                             <td class="py-2 px-4 border-b text-center align-middle" :class="{ 'text-success': analise.status === 'Aprovada', 'text-danger': analise.status === 'Rejeitada' }">
                                                 {{ analise.status || 'Não informado' }}
                                             </td>
-                                            <td class="py-2 px-4 border-b text-center align-middle">{{ analise.comentario || 'Não informado' }}</td>
+                                            <!-- <td class="py-2 px-4 border-b text-center align-middle">{{ analise.comentario || 'Não informado' }}</td> -->
                                             <td class="py-2 px-4 border-b text-center align-middle">{{ analise.created_at || 'Não informado' }}</td>
                                         </tr>
                                     </tbody>

@@ -139,36 +139,11 @@ const form = useForm({
     grupo_faunistico: met.grupo_faunistico || '',
     metodologia: met.metodologia || '',
   })) || [],
-  resultados: props.campanha.resultados?.map(res => ({
-    modulo: res.modulo || '',
-    parcela: res.parcela || '',
-    id_armadilha: res.id_armadilha || '',
-    grupo_amostrado: res.grupo_amostrado || '',
-    data_registro: res.data_registro || '',
-    hora_registro: res.hora_registro || '',
-    categoria: res.categoria || '',
-    classe: res.classe || '',
-    ordem: res.ordem || '',
-    familia: res.familia || '',
-    genero: res.genero || '',
-    especie: res.especie || '',
-    nome_comum: res.nome_comum || '',
-    sexo: res.sexo || '',
-    faixa_etaria: res.faixa_etaria || '',
-    qnt_individuos: res.qnt_individuos || null,
-    num_marcacao: res.num_marcacao || '',
-    coletado: res.coletado || '',
-    num_tombamento: res.num_tombamento || '',
-    dados_biometricos: res.dados_biometricos || '',
-    comp_total: res.comp_total || null,
-    cabeca: res.cabeca || null,
-    cauda: res.cauda || null,
-    femur: res.femur || null,
-    orelha: res.orelha || null,
-    peso: res.peso || null,
-    status_conservacao_federal: res.status_conservacao_federal || '',
-    status_conservacao_iucn: res.status_conservacao_iucn || '',
-  })) || [],
+  resultados: {
+      terrestre: props.campanha.resultados?.filter(r => r.tipo === 'terrestre') || [],
+      aquatica: props.campanha.resultados?.filter(r => r.tipo === 'aquatica') || [],
+      cavernicola: props.campanha.resultados?.filter(r => r.tipo === 'cavernicola') || [],
+  },
   consideracoes: props.campanha.consideracoes || '',
   planilha: null,
   anexos: {
@@ -479,7 +454,10 @@ const submitForm = () => {
   if (form.obs) formData.append('observacoes', form.obs);
   if (form.nao_se_aplica) formData.append('nao_se_aplica', form.nao_se_aplica);
   if (form.consideracoes) formData.append('consideracoes', form.consideracoes);
-  if (form.planilha) formData.append('planilha', form.planilha);
+  if (form.planilha_terrestre)   formData.append('planilha_terrestre', form.planilha_terrestre);
+  if (form.planilha_aquatica)    formData.append('planilha_aquatica', form.planilha_aquatica);
+  if (form.planilha_cavernicola) formData.append('planilha_cavernicola', form.planilha_cavernicola);
+
 
   form.abios.forEach((abio, index) => {
     formData.append(`abios[${index}][id]`, abio.abio.id);

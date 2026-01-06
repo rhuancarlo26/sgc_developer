@@ -62,7 +62,11 @@ class StoreCampanhaRequest extends FormRequest
             'metodologias.*.grupo_faunistico' => 'nullable|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos,Quelônios e Crocodilianos,Fauna Cavernícola,Invertebrados',
             'metodologias.*.metodologia' => 'required_with:metodologias|string',
             'consideracoes' => 'nullable|string',
-            'planilha' => 'nullable|file|mimes:xlsx,xls|max:10240',
+
+            'planilha_terrestre'   => 'nullable|file|mimes:xlsx,xls|max:10240',
+            'planilha_aquatica'    => 'nullable|file|mimes:xlsx,xls|max:10240',
+            'planilha_cavernicola' => 'nullable|file|mimes:xlsx,xls|max:10240',
+
             'anexos.anuencia_proprietarios' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'anexos.registro_fotografico' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'anexos.dados_secundarios' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',

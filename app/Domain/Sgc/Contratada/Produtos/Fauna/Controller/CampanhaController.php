@@ -38,7 +38,10 @@ class CampanhaController extends Controller
     {
         $validated = $request->validated();
         $validated['anexos'] = $request->file('anexos') ?? [];
-        $validated['planilha'] = $request->file('planilha');
+        $validated['planilha_terrestre']   = $request->file('planilha_terrestre');
+        $validated['planilha_aquatica']    = $request->file('planilha_aquatica');
+        $validated['planilha_cavernicola'] = $request->file('planilha_cavernicola');
+
 
         try {
             DB::beginTransaction();
@@ -95,7 +98,11 @@ class CampanhaController extends Controller
                 ];
             }, (array) $request->input('profissionais', []));
             $validated['anexos'] = $request->file('anexos') ?? [];
-            $validated['planilha'] = $request->file('planilha');
+            // $validated['planilha'] = $request->file('planilha');
+            $validated['planilha_terrestre']   = $request->file('planilha_terrestre');
+            $validated['planilha_aquatica']    = $request->file('planilha_aquatica');
+            $validated['planilha_cavernicola'] = $request->file('planilha_cavernicola');
+
 
             DB::beginTransaction();
             $campanhaId = $this->campanhaService->atualizarCampanha($contrato, $campanhaId, $validated);
@@ -137,16 +144,20 @@ class CampanhaController extends Controller
             'pontos_quelo_crocod',
             'pontos_cavernicola',
             'metodologias',
-            'resultados',
+            // 'resultados',
+            'resultadosTerrestre',
+            'resultadosAquatica',
+            'resultadosCavernicola',
             'resultados_consideracoes',
             'anexos'
         ])->findOrFail($campanhaId);
 
-        Log::debug('CampanhaController: Dados da campanha', [
-            'campanha_id' => $campanhaId,
-            'resultados_count' => $campanha->resultados->count(),
-            'anexos_count' => $campanha->anexos->count(),
-        ]);
+        Log::debug('FaunaController: resultados por grupo', [
+            'campanha_id'          => $campanhaId,
+            'terrestre_count'      => $campanha->resultadosTerrestre->count(),
+            'aquatica_count'       => $campanha->resultadosAquatica->count(),
+            'cavernicola_count'    => $campanha->resultadosCavernicola->count(),
+        ]);        
 
         return Inertia::render('Sgc/Contratada/Produtos/Fauna/VisualizarCampanha', [
             'campanha' => $this->mapCampanhaData($campanha),
@@ -398,78 +409,40 @@ class CampanhaController extends Controller
                     'metodologia' => $metodologia->metodologia,
                 ];
             })->toArray() : [],
-            'formResultados' => $campanha->resultados && $campanha->resultados->isNotEmpty() ? [
-                'id_campanha' => $campanha->resultados->last()->id_campanha,
-                'modulo' => $campanha->resultados->last()->modulo,
-                'parcela' => $campanha->resultados->last()->parcela,
-                'id_armadilha' => $campanha->resultados->last()->id_armadilha,
-                'grupo_amostrado' => $campanha->resultados->last()->grupo_amostrado,
-                'data_registro' => $campanha->resultados->last()->data_registro,
-                'hora_registro' => $campanha->resultados->last()->hora_registro,
-                'categoria' => $campanha->resultados->last()->categoria,
-                'classe' => $campanha->resultados->last()->classe,
-                'ordem' => $campanha->resultados->last()->ordem,
-                'familia' => $campanha->resultados->last()->familia,
-                'genero' => $campanha->resultados->last()->genero,
-                'especie' => $campanha->resultados->last()->especie,
-                'nome_comum' => $campanha->resultados->last()->nome_comum,
-                'sexo' => $campanha->resultados->last()->sexo,
-                'faixa_etaria' => $campanha->resultados->last()->faixa_etaria,
-                'qnt_individuos' => $campanha->resultados->last()->qnt_individuos,
-                'num_marcacao' => $campanha->resultados->last()->num_marcacao,
-                'coletado' => $campanha->resultados->last()->coletado,
-                'num_tombamento' => $campanha->resultados->last()->num_tombamento,
-                'dados_biometricos' => $campanha->resultados->last()->dados_biometricos,
-                'comp_total' => $campanha->resultados->last()->comp_total,
-                'cabeca' => $campanha->resultados->last()->cabeca,
-                'cauda' => $campanha->resultados->last()->cauda,
-                'femur' => $campanha->resultados->last()->femur,
-                'orelha' => $campanha->resultados->last()->orelha,
-                'peso' => $campanha->resultados->last()->peso,
-                'status_conservacao_federal' => $campanha->resultados->last()->status_conservacao_federal,
-                'status_conservacao_iucn' => $campanha->resultados->last()->status_conservacao_iucn,
-                'especies_bioindicadoras' => $campanha->resultados->last()->especies_bioindicadoras ?? null,
-                'especies_alvo_monitoramento' => $campanha->resultados->last()->especies_alvo_monitoramento ?? null,
-            ] : [
-                'id_campanha' => null,
-                'modulo' => null,
-                'parcela' => null,
-                'id_armadilha' => null,
-                'grupo_amostrado' => null,
-                'data_registro' => null,
-                'hora_registro' => null,
-                'categoria' => null,
-                'classe' => null,
-                'ordem' => null,
-                'familia' => null,
-                'genero' => null,
-                'especie' => null,
-                'nome_comum' => null,
-                'sexo' => null,
-                'faixa_etaria' => null,
-                'qnt_individuos' => null,
-                'num_marcacao' => null,
-                'coletado' => null,
-                'num_tombamento' => null,
-                'dados_biometricos' => null,
-                'comp_total' => null,
-                'cabeca' => null,
-                'cauda' => null,
-                'femur' => null,
-                'orelha' => null,
-                'peso' => null,
-                'status_conservacao_federal' => null,
-                'status_conservacao_iucn' => null,
-                'especies_bioindicadoras' => null,
-                'especies_alvo_monitoramento' => null,
-            ],
+                'resultadosTerrestre'   => $campanha->resultadosTerrestre->toArray(),
+                'resultadosAquatica'    => $campanha->resultadosAquatica->toArray(),
+                'resultadosCavernicola' => $campanha->resultadosCavernicola->toArray(),
+
             'consideracoes' => $campanha->resultados_consideracoes ? $campanha->resultados_consideracoes->consideracoes : null,
-            'abios' => $campanha->abios && $campanha->abios->isNotEmpty() ? $campanha->abios->map(function ($abio) {
+            'abios' => $campanha->abios->map(function ($abio) {
                 return [
-                    'id' => $abio->n_abio,
-                    'abio' => ['numero_licenca' => $abio->abio->numero_licenca ?? 'N/A'],
+                    'id' => $abio->id,
+                    'n_abio' => $abio->n_abio,
+                    'abio' => $abio->abio ? [
+                        'id' => $abio->abio->id,
+                        'numero_licenca' => $abio->abio->numero_licenca,
+                        'tipo' => $abio->abio->tipo,
+                        'data_emissao' => $abio->abio->data_emissao,
+                        'vencimento' => $abio->abio->vencimento,
+                        'numero_sei' => $abio->abio->numero_sei,
+                        'processo_dnit' => $abio->abio->processo_dnit,
+                        'inicio_subtrecho' => $abio->abio->inicio_subtrecho,
+                        'fim_subtrecho' => $abio->abio->fim_subtrecho,
+                        'extensao' => $abio->abio->extensao,
+                        'emissor' => $abio->abio->emissor,
+                        'empreendimento' => $abio->abio->empreendimento,
+                        'dias_renovacao' => $abio->abio->dias_renovacao,
+                        'renovacao' => $abio->abio->renovacao,
+                        'requerimento' => $abio->abio->requerimento,
+                        'fiscal' => $abio->abio->fiscal,
+                        'obs_renovacao' => $abio->abio->obs_renovacao,
+                        'data_publicacao' => $abio->abio->data_publicacao,
+                        // futuramente:
+                        // 'orgao_emissor' => $abio->abio->orgao_emissor,
+                        // 'validade' => $abio->abio->validade,
+                    ] : null,
                 ];
-            })->toArray() : [],
+            })->toArray(),
             'profissionais' => $campanha->profissionais && $campanha->profissionais->isNotEmpty() ? $campanha->profissionais->map(function ($prof) {
                 return [
                     'id' => $prof->id,
@@ -582,7 +555,8 @@ class CampanhaController extends Controller
                     'etapa' => $analise->etapa,
                     'status' => $analise->status,
                     // 'observacoes' => $analise->observacoes,
-                    'observacoes' => $analise->comentario,
+                    // 'observacoes' => $analise->comentario,
+                    'comentario' => $analise->comentario,
                     'created_at' => $analise->created_at,
                 ];
             })->toArray() : [],

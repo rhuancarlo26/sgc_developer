@@ -26,6 +26,7 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\CampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ComentarioController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ProfissionalController;
 use App\Domain\Sgc\Contratada\Produtos\Pmqa\Controller\PmqaCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ResultadoController;
 use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
 
@@ -185,6 +186,7 @@ Route::prefix('/contratada')->group(function () {
 
  
 
+         Route::post('/{contrato}/produtos/{produto}/resultados/upload', [ResultadoController::class, 'upload'])->name('sgc.contratada.produtos.fauna.resultados.upload');
 
 
   

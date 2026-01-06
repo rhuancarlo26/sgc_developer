@@ -1,170 +1,406 @@
 <script setup>
+import { ref } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import NavButton from '@/Components/NavButton.vue';
 
-defineProps({
-    resultados: {
-        type: Array,
-        default: () => [],
-    },
-    consideracoes: {
-        type: String,
-        default: null,
-    },
+const props = defineProps({
+    resultadosTerrestre: Array,
+    resultadosAquatica: Array,
+    resultadosCavernicola: Array,
+    consideracoes: String
 });
 
-defineEmits(['next', 'prev']);
+defineEmits(['next','prev']);
+
+const subtab = ref('terrestre');
 </script>
 
 <template>
-    <div class="card">
-        <div class="card-body">
-            <h4 class="mb-3" style="text-align: center;">RESULTADOS</h4>
+<div class="card">
+<div class="card-body">
 
-            <!-- Tabela de Resultados -->
-            <div v-if="resultados && resultados.length > 0" class="overflow-x-auto mb-6">
-                <table class="min-w-full bg-white border border-gray-300">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="py-2 px-4 border-b text-left">ID</th>
-                            <th class="py-2 px-4 border-b text-left">Módulo</th>
-                            <th class="py-2 px-4 border-b text-left">Parcela</th>
-                            <th class="py-2 px-4 border-b text-left">ID Armadilha</th>
-                            <th class="py-2 px-4 border-b text-left">Grupo Amostrado</th>
-                            <th class="py-2 px-4 border-b text-left">Data Registro</th>
-                            <th class="py-2 px-4 border-b text-left">Hora Registro</th>
-                            <th class="py-2 px-4 border-b text-left">Categoria</th>
-                            <th class="py-2 px-4 border-b text-left">Classe</th>
-                            <th class="py-2 px-4 border-b text-left">Ordem</th>
-                            <th class="py-2 px-4 border-b text-left">Família</th>
-                            <th class="py-2 px-4 border-b text-left">Gênero</th>
-                            <th class="py-2 px-4 border-b text-left">Espécie</th>
-                            <th class="py-2 px-4 border-b text-left">Nome Comum</th>
-                            <th class="py-2 px-4 border-b text-left">Sexo</th>
-                            <th class="py-2 px-4 border-b text-left">Faixa Etária</th>
-                            <th class="py-2 px-4 border-b text-left">Quantidade</th>
-                            <th class="py-2 px-4 border-b text-left">Nº Marcação</th>
-                            <th class="py-2 px-4 border-b text-left">Coletado</th>
-                            <th class="py-2 px-4 border-b text-left">Nº Tombamento</th>
-                            <th class="py-2 px-4 border-b text-left">Dados Biométricos</th>
-                            <th class="py-2 px-4 border-b text-left">Comp. Total (cm)</th>
-                            <th class="py-2 px-4 border-b text-left">Cabeça (cm)</th>
-                            <th class="py-2 px-4 border-b text-left">Cauda (cm)</th>
-                            <th class="py-2 px-4 border-b text-left">Fêmur (cm)</th>
-                            <th class="py-2 px-4 border-b text-left">Orelha (cm)</th>
-                            <th class="py-2 px-4 border-b text-left">Peso (g)</th>
-                            <th class="py-2 px-4 border-b text-left">Status Federal</th>
-                            <th class="py-2 px-4 border-b text-left">Status IUCN</th>
-                            <th class="py-2 px-4 border-b text-left">Espécies Bioindicadoras</th>
-                            <th class="py-2 px-4 border-b text-left">Espécies Alvo de Monitoramento</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="resultado in resultados" :key="resultado.id" class="hover:bg-gray-50">
-                            <td class="py-2 px-4 border-b">{{ resultado.id || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.modulo || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.parcela || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.id_armadilha || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.grupo_amostrado || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.data_registro || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.hora_registro || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.categoria || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.classe || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.ordem || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.familia || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.genero || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.especie || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.nome_comum || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.sexo || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.faixa_etaria || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.qnt_individuos || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.num_marcacao || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.coletado || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.num_tombamento || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.dados_biometricos || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.comp_total || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.cabeca || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.cauda || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.femur || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.orelha || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.peso || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.status_conservacao_federal || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.status_conservacao_iucn || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.especies_bioindicadoras || 'Não informado' }}</td>
-                            <td class="py-2 px-4 border-b">{{ resultado.especies_alvo_monitoramento || 'Não informado' }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div v-else class="alert alert-info text-center">
-                Nenhum resultado disponível.
-            </div>
+<h4 class="mb-3 text-center">RESULTADOS</h4>
 
-            <!-- Considerações -->
-            <div class="mb-6">
-                <InputLabel value="CONSIDERAÇÕES" for="consideracoes" />
-                <textarea
-                    class="form-control"
-                    id="consideracoes"
-                    rows="4"
-                    :value="consideracoes || 'Não informado'"
-                    disabled
-                ></textarea>
-            </div>
+<!-- SUBTABS -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" :class="{active: subtab==='terrestre'}"
+           @click.prevent="subtab='terrestre'">Fauna Terrestre</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" :class="{active: subtab==='aquatica'}"
+           @click.prevent="subtab='aquatica'">Fauna Aquática</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" :class="{active: subtab==='cavernicola'}"
+           @click.prevent="subtab='cavernicola'">Fauna Cavernícola</a>
+    </li>
+</ul>
 
-            <!-- Navegação -->
-            <div class="d-flex justify-content-between mt-4">
-                <NavButton type="button" type-button="secondary" title="Voltar" @click="$emit('prev')" />
-                <NavButton type="button" type-button="primary" title="Avançar" @click="$emit('next')" />
-            </div>
-        </div>
-    </div>
+<!-- ====================== TERRESTRE ====================== -->
+<div v-if="subtab==='terrestre'">
+<h5 class="text-center mb-3">Fauna Terrestre</h5>
+
+<div v-if="resultadosTerrestre.length" class="overflow-x-auto">
+<table class="min-w-full bg-white border border-gray-300">
+<thead>
+<tr class="bg-gray-100">
+    <th>ID</th>
+    <th>Campanha</th>
+    <th>Estação do Ano</th>
+    <th>Data</th>
+    <th>Horário</th>
+    <th>Clima</th>
+    <th>Temp (°C)</th>
+    <th>Pluviosidade</th>
+    <th>Município</th>
+    <th>Unidade Amostral</th>
+    <th>Ponto Amostral</th>
+    <th>Latitude</th>
+    <th>Longitude</th>
+    <th>Metodologia</th>
+    <th>Tipo Metodologia</th>
+    <th>Fitofisionomia</th>
+    <th>Habitat</th>
+    <th>Características do Ponto</th>
+
+    <!-- TAXONOMIA -->
+    <th>Classe</th>
+    <th>Ordem</th>
+    <th>Família</th>
+    <th>Gênero</th>
+    <th>Espécie</th>
+    <th>Nome Científico</th>
+    <th>Nome Comum</th>
+
+    <!-- Atributos -->
+    <th>Abundância</th>
+    <th>Sensibilidade</th>
+    <th>Endemismo</th>
+    <th>Observação</th>
+    
+    <!-- Status -->
+    <th>IUCN</th>
+    <th>MMA</th>
+    <th>Salve</th>
+    <th>Estado</th>
+
+    <!-- Coleta -->
+    <th>Registro Fotográfico</th>
+    <th>Coletado</th>
+    <th>Nº Tombo</th>
+</tr>
+</thead>
+
+<tbody>
+<tr v-for="r in resultadosTerrestre" :key="r.id">
+    <td>{{ r.id }}</td>
+    <td>{{ r.campanha }}</td>
+    <td>{{ r.estacao_do_ano }}</td>
+    <td>{{ r.data }}</td>
+    <td>{{ r.horario }}</td>
+    <td>{{ r.condicao_climatica }}</td>
+    <td>{{ r.temperatura }}</td>
+    <td>{{ r.pluviosidade }}</td>
+    <td>{{ r.municipio }}</td>
+    <td>{{ r.unidade_amostral }}</td>
+    <td>{{ r.ponto_amostral }}</td>
+    <td>{{ r.latitude }}</td>
+    <td>{{ r.longitude }}</td>
+    <td>{{ r.metodologia }}</td>
+    <td>{{ r.tipo_metodologia }}</td>
+    <td>{{ r.fitofisionomia }}</td>
+    <td>{{ r.habitat }}</td>
+    <td>{{ r.caracteristicas_ponto }}</td>
+
+    <!-- TAXONOMIA -->
+    <td>{{ r.classe }}</td>
+    <td>{{ r.ordem }}</td>
+    <td>{{ r.familia }}</td>
+    <td>{{ r.genero }}</td>
+    <td>{{ r.especie }}</td>
+    <td>{{ r.nome_cientifico }}</td>
+    <td>{{ r.nome_comum }}</td>
+
+    <!-- ATRIBUTOS -->
+    <td>{{ r.abundancia }}</td>
+    <td>{{ r.sensibilidade }}</td>
+    <td>{{ r.endemismo }}</td>
+    <td>{{ r.observacao }}</td>
+
+    <!-- STATUS -->
+    <td>{{ r.iucn }}</td>
+    <td>{{ r.mma }}</td>
+    <td>{{ r.salve }}</td>
+    <td>{{ r.estado }}</td>
+
+    <!-- COLETA -->
+    <td>{{ r.registro_fotografico }}</td>
+    <td>{{ r.coletado }}</td>
+    <td>{{ r.numero_tombo }}</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div v-else class="alert alert-info text-center">Nenhum registro terrestre.</div>
+</div>
+
+<!-- ====================== AQUÁTICA ====================== -->
+<div v-if="subtab==='aquatica'">
+<h5 class="text-center mb-3">Fauna Aquática</h5>
+
+<div v-if="resultadosAquatica.length" class="overflow-x-auto">
+<table class="min-w-full bg-white border border-gray-300">
+<thead>
+<tr class="bg-gray-100">
+    <th>ID</th>
+    <th>Campanha</th>
+    <th>Estação</th>
+    <th>Data</th>
+    <th>Horário</th>
+    <th>Clima</th>
+    <th>Temperatura</th>
+    <th>Pluviosidade</th>
+    <th>Município</th>
+    <th>Unidade Amostral</th>
+    <th>Ponto Amostral</th>
+    <th>Latitude</th>
+    <th>Longitude</th>
+
+    <th>Metodologia</th>
+    <th>Tipo Metodologia</th>
+    <th>Fitofisionomia</th>
+
+    <th>Habitat Preferencial</th>
+    <th>Tipo de Ambiente</th>
+    <th>Largura Médio Rio</th>
+    <th>Profundidade Média</th>
+    <th>Substrato</th>
+    <th>Características da Água</th>
+    <th>Características do Entorno</th>
+
+    <!-- TAXONOMIA -->
+    <th>Classe</th>
+    <th>Ordem</th>
+    <th>Família</th>
+    <th>Gênero</th>
+    <th>Espécie</th>
+    <th>Nome Científico</th>
+    <th>Nome Comum</th>
+
+    <th>Abundância</th>
+    <th>Sensibilidade</th>
+    <th>Endemismo</th>
+    <th>Observação</th>
+
+    <th>IUCN</th>
+    <th>MMA</th>
+    <th>Salve</th>
+    <th>Estado</th>
+
+    <th>Registro Fotográfico</th>
+    <th>Coletado</th>
+    <th>Nº Tombo</th>
+</tr>
+</thead>
+
+<tbody>
+<tr v-for="r in resultadosAquatica" :key="r.id">
+    <td>{{ r.id }}</td>
+    <td>{{ r.campanha }}</td>
+    <td>{{ r.estacao_do_ano }}</td>
+    <td>{{ r.data }}</td>
+    <td>{{ r.horario }}</td>
+    <td>{{ r.condicao_climatica }}</td>
+    <td>{{ r.temperatura }}</td>
+    <td>{{ r.pluviosidade }}</td>
+    <td>{{ r.municipio }}</td>
+    <td>{{ r.unidade_amostral }}</td>
+    <td>{{ r.ponto_amostral }}</td>
+    <td>{{ r.latitude }}</td>
+    <td>{{ r.longitude }}</td>
+
+    <td>{{ r.metodologia }}</td>
+    <td>{{ r.tipo_metodologia }}</td>
+    <td>{{ r.fitofisionomia }}</td>
+
+    <td>{{ r.habitat_preferencial }}</td>
+    <td>{{ r.tipo_ambiente }}</td>
+    <td>{{ r.largura_media_rio }}</td>
+    <td>{{ r.profundidade_media }}</td>
+    <td>{{ r.tipo_substrato }}</td>
+    <td>{{ r.caracteristicas_agua }}</td>
+    <td>{{ r.caracteristicas_entorno_ponto }}</td>
+
+    <td>{{ r.classe }}</td>
+    <td>{{ r.ordem }}</td>
+    <td>{{ r.familia }}</td>
+    <td>{{ r.genero }}</td>
+    <td>{{ r.especie }}</td>
+    <td>{{ r.nome_cientifico }}</td>
+    <td>{{ r.nome_comum }}</td>
+
+    <td>{{ r.abundancia }}</td>
+    <td>{{ r.sensibilidade }}</td>
+    <td>{{ r.endemismo }}</td>
+    <td>{{ r.observacao }}</td>
+
+    <td>{{ r.iucn }}</td>
+    <td>{{ r.mma }}</td>
+    <td>{{ r.salve }}</td>
+    <td>{{ r.estado }}</td>
+
+    <td>{{ r.registro_fotografico }}</td>
+    <td>{{ r.coletado }}</td>
+    <td>{{ r.numero_tombo }}</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div v-else class="alert alert-info text-center">Nenhum registro aquático.</div>
+</div>
+
+<!-- ====================== CAVERNÍCOLA ====================== -->
+<div v-if="subtab==='cavernicola'">
+<h5 class="text-center mb-3">Fauna Cavernícola</h5>
+
+<div v-if="resultadosCavernicola.length" class="overflow-x-auto">
+<table class="min-w-full bg-white border border-gray-300">
+<thead>
+<tr class="bg-gray-100">
+    <th>ID</th>
+    <th>Caverna</th>
+    <th>Campanha</th>
+    <th>Estação</th>
+    <th>Data</th>
+    <th>Horário</th>
+    <th>Clima</th>
+    <th>Temp</th>
+    <th>Pluviosidade</th>
+    <th>Município</th>
+    <th>Unidade Amostral</th>
+    <th>Ponto Amostral</th>
+    <th>Latitude</th>
+    <th>Longitude</th>
+    <th>Metodologia</th>
+    <th>Tipo Metodologia</th>
+    <th>Fitofisionomia</th>
+    <th>Substrato</th>
+    <th>Características Entorno</th>
+
+    <!-- TAXONOMIA -->
+    <th>Classe</th>
+    <th>Ordem</th>
+    <th>Família</th>
+    <th>Gênero</th>
+    <th>Especie</th>
+    <th>Nome Científico</th>
+    <th>Nome Comum</th>
+
+    <!-- Atributos -->
+    <th>Abundância</th>
+    <th>Categoria Ecológica</th>
+    <th>Sensibilidade</th>
+    <th>Endemismo</th>
+    <th>Observação</th>
+
+    <th>Guano</th>
+    <th>Presença de Água</th>
+    <th>Conectividade Externa</th>
+    <th>Perturbação Antropica</th>
+
+    <th>IUCN</th>
+    <th>MMA</th>
+    <th>Salve</th>
+    <th>Estado</th>
+
+    <th>Registro Fotográfico</th>
+    <th>Coletado</th>
+    <th>Nº Tombo</th>
+</tr>
+</thead>
+
+<tbody>
+<tr v-for="r in resultadosCavernicola" :key="r.id">
+    <td>{{ r.id }}</td>
+    <td>{{ r.caverna }}</td>
+    <td>{{ r.campanha }}</td>
+    <td>{{ r.estacao_do_ano }}</td>
+    <td>{{ r.data }}</td>
+    <td>{{ r.horario }}</td>
+    <td>{{ r.condicao_climatica }}</td>
+    <td>{{ r.temperatura }}</td>
+    <td>{{ r.pluviosidade }}</td>
+    <td>{{ r.municipio }}</td>
+    <td>{{ r.unidade_amostral }}</td>
+    <td>{{ r.ponto_amostral }}</td>
+    <td>{{ r.latitude }}</td>
+    <td>{{ r.longitude }}</td>
+
+    <td>{{ r.metodologia }}</td>
+    <td>{{ r.tipo_metodologia }}</td>
+    <td>{{ r.fitofisionomia }}</td>
+    <td>{{ r.substrato_amostrado }}</td>
+    <td>{{ r.caracteristicas_entorno_ponto }}</td>
+
+    <td>{{ r.classe }}</td>
+    <td>{{ r.ordem }}</td>
+    <td>{{ r.familia }}</td>
+    <td>{{ r.genero }}</td>
+    <td>{{ r.especie }}</td>
+    <td>{{ r.nome_cientifico }}</td>
+    <td>{{ r.nome_comum }}</td>
+
+    <td>{{ r.abundancia }}</td>
+    <td>{{ r.categoria_ecologica }}</td>
+    <td>{{ r.sensibilidade }}</td>
+    <td>{{ r.endemismo }}</td>
+    <td>{{ r.observacao }}</td>
+
+    <td>{{ r.presenca_guano }}</td>
+    <td>{{ r.presenca_agua }}</td>
+    <td>{{ r.conectividade_externa }}</td>
+    <td>{{ r.perturbacao_antropica }}</td>
+
+    <td>{{ r.iucn }}</td>
+    <td>{{ r.mma }}</td>
+    <td>{{ r.salve }}</td>
+    <td>{{ r.estado }}</td>
+
+    <td>{{ r.registro_fotografico }}</td>
+    <td>{{ r.coletado }}</td>
+    <td>{{ r.numero_tombo }}</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div v-else class="alert alert-info text-center">Nenhum registro cavernícola.</div>
+</div>
+
+<!-- Considerações -->
+<div class="mt-4">
+    <InputLabel value="CONSIDERAÇÕES" />
+    <textarea class="form-control" rows="4" :value="consideracoes || 'Não informado'" disabled></textarea>
+</div>
+
+<!-- Navegação -->
+<div class="d-flex justify-content-between mt-4">
+    <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
+    <NavButton type-button="primary" title="Avançar" @click="$emit('next')" />
+</div>
+
+</div>
+</div>
 </template>
 
 <style scoped>
-.card {
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-    margin: 1.5rem;
-}
-.card-body {
-    padding: 2rem;
-}
-.form-control:disabled {
-    background-color: #f8f9fa;
-    color: #495057;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 200px;
-    max-width: 100%;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-}
-textarea.form-control:disabled {
-    resize: none;
-}
-.alert-info {
-    font-size: 1rem;
-    padding: 1rem;
-    border-radius: 6px;
-    background-color: #e7f1ff;
-    color: #084298;
-}
-table {
-    border-collapse: collapse;
-}
-th, td {
-    padding: 0.5rem 1rem;
-    border: 1px solid #dee2e6;
-}
-thead {
-    background-color: #f8f9fa;
-}
-tr:hover {
-    background-color: #f1f5f9;
-}
+.card { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.card-body { padding: 2rem; }
+.nav-tabs .nav-link { cursor: pointer; }
+table th, table td { padding: .5rem 1rem; border: 1px solid #ddd; }
+tr:hover { background-color: #f9fafb; }
 </style>

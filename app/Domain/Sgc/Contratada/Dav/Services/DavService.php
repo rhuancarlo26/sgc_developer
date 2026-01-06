@@ -10,32 +10,32 @@ use App\Shared\Traits\Searchable;
 
 class DavService extends BaseModelService
 {
-  use Searchable, Deletable;
+    use Searchable, Deletable;
 
-  protected string $modelClass = Dav::class;
-  protected string $davProfissionaisModel = SgcDavProfissionais::class;
+    protected string $modelClass = Dav::class;
+    protected string $davProfissionaisModel = SgcDavProfissionais::class;
 
-  public function salvarDav($dados)
-  {
-    $response = $this->dataManagement->create(entity: $this->modelClass, infos: $dados);
+    public function salvarDav($dados)
+    {
+        $response = $this->dataManagement->create(entity: $this->modelClass, infos: $dados);
 
-    return $response;
-  }
+        return $response;
+    }
 
-//   public function update($request)
-//   {
-//     $introducao = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+    public function profissionalExiste(string $nome, int $contratoId): bool
+    {
+        return SgcDavProfissionais::where('contrato_id', $contratoId)
+            ->whereRaw('LOWER(TRIM(nome)) = ?', [mb_strtolower(trim($nome))])
+            ->exists();
+    }
 
-//     return [
-//       'request' => $introducao['request']
-//     ];
-//   }
+    public function salvarDavProfissionais($dados)
+    {
+        $dados['nome_normalizado'] = mb_strtolower(trim($dados['nome']));
 
-  public function salvarDavProfissionais($dados)
-  {
-
-    $response = $this->dataManagement->create(entity: $this->davProfissionaisModel, infos: $dados);
-
-    return $response; // Retorne o modelo criado, ou faça outro tipo de resposta
-  }
+        return $this->dataManagement->create(
+            entity: $this->davProfissionaisModel,
+            infos: $dados
+        );
+    }
 }

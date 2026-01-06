@@ -56,7 +56,36 @@ class CampanhaService
         $this->pontoService->salvarPontosQuelonios($contratoId, $campanha->id, $data['pontos_quelo_crocod'] ?? [], $data['nao_se_aplica_quelo'] ?? false);
         $this->pontoService->salvarPontosCavernicola($contratoId, $campanha->id, $data['pontos_cavernicola'] ?? [], $data['nao_se_aplica_cavernicola'] ?? false);
         $this->metodologiaService->salvarMetodologias($contratoId, $campanha->id, $data['metodologias'] ?? []);
-        $this->resultadoService->salvarResultados($contratoId, $data['planilha'] ?? null, $campanha->id, $data['consideracoes'] ?? null);
+        if (!empty($data['planilha_terrestre'])) {
+            $this->resultadoService->salvarResultados(
+                $contratoId,
+                $data['planilha_terrestre'],
+                $campanha->id,
+                $data['consideracoes'] ?? null,
+                'terrestre'
+            );
+        }
+
+        if (!empty($data['planilha_aquatica'])) {
+            $this->resultadoService->salvarResultados(
+                $contratoId,
+                $data['planilha_aquatica'],
+                $campanha->id,
+                $data['consideracoes'] ?? null,
+                'aquatica'
+            );
+        }
+
+        if (!empty($data['planilha_cavernicola'])) {
+            $this->resultadoService->salvarResultados(
+                $contratoId,
+                $data['planilha_cavernicola'],
+                $campanha->id,
+                $data['consideracoes'] ?? null,
+                'cavernicola'
+            );
+        }
+
         $this->anexoService->salvarAnexos($contratoId, $campanha->id, $data['anexos'] ?? []);
 
         return $campanha->id;
