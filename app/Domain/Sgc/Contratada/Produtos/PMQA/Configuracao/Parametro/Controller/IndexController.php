@@ -2,10 +2,10 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Parametro\Controller;
 
-use App\Domain\Sgc\Contratada\Produtos\PMQA\app\Utils\ConfigucacaoParecer;
 use App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Parametro\Services\ParametroService;
 use App\Models\Contrato;
-use App\Models\Servicos;
+use App\Models\SgcPmqa;
+use App\Models\SgcPmqaPonto;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,22 +15,30 @@ class IndexController extends Controller
 {
     public function __construct(
         private readonly ParametroService $parametroService,
-        private readonly ConfigucacaoParecer $configucacaoParecer
-    )
+    ) {}
+
+    public function index(int $contrato, string $produto, int $pmqa, Request $request): Response
     {
-    }
+        $contratoModel = Contrato::findOrFail($contrato);
+        $pmqaModel = SgcPmqa::findOrFail($pmqa);
 
-    public function index(Contrato $contrato, Servicos $servico, Request $request): Response
-    {
-        $searchParams = $request->all('columns', 'value');
+        $pontos = SgcPmqaPonto::where('pmqa_id', $pmqaModel->id)
+            ->orderBy('id')
+            ->get();
 
-        $response = $this->parametroService->index($servico, $searchParams);
+        $searchParams = $request->only(['columns', 'value']);
 
-        return Inertia::render('Servico/PMQA/Configuracao/Parametro/Index', [
-            'contrato' => $contrato,
-            'servico'  => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
-            ...$response,
-            ...$this->configucacaoParecer->get($servico->id)
+        $tabParametros = $this->parametroService->index($pmqaModel, $searchParams);
+
+        return Inertia::render('Sgc/Contratada/Produtos/Pmqa/Create', [
+            'contrato'  => $contratoModel->id,
+            'contratos' => $contratoModel,
+            'produto'   => ['slug' => $produto],
+            'pmqa'      => $pmqaModel,
+            'pontos'    => $pontos,
+            ...$tabParametros,
+            'subStep'   => (int) $request->query('subStep', 2),
+            'tab'       => $request->query('tab', 'configuracao'),
         ]);
     }
 }

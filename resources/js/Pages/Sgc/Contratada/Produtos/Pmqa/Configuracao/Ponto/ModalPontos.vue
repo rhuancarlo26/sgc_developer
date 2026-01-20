@@ -6,13 +6,12 @@ import { ref, nextTick } from "vue";
 import axios from "axios";
 
 const props = defineProps({
-    draftData: { type: Object },
-    contrato: { type: Object },
-    produto: { type: Object },
+    pmqa: { type: Object, required: true },
+    contrato: { type: [Object, Number, String], required: true },
+    produto: { type: [Object, String], required: true },
 });
 
-
-const emit = defineEmits(["importacaoConclucluida"]);
+const emit = defineEmits(["importacaoConcluida"]);
 
 const modalImportarPonto = ref();
 const selectedFile = ref(null);
@@ -20,11 +19,7 @@ const isProcessing = ref(false);
 
 const abrirModal = async () => {
     await nextTick();
-    if (modalImportarPonto.value) {
-        modalImportarPonto.value.getBsModal().show();
-    } else {
-        console.error("A referência para o modal não foi encontrada!");
-    }
+    modalImportarPonto.value?.getBsModal().show();
 };
 
 const importarArquivo = () => {
@@ -37,38 +32,32 @@ const importarArquivo = () => {
 
     const formData = new FormData();
     formData.append("arquivo", selectedFile.value);
-    formData.append("campanha_id", props.draftData.id);
 
-    const url = route("sgc.contratada.produtos.pmqa.importar_pontos", {
-        contrato: props.contrato,
-        produto: props.produto,
-    });
+    const url = route(
+        "contratos.contratada.sgc.pmqa.configuracao.ponto.importar",
+        {
+            contrato: props.contrato.id ?? props.contrato,
+            produto: props.produto.slug ?? props.produto,
+            pmqa: props.pmqa.id,
+        }
+    );
 
-    axios.post(url, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-    })
-    .then((response) => {
-        console.log("Sucesso:", response.data);
-        alert("Importação realizada com sucesso!");
+    axios
+        .post(url, formData)
 
-        // ALTERADO: Em vez de buscar os dados aqui, emitimos o evento para o pai.
-        emit("importacaoConcluida");
-
-        modalImportarPonto.value.getBsModal().hide();
-    })
-    .catch((error) => {
-        console.error("--- RESPOSTA COMPLETA DO ERRO ---");
-        console.error(error.response.data);
-        alert(
-            "Falha na importação. Verifique o console para a resposta detalhada do erro."
-        );
-    })
-    .finally(() => {
-        isProcessing.value = false;
-    });
+        .then(() => {
+            emit("importacaoConcluida");
+            modalImportarPonto.value.getBsModal().hide();
+        })
+        .catch((error) => {
+            console.error(error.response?.data || error);
+            alert("Erro ao importar arquivo.");
+        })
+        .finally(() => {
+            isProcessing.value = false;
+        });
 };
 
-// Função para atualizar a variável quando um arquivo é escolhido
 const handleFileChange = (event) => {
     selectedFile.value = event.target.files[0];
 };
@@ -88,17 +77,17 @@ defineExpose({ abrirModal });
                 <div class="row g-2">
                     <div class="col">
                         <input
-                            @change="handleFileChange"
                             type="file"
                             class="form-control"
+                            @change="handleFileChange"
                         />
                     </div>
                     <div class="col-auto">
                         <NavButton
-                            @click="importarArquivo()"
-                            :disabled="isProcessing"
-                            type-button="success"
                             title="Importar"
+                            type-button="success"
+                            :disabled="isProcessing"
+                            @click="importarArquivo"
                         />
                     </div>
                 </div>

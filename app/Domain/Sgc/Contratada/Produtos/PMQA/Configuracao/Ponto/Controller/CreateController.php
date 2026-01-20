@@ -3,6 +3,7 @@
 namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Ponto\Controller;
 
 use App\Models\Contrato;
+use App\Models\SgcPmqa;
 use App\Models\SgcPmqaCampanha;
 use App\Models\SgcPmqaPonto;
 use App\Shared\Http\Controllers\Controller;
@@ -11,20 +12,21 @@ use Inertia\Response;
 
 class CreateController extends Controller
 {
-    /**
-     * @param Contrato $contrato   — rota: {contrato}
-     * @param SgcPmqaCampanha $campanha — rota: {campanha}
-     * @param SgcPmqaPonto|null $ponto  — rota opcional: {ponto}
-     */
-    public function index(Contrato $contrato, SgcPmqaCampanha $campanha, ?SgcPmqaPonto $ponto = null): Response
+    public function index(Contrato $contrato, SgcPmqa $campanha, ?SgcPmqaPonto $ponto = null): Response
     {
-        // carregue relações se precisar (ex.: campanha->parametros)
+        // Carrega relações necessárias
         $campanha->load(['parametros']);
 
-        return Inertia::render('Servico/PMQA/Configuracao/Ponto/Form', [
+        // Carrega TODOS os pontos da campanha (ou da pmqa/campanha)
+        $pontos = SgcPmqaPonto::where('campanha_id', 5)  // ou 'fk_pmqa' se for esse o campo
+            ->orderBy('id')  // ou 'chave', 'nome_ponto_coleta'
+            ->get();
+
+        return Inertia::render('Sgc/Contratada/Produtos/Pmqa/Components/ImportarPontos', [
             'contrato' => $contrato,
             'campanha' => $campanha,
-            'ponto' => $ponto,
+            'ponto'    => $ponto,
+            'pontos'   => $pontos,  // ← Array de pontos para a tabela
         ]);
     }
 }

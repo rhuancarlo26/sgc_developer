@@ -1,36 +1,40 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from "vue";
+import { router } from "@inertiajs/vue3";
 import NavButton from "@/Components/NavButton.vue";
 import Table from "@/Components/Table.vue";
-import { router } from "@inertiajs/vue3";
-import ModalPontos from '../Fases/ModalPontos.vue';
+import ModalPontos from "./ModalPontos.vue";
 
 const props = defineProps({
-    contrato: { type: [Object, String] }, // ✅ ACEITA STRING
-    servico: { type: Object },
-    pontos: { type: Object },
-    produto: { type: [Object, String] },   // ✅ ACEITA STRING
+    contrato: { type: [Object, String] },
+    pontos: { type: Array, default: () => [] },
+    produto: { type: [Object, String] },
     contratos: { type: Object },
-    draftData: { type: Object },
+    pmqa: { type: Object },
 });
+const emit = defineEmits(["next", "prev"]);
 
-const modalImportarPonto = ref(null); // ✅ DECLARAR REF
-const modalVisualizarPonto = ref(null); // ✅ DECLARAR REF
+const campanhaId = computed(() => props.pmqa?.campanha_id);
+
+const contratoId = computed(() =>
+    typeof props.contrato === "object" ? props.contrato.id : props.contrato,
+);
+
+const modalImportarPonto = ref(null);
+const modalVisualizarPonto = ref(null);
 
 const abrirModalImportar = () => {
     modalImportarPonto.value.abrirModal();
 };
 
-const abrirModalVisualizar = (item) => {
-    modalVisualizarPonto.value.abrirModal(item);
-};
+const pontosTable = computed(() => ({
+    data: props.pontos,
+    links: [],
+}));
 
 const atualizarListaDePontos = () => {
-    console.log("Evento 'importacaoConcluida' recebido!");
     router.reload({
         only: ["pontos"],
-        onSuccess: () => console.log("Pontos atualizados!"),
-        onError: () => alert("Erro ao atualizar pontos."),
     });
 };
 </script>
@@ -40,16 +44,7 @@ const atualizarListaDePontos = () => {
         <div class="card-body">
             <h2>Importar pontos</h2>
             <div class="d-flex justify-content-end mb-3">
-                <a
-                    class="btn btn-info me-1"
-                    target="_blank"
-                    :href="
-                        route(
-                            'contratos.contratada.servicos.pmqa.configuracao.ponto.download_modelo'
-                        )
-                    "
-                    >Modelo</a
-                >
+                <a class="btn btn-info me-1" target="_blank">Modelo</a>
                 <NavButton
                     @click="abrirModalImportar()"
                     type-button="success"
@@ -73,7 +68,7 @@ const atualizarListaDePontos = () => {
                     'Estaca',
                     'Ação',
                 ]"
-                :records="props.pontos"
+                :records="pontosTable"
                 table-class="table-hover"
             >
                 <template #body="{ item }">
@@ -82,16 +77,28 @@ const atualizarListaDePontos = () => {
                         <td class="text-center">
                             {{ item.nome_ponto_coleta }}
                         </td>
-                        <td class="text-center">{{ item.lat_x }}</td>
-                        <td class="text-center">{{ item.long_y }}</td>
+                        <td class="text-center">
+                            {{ item.lat_x }}
+                        </td>
+                        <td class="text-center">
+                            {{ item.long_y }}
+                        </td>
                         <td>{{ item.classificacao }}</td>
-                        <td class="text-center">{{ item.classe }}</td>
-                        <td class="text-center">{{ item.tipo_ambiente }}</td>
+                        <td class="text-center">
+                            {{ item.classe }}
+                        </td>
+                        <td class="text-center">
+                            {{ item.tipo_ambiente }}
+                        </td>
                         <td class="text-center">{{ item.UF }}</td>
                         <td>{{ item.municipio }}</td>
                         <td>{{ item.bacia_hidrografica }}</td>
-                        <td class="text-center">{{ item.km_rodovia }}</td>
-                        <td class="text-center">{{ item.estaca }}</td>
+                        <td class="text-center">
+                            {{ item.km_rodovia }}
+                        </td>
+                        <td class="text-center">
+                            {{ item.estaca }}
+                        </td>
                     </tr>
                 </template>
             </Table>
@@ -112,9 +119,8 @@ const atualizarListaDePontos = () => {
     </div>
     <ModalPontos
         :contrato="contrato"
-        :draftData="draftData"
         :produto="produto"
+        :pmqa="pmqa"
         ref="modalImportarPonto"
     />
-    <!-- <ModalVisualizarPonto ref="modalVisualizarPonto" /> -->
 </template>

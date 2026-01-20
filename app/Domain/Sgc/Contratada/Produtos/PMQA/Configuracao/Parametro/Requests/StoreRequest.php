@@ -9,7 +9,7 @@ class StoreRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'servico_id'  => ['required'],
+      'pmqa_id'     => ['required'],
       'nome'        => ['required'],
       'medir_iqa'   => ['required'],
       'parametros'  => ['required']

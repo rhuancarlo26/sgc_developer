@@ -5,6 +5,7 @@ import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import { ref, computed } from 'vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import NavButton from '@/Components/NavButton.vue';
+import PreviewApresentacaoModal from '../Pmqa/Components/Modals/PreviewApresentacaoModal.vue';
 
 const props = defineProps({
     subprodutos: { type: Array, default: () => [] },
@@ -15,9 +16,9 @@ const props = defineProps({
     canApprove: { type: Boolean, default: false },
     auth: { type: Object, required: true },
 });
+const previewModal = ref(null)
 
-console.log('Auth:', props.auth);
-
+console.log(props.campanhas)
 // Lista de produtos disponíveis
 const produtos = [
   { title: "Fauna", routeParam: "fauna" },
@@ -37,6 +38,9 @@ const produtos = [
 // Estado reativo para produto e subproduto
 const selectedProduto = ref(props.produto.toLowerCase());
 const selectedSubproduto = ref('');
+
+const isEia = computed(() => selectedProduto.value === 'eia')
+const isEmElaboracao = (c) => c.status === 'Em elaboração'
 
 // Atualizar a rota quando o produto mudar
 const updateProduto = () => {
@@ -78,9 +82,29 @@ const goToCreate = () => {
 };
 
 // Redirecionar para visualização
-const visualizarCampanha = (campanhaId) => {
-  router.get(route('sgc.contratada.produtos.show', [props.contrato, selectedProduto.value, campanhaId]));
-};
+const visualizarCampanha = (campanha) => {
+  if (selectedProduto.value === 'eia') {
+    previewModal.value.abrirModal(campanha)
+    return
+  }
+
+  router.get(
+    route('sgc.contratada.produtos.show', [
+      props.contrato,
+      selectedProduto.value,
+      campanha.id,
+    ])
+  )
+}
+
+const gerenciarCampanha = (pmqaId) => {
+  router.get(
+    route(
+      'contratos.contratada.sgc.pmqa.configuracao.ponto.index', [props.contrato, selectedProduto.value, pmqaId]
+    )
+  )
+}
+
 
 // Redirecionar para análise
 const analisarCampanha = (campanhaId) => {
@@ -203,8 +227,15 @@ const editarCampanha = (campanhaId) => {
                             <NavButton
                               type-button="info"
                               title="Visualizar"
-                              @click="visualizarCampanha(campanha.id)"
+                              @click="visualizarCampanha(campanha)"
                             />
+                            <NavButton
+                            v-if="selectedProduto === 'eia' && campanha.status?.trim() === 'Em elaboração'"
+                            type-button="primary"
+                            title="Gerenciar"
+                            @click="gerenciarCampanha(campanha.id)"
+                            />
+
                             <NavButton
                               v-if="canApprove && campanha.status === 'Em análise'"
                               type-button="success"
@@ -232,7 +263,8 @@ const editarCampanha = (campanhaId) => {
         </div>
       </template>
     </NavbarContrato>
-  </AuthenticatedLayout>
+  </AuthenticatedLayout >
+  <PreviewApresentacaoModal ref="previewModal"/>
 </template>
 
 <style scoped>

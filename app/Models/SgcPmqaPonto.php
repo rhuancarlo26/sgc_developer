@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\SgcPmqaCampanha;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class SgcPmqaPonto extends Model
 {
@@ -13,13 +11,9 @@ class SgcPmqaPonto extends Model
 
     protected $guarded = ['id', 'created_at'];
 
-    public function campanha(): BelongsTo
+    /** 🔗 PMQA (raiz do domínio) */
+    public function pmqa(): BelongsTo
     {
-        return $this->belongsTo(SgcPmqaCampanha::class, 'campanha_id');
-    }
-
-    public function parametros(): BelongsToMany
-    {
-        return $this->belongsToMany(SgcPmqaParametro::class, 'sgc_pmqa_ponto_parametro', 'ponto_id', 'parametro_id')->withTimestamps();
+        return $this->belongsTo(SgcPmqa::class, 'campanha_id');
     }
 }

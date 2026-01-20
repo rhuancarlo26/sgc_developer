@@ -6,6 +6,9 @@ use App\Models\ServicoPmqaListaParametro;
 use App\Models\ServicoPmqaParametro;
 use App\Models\ServicoPmqaParametroLista;
 use App\Models\Servicos;
+use App\Models\SgcPmqa;
+use App\Models\SgcPmqaListaParametro;
+use App\Models\SgcPmqaParametroLista;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -14,25 +17,31 @@ class ParametroService extends BaseModelService
 {
     use Searchable, Deletable;
 
-    protected string $modelClass = ServicoPmqaParametroLista::class;
-    protected string $modelClassListaParametro = ServicoPmqaListaParametro::class;
+    protected string $modelClass = SgcPmqaParametroLista::class;
+    protected string $modelClassListaParametro = SgcPmqaListaParametro::class;
 
-    public function index(Servicos $servico, array $searchParams): array
+    public function index(SgcPmqa $pmqa, array $searchParams): array
     {
+        $query = $this->searchAllColumns(
+            $searchParams['columns'] ?? null,
+            $searchParams['value'] ?? null
+        );
+
         return [
-            'listas' => $this->searchAllColumns(...$searchParams)
+            'listas' => $query
                 ->with(['parametros'])
-                ->where('fk_servico', '=', $servico->id)
+                ->where('pmqa_id', $pmqa->id)   // ou fk_servico, depende da sua tabela
                 ->paginate()
                 ->appends($searchParams),
-            'parametros' => ServicoPmqaParametro::orderBy('parametro')->get()
+
+            'parametros' => ServicoPmqaParametro::orderBy('parametro')->get(),
         ];
     }
 
-    public function store(Servicos $servico, array $request)
+    public function store(SgcPmqa $pmqa, array $request)
     {
         $response = $this->storeParametroLista([
-            'fk_servico' => $servico->id,
+            'pmqa_id' => $pmqa->id,
             'nome' => $request['nome'],
             'medir_iqa' => $request['medir_iqa']
         ]);
@@ -42,11 +51,11 @@ class ParametroService extends BaseModelService
         return $response['request'];
     }
 
-    public function update(Servicos $servico, array $request)
+    public function update(SgcPmqa $pmqa, array $request)
     {
         $response = $this->updateParametroLista([
             'id' => $request['id'],
-            'fk_servico' => $servico->id,
+            'pmqa_id' => $pmqa->id,
             'nome' => $request['nome'],
             'medir_iqa' => $request['medir_iqa']
         ]);
@@ -70,23 +79,22 @@ class ParametroService extends BaseModelService
         return $response;
     }
 
-    private function storeListaParametros(ServicoPmqaParametroLista $parametroLista, array $request): void
+    private function storeListaParametros(SgcPmqaParametroLista $parametroLista, array $request): void
     {
         $parametroLista->parametros()->sync(collect($request)->toArray());
     }
 
     private function updateListaParametros(array $parametroLista, array $request): void
     {
-        $parametroLista = ServicoPmqaParametroLista::find($parametroLista['id']);
+        $parametroLista = SgcPmqaParametroLista::find($parametroLista['id']);
 
         $parametroLista->parametros()->sync(collect($request)->toArray());
     }
 
-    public function destroy(ServicoPmqaParametroLista $parametroLista)
+    public function destroy(SgcPmqaParametroLista $parametroLista)
     {
         $response = $this->dataManagement->delete($this->modelClass, $parametroLista->id);
 
         return $response;
     }
-
 }
