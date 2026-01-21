@@ -113,6 +113,19 @@ class FaunaController extends Controller
             'modulos_amostrais.*.latitude_final' => 'nullable|numeric',
             'modulos_amostrais.*.longitude_final' => 'nullable|numeric',
             'modulos_amostrais.*.arquivo' => 'nullable|file|mimes:shp,zip|max:1024',
+            'atropelamento_campanha.*.id_campanha' => 'nullable|numeric',
+            'atropelamento_campanha.*.rodovia' => 'nullable|string',
+            'atropelamento_campanha.*.data_inicial' => 'nullable|date',
+            'atropelamento_campanha.*.data_final' => 'nullable|date',
+            'atropelamento_campanha.*.uf_inicial' => 'nullable|string|size:2',
+            'atropelamento_campanha.*.uf_final' => 'nullable|string|size:2',
+            'atropelamento_campanha.*.km_inicial' => 'nullable|numeric',
+            'atropelamento_campanha.*.km_final' => 'nullable|numeric',
+            'atropelamento_campanha.*.latitude_inicial' => 'nullable|numeric',
+            'atropelamento_campanha.*.longitude_inicial' => 'nullable|numeric',
+            'atropelamento_campanha.*.latitude_final' => 'nullable|numeric',
+            'atropelamento_campanha.*.longitude_final' => 'nullable|numeric',
+            'atropelamento_campanha.*.obs' => 'nullable|string',
             'pontos_quelo_crocod' => 'nullable|array',
             'pontos_quelo_crocod.*.ponto_de_coleta' => 'required_without:nao_se_aplica_quelo|string',
             'pontos_quelo_crocod.*.nome_curso_hidrico' => 'required_without:nao_se_aplica_quelo|string',
@@ -146,6 +159,8 @@ class FaunaController extends Controller
             'anexos.ctf' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'anexos.anuencia_colecoes' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'anexos.oficio_atividades_campo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.rfaef' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.cartas_anuencia' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'status' => 'required|string|in:Em análise,Aprovada,Rejeitada',
         ]);
 
@@ -475,7 +490,7 @@ public function show($contrato, $produto, $campanhaId)
             return redirect()->back()->withErrors(['error' => 'Erro ao salvar comentário: ' . $e->getMessage()]);
         }
     }
-    
+
     public function destroyComentario($contrato, $produto, $campanha, $comentarioId): RedirectResponse
     {
         if (!Auth::check()) {
@@ -1147,7 +1162,7 @@ public function show($contrato, $produto, $campanhaId)
                 'status_conservacao_iucn' => $resultado->status_conservacao_iucn,
                 'especies_bioindicadoras' => $resultado->especies_bioindicadoras ?? null,
                 'especies_alvo_monitoramento' => $resultado->especies_alvo_monitoramento ?? null,
-                
+
             ];
         })->toArray();
 
@@ -1189,7 +1204,7 @@ public function show($contrato, $produto, $campanhaId)
                 'tipo_contrato' => $campanha->tipo_contrato,
                 'contratada' => $campanha->contratada,
             ],
-            'comentarios' => $comentarios, 
+            'comentarios' => $comentarios,
         ]);
     }
 
@@ -1216,8 +1231,8 @@ public function show($contrato, $produto, $campanhaId)
                 'observacoes' => 'nullable|string',
                 'cod_emp' => 'required|string|max:255',
                 'subproduto' => 'required|string|max:255',
-                'nao_se_aplica_quelo' => 'nullable|boolean', 
-                'nao_se_aplica_cavernicola' => 'nullable|boolean', 
+                'nao_se_aplica_quelo' => 'nullable|boolean',
+                'nao_se_aplica_cavernicola' => 'nullable|boolean',
                 'abios' => 'nullable|array',
                 'profissionais' => 'nullable|array',
                 'profissionais.*.grupo_faunistico' => 'nullable|string|in:Avifauna,Herpetofauna,Mastofauna,Ictiofauna,Bentos',
@@ -1331,12 +1346,12 @@ public function show($contrato, $produto, $campanhaId)
                 ->where('id_contrato', $contrato)
                 ->where('id_campanha', $campanhaId)
                 ->firstOrFail();
-            
+
             $campanha = SgcFaunaCampanha::findOrFail($campanhaId);
             if (!in_array($campanha->status, ['Rejeitada', 'Em elaboração'])) {
                 return redirect()->back()->withErrors(['error' => 'Apenas campanhas rejeitadas ou em elaboração podem ter anexos excluídos.']);
             }
-            
+
             Storage::disk('public')->delete($anexo->caminho);
             $anexo->delete();
             return redirect()->back()->with('success', 'Anexo excluído com sucesso!');

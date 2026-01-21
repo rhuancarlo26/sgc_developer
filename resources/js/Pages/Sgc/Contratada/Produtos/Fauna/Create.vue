@@ -8,11 +8,14 @@ import NavButton from '@/Components/NavButton.vue';
 import { ref, onMounted, watch } from 'vue';
 import DadosGerais from './DadosGerais.vue';
 import ModulosAmostragem from './ModulosAmostrais.vue';
+import CampanhaAtropelamento from './CampanhaAtropelamento.vue';
 import QueloniosCrocodilian from './QueloniosCrocodilianos.vue';
 import FaunaCavernic from './FaunaCavernicola.vue';
 import Metodologia from './Metodologia.vue';
 import FaunaResultados from './FaunaResultados.vue';
 import { IconScanEye, IconTrash } from "@tabler/icons-vue";
+import { is } from 'date-fns/locale';
+import { isArray } from 'highcharts';
 
 // Props
 const props = defineProps({
@@ -104,6 +107,21 @@ const formModuloAmostral = useForm({
     obs: null,
     arquivo: null,
 });
+const formCampanha = useForm({
+    id_campanha: null,
+    rodovia: null,
+    data_inicial: null,
+    data_final: null,
+    uf_inicial: null,
+    uf_final: null,
+    km_inicial: null,
+    km_final: null,
+    latitude_inicial: null,
+    longitude_inicial: null,
+    latitude_final: null,
+    longitude_final: null,
+    obs: null,
+});
 const formPontosAmostragem = useForm({
     ponto_de_coleta: '',
     nome_curso_hidrico: '',
@@ -139,6 +157,7 @@ const formResultados = useForm({
 const abioRecords = ref(props.draftData?.abios ?? []);
 const profissionalRecords = ref(props.draftData?.profissionais ?? []);
 const moduloRecords = ref(props.draftData?.modulos_amostrais ?? []);
+const campanhaRecords = ref(props.draftData?.atropelamento_campanha ?? []);
 const pontoRecords = ref(props.draftData?.pontos_quelo_crocod ?? []);
 const pontoCavernicolaRecords = ref(props.draftData?.pontos_cavernicola ?? []);
 const metodologiaRecords = ref(props.draftData?.metodologias ?? []);
@@ -185,6 +204,22 @@ const salvarDadosGerais = (consideracoesData = {}) => {
         if (modulo.arquivo) {
             formData.append(`modulos_amostrais[${index}][arquivo]`, modulo.arquivo);
         }
+    });
+    // Adicionar Campanha - Módulo Atropelamento
+    campanhaRecords.value.forEach((modulo, index) => {
+        formData.append(`atropelamento_campanha[${index}][id_campanha]`, modulo.id_campanha || '');
+        formData.append(`atropelamento_campanha[${index}][rodovia]`, modulo.rodovia || '');
+        formData.append(`atropelamento_campanha[${index}][data_inicial]`, modulo.data_inicial || '');
+        formData.append(`atropelamento_campanha[${index}][data_final]`, modulo.data_final || '');
+        formData.append(`atropelamento_campanha[${index}][uf_inicial]`, modulo.uf_inicial || '');
+        formData.append(`atropelamento_campanha[${index}][uf_final]`, modulo.uf_final || '');
+        formData.append(`atropelamento_campanha[${index}][km_inicial]`, modulo.km_inicial || '');
+        formData.append(`atropelamento_campanha[${index}][km_final]`, modulo.km_final || '');
+        formData.append(`atropelamento_campanha[${index}][latitude_inicial]`, modulo.latitude_inicial || '');
+        formData.append(`atropelamento_campanha[${index}][longitude_inicial]`, modulo.longitude_inicial || '');
+        formData.append(`atropelamento_campanha[${index}][latitude_final]`, modulo.latitude_final || '');
+        formData.append(`atropelamento_campanha[${index}][longitude_final]`, modulo.longitude_final || '');
+        formData.append(`atropelamento_campanha[${index}][obs]`, modulo.obs || '');
     });
 
     // Adicionar Pontos Quelônios/Crocodinianos
@@ -260,6 +295,7 @@ const salvarDadosGerais = (consideracoesData = {}) => {
             profissionalRecords.value = [];
             abioRecords.value = [];
             moduloRecords.value = [];
+            campanhaRecords.value = [];
             pontoRecords.value = [];
             pontoCavernicolaRecords.value = [];
             metodologiaRecords.value = [];
@@ -394,9 +430,38 @@ const adicionarModulo = () => {
         formModuloAmostral.reset();
     }
 };
+const adicionarCampanha = () => {
+    if (
+        formCampanha.data_inicial &&
+        formCampanha.data_final &&
+        formCampanha.uf_inicial &&
+        formCampanha.uf_final
+    ) {
+        campanhaRecords.value.push({
+            id: Date.now(),
+            id_campanha: formCampanha.id_campanha,
+            rodovia: formCampanha.rodovia,
+            data_inicial: formCampanha.data_inicial,
+            data_final: formCampanha.data_final,
+            uf_inicial: formCampanha.uf_inicial,
+            uf_final: formCampanha.uf_final,
+            km_inicial: formCampanha.km_inicial,
+            km_final: formCampanha.km_final,
+            latitude_inicial: formCampanha.latitude_inicial,
+            longitude_inicial: formCampanha.longitude_inicial,
+            latitude_final: formCampanha.latitude_final,
+            longitude_final: formCampanha.longitude_final,
+            obs: formCampanha.obs,
+        });
+        formCampanha.reset();
+    }
+};
 
 const excluirModulo = (id) => {
     moduloRecords.value = moduloRecords.value.filter(item => item.id !== id);
+};
+const excluirCampanha = (id) => {
+    campanhaRecords.value = campanhaRecords.value.filter(item => item.id !== id);
 };
 
 const adicionarPonto = () => {
@@ -458,22 +523,35 @@ const excluirPontoCavernicola = (id) => {
 };
 
 const nextSubStep = () => {
-    if (subStep.value === 3 && moduloRecords.value.length === 0) {
+    if (subStep.value === 3 && moduloRecords.value.length === 0 && isAtropelamento.value == false) {
         alert('Adicione ao menos um módulo amostral antes de avançar.');
         return;
     }
-    if (subStep.value === 4 && !naoSeAplicaQuelonios.value && pontoRecords.value.length === 0) {
+    if (subStep.value === 3 && isAtropelamento.value == true && campanhaRecords.value.length === 0) {
+        alert('Adicione ao menos uma campanha de atropelamento antes de avançar.');
+        return;
+    }
+    if (subStep.value === 4 && !naoSeAplicaQuelonios.value && pontoRecords.value.length === 0 && isAtropelamento.value == false) {
         alert('Adicione ao menos um ponto de quelônio ou crocodiliano antes de avançar, ou marque "Não se aplica".');
         return;
     }
-    if (subStep.value === 5 && !naoSeAplicaCavernicola.value && pontoCavernicolaRecords.value.length === 0) {
+    if (subStep.value === 5 && !naoSeAplicaCavernicola.value && pontoCavernicolaRecords.value.length === 0 && isAtropelamento.value == false) {
         alert('Adicione pelo menos um ponto de fauna cavernícola antes de avançar, ou marque "Não se aplica".');
         return;
     }
-    if (subStep.value < 5) {
-        subStep.value += 1;
+    // Em atropelamento, só há 2 subetapas na aba de apresentação
+    if (isAtropelamento.value == false) {
+        if (subStep.value < 5) {
+            subStep.value += 1;
+        } else {
+            setActiveTab('metodologia');
+        }
     } else {
-        setActiveTab('metodologia');
+        if (subStep.value < 3) {
+            subStep.value += 1;
+        } else {
+            setActiveTab('metodologia');
+        }
     }
 };
 
@@ -486,7 +564,11 @@ const prevSubStep = () => {
 const setActiveTab = (tab) => {
     activeTab.value = tab;
     if (tab === 'apresentacao') {
-        subStep.value = 5; // Volta para a última subetapa (Fauna Cavernícola)
+        if (isAtropelamento.value == false) {
+            subStep.value = 5; // Volta para a última subetapa (Fauna Cavernícola)
+        } else {
+            subStep.value = 3; // Volta para a primeira subetapa em atropelamento
+        }
     }
 };
 
@@ -529,6 +611,16 @@ const anexosLabels = {
     anuencia_colecoes: 'Anuência de Coleções',
     oficio_atividades_campo: 'Ofício de Atividades de Campo'
 };
+const anexosLabelsCampanha = {
+    registro_fotografico: 'Registro Fotográfico',
+    ctf: 'CTF',
+    dados_secundarios: 'Dados Secundários',
+    art: 'ART',
+    rfaef: 'Formulário Registro de Atropelamentos de Espécimes da Fauna',
+    cartas_anuencia: 'Cartas de Anuência',
+    // anuencia_colecoes: 'Anuência de Coleções',
+    // oficio_atividades_campo: 'Ofício de Atividades de Campo'
+};
 
 // MODAL DE PREVIEW
 const previewFile = ref(null);
@@ -556,6 +648,14 @@ const closePreview = () => {
     previewType.value = null;
 };
 
+// Mudanças para Módulo submódulo com atropelamento
+const isAtropelamento = ref(false);
+onMounted(() => {
+    if (props.subproduto && props.subproduto.toLowerCase().includes('atropelamento')) {
+        isAtropelamento.value = true;
+    }
+});
+
 </script>
 
 <template>
@@ -574,9 +674,9 @@ const closePreview = () => {
                 <div class="card">
                     <div class="card-body">
                         <h2 class="text-center mb-4">CADASTRAR {{ props.produto.toUpperCase() }}</h2>
-                        <h3 class="text-center mb-4">{{ props.subproduto && props.subproduto.toLowerCase().includes('atropelamento') ? 'Atropelamento' : 'Outro' }}</h3>
+                        <h3 class="text-center mb-0 text-uppercase" v-if="isAtropelamento">atropelamento</h3>
                         <!-- Subproduto - se tiver a palavra atropelamento no nome do subproduto: -->
-                        <!-- <h4 class="text-center mb-4">{{ props.subproduto.toUpperCase() }}</h4> -->
+                        <h5 class="text-center mb-4">{{ props.subproduto.toUpperCase() }}</h5>
                         <ul class="nav nav-tabs mb-4">
                             <li class="nav-item">
                                 <a
@@ -640,11 +740,11 @@ const closePreview = () => {
                                         <div class="d-flex justify-content-end">
                                             <NavButton type="submit" type-button="primary" title="Avançar" />
                                         </div>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ isAtropelamento ? 2 : 5 }}</h4>
                                     </form>
                                 </div>
                                 <DadosGerais
-                                    v-if="subStep === 2"
+                                    v-if="subStep === 2 && isAtropelamento == false"
                                     :form-dados-gerais="formDadosGerais"
                                     :form-abio="formAbio"
                                     :form-profissional="formProfissional"
@@ -662,11 +762,33 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ isAtropelamento ? 2 : 5 }}</h4>
+                                    </template>
+                                </DadosGerais>
+                                <DadosGerais
+                                    v-else-if="subStep === 2 && isAtropelamento == true"
+                                    :form-dados-gerais="formDadosGerais"
+                                    :form-abio="formAbio"
+                                    :form-profissional="formProfissional"
+                                    :form-novo-profissional="formNovoProfissional"
+                                    :abios="props.abios"
+                                    :profissionais="props.profissionais"
+                                    :abio-records="abioRecords"
+                                    :profissional-records="profissionalRecords"
+                                    @vincular-abio="vincularAbio"
+                                    @excluir-abio="excluirAbio"
+                                    @salvar-novo-profissional="salvarNovoProfissional"
+                                    @vincular-profissional="vincularProfissional"
+                                    @excluir-profissional="excluirProfissional"
+                                    @next="nextSubStep"
+                                    @prev="prevSubStep"
+                                >
+                                    <template #footer>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/2</h4>
                                     </template>
                                 </DadosGerais>
                                 <ModulosAmostragem
-                                    v-if="subStep === 3"
+                                    v-if="subStep === 3 && isAtropelamento == false"
                                     :form-modulo-amostral="formModuloAmostral"
                                     :ufs="[
                                         { uf: 'AC' },{ uf: 'AL' },{ uf: 'AP' },{ uf: 'AM' },{ uf: 'BA' },{ uf: 'CE' },{ uf: 'DF' },{ uf: 'ES' },{ uf: 'GO' },{ uf: 'MA' },{ uf: 'MT' },{ uf: 'MS' },{ uf: 'MG' },
@@ -690,6 +812,23 @@ const closePreview = () => {
                                         <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                     </template>
                                 </ModulosAmostragem>
+                                <CampanhaAtropelamento
+                                    v-if="subStep === 3 && isAtropelamento == true"
+                                    :form-campanha="formCampanha"
+                                    :campanha-records="campanhaRecords"
+                                    @adicionar-campanha="adicionarCampanha"
+                                    @excluir-campanha="excluirCampanha"
+                                    @next="nextSubStep"
+                                    @prev="prevSubStep"
+                                    :ufs="[
+                                        { uf: 'AC' },{ uf: 'AL' },{ uf: 'AP' },{ uf: 'AM' },{ uf: 'BA' },{ uf: 'CE' },{ uf: 'DF' },{ uf: 'ES' },{ uf: 'GO' },{ uf: 'MA' },{ uf: 'MT' },{ uf: 'MS' },{ uf: 'MG' },
+                                        { uf: 'PA' },{ uf: 'PB' },{ uf: 'PR' },{ uf: 'PE' },{ uf: 'PI' },{ uf: 'RJ' },{ uf: 'RN' },{ uf: 'RS' },{ uf: 'RO' },{ uf: 'RR' },{ uf: 'SC' },{ uf: 'SP' },{ uf: 'SE' },{ uf: 'TO' },
+                                    ]"
+                                >
+                                    <template #footer>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/3</h4>
+                                    </template>
+                                </CampanhaAtropelamento>
                                 <QueloniosCrocodilian
                                     v-if="subStep === 4"
                                     v-model:naoSeAplica="naoSeAplicaQuelonios"
@@ -746,7 +885,7 @@ const closePreview = () => {
                                     <div class="row g-4">
 
                                         <!-- CARD DE UPLOAD PROFISSIONAL -->
-                                        <div v-for="(label, tipo) in anexosLabels" :key="tipo" class="col-md-6">
+                                        <div v-for="(label, tipo) in (isAtropelamento?anexosLabelsCampanha:anexosLabels)" :key="tipo" class="col-md-6">
                                             <div class="anexo-card shadow-sm p-3 rounded bg-white">
 
                                                 <!-- Título -->
