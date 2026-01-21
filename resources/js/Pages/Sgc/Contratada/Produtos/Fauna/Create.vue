@@ -574,6 +574,9 @@ const closePreview = () => {
                 <div class="card">
                     <div class="card-body">
                         <h2 class="text-center mb-4">CADASTRAR {{ props.produto.toUpperCase() }}</h2>
+                        <h3 class="text-center mb-4">{{ props.subproduto && props.subproduto.toLowerCase().includes('atropelamento') ? 'Atropelamento' : 'Outro' }}</h3>
+                        <!-- Subproduto - se tiver a palavra atropelamento no nome do subproduto: -->
+                        <!-- <h4 class="text-center mb-4">{{ props.subproduto.toUpperCase() }}</h4> -->
                         <ul class="nav nav-tabs mb-4">
                             <li class="nav-item">
                                 <a
