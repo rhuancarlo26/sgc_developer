@@ -15,10 +15,11 @@ const props = defineProps({
     campanhas: { type: Array, default: () => [] },
     canApprove: { type: Boolean, default: false },
     auth: { type: Object, required: true },
+    vinculacoes: { type: Object }
 });
 const previewModal = ref(null)
 
-console.log(props.campanhas)
+console.log(props.vinculacoes)
 // Lista de produtos disponíveis
 const produtos = [
   { title: "Fauna", routeParam: "fauna" },

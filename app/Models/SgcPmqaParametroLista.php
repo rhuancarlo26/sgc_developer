@@ -34,8 +34,14 @@ class SgcPmqaParametroLista extends Model
 
     public function pontos(): BelongsToMany
     {
-        return $this->belongsToMany(ServicoPmqaPonto::class, 'sgc_pmqa_config_parametros', 'parametro_lista_id', 'fk_ponto');
+        return $this->belongsToMany(
+            related: SgcPmqaPonto::class,
+            table: 'sgc_pmqa_config_ponto_lista',
+            foreignPivotKey: 'lista_id',
+            relatedPivotKey: 'ponto_id'
+        )->withPivot('pmqa_id');
     }
+
 
     public function listaParametros(): Attribute
     {

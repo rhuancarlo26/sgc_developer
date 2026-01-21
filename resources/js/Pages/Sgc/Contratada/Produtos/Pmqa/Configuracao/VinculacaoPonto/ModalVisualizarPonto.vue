@@ -14,7 +14,7 @@ const lista = ref({});
 
 const abrirModal = (item) => {
     lista.value = item;
-
+    console.log(item)
     modalVisualizarPonto.value.getBsModal().show();
 }
 
@@ -45,7 +45,7 @@ defineExpose({abrirModal});
                             <td class="text-center">{{ ponto.id }}</td>
                             <td class="text-center">{{ ponto.classe }}</td>
                             <td class="text-center">{{ ponto.tipo_ambiente }}</td>
-                            <td class="text-center">{{ ponto.UF }}</td>
+                            <td class="text-center">{{ ponto.uf }}</td>
                             <td class="text-center">{{ ponto.municipio }}</td>
                             <td class="text-center">{{ ponto.bacia_hidrografica }}</td>
                             <td class="text-center">{{ ponto.km_rodovia }}</td>

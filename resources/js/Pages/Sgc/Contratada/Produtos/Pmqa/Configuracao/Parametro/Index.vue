@@ -7,6 +7,7 @@ import { IconPencil } from "@tabler/icons-vue";
 import { IconTrash } from "@tabler/icons-vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import ModalParametros from "./ModalParametros.vue";
+import { Link } from "@inertiajs/vue3";
 
 const modalParametros = ref(null);
 
@@ -39,7 +40,7 @@ const ap = (ap) => {
 
 <template #body>
     <ModelSearchFormAllColumns
-        :columns="['nome', 'parametros.nome']"
+        :columns="['nome', 'parametros?.nome']"
         v-if="ap(aprovacao)"
     >
         <template #action>
@@ -63,7 +64,7 @@ const ap = (ap) => {
                     <p v-if="item.parametros">
                         <span
                             v-for="(record, i) in item.parametros"
-                            :key="parametro"
+                            :key="record.id"
                             class="badge bg-warning text-white m-1"
                         >
                             {{ record.parametro }}
@@ -81,9 +82,29 @@ const ap = (ap) => {
                         <LinkConfirmation
                             v-slot="confirmation"
                             :options="{
-                                text: 'A remoção de um ponto será permanente.',
+                                text: 'A remoção de uma lista de paramêtros será permanente.',
                             }"
                         >
+                            <Link
+                                :onBefore="confirmation.show"
+                                :href="
+                                    route(
+                                        'contratos.contratada.sgc.pmqa.configuracao.parametro.destroy',
+                                        {
+                                            contrato: contrato.id,
+                                            produto: produto.slug,
+                                            pmqa: pmqa.id,
+                                            lista: item.id,
+                                        },
+                                    )
+                                "
+                                as="button"
+                                method="delete"
+                                type="button"
+                                class="btn btn-icon btn-danger"
+                            >
+                                <IconTrash />
+                            </Link>
                         </LinkConfirmation>
                     </div>
                 </td>

@@ -18,6 +18,7 @@ use App\Models\SgcPmqaPonto;
 use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
 use App\Models\SgcPmqa;
+use App\Models\SgcPmqaParametroLista;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Response;
@@ -57,6 +58,7 @@ class ProdutosController extends Controller
             'espeleologia' => $this->getCampanhasEspeleologia($contrato),
             default        => collect(), // segurança
         };
+        
 
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
@@ -308,6 +310,19 @@ class ProdutosController extends Controller
             ->pluck('cod_emp')
             ->toArray();
 
+        $listasVinculacoes = SgcPmqaParametroLista::with(['pontos'])
+            ->where('pmqa_id', $pmqa->id)
+            ->get();
+
+        // pontos do pmqa (isso alimenta a lista de checkboxes)
+        $vinculacoes = SgcPmqaPonto::with(['lista', 'vinculacao'])
+            ->where('pmqa_id', $pmqa->id)
+            ->get();
+        Log::info('Create PMQA payload', [
+            'pmqa_id' => $pmqa->id,
+            'vinculacoes_count' => $vinculacoes->count(),
+            'component' => 'Sgc/Contratada/Produtos/Pmqa/Create',
+        ]);
         return inertia('Sgc/Contratada/Produtos/Pmqa/Create', [
             'contrato'        => $contrato,
             'produto'         => ucfirst($produto),
@@ -316,6 +331,8 @@ class ProdutosController extends Controller
             'empreendimentos' => $empreendimentos,
             'pmqa'            => $pmqa, // ✅ sempre com ID
             ...$tabParametros,
+            'vinculacoes' => $vinculacoes,
+            'listasVinculacoes' => $listasVinculacoes
         ]);
     }
 
@@ -360,44 +377,49 @@ class ProdutosController extends Controller
 
     private function getCampanhasPmqa($contrato)
     {
-        return SgcPmqa::where('id_contrato', $contrato)
-            ->get()
-            ->map(function ($pmqa) {
-                return [
-                    // 🔹 Identificação
-                    'id'             => $pmqa->id,
-                    'id_campanha'    => $pmqa->id,
-                    'id_contrato'    => $pmqa->id_contrato,
-                    'chave'          => $pmqa->chave ?? null,
-                    'tipo'           => $pmqa->tipo ?? 'PMQA',
+        $pmqas = SgcPmqa::where('id_contrato', $contrato)->get();
 
-                    // 🔹 Campos usados na LISTAGEM
-                    'empreendimento' => $pmqa->cod_emp ?? 'N/A',
-                    'subproduto'     => $pmqa->tipo ?? 'PMQA',
-                    'data_inicial'   => $pmqa->created_at
-                        ? $pmqa->created_at->format('d/m/Y')
-                        : 'N/A',
-                    'data_final'     => 'N/A',
-                    'status'         => $pmqa->status_aprovacao ?? 'rascunho',
+        $resumoVinc = $this->getResumoVinculacoesPmqa($pmqas->pluck('id')->all());
 
-                    // 🔹 Campos da APRESENTAÇÃO (modal)
-                    'tema'           => $pmqa->tema,
-                    'cod_emp'        => $pmqa->cod_emp,
-                    'especificacao'  => $pmqa->especificacao,
-                    'introducao'     => $pmqa->introducao,
-                    'justificativa'  => $pmqa->justificativa,
-                    'objetivos'      => $pmqa->objetivos,
-                    'metodologia'    => $pmqa->metodologia,
-                    'publico_alvo'   => $pmqa->publico_alvo,
+        return $pmqas->map(function ($pmqa) use ($resumoVinc) {
+            return [
+                'id'             => $pmqa->id,
+                'id_campanha'    => $pmqa->id,
+                'id_contrato'    => $pmqa->id_contrato,
+                'chave'          => $pmqa->chave ?? null,
+                'tipo'           => $pmqa->tipo ?? 'PMQA',
 
-                    // 🔹 Status e datas completas
-                    'status_aprovacao' => $pmqa->status_aprovacao,
-                    'created_at'       => optional($pmqa->created_at)->toISOString(),
-                    'updated_at'       => optional($pmqa->updated_at)->toISOString(),
-                    'deleted_at'       => optional($pmqa->deleted_at)->toISOString(),
-                ];
-            });
+                'empreendimento' => $pmqa->cod_emp ?? 'N/A',
+                'subproduto'     => $pmqa->tipo ?? 'PMQA',
+                'data_inicial'   => $pmqa->created_at ? $pmqa->created_at->format('d/m/Y') : 'N/A',
+                'data_final'     => 'N/A',
+                'status'         => $pmqa->status_aprovacao ?? 'rascunho',
+
+                // ✅ resumo das vinculações
+                'vinculacoesResumo' => $resumoVinc[$pmqa->id] ?? [
+                    'total_listas' => 0,
+                    'total_pontos' => 0,
+                    'total_pontos_vinculados' => 0,
+                ],
+
+                // modal
+                'tema'           => $pmqa->tema,
+                'cod_emp'        => $pmqa->cod_emp,
+                'especificacao'  => $pmqa->especificacao,
+                'introducao'     => $pmqa->introducao,
+                'justificativa'  => $pmqa->justificativa,
+                'objetivos'      => $pmqa->objetivos,
+                'metodologia'    => $pmqa->metodologia,
+                'publico_alvo'   => $pmqa->publico_alvo,
+
+                'status_aprovacao' => $pmqa->status_aprovacao,
+                'created_at'       => optional($pmqa->created_at)->toISOString(),
+                'updated_at'       => optional($pmqa->updated_at)->toISOString(),
+                'deleted_at'       => optional($pmqa->deleted_at)->toISOString(),
+            ];
+        });
     }
+
 
     private function createPmqaByCampanha(
         Request $request,
@@ -415,9 +437,21 @@ class ProdutosController extends Controller
             ->toArray();
 
         $searchParams = $request->only(['columns', 'value']);
-        dd( $searchParams );
         $tabParametros = $this->parametroService->index($pmqa, $searchParams);
+        // listas com pontos (isso alimenta dropdown e a tabela)
+        $listasVinculacoes = SgcPmqaParametroLista::with(['pontos'])
+            ->where('pmqa_id', $pmqa->id)
+            ->get();
 
+        // pontos do pmqa (isso alimenta a lista de checkboxes)
+        $vinculacoes = SgcPmqaPonto::with(['lista', 'vinculacao'])
+            ->where('pmqa_id', $pmqa->id)
+            ->get();
+        Log::info('Create PMQA payload', [
+            'pmqa_id' => $pmqa->id,
+            'vinculacoes_count' => $vinculacoes->count(),
+            'component' => 'Sgc/Contratada/Produtos/Pmqa/Create',
+        ]);
         return inertia('Sgc/Contratada/Produtos/Pmqa/Create', [
             'contrato'        => $contrato,
             'produto'         => ucfirst($produto),
@@ -427,6 +461,91 @@ class ProdutosController extends Controller
             'pmqa'            => $pmqa,
             'subStep'         => (int) $request->query('subStep', 1),
             ...$tabParametros,
+            'vinculacoes' => $vinculacoes,
+            'listasVinculacoes' => $listasVinculacoes
         ]);
+    }
+
+    private function getResumoVinculacoesPmqa(array $pmqaIds): array
+    {
+        if (empty($pmqaIds)) return [];
+
+        // total de listas
+        $listasPorPmqa = SgcPmqaParametroLista::query()
+            ->whereIn('pmqa_id', $pmqaIds)
+            ->selectRaw('pmqa_id, COUNT(*) as total_listas')
+            ->groupBy('pmqa_id')
+            ->pluck('total_listas', 'pmqa_id')
+            ->toArray();
+
+        // total de pontos
+        $pontosPorPmqa = SgcPmqaPonto::query()
+            ->whereIn('pmqa_id', $pmqaIds)
+            ->selectRaw('pmqa_id, COUNT(*) as total_pontos')
+            ->groupBy('pmqa_id')
+            ->pluck('total_pontos', 'pmqa_id')
+            ->toArray();
+
+        // ✅ total de pontos vinculados (JOIN REAL)
+        $pontosVinculadosPorPmqa = DB::table('sgc_pmqa_config_ponto_lista as vpl')
+            ->whereIn('vpl.pmqa_id', $pmqaIds)
+            ->selectRaw('vpl.pmqa_id, COUNT(DISTINCT vpl.ponto_id) as total_pontos_vinculados')
+            ->groupBy('vpl.pmqa_id')
+            ->pluck('total_pontos_vinculados', 'pmqa_id')
+            ->toArray();
+
+        // monta o mapa final
+        $map = [];
+        foreach ($pmqaIds as $id) {
+            $map[$id] = [
+                'total_listas' => $listasPorPmqa[$id] ?? 0,
+                'total_pontos' => $pontosPorPmqa[$id] ?? 0,
+                'total_pontos_vinculados' => $pontosVinculadosPorPmqa[$id] ?? 0,
+            ];
+        }
+
+        return $map;
+    }
+
+    private function getVinculacoesParaTabela(int $pmqaId): array
+    {
+        $rows = DB::table('sgc_pmqa_parametros_lista as l')
+            ->leftJoin('sgc_pmqa_config_ponto_lista as pl', 'pl.lista_id', '=', 'l.id')
+            ->leftJoin('sgc_pmqa_pontos as p', 'p.id', '=', 'pl.ponto_id')
+            ->where('l.pmqa_id', $pmqaId)
+            ->orderBy('l.id')
+            ->orderBy('p.id')
+            ->get([
+                'l.id as lista_id',
+                'l.nome as lista_nome',
+                'p.id as ponto_id',
+                'p.nome_ponto_coleta',
+            ]);
+
+        // Agrupa: lista -> pontos
+        $grouped = [];
+
+        foreach ($rows as $r) {
+            if (!isset($grouped[$r->lista_id])) {
+                $grouped[$r->lista_id] = [
+                    'id' => (int) $r->lista_id,
+                    'nome' => $r->lista_nome,
+                    'pontos' => [],
+                ];
+            }
+
+            // se não tiver ponto (left join), não adiciona
+            if ($r->ponto_id) {
+                $grouped[$r->lista_id]['pontos'][] = [
+                    'id' => (int) $r->ponto_id,
+                    'nome_ponto_coleta' => $r->nome_ponto_coleta,
+                ];
+            }
+        }
+
+        return [
+            'data' => array_values($grouped),
+            'links' => [], // seu componente espera existir (mesmo vazio)
+        ];
     }
 }

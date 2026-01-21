@@ -6,6 +6,9 @@ use App\Models\ServicoPmqaConfiguracaoParecer;
 use App\Models\ServicoPmqaParametroLista;
 use App\Models\ServicoPmqaPonto;
 use App\Models\Servicos;
+use App\Models\SgcPmqa;
+use App\Models\SgcPmqaParametroLista;
+use App\Models\SgcPmqaPonto;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -14,19 +17,18 @@ class VinculacaoPontoService extends BaseModelService
 {
     use Searchable, Deletable;
 
-    protected string $modelClass = ServicoPmqaParametroLista::class;
-    protected string $modelClassConfigParecer = ServicoPmqaConfiguracaoParecer::class;
+    protected string $modelClass = SgcPmqaParametroLista::class;
 
-    public function index(Servicos $servico, $searchParams): array
+    public function index(SgcPmqa $pmqa, $searchParams): array
     {
         $vinculacoes = $this->searchAllColumns(...$searchParams)
             ->with(['pontos'])
-            ->where('fk_servico', $servico->id)
+            ->where('pmqa_id', $pmqa->id)
             ->has('pontos')
             ->paginate()
             ->appends($searchParams);
-        $listas = ServicoPmqaParametroLista::with(['pontos'])->where('fk_servico', $servico->id)->get();
-        $pontos = ServicoPmqaPonto::with(['vinculado'])->where('fk_servico', $servico->id)->get();
+        $listas = SgcPmqaParametroLista::with(['pontos'])->where('pmqa_id', $pmqa->id)->get();
+        $pontos = SgcPmqaPonto::with(['vinculado'])->where('pmqa_id', $pmqa->id)->get();
 
         return [
             'vinculacoes' => $vinculacoes,
@@ -35,13 +37,19 @@ class VinculacaoPontoService extends BaseModelService
         ];
     }
 
-    public function store(Servicos $servico, array $request)
+    public function store(SgcPmqa $pmqa, array $request)
     {
         $this->updateLista($request);
 
-        $modelLista = ServicoPmqaParametroLista::find($request['lista']['id']);
+        $modelLista = SgcPmqaParametroLista::findOrFail($request['lista']['id']);
 
-        $modelLista->pontos()->sync(collect($request['pontos'])->toArray());
+        $syncData = collect($request['pontos'])
+            ->mapWithKeys(fn($pontoId) => [
+                $pontoId => ['pmqa_id' => $pmqa->id]
+            ])
+            ->toArray();
+
+        $modelLista->pontos()->sync($syncData);
 
         return [
             'request' => [
@@ -51,12 +59,13 @@ class VinculacaoPontoService extends BaseModelService
         ];
     }
 
+
     public function updateLista(array $request): void
     {
         $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['lista']['id']);
     }
 
-    public function deleteVinculacao(ServicoPmqaParametroLista $lista)
+    public function deleteVinculacao(SgcPmqaParametroLista $lista)
     {
         $lista->pontos()->sync(collect([])->toArray());
 
@@ -68,14 +77,14 @@ class VinculacaoPontoService extends BaseModelService
         ];
     }
 
-    public function enviarListaFiscal(array $post)
-    {
-        $parecer = $this->modelClassConfigParecer::where('fk_servico', $post['fk_servico'])->first();
+    // public function enviarListaFiscal(array $post)
+    // {
+    //     $parecer = $this->modelClassConfigParecer::where('fk_servico', $post['fk_servico'])->first();
 
-        if (empty($parecer)) {
-            return $this->dataManagement->create(entity: $this->modelClassConfigParecer, infos: $post);
-        }
+    //     if (empty($parecer)) {
+    //         return $this->dataManagement->create(entity: $this->modelClassConfigParecer, infos: $post);
+    //     }
 
-        return $this->dataManagement->update(entity: $this->modelClassConfigParecer, infos: $post, id: $parecer->id);
-    }
+    //     return $this->dataManagement->update(entity: $this->modelClassConfigParecer, infos: $post, id: $parecer->id);
+    // }
 }

@@ -17,17 +17,15 @@ const props = defineProps({
     produto: {type: Object},
     pmqa: {type: Object},
 });
-console.log(props.produto)
 const modalParametros = ref();
 
 const form = useForm({
     id: null,
-    pmqa_id: props.pmqa?.id ?? null, 
+    pmqa_id: props.pmqa?.id ?? null,
     nome: null,
     medir_iqa: false,
     parametros: []
 });
-console.log(props.pmqa);
 
 const reset = () => {
   form.id = null;

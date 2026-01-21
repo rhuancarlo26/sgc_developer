@@ -19,7 +19,7 @@ class DeleteController extends Controller
     {
         $response = $this->pontoService->deletePonto($ponto);
 
-        return to_route('contratos.contratada.servicos.pmqa.configuracao.ponto.index', [
+        return to_route('contratos.contratada.sgc.pmqa.configuracao.ponto.index', [
             'contrato' => $contrato->id,
             'campanha' => $campanha->id
         ])->with('message', $response['content'] ?? $response);

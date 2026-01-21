@@ -136,6 +136,7 @@ Route::prefix('/contratada')->group(function () {
         Route::prefix('/recursos-pmqa')->group(function () {
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/Ponto/Routes/PontoRoutes.php';
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/Parametro/Routes/ParametroRoutes.php';
+            require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/VinculacaoPonto/Routes/VinculacaoPontoRoutes.php';
         });
     });
 

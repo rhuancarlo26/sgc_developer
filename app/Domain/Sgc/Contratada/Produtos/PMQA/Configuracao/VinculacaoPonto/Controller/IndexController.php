@@ -3,9 +3,10 @@
 namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\VinculacaoPonto\Controller;
 
 use App\Domain\Servico\PMQA\app\Utils\ConfigucacaoParecer;
-use App\Domain\Servico\PMQA\Configuracao\VinculacaoPonto\Services\VinculacaoPontoService;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\VinculacaoPonto\Services\VinculacaoPontoService;
 use App\Models\Contrato;
 use App\Models\Servicos;
+use App\Models\SgcPmqa;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,17 +21,16 @@ class IndexController extends Controller
     {
     }
 
-    public function index(Contrato $contrato, Servicos $servico, Request $request): Response
+    public function index(Contrato $contrato, SgcPmqa $pmqa, Request $request): Response
     {
         $searchParams = $request->all('columns', 'value');
 
-        $response = $this->vinculacaoPontoService->index($servico, $searchParams);
-
+        $response = $this->vinculacaoPontoService->index($pmqa, $searchParams);
         return Inertia::render('Servico/PMQA/Configuracao/VinculacaoPonto/Index', [
             'contrato' => $contrato,
-            'servico'  => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+            'pmqa'  => $pmqa->load(['tipo', 'pmqa_config_lista_parecer']),
             ...$response,
-            ...$this->configucacaoParecer->get($servico->id)
+            ...$this->configucacaoParecer->get($pmqa->id)
         ]);
     }
 }

@@ -11,19 +11,23 @@ import { IconPencil } from "@tabler/icons-vue";
 import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 
-const modalVincularPonto = ref({});
-const modalVisualizarPonto = ref({});
+const modalVincularPonto = ref(null);
+const modalVisualizarPonto = ref(null);
 
 const props = defineProps({
+    listas: { type: [Array, Object], default: () => [] },
+    pontos: { type: [Array, Object], default: () => [] },
     vinculacoes: { type: Object },
     contrato: { type: Object },
-    servico: { type: Object },
-    listas: { type: Array },
-    pontos: { type: Array },
+    pmqa: { type: Object },
     aprovacao: { type: Object },
+    produto: { type: Object },
 });
 
-const abrirModalVincularPonto = (item) => {
+const emit = defineEmits(['next', 'prev'])
+
+const abrirModalVincularPonto = (item = null) => {
+    if (!modalVincularPonto.value?.abrirModal) return;
     modalVincularPonto.value.abrirModal(item);
 };
 
@@ -57,7 +61,7 @@ const enviaFiscal = (aprovacao) => {
 };
 </script>
 <template #body>
-    <ModelSearchFormAllColumns>
+    <ModelSearchFormAllColumns :columns="['nome']">
         <template #action>
             <NavButton
                 type-button="primary"
@@ -78,39 +82,53 @@ const enviaFiscal = (aprovacao) => {
         :records="vinculacoes"
         table-class="table-hover"
     >
-        <tr>
-            <td>{{ item.nome }}</td>
-            <td class="text-center">{{ item.pontos.length }}</td>
-            <td class="text-center">
-                <LinkConfirmation
-                    v-slot="confirmation"
-                    v-if="ap(aprovacao)"
-                    :options="{
-                        text: 'A remoção de um ponto será permanente.',
-                    }"
-                >
-                    <Link
-                        :onBefore="confirmation.show"
-                        :href="
-                            route(
-                                'contratos.contratada.servicos.pmqa.configuracao.vinculacao_ponto.destroy',
-                                {
-                                    contrato: contrato.id,
-                                    servico: servico.id,
-                                    lista: item.id,
-                                },
-                            )
-                        "
-                        as="button"
-                        method="delete"
-                        type="button"
-                        class="btn btn-icon btn-danger"
+        <template #body="{ item }">
+            <tr>
+                <td>{{ item.nome }}</td>
+                <td class="text-center">{{ item.pontos.length }}</td>
+                <td class="text-center">
+                    <NavButton
+                        :icon="IconEye"
+                        class="btn-icon"
+                        type-button="info"
+                        @click="abrirModalVisualizarPonto(item)"
+                    />
+                    <NavButton
+                        :icon="IconPencil"
+                        class="btn-icon"
+                        type-button="primary"
+                        @click="abrirModalVincularPonto(item)"
+                    />
+                    <LinkConfirmation
+                        v-slot="confirmation"
+                        :options="{
+                            text: 'A remoção de um ponto será permanente.',
+                        }"
                     >
-                        <IconTrash />
-                    </Link>
-                </LinkConfirmation>
-            </td>
-        </tr>
+                        <Link
+                            :onBefore="confirmation.show"
+                            :href="
+                                route(
+                                    'contratos.contratada.sgc.pmqa.configuracao.vinculacao_ponto.destroy',
+                                    {
+                                        contrato: contrato.id,
+                                        produto: produto.slug,
+                                        pmqa: pmqa.id,
+                                        lista: item.id,
+                                    },
+                                )
+                            "
+                            as="button"
+                            method="delete"
+                            type="button"
+                            class="btn btn-icon btn-danger"
+                        >
+                            <IconTrash />
+                        </Link>
+                    </LinkConfirmation>
+                </td>
+            </tr>
+        </template>
     </Table>
     <div class="d-flex justify-content-between my-4 px-1">
         <NavButton
@@ -129,10 +147,11 @@ const enviaFiscal = (aprovacao) => {
 
     <ModalVincularPonto
         ref="modalVincularPonto"
-        :listas="listas"
+        :listas="listas?.data ?? []"
         :pontos="pontos"
         :contrato="contrato"
-        :servico="servico"
+        :pmqa="pmqa"
+        :produto="produto"
     />
     <ModalVisualizarPonto ref="modalVisualizarPonto" />
 </template>

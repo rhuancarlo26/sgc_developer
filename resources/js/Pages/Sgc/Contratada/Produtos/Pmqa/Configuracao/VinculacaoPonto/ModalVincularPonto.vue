@@ -11,57 +11,63 @@ import {ref} from "vue";
 
 const props = defineProps({
     contrato: {type: Object},
-    servico: {type: Object},
+    pmqa: {type: Object},
     listas: {type: Array},
-    pontos: {type: Array}
+    pontos: {type: Array},
+    produto: {type: Object},
 });
 
 const modalVincularPonto = ref();
 const vinculacao = ref({});
 
 const form = useForm({
-    fk_servico: props.servico.id,
-    lista: null,
-    periodicidade: null,
-    relatorio_parcial: null,
-    relatorio_acomulado: null,
-    pontos: []
-})
+  pmqa_id: props.pmqa.id,   // ✅
+  lista: null,
+  periodicidade: null,
+  relatorio_parcial: null,
+  relatorio_acomulado: null,
+  pontos: [],
+});
 
 const reset = () => {
-    form.servico_id = props.servico.id;
-    form.lista = null;
-    form.periodicidade = null;
-    form.relatorio_parcial = null;
-    form.relatorio_acomulado = null;
-    form.pontos = [];
-}
+  form.pmqa_id = props.pmqa.id;  // ✅
+  form.lista = null;
+  form.periodicidade = null;
+  form.relatorio_parcial = null;
+  form.relatorio_acomulado = null;
+  form.pontos = [];
+};
 
-const abrirModal = (item) => {
-    reset();
-    vinculacao.value = {};
 
-    if (item) {
-        vinculacao.value = item;
+const abrirModal = (item = null) => {
+  reset();
+  vinculacao.value = {};
 
-        form.id = item.id
-        form.periodicidade = item.periodicidade;
-        form.relatorio_parcial = item.relatorio_parcial;
-        form.relatorio_acomulado = item.relatorio_acomulado;
-        form.lista = props.listas[props.listas.findIndex(lista => lista.id === item.id)]
+  if (item) {
+    vinculacao.value = item;
 
-        if (item.pontos.length) {
-            form.pontos = item.pontos.map(a => a.id) ?? []
-        }
-    }
+    form.id = item.id ?? null;
+    form.periodicidade = item.periodicidade ?? null;
+    form.relatorio_parcial = item.relatorio_parcial ?? null;
+    form.relatorio_acomulado = item.relatorio_acomulado ?? null;
 
-    modalVincularPonto.value.getBsModal().show();
-}
+    form.lista =
+      props.listas.find(l => l.id === (item.lista_id ?? item.id)) ?? null;
+
+    form.pontos = item.pontos?.map(p => p.id) ?? [];
+  }
+
+  modalVincularPonto.value?.getBsModal?.()?.show(); // ✅ não quebra
+};
+
+const listasArray = computed(() =>
+  Array.isArray(props.listas) ? props.listas : (props.listas?.data ?? [])
+);
 
 const listasNaoUtilizados = computed(() => {
-    return props.listas.filter(lista => {
-        return !lista.pontos.length || lista.id === vinculacao.value.id;
-    });
+  return listasArray.value.filter((lista) => {
+    return !lista.pontos?.length || lista.id === vinculacao.value.id;
+  });
 });
 
 const pontosNaoUtilizados = computed(() => {
@@ -80,15 +86,16 @@ const pontosNaoUtilizados = computed(() => {
 });
 
 const saveVinculacaoPontos = () => {
-    form.post(route('contratos.contratada.servicos.pmqa.configuracao.vinculacao_ponto.store', {
+    form.post(route('contratos.contratada.sgc.pmqa.configuracao.vinculacao_ponto.store', {
         contrato: props.contrato.id,
-        servico: props.servico.id
+        produto: props.produto.slug,
+        pmqa: props.pmqa.id
     }), {
         onSuccess: () => modalVincularPonto.value.getBsModal().hide()
     });
 }
 
-defineExpose({abrirModal});
+defineExpose({ abrirModal });
 </script>
 
 <template>
@@ -163,7 +170,7 @@ defineExpose({abrirModal});
                             </td>
                             <td class="text-center">{{ ponto.classe }}</td>
                             <td class="text-center">{{ ponto.tipo_ambiente }}</td>
-                            <td class="text-center">{{ ponto.UF }}</td>
+                            <td class="text-center">{{ ponto.uf }}</td>
                             <td class="text-center">{{ ponto.municipio }}</td>
                             <td class="text-center">{{ ponto.bacia_hidrografica }}</td>
                             <td class="text-center">{{ ponto.km_rodovia }}</td>

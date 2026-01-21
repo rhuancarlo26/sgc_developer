@@ -1,9 +1,15 @@
 <script setup>
 import { ref, computed } from "vue";
-import { router } from "@inertiajs/vue3";
+import { Link, router } from "@inertiajs/vue3";
 import NavButton from "@/Components/NavButton.vue";
 import Table from "@/Components/Table.vue";
 import ModalPontos from "./ModalPontos.vue";
+import SgcLinkConfirmation from "@/Components/SgcLinkConfirmation.vue";
+import { IconEye } from "@tabler/icons-vue";
+import { IconPencil } from "@tabler/icons-vue";
+import { IconTrash } from "@tabler/icons-vue";
+import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
+import ModalFormPonto from "./ModalFormPonto.vue";
 
 const props = defineProps({
     contrato: { type: [Object, String] },
@@ -22,10 +28,20 @@ const contratoId = computed(() =>
 
 const modalImportarPonto = ref(null);
 const modalVisualizarPonto = ref(null);
+const modalFormPonto = ref(null);
 
 const abrirModalImportar = () => {
     modalImportarPonto.value.abrirModal();
 };
+
+const abrirModalVisualizar = (item) => {
+    modalVisualizarPonto.value?.abrirModal(item);
+};
+
+const abrirEditar = (item) => modalFormPonto.value?.abrirModal(item);
+const abrirNovo = () => modalFormPonto.value?.abrirModal(null);
+
+const onSaved = () => router.reload({ only: ["pontos"] });
 
 const pontosTable = computed(() => ({
     data: props.pontos,
@@ -42,7 +58,7 @@ const atualizarListaDePontos = () => {
 <template #body>
     <div class="card">
         <div class="card-body">
-            <h2>Importar pontos</h2>
+            <h2>Pontos de coleta</h2>
             <div class="d-flex justify-content-end mb-3">
                 <a class="btn btn-info me-1" target="_blank">Modelo</a>
                 <NavButton
@@ -99,6 +115,51 @@ const atualizarListaDePontos = () => {
                         <td class="text-center">
                             {{ item.estaca }}
                         </td>
+                        <td class="text-center">
+                            <div class="acao-btns">
+                                <NavButton
+                                    type-button="info"
+                                    class="btn-icon"
+                                    @click="abrirModalVisualizar(item)"
+                                    :icon="IconEye"
+                                />
+
+                                <NavButton
+                                    type-button="primary"
+                                    class="btn-icon"
+                                    :icon="IconPencil"
+                                    @click="abrirEditar(item)"
+                                />
+
+                                <SgcLinkConfirmation
+                                    v-slot="confirmation"
+                                    :options="{
+                                        text: 'A remoção de um ponto será permanente.',
+                                    }"
+                                >
+                                    <Link
+                                        :onBefore="confirmation.show"
+                                        :href="
+                                            route(
+                                                'contratos.contratada.sgc.pmqa.configuracao.ponto.delete',
+                                                {
+                                                    contrato: contratoId,
+                                                    produto: props.produto.slug,
+                                                    pmqa: props.pmqa,
+                                                    ponto: item.id,
+                                                },
+                                            )
+                                        "
+                                        as="button"
+                                        method="delete"
+                                        type="button"
+                                        class="btn btn-icon btn-danger"
+                                    >
+                                        <IconTrash />
+                                    </Link>
+                                </SgcLinkConfirmation>
+                            </div>
+                        </td>
                     </tr>
                 </template>
             </Table>
@@ -123,4 +184,40 @@ const atualizarListaDePontos = () => {
         :pmqa="pmqa"
         ref="modalImportarPonto"
     />
+    <ModalFormPonto
+        ref="modalFormPonto"
+        :contrato-id="contrato"
+        :produto-slug="produto"
+        :pmqa="pmqa"
+        @saved="onSaved"
+    />
+    <ModalVisualizarPonto ref="modalVisualizarPonto" />
 </template>
+
+<style scoped>
+.table-icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* força o <li> a não quebrar layout */
+.table-icon-wrapper li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* centraliza o conteúdo do NavLink */
+.table-icon-wrapper .nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem; /* igual btn-icon */
+}
+
+/* corrige alinhamento do SVG */
+.table-icon-wrapper svg {
+    display: block;
+}
+</style>
