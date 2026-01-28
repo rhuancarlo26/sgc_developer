@@ -5,24 +5,28 @@ namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Services;
 use App\Models\ServicoPmqaCampanha;
 use App\Models\ServicoPmqaPonto;
 use App\Models\Servicos;
+use App\Models\SgcPmqa;
+use App\Models\SgcPmqaExecCampanha;
+use App\Models\SgcPmqaPonto;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
+use Illuminate\Support\Facades\Log;
 
 class CampanhaService extends BaseModelService
 {
     use Searchable, Deletable;
 
-    protected string $modelClass = ServicoPmqaCampanha::class;
+    protected string $modelClass = SgcPmqaExecCampanha::class;
 
-    public function index(Servicos $servico, $searchParams): array
+    public function index(SgcPmqa $pmqa, $searchParams): array
     {
         $campanhas = $this->searchAllColumns(...$searchParams)
             ->with(['pontos'])
-            ->where('fk_servico', $servico->id)
+            ->where('pmqa_id', $pmqa->id)
             ->paginate()
             ->appends($searchParams);
-        $pontos = ServicoPmqaPonto::with(['vinculado', 'campanhas'])->where('fk_servico', $servico->id)->get();
+        $pontos = SgcPmqaPonto::with(['vinculacao', 'campanhas'])->where('pmqa_id', $pmqa->id)->get();
 
         return [
             'campanhas' => $campanhas,
@@ -32,9 +36,25 @@ class CampanhaService extends BaseModelService
 
     public function store(array $request): array
     {
-        $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+        Log::info('CampanhaService@store', [
+            'pmqa_id' => $request['pmqa_id'] ?? null,
+            'pontos_count' => isset($request['pontos']) ? count($request['pontos']) : null,
+        ]);
 
-        $response['model']->pontos()->sync(collect($request['pontos'])->toArray());
+        // MUITO recomendado: tirar 'pontos' do create (evita create “interpretar” array)
+        $dadosCampanha = collect($request)->except('pontos')->toArray();
+
+        $response = $this->dataManagement->create(entity: $this->modelClass, infos: $dadosCampanha);
+
+        Log::info('CampanhaService@store created', [
+            'campanha_id' => $response['model']->id ?? null,
+        ]);
+
+        $response['model']->pontos()->sync($request['pontos'] ?? []);
+
+        Log::info('CampanhaService@store synced', [
+            'campanha_id' => $response['model']->id ?? null,
+        ]);
 
         return $response;
     }

@@ -9,7 +9,7 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fk_campanha_ponto' => ['required'],
+            'campanha_ponto_id' => ['required'],
             'medido' => ['nullable'],
             'iqa' => ['nullable'],
             'parametros' => ['nullable'],

@@ -9,10 +9,10 @@ use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\Medir\app\Controller\Update
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/medir')->group(function () {
-  Route::get('{servico}/{campanha}/create/{ponto}',              [CreateController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.medir.create');
-  Route::post('{servico}/{campanha}/store/{ponto}',              [StoreController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.medir.store');
-  Route::post('{servico}/{campanha}/store_arquivo/{ponto}',      [StoreArquivoController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.medir.store_arquivo');
-  Route::get('{servico}/{campanha}/show_arquivo/{arquivo}',      [ShowArquivoController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.medir.show_arquivo');
-  Route::delete('{servico}/{campanha}/delete_arquivo/{arquivo}', [DeleteArquivoController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.medir.delete_arquivo');
-  Route::patch('{servico}/{campanha}/update/{ponto}',            [UpdateController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.medir.update');
+  Route::get('{pmqa}/{campanha}/create/{ponto}',              [CreateController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.medir.create');
+  Route::post('{pmqa}/{campanha}/store/{ponto}',              [StoreController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.medir.store');
+  Route::post('{pmqa}/{campanha}/store_arquivo/{ponto}',      [StoreArquivoController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.medir.store_arquivo');
+  Route::get('{pmqa}/{campanha}/show_arquivo/{arquivo}',      [ShowArquivoController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.medir.show_arquivo');
+  Route::delete('{pmqa}/{campanha}/delete_arquivo/{arquivo}', [DeleteArquivoController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.medir.delete_arquivo');
+  Route::patch('{servico}/{campanha}/update/{ponto}',            [UpdateController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.medir.update');
 });

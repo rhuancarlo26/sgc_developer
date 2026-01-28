@@ -5,6 +5,9 @@ namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\Medir\app\Services;
 use App\Models\ServicoPmqaCampanhaPontoMedicao;
 use App\Models\ServicoPmqaCampanhaPontoMedicaoArquivo;
 use App\Models\ServicoPmqaCampanhaPontoMedicaoParametro;
+use App\Models\SgcPmqaCampanhaPontoMedicao;
+use App\Models\SgcPmqaCampanhaPontoMedicaoArquivo;
+use App\Models\SgcPmqaCampanhaPontoMedicaoParametro;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -14,8 +17,8 @@ class MedicaoService extends BaseModelService
 {
     use Searchable, Deletable;
 
-    protected string $modelClass = ServicoPmqaCampanhaPontoMedicao::class;
-    protected string $modelClassArquivo = ServicoPmqaCampanhaPontoMedicaoArquivo::class;
+    protected string $modelClass = SgcPmqaCampanhaPontoMedicao::class;
+    protected string $modelClassArquivo = SgcPmqaCampanhaPontoMedicaoArquivo::class;
 
     public function store(array $request): array
     {
@@ -33,20 +36,20 @@ class MedicaoService extends BaseModelService
         $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
 
         if ($request['parametros']) {
-            $this->syncParametros(ServicoPmqaCampanhaPontoMedicao::find($request['id']), $request['parametros']);
+            $this->syncParametros(SgcPmqaCampanhaPontoMedicao::find($request['id']), $request['parametros']);
         }
 
         return $response;
     }
 
-    public function syncParametros(ServicoPmqaCampanhaPontoMedicao $medicao, array $parametros): void
+    public function syncParametros(SgcPmqaCampanhaPontoMedicao $medicao, array $parametros): void
     {
-        ServicoPmqaCampanhaPontoMedicaoParametro::where('fk_ponto_medicao', $medicao->id)->delete();
+        SgcPmqaCampanhaPontoMedicaoParametro::where('pmqa_ponto_medicao_id', $medicao->id)->delete();
 
         foreach ($parametros as $key => $value) {
-            ServicoPmqaCampanhaPontoMedicaoParametro::create([
-                'fk_ponto_medicao' => $medicao->id,
-                'fk_parametro' => $key,
+            SgcPmqaCampanhaPontoMedicaoParametro::create([
+                'pmqa_ponto_medicao_id' => $medicao->id,
+                'parametro_id' => $key,
                 'medicao' => $value
             ]);
         }
@@ -66,7 +69,7 @@ class MedicaoService extends BaseModelService
         }
     }
 
-    public function deleteArquivo(ServicoPmqaCampanhaPontoMedicaoArquivo $arquivo): array
+    public function deleteArquivo(SgcPmqaCampanhaPontoMedicaoArquivo $arquivo): array
     {
         Storage::delete($arquivo->caminho_arquivo);
 

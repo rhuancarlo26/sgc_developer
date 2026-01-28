@@ -9,10 +9,10 @@ use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\Coleta\app\Controller\Updat
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/coleta')->group(function () {
-    Route::get('{servico}/{campanha}/create/{ponto}', [CreateController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.coleta.create');
-    Route::get('{servico}/{campanha}/show_arquivo/{arquivo}', [ShowArquivoController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.coleta.show_arquivo');
-    Route::delete('{servico}/{campanha}/delete_arquivo/{arquivo}', [DeleteArquivoController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.coleta.delete_arquivo');
-    Route::post('{servico}/{campanha}/store/{coleta?}', [StoreController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.coleta.store');
-    Route::post('{servico}/{campanha}/store_arquivo', [StoreArquivoController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.coleta.store_arquivo');
-    Route::patch('{servico}/{campanha}/update', [UpdateController::class, 'index'])->name('contratos.contratada.servicos.pmqa.execucao.coleta.update');
+    Route::get('{pmqa}/{campanha}/create/{ponto}', [CreateController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.coleta.create');
+    Route::get('{pmqa}/{campanha}/show_arquivo/{arquivo}', [ShowArquivoController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.coleta.show_arquivo');
+    Route::delete('{pmqa}/{campanha}/delete_arquivo/{arquivo}', [DeleteArquivoController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.coleta.delete_arquivo');
+    Route::post('{pmqa}/{campanha}/store/{coleta?}', [StoreController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.coleta.store');
+    Route::post('{pmqa}/{campanha}/store_arquivo', [StoreArquivoController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.coleta.store_arquivo');
+    Route::patch('{pmqa}/{campanha}/update', [UpdateController::class, 'index'])->name('contratos.contratada.sgc.pmqa.execucao.coleta.update');
 });

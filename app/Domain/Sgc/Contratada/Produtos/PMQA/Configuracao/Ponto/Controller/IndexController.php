@@ -5,6 +5,7 @@ namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Ponto\Controller;
 use App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Parametro\Services\ParametroService;
 use App\Models\Contrato;
 use App\Models\SgcPmqa;
+use App\Models\SgcPmqaExecCampanha;
 use App\Models\SgcPmqaParametroLista;
 use App\Models\SgcPmqaPonto;
 use App\Shared\Http\Controllers\Controller;
@@ -47,6 +48,18 @@ class IndexController extends Controller
         $listas = SgcPmqaParametroLista::where('pmqa_id', $pmqa)->get(['id', 'nome', 'medir_iqa']);
         $pontosVinculados = SgcPmqaPonto::where('pmqa_id', $pmqa)->get(['id', 'nome_ponto_coleta']);
 
+        $campanhaTermo = $request->query('campanha'); // ex: ?campanha=teste
+
+        $campanhas = SgcPmqaExecCampanha::query()
+            ->with(['pontos']) // traz os pontos de cada campanha
+            ->where('pmqa_id', $pmqaModel->id)
+            ->when($campanhaTermo, function ($q) use ($campanhaTermo) {
+                $q->where('nome_campanha', 'like', "%{$campanhaTermo}%");
+            })
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->appends($request->query());
+
         return Inertia::render('Sgc/Contratada/Produtos/Pmqa/Create', [
             'contrato'  => $contratoModel->id,
             'contratos' => $contratoModel,
@@ -61,7 +74,8 @@ class IndexController extends Controller
             'subStep'   => (int) $request->query('subStep', 2),
             'tab'       => $request->query('tab', 'configuracao'),
             'vinculacoes' => $vinculacoes,
-            'pontosVinculados' => $pontosVinculados
+            'pontosVinculados' => $pontosVinculados,
+            'campanhas' => $campanhas,
         ]);
     }
 

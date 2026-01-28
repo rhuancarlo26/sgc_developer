@@ -14,7 +14,6 @@ const lista = ref({});
 
 const abrirModal = (item) => {
     lista.value = item;
-    console.log(item)
     modalVisualizarPonto.value.getBsModal().show();
 }
 

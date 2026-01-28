@@ -2,12 +2,15 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\Medir\app\Controller;
 
-use App\Domain\Servico\PMQA\Execucao\Medir\app\Requests\StoreRequest;
-use App\Domain\Servico\PMQA\Execucao\Medir\app\Services\MedicaoService;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\Medir\app\Requests\StoreRequest;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\Medir\app\Services\MedicaoService;
 use App\Models\Contrato;
 use App\Models\ServicoPmqaCampanha;
 use App\Models\ServicoPmqaCampanhaPonto;
 use App\Models\Servicos;
+use App\Models\SgcPmqa;
+use App\Models\SgcPmqaCampanha;
+use App\Models\SgcPmqaCampanhasPonto;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -19,11 +22,11 @@ class StoreController extends Controller
     {
     }
 
-    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, ServicoPmqaCampanhaPonto $ponto, StoreRequest $request): RedirectResponse
+    public function index(Contrato $contrato, string $produto, SgcPmqa $pmqa, SgcPmqaCampanha $campanha, SgcPmqaCampanhasPonto $ponto, StoreRequest $request): RedirectResponse
     {
         $post = [];
 
-        $post['fk_campanha_ponto'] = $request->validated('fk_campanha_ponto');
+        $post['campanha_ponto_id'] = $request->validated('campanha_ponto_id');
         $post['campanha_id'] = $campanha->id;
         $post['medido'] = $request->validated('medido');
 
@@ -41,6 +44,6 @@ class StoreController extends Controller
 
         $response = $this->medicaoService->store($post);
 
-        return to_route('contratos.contratada.servicos.pmqa.execucao.medir.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id, 'ponto' => $ponto->id])->with('message', $response['request']);
+        return to_route('contratos.contratada.sgc.pmqa.execucao.medir.create', ['contrato' => $contrato->id, 'produto' => $produto, 'pmqa' => $pmqa->id, 'campanha' => $campanha->id, 'ponto' => $ponto->id])->with('message', $response['request']);
     }
 }

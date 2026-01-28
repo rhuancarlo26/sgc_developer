@@ -2,11 +2,12 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\Coleta\app\Controller;
 
-use App\Domain\Servico\PMQA\Execucao\Coleta\app\Requests\StoreRequest;
-use App\Domain\Servico\PMQA\Execucao\Coleta\app\Services\ColetaService;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\Coleta\app\Requests\StoreRequest;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\Coleta\app\Services\ColetaService;
 use App\Models\Contrato;
 use App\Models\ServicoPmqaCampanha;
 use App\Models\Servicos;
+use App\Models\SgcPmqa;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -17,11 +18,11 @@ class StoreController extends Controller
     {
     }
 
-    public function index(Contrato $contrato, Servicos $servico, ServicoPmqaCampanha $campanha, StoreRequest $request): RedirectResponse
+    public function index(Contrato $contrato, string $produto, SgcPmqa $pmqa, ServicoPmqaCampanha $campanha, StoreRequest $request): RedirectResponse
     {
         $post = [];
 
-        $post['fk_campanha_ponto'] = $request->validated('fk_campanha_ponto');
+        $post['campanha_ponto_id'] = $request->validated('campanha_ponto_id');
         $post['dt_coleta'] = $request->validated('dt_coleta');
         $post['coleta'] = $request->validated('coleta');
 
@@ -41,6 +42,6 @@ class StoreController extends Controller
 
         $response = $this->coletaService->store($post);
 
-        return to_route('contratos.contratada.servicos.pmqa.execucao.coleta.create', ['contrato' => $contrato->id, 'servico' => $servico->id, 'campanha' => $campanha->id, 'ponto' => $request->fk_campanha_ponto])->with('message', $response['request']);
+        return to_route('contratos.contratada.sgc.pmqa.execucao.coleta.create', ['contrato' => $contrato->id, 'produto' => $produto, 'pmqa' => $pmqa->id, 'campanha' => $campanha->id, 'ponto' => $request->campanha_ponto_id])->with('message', $response['request']);
     }
 }

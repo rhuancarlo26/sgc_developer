@@ -2,26 +2,31 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Controller;
 
-use App\Domain\Servico\PMQA\Execucao\app\Requests\StoreRequest;
-use App\Domain\Servico\PMQA\Execucao\app\Services\CampanhaService;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Requests\StoreRequest;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Services\CampanhaService;
 use App\Models\Contrato;
-use App\Models\Servicos;
+use App\Models\SgcPmqa;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 
 class StoreController extends Controller
 {
-    public function __construct(private readonly CampanhaService $campanhaService)
-    {
-    }
+    public function __construct(private readonly CampanhaService $campanhaService) {}
 
-    public function index(Contrato $contrato, Servicos $servico, StoreRequest $request): RedirectResponse
-    {
+    public function index(
+        Contrato $contrato,
+        string $produto,
+        SgcPmqa $pmqa,
+        StoreRequest $request
+    ): RedirectResponse {
         $response = $this->campanhaService->store($request->validated());
 
-        return to_route('contratos.contratada.servicos.pmqa.execucao.index', [
+        return to_route('contratos.contratada.sgc.pmqa.execucao.index', [
             'contrato' => $contrato->id,
-            'servico'  => $servico->id
+            'produto'  => $produto,
+            'pmqa'     => $pmqa->id,
+            'tab'      => 'execucao',
+            'subStep'  => 5, 
         ])->with('message', $response['request']);
     }
 }

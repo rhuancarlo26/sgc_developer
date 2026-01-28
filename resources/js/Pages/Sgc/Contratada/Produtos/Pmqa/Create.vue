@@ -1,17 +1,14 @@
 <script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import Breadcrumb from "@/Components/Breadcrumb.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import Index from "./Configuracao/Ponto/Index.vue";
 import IndexParametros from "./Configuracao/Parametro/Index.vue";
 import IndexVincularParametro from "./Configuracao/VinculacaoPonto/Index.vue";
-import NavbarContrato from "../../NavbarContrato.vue";
-import InputLabel from "@/Components/InputLabel.vue";
+import IndexExecucao from "./Execucao/Index.vue";
 import { usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
-import InputError from "@/Components/InputError.vue";
-import { IconDeviceFloppy } from "@tabler/icons-vue";
+import ProdutoTabsLayout from "../ProdutoTabsLayout.vue";
+import ApresentacaoForm from "./ApresentacaoForm.vue";
 
 const props = defineProps({
     contrato: { type: [Object, String, Number], required: true },
@@ -23,8 +20,10 @@ const props = defineProps({
     parametros: { type: Array, default: () => [] },
     listas: { type: Object },
     vinculacoes: { type: Object },
+    campanhas: { type: Object },
+    campanha: { type: Object },
+    pontosExecucao: {type: Object }
 });
-
 const page = usePage();
 
 const subStep = ref(Number(page.props.subStep) || 1);
@@ -67,8 +66,8 @@ const setActiveTab = (tabId) => {
 const salvarApresentacao = () => {
     form.patch(
         route("sgc.contratada.produtos.pmqa.update", [
-            props.contrato,
-            props.produto.slug,
+            props.contratos,
+            props.produto,
         ]),
         {
             preserveScroll: true,
@@ -125,364 +124,78 @@ const produtoNome = computed(() =>
         ? props.produto
         : (props.produto?.slug ?? props.produto?.nome),
 );
+
+watch(activeTab, (tab) => {
+  if (tab === 'execucao') {
+    router.visit(
+      route('contratos.contratada.sgc.pmqa.execucao.index', [
+        props.contratos.id,
+        props.produto.slug,
+        props.pmqa.id,
+      ]),
+      {
+        preserveState: false,
+        preserveScroll: true,
+      }
+    )
+  }
+})
+
 </script>
 
 <template>
-    <Head :title="`${contratos.contratada.slice(0, 10)}...`" />
-    <AuthenticatedLayout>
-        <template #header>
-            <div class="w-100 d-flex justify-content-between">
-                <Breadcrumb
-                    class="align-self-center"
-                    :links="[
-                        {
-                            route: route(
-                                'contratos.gestao.listagem',
-                                contratos.tipo_contrato,
-                            ),
-                            label: `Gestão de Contratos`,
-                        },
-                        { route: '#', label: contratos.contratada },
-                    ]"
-                />
-                <!-- <Link
-                    class="btn btn-primary"
-                    :href="
-                        route('contratos.contratada.servicos.index', {
-                            contrato: props.contratos.id,
-                        })
-                    "
-                >
-                    Voltar
-                </Link> -->
-            </div>
+    <ProdutoTabsLayout
+        :contratos="contratos"
+        :title="'PMQA - EIA'"
+        v-model:activeTab="activeTab"
+    >
+        <template #apresentacao>
+            <ApresentacaoForm
+                :pmqa="pmqa"
+                :contratos="contratos"
+                :produto="produto"
+                :temas="temas"
+                :empreendimentos="empreendimentos"
+                @saved="subStep = 2"
+            />
         </template>
 
-        <NavbarContrato :tipo="contratos">
-            <template #body>
-                <div class="card">
-                    <div class="card-body">
-                        <h2 class="text-center mb-4">
-                            CADASTRAR {{ produtoNome.toUpperCase() }}
-                        </h2>
-                        <ul class="nav nav-tabs mb-4">
-                            <li class="nav-item">
-                                <a
-                                    class="nav-link"
-                                    :class="{
-                                        active: activeTab === 'apresentacao',
-                                    }"
-                                    @click.prevent="
-                                        setActiveTab('apresentacao')
-                                    "
-                                    >Apresentacao</a
-                                >
-                            </li>
-                            <li class="nav-item">
-                                <a
-                                    class="nav-link"
-                                    :class="{
-                                        active: activeTab === 'configuracao',
-                                    }"
-                                    @click.prevent="
-                                        setActiveTab('configuracao')
-                                    "
-                                    >Configuração</a
-                                >
-                            </li>
-                            <li class="nav-item">
-                                <a
-                                    class="nav-link"
-                                    :class="{
-                                        active: activeTab === 'resultados',
-                                    }"
-                                    @click.prevent="setActiveTab('resultados')"
-                                    >Resultados</a
-                                >
-                            </li>
-                            <li class="nav-item">
-                                <a
-                                    class="nav-link"
-                                    :class="{ active: activeTab === 'anexos' }"
-                                    @click.prevent="setActiveTab('anexos')"
-                                    >Anexos</a
-                                >
-                            </li>
-                        </ul>
-                        <div class="tab-content">
-                            <div
-                                v-if="activeTab === 'apresentacao'"
-                                class="tab-pane fade"
-                                :class="{
-                                    'show active': activeTab === 'apresentacao',
-                                }"
-                            >
-                                <!-- Subetapa 1/5 -->
-                                <div v-if="subStep === 1">
-                                    <h4 class="mb-3" style="text-align: center">
-                                        APRESENTAÇÃO
-                                    </h4>
-                                    <form @submit.prevent="salvarApresentacao">
-                                        <div class="row mb-4">
-                                            <div class="col form-group">
-                                                <InputLabel
-                                                    value="Tema"
-                                                    for="tema"
-                                                />
-                                                <v-select
-                                                    :options="temas"
-                                                    label="nome_tema"
-                                                    :reduce="(t) => t.nome_tema"
-                                                    v-model="form.tema"
-                                                >
-                                                    <template #no-options="{}">
-                                                        Nenhum registro
-                                                        encontrado.
-                                                    </template>
-                                                </v-select>
-                                                <InputError
-                                                    :message="form.errors.tema"
-                                                />
-                                            </div>
-                                            <div class="col form-group">
-                                                <InputLabel
-                                                    value="Código de Empreendimento"
-                                                    for="cod_emp"
-                                                />
-                                                <v-select
-                                                    :options="empreendimentos"
-                                                    label="nome"
-                                                    v-model="form.cod_emp"
-                                                >
-                                                    <template #no-options="{}">
-                                                        Nenhum registro
-                                                        encontrado.
-                                                    </template>
-                                                </v-select>
-                                                <InputError
-                                                    :message="form.errors.tipo"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-4">
-                                            <div class="col form-group">
-                                                <InputLabel
-                                                    value="Especificação"
-                                                    for="especificacao"
-                                                />
-                                                <textarea
-                                                    name="especificacao"
-                                                    id="especificacao"
-                                                    class="form-control"
-                                                    v-model="form.especificacao"
-                                                    rows="5"
-                                                ></textarea>
-                                                <InputError
-                                                    :message="
-                                                        form.errors
-                                                            .especificacao
-                                                    "
-                                                />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-4">
-                                            <div class="col form-group">
-                                                <InputLabel
-                                                    value="Introdução"
-                                                    for="introducao"
-                                                />
-                                                <textarea
-                                                    name="introducao"
-                                                    id="introducao"
-                                                    class="form-control"
-                                                    v-model="form.introducao"
-                                                    rows="5"
-                                                ></textarea>
-                                                <InputError
-                                                    :message="
-                                                        form.errors.introducao
-                                                    "
-                                                />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-4">
-                                            <div class="col form-group">
-                                                <InputLabel
-                                                    value="Justificativa"
-                                                    for="justificativa"
-                                                />
-                                                <textarea
-                                                    name="justificativa"
-                                                    id="justificativa"
-                                                    class="form-control"
-                                                    v-model="form.justificativa"
-                                                    rows="5"
-                                                ></textarea>
-                                                <InputError
-                                                    :message="
-                                                        form.errors
-                                                            .justificativa
-                                                    "
-                                                />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-4">
-                                            <div class="col form-group">
-                                                <InputLabel
-                                                    value="Objetivos"
-                                                    for="objetivo"
-                                                />
-                                                <textarea
-                                                    name="objetivo"
-                                                    id="objetivo"
-                                                    class="form-control"
-                                                    v-model="form.objetivos"
-                                                    rows="5"
-                                                ></textarea>
-                                                <InputError
-                                                    :message="
-                                                        form.errors.objetivos
-                                                    "
-                                                />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-4">
-                                            <div class="col form-group">
-                                                <InputLabel
-                                                    value="Metodologia"
-                                                    for="metodologia"
-                                                />
-                                                <textarea
-                                                    name="metodologia"
-                                                    id="metodologia"
-                                                    class="form-control"
-                                                    v-model="form.metodologia"
-                                                    rows="5"
-                                                ></textarea>
-                                                <InputError
-                                                    :message="
-                                                        form.errors.metodologia
-                                                    "
-                                                />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-4">
-                                            <div class="col form-group">
-                                                <InputLabel
-                                                    value="Público alvo"
-                                                    for="publico_alvo"
-                                                />
-                                                <textarea
-                                                    name="publico_alvo"
-                                                    id="publico_alvo"
-                                                    class="form-control"
-                                                    v-model="form.publico_alvo"
-                                                    rows="5"
-                                                ></textarea>
-                                                <InputError
-                                                    :message="
-                                                        form.errors.publico_alvo
-                                                    "
-                                                />
-                                            </div>
-                                        </div>
-                                        <div
-                                            class="mb-4 d-flex justify-content-end"
-                                        >
-                                            <button
-                                                v-if="!isViewMode"
-                                                type="submit"
-                                                class="btn btn-success"
-                                                :disabled="form.processing"
-                                            >
-                                                <IconDeviceFloppy
-                                                    class="me-2"
-                                                />
-                                                Salvar
-                                            </button>
+        <template #configuracao>
+            <Index
+                v-if="subStep === 2"
+                :contrato="contratos"
+                :produto="produto"
+                :pmqa="pmqa"
+                :pontos="pontos"
+                @next="nextSubStepFromConfiguracao"
+                @prev="prevSubStepFromConfiguracao"
+            />
 
-                                            <button
-                                                v-else
-                                                type="button"
-                                                class="btn btn-primary"
-                                                @click="
-                                                    setActiveTab('configuracao')
-                                                "
-                                            >
-                                                Avançar
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                            <div
-                                v-if="activeTab === 'configuracao'"
-                                class="tab-pane fade"
-                                :class="{
-                                    'show active': activeTab === 'configuracao',
-                                }"
-                            >
-                                <Index
-                                    v-if="subStep === 2"
-                                    :contrato="contratos"
-                                    :produto="produto"
-                                    :pmqa="pmqa"
-                                    :pontos="pontos"
-                                    @next="nextSubStepFromConfiguracao"
-                                    @prev="prevSubStepFromConfiguracao"
-                                />
+            <IndexParametros
+                v-else-if="subStep === 3"
+                :contrato="contratos"
+                :produto="produto"
+                :pmqa="pmqa"
+                :parametros="parametros"
+                :listas="listas"
+                @next="nextSubStepFromConfiguracao"
+                @prev="prevSubStepFromConfiguracao"
+            />
 
-                                <IndexParametros
-                                    v-else-if="subStep === 3"
-                                    :contrato="contratos"
-                                    :produto="produto"
-                                    :pmqa="pmqa"
-                                    :parametros="parametros"
-                                    :listas="listas"
-                                    @next="nextSubStepFromConfiguracao"
-                                    @prev="prevSubStepFromConfiguracao"
-                                />
+            <IndexVincularParametro
+                v-else-if="subStep === 4"
+                :contrato="contratos"
+                :produto="produto"
+                :pontos="pontos"
+                :pmqa="pmqa"
+                :listas="listas"
+                :vinculacoes="vinculacoes"
+                @next="nextSubStepFromConfiguracao"
+                @prev="prevSubStepFromConfiguracao"
+            />
+        </template>
 
-                                <IndexVincularParametro
-                                    v-else-if="subStep === 4"
-                                    :contrato="contratos"
-                                    :produto="produto"
-                                    :pontos="pontos"
-                                    :pmqa="pmqa"
-                                    :listas="listas"
-                                    :vinculacoes="vinculacoes"
-                                    @next="nextSubStepFromConfiguracao"
-                                    @prev="prevSubStepFromConfiguracao"
-                                />
-                                <div v-else class="alert alert-info mb-0">
-                                    Selecione uma etapa de configuração.
-                                </div>
-                            </div>
-
-                            <div
-                                v-if="activeTab === 'resultados'"
-                                class="tab-pane fade"
-                                :class="{
-                                    'show active': activeTab === 'resultados',
-                                }"
-                            >
-                                teste
-                            </div>
-                            <div
-                                v-if="activeTab === 'anexos'"
-                                class="tab-pane fade"
-                                :class="{
-                                    'show active': activeTab === 'anexos',
-                                }"
-                            >
-                                teste
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </NavbarContrato>
-    </AuthenticatedLayout>
+    </ProdutoTabsLayout>
 </template>
 
 <style scoped></style>

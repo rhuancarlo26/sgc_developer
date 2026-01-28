@@ -19,8 +19,6 @@ const props = defineProps({
 });
 const previewModal = ref(null)
 
-console.log(props.vinculacoes)
-// Lista de produtos disponíveis
 const produtos = [
   { title: "Fauna", routeParam: "fauna" },
   { title: "Espeleologia", routeParam: "espeleologia" },
@@ -107,12 +105,10 @@ const gerenciarCampanha = (pmqaId) => {
 }
 
 
-// Redirecionar para análise
 const analisarCampanha = (campanhaId) => {
   router.get(route('sgc.contratada.produtos.analise', [props.contrato, selectedProduto.value, campanhaId]));
 };
 
-// Redirecionar para edição
 const editarCampanha = (campanhaId) => {
   router.get(route('sgc.contratada.produtos.edit', [props.contrato, selectedProduto.value, campanhaId]));
 };

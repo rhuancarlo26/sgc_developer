@@ -2,8 +2,8 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\Coleta\app\Services;
 
-use App\Models\ServicoPmqaCampanhaPontoColeta;
-use App\Models\ServicoPmqaCampanhaPontoColetaArquivo;
+use App\Models\SgcPmqaCampanhaPontoColeta;
+use App\Models\SgcPmqaCampanhaPontoColetaArquivo;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -13,8 +13,8 @@ class ColetaService extends BaseModelService
 {
     use Searchable, Deletable;
 
-    protected string $modelClass = ServicoPmqaCampanhaPontoColeta::class;
-    protected string $modelClassArquivo = ServicoPmqaCampanhaPontoColetaArquivo::class;
+    protected string $modelClass = SgcPmqaCampanhaPontoColeta::class;
+    protected string $modelClassArquivo = SgcPmqaCampanhaPontoColetaArquivo::class;
 
     public function store(array $request): array
     {
@@ -35,7 +35,7 @@ class ColetaService extends BaseModelService
             $caminho = $request['arquivo']->storeAs('Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Arquivo' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
 
             $return = $this->dataManagement->create(entity: $this->modelClassArquivo, infos: [
-                'fk_ponto_coleta' => $request['id'],
+                'pmqa_ponto_coleta_id' => $request['id'],
                 'nome' => $nome,
                 'caminho_imagem' => $caminho
             ]);
@@ -43,7 +43,7 @@ class ColetaService extends BaseModelService
         return $return;
     }
 
-    public function deleteArquivo(ServicoPmqaCampanhaPontoColetaArquivo $arquivo): array
+    public function deleteArquivo(SgcPmqaCampanhaPontoColetaArquivo $arquivo): array
     {
 //        Storage::delete($arquivo->caminho);
 

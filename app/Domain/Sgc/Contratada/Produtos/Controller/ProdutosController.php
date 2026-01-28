@@ -9,6 +9,7 @@ use App\Models\SgcvwEmpreendimentos;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaService;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoService;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Services\CampanhaService;
 use App\Models\ServicoPmqaParametro;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcEspeleoCampanha;
@@ -34,17 +35,20 @@ class ProdutosController extends Controller
     protected $faunaService;
     protected $espeleoService;
     protected $parametroService;
+    protected $execucaoCampanhaService;
 
     public function __construct(
         ProdutosService $produtosService,
         FaunaService $faunaService,
         EspeleoService $espeleoService,
-        ParametroService $parametroService
+        ParametroService $parametroService,
+        CampanhaService $execucaoCampanhaService
     ) {
         $this->produtosService = $produtosService;
         $this->faunaService = $faunaService;
         $this->espeleoService = $espeleoService;
         $this->parametroService = $parametroService;
+        $this->execucaoCampanhaService = $execucaoCampanhaService;
     }
 
     public function index(Request $request, $contrato, $produto): Response
@@ -56,9 +60,9 @@ class ProdutosController extends Controller
             'fauna'        => $this->getCampanhasFauna($contrato),
             'pmqa', 'eia'  => $this->getCampanhasPmqa($contrato),
             'espeleologia' => $this->getCampanhasEspeleologia($contrato),
-            default        => collect(), // segurança
+            default        => collect(),
         };
-        
+
 
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
@@ -72,7 +76,7 @@ class ProdutosController extends Controller
 
     public function create(Request $request, $contrato, $produto): Response
     {
-        Log::info('Acessando create', ['contrato' => $contrato, 'produto' => $produto, 'subproduto' => $request->query('subproduto')]);
+
         $contratoObj = Contrato::findOrFail($contrato);
         $subproduto = $request->query('subproduto');
         $campanhaId = $request->query('campanha_id');
@@ -82,7 +86,6 @@ class ProdutosController extends Controller
         }
 
         if (!$subproduto) {
-            Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
             return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
                 'contrato' => $contrato,
                 'produto' => ucfirst($produto),
@@ -96,18 +99,14 @@ class ProdutosController extends Controller
             ]);
         }
 
-        // Atualizar o método create()
         if ($produto === 'fauna') {
             return $this->createFauna($request, $contrato, $produto, $contratoObj, $subproduto);
-        } elseif ($produto === 'pmqa' || $produto === 'eia') { // <-- MUDANÇA AQUI
-            // Se o produto for 'pmqa' OU 'eia', chamamos a função de criação do PMQA.
-            // Passamos a variável $produto original ('eia') para que a tela mantenha o título correto.
+        } elseif ($produto === 'pmqa' || $produto === 'eia') {
             return $this->createPmqa($request, $contrato, $produto, $contratoObj, $subproduto);
         } else {
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
         }
 
-        // Atualizar o método index()
         $campanhas = match ($produto) {
             'fauna' => $this->getCampanhasFauna($contrato),
             'pmqa' => $this->getCampanhasPmqa($contrato),
@@ -128,7 +127,6 @@ class ProdutosController extends Controller
                 'subproduto' => $subproduto,
                 'status' => 'Em elaboração',
             ]);
-            Log::info('Draft criado para Fauna', ['draft_id' => $draft->id]);
         }
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
@@ -295,13 +293,11 @@ class ProdutosController extends Controller
     private function createPmqa(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
 
-        $pmqa = SgcPmqa::firstOrCreate(
-            ['id_contrato' => $contrato],
-            [
-                'status_aprovacao' => 'rascunho',
-                'subproduto'       => $subproduto,
-            ]
-        );
+        $pmqa = SgcPmqa::create([
+            'id_contrato'      => $contrato,
+            'status_aprovacao' => 'Em analise',
+            'subproduto'       => $subproduto,
+        ]);
 
         $searchParams = $request->only(['columns', 'value']);
         $tabParametros = $this->parametroService->index($pmqa, $searchParams);
@@ -323,16 +319,21 @@ class ProdutosController extends Controller
             'vinculacoes_count' => $vinculacoes->count(),
             'component' => 'Sgc/Contratada/Produtos/Pmqa/Create',
         ]);
+
+        $searchExec = $request->only(['columns', 'value']);
+        $execucao = $this->execucaoCampanhaService->index($pmqa, $searchExec);
+
         return inertia('Sgc/Contratada/Produtos/Pmqa/Create', [
             'contrato'        => $contrato,
             'produto'         => ucfirst($produto),
             'contratos'       => $contratoObj,
             'subproduto'      => $subproduto,
             'empreendimentos' => $empreendimentos,
-            'pmqa'            => $pmqa, // ✅ sempre com ID
+            'pmqa'            => $pmqa,
             ...$tabParametros,
             'vinculacoes' => $vinculacoes,
-            'listasVinculacoes' => $listasVinculacoes
+            'listasVinculacoes' => $listasVinculacoes,
+            ...$execucao,
         ]);
     }
 
@@ -356,7 +357,7 @@ class ProdutosController extends Controller
 
         $pmqa->update([
             'cod_emp'       => $data['cod_emp'],
-            'tema_id'       => is_array($data['tema']) ? $data['tema']['id'] : $data['tema'],
+            'tema'          => is_array($data['tema']) ? $data['tema']['id'] : $data['tema'],
             'especificacao' => $data['especificacao'],
             'introducao'    => $data['introducao'],
             'justificativa' => $data['justificativa'],
@@ -368,7 +369,7 @@ class ProdutosController extends Controller
         return redirect()
             ->route('sgc.contratada.produtos.index', [
                 'contrato' => $contrato,
-                'produto'  => 'fauna',
+                'produto'  => 'eia',
             ])
             ->with('success', 'Campanha de Fauna salva com sucesso!');
     }
@@ -395,14 +396,12 @@ class ProdutosController extends Controller
                 'data_final'     => 'N/A',
                 'status'         => $pmqa->status_aprovacao ?? 'rascunho',
 
-                // ✅ resumo das vinculações
                 'vinculacoesResumo' => $resumoVinc[$pmqa->id] ?? [
                     'total_listas' => 0,
                     'total_pontos' => 0,
                     'total_pontos_vinculados' => 0,
                 ],
 
-                // modal
                 'tema'           => $pmqa->tema,
                 'cod_emp'        => $pmqa->cod_emp,
                 'especificacao'  => $pmqa->especificacao,
@@ -438,12 +437,10 @@ class ProdutosController extends Controller
 
         $searchParams = $request->only(['columns', 'value']);
         $tabParametros = $this->parametroService->index($pmqa, $searchParams);
-        // listas com pontos (isso alimenta dropdown e a tabela)
         $listasVinculacoes = SgcPmqaParametroLista::with(['pontos'])
             ->where('pmqa_id', $pmqa->id)
             ->get();
 
-        // pontos do pmqa (isso alimenta a lista de checkboxes)
         $vinculacoes = SgcPmqaPonto::with(['lista', 'vinculacao'])
             ->where('pmqa_id', $pmqa->id)
             ->get();
@@ -452,6 +449,10 @@ class ProdutosController extends Controller
             'vinculacoes_count' => $vinculacoes->count(),
             'component' => 'Sgc/Contratada/Produtos/Pmqa/Create',
         ]);
+
+        $searchExec = $request->only(['columns', 'value']);
+        $execucao = $this->execucaoCampanhaService->index($pmqa, $searchExec);
+
         return inertia('Sgc/Contratada/Produtos/Pmqa/Create', [
             'contrato'        => $contrato,
             'produto'         => ucfirst($produto),
@@ -462,7 +463,8 @@ class ProdutosController extends Controller
             'subStep'         => (int) $request->query('subStep', 1),
             ...$tabParametros,
             'vinculacoes' => $vinculacoes,
-            'listasVinculacoes' => $listasVinculacoes
+            'listasVinculacoes' => $listasVinculacoes,
+            ...$execucao,
         ]);
     }
 
@@ -470,7 +472,6 @@ class ProdutosController extends Controller
     {
         if (empty($pmqaIds)) return [];
 
-        // total de listas
         $listasPorPmqa = SgcPmqaParametroLista::query()
             ->whereIn('pmqa_id', $pmqaIds)
             ->selectRaw('pmqa_id, COUNT(*) as total_listas')
@@ -478,7 +479,6 @@ class ProdutosController extends Controller
             ->pluck('total_listas', 'pmqa_id')
             ->toArray();
 
-        // total de pontos
         $pontosPorPmqa = SgcPmqaPonto::query()
             ->whereIn('pmqa_id', $pmqaIds)
             ->selectRaw('pmqa_id, COUNT(*) as total_pontos')
@@ -486,7 +486,6 @@ class ProdutosController extends Controller
             ->pluck('total_pontos', 'pmqa_id')
             ->toArray();
 
-        // ✅ total de pontos vinculados (JOIN REAL)
         $pontosVinculadosPorPmqa = DB::table('sgc_pmqa_config_ponto_lista as vpl')
             ->whereIn('vpl.pmqa_id', $pmqaIds)
             ->selectRaw('vpl.pmqa_id, COUNT(DISTINCT vpl.ponto_id) as total_pontos_vinculados')
@@ -494,7 +493,6 @@ class ProdutosController extends Controller
             ->pluck('total_pontos_vinculados', 'pmqa_id')
             ->toArray();
 
-        // monta o mapa final
         $map = [];
         foreach ($pmqaIds as $id) {
             $map[$id] = [
@@ -522,7 +520,6 @@ class ProdutosController extends Controller
                 'p.nome_ponto_coleta',
             ]);
 
-        // Agrupa: lista -> pontos
         $grouped = [];
 
         foreach ($rows as $r) {
@@ -534,7 +531,6 @@ class ProdutosController extends Controller
                 ];
             }
 
-            // se não tiver ponto (left join), não adiciona
             if ($r->ponto_id) {
                 $grouped[$r->lista_id]['pontos'][] = [
                     'id' => (int) $r->ponto_id,

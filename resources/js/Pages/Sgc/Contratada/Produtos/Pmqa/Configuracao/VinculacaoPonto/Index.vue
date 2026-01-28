@@ -137,12 +137,6 @@ const enviaFiscal = (aprovacao) => {
             title="Voltar"
             @click="$emit('prev')"
         />
-        <NavButton
-            type="button"
-            type-button="primary"
-            title="Avançar"
-            @click="$emit('next')"
-        />
     </div>
 
     <ModalVincularPonto

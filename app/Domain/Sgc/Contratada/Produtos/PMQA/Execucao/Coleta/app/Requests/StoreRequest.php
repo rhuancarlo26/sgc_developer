@@ -11,7 +11,7 @@ class StoreRequest extends FormRequest
         $request = (object)request()->all();
         $regras = [];
 
-        $regras['fk_campanha_ponto'] = 'required';
+        $regras['campanha_ponto_id'] = 'required';
         $regras['dt_coleta'] = 'required';
         $regras['coleta'] = 'required';
 

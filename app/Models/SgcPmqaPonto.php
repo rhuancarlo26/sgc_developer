@@ -34,4 +34,14 @@ class SgcPmqaPonto extends Model
             'lista_id'  // FK para lista no pivot
         );
     }
+
+    public function campanhas()
+    {
+        return $this->belongsToMany(
+            related: SgcPmqaPonto::class,
+            table: 'sgc_pmqa_campanhas_pontos',
+            foreignPivotKey: 'ponto_id',
+            relatedPivotKey: 'sgc_pmqa_campanha_id'
+        );
+    }
 }
