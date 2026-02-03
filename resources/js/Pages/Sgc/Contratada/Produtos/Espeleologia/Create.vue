@@ -15,6 +15,11 @@
         <div class="card">
           <div class="card-body">
             <h2 class="text-center mb-4">Criar Campanha de Espeleologia</h2>
+            <!-- {{ produto }}
+            {{ subproduto }} -->
+            <!-- identificar o subproduto contendo a palavra "prospecção" -->
+             <h4 class="text-center" v-if="isProspeccao">Prospecção</h4>
+             <h5 class="text-center" v-if="isProspeccao">{{ subproduto }}</h5>
             <ul class="nav nav-tabs mb-4">
               <li class="nav-item">
                 <a
@@ -77,7 +82,19 @@
                 />
               </div>
               <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
+                <ResultadosProspeccao
+                  v-if="isProspeccao"
+                  :empreendimentos="empreendimentos"
+                  :errors="errors"
+                  :campanha-id="campanhaId"
+                  :contrato="contrato"
+                  :resultados-anexos="form.resultados_anexos"
+                  @update-resultados-anexos="updateResultadosAnexos"
+                  :subprodutos-espeleologia="subprodutosEspeleologia"
+                  :estudos-posteriores="draftData.estudosPosteriores ?? []"
+                />
                 <Resultados
+                  v-else
                   :empreendimentos="empreendimentos"
                   :errors="errors"
                   :campanha-id="campanhaId"
@@ -128,6 +145,7 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Apresentacao from './Apresentacao.vue';
 import Metodologias from './Metodologias.vue';
 import Resultados from './Resultados.vue';
+import ResultadosProspeccao from './ResultadosProspeccao.vue';
 import Anexos from './Anexos.vue';
 import { reactive, ref, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
@@ -391,6 +409,14 @@ const previousTab = () => {
     changeTab(order[i - 1]);
   }
 };
+
+// Mudanças para Módulo submódulo com prospecção
+const isProspeccao = ref(false);
+onMounted(() => {
+    if (props.subproduto && props.subproduto.toLowerCase().includes('prospecção')) {
+        isProspeccao.value = true;
+    }
+});
 
 </script>
 
