@@ -12,7 +12,6 @@ import QueloniosCrocodilianosVisualizar from './Componentes/QueloniosCrocodilian
 import FaunaCavernicolaVisualizar from './Componentes/FaunaCavernicolaVisualizar.vue';
 import MetodologiaVisualizar from './Componentes/MetodologiaVisualizar.vue';
 import FaunaResultadosVisualizar from './Componentes/FaunaResultadosVisualizar.vue';
-import MapLayer from '../Espeleologia/MapViewer.vue';
 
 defineProps({
     campanha: {
@@ -98,7 +97,6 @@ const formatAnexoLabel = (tipo) => {
             <template #body>
                 <div class="card">
                     <div class="card-body">
-                        <pre>{{ produto }}</pre>
                         <h2 class="text-center mb-4">VISUALIZAR CAMPANHA {{ produto.toUpperCase() }}</h2>
                         <h4 class="mb-3">Status: {{ campanha.status }}</h4>
                         <ul class="nav nav-tabs mb-4">
@@ -139,22 +137,13 @@ const formatAnexoLabel = (tipo) => {
                             <div v-if="activeTab === 'apresentacao'" class="tab-pane fade" :class="{ 'show active': activeTab === 'apresentacao' }">
                                 <div v-if="subStep === 1">
                                     <h4 class="text-center mb-3" style="font-weight: bold;">APRESENTAÇÃO</h4>
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <!-- <pre>Mapa aqui</pre> -->
-                                             <MapLayer/>
-                                        </div>
-                                        <div class="col-md-4">
-
-                                            <div class="mb-3">
-                                                <label class="form-label">Empreendimento</label>
-                                                <input type="text" class="form-control" :value="campanha.cod_emp" disabled />
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Subproduto</label>
-                                                <input type="text" class="form-control" :value="campanha.familia || 'Fauna'" disabled />
-                                            </div>
-                                        </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Empreendimento</label>
+                                        <input type="text" class="form-control" :value="campanha.cod_emp" disabled />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Subproduto</label>
+                                        <input type="text" class="form-control" :value="campanha.familia || 'Fauna'" disabled />
                                     </div>
                                     <div class="d-flex justify-content-end">
                                         <button class="btn btn-primary" @click="subStep = 2">Avançar</button>

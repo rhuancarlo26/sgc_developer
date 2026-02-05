@@ -78,8 +78,8 @@ const goToCreate = () => {
 };
 
 // Redirecionar para visualização
-const visualizarCampanha = (campanhaId) => {
-  router.get(route('sgc.contratada.produtos.show', [props.contrato, selectedProduto.value, campanhaId]));
+const visualizarCampanha = (campanhaId, modulo = null) => {
+  router.get(route('sgc.contratada.produtos.show', [props.contrato, selectedProduto.value, campanhaId, modulo]));
 };
 
 // Redirecionar para análise
@@ -203,7 +203,7 @@ const editarCampanha = (campanhaId) => {
                             <NavButton
                               type-button="info"
                               title="Visualizar"
-                              @click="visualizarCampanha(campanha.id)"
+                              @click="visualizarCampanha(campanha.id, selectedProduto == 'espeleologia' ? 'espeleologia' : null)"
                             />
                             <NavButton
                               v-if="canApprove && campanha.status === 'Em análise'"

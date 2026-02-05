@@ -2,6 +2,7 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\Fauna\Controller;
 
+use App\Models\SgcEspeleoCampanha;
 use App\Shared\Http\Controllers\Controller;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\CampanhaService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaFiscalService;
@@ -135,32 +136,42 @@ class CampanhaController extends Controller
         return redirect()->back()->with('success', 'Dados da aba salvos com sucesso!');
     }
 
-    public function show($contrato, $produto, $campanhaId)
+    public function show($contrato, $produto, $campanhaId, $modulo = null)
     {
-        $campanha = SgcFaunaCampanha::with([
-            'abios.abio',
-            'profissionais.profissional',
-            'modulos_amostrais',
-            'pontos_quelo_crocod',
-            'pontos_cavernicola',
-            'metodologias',
-            // 'resultados',
-            'resultadosTerrestre',
-            'resultadosAquatica',
-            'resultadosCavernicola',
-            'resultados_consideracoes',
-            'anexos'
-        ])->findOrFail($campanhaId);
 
-        Log::debug('FaunaController: resultados por grupo', [
-            'campanha_id'          => $campanhaId,
-            'terrestre_count'      => $campanha->resultadosTerrestre->count(),
-            'aquatica_count'       => $campanha->resultadosAquatica->count(),
-            'cavernicola_count'    => $campanha->resultadosCavernicola->count(),
-        ]);        
+        // identifica se o modulo é igual à espeleologia:
+            if($modulo === 'espeleologia'){
+                Log::debug('CampanhaController: Módulo de Espeleologia acessado', [
+                    'campanha_id' => $campanhaId,
+                ]);
+                $campanha = SgcEspeleoCampanha::findOrFail($campanhaId);
+            } else {
+                $campanha = SgcFaunaCampanha::with([
+                    'abios.abio',
+                    'profissionais.profissional',
+                    'modulos_amostrais',
+                    'pontos_quelo_crocod',
+                    'pontos_cavernicola',
+                    'metodologias',
+                    // 'resultados',
+                    'resultadosTerrestre',
+                    'resultadosAquatica',
+                    'resultadosCavernicola',
+                    'resultados_consideracoes',
+                    'anexos'
+                ])->findOrFail($campanhaId);
+                Log::debug('FaunaController: resultados por grupo', [
+                    'campanha_id'          => $campanhaId,
+                    'terrestre_count'      => $campanha->resultadosTerrestre->count(),
+                    'aquatica_count'       => $campanha->resultadosAquatica->count(),
+                    'cavernicola_count'    => $campanha->resultadosCavernicola->count(),
+                ]);
+            }
+
 
         return Inertia::render('Sgc/Contratada/Produtos/Fauna/VisualizarCampanha', [
             'campanha' => $this->mapCampanhaData($campanha),
+            'campanha_id' => $campanhaId,
             'contrato' => $campanha->id_contrato,
             'produto' => $campanha->subproduto,
             'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
@@ -409,12 +420,13 @@ class CampanhaController extends Controller
                     'metodologia' => $metodologia->metodologia,
                 ];
             })->toArray() : [],
-                'resultadosTerrestre'   => $campanha->resultadosTerrestre->toArray(),
-                'resultadosAquatica'    => $campanha->resultadosAquatica->toArray(),
-                'resultadosCavernicola' => $campanha->resultadosCavernicola->toArray(),
+                // aplicando condição pra quando não há array de resultados (arrays vazios ou null)
+                'resultadosTerrestre'   => !empty($campanha->resultadosTerrestre) ? $campanha->resultadosTerrestre->toArray() : null,
+                'resultadosAquatica'    => !empty($campanha->resultadosAquatica) ? $campanha->resultadosAquatica->toArray() : null,
+                'resultadosCavernicola' => !empty($campanha->resultadosCavernicola) ? $campanha->resultadosCavernicola->toArray() : null,
 
             'consideracoes' => $campanha->resultados_consideracoes ? $campanha->resultados_consideracoes->consideracoes : null,
-            'abios' => $campanha->abios->map(function ($abio) {
+            'abios' => empty($campanha->abios) ? null : $campanha->abios->map(function ($abio) {
                 return [
                     'id' => $abio->id,
                     'n_abio' => $abio->n_abio,

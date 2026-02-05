@@ -42,8 +42,8 @@ class EspeleoCampanhaController extends Controller
             'data' => $data,
             'contrato' => $contrato,
             'campanhaId' => $request->id,
-            'codigo_sei' => $data['justificativas'][0]['codigo_sei'] ?? 'Não fornecido', 
-            'justificativas_count' => count($data['justificativas'] ?? []), 
+            'codigo_sei' => $data['justificativas'][0]['codigo_sei'] ?? 'Não fornecido',
+            'justificativas_count' => count($data['justificativas'] ?? []),
         ]);
 
         try {
@@ -54,7 +54,7 @@ class EspeleoCampanhaController extends Controller
             Log::error('Erro ao salvar campanha', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'data' => $data, 
+                'data' => $data,
             ]);
             throw $e;
         }

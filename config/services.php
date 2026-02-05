@@ -30,5 +30,10 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'geoserver' => [
+        'url' => env('GEOSERVER_URL', 'http://localhost:8080/geoserver'),
+        'user' => env('GEOSERVER_USER', 'admin'),
+        'password' => env('GEOSERVER_PASSWORD', 'geoserver'),
+    ],
 
 ];

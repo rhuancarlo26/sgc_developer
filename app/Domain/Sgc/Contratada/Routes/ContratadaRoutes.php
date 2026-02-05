@@ -31,6 +31,9 @@ use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
 use App\Domain\Sgc\Contratada\app\Controller\LayerController;
 
+use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Controller\MapLayerController;
+use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Controller\MapPageController;
+
 
 
 Route::prefix('/contratada')->group(function () {
@@ -143,7 +146,7 @@ Route::prefix('/contratada')->group(function () {
         Route::post('salvar-campanha', [CampanhaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.salvar_campanha');
         Route::post('profissional/store', [ProfissionalController::class, 'storeProfissional'])->name('sgc.contratada.produtos.profissional.store');
         Route::post('resultados/store', [CampanhaController::class, 'storeResultados'])->name('sgc.contratada.produtos.resultados.store');
-        Route::get('campanhas/{campanhaId}', [CampanhaController::class, 'show'])->name('sgc.contratada.produtos.show');
+        Route::get('campanhas/{campanhaId}/{modulo?}', [CampanhaController::class, 'show'])->name('sgc.contratada.produtos.show');
         Route::post('campanhas/{campanhaId}/approve', [CampanhaController::class, 'approve'])->name('sgc.contratada.produtos.approve')->middleware('auth', 'role:analista');
         Route::get('fauna/campanhas/{campanha}/analise', [CampanhaController::class, 'analise'])->name('sgc.contratada.produtos.analise');
         Route::post('fauna/campanhas/{campanha}/analise', [CampanhaController::class, 'salvarAnalise'])->name('sgc.contratada.produtos.salvarAnalise');
@@ -194,7 +197,15 @@ Route::prefix('/contratada')->group(function () {
 
          Route::post('/{contrato}/produtos/{produto}/resultados/upload', [ResultadoController::class, 'upload'])->name('sgc.contratada.produtos.fauna.resultados.upload');
 
+    // Rotas para MapLayerController
+    // routes/web.php ou routes/api.php
 
+    Route::get('/mapa/wms', [MapLayerController::class, 'proxyWms']);
 
-
+    Route::post('/espeleologia/layers/upload-shapefile', [MapLayerController::class, 'store'])->name('sgc.contratada.espeleologia.layers.upload_shapefile');
+    Route::post('/espeleologia/layers/{layer}/publish', [MapLayerController::class, 'publish'])->name('sgc.contratada.espeleologia.layers.publish');
+    Route::get('/espeleologia/layers', [MapLayerController::class, 'index'])->name('sgc.contratada.espeleologia.layers.index');
+    // Rotas para MapPageController
+    Route::get('/espeleologia/mapa/viewer', [MapPageController::class, 'viewer'])->name('sgc.contratada.espeleologia.mapa.viewer');
+    Route::get('/espeleologia/mapa/create', [MapPageController::class, 'create'])->name('sgc.contratada.espeleologia.mapa.create');
 });

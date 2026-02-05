@@ -55,4 +55,5 @@ class SgcEspeleoCampanha extends Model
     {
         return $this->hasMany(SgcEspeleoResultadoAnexo::class, 'campanha_id');
     }
+    
 }
