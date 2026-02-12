@@ -13,6 +13,19 @@ const map = ref(null);
 const layers = ref([]);
 const showLayersPanel = ref(true);
 const activeLayers = ref({});
+const layerColors = ref({});
+
+// Paleta de cores para as camadas
+const colorPalette = [
+  '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+  '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B88B', '#52D273',
+  '#FF6F9F', '#00D2FC', '#FFD700', '#FF1493', '#00CED1'
+];
+
+// Função para gerar cor baseada no índice da camada
+function getLayerColor(index) {
+  return colorPalette[index % colorPalette.length];
+}
 
 onMounted(async () => {
   map.value = L.map("map").setView([-14.235, -51.925], 4);
@@ -24,7 +37,13 @@ onMounted(async () => {
   const { data } = await axios.get("/sgc/contratada/espeleologia/layers");
   layers.value = data;
 
-  map.value.on('click', getFeatureInfo);
+  // Armazenar cores para cada camada
+  data.forEach((layer, index) => {
+    const key = `${layer.workspace}:${layer.layer_name}`;
+    layerColors.value[key] = getLayerColor(index);
+  });
+
+  map.value.on("click", getFeatureInfo);
 });
 
 function toggleLayer(layer) {
@@ -42,6 +61,7 @@ function toggleLayer(layer) {
     version: "1.1.1",
     srs: "EPSG:3857",
     tiled: true,
+    opacity: 0.7, // Aumenta transparência para melhor visualização quando sobrepostas
   });
 
   wmsLayer.addTo(map.value);
@@ -68,63 +88,67 @@ async function getFeatureInfo(e) {
   const projectedNE = crs.project(geoBounds.getNorthEast());
   const bbox = `${projectedSW.x},${projectedSW.y},${projectedNE.x},${projectedNE.y}`;
 
-  let popupContent = '';
+  let popupContent = "";
   let featureCounter = 0;
 
   const baseParams = {
-    REQUEST: 'GetFeatureInfo',
-    VERSION: '1.1.1',
-    FORMAT: 'image/png',
+    REQUEST: "GetFeatureInfo",
+    VERSION: "1.1.1",
+    FORMAT: "image/png",
     TRANSPARENT: true,
-    INFO_FORMAT: 'text/html',  // HTML para matching com o viewer do GeoServer
+    INFO_FORMAT: "text/html", // HTML para matching com o viewer do GeoServer
     FEATURE_COUNT: 50,
     WIDTH: size.x,
     HEIGHT: size.y,
-    SRS: 'EPSG:3857',
+    SRS: "EPSG:3857",
     BBOX: bbox,
     X: Math.round(point.x),
     Y: Math.round(point.y),
-    BUFFER: 20,  // Tolerância em pixels
+    BUFFER: 20, // Tolerância em pixels
   };
 
   for (const key in activeLayers.value) {
     const params = { ...baseParams, LAYERS: key, QUERY_LAYERS: key };
-    const url = '/sgc/contratada/mapa/wms?' + new URLSearchParams(params).toString();
-    console.log('GetFeatureInfo URL:', url);
+    const url =
+      "/sgc/contratada/mapa/wms?" + new URLSearchParams(params).toString();
+    console.log("GetFeatureInfo URL:", url);
 
     try {
-      const response = await axios.get(url, { responseType: 'text' });  // Garantir texto puro para HTML
+      const response = await axios.get(url, { responseType: "text" }); // Garantir texto puro para HTML
       let data = response.data;
-      console.log('Raw Response:', data);  // Log completo para debug
+      console.log("Raw Response:", data); // Log completo para debug
 
       // Corrige encoding: substitui caracteres estranhos comuns (ex: â -> ã, etc.), mas ideal é configurar GeoServer para UTF-8
       data = data
-        .replace(/Ã/g, 'Ã')  // Ajuste para caracteres comuns em PT-BR; teste e adicione mais se necessário
-        .replace(/â/g, 'â')
-        .replace(/õ/g, 'õ')
-        .replace(/ç/g, 'ç')
-        .replace(/á/g, 'á')
-        .replace(/é/g, 'é')
-        .replace(/í/g, 'í')
-        .replace(/ó/g, 'ó')
-        .replace(/ú/g, 'ú')
-        .replace(/Â/g, 'Â')
-        .replace(/Ê/g, 'Ê')
-        .replace(/Ô/g, 'Ô');  // Isso é paliativo; verifique o encoding no GeoServer/DB
+        .replace(/Ã/g, "Ã") // Ajuste para caracteres comuns em PT-BR; teste e adicione mais se necessário
+        .replace(/â/g, "â")
+        .replace(/õ/g, "õ")
+        .replace(/ç/g, "ç")
+        .replace(/á/g, "á")
+        .replace(/é/g, "é")
+        .replace(/í/g, "í")
+        .replace(/ó/g, "ó")
+        .replace(/ú/g, "ú")
+        .replace(/Â/g, "Â")
+        .replace(/Ê/g, "Ê")
+        .replace(/Ô/g, "Ô"); // Isso é paliativo; verifique o encoding no GeoServer/DB
 
-      if (typeof data === 'string' && data.includes('<table')) {
+      if (typeof data === "string" && data.includes("<table")) {
         // HTML do GeoServer: injeta diretamente (já é uma tabela bonita)
-        popupContent += `<h3>${key.replace(':', ' - ')}</h3>`;
+        popupContent += `<h3>${key.replace(":", " - ")}</h3>`;
         popupContent += `<div class="feature-container" style=" overflow-x: scroll !important;
-    overflow-y: scroll !important;
-    max-width: 400px !important;
-    max-height: 300px !important;">`;
+            overflow-y: scroll !important;
+            max-width: 400px !important;
+            max-height: 300px !important;">`;
         // popupContent += `<input type="text" class="filter-input" placeholder="Filtrar atributos..." data-table-class="featureInfo">`;  // Usa a classe original do GeoServer
-        popupContent += data.replace(/<table class="featureInfo"/g, '<table class="info-table featureInfo"');  // Mantém classe para filtro
+        popupContent += data.replace(
+          /<table class="featureInfo"/g,
+          '<table class="info-table featureInfo"'
+        ); // Mantém classe para filtro
         popupContent += `</div>`;
       } else if (data.features && data.features.length > 0) {
         // Fallback se JSON (caso mude de volta)
-        popupContent += `<h3>${key.replace(':', ' - ')}</h3>`;
+        popupContent += `<h3>${key.replace(":", " - ")}</h3>`;
         data.features.forEach((feature, index) => {
           featureCounter++;
           const tableId = `info-table-${Date.now()}-${featureCounter}`;
@@ -135,12 +159,13 @@ async function getFeatureInfo(e) {
           popupContent += `<h4>Feature ${index + 1}</h4>`;
           popupContent += `<input type="text" class="filter-input" placeholder="Filtrar atributos..." data-table-id="${tableId}">`;
           popupContent += `<table id="${tableId}" class="info-table">`;
-          popupContent += '<thead><tr><th>Atributo</th><th>Valor</th></tr></thead><tbody>';
+          popupContent +=
+            "<thead><tr><th>Atributo</th><th>Valor</th></tr></thead><tbody>";
           for (const prop in feature.properties) {
-            const value = feature.properties[prop] || 'N/A';
+            const value = feature.properties[prop] || "N/A";
             popupContent += `<tr><td>${prop}</td><td>${value}</td></tr>`;
           }
-          popupContent += '</tbody></table></div>';
+          popupContent += "</tbody></table></div>";
         });
       } else {
         popupContent += `<p>Nenhuma feature na camada ${key} (verifique zoom/clique).</p>`;
@@ -155,37 +180,38 @@ async function getFeatureInfo(e) {
   popupContent = `<meta charset="UTF-8">${popupContent}`;
 
   if (popupContent) {
-    const popup = L.popup({ maxWidth: 450, className: 'custom-popup' })
+    const popup = L.popup({ maxWidth: 450, className: "custom-popup" })
       .setLatLng(e.latlng)
       .setContent(popupContent)
       .openOn(map.value);
 
     setTimeout(() => {
-      const popupEl = document.querySelector('.leaflet-popup-content');
+      const popupEl = document.querySelector(".leaflet-popup-content");
       if (popupEl) {
-        const inputs = popupEl.querySelectorAll('.filter-input');
-        inputs.forEach(input => {
-          input.addEventListener('input', (ev) => {
+        const inputs = popupEl.querySelectorAll(".filter-input");
+        inputs.forEach((input) => {
+          input.addEventListener("input", (ev) => {
             const filter = ev.target.value.toLowerCase();
             const tableId = ev.target.dataset.tableId;
             const tableClass = ev.target.dataset.tableClass;
             let rows = [];
             if (tableId) {
               const table = document.getElementById(tableId);
-              if (table) rows = Array.from(table.querySelectorAll('tbody tr'));
+              if (table) rows = Array.from(table.querySelectorAll("tbody tr"));
             } else if (tableClass) {
               const tables = popupEl.querySelectorAll(`.${tableClass}`);
-              tables.forEach(t => {
+              tables.forEach((t) => {
                 // Para GeoServer HTML: rows são tr após o header (th)
-                const tableRows = t.querySelectorAll('tr');
-                for (let i = 1; i < tableRows.length; i++) {  // Pula a primeira tr (header)
+                const tableRows = t.querySelectorAll("tr");
+                for (let i = 1; i < tableRows.length; i++) {
+                  // Pula a primeira tr (header)
                   rows.push(tableRows[i]);
                 }
               });
             }
-            rows.forEach(row => {
+            rows.forEach((row) => {
               const text = row.textContent.toLowerCase();
-              row.style.display = text.includes(filter) ? '' : 'none';
+              row.style.display = text.includes(filter) ? "" : "none";
             });
           });
         });
@@ -194,7 +220,9 @@ async function getFeatureInfo(e) {
   } else {
     L.popup()
       .setLatLng(e.latlng)
-      .setContent('<p style="color:#666">Nenhuma feature encontrada.<br>Tente zoom maior ou BUFFER mais alto.</p>')
+      .setContent(
+        '<p style="color:#666">Nenhuma feature encontrada.<br>Tente zoom maior ou BUFFER mais alto.</p>'
+      )
       .openOn(map.value);
   }
 }
@@ -206,65 +234,84 @@ async function getFeatureInfo(e) {
   <div class="overflow-hidden">
     <!-- Sidebar de camadas -->
     <div class="w-72 p-4 border-r bg-gray-50 overflow-y-auto card">
-       <div class="map-container">
-    <!-- Mapa -->
-    <div id="map"></div>
+      <div class="map-container">
+        <!-- Mapa -->
+        <div id="map"></div>
 
-    <!-- Painel de controle de camadas -->
-    <div class="layers-panel" :class="{ 'hidden': !showLayersPanel }">
-      <div class="panel-header">
-        <h2>Camadas do Mapa</h2>
-        <button class="close-btn" @click="toggleLayersPanel" title="Fechar painel">
-          <span>&times;</span>
-        </button>
-      </div>
-
-      <div class="panel-body">
-        <div v-if="layers.length === 0" class="no-layers">
-          <p>Nenhuma camada disponível no momento</p>
-        </div>
-
-        <div v-else class="layers-list">
-          <div
-            v-for="layer in layers"
-            :key="layer.id"
-            class="layer-item"
-            :class="{ 'active': !!activeLayers[`${layer.workspace}:${layer.layer_name}`] }"
-          >
-            <input
-              type="checkbox"
-              :id="'layer-' + layer.id"
-              :checked="!!activeLayers[`${layer.workspace}:${layer.layer_name}`]"
-              @change="toggleLayer(layer)"
-            />
-            <label :for="'layer-' + layer.id">
-              <span class="layer-icon"></span>
-              <span class="layer-name">{{ layer.title || layer.layer_name.replace(/_/g, ' ') }}</span>
-            </label>
+        <!-- Painel de controle de camadas -->
+        <div class="layers-panel" :class="{ hidden: !showLayersPanel }">
+          <div class="panel-header">
+            <h2>Camadas do Mapa</h2>
+            <button
+              class="close-btn"
+              @click="toggleLayersPanel"
+              title="Fechar painel"
+            >
+              <span>&times;</span>
+            </button>
           </div>
-        </div>
-      </div>
 
-      <div class="panel-footer">
-        <!-- <button class="btn-toggle-all" @click="toggleAllLayers">
+          <div class="panel-body">
+            <div v-if="layers.length === 0" class="no-layers">
+              <p>Nenhuma camada disponível no momento</p>
+            </div>
+
+            <div v-else class="layers-list">
+              <div
+                v-for="(layer, index) in layers"
+                :key="layer.id"
+                class="layer-item"
+                :class="{
+                  active:
+                    !!activeLayers[`${layer.workspace}:${layer.layer_name}`],
+                }"
+              >
+                <input
+                  type="checkbox"
+                  :id="'layer-' + layer.id"
+                  :checked="
+                    !!activeLayers[`${layer.workspace}:${layer.layer_name}`]
+                  "
+                  @change="toggleLayer(layer)"
+                />
+                <label :for="'layer-' + layer.id">
+                  <span
+                    class="layer-icon"
+                    :style="{ backgroundColor: layerColors[`${layer.workspace}:${layer.layer_name}`] }"
+                  ></span>
+                  <span class="layer-name">{{
+                    layer.title || layer.layer_name.replace(/_/g, " ")
+                  }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-footer">
+            <!-- <button class="btn-toggle-all" @click="toggleAllLayers">
           {{ allLayersActive ? 'Desativar todas' : 'Ativar todas' }}
         </button> -->
+          </div>
+        </div>
+
+        <!-- Botão para mostrar/esconder o painel -->
+        <button
+          class="toggle-panel-btn"
+          :class="{ expanded: showLayersPanel }"
+          @click="toggleLayersPanel"
+        >
+          <div class="panel-icon">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+          <span class="btn-text">{{
+            showLayersPanel ? "Ocultar Camadas" : "Mostrar Camadas"
+          }}</span>
+        </button>
+
+        <!-- Legenda informativa -->
       </div>
-    </div>
-
-    <!-- Botão para mostrar/esconder o painel -->
-    <button class="toggle-panel-btn" :class="{ 'expanded': showLayersPanel }" @click="toggleLayersPanel">
-      <div class="panel-icon">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-      </div>
-      <span class="btn-text">{{ showLayersPanel ? 'Ocultar Camadas' : 'Mostrar Camadas' }}</span>
-    </button>
-
-    <!-- Legenda informativa -->
-
-  </div>
     </div>
 
     <!-- Mapa -->
@@ -282,7 +329,7 @@ async function getFeatureInfo(e) {
   position: relative;
   width: 100%;
   height: 60vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #map {
@@ -421,11 +468,13 @@ async function getFeatureInfo(e) {
   border-radius: 4px;
   margin-right: 10px;
   flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
 }
 
 .layer-item.active .layer-icon {
-  background: linear-gradient(135deg, #2196f3, #1565c0);
-  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8), 0 0 0 3px currentColor;
+  transform: scale(1.1);
 }
 
 .layer-name {
@@ -608,22 +657,44 @@ async function getFeatureInfo(e) {
 
 /* Animações de entrada */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .layer-item {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
-.layer-item:nth-child(1) { animation-delay: 0.05s; }
-.layer-item:nth-child(2) { animation-delay: 0.1s; }
-.layer-item:nth-child(3) { animation-delay: 0.15s; }
-.layer-item:nth-child(4) { animation-delay: 0.2s; }
-.layer-item:nth-child(5) { animation-delay: 0.25s; }
-.layer-item:nth-child(6) { animation-delay: 0.3s; }
-.layer-item:nth-child(7) { animation-delay: 0.35s; }
-.layer-item:nth-child(8) { animation-delay: 0.4s; }
+.layer-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.layer-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.layer-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.layer-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.layer-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.layer-item:nth-child(6) {
+  animation-delay: 0.3s;
+}
+.layer-item:nth-child(7) {
+  animation-delay: 0.35s;
+}
+.layer-item:nth-child(8) {
+  animation-delay: 0.4s;
+}
 
 /* Responsividade */
 @media (max-width: 768px) {
@@ -687,7 +758,7 @@ async function getFeatureInfo(e) {
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   padding: 15px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .custom-popup .leaflet-popup-content {
@@ -711,10 +782,10 @@ async function getFeatureInfo(e) {
 
 .custom-popup .feature-container {
   margin-bottom: 20px;
-      overflow-x: scroll !important;
-    overflow-y: scroll !important;
-    max-width: 400px !important;
-    max-height: 300px !important;
+  overflow-x: scroll !important;
+  overflow-y: scroll !important;
+  max-width: 400px !important;
+  max-height: 300px !important;
 }
 
 .custom-popup .filter-input {
@@ -724,7 +795,7 @@ async function getFeatureInfo(e) {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 0.9rem;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: border-color 0.2s;
 }
 
@@ -785,15 +856,15 @@ async function getFeatureInfo(e) {
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   padding: 15px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .custom-popup .leaflet-popup-content {
-  max-height: 400px;  /* Aumentado para mais espaço, com scroll */
+  max-height: 400px; /* Aumentado para mais espaço, com scroll */
   overflow-y: auto;
   width: 100%;
-  max-width: 400px;  /* Limite de largura para evitar estourar horizontalmente */
-  word-wrap: break-word;  /* Evita texto longo sem quebra */
+  max-width: 400px; /* Limite de largura para evitar estourar horizontalmente */
+  word-wrap: break-word; /* Evita texto longo sem quebra */
 }
 
 .custom-popup h3 {
@@ -812,10 +883,10 @@ async function getFeatureInfo(e) {
 
 .custom-popup .feature-container {
   margin-bottom: 20px;
-   overflow-x: scroll !important;
-    overflow-y: scroll !important;
-    max-width: 400px !important;
-    max-height: 300px !important;
+  overflow-x: scroll !important;
+  overflow-y: scroll !important;
+  max-width: 400px !important;
+  max-height: 300px !important;
 }
 
 .custom-popup .filter-input {
@@ -825,7 +896,7 @@ async function getFeatureInfo(e) {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 0.9rem;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: border-color 0.2s;
 }
 
@@ -836,7 +907,8 @@ async function getFeatureInfo(e) {
 }
 
 .custom-popup .info-table,
-.custom-popup .featureInfo {  /* Compatível com classe do GeoServer */
+.custom-popup .featureInfo {
+  /* Compatível com classe do GeoServer */
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 15px;

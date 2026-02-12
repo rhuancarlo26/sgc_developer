@@ -209,12 +209,13 @@
                 "
                 class="absolute bg-white shadow-lg p-2 border rounded"
               >
-                <input
+                <textarea
                   v-model="empreendimentoEdit.valor"
                   class="border p-1"
                   @keyup.enter="salvarEdicao"
                   @blur="fecharEdicao"
-                />
+                  style="width: 100% !important;"
+                ></textarea>
               </div>
             </td>
           </tr>
@@ -357,6 +358,7 @@ const salvarEdicao = () => {
     route('sgc.contratada.updatecampoestudos', empreendimentoEdit.value.id),
     { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
     {
+      preserveScroll: true,
       onSuccess: () => {
         campoEditando.value = { id: null, campo: null };
         dados.value = [...page.props.empreendimentos.data];
