@@ -261,7 +261,12 @@ const editarCampanha = (campanhaId) => {
       </template>
     </NavbarContrato>
   </AuthenticatedLayout >
-  <PreviewApresentacaoModal ref="previewModal"/>
+  <PreviewApresentacaoModal ref="previewModal"
+    :contrato="contrato"
+    :produto="produto"
+    @aprovado="(id) => atualizarStatus(id, 'Em elaboracao')"
+    @reprovado="(id) => atualizarStatus(id, 'Reprovado')"
+  />
 </template>
 
 <style scoped>

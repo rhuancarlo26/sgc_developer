@@ -20,6 +20,7 @@ use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
 use App\Models\SgcPmqa;
 use App\Models\SgcPmqaParametroLista;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Response;
@@ -299,29 +300,9 @@ class ProdutosController extends Controller
             'subproduto'       => $subproduto,
         ]);
 
-        $searchParams = $request->only(['columns', 'value']);
-        $tabParametros = $this->parametroService->index($pmqa, $searchParams);
-
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->pluck('cod_emp')
             ->toArray();
-
-        $listasVinculacoes = SgcPmqaParametroLista::with(['pontos'])
-            ->where('pmqa_id', $pmqa->id)
-            ->get();
-
-        // pontos do pmqa (isso alimenta a lista de checkboxes)
-        $vinculacoes = SgcPmqaPonto::with(['lista', 'vinculacao'])
-            ->where('pmqa_id', $pmqa->id)
-            ->get();
-        Log::info('Create PMQA payload', [
-            'pmqa_id' => $pmqa->id,
-            'vinculacoes_count' => $vinculacoes->count(),
-            'component' => 'Sgc/Contratada/Produtos/Pmqa/Create',
-        ]);
-
-        $searchExec = $request->only(['columns', 'value']);
-        $execucao = $this->execucaoCampanhaService->index($pmqa, $searchExec);
 
         return inertia('Sgc/Contratada/Produtos/Pmqa/Create', [
             'contrato'        => $contrato,
@@ -330,12 +311,43 @@ class ProdutosController extends Controller
             'subproduto'      => $subproduto,
             'empreendimentos' => $empreendimentos,
             'pmqa'            => $pmqa,
-            ...$tabParametros,
-            'vinculacoes' => $vinculacoes,
-            'listasVinculacoes' => $listasVinculacoes,
-            ...$execucao,
         ]);
     }
+
+    public function aprovarPmqa(Request $request, $contrato, $produto, $pmqa): RedirectResponse
+    {
+        $pmqaModel = SgcPmqa::where('id', $pmqa)
+            ->where('id_contrato', $contrato)
+            ->firstOrFail();
+
+        $pmqaModel->update([
+            'status_aprovacao' => 'Em elaboração',
+            'aprovado_por'     => Auth::getName(),
+            'aprovado_em'      => now(),
+        ]);
+
+        return back()->with('success', 'Campanha aprovada com sucesso!');
+    }
+
+    // public function reprovarPmqa(Request $request, $contrato, $produto, $pmqa): \Illuminate\Http\RedirectResponse
+    // {
+    //     $data = $request->validate([
+    //         'motivo' => 'nullable|string|max:1000',
+    //     ]);
+
+    //     $pmqaModel = SgcPmqa::where('id', $pmqa)
+    //         ->where('id_contrato', $contrato)
+    //         ->firstOrFail();
+
+    //     $pmqaModel->update([
+    //         'status_aprovacao'  => 'Reprovado',
+    //         'reprovado_por'     => Auth::id(),
+    //         'reprovado_em'      => now(),
+    //         'motivo_reprovacao' => $data['motivo'] ?? null,
+    //     ]);
+
+    //     return back()->with('error', 'Campanha reprovada.');
+    // }
 
 
 

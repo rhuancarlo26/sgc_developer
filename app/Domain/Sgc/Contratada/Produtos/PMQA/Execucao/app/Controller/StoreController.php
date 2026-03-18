@@ -19,14 +19,14 @@ class StoreController extends Controller
         SgcPmqa $pmqa,
         StoreRequest $request
     ): RedirectResponse {
-        $response = $this->campanhaService->store($request->validated());
 
+        $response = $this->campanhaService->store($request->validated());
         return to_route('contratos.contratada.sgc.pmqa.execucao.index', [
             'contrato' => $contrato->id,
             'produto'  => $produto,
             'pmqa'     => $pmqa->id,
             'tab'      => 'execucao',
-            'subStep'  => 5, 
+            'subStep'  => 5,
         ])->with('message', $response['request']);
     }
 }

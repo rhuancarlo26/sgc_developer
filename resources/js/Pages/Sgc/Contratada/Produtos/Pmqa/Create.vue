@@ -4,7 +4,7 @@ import { ref, watch } from "vue";
 import Index from "./Configuracao/Ponto/Index.vue";
 import IndexParametros from "./Configuracao/Parametro/Index.vue";
 import IndexVincularParametro from "./Configuracao/VinculacaoPonto/Index.vue";
-import IndexExecucao from "./Execucao/Index.vue";
+import IndexResultado from "./Resultado/Index.vue";
 import { usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
 import ProdutoTabsLayout from "../ProdutoTabsLayout.vue";
@@ -22,8 +22,10 @@ const props = defineProps({
     vinculacoes: { type: Object },
     campanhas: { type: Object },
     campanha: { type: Object },
-    pontosExecucao: {type: Object }
+    pontosExecucao: { type: Object },
 });
+
+console.log(props.pmqa)
 const page = usePage();
 
 const subStep = ref(Number(page.props.subStep) || 1);
@@ -36,13 +38,9 @@ const temas = [{ id: 1, nome_tema: "Recursos Hídricos" }];
 
 const form = useForm({
     id: props.pmqa?.id ?? null,
-
     cod_emp: props.pmqa?.cod_emp ?? "",
-
     tipo: props.produto === "Eia" ? "Eia" : (props.pmqa?.subproduto ?? ""),
-
     tema: props.pmqa?.tema ?? "Recursos Hídricos",
-
     especificacao: props.pmqa?.especificacao ?? "",
     introducao: props.pmqa?.introducao ?? "",
     justificativa: props.pmqa?.justificativa ?? "",
@@ -126,20 +124,20 @@ const produtoNome = computed(() =>
 );
 
 watch(activeTab, (tab) => {
-  if (tab === 'execucao') {
-    router.visit(
-      route('contratos.contratada.sgc.pmqa.execucao.index', [
-        props.contratos.id,
-        props.produto.slug,
-        props.pmqa.id,
-      ]),
-      {
-        preserveState: false,
-        preserveScroll: true,
-      }
-    )
-  }
-})
+    if (tab === "execucao") {
+        router.visit(
+            route("contratos.contratada.sgc.pmqa.execucao.index", [
+                props.contratos.id,
+                props.produto.slug,
+                props.pmqa.id,
+            ]),
+            {
+                preserveState: false,
+                preserveScroll: true,
+            },
+        );
+    }
+});
 
 </script>
 
@@ -147,6 +145,7 @@ watch(activeTab, (tab) => {
     <ProdutoTabsLayout
         :contratos="contratos"
         :title="'PMQA - EIA'"
+        :pmqa="pmqa"
         v-model:activeTab="activeTab"
     >
         <template #apresentacao>
@@ -156,7 +155,7 @@ watch(activeTab, (tab) => {
                 :produto="produto"
                 :temas="temas"
                 :empreendimentos="empreendimentos"
-                @saved="subStep = 2"
+                @saved="subStep = 1"
             />
         </template>
 
@@ -195,6 +194,14 @@ watch(activeTab, (tab) => {
             />
         </template>
 
+        <!-- <template #resultados>
+            <IndexResultado
+                :contrato="contratos"
+                :produto="produto"
+                :pontos="pontos"
+                :pmqa="pmqa"
+            />
+        </template> -->
     </ProdutoTabsLayout>
 </template>
 

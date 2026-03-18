@@ -71,7 +71,7 @@ const saveCampanha = () => {
         form.post(
             route("contratos.contratada.sgc.pmqa.execucao.store", {
                 contrato: props.contrato.id,
-                produto: props.produto.slug,
+                produto: props.produto,
                 pmqa: props.pmqa.id,
             }),
             {

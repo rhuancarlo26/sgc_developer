@@ -2,10 +2,10 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Resultado\app\Controller;
 
-use App\Domain\Servico\PMQA\Resultado\app\Services\ResultadoService;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Resultado\app\Services\ResultadoService;
 use App\Models\Contrato;
-use App\Models\ServicoPmqaResultado;
-use App\Models\Servicos;
+use App\Models\SgcPmqa;
+use App\Models\SgcPmqaResultado;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,13 +17,14 @@ class ResultadoController extends Controller
   {
   }
 
-  public function index(Contrato $contrato, Servicos $servico, ServicoPmqaResultado $resultado): Response
+  public function index(Contrato $contrato, string $produto, SgcPmqa $pmqa, SgcPmqaResultado $resultado): Response
   {
     $response = $this->resultadoService->resultado($resultado);
 
-    return Inertia::render('Servico/PMQA/Resultado/Resultado', [
+    return Inertia::render('Sgc/Contratada/Produtos/Pmqa/Resultado/Resultado', [
       'contrato' => $contrato,
-      'servico' => $servico->load(['tipo', 'pmqa_config_lista_parecer']),
+      'produto' => $produto,
+      'pmqa' => $pmqa,
       ...$response
     ]);
   }

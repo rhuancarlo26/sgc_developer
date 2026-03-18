@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import { Head, Link, useForm } from "@inertiajs/vue3";
+import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import NavButton from "@/Components/NavButton.vue";
@@ -12,14 +12,19 @@ import { IconDeviceFloppy } from "@tabler/icons-vue";
 import NavbarContrato from "@/Pages/Sgc/Contratada/NavbarContrato.vue";
 import ProdutoTabsLayout from "../../../ProdutoTabsLayout.vue";
 import { ref } from "vue";
+import { computed } from "vue";
 
 const props = defineProps({
     contrato: { type: Object },
     pmqa: { type: Object },
     campanha: { type: Object },
     ponto: { type: Object },
-    produto: { type: Object }
+    produto: { type: [String, Object] },
 });
+
+const produtoSlug = computed(() =>
+    typeof props.produto === "string" ? props.produto : props.produto.slug,
+);
 
 const form = useForm({
     id: null,
@@ -51,7 +56,7 @@ const saveColetaPonto = () => {
         form.post(
             route("contratos.contratada.sgc.pmqa.execucao.coleta.store", {
                 contrato: props.contrato.id,
-                produto: props.produto,
+                produto: produtoSlug.value,
                 pmqa: props.pmqa.id,
                 campanha: props.campanha.id,
             }),
@@ -70,6 +75,18 @@ const saveArquivo = () => {
         }),
     );
 };
+
+const voltar = () => {
+    router.visit(
+        route("contratos.contratada.sgc.pmqa.execucao.gerenciar", {
+            contrato: props.contrato.id,
+            produto: props.produto,
+            pmqa: props.pmqa.id,
+            campanha: props.campanha.id,
+        }),
+    );
+};
+
 const activeTab = ref("execucao");
 </script>
 <template>
@@ -193,7 +210,12 @@ const activeTab = ref("execucao");
                 </div>
             </div>
             <div class="row mt-4">
-                <div class="col d-flex justify-content-end">
+                <div class="d-flex justify-content-between mt-4">
+                    <NavButton
+                        @click="voltar"
+                        type-button="secondary"
+                        title="Voltar"
+                    />
                     <NavButton
                         @click="saveColetaPonto()"
                         type-button="success"

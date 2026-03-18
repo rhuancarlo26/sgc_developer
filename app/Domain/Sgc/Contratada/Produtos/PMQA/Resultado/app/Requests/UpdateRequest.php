@@ -10,7 +10,7 @@ class UpdateRequest extends FormRequest
     {
         return [
             'id' => ['required'],
-            'fk_servico' => ['required'],
+            'pmqa_id' => ['required'],
             'nome' => ['required'],
             'campanhas_selecionadas' => ['required'],
         ];

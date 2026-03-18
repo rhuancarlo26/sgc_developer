@@ -12,26 +12,26 @@ class SgcPmqaResultado extends Model
 {
     use HasFactory;
 
-    protected $table = 'sgc_pmqa_resultado';
+    protected $table = 'sgc_pmqa_resultados';
     protected $guarded = ['id', 'created_at'];
 
     public function campanhas(): BelongsToMany
     {
-        return $this->belongsToMany(SgcPmqaCampanha::class, 'sgc_pmqa_resultado_campanhas', 'fk_resultado', 'fk_pmqa_campanha');
+        return $this->belongsToMany(SgcPmqaCampanha::class, 'sgc_pmqa_resultado_campanhas', 'sgc_resultado_id', 'campanha_id');
     }
 
     public function analises(): HasMany
     {
-        return $this->hasMany(ServicoPmqaResultadoAnaliseParametro::class, 'fk_resultado');
+        return $this->hasMany(SgcPmqaResultadoAnaliseParametro::class, 'sgc_resultado_id');
     }
 
     public function analise_iqa(): Hasone
     {
-        return $this->hasOne(ServicoPmqaResultadoAnaliseIqa::class, 'fk_resultado');
+        return $this->hasOne(SgcPmqaResultadoAnaliseIqa::class, 'sgc_resultado_id');
     }
 
     public function outras_analises(): HasMany
     {
-        return $this->hasMany(ServicoPmqaResultadoOutraAnalise::class, 'fk_resultado');
+        return $this->hasMany(SgcPmqaResultadoOutraAnalise::class, 'sgc_resultado_id');
     }
 }

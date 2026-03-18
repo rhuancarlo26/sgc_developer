@@ -1,5 +1,8 @@
 <script setup>
+import InputError from "@/Components/InputError.vue";
+import InputLabel from "@/Components/InputLabel.vue";
 import { useForm } from "@inertiajs/vue3";
+import { IconDeviceFloppy } from "@tabler/icons-vue";
 import { computed } from "vue";
 
 const props = defineProps({
@@ -37,10 +40,10 @@ const salvar = () => {
     );
 };
 
-const isReadonly = computed(() => !!form.id);
+const isReadonly = computed(() => !form.id);
 </script>
 
-<template>
+<template #body>
     <form @submit.prevent="salvar">
         <div class="row mb-4">
             <div class="col form-group">
@@ -50,7 +53,6 @@ const isReadonly = computed(() => !!form.id);
                     label="nome_tema"
                     :reduce="(t) => t.nome_tema"
                     v-model="form.tema"
-                    :disabled="isReadonly"
                 >
                     <template #no-options>
                         Nenhum registro encontrado.
@@ -65,7 +67,6 @@ const isReadonly = computed(() => !!form.id);
                     :options="empreendimentos"
                     label="nome"
                     v-model="form.cod_emp"
-                    :disabled="isReadonly"
                 >
                     <template #no-options>
                         Nenhum registro encontrado.
@@ -94,7 +95,6 @@ const isReadonly = computed(() => !!form.id);
                     :id="field[0]"
                     v-model="form[field[0]]"
                     rows="5"
-                    :disabled="isReadonly"
                 />
                 <InputError :message="form.errors[field[0]]" />
             </div>
@@ -102,7 +102,6 @@ const isReadonly = computed(() => !!form.id);
 
         <div class="mb-4 d-flex justify-content-end">
             <button
-                v-if="!form.id"
                 type="submit"
                 class="btn btn-success"
                 :disabled="processing"

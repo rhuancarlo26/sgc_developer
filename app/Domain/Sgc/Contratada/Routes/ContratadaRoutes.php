@@ -110,6 +110,8 @@ Route::prefix('/contratada')->group(function () {
         Route::get('/',                                                   [ProdutosController::class,                              'index'])->name('sgc.contratada.produtos.index');
         Route::get('create',                                              [ProdutosController::class,                              'create'])->name('sgc.contratada.produtos.create');
         Route::patch('/pmqa-update',                                      [ProdutosController::class,                              'updatePmqa'])->name('sgc.contratada.produtos.pmqa.update');
+        Route::patch('/pmqa/{pmqa}/aprovar',                              [ProdutosController::class,                              'aprovarPmqa'])->name('sgc.contratada.produtos.pmqa.aprovar');
+        // Route::patch('/pmqa-reporvar',                                    [ProdutosController::class],                             'reprovarPmqa')->name('sgc.contratada.produtos.pmqa.reprovar');
         Route::post('abio/store',                                         [StoreProdutoAbioController::class,                      'store'])->name('sgc.contratada.produtos.abio.store');
         Route::delete('abio/{produto_abio}',                              [StoreProdutoAbioController::class,                      'destroy'])->name('sgc.contratada.produtos.abio.destroy');
         Route::post('salvar-campanha',                                    [CampanhaController::class,                              'salvarCampanha'])->name('sgc.contratada.produtos.salvar_campanha');
@@ -138,6 +140,7 @@ Route::prefix('/contratada')->group(function () {
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/Parametro/Routes/ParametroRoutes.php';
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/VinculacaoPonto/Routes/VinculacaoPontoRoutes.php';
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Execucao/app/Routes/ExecucaoRoutes.php';
+            require __DIR__  . '/../../Contratada/Produtos/PMQA/Resultado/app/Routes/ResultadoRoutes.php';
 
         });
     });

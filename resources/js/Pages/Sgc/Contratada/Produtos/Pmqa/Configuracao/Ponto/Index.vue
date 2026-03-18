@@ -183,6 +183,7 @@ const atualizarListaDePontos = () => {
         :produto="produto"
         :pmqa="pmqa"
         ref="modalImportarPonto"
+        @importacao-concluida="onSaved"
     />
     <ModalFormPonto
         ref="modalFormPonto"

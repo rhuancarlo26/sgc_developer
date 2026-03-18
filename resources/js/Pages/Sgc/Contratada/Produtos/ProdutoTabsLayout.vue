@@ -1,8 +1,9 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import { Head, router } from "@inertiajs/vue3";
+import { Head, router, usePage } from "@inertiajs/vue3";
 import NavbarContrato from "../NavbarContrato.vue";
+import { computed } from "vue";
 
 const props = defineProps({
   contratos: { type: Object, required: true },
@@ -12,24 +13,33 @@ const props = defineProps({
 
 const emit = defineEmits(["update:activeTab"]);
 
+const page = usePage()
+
+const pmqaId = computed(() => {
+  return props.pmqa?.id ?? page.props.ziggy.query?.pmqa ?? route().params?.pmqa
+})
+
 const setTab = (tab) => {
-  if (props.activeTab === "execucao" && tab !== "execucao") {
+  const baseParams = [props.contratos.id, 'eia', pmqaId.value];
+
+  if (tab === "configuracao") {
     router.visit(
-      route("contratos.contratada.sgc.pmqa.configuracao.ponto.index", [
-        props.contratos.id,
-        'eia',
-        9
-      ], {
-        tab,
-        subStep: tab === "configuracao" ? 2 : 1,
-      })
+      route("contratos.contratada.sgc.pmqa.configuracao.ponto.index", baseParams),
+      { data: { tab: "configuracao", subStep: 2 }, preserveScroll: true }
     );
     return;
   }
 
-  emit("update:activeTab", tab);
-};
+  if (tab === "execucao") {
+    router.visit(route("contratos.contratada.sgc.pmqa.execucao.index", baseParams));
+    return;
+  }
 
+  if (tab === "resultados") {
+    router.visit(route("contratos.contratada.sgc.pmqa.resultado.index", baseParams));
+    return;
+  }
+};
 </script>
 
 <template>
@@ -73,8 +83,8 @@ const setTab = (tab) => {
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'anexos' }" @click.prevent="setTab('anexos')">
-                  Anexos
+                <a class="nav-link" :class="{ active: activeTab === 'resultados' }" @click.prevent="setTab('resultados')">
+                  Resultados
                 </a>
               </li>
             </ul>
@@ -92,8 +102,8 @@ const setTab = (tab) => {
                 <slot name="execucao" />
               </div>
 
-              <div v-show="activeTab === 'anexos'">
-                <slot name="anexos" />
+              <div v-show="activeTab === 'resultados'">
+                <slot name="resultados" />
               </div>
             </div>
           </div>

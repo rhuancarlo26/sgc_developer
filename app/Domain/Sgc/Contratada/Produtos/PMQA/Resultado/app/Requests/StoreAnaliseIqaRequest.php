@@ -9,7 +9,7 @@ class StoreAnaliseIqaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fk_resultado' => ['required'],
+            'sgc_resultado_id' => ['required'],
             'analise_iqa' => ['required'],
             'graf_analise_iqa' => ['required'],
         ];

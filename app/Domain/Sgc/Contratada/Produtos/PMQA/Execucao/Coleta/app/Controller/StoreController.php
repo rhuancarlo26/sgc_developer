@@ -8,6 +8,7 @@ use App\Models\Contrato;
 use App\Models\ServicoPmqaCampanha;
 use App\Models\Servicos;
 use App\Models\SgcPmqa;
+use App\Models\SgcPmqaCampanha;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +19,7 @@ class StoreController extends Controller
     {
     }
 
-    public function index(Contrato $contrato, string $produto, SgcPmqa $pmqa, ServicoPmqaCampanha $campanha, StoreRequest $request): RedirectResponse
+    public function index(Contrato $contrato, string $produto, SgcPmqa $pmqa, SgcPmqaCampanha $campanha, StoreRequest $request): RedirectResponse
     {
         $post = [];
 

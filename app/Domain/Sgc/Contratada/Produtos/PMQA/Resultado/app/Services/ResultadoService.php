@@ -1,14 +1,17 @@
 <?php
 
-namespace App\Domain\Servico\PMQA\Resultado\app\Services;
+namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Resultado\app\Services;
 
-use App\Models\ServicoPmqaCampanha;
 use App\Models\ServicoPmqaParametro;
 use App\Models\ServicoPmqaResultado;
 use App\Models\ServicoPmqaResultadoAnaliseIqa;
-use App\Models\ServicoPmqaResultadoAnaliseParametro;
+use App\Models\SgcPmqaResultadoAnaliseParametro;
 use App\Models\ServicoPmqaResultadoOutraAnalise;
-use App\Models\Servicos;
+use App\Models\SgcPmqa;
+use App\Models\SgcPmqaCampanha;
+use App\Models\SgcPmqaResultado;
+use App\Models\SgcPmqaResultadoAnaliseIqa;
+use App\Models\SgcPmqaResultadoOutraAnalise;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
@@ -18,20 +21,20 @@ class ResultadoService extends BaseModelService
 {
     use Searchable, Deletable;
 
-    protected string $modelClass = ServicoPmqaResultado::class;
-    protected string $modelClassAnalise = ServicoPmqaResultadoAnaliseParametro::class;
-    protected string $modelClassAnaliseIqa = ServicoPmqaResultadoAnaliseIqa::class;
-    protected string $modelClassOutraAnalise = ServicoPmqaResultadoOutraAnalise::class;
+    protected string $modelClass = SgcPmqaResultado::class;
+    protected string $modelClassAnalise = SgcPmqaResultadoAnaliseParametro::class;
+    protected string $modelClassAnaliseIqa = SgcPmqaResultadoAnaliseIqa::class;
+    protected string $modelClassOutraAnalise = SgcPmqaResultadoOutraAnalise::class;
 
-    public function index(Servicos $servico, array $searchParams): array
+    public function index(SgcPmqa $pmqa, array $searchParams): array
     {
         $resultados = $this->searchAllColumns(...$searchParams)
             ->with(['campanhas'])
-            ->where('fk_servico', $servico->id)
+            ->where('pmqa_id', $pmqa->id)
             ->paginate()
             ->appends($searchParams);
 
-        $campanhas = ServicoPmqaCampanha::where('fk_servico', $servico->id)->get();
+        $campanhas = SgcPmqaCampanha::where('pmqa_id', $pmqa->id)->get();
 
         return [
             'resultados' => $resultados,
@@ -50,7 +53,7 @@ class ResultadoService extends BaseModelService
 
     public function storeAnalises(array $request): array
     {
-        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $request['fk_resultado'] . '_' . $request['fk_parametro'] . '.png';
+        $path = 'public' . DIRECTORY_SEPARATOR . 'SgcPmqa' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $request['sgc_resultado_id'] . '_' . $request['parametro_id'] . '.png';
         Storage::disk()->put($path, $request['graf_analise_parametro']);
 
         return $this->dataManagement->create(entity: $this->modelClassAnalise, infos: [
@@ -61,7 +64,7 @@ class ResultadoService extends BaseModelService
 
     public function storeAnaliseIqa(array $request): array
     {
-        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['fk_resultado'] . '.png';
+        $path = 'public' . DIRECTORY_SEPARATOR . 'SgcPmqa' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['sgc_resultado_id'] . '.png';
         Storage::disk()->put($path, $request['graf_analise_iqa']);
 
         return $this->dataManagement->create(entity: $this->modelClassAnaliseIqa, infos: [
@@ -75,11 +78,11 @@ class ResultadoService extends BaseModelService
         if ($request['arquivo']->isvalid()) {
             $nome = $request['arquivo']->getClientOriginalName();
             $tipo = $request['arquivo']->extension();
-            $caminho = $request['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'OutraAnalise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+            $caminho = $request['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'SgcPmqa' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'OutraAnalise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
         }
 
         return $this->dataManagement->create(entity: $this->modelClassOutraAnalise, infos: [
-            'fk_resultado' => $request['fk_resultado'],
+            'sgc_resultado_id' => $request['sgc_resultado_id'],
             'nome' => $request['nome'],
             'extensao' => $tipo,
             'caminho_arquivo' => str_replace("public\\", "", $caminho),
@@ -98,11 +101,11 @@ class ResultadoService extends BaseModelService
         if ($request['arquivo']->isvalid()) {
             $nome = $request['arquivo']->getClientOriginalName();
             $tipo = $request['arquivo']->extension();
-            $caminho = $request['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'OutraAnalise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
+            $caminho = $request['arquivo']->storeAs('public' . DIRECTORY_SEPARATOR . 'SgcPmqa' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'OutraAnalise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nome);
         }
 
         return $this->dataManagement->update(entity: $this->modelClassOutraAnalise, infos: [
-            'fk_resultado' => $request['fk_resultado'],
+            'sgc_resultado_id' => $request['sgc_resultado_id'],
             'tipo' => $tipo,
             'caminho_arquivo' => str_replace("public\\", "", $caminho),
             'nome' => $request['nome'],
@@ -112,13 +115,13 @@ class ResultadoService extends BaseModelService
 
     public function updateAnalises(array $request): array
     {
-        $analise = $this->modelClassAnalise::where('fk_resultado', $request['fk_resultado'])->where('fk_parametro', $request['fk_parametro'])->first();
+        $analise = $this->modelClassAnalise::where('sgc_resultado_id', $request['sgc_resultado_id'])->where('parametro_id', $request['parametro_id'])->first();
 
         if (isset($analise->graf_analise_parametro)) {
             Storage::delete('public' . DIRECTORY_SEPARATOR . $analise->graf_analise_parametro);
         }
 
-        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $request['fk_resultado'] . '_' . $request['fk_parametro'] . '.png';
+        $path = 'public' . DIRECTORY_SEPARATOR . 'SgcPmqa' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_' . $request['sgc_resultado_id'] . '_' . $request['parametro_id'] . '.png';
         Storage::disk()->put($path, $request['graf_analise_parametro']);
 
         if ($analise) {
@@ -138,13 +141,13 @@ class ResultadoService extends BaseModelService
 
     public function updateAnaliseIqa(array $request): array
     {
-        $analiseIqa = ServicoPmqaResultadoAnaliseIqa::where('fk_resultado', $request['fk_resultado'])->first();
+        $analiseIqa = ServicoPmqaResultadoAnaliseIqa::where('sgc_resultado_id', $request['sgc_resultado_id'])->first();
 
         if (isset($analiseIqa->graf_analise_iqa)) {
             Storage::delete('public' . DIRECTORY_SEPARATOR . $analiseIqa->graf_analise_iqa);
         }
 
-        $path = 'public' . DIRECTORY_SEPARATOR . 'Servico' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['fk_resultado'] . '.png';
+        $path = 'public' . DIRECTORY_SEPARATOR . 'SgcPmqa' . DIRECTORY_SEPARATOR . 'Pmqa' . DIRECTORY_SEPARATOR . 'Resultado' . DIRECTORY_SEPARATOR . 'Analise' . DIRECTORY_SEPARATOR . uniqid() . '_iqa_' . $request['sgc_resultado_id'] . '.png';
         Storage::disk()->put($path, $request['graf_analise_iqa']);
 
         return $this->dataManagement->update(entity: $this->modelClassAnaliseIqa, infos: [
@@ -232,7 +235,7 @@ class ResultadoService extends BaseModelService
         $parametrosIds = collect($resultado->campanhas)->flatMap(function ($campanha) {
             return collect($campanha->campanha_pontos)->flatMap(function ($campanhaPonto) {
                 if (isset($campanhaPonto->medicao)) {
-                    return collect($campanhaPonto->medicao->parametros)->pluck('fk_parametro');
+                    return collect($campanhaPonto->medicao->parametros)->pluck('parametro_id');
                 }
             });
         })->unique()->toArray();
@@ -246,7 +249,7 @@ class ResultadoService extends BaseModelService
                                 if (isset($campanhaPonto->medicao)) {
                                     $medicoes = collect($campanhaPonto->medicao->parametros)
                                         ->filter(function ($medicaoParametro) use ($parametro) {
-                                            return $medicaoParametro->fk_parametro == $parametro->id;
+                                            return $medicaoParametro->parametro_id == $parametro->id;
                                         })
                                         ->pluck('medicao')
                                         ->toArray();

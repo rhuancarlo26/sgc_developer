@@ -19,8 +19,8 @@ class SgcPmqaCampanha extends Model
         );
     }
 
-    // public function campanha_pontos()
-    // {
-    //     return $this->hasMany(ServicoPmqaCampanhaPonto::class, 'fk_exec_campanha');
-    // }
+    public function campanha_pontos()
+    {
+        return $this->hasMany(SgcPmqaCampanhasPonto::class, 'sgc_pmqa_campanha_id');
+    }
 }

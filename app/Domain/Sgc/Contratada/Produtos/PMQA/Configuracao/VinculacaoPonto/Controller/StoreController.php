@@ -20,20 +20,12 @@ class StoreController extends Controller
         string $produto,
         SgcPmqa $pmqa,
         StoreRequest $request
-    ): JsonResponse {
+    ) {
         $response = $this->vinculacaoPontoService->store(
             $pmqa,
             $request->validated()
         );
 
-        return response()->json([
-            'success' => true,
-            'message' => $response['request']['content'],
-            'data' => [
-                'contrato_id' => $contrato->id,
-                'produto'     => $produto,
-                'pmqa_id'     => $pmqa->id,
-            ]
-        ], 200);
+        return back()->with('success', $response['request']['content']);
     }
 }

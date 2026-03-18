@@ -9,8 +9,8 @@ class UpdateAnaliseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fk_resultado' => ['required'],
-            'fk_parametro' => ['required'],
+            'sgc_resultado_id' => ['required'],
+            'parametro_id' => ['required'],
             'analises' => ['required'],
             'graf_analise_parametro' => ['required'],
         ];

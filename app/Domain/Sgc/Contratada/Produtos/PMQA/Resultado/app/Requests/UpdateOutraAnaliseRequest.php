@@ -10,7 +10,7 @@ class UpdateOutraAnaliseRequest extends FormRequest
     {
         return [
             'id' => ['required'],
-            'fk_resultado' => ['required'],
+            'sgc_resultado_id' => ['required'],
             'nome' => ['required'],
             'arquivo' => ['required'],
             'analise' => ['required'],

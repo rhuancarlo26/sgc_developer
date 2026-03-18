@@ -9,7 +9,7 @@ class StoreOutraAnaliseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fk_resultado' => ['required'],
+            'sgc_resultado_id' => ['required'],
             'nome' => ['required'],
             'arquivo' => ['required'],
             'analise' => ['required'],
