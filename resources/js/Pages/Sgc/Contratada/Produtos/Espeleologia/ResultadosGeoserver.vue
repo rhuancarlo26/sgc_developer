@@ -472,7 +472,7 @@ const vincularMapa = async (tipo) => {
 
   try {
     const response = await axios.post(
-      // rota nomeada configurada em ContratadaRoutes para MapLayerController@store
+      // rota nomeada configurada em ContratadaRoutes para MapLayerController@storeuma
       route('sgc.contratada.espeleologia.layers.upload_shapefile'),
       formData,
       { headers: { 'Content-Type': 'multipart/form-data' } }

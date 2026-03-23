@@ -177,6 +177,13 @@ Route::prefix('/contratada')->group(function () {
 
     });
 
+
+    /**
+     * CONFERIR NOVAMENTE E CAPTURAR IMPRESSÕES DE VIEW DO DOCUMENTO
+     * ESTABELECER ROTA ESPECÍFICA PRA ESPELEOLOGIA
+     *
+     */
+
         Route::post('/espeleo/resultados/upload', [EspeleoCampanhaController::class, 'uploadResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.upload');
 
 

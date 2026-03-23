@@ -8,12 +8,13 @@ import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import DadosGeraisVisualizar from './Componentes/DadosGeraisVisualizar.vue';
 import ModulosAmostraisVisualizar from './Componentes/ModulosAmostraisVisualizar.vue';
-import QueloniosCrocodilianosVisualizar from './Componentes/QueloniosCrocodilianosVisualizar.vue';
-import FaunaCavernicolaVisualizar from './Componentes/FaunaCavernicolaVisualizar.vue';
+// import QueloniosCrocodilianosVisualizar from './Componentes/QueloniosCrocodilianosVisualizar.vue';
+// import FaunaCavernicolaVisualizar from './Componentes/FaunaCavernicolaVisualizar.vue';
 import MetodologiaVisualizar from './Componentes/MetodologiaVisualizar.vue';
-import FaunaResultadosVisualizar from './Componentes/FaunaResultadosVisualizar.vue';
+// import FaunaResultadosVisualizar from './Componentes/FaunaResultadosVisualizar.vue';
+import MapLayer from '../Espeleologia/MapViewer.vue';
 
-defineProps({
+const props = defineProps({
     campanha: {
         type: Object,
         default: () => ({}),
@@ -22,7 +23,10 @@ defineProps({
     produto: String,
     contratos: Object,
     canApprove: Boolean,
+    coordenadas: Object,
 });
+
+// console.log('Cooredenadas:', props.coordenadas);
 
 const activeTab = ref('apresentacao');
 const subStep = ref(1);
@@ -97,6 +101,7 @@ const formatAnexoLabel = (tipo) => {
             <template #body>
                 <div class="card">
                     <div class="card-body">
+                        <pre>{{ produto }}</pre>
                         <h2 class="text-center mb-4">VISUALIZAR CAMPANHA {{ produto.toUpperCase() }}</h2>
                         <h4 class="mb-3">Status: {{ campanha.status }}</h4>
                         <ul class="nav nav-tabs mb-4">
@@ -137,13 +142,22 @@ const formatAnexoLabel = (tipo) => {
                             <div v-if="activeTab === 'apresentacao'" class="tab-pane fade" :class="{ 'show active': activeTab === 'apresentacao' }">
                                 <div v-if="subStep === 1">
                                     <h4 class="text-center mb-3" style="font-weight: bold;">APRESENTAÇÃO</h4>
-                                    <div class="mb-3">
-                                        <label class="form-label">Empreendimento</label>
-                                        <input type="text" class="form-control" :value="campanha.cod_emp" disabled />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Subproduto</label>
-                                        <input type="text" class="form-control" :value="campanha.familia || 'Fauna'" disabled />
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <!-- <pre>Mapa aqui</pre> -->
+                                             <MapLayer :emp_coordenadas="coordenadas" />
+                                        </div>
+                                        <div class="col-md-4">
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Empreendimento</label>
+                                                <input type="text" class="form-control" :value="campanha.cod_emp" disabled />
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Subproduto</label>
+                                                <input type="text" class="form-control" :value="campanha.familia || 'Fauna'" disabled />
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="d-flex justify-content-end">
                                         <button class="btn btn-primary" @click="subStep = 2">Avançar</button>

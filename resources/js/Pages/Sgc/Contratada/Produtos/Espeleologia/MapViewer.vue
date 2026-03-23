@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.vectorgrid";
@@ -9,11 +9,62 @@ import "leaflet-draw";
 import "leaflet-measure";
 import axios from "axios";
 
+// receber dados do empreendimento
+const props = defineProps({
+  campanha: Object,
+  produto: String,
+  emp_coordenadas: [Object, String],
+});
+console.log("MapViewer Props:", props.emp_coordenadas); // Log para verificar os dados recebidos
+
+
 const map = ref(null);
+const mapContainerRef = ref(null);
+const empCoordinatesLayer = ref(null);
+const empStartMarker = ref(null);
+const empEndMarker = ref(null);
+const drawnItems = ref(null);
 const layers = ref([]);
 const showLayersPanel = ref(true);
 const activeLayers = ref({});
 const layerColors = ref({});
+const isFullscreen = ref(false);
+
+function handleDrawCreated(event) {
+  if (!drawnItems.value) return;
+  drawnItems.value.addLayer(event.layer);
+}
+
+function initTemporaryDrawTools() {
+  if (!map.value) return;
+
+  drawnItems.value = new L.FeatureGroup();
+  map.value.addLayer(drawnItems.value);
+
+  const drawControl = new L.Control.Draw({
+    position: "topleft",
+    draw: {
+      polyline: true,
+      polygon: false,
+      rectangle: false,
+      circle: true,
+      marker: false,
+      circlemarker: false,
+    },
+    edit: {
+      featureGroup: drawnItems.value,
+      remove: true,
+    },
+  });
+
+  map.value.addControl(drawControl);
+  map.value.on(L.Draw.Event.CREATED, handleDrawCreated);
+}
+
+function clearTemporaryDrawings() {
+  if (!drawnItems.value) return;
+  drawnItems.value.clearLayers();
+}
 
 // Paleta de cores para as camadas
 const colorPalette = [
@@ -27,12 +78,164 @@ function getLayerColor(index) {
   return colorPalette[index % colorPalette.length];
 }
 
+function normalizeEmpCoordinates(rawCoordinates) {
+  if (!rawCoordinates) return null;
+
+  let parsedCoordinates = rawCoordinates;
+  if (typeof parsedCoordinates === "string") {
+    try {
+      parsedCoordinates = JSON.parse(parsedCoordinates);
+    } catch (error) {
+      console.error("emp_coordenadas invalido:", error);
+      return null;
+    }
+  }
+
+  if (!parsedCoordinates || typeof parsedCoordinates !== "object") return null;
+
+  if (parsedCoordinates.type === "Feature") {
+    return parsedCoordinates;
+  }
+
+  if (parsedCoordinates.type === "FeatureCollection") {
+    return parsedCoordinates;
+  }
+
+  if (parsedCoordinates.type && parsedCoordinates.coordinates) {
+    return {
+      type: "Feature",
+      properties: {},
+      geometry: parsedCoordinates,
+    };
+  }
+
+  return null;
+}
+
+function addEmpCoordinatesLayer() {
+  if (!map.value) return;
+
+  if (empCoordinatesLayer.value) {
+    map.value.removeLayer(empCoordinatesLayer.value);
+    empCoordinatesLayer.value = null;
+  }
+
+  if (empStartMarker.value) {
+    map.value.removeLayer(empStartMarker.value);
+    empStartMarker.value = null;
+  }
+
+  if (empEndMarker.value) {
+    map.value.removeLayer(empEndMarker.value);
+    empEndMarker.value = null;
+  }
+
+  const geojson = normalizeEmpCoordinates(props.emp_coordenadas);
+  if (!geojson) return;
+
+  empCoordinatesLayer.value = L.geoJSON(geojson, {
+    style: {
+      color: "#E65100",
+      weight: 4,
+      opacity: 0.9,
+    },
+    pointToLayer: (_, latlng) =>
+      L.circleMarker(latlng, {
+        radius: 6,
+        color: "#E65100",
+        weight: 2,
+        fillColor: "#FF9800",
+        fillOpacity: 0.85,
+      }),
+  }).addTo(map.value);
+
+  const bounds = empCoordinatesLayer.value.getBounds();
+
+  // Marca visualmente os pontos inicial e final para orientar o usuario.
+  const rawMapLayers = empCoordinatesLayer.value.getLayers();
+  const collectedLatLngs = [];
+  rawMapLayers.forEach((layer) => {
+    if (typeof layer.getLatLngs === "function") {
+      const latLngs = layer.getLatLngs();
+      if (Array.isArray(latLngs)) {
+        const flattened = latLngs.flat(Infinity);
+        flattened.forEach((item) => {
+          if (item && typeof item.lat === "number" && typeof item.lng === "number") {
+            collectedLatLngs.push(item);
+          }
+        });
+      }
+      return;
+    }
+
+    if (typeof layer.getLatLng === "function") {
+      const point = layer.getLatLng();
+      if (point && typeof point.lat === "number" && typeof point.lng === "number") {
+        collectedLatLngs.push(point);
+      }
+    }
+  });
+
+  const firstLatLng = collectedLatLngs[0] || null;
+  const lastLatLng = collectedLatLngs[collectedLatLngs.length - 1] || null;
+
+  if (firstLatLng) {
+    empStartMarker.value = L.marker(firstLatLng)
+      .addTo(map.value)
+      .bindPopup("Ponto inicial do trecho")
+      .openPopup();
+  }
+
+  if (lastLatLng) {
+    empEndMarker.value = L.marker(lastLatLng)
+      .addTo(map.value)
+      .bindPopup("Ponto final do trecho");
+  }
+
+  if (bounds.isValid()) {
+    map.value.fitBounds(bounds, {
+      padding: [10, 10],
+      maxZoom: 18,
+    });
+
+    // Dá um passo extra de zoom para focar melhor no trecho ao abrir.
+    const nextZoom = Math.min(map.value.getZoom() + 1, 18);
+    map.value.setZoom(nextZoom);
+  }
+}
+
+async function toggleFullscreen() {
+  if (!mapContainerRef.value) return;
+
+  try {
+    if (!document.fullscreenElement) {
+      await mapContainerRef.value.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  } catch (error) {
+    console.error("Nao foi possivel alternar tela cheia:", error);
+  }
+}
+
+function handleFullscreenChange() {
+  isFullscreen.value = document.fullscreenElement === mapContainerRef.value;
+
+  // Leaflet precisa recalcular dimensoes apos troca de layout.
+  setTimeout(() => {
+    if (map.value) map.value.invalidateSize();
+  }, 200);
+}
+
 onMounted(async () => {
   map.value = L.map("map").setView([-14.235, -51.925], 4);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors",
   }).addTo(map.value);
+
+  addEmpCoordinatesLayer();
+  initTemporaryDrawTools();
 
   const { data } = await axios.get("/sgc/contratada/espeleologia/layers");
   layers.value = data;
@@ -44,7 +247,23 @@ onMounted(async () => {
   });
 
   map.value.on("click", getFeatureInfo);
+  document.addEventListener("fullscreenchange", handleFullscreenChange);
 });
+
+onUnmounted(() => {
+  document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  if (map.value) {
+    map.value.off(L.Draw.Event.CREATED, handleDrawCreated);
+  }
+});
+
+watch(
+  () => props.emp_coordenadas,
+  () => {
+    addEmpCoordinatesLayer();
+  },
+  { deep: true }
+);
 
 function toggleLayer(layer) {
   const key = `${layer.workspace}:${layer.layer_name}`;
@@ -234,9 +453,29 @@ async function getFeatureInfo(e) {
   <div class="overflow-hidden">
     <!-- Sidebar de camadas -->
     <div class="w-72 p-4 border-r bg-gray-50 overflow-y-auto card">
-      <div class="map-container">
+      <div
+        ref="mapContainerRef"
+        class="map-container"
+        :class="{ 'is-fullscreen': isFullscreen }"
+      >
         <!-- Mapa -->
         <div id="map"></div>
+
+        <button
+          class="fullscreen-btn"
+          @click="toggleFullscreen"
+          :title="isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'"
+        >
+          {{ isFullscreen ? "Sair da Tela Cheia" : "Tela Cheia" }}
+        </button>
+
+        <button
+          class="clear-drawings-btn"
+          @click="clearTemporaryDrawings"
+          title="Limpar desenhos temporarios"
+        >
+          Limpar Desenhos
+        </button>
 
         <!-- Painel de controle de camadas -->
         <div class="layers-panel" :class="{ hidden: !showLayersPanel }">
@@ -258,7 +497,7 @@ async function getFeatureInfo(e) {
 
             <div v-else class="layers-list">
               <div
-                v-for="(layer, index) in layers"
+                v-for="layer in layers"
                 :key="layer.id"
                 class="layer-item"
                 :class="{
@@ -329,13 +568,67 @@ async function getFeatureInfo(e) {
   position: relative;
   width: 100%;
   height: 60vh;
+  min-height: 420px;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #map {
   width: 100%;
-  height: 600px;
+  height: 100%;
   z-index: 1;
+}
+
+.map-container:fullscreen,
+.map-container.is-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  background: #fff;
+}
+
+.fullscreen-btn {
+  position: absolute;
+  top: 16px;
+  left: 56px;
+  z-index: 1002;
+  background: rgba(38, 0, 255, 0.95);
+  border: 1px solid #d1d5db;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s ease;
+}
+
+.fullscreen-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+}
+
+.clear-drawings-btn {
+  position: absolute;
+  top: 58px;
+  left: 56px;
+  z-index: 1002;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #d1d5db;
+  color: #1f2937;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s ease;
+}
+
+.clear-drawings-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
 }
 
 /* Painel de camadas */
@@ -698,10 +991,28 @@ async function getFeatureInfo(e) {
 
 /* Responsividade */
 @media (max-width: 768px) {
+  .map-container {
+    min-height: 360px;
+  }
+
   .layers-panel {
     width: 280px;
     left: 15px;
     top: 15px;
+  }
+
+  .fullscreen-btn {
+    top: 12px;
+    left: 12px;
+    padding: 7px 10px;
+    font-size: 0.8rem;
+  }
+
+  .clear-drawings-btn {
+    top: 52px;
+    left: 50px;
+    padding: 6px 9px;
+    font-size: 0.75rem;
   }
 
   .toggle-panel-btn {
@@ -722,10 +1033,28 @@ async function getFeatureInfo(e) {
 }
 
 @media (max-width: 480px) {
+  .map-container {
+    min-height: 300px;
+  }
+
   .layers-panel {
     width: 92%;
     left: 4%;
     top: 15px;
+  }
+
+  .fullscreen-btn {
+    top: 10px;
+    left: 10px;
+    padding: 6px 9px;
+    font-size: 0.75rem;
+  }
+
+  .clear-drawings-btn {
+    top: 47px;
+    left: 45px;
+    padding: 6px 8px;
+    font-size: 0.72rem;
   }
 
   .toggle-panel-btn {

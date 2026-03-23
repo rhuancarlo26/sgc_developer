@@ -51,13 +51,16 @@ public function store(Request $request, GeoServerService $geo)
     $shpPath = $shpFiles[0];
     $layerName = pathinfo($shpPath, PATHINFO_FILENAME);
 
+    $idcampanha = $request->input('id_campanha'); // opcional, se quiser vincular à campanha
+
     // 5️⃣ Cria registro no banco
     $layer = MapLayer::create([
         'name' => $layerName,
         'workspace' => 'jonatas-mapas',
         'datastore' => 'ds_' . time(),
         'layer_name' => $layerName,
-        'storage_path' => str_replace(storage_path('app/'), '', $shpPath)
+        'storage_path' => str_replace(storage_path('app/'), '', $shpPath),
+        'id_campanha' => $idcampanha ?? null, // ou vincule à campanha atual se aplicável
     ]);
 
     try {

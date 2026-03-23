@@ -140,11 +140,13 @@ class CampanhaController extends Controller
     {
 
         // identifica se o modulo é igual à espeleologia:
+            $moduloativo = "Fauna";
             if($modulo === 'espeleologia'){
                 Log::debug('CampanhaController: Módulo de Espeleologia acessado', [
                     'campanha_id' => $campanhaId,
                 ]);
                 $campanha = SgcEspeleoCampanha::findOrFail($campanhaId);
+                $moduloativo = "Espeleologia";
             } else {
                 $campanha = SgcFaunaCampanha::with([
                     'abios.abio',
@@ -167,15 +169,18 @@ class CampanhaController extends Controller
                     'cavernicola_count'    => $campanha->resultadosCavernicola->count(),
                 ]);
             }
+            $empreendimento = SgcvwEmpreendimentos::where('cod_emp', $campanha->cod_emp)->first();
 
+            $coordenadas = $empreendimento->coordenadas;
 
-        return Inertia::render('Sgc/Contratada/Produtos/Fauna/VisualizarCampanha', [
+        return Inertia::render('Sgc/Contratada/Produtos/'.$moduloativo.'/VisualizarCampanha', [
             'campanha' => $this->mapCampanhaData($campanha),
             'campanha_id' => $campanhaId,
             'contrato' => $campanha->id_contrato,
             'produto' => $campanha->subproduto,
             'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
             'canApprove' => Auth::user()->perfis_id === 2 && $campanha->status === 'Em análise',
+            'coordenadas' => $coordenadas,
         ]);
     }
 
@@ -301,12 +306,28 @@ class CampanhaController extends Controller
         $analises = $this->faunaFiscalService->getAnalisesByCampanha($contrato, $campanha);
         $comentarios = $this->campanhaService->getComentariosByCampanha($contrato, $campanha);
 
+        // obter cooredenadas do empreendimento
+            $empreendimento = SgcvwEmpreendimentos::where('contrato_id', $contrato)->first();
+            if ($empreendimento) {
+                $empreendimento->latitude = $empreendimento->latitude ? (float) $empreendimento->latitude : null;
+                $empreendimento->longitude = $empreendimento->longitude ? (float) $empreendimento->longitude : null;
+            } else {
+                Log::warning('CampanhaController: Empreendimento não encontrado para coordenadas', [
+                    'contrato_id' => $contrato,
+                ]);
+            }
+
+        $coordenadas = $empreendimento && $empreendimento->latitude && $empreendimento->longitude
+            ? ['latitude' => $empreendimento->latitude, 'longitude' => $empreendimento->longitude]
+            : null;
+
         return Inertia::render('Sgc/Contratada/Produtos/Fauna/AnaliseCampanha', [
             'campanha' => $this->mapCampanhaData($campanhaObj),
             'contrato' => $campanhaObj->id_contrato,
             'produto' => $campanhaObj->subproduto,
             'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
             'canApprove' => Auth::user()->perfis_id === 2 && $campanhaObj->status === 'Em análise',
+            'coordenadas' => $coordenadas,
             'analises' => $analises ?? [],
             'comentarios' => $comentarios ?? [],
         ]);
