@@ -19,6 +19,8 @@ const props = defineProps({
     pmqa: { type: Object },
 });
 
+
+console.log(props.pmqa.id)
 const emit = defineEmits(["next", "prev"]);
 
 const campanhaId = computed(() => props.pmqa?.campanha_id);
@@ -147,7 +149,7 @@ const atualizarListaDePontos = () => {
                                                 {
                                                     contrato: contratoId,
                                                     produto: props.produto.slug,
-                                                    pmqa: props.pmqa,
+                                                    pmqa: props.pmqa?.id,
                                                     ponto: item.id,
                                                 },
                                             )

@@ -4,24 +4,21 @@ namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Ponto\Controller;
 
 use App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Ponto\Services\PontoService; // <-- service SGC
 use App\Models\Contrato;
-use App\Models\SgcPmqaCampanha;
+use App\Models\SgcPmqa;
 use App\Models\SgcPmqaPonto;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 
 class DeleteController extends Controller
 {
-    public function __construct(private readonly PontoService $pontoService)
-    {
-    }
+    public function __construct(private readonly PontoService $pontoService) {}
 
-    public function index(Contrato $contrato, SgcPmqaCampanha $campanha, SgcPmqaPonto $ponto): RedirectResponse
+    public function index(Contrato $contrato, $produto, $pmqa, $ponto): RedirectResponse
     {
-        $response = $this->pontoService->deletePonto($ponto);
+        $pmqaModel = SgcPmqa::findOrFail($pmqa);
+        $pontoModel = SgcPmqaPonto::findOrFail($ponto);
+        $response = $this->pontoService->deletePonto($pontoModel);
 
-        return to_route('contratos.contratada.sgc.pmqa.configuracao.ponto.index', [
-            'contrato' => $contrato->id,
-            'campanha' => $campanha->id
-        ])->with('message', $response['content'] ?? $response);
+        return redirect()->back()->with('message', $response['request'] ?? $response);
     }
 }

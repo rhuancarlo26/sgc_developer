@@ -144,10 +144,42 @@ class PontoService extends BaseModelService
     {
         try {
             $ponto->delete();
-            return ['type' => 'success', 'content' => 'Ponto removido'];
+            return ['type' => 'success', 'content' => 'Ponto removido com sucesso'];
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == '23000' || str_contains($e->getMessage(), 'Integrity constraint violation')) {
+                Log::warning('Tentativa de deletar ponto com vínculos', [
+                    'ponto_id' => $ponto->id,
+                    'ponto_nome' => $ponto->nome_ponto_coleta,
+                    'error' => $e->getMessage()
+                ]);
+
+                return [
+                    'type' => 'error',
+                    'content' => "Ponto já vinculado a lista de paramêtros. Remova primeiro os vínculos antes de excluir."
+                ];
+            }
+
+            // Outros erros de query
+            Log::error('Erro de query ao deletar ponto PMQA: ' . $e->getMessage(), [
+                'id' => $ponto->id,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'type' => 'error',
+                'content' => 'Erro no banco de dados ao deletar ponto. Tente novamente.'
+            ];
         } catch (\Throwable $e) {
-            Log::error('Erro ao deletar ponto PMQA: ' . $e->getMessage(), ['id' => $ponto->id]);
-            return ['type' => 'error', 'content' => 'Erro ao deletar ponto'];
+            // Qualquer outro erro
+            Log::error('Erro inesperado ao deletar ponto PMQA: ' . $e->getMessage(), [
+                'id' => $ponto->id,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'type' => 'error',
+                'content' => 'Erro inesperado ao deletar ponto. Contate o suporte técnico.'
+            ];
         }
     }
 }
