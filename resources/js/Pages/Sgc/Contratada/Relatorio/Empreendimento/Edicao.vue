@@ -205,34 +205,19 @@
               </span>
               <br v-if="campoFoiEditado(linha, coluna)"/>
               <span  @click="abrirEdicao(linha, coluna)" :class="'cursor-pointer ' + (linha[coluna] ? '':'text-info')">{{ linha[coluna] ?? 's/info' }}</span>
-
               <div
                 v-if="
                   campoEditando.id === linha.id &&
                   campoEditando.campo === coluna
                 "
-                class="edit-popup"
+                class="absolute bg-white shadow-lg p-2 border rounded"
               >
-                <textarea
+                <input
                   v-model="empreendimentoEdit.valor"
-                  class="edit-textarea"
-                ></textarea>
-
-                <div class="mt-2 text-end">
-                  <button
-                    class="btn btn-sm btn-success me-2"
-                    @click="salvarEdicao"
-                  >
-                    Salvar
-                  </button>
-
-                  <button
-                    class="btn btn-sm btn-secondary"
-                    @click="fecharEdicao"
-                  >
-                    Cancelar
-                  </button>
-                </div>
+                  class="border p-1"
+                  @keyup.enter="salvarEdicao"
+                  @blur="fecharEdicao"
+                />
               </div>
             </td>
           </tr>
@@ -310,7 +295,6 @@ const salvarEdicao = () => {
     route('sgc.contratada.updatecampo', empreendimentoEdit.value.id),
     { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
     {
-      preserveScroll: true,
       onSuccess: () => {
         campoEditando.value = { id: null, campo: null };
         dados.value = [...page.props.empreendimentos];
@@ -520,35 +504,10 @@ onMounted(() => {
   border-radius: 50%;
   z-index: 1;
 }
-.float-right {
+float-right {
   float: right !important;
 }
 li .active {
     border-bottom: 2px solid #f6f8fb !important;
 }
-
-.edit-textarea:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13,110,253,0.2);
-}
-
-.edit-popup {
-  position: absolute;
-  z-index: 1000;
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
-
-.edit-textarea {
-  width: 670px;
-  min-height: 220px;
-  resize: vertical;
-  padding: 8px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-}
-
 </style>

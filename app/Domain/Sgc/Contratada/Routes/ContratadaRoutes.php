@@ -12,7 +12,6 @@ use App\Domain\Sgc\Contratada\Comentario\Controller\StoreSgcComentarioController
 use App\Domain\Sgc\Contratada\Comentario\Controller\StoreSgcComentariosController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StoreUploadRelatorioController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\VisualizarDocxController;;
-
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\StatusUpdateController;
 use App\Domain\Sgc\Contratada\RelatorioCoord\Controller\CreateController;
 use App\Domain\Sgc\Contratada\Dav\Controller\ListagemDavController;
@@ -39,6 +38,12 @@ Route::prefix('/contratada')->group(function () {
     Route::get('{contrato}/relatorios',                                   [RelatorioCoordenacaoController::class,                  'relatorios'])->name('sgc.contratada.relatorios.index');
     Route::get('{contrato}/relatorio/{relatorio_num}',                    [RelatorioCoordenacaoController::class,                  'index'])->name('sgc.contratada.relatorio.detalhes');
     Route::get('{contrato}/relatorio/{relatorio_num}/historico/{versao}', [RelatorioCoordenacaoController::class,                  'showHistorico'])->name('sgc.contratada.relatorio.historico');
+
+    // Download anexo
+    Route::get('/sgc/contratada/download-anexo/{contratoId}/{itemId}/{relatorioNum}', [StoreUploadRelatorioController::class, 'downloadAnexo'])->name('sgc.contratada.download_anexo');
+
+    // Relatório de Coordenação
+    Route::get('/sgc/visualizar',                                  [VisualizarDocxController::class,                        'index'])->name('sgc.contratada.visualizar_doc');
 
     Route::get('/sgc/relatorio-coordenacao', function () {
         $itens = App\Models\SgcRelatorioCoordenacao::all();
@@ -96,9 +101,6 @@ Route::prefix('/contratada')->group(function () {
     Route::post('/cadastrarestudo/{corretor}',                            [EmpreendimentosController::class,                       'cadastrarestudo'])->name('sgc.contratada.cadastrarestudo');
     Route::post('/cadastrarsubproduto/{corretor}',                        [EmpreendimentosController::class,                       'cadastrarsubproduto'])->name('sgc.contratada.cadastrarsubproduto');
 
-    // PDF Consolidado
-    // Route::get('/sgc/contratada/download-pdf-consolidado/{contratoId}/{relatorioNum}', [RelatorioCoordenacaoController::class, 'downloadPdfConsolidado'])->name('sgc.contratada.download_pdf_consolidado');
-
     // Produtos - Criação/Analise/Visualização
     Route::get('/{contrato}/produtos/{produto}',                          [ProdutosController::class,                              'index'])->name('sgc.contratada.produtos.index');
     Route::get('/{contrato}/produtos/{produto}/create',                   [ProdutosController::class,                              'create'])->name('sgc.contratada.produtos.create');
@@ -155,7 +157,9 @@ Route::prefix('/contratada')->group(function () {
     Route::post('/espeleologia/resultados/{id}/update',                   [EspeleoCampanhaController::class,                       'updateResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.update');
     Route::post('/espeleologia/estudos/store',                            [EspeleoCampanhaController::class,                       'storeEstudosPosteriores'])->name('sgc.contratada.produtos.espeleo.estudos.store');
 
+    // Route::post('/{contrato}/produtos/{produto}/resultados/upload',       [ResultadoController::class, 'upload'])->name('sgc.contratada.produtos.fauna.resultados.upload');
 
 
-    // Route::post('/{contrato}/produtos/{produto}/resultados/upload', [ResultadoController::class, 'upload'])->name('sgc.contratada.produtos.fauna.resultados.upload');
+
+
 });

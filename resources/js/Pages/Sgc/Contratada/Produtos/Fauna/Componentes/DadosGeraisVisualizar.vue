@@ -2,6 +2,7 @@
 import { defineProps, defineEmits } from 'vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import NavButton from '@/Components/NavButton.vue';
+import { IconScanEye, IconDeviceFloppy, IconPlus, IconDots, IconMap } from "@tabler/icons-vue";
 
 defineProps({
   campanha: {
@@ -23,13 +24,30 @@ defineProps({
 });
 
 defineEmits(['next', 'prev']);
+
+import { ref } from 'vue'
+
+const showAbioModal = ref(false)
+const selectedAbio = ref(null)
+
+function openAbioModal(abio) {
+  selectedAbio.value = abio
+  showAbioModal.value = true
+}
+
+function closeAbioModal() {
+  showAbioModal.value = false
+  selectedAbio.value = null
+}
+
+
 </script>
 
 <template>
   <div class="card">
     <div class="card-body">
       <h4 class="mb-3" style="text-align: center;">DADOS GERAIS DA CAMPANHA</h4>
-      
+
       <!-- Dados da Campanha -->
       <div v-if="campanha && Object.keys(campanha).length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div>
@@ -96,18 +114,29 @@ defineEmits(['next', 'prev']);
 
       <!-- Licenças (Abios) -->
       <h5 class="section-title">ABIO'S VINCULADAS</h5>
+
       <div v-if="abioRecords && abioRecords.length" class="table-responsive">
-        <table class="table table-bordered">
+        <table class="table table-bordered align-middle">
           <thead>
             <tr>
               <th>Número da Licença</th>
-              <th>Número SEI</th>
+              <th width="80" class="text-center">Visualizar</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="abio in abioRecords" :key="abio.id">
-              <td>{{ abio.abio?.numero_licenca || 'Não informado' }}</td>
-              <td>{{ abio.abio?.numero_sei || 'Não informado' }}</td>
+              <td>
+                {{ abio.abio?.numero_licenca || 'Não informado' }}
+              </td>
+              <td class="text-center">
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  @click="openAbioModal(abio.abio)"
+                  :disabled="!abio.abio"
+                >
+                  <IconScanEye />
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -115,6 +144,109 @@ defineEmits(['next', 'prev']);
       <div v-else class="alert alert-info text-center">
         Nenhuma licença vinculada.
       </div>
+
+      <!-- Modal ABIO -->
+      <div
+        class="modal fade show"
+        tabindex="-1"
+        style="display: block;"
+        v-if="showAbioModal"
+      >
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+          <div class="modal-content">
+
+            <!-- Header -->
+            <div class="modal-header justify-content-center position-relative">
+              <h5 class="modal-title text-center w-100">
+                ABIO - DETALHES DA LICENÇA
+              </h5>
+              <button
+                type="button"
+                class="btn-close position-absolute end-0 me-3"
+                @click="closeAbioModal"
+              ></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body" v-if="selectedAbio">
+              <div class="abio-list">
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">NÚMERO DA LICENÇA</div>
+                  <div class="col-md-8 abio-value">{{ selectedAbio.numero_licenca }}</div>
+                </div>
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">DATA DE EMISSÃO</div>
+                  <div class="col-md-8 abio-value">{{ selectedAbio.data_emissao }}</div>
+                </div>
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">VENCIMENTO</div>
+                  <div class="col-md-8 abio-value">{{ selectedAbio.vencimento }}</div>
+                </div>
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">Nº SEI</div>
+                  <div class="col-md-8 abio-value">{{ selectedAbio.numero_sei }}</div>
+                </div>
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">PROCESSO DNIT</div>
+                  <div class="col-md-8 abio-value">{{ selectedAbio.processo_dnit }}</div>
+                </div>
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">EMPREENDIMENTO</div>
+                  <div class="col-md-8 abio-value">{{ selectedAbio.empreendimento }}</div>
+                </div>
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">INÍCIO SUBTRECHO</div>
+                  <div class="col-md-8 abio-value">{{ selectedAbio.inicio_subtrecho }}</div>
+                </div>
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">FIM SUBTRECHO</div>
+                  <div class="col-md-8 abio-value">{{ selectedAbio.fim_subtrecho }}</div>
+                </div>
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">EXTENSÃO</div>
+                  <div class="col-md-8 abio-value">{{ selectedAbio.extensao }}</div>
+                </div>
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">EMISSOR</div>
+                  <div class="col-md-8 abio-value">{{ selectedAbio.emissor }}</div>
+                </div>
+
+                <div class="row abio-row">
+                  <div class="col-md-4 abio-label">OBSERVAÇÕES</div>
+                  <div class="col-md-8 abio-value">
+                    {{ selectedAbio.obs_renovacao || '—' }}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+
+
+            <!-- Footer -->
+            <div class="modal-footer">
+              <button class="btn btn-secondary" @click="closeAbioModal">
+                Fechar
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Backdrop -->
+      <div class="modal-backdrop fade show" v-if="showAbioModal"></div>
+
 
       <!-- Profissionais -->
       <h5 class="section-title">PROFISSIONAIS VINCULADOS</h5>
@@ -245,5 +377,29 @@ textarea.form-control:disabled {
 .text-muted {
   color: #6c757d !important;
 }
+
+.abio-list {
+  font-size: 0.95rem;
+}
+
+.abio-row {
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.abio-row:last-child {
+  border-bottom: none;
+}
+
+.abio-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.abio-value {
+  line-height: 1.4;
+}
+
+
 </style>
-```

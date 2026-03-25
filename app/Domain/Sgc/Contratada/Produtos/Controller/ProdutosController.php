@@ -64,6 +64,9 @@ class ProdutosController extends Controller
             default        => collect(),
         };
 
+        // $campanhas = $produto === 'fauna'
+        //     ? $this->getCampanhasFauna($contrato)
+        //     : $this->getCampanhasEspeleologia($contrato);
 
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
@@ -86,7 +89,14 @@ class ProdutosController extends Controller
             return $this->createPmqaByCampanha($request, $contrato, $produto, $contratoObj, $campanhaId);
         }
 
+        //CONFERIR ESSES TRECHOS
+        // if (!$subproduto) {
+        // Log::info('Acessando create', ['contrato' => $contrato, 'produto' => $produto, 'subproduto' => $request->query('subproduto')]);
+        // $contratoObj = Contrato::findOrFail($contrato);
+        // $subproduto = $request->query('subproduto');
+
         if (!$subproduto) {
+            Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
             return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
                 'contrato' => $contrato,
                 'produto' => ucfirst($produto),
@@ -103,6 +113,12 @@ class ProdutosController extends Controller
         if ($produto === 'fauna') {
             return $this->createFauna($request, $contrato, $produto, $contratoObj, $subproduto);
         } elseif ($produto === 'pmqa' || $produto === 'eia') {
+        // CONFERIR
+        // if ($produto === 'fauna') {
+        //     return $this->createFauna($request, $contrato, $produto, $contratoObj, $subproduto);
+        // } elseif ($produto === 'pmqa' || $produto === 'eia') { // <-- MUDANÇA AQUI
+        //     // Se o produto for 'pmqa' OU 'eia', chamamos a função de criação do PMQA.
+        //     // Passamos a variável $produto original ('eia') para que a tela mantenha o título correto.
             return $this->createPmqa($request, $contrato, $produto, $contratoObj, $subproduto);
         } else {
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
@@ -237,12 +253,10 @@ class ProdutosController extends Controller
             ];
         })->toArray();
 
-        // Carregar estudos posteriores já salvos para essa campanha
         $estudosPosteriores = SgcEspeleoEstudosPosteriores::where('campanha_id', $draft->id)
             ->get(['id', 'subproduto_id', 'quantidade', 'coordenadas', 'necessario'])
             ->toArray();
 
-        // Buscar subprodutos da família Espeleologia
         $subprodutosEspeleologia = SgcvwSubprodutos::where('familia', 'Espeleologia')
             ->where('contrato_id', $contrato)
             ->orderBy('descricao_revisada')
@@ -553,7 +567,7 @@ class ProdutosController extends Controller
 
         return [
             'data' => array_values($grouped),
-            'links' => [], // seu componente espera existir (mesmo vazio)
+            'links' => [],
         ];
     }
 }
