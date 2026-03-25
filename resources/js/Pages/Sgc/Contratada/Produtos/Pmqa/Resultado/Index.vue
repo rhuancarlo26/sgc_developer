@@ -21,7 +21,7 @@ const props = defineProps({
     pmqa: {type: Object },
     produto: {type:Object}
 });
-console.log(props.resultados)
+
 const abrirModalResultado = (item) => {
     refModalResultado.value.abrirModal(item);
 };

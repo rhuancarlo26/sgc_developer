@@ -140,7 +140,8 @@ Route::prefix('/contratada')->group(function () {
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/Parametro/Routes/ParametroRoutes.php';
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/VinculacaoPonto/Routes/VinculacaoPontoRoutes.php';
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Execucao/app/Routes/ExecucaoRoutes.php';
-            require __DIR__  . '/../../Contratada/Produtos/PMQA/Resultado/app/Routes/ResultadoRoutes.php';
+            require __DIR__ . '/../../Contratada/Produtos/PMQA/Resultado/app/Routes/ResultadoRoutes.php';
+            require __DIR__ . '/../../Contratada/Produtos/PMQA/Relatorio/app/Routes/RelatorioRoutes.php';
 
         });
     });

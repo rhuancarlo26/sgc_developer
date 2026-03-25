@@ -27,4 +27,9 @@ class SgcPmqaCampanhasPonto extends Model
     {
         return $this->hasOne(related: SgcPmqaCampanhaPontoMedicao::class, foreignKey: 'campanha_ponto_id');
     }
+
+        public function campanha()
+    {
+        return $this->belongsTo(SgcPmqaCampanha::class, 'sgc_pmqa_campanha_id');
+    }
 }

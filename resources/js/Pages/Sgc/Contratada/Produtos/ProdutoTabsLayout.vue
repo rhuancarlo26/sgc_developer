@@ -40,6 +40,10 @@ const setTab = (tab) => {
     router.visit(route("contratos.contratada.sgc.pmqa.resultado.index", baseParams));
     return;
   }
+
+  if (tab === "relatorio") {
+    router.visit(route("contratos.contratada.relatorio.pmqa.relatorio.index", baseParams))
+  }
 };
 </script>
 

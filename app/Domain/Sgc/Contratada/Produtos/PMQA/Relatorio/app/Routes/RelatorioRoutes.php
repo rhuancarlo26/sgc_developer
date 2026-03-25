@@ -7,8 +7,10 @@ use App\Domain\Sgc\Contratada\Produtos\PMQA\Relatorio\app\Controller\DeleteContr
 use App\Domain\Sgc\Contratada\Produtos\PMQA\Relatorio\app\Controller\PdfController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('{servico}', [IndexController::class, 'index'])->name('contratos.contratada.servicos.pmqa.relatorio.index');
-Route::post('{servico}/store', [StoreController::class, 'index'])->name('contratos.contratada.servicos.pmqa.relatorio.store');
-Route::post('{servico}/update', [UpdateController::class, 'index'])->name('contratos.contratada.servicos.pmqa.relatorio.update');
-Route::delete('{servico}/delete/{relatorio}', [DeleteController::class, 'index'])->name('contratos.contratada.servicos.pmqa.relatorio.delete');
-Route::get('{servico}/gerar_pdf/{relatorio}', [PdfController::class, 'index'])->name('contratos.contratada.servicos.pmqa.relatorio.gerar_pdf');
+Route::prefix('/relatorio')->group(function () {
+    Route::get('{pmqa}',                       [IndexController::class,   'index'])->name('contratos.contratada.relatorio.pmqa.relatorio.index');
+    Route::post('{pmqa}/store',                [StoreController::class,   'index'])->name('contratos.contratada.relatorio.pmqa.relatorio.store');
+    Route::post('{pmqa}/update',               [UpdateController::class,  'index'])->name('contratos.contratada.relatorio.pmqa.relatorio.update');
+    Route::delete('{pmqa}/delete/{relatorio}', [DeleteController::class,  'index'])->name('contratos.contratada.relatorio.pmqa.relatorio.delete');
+    Route::get('{pmqa}/gerar_pdf/{relatorio}', [PdfController::class,     'index'])->name('contratos.contratada.relatorio.pmqa.relatorio.gerar_pdf');
+});

@@ -35,13 +35,13 @@ class SgcPmqaPonto extends Model
         );
     }
 
-    public function campanhas()
+    public function campanhas(): BelongsToMany
     {
         return $this->belongsToMany(
-            related: SgcPmqaPonto::class,
-            table: 'sgc_pmqa_campanhas_pontos',
-            foreignPivotKey: 'ponto_id',
-            relatedPivotKey: 'sgc_pmqa_campanha_id'
+            SgcPmqaCampanha::class, // CORRIGIDO: Relaciona com Campanha, não com Ponto
+            'sgc_pmqa_campanhas_pontos', // Nome da tabela pivot
+            'ponto_id', // Foreign key da tabela atual (pontos) na pivot
+            'sgc_pmqa_campanha_id' // Foreign key da tabela relacionada (campanhas) na pivot
         );
     }
 }
