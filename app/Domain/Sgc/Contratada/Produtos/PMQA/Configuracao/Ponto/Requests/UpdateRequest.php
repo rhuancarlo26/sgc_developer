@@ -16,7 +16,7 @@ class UpdateRequest extends FormRequest
       'classificacao'      => ['required'],
       'classe'             => ['required'],
       'tipo_ambiente'      => ['required'],
-      'UF'                 => ['required'],
+      'uf'                 => ['required'],
       'municipio'          => ['required'],
       'bacia_hidrografica' => ['required'],
       'km_rodovia'         => ['required'],

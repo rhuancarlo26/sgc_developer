@@ -112,8 +112,9 @@ class PontoService extends BaseModelService
      */
     public function updateParaCampanha(array $updateRequest): array
     {
-        if (empty($updateRequest['pmqa_id'])) {
-            return ['type' => 'error', 'content' => 'pmqa_id é obrigatório.'];
+        // dd($updateRequest);
+        if (empty($updateRequest['id'])) {
+            return ['type' => 'error', 'content' => 'id é obrigatório.'];
         }
 
         $modelClass = $this->modelClass;

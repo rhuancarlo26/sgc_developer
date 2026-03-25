@@ -18,6 +18,7 @@ const props = defineProps({
     contratos: { type: Object },
     pmqa: { type: Object },
 });
+
 const emit = defineEmits(["next", "prev"]);
 
 const campanhaId = computed(() => props.pmqa?.campanha_id);
@@ -60,7 +61,8 @@ const atualizarListaDePontos = () => {
         <div class="card-body">
             <h2>Pontos de coleta</h2>
             <div class="d-flex justify-content-end mb-3">
-                <a class="btn btn-info me-1" target="_blank">Modelo</a>
+                <a class="btn btn-info me-1" target="_blank"
+                :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.download_modelo')">Modelo</a>
                 <NavButton
                     @click="abrirModalImportar()"
                     type-button="success"
@@ -106,7 +108,7 @@ const atualizarListaDePontos = () => {
                         <td class="text-center">
                             {{ item.tipo_ambiente }}
                         </td>
-                        <td class="text-center">{{ item.UF }}</td>
+                        <td class="text-center">{{ item.uf }}</td>
                         <td>{{ item.municipio }}</td>
                         <td>{{ item.bacia_hidrografica }}</td>
                         <td class="text-center">
@@ -187,8 +189,8 @@ const atualizarListaDePontos = () => {
     />
     <ModalFormPonto
         ref="modalFormPonto"
-        :contrato-id="contrato"
-        :produto-slug="produto"
+        :contrato="contrato"
+        :produto="produto"
         :pmqa="pmqa"
         @saved="onSaved"
     />

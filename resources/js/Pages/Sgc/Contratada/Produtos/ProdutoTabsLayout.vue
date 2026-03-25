@@ -9,6 +9,7 @@ const props = defineProps({
   contratos: { type: Object, required: true },
   title: { type: String, required: true },
   activeTab: { type: String, required: true },
+  pmqa: { type: Object }
 });
 
 const emit = defineEmits(["update:activeTab"]);
@@ -68,11 +69,6 @@ const setTab = (tab) => {
 
             <ul class="nav nav-tabs mb-4">
               <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'apresentacao' }" @click.prevent="setTab('apresentacao')">
-                  Apresentação
-                </a>
-              </li>
-              <li class="nav-item">
                 <a class="nav-link" :class="{ active: activeTab === 'configuracao' }" @click.prevent="setTab('configuracao')">
                   Configuração
                 </a>
@@ -87,11 +83,16 @@ const setTab = (tab) => {
                   Resultados
                 </a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{ active: activeTab === 'relatorio' }" @click.prevent="setTab('relatorio')">
+                  Relatório
+                </a>
+              </li>
             </ul>
 
             <div class="tab-content">
-              <div v-show="activeTab === 'apresentacao'">
-                <slot name="apresentacao" />
+              <div v-show="activeTab === 'relatorio'">
+                <slot name="relatorio" />
               </div>
 
               <div v-show="activeTab === 'configuracao'">

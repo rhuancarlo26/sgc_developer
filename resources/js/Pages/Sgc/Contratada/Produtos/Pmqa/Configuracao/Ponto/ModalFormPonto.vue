@@ -27,7 +27,7 @@ const form = useForm({
   classificacao: null,
   classe: null,
   tipo_ambiente: null,
-  UF: null,
+  uf: null,
   municipio: null,
   bacia_hidrografica: null,
   km_rodovia: null,
@@ -53,7 +53,7 @@ const abrirModal = (item = null) => {
     classificacao: null,
     classe: null,
     tipo_ambiente: null,
-    UF: null,
+    uf: null,
     municipio: null,
     bacia_hidrografica: null,
     km_rodovia: null,
@@ -74,8 +74,8 @@ const fecharModal = () => {
 
 const salvar = () => {
   const params = {
-    contrato: Number(props.contrato),
-    produto: props.produto,
+    contrato: props.contrato.id,
+    produto: props.produto.slug,
     pmqa: props.pmqa,
     ponto: form.id,
   };
@@ -88,6 +88,10 @@ const salvar = () => {
         onSuccess: () => {
           emit("saved");
           fecharModal();
+        },
+        onError: (errors) => {
+          console.error("Erros de validação:", errors);
+          // O form já vai mostrar os erros automaticamente via form.errors
         },
       }
     );
@@ -155,9 +159,9 @@ defineExpose({ abrirModal });
 
         <div class="row mb-4">
           <div class="col form-group">
-            <InputLabel value="UF" for="UF" />
-            <input type="text" class="form-control" v-model="form.UF" />
-            <InputError :message="form.errors.UF" />
+            <InputLabel value="uf" for="uf" />
+            <input type="text" class="form-control" v-model="form.uf" />
+            <InputError :message="form.errors.uf" />
           </div>
           <div class="col form-group">
             <InputLabel value="Municipio" for="municipio" />

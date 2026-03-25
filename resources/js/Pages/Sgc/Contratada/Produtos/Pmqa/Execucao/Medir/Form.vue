@@ -4,11 +4,8 @@ import NavButton from "@/Components/NavButton.vue";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
-import { onMounted, ref, computed, watch } from "vue";
+import { onMounted, ref } from "vue";
 import ProdutoTabsLayout from "../../../ProdutoTabsLayout.vue";
-
-// Composable IQA — salve em resources/js/composables/useIqaCetesb.js
-import { detectarChaveIqa, calcularIqa, classificarIqa, PESOS_IQA } from "../../../../../../../Utils/Useiqacetesb";
 
 const props = defineProps({
     contrato: { type: Object },
@@ -41,51 +38,6 @@ onMounted(() => {
         }
     }
 });
-
-// ---------------------------------------------------------------------------
-// IQA automático
-// ---------------------------------------------------------------------------
-
-const listaParametros = computed(() =>
-    props.ponto.ponto?.lista?.parametros_vinculados ?? []
-);
-
-/**
- * Monta o mapa { chaveIqa: valor } a partir dos inputs preenchidos.
- * Usa detectarChaveIqa() para mapear cada parâmetro pelo sigla/nome.
- */
-const valoresIqa = computed(() => {
-    const mapa = {};
-    listaParametros.value.forEach((vinculado) => {
-        const chave = detectarChaveIqa(vinculado.parametro);
-        if (!chave) return;
-        const valor = form.parametros[vinculado.parametro.id];
-        if (valor !== null && valor !== undefined && valor !== '') {
-            mapa[chave] = valor;
-        }
-    });
-    return mapa;
-});
-
-/** Resultado completo do cálculo — atualiza em tempo real conforme o usuário digita */
-const resultadoIqa = computed(() => {
-    if (!props.ponto.ponto?.lista?.medir_iqa) return null;
-    if (Object.keys(valoresIqa.value).length === 0) return null;
-    return calcularIqa(valoresIqa.value);
-});
-
-/** Classificação qualitativa para exibir o badge */
-const classificacao = computed(() => classificarIqa(resultadoIqa.value?.iqa ?? null));
-
-/** Quantos dos 9 parâmetros já foram preenchidos */
-const totalPreenchidos = computed(() => resultadoIqa.value?.parametrosUsados?.length ?? 0);
-
-/** Sincroniza form.iqa com o cálculo — valor que vai para o banco */
-watch(resultadoIqa, (resultado) => {
-    if (resultado?.iqa !== null && resultado?.iqa !== undefined) {
-        form.iqa = resultado.iqa;
-    }
-}, { immediate: true });
 
 // ---------------------------------------------------------------------------
 // Ações
@@ -168,34 +120,17 @@ const activeTab = ref("execucao");
                         </thead>
                         <tbody>
 
-                            <!-- Linha do IQA — somente leitura, calculado automaticamente -->
+                            <!-- Linha do IQA — campo livre para preenchimento -->
                             <tr v-if="ponto.ponto?.lista?.medir_iqa">
-                                <td>
-                                    <strong>IQA</strong>
-                                    <!-- Badge de classificação -->
-                                    <!-- <span
-                                        v-if="classificacao"
-                                        class="badge ms-2"
-                                        :class="`bg-${classificacao.badge}`"
-                                    >
-                                        {{ classificacao.classe }}
-                                        ({{ classificacao.faixa }})
-                                    </span> -->
-                                    <!-- Progresso de preenchimento -->
-                                    <small class="text-muted ms-2">
-                                        {{ totalPreenchidos }}/9 parâmetros
-                                    </small>
-                                </td>
+                                <td><strong>IQA</strong></td>
                                 <td>—</td>
                                 <td>—</td>
                                 <td>
                                     <input
                                         type="text"
-                                        class="form-control bg-light text-muted"
-                                        :value="form.iqa ?? ''"
-                                        readonly
-                                        placeholder="Calculado automaticamente"
-                                        title="Preenchido automaticamente com base nos valores inseridos"
+                                        class="form-control"
+                                        v-model="form.iqa"
+                                        placeholder="Informe o valor do IQA"
                                     />
                                 </td>
                             </tr>
@@ -225,44 +160,6 @@ const activeTab = ref("execucao");
 
                         </tbody>
                     </table>
-                </div>
-
-                <!--
-                    Detalhamento do cálculo (opcional — remova o bloco abaixo se não quiser exibir)
-                    Mostra o qi de cada parâmetro para transparência metodológica.
-                -->
-                <div v-if="resultadoIqa?.parametrosUsados?.length" class="col-12 mt-1">
-                    <details>
-                        <summary class="text-muted small" style="cursor:pointer">
-                            Ver detalhamento do cálculo IQA
-                        </summary>
-                        <table class="table table-sm table-bordered mt-2">
-                            <thead>
-                                <tr>
-                                    <th>Parâmetro</th>
-                                    <th>qi (0–100)</th>
-                                    <th>wi</th>
-                                    <th>qi^wi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(qiVal, chave) in resultadoIqa.qi" :key="chave">
-                                    <td class="text-capitalize">{{ chave }}</td>
-                                    <td>{{ qiVal }}</td>
-                                    <td>{{ PESOS_IQA[chave] }}</td>
-                                    <td>{{ Math.pow(qiVal, PESOS_IQA[chave]).toFixed(4) }}</td>
-                                </tr>
-                                <tr class="table-secondary fw-bold">
-                                    <td colspan="3">IQA Final (∏ qi^wi)</td>
-                                    <td>{{ resultadoIqa.iqa }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <small class="text-muted">
-                            Pesos normalizados: {{ resultadoIqa.somaPesos }}/1.00
-                            ({{ resultadoIqa.somaPesos < 1 ? 'normalizado por pesos disponíveis' : 'todos os parâmetros' }})
-                        </small>
-                    </details>
                 </div>
             </div>
 

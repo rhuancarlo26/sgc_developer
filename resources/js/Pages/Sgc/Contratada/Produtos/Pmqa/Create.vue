@@ -25,7 +25,6 @@ const props = defineProps({
     pontosExecucao: { type: Object },
 });
 
-console.log(props.pmqa)
 const page = usePage();
 
 const subStep = ref(Number(page.props.subStep) || 1);
