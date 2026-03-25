@@ -21,7 +21,8 @@ class UpdateRequest extends FormRequest
       'bacia_hidrografica' => ['required'],
       'km_rodovia'         => ['required'],
       'estaca'             => ['required'],
-      'observacoes'        => ['required']
+      'observacoes'        => ['required'],
+      'pmqa_id'            => ['required']
     ];
   }
 

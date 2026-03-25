@@ -76,10 +76,10 @@ const salvar = () => {
   const params = {
     contrato: props.contrato.id,
     produto: props.produto.slug,
-    pmqa: props.pmqa,
+    pmqa: props.pmqa.id,
     ponto: form.id,
   };
-
+  console.log(params)
   if (modo.value === "edit") {
     form.patch(
       route("contratos.contratada.sgc.pmqa.configuracao.ponto.update", params),
