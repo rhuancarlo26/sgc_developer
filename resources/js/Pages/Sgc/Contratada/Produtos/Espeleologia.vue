@@ -1,34 +1,68 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
+import NavButton from '@/Components/NavButton.vue';
 import { ref, computed } from 'vue';
 
 const props = defineProps({
-    subprodutos: Array,
-    contrato: [Number, String],
-    produto: String,
-    contratos: Object
+    subprodutos: { type: Array, default: () => [] },
+    contrato: { type: [Number, String], required: true },
+    produto: { type: String, required: true },
+    contratos: { type: Object, required: true },
+    campanhas: { type: Array, default: () => [] },
 });
 
+const produtos = [
+    { title: 'Fauna', routeParam: 'fauna' },
+    { title: 'Espeleologia', routeParam: 'espeleologia' },
+    { title: 'Patrimonio', routeParam: 'patrimonio' },
+    { title: 'Indigena', routeParam: 'indigena' },
+    { title: 'Quilombola', routeParam: 'quilombola' },
+    { title: 'Malarigeno', routeParam: 'malarigeno' },
+    { title: 'Eia', routeParam: 'eia' },
+    { title: 'Rima', routeParam: 'rima' },
+    { title: 'Audiencia', routeParam: 'audiencia' },
+    { title: 'Pba', routeParam: 'pba' },
+    { title: 'Asv', routeParam: 'asv' },
+    { title: 'Viagens', routeParam: 'viagens' },
+];
+
+const selectedProduto = ref(props.produto.toLowerCase());
 const selectedSubproduto = ref('');
+
+const updateProduto = () => {
+    router.get(route('sgc.contratada.produtos.index', [props.contrato, selectedProduto.value]));
+};
+
 const uniqueSubprodutos = computed(() => {
-    const descriptions = props.subprodutos.map(sub => sub.descricao_revisada).filter(desc => desc);
+    const descriptions = props.subprodutos.map((sub) => sub.descricao_revisada).filter((desc) => desc);
     return [...new Set(descriptions)];
 });
 
-const handleFilter = () => {
-    console.log('Filtro selecionado:', selectedSubproduto.value);
-};
-
-const handleAction = (action) => {
-    console.log(`Ação ${action} clicada - Contrato: ${props.contrato}, Produto: ${props.produto}`);
-};
-
-const filteredSubprodutos = computed(() => {
-    if (!selectedSubproduto.value) return props.subprodutos;
-    return props.subprodutos.filter(sub => sub.descricao_revisada === selectedSubproduto.value);
+const campanhasFiltradas = computed(() => {
+    if (!selectedSubproduto.value) {
+        return props.campanhas;
+    }
+    return props.campanhas.filter((campanha) => campanha.subproduto === selectedSubproduto.value);
 });
+
+const goToCreate = () => {
+    if (!selectedSubproduto.value) {
+        alert('Selecione um subproduto antes de cadastrar.');
+        return;
+    }
+
+    router.get(
+        route('sgc.contratada.produtos.create', [props.contrato, 'espeleologia']),
+        { subproduto: selectedSubproduto.value }
+    );
+};
+
+const visualizarCampanha = (campanhaId) => {
+    router.get(route('sgc.contratada.produtos.espeleo.show', [props.contrato, 'espeleologia', campanhaId]));
+};
 </script>
 
 <template>
@@ -52,17 +86,27 @@ const filteredSubprodutos = computed(() => {
                 <div class="card">
                     <div class="card-body">
                         <h2 class="text-center mb-4">ESPELEOLOGIA</h2>
-                        <div v-if="!subprodutos || subprodutos.length === 0" class="alert alert-danger">
-                            Nenhum dado encontrado para {{ produto }}.
+                        <div v-if="!subprodutos.length" class="alert alert-danger">
+                            Nenhum dado encontrado para Espeleologia.
                         </div>
                         <div v-else class="row">
                             <div class="col-md-12">
                                 <div class="row">
-                                    <!-- Filtro -->
+                                    <div class="col-md-4 mb-4">
+                                        <div class="block-card block-card-short">
+                                            <h4 class="text-center mb-2">ESCOLHER PRODUTO</h4>
+                                            <select v-model="selectedProduto" class="form-select" @change="updateProduto">
+                                                <option v-for="item in produtos" :key="item.routeParam" :value="item.routeParam">
+                                                    {{ item.title }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-4 mb-4">
                                         <div class="block-card block-card-short">
                                             <h4 class="text-center mb-2">ESCOLHER SUBPRODUTO</h4>
-                                            <select v-model="selectedSubproduto" class="form-select" @change="handleFilter">
+                                            <select v-model="selectedSubproduto" class="form-select">
                                                 <option value="">Todos</option>
                                                 <option v-for="desc in uniqueSubprodutos" :key="desc" :value="desc">
                                                     {{ desc }}
@@ -71,22 +115,11 @@ const filteredSubprodutos = computed(() => {
                                         </div>
                                     </div>
 
-                                    <!-- Botões -->
-                                    <div class="col-md-8 mb-4">
+                                    <div class="col-md-4 mb-4">
                                         <div class="row">
-                                            <div class="col-md-4 mb-4">
-                                                <div class="block-card block-card-short action-button bg-primary text-white cursor-pointer" @click="handleAction('cadastrar')">
+                                            <div class="col-md-12 mb-4">
+                                                <div class="block-card block-card-short action-button bg-primary text-white cursor-pointer" @click="goToCreate">
                                                     Cadastrar
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4 mb-4">
-                                                <div class="block-card block-card-short action-button bg-success text-white cursor-pointer" @click="handleAction('analisar')">
-                                                    Analisar
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4 mb-4">
-                                                <div class="block-card block-card-short action-button bg-info text-white cursor-pointer" @click="handleAction('visualizar')">
-                                                    Visualizar
                                                 </div>
                                             </div>
                                         </div>
@@ -94,19 +127,40 @@ const filteredSubprodutos = computed(() => {
                                 </div>
                             </div>
 
-                            <!-- Lista de Subprodutos -->
                             <div class="col-md-12 mt-4">
                                 <div class="block-card">
-                                    <h4 class="text-center mb-4">{{ produto.toUpperCase() }} DETALHES</h4>
-                                    <ul class="list-group">
-                                        <li v-for="subproduto in filteredSubprodutos" :key="subproduto.id" class="list-group-item">
-                                            <strong>ID:</strong> {{ subproduto.id }} |
-                                            <strong>Código SIAC:</strong> {{ subproduto.cod_siac || 'N/A' }} |
-                                            <strong>Descrição:</strong> {{ subproduto.descricao_revisada || 'N/A' }} |
-                                            <strong>Contrato:</strong> {{ subproduto.contrato || 'N/A' }} |
-                                            <strong>Família:</strong> {{ subproduto.familia || 'N/A' }}
-                                        </li>
-                                    </ul>
+                                    <h4 class="text-center mb-4">CAMPANHAS DE ESPELEOLOGIA</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">ID Campanha</th>
+                                                    <th class="text-center">Empreendimento</th>
+                                                    <th class="text-center">Subproduto</th>
+                                                    <th class="text-center">Status</th>
+                                                    <th class="text-center">Ação</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="campanha in campanhasFiltradas" :key="campanha.id">
+                                                    <td class="text-center">{{ campanha.id || 'N/A' }}</td>
+                                                    <td class="text-center">{{ campanha.empreendimento || 'N/A' }}</td>
+                                                    <td class="text-center">{{ campanha.subproduto || 'N/A' }}</td>
+                                                    <td class="text-center">{{ campanha.status || 'N/A' }}</td>
+                                                    <td class="text-center">
+                                                        <NavButton
+                                                            type-button="info"
+                                                            title="Visualizar"
+                                                            @click="visualizarCampanha(campanha.id)"
+                                                        />
+                                                    </td>
+                                                </tr>
+                                                <tr v-if="!campanhasFiltradas.length">
+                                                    <td colspan="5" class="text-center">Nenhuma campanha disponível.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -146,6 +200,10 @@ const filteredSubprodutos = computed(() => {
 
 .bg-info {
     background-color: #17a2b8 !important;
+}
+
+.table th, .table td {
+    vertical-align: middle;
 }
 
 .list-group-item {

@@ -229,7 +229,7 @@ const props = defineProps({
 const activeTab = ref("apresentacao");
 const anexos = ref([]);
 const form = reactive({
-  id_campanha: "3",
+  id_campanha: props.draftData?.id_campanha || '',
   cod_emp: props.draftData?.cod_emp || "",
   subproduto: props.subproduto || "",
   subtrecho: props.draftData?.subtrecho || "",

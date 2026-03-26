@@ -27,6 +27,7 @@ class MapLayer extends Model
 
         // Arquivos
         'storage_path',
+        'published_at',
 
         'visible'
     ];

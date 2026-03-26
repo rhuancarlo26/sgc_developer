@@ -212,6 +212,7 @@
 <script setup>
 import { ref, nextTick, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
+import axios from 'axios'
 import L from 'leaflet'
 import * as shapefile from 'shapefile'
 import JSZip from 'jszip'
@@ -465,10 +466,16 @@ const processFiles = async (files, tipo) => {
 const vincularMapa = async (tipo) => {
   const zipFile = zipFiles.value[tipo]
   if (!zipFile) return
+  if (!props.campanhaId) {
+    console.error('Campanha não definida para vincular camada GeoServer.')
+    return
+  }
 
   const formData = new FormData()
   // MapLayerController espera o campo 'file'
   formData.append('file', zipFile)
+  formData.append('campanha_id', props.campanhaId)
+  formData.append('tipo', tipo)
 
   try {
     const response = await axios.post(
@@ -485,7 +492,8 @@ const vincularMapa = async (tipo) => {
         id: response.data.layer.id,
         tipo,
         nome_arquivo: response.data.layer.layer_name || response.data.layer.title || 'shapefile',
-        comentario: observacoes.value[tipo] || ''
+        comentario: observacoes.value[tipo] || '',
+        fromGeoServer: true,
       })
       emit('update-resultados-anexos', anexos.value)
       uploadedFiles.value[tipo] = []

@@ -12,6 +12,7 @@ import axios from "axios";
 // receber dados do empreendimento
 const props = defineProps({
   campanha: Object,
+  campanhaId: [Number, String],
   produto: String,
   emp_coordenadas: [Object, String],
 });
@@ -237,7 +238,12 @@ onMounted(async () => {
   addEmpCoordinatesLayer();
   initTemporaryDrawTools();
 
-  const { data } = await axios.get("/sgc/contratada/espeleologia/layers");
+  const params = {};
+  if (props.campanhaId) {
+    params.campanha_id = props.campanhaId;
+  }
+
+  const { data } = await axios.get("/sgc/contratada/espeleologia/layers", { params });
   layers.value = data;
 
   // Armazenar cores para cada camada

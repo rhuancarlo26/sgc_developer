@@ -24,7 +24,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class ProdutosController extends Controller
 {
@@ -47,11 +46,19 @@ class ProdutosController extends Controller
         $subprodutos = $this->produtosService->getSubprodutosByContrato($contrato, $produto);
         $contratoObj = Contrato::findOrFail($contrato);
 
-        $campanhas = $produto === 'fauna'
-            ? $this->getCampanhasFauna($contrato)
-            : $this->getCampanhasEspeleologia($contrato);
+        $campanhas = match ($produto) {
+            'fauna' => $this->getCampanhasFauna($contrato),
+            'pmqa', 'eia' => $this->getCampanhasPmqa($contrato),
+            default => $this->getCampanhasEspeleologia($contrato),
+        };
 
-        return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
+        $view = match ($produto) {
+            'fauna' => 'Sgc/Contratada/Produtos/Fauna/Fauna',
+            'pmqa', 'eia' => 'Sgc/Contratada/Produtos/Pmqa/Pmqa',
+            default => 'Sgc/Contratada/Produtos/Espeleologia',
+        };
+
+        return inertia($view, [
             'subprodutos' => $subprodutos,
             'contrato' => $contrato,
             'produto' => ucfirst($produto),
@@ -162,9 +169,11 @@ class ProdutosController extends Controller
             ->first();
 
         if (!$draft) {
+            $nextCampanhaId = ((int) SgcEspeleoCampanha::where('id_contrato', $contrato)->max('id_campanha')) + 1;
+
             $draft = SgcEspeleoCampanha::create([
                 'id_contrato' => $contrato,
-                'id_campanha' => '3',
+                'id_campanha' => (string) $nextCampanhaId,
                 'subproduto' => $subproduto,
                 'status' => 'Em elaboração',
             ]);
@@ -233,15 +242,15 @@ class ProdutosController extends Controller
         $subprodutosEspeleologia = SgcvwSubprodutos::where('familia', 'Espeleologia')
             ->where('contrato_id', $contrato)
             ->orderBy('descricao_revisada')
-            ->get(['id', 'descricao_revisada']) 
+            ->get(['id', 'descricao_revisada'])
             ->map(function ($s) {
                 return [
                     'id' => $s->id,
                     'descricao_revisada' => $s->descricao_revisada
                 ];
             })
-            ->values() 
-            ->toArray(); 
+            ->values()
+            ->toArray();
 
 
         return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
@@ -253,7 +262,7 @@ class ProdutosController extends Controller
             'campanhaId' => $draft->id,
             'draftData' => $draft->toArray(),
             'profissionais' => $profissionais,
-            'justificativas' => $justificativas, 
+            'justificativas' => $justificativas,
             'metodologia' => $metodologia,
             'resultados_anexos' => $resultadosAnexos,
             'subprodutosEspeleologia' => $subprodutosEspeleologia,

@@ -55,5 +55,45 @@ class SgcEspeleoCampanha extends Model
     {
         return $this->hasMany(SgcEspeleoResultadoAnexo::class, 'campanha_id');
     }
-    
+
+    public function anexos()
+    {
+        return $this->hasMany(SgcEspeleoAnexo::class, 'campanha_id');
+    }
+
+    public function campanhaProfissionais()
+    {
+        return $this->hasMany(SgcEspeleoCampanhaProfissional::class, 'campanha_id');
+    }
+
+    public function profissionais()
+    {
+        return $this->belongsToMany(
+            SgcEspeleoProfissional::class,
+            'sgc_espeleo_campanha_profissionais',
+            'campanha_id',
+            'profissional_id'
+        );
+    }
+
+    public function estudosPosteriores()
+    {
+        return $this->hasMany(SgcEspeleoEstudosPosteriores::class, 'campanha_id');
+    }
+
+    public function campanhaLayers()
+    {
+        return $this->hasMany(SgcEspeleoCampanhaLayer::class, 'campanha_id');
+    }
+
+    public function mapLayers()
+    {
+        return $this->belongsToMany(
+            MapLayer::class,
+            'sgc_espeleo_campanha_layers',
+            'campanha_id',
+            'map_layer_id'
+        )->withPivot('tipo')->withTimestamps();
+    }
+
 }

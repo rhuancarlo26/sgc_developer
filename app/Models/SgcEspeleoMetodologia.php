@@ -14,7 +14,8 @@ class SgcEspeleoMetodologia extends Model
     protected $fillable = [
         'campanha_id',
         'id_contrato',
-        'titulo',
+        'id_modulo',
+        'grupo_faunistico',
         'metodologia',
     ];
 

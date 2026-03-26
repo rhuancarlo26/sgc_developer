@@ -4,14 +4,24 @@ namespace App\Domain\Sgc\Contratada\Produtos\Espeleologia\Controller;
 use App\Shared\Http\Controllers\Controller;
 
 use App\Models\MapLayer;
+use App\Models\SgcEspeleoCampanha;
+use App\Models\SgcEspeleoCampanhaLayer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\Process\Process;
 use App\Domain\Sgc\Contratada\Produtos\Services\GeoServerService;
 
 class MapLayerController extends Controller
 {
+    private function isGeoServerAlreadyExistsError(string $message): bool
+    {
+        $message = strtolower($message);
+
+        return str_contains($message, 'already exists')
+            || str_contains($message, 'resource named')
+            || str_contains($message, 'already configured')
+            || str_contains($message, 'name already in use');
+    }
+
     /**
      * Upload e pré-processamento do shapefile
      * NÃO publica no GeoServer ainda
@@ -19,8 +29,12 @@ class MapLayerController extends Controller
 public function store(Request $request, GeoServerService $geo)
 {
     $request->validate([
-        'file' => 'required|file|mimes:zip'
+        'file' => 'required|file|mimes:zip',
+        'campanha_id' => 'required|exists:sgc_espeleo_campanhas,id',
+        'tipo' => 'nullable|string|max:100',
     ]);
+
+    $campanha = SgcEspeleoCampanha::findOrFail($request->input('campanha_id'));
 
     // 1️⃣ Salva o ZIP
     $zipPath = $request->file('file')->store('shapes');
@@ -51,48 +65,90 @@ public function store(Request $request, GeoServerService $geo)
     $shpPath = $shpFiles[0];
     $layerName = pathinfo($shpPath, PATHINFO_FILENAME);
 
-    $idcampanha = $request->input('id_campanha'); // opcional, se quiser vincular à campanha
+    $tipo = $request->input('tipo');
+    $workspace = 'jonatas-mapas';
+    $isNewLayer = false;
 
-    // 5️⃣ Cria registro no banco
-    $layer = MapLayer::create([
-        'name' => $layerName,
-        'workspace' => 'jonatas-mapas',
-        'datastore' => 'ds_' . time(),
-        'layer_name' => $layerName,
-        'storage_path' => str_replace(storage_path('app/'), '', $shpPath),
-        'id_campanha' => $idcampanha ?? null, // ou vincule à campanha atual se aplicável
-    ]);
+    // 5️⃣ Se já existir no banco (workspace + layer), reaproveita e só vincula campanha.
+    // Isso evita erro de unique key (map_layers.uniq_layer).
+    $layer = MapLayer::where('workspace', $workspace)
+        ->where('layer_name', $layerName)
+        ->first();
 
-    try {
-        // 6️⃣ GeoServer
-        $geo->ensureWorkspace($layer->workspace);
-
-        $geo->createShapefileDatastore(
-            $layer->workspace,
-            $layer->datastore,
-            $shpPath
-        );
-
-        $geo->publishLayer(
-            $layer->workspace,
-            $layer->datastore,
-            $layer->layer_name
-        );
-
-        $layer->update([
-            'published_at' => now()
+    if (!$layer) {
+        $layer = MapLayer::create([
+            'user_id' => auth()->id() ?? 0,
+            'workspace' => $workspace,
+            'datastore' => 'ds_' . time(),
+            'layer_name' => $layerName,
+            'title' => $tipo ? str_replace('_', ' ', $tipo) : '',
+            'description' => null,
+            'geometry_type' => 'Point',
+            'crs' => 'EPSG:4674',
+            'bbox' => null,
+            'storage_path' => str_replace(storage_path('app/'), '', $shpPath),
+            'visible' => true,
         ]);
+        $isNewLayer = true;
+    } elseif (!$layer->published_at) {
+        // Se a layer já existe, mantém cadastro atualizado sem criar duplicata.
+        $layer->update([
+            'title' => $tipo ? str_replace('_', ' ', $tipo) : $layer->title,
+            'storage_path' => $layer->storage_path ?: str_replace(storage_path('app/'), '', $shpPath),
+            'visible' => true,
+        ]);
+    }
 
-    } catch (\Throwable $e) {
-        return response()->json([
-            'error' => 'Erro ao publicar no GeoServer',
-            'details' => $e->getMessage()
-        ], 500);
+    SgcEspeleoCampanhaLayer::updateOrCreate(
+        [
+            'campanha_id' => $campanha->id,
+            'map_layer_id' => $layer->id,
+        ],
+        [
+            'tipo' => $tipo,
+        ]
+    );
+
+    // 6️⃣ Publica no GeoServer apenas quando necessário.
+    if ($isNewLayer || !$layer->published_at) {
+        try {
+            $geo->ensureWorkspace($layer->workspace);
+
+            $geo->createShapefileDatastore(
+                $layer->workspace,
+                $layer->datastore,
+                $shpPath
+            );
+
+            $geo->publishLayer(
+                $layer->workspace,
+                $layer->datastore,
+                $layer->layer_name
+            );
+
+            $layer->update([
+                'published_at' => now()
+            ]);
+
+        } catch (\Throwable $e) {
+            if (!$this->isGeoServerAlreadyExistsError($e->getMessage())) {
+                return response()->json([
+                    'error' => 'Erro ao publicar no GeoServer',
+                    'details' => $e->getMessage()
+                ], 500);
+            }
+
+            $layer->update([
+                'published_at' => now()
+            ]);
+        }
     }
 
     return response()->json([
-        'message' => 'Shapefile publicado com sucesso',
-        'layer' => $layer
+        'message' => $isNewLayer ? 'Shapefile publicado com sucesso' : 'Layer existente vinculada com sucesso',
+        'layer' => $layer,
+        'campanha_id' => $campanha->id,
+        'tipo' => $tipo,
     ]);
 }
 
@@ -129,16 +185,32 @@ public function store(Request $request, GeoServerService $geo)
             'message' => 'Layer publicada com sucesso no GeoServer.'
         ]);
     }
-    public function index()
+    public function index(Request $request)
     {
-        return MapLayer::whereNotNull('created_at')
-            ->orderBy('created_at')
-            ->get([
-                'id',
-                'layer_name',
-                'workspace',
-                'layer_name'
+        $campaignId = $request->query('campanha_id');
+
+        $query = MapLayer::query()->whereNotNull('map_layers.created_at');
+
+        if ($campaignId) {
+            $query->join('sgc_espeleo_campanha_layers as scl', 'scl.map_layer_id', '=', 'map_layers.id')
+                ->where('scl.campanha_id', $campaignId)
+                ->select([
+                    'map_layers.id',
+                    'map_layers.layer_name',
+                    'map_layers.workspace',
+                    'map_layers.title',
+                    'scl.tipo',
+                ]);
+        } else {
+            $query->select([
+                'map_layers.id',
+                'map_layers.layer_name',
+                'map_layers.workspace',
+                'map_layers.title',
             ]);
+        }
+
+        return $query->orderBy('map_layers.created_at')->get();
     }
     // contornando o cors
     public function proxyWms(Request $request)

@@ -11,10 +11,12 @@ use App\Models\SgcvwEmpreendimentos;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcEspeleoResultadoAnexo;
 use App\Models\SgcEspeleoEstudosPosteriores;
+use App\Models\Contrato;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EspeleoCampanhaController extends Controller
 {
@@ -28,6 +30,114 @@ class EspeleoCampanhaController extends Controller
     {
         $this->espeleoService = $espeleoService;
         $this->anexoService = $anexoService;
+    }
+
+    public function show($contrato, $produto, $campanhaId)
+    {
+        if ($produto !== 'espeleologia') {
+            abort(404, 'Produto inválido');
+        }
+
+        $campanha = SgcEspeleoCampanha::with([
+            'justificativas',
+            'metodologia',
+            'resultadoAnexos',
+            'anexos',
+            'profissionais',
+        ])->findOrFail($campanhaId);
+
+        if ((int) $campanha->id_contrato !== (int) $contrato) {
+            abort(403, 'Acesso negado');
+        }
+
+        $empreendimento = SgcvwEmpreendimentos::where('cod_emp', $campanha->cod_emp)->first();
+        $coordenadas = $empreendimento->coordenadas ?? null;
+
+        $contratoObj = Contrato::find($campanha->id_contrato);
+
+        $campanhaData = [
+            'id' => $campanha->id,
+            'id_campanha' => $campanha->id_campanha,
+            'cod_emp' => $campanha->cod_emp,
+            'subproduto' => $campanha->subproduto,
+            'subtrecho' => $campanha->subtrecho,
+            'segmento' => $campanha->segmento,
+            'extensao' => $campanha->extensao,
+            'tipo_de_intervencao' => $campanha->tipo_de_intervencao,
+            'descricao' => $campanha->descricao,
+            'bioma' => $campanha->bioma,
+            'status' => $campanha->status,
+            'metodologia' => optional($campanha->metodologia)->metodologia,
+            'justificativas' => $campanha->justificativas->map(function ($justificativa) {
+                return [
+                    'id' => $justificativa->id,
+                    'tipo' => $justificativa->tipo,
+                    'titulo' => $justificativa->titulo,
+                    'justificativa' => $justificativa->justificativa,
+                    'codigo_sei' => $justificativa->codigo_sei,
+                ];
+            })->values(),
+            'resultados_anexos' => $campanha->resultadoAnexos->map(function ($anexo) {
+                return [
+                    'id' => $anexo->id,
+                    'nome_arquivo' => $anexo->nome_arquivo,
+                    'tipo' => $anexo->tipo,
+                    'comentario' => $anexo->comentario,
+                    'caminho' => Storage::url($anexo->caminho),
+                    'created_at' => optional($anexo->created_at)->format('d/m/Y H:i'),
+                ];
+            })->values(),
+            'anexos' => $campanha->anexos->map(function ($anexo) {
+                return [
+                    'id' => $anexo->id,
+                    'tipo_anexo' => $anexo->tipo,
+                    'nome_arquivo' => $anexo->nome,
+                    'legenda' => $anexo->legenda,
+                    'caminho' => Storage::url($anexo->caminho),
+                    'created_at' => optional($anexo->created_at)->format('d/m/Y H:i'),
+                ];
+            })->values(),
+            'profissionais' => $campanha->profissionais->map(function ($profissional) {
+                return [
+                    'id' => $profissional->id,
+                    'profissional' => $profissional->profissional,
+                    'formacao' => $profissional->formacao,
+                    'funcao' => $profissional->funcao,
+                ];
+            })->values(),
+        ];
+
+        return Inertia::render('Sgc/Contratada/Produtos/Espeleologia/VisualizarCampanha', [
+            'campanha' => $campanhaData,
+            'campanha_id' => $campanha->id,
+            'contrato' => $campanha->id_contrato,
+            'produto' => 'Espeleologia',
+            'contratos' => $contratoObj,
+            'canApprove' => Auth::user()->perfis_id === 2 && $campanha->status === 'Em análise',
+            'coordenadas' => $coordenadas,
+        ]);
+    }
+
+    public function approve(Request $request, $contrato, $produto, $campanhaId)
+    {
+        if ($produto !== 'espeleologia') {
+            abort(404, 'Produto inválido');
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|string|in:Aprovada,Rejeitada',
+            'observacoes' => 'nullable|string|max:5000',
+        ]);
+
+        $campanha = SgcEspeleoCampanha::findOrFail($campanhaId);
+        if ((int) $campanha->id_contrato !== (int) $contrato) {
+            abort(403, 'Acesso negado');
+        }
+
+        $campanha->status = $validated['status'];
+        $campanha->save();
+
+        return back()->with('success', 'Campanha atualizada com sucesso.');
     }
 
     public function salvarCampanha(EspeleoSalvarCampanhaRequest $request, $contrato, $produto)
@@ -197,6 +307,29 @@ class EspeleoCampanhaController extends Controller
         // Nada de JSON. Redireciona (303) para satisfazer o Inertia.
         return back(303);
         // Se quiser flash: return back(303)->with('flash', ['success' => 'Observação salva.']);
+    }
+
+    public function deleteResultadoAnexo(Request $request, $contrato, $produto, $id)
+    {
+        if ($produto !== 'espeleologia') {
+            abort(404, 'Produto inválido');
+        }
+
+        $anexo = SgcEspeleoResultadoAnexo::findOrFail($id);
+        if ((int) $anexo->id_contrato !== (int) $contrato) {
+            abort(403, 'Acesso negado');
+        }
+
+        if ($anexo->caminho && Storage::disk('public')->exists($anexo->caminho)) {
+            Storage::disk('public')->delete($anexo->caminho);
+        }
+
+        $anexo->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Anexo de resultado excluido com sucesso.',
+        ]);
     }
 
 

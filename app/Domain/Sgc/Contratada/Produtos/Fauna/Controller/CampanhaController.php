@@ -171,7 +171,7 @@ class CampanhaController extends Controller
             }
             $empreendimento = SgcvwEmpreendimentos::where('cod_emp', $campanha->cod_emp)->first();
 
-            $coordenadas = $empreendimento->coordenadas;
+            $coordenadas = $empreendimento->coordenadas ?? null;
 
         return Inertia::render('Sgc/Contratada/Produtos/'.$moduloativo.'/VisualizarCampanha', [
             'campanha' => $this->mapCampanhaData($campanha),
