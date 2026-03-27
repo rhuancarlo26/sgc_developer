@@ -229,7 +229,7 @@ class ProdutosController extends Controller
                 'id' => $anexo->id,
                 'nome_arquivo' => $anexo->nome_arquivo,
                 'caminho' => $anexo->caminho,
-                'url_publica' => Storage::url($anexo->caminho),
+                'url_publica' => \App\Helpers\StorageHelper::publicUrl($anexo->caminho),
             ];
         })->toArray();
 

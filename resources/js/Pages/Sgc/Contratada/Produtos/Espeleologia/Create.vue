@@ -140,6 +140,7 @@
                 :errors="errors"
                 :campanha-id="campanhaId"
                 :contrato="contrato"
+                :subproduto="subproduto"
                 :resultados-anexos="form.resultados_anexos"
                 @update-resultados-anexos="updateResultadosAnexos"
                 :subprodutos-espeleologia="subprodutosEspeleologia"

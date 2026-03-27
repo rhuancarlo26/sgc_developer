@@ -1,5 +1,15 @@
 <template>
-  <div>
+  <div style="position: relative;">
+    <!-- Overlay de carregamento geral (loadGeoLayers / vincularMapa) -->
+    <transition name="geo-fade">
+      <div v-if="isLoading" class="geo-loading-overlay">
+        <div class="geo-loading-box">
+          <div class="spinner-border text-primary" role="status" style="width:2.2rem;height:2.2rem;"></div>
+          <p class="mt-2 mb-0 fw-semibold">{{ loadingMessage || 'Carregando...' }}</p>
+        </div>
+      </div>
+    </transition>
+
     <h3>Resultados - Visualização de Shapefiles</h3>
     <p class="text-muted mb-4">
       Carregue shapefiles (ZIP) para cada tipo de mapa, vincule-os e adicione observações.
@@ -119,12 +129,24 @@
                     <small class="text-muted ms-2">— {{ layer.layer_name }}</small>
                   </span>
                   <div>
-                    <button @click="toggleRenderLayer(layer)" class="btn btn-sm btn-outline-secondary me-1" type="button">
-                      <i :class="renderedLayers[layer.id] ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                      {{ renderedLayers[layer.id] ? 'Esconder' : 'Ver Mapa' }}
+                    <button
+                      @click="toggleRenderLayer(layer)"
+                      class="btn btn-sm btn-outline-secondary me-1"
+                      type="button"
+                      :disabled="loadingLayerIds.includes(layer.id)"
+                    >
+                      <span v-if="loadingLayerIds.includes(layer.id)" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                      <i v-else :class="renderedLayers[layer.id] ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                      {{ loadingLayerIds.includes(layer.id) ? 'Carregando...' : (renderedLayers[layer.id] ? 'Esconder' : 'Ver Mapa') }}
                     </button>
-                    <button @click="desvincularLayer(layer.id, tipo)" class="btn btn-sm btn-outline-danger" type="button">
-                      <i class="fas fa-unlink"></i>
+                    <button
+                      @click="desvincularLayer(layer.id, tipo)"
+                      class="btn btn-sm btn-outline-danger"
+                      type="button"
+                      :disabled="loadingLayerIds.includes(layer.id)"
+                    >
+                      <span v-if="loadingLayerIds.includes(layer.id)" class="spinner-border spinner-border-sm" role="status"></span>
+                      <i v-else class="fas fa-unlink"></i>
                     </button>
                   </div>
                 </div>
@@ -177,9 +199,11 @@
               @click="vincularMapa(tipo)"
               class="btn btn-primary mb-3"
               type="button"
+              :disabled="loadingTipo === tipo"
             >
-              <i class="fas fa-link me-1"></i>
-              Vincular Mapa{{ layersForTipo(tipo).length > 0 ? ' Adicional' : '' }}
+              <span v-if="loadingTipo === tipo" class="spinner-border spinner-border-sm me-1" role="status"></span>
+              <i v-else class="fas fa-link me-1"></i>
+              {{ loadingTipo === tipo ? 'Publicando no GeoServer...' : ('Vincular Mapa' + (layersForTipo(tipo).length > 0 ? ' Adicional' : '')) }}
             </button>
           </template>
         </div>
@@ -189,8 +213,9 @@
 </template>
 
 <script setup>
-import { ref, nextTick, watch, onMounted } from 'vue'
+import { computed, ref, nextTick, watch, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { useLoading } from '@/Composables/useLoading'
 import axios from 'axios'
 import L from 'leaflet'
 import * as shapefile from 'shapefile'
@@ -201,6 +226,7 @@ const props = defineProps({
   errors: Object,
   campanhaId: Number,
   contrato: Number,
+  subproduto: { type: String, default: '' },
   resultadosAnexos: Array,
   subprodutosEspeleologia: { type: Array, default: () => [] },
   estudosPosteriores: { type: Array, default: () => [] },
@@ -208,14 +234,14 @@ const props = defineProps({
 
 const emit = defineEmits(['update-resultados-anexos'])
 
-const tipos = [
+const tiposPadrao = [
   'geologico', 'geomorfologico', 'hipsometrico',
   'declividades', 'hidrografico', 'cavidades',
   'limites_areas', 'potencial_inicial', 'potencial_reclassificado',
   'projeto_engenharia', 'estudos_posteriores'
 ]
 
-const nomesTipos = {
+const nomesTiposPadrao = {
   geologico: 'Mapa Geológico',
   geomorfologico: 'Mapa Geomorfológico',
   hipsometrico: 'Mapa Hipsométrico',
@@ -229,7 +255,39 @@ const nomesTipos = {
   estudos_posteriores: 'Estudos Posteriores'
 }
 
-const activeSubTab = ref('geologico')
+const tiposProspeccao = [
+  'feicoes',
+  'feicoes_carsticas_identificadas',
+  'cavidades_nao_encontradas',
+  'cavidades_cecav_canie',
+  'caminhamento',
+  'raio_de_250m_de_cavidades',
+  'curvas_de_nivel',
+  'extensao_rodovia_prospectada'
+]
+
+const nomesTiposProspeccao = {
+  feicoes: 'Planilha de Feições Cársticas',
+  feicoes_carsticas_identificadas: 'Feições Cársticas Identificadas',
+  cavidades_nao_encontradas: 'Cavidades Não Encontradas',
+  cavidades_cecav_canie: 'Cavidades CECAV/CANIE',
+  caminhamento: 'Mapa de Caminhamento',
+  raio_de_250m_de_cavidades: 'Raio de 250m de Cavidades',
+  curvas_de_nivel: 'Curvas de Nível',
+  extensao_rodovia_prospectada: 'Extensão de Rodovia Prospectada'
+}
+
+const normalizeText = (value) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+
+const isProspeccao = computed(() => normalizeText(props.subproduto).includes('prospeccao'))
+const tipos = computed(() => (isProspeccao.value ? tiposProspeccao : tiposPadrao))
+const nomesTipos = computed(() => (isProspeccao.value ? nomesTiposProspeccao : nomesTiposPadrao))
+
+const activeSubTab = ref('')
 const uploadedFiles = ref({})
 const features = ref({})
 const observacoes = ref({})
@@ -238,6 +296,13 @@ const anexos = ref(Array.isArray(props.resultadosAnexos) ? [...props.resultadosA
 const rendered = ref({})
 const zipFiles = ref({})
 const maps = ref({})
+
+// === Estados de carregamento ===
+const isLoading = ref(false)
+const loadingMessage = ref('')
+const loadingLayerIds = ref([])
+const loadingTipo = ref(null)
+const { start: startLoading, stop: stopLoading } = useLoading()
 
 // === GeoServer layers da campanha
 const geoLayers = ref([])
@@ -249,18 +314,47 @@ const necessarioEstudos = ref(false)
 const estudos = ref([]) // [{ __key, subproduto_id, quantidade, coordenadas: [{__key, lat, lng}] }]
 
 // inicialização reativa geral
-tipos.forEach(t => {
-  uploadedFiles.value[t] = []
-  features.value[t] = []
-  observacoes.value[t] = ''
-  savedObservacoes.value[t] = ''
-  rendered.value[t] = false
-  zipFiles.value[t] = null
-})
+const ensureTiposState = (tiposLista) => {
+  tiposLista.forEach((t) => {
+    if (!(t in uploadedFiles.value)) uploadedFiles.value[t] = []
+    if (!(t in features.value)) features.value[t] = []
+    if (!(t in observacoes.value)) observacoes.value[t] = ''
+    if (!(t in savedObservacoes.value)) savedObservacoes.value[t] = ''
+    if (!(t in rendered.value)) rendered.value[t] = false
+    if (!(t in zipFiles.value)) zipFiles.value[t] = null
+  })
+}
+
+watch(
+  tipos,
+  (tiposLista) => {
+    ensureTiposState(tiposLista)
+
+    if (!tiposLista.includes(activeSubTab.value)) {
+      activeSubTab.value = tiposLista[0] || ''
+    }
+  },
+  { immediate: true }
+)
+
+const editando = ref({})
+
+watch(
+  tipos,
+  (tiposLista) => {
+    tiposLista.forEach((t) => {
+      if (!(t in editando.value)) editando.value[t] = false
+    })
+  },
+  { immediate: true }
+)
 
 // === Carrega layers do GeoServer vinculadas a esta campanha
 const loadGeoLayers = async () => {
   if (!props.campanhaId) return
+  isLoading.value = true
+  loadingMessage.value = 'Carregando camadas vinculadas...'
+  startLoading()
   try {
     const { data } = await axios.get(route('sgc.contratada.espeleologia.layers.index'), {
       params: { campanha_id: props.campanhaId }
@@ -268,6 +362,10 @@ const loadGeoLayers = async () => {
     geoLayers.value = Array.isArray(data) ? data : []
   } catch (e) {
     console.error('Erro ao carregar layers da campanha:', e)
+  } finally {
+    isLoading.value = false
+    loadingMessage.value = ''
+    stopLoading()
   }
 }
 
@@ -277,20 +375,26 @@ watch(() => props.campanhaId, loadGeoLayers)
 const layersForTipo = (tipo) => geoLayers.value.filter(l => l.tipo === tipo)
 
 const tipoLabel = (tipo, index, total) => {
-  const base = nomesTipos[tipo] || tipo
+  const base = nomesTipos.value[tipo] || tipo
   return total > 1 ? `${base} ${index + 1}` : base
 }
 
 const toggleRenderLayer = async (layer) => {
   renderedLayers.value = { ...renderedLayers.value, [layer.id]: !renderedLayers.value[layer.id] }
   if (renderedLayers.value[layer.id]) {
+    loadingLayerIds.value = [...loadingLayerIds.value, layer.id]
+    startLoading()
     await nextTick()
-    setTimeout(() => renderLayerWms(layer), 50)
+    setTimeout(() => {
+      renderLayerWms(layer)
+      // O indicador por camada será removido pelo evento 'load' do mapa Leaflet
+    }, 50)
   } else {
     if (layerMaps.value[layer.id]) {
       try { layerMaps.value[layer.id].remove() } catch (e) { /* noop */ }
       layerMaps.value[layer.id] = null
     }
+    loadingLayerIds.value = loadingLayerIds.value.filter(id => id !== layer.id)
   }
 }
 
@@ -302,6 +406,13 @@ const renderLayerWms = (layer) => {
   }
   const map = L.map(container).setView([-14.235, -51.925], 6)
   layerMaps.value[layer.id] = map
+
+  // Remove indicador assim que os tiles terminarem de carregar
+  map.on('load', () => {
+    loadingLayerIds.value = loadingLayerIds.value.filter(id => id !== layer.id)
+    stopLoading()
+  })
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map)
@@ -316,6 +427,8 @@ const renderLayerWms = (layer) => {
 
 const desvincularLayer = async (layerId, tipo) => {
   if (!confirm('Desvincular este mapa da campanha?')) return
+  loadingLayerIds.value = [...loadingLayerIds.value, layerId]
+  startLoading()
   try {
     await axios.delete(route('sgc.contratada.espeleologia.layers.desvincular', layerId), {
       params: { campanha_id: props.campanhaId }
@@ -327,6 +440,9 @@ const desvincularLayer = async (layerId, tipo) => {
     geoLayers.value = geoLayers.value.filter(l => l.id !== layerId)
   } catch (e) {
     console.error('Erro ao desvincular layer:', e)
+  } finally {
+    loadingLayerIds.value = loadingLayerIds.value.filter(id => id !== layerId)
+    stopLoading()
   }
 }
 
@@ -335,7 +451,7 @@ watch(
   () => props.resultadosAnexos,
   (newVal) => {
     anexos.value = Array.isArray(newVal) ? [...newVal] : []
-    tipos.forEach((t) => {
+    tipos.value.forEach((t) => {
       const a = anexos.value.find(x => x.tipo === t)
       savedObservacoes.value[t] = a?.comentario || ''
       observacoes.value[t] = savedObservacoes.value[t]
@@ -423,9 +539,6 @@ const salvarEstudos = () => {
 }
 
 // === Observações (mantém não reativo até clicar em salvar)
-const editando = ref({})
-tipos.forEach(t => { editando.value[t] = false })
-
 const salvarObservacao = (tipo) => {
   const anexo = anexos.value.find(a => a.tipo === tipo)
   if (!anexo) return
@@ -503,6 +616,8 @@ const processFiles = async (files, tipo) => {
   if (!zipFile) return
 
   zipFiles.value[tipo] = zipFile
+  loadingTipo.value = tipo
+  startLoading()
   try {
     const zip = await JSZip.loadAsync(zipFile)
     const shpName = Object.keys(zip.files).find(n => n.endsWith('.shp'))
@@ -515,6 +630,9 @@ const processFiles = async (files, tipo) => {
     renderMap(tipo)
   } catch (e) {
     console.error(`Erro ao processar ZIP (${tipo})`, e)
+  } finally {
+    loadingTipo.value = null
+    stopLoading()
   }
 }
 
@@ -528,14 +646,16 @@ const vincularMapa = async (tipo) => {
   }
 
   const formData = new FormData()
-  // MapLayerController espera o campo 'file'
   formData.append('file', zipFile)
   formData.append('campanha_id', props.campanhaId)
   formData.append('tipo', tipo)
 
+  loadingTipo.value = tipo
+  isLoading.value = true
+  loadingMessage.value = 'Publicando no GeoServer...'
+  startLoading()
   try {
     const response = await axios.post(
-      // rota nomeada configurada em ContratadaRoutes para MapLayerController@storeuma
       route('sgc.contratada.espeleologia.layers.upload_shapefile'),
       formData,
       { headers: { 'Content-Type': 'multipart/form-data' } }
@@ -560,6 +680,11 @@ const vincularMapa = async (tipo) => {
     }
   } catch (error) {
     console.error('Erro ao vincular mapa:', error)
+  } finally {
+    loadingTipo.value = null
+    isLoading.value = false
+    loadingMessage.value = ''
+    stopLoading()
   }
 }
 
@@ -603,7 +728,7 @@ const removerAnexo = (id) => {
     anexos.value = anexos.value.filter(a => a.id !== id)
     emit('update-resultados-anexos', anexos.value)
 
-    tipos.forEach(t => {
+    tipos.value.forEach(t => {
       if (!anexos.value.find(a => a.tipo === t)) {
         observacoes.value[t] = ''
         features.value[t] = []
@@ -625,7 +750,7 @@ const removerAnexo = (id) => {
       anexos.value = anexos.value.filter(a => a.id !== id)
       emit('update-resultados-anexos', anexos.value)
 
-      tipos.forEach(t => {
+      tipos.value.forEach(t => {
         if (!anexos.value.find(a => a.tipo === t)) {
           observacoes.value[t] = ''
           features.value[t] = []
@@ -641,6 +766,40 @@ const removerAnexo = (id) => {
 <style scoped>
 @import 'leaflet/dist/leaflet.css';
 @import '@fortawesome/fontawesome-free/css/all.min.css';
+
+/* === Loading overlay do componente === */
+.geo-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.geo-loading-box {
+  background: white;
+  border-radius: 10px;
+  padding: 22px 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.geo-fade-enter-active,
+.geo-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.geo-fade-enter-from,
+.geo-fade-leave-to {
+  opacity: 0;
+}
 
 .nav-tabs .nav-link {
   color: #6c757d;

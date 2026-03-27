@@ -1,6 +1,6 @@
 <template>
   <div>
-    <form>
+    <form @submit.prevent>
       <div class="row mb-4">
         <div class="col-md-6 mb-3">
           <label>Subproduto</label>
@@ -110,7 +110,7 @@
               <tr v-for="prof in profissionalRecords" :key="prof.id">
                 <td>{{ prof.profissional }}</td>
                 <td>{{ prof.formacao }}</td>
-                <td><button @click="excluirProfissional(prof.id)" class="btn btn-danger btn-sm">Excluir</button></td>
+                <td><button type="button" @click="excluirProfissional(prof.id)" class="btn btn-danger btn-sm">Excluir</button></td>
               </tr>
             </tbody>
           </table>
@@ -152,11 +152,11 @@
                 ></textarea>
               </div>
               <div class="col-md-12 text-end">
-                <button @click="excluirJustificativa(index)" class="btn btn-danger btn-sm" v-if="index > 0">Remover</button>
+                <button type="button" @click="excluirJustificativa(index)" class="btn btn-danger btn-sm" v-if="index > 0">Remover</button>
               </div>
             </div>
           </div>
-          <button @click="adicionarJustificativa" class="btn btn-secondary mt-2">Adicionar Justificativa</button>
+          <button type="button" @click="adicionarJustificativa" class="btn btn-secondary mt-2">Adicionar Justificativa</button>
         </div>
       </div>
 
@@ -226,7 +226,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" @click="showModal = false">Fechar</button>
-              <button @click="emitSalvarNovoProfissional" class="btn btn-primary">Salvar</button>
+              <button type="button" @click="emitSalvarNovoProfissional" class="btn btn-primary">Salvar</button>
             </div>
           </div>
         </div>

@@ -57,20 +57,135 @@
           </div>
 
           <div v-else-if="tipo === 'feicoes'">
-            <!-- === Opção de DOWNLOAD DA PLANILHA DE FEIÇÕES CÁRSTICAS === -->
-            <div class="">
-              <h5>Download da Planilha de Feições Cársticas</h5>
-              <p>
-                Clique no botão abaixo para baixar a planilha padrão de feições cársticas que deve ser preenchida e
-                posteriormente carregada no sistema.
-              </p>
-              <a
-                :href="'caminho_dessa_pelota_que_nao_sei_onde_está/planilha_feicoes_carsticas.xlsx'"
-                class="btn btn-primary"
-                download
+            <!-- === Aba: Planilha de Feições Cársticas === -->
+
+            <!-- Se já há planilha vinculada -->
+            <div v-if="anexos.find(a => a.tipo === 'feicoes')" class="mb-3">
+              <div class="alert alert-success d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <span>
+                  <i class="fas fa-file-excel me-1"></i>
+                  <strong>{{ anexos.find(a => a.tipo === 'feicoes').nome_arquivo }}</strong>
+                </span>
+                <div class="d-flex gap-2">
+                  <a
+                    :href="(anexos.find(a => a.tipo === 'feicoes').url_publica || anexos.find(a => a.tipo === 'feicoes').caminho)"
+                    class="btn btn-sm btn-outline-primary"
+                    download
+                  >
+                    <i class="fas fa-download me-1"></i> Baixar
+                  </a>
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    type="button"
+                    @click="removerAnexo(anexos.find(a => a.tipo === 'feicoes').id)"
+                  >
+                    <i class="fas fa-trash-alt me-1"></i> Excluir
+                  </button>
+                </div>
+              </div>
+
+              <!-- Pré-visualização da planilha vinculada -->
+              <div class="mt-2">
+                <button
+                  class="btn btn-sm btn-outline-secondary mb-2"
+                  type="button"
+                  @click="togglePlanilhaPreview('vinculada')"
+                >
+                  <span v-if="loadingPlanilhaPreview" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  <i v-else :class="showPlanilhaPreview ? 'fas fa-eye-slash' : 'fas fa-eye'" class="me-1"></i>
+                  {{ showPlanilhaPreview ? 'Ocultar pré-visualização' : 'Pré-visualizar (10 primeiras linhas)' }}
+                </button>
+                <div v-if="showPlanilhaPreview && planilhaPreviewRows.length > 0" class="table-responsive border rounded">
+                  <table class="table table-sm table-bordered mb-0" style="font-size:0.82rem;">
+                    <thead class="table-light">
+                      <tr>
+                        <th v-for="col in planilhaPreviewHeaders" :key="col">{{ col }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(row, i) in planilhaPreviewRows" :key="i">
+                        <td v-for="col in planilhaPreviewHeaders" :key="col">{{ row[col] ?? '' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p v-if="showPlanilhaPreview && planilhaPreviewRows.length === 0 && !loadingPlanilhaPreview" class="text-muted small">
+                  Não foi possível carregar a pré-visualização.
+                </p>
+              </div>
+
+              <!-- Substituir planilha -->
+              <div class="mt-3">
+                <button
+                  class="btn btn-sm btn-outline-warning"
+                  type="button"
+                  @click="mostrarUploadFeicoes = !mostrarUploadFeicoes"
+                >
+                  <i class="fas fa-exchange-alt me-1"></i> Substituir planilha
+                </button>
+              </div>
+            </div>
+
+            <!-- Upload de nova planilha (aparece se não há arquivo vinculado OU se clicou em substituir) -->
+            <div v-if="!anexos.find(a => a.tipo === 'feicoes') || mostrarUploadFeicoes" class="mt-3">
+              <label class="form-label fw-semibold">Selecionar planilha (.xlsx, .xls, .csv)</label>
+              <div
+                class="border rounded p-4 text-center bg-light"
+                style="cursor:pointer; border-style: dashed !important;"
+                @click="triggerPlanilhaInput"
+                @drop.prevent="onPlanilhaDrop"
+                @dragover.prevent
+                @dragenter.prevent
               >
-                <i class="fas fa-download"></i> Baixar Planilha de Feições Cársticas
-              </a>
+                <i class="fas fa-file-excel fa-2x text-success mb-2 d-block"></i>
+                <p class="mb-0" v-if="!planilhaFile">
+                  Arraste o arquivo aqui ou <span class="text-primary">clique para selecionar</span>
+                </p>
+                <p class="mb-0 text-success fw-semibold" v-else>
+                  <i class="fas fa-check-circle me-1"></i>{{ planilhaFile.name }}
+                </p>
+              </div>
+              <input
+                id="planilhaFeicoes-input"
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                style="display:none"
+                @change="onPlanilhaFileChange"
+              />
+
+              <!-- Pré-visualização do arquivo selecionado -->
+              <div v-if="planilhaPreviewRows.length > 0" class="mt-3">
+                <p class="text-muted small mb-1">Pré-visualização (10 primeiras linhas):</p>
+                <div class="table-responsive border rounded">
+                  <table class="table table-sm table-bordered mb-0" style="font-size:0.82rem;">
+                    <thead class="table-light">
+                      <tr>
+                        <th v-for="col in planilhaPreviewHeaders" :key="col">{{ col }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(row, i) in planilhaPreviewRows" :key="i">
+                        <td v-for="col in planilhaPreviewHeaders" :key="col">{{ row[col] ?? '' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <button
+                v-if="planilhaFile"
+                class="btn btn-primary mt-3"
+                type="button"
+                :disabled="uploadingPlanilha"
+                @click="vincularPlanilha"
+              >
+                <span v-if="uploadingPlanilha" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                <i v-else class="fas fa-link me-1"></i>
+                {{ uploadingPlanilha ? 'Enviando...' : 'Vincular Planilha' }}
+              </button>
+              <div v-if="planilhaError" class="alert alert-danger mt-3 mb-0 py-2">
+                {{ planilhaError }}
+              </div>
             </div>
           </div>
 
@@ -190,7 +305,8 @@ import { router } from '@inertiajs/vue3'
 import L from 'leaflet'
 import * as shapefile from 'shapefile'
 import JSZip from 'jszip'
-// import { ex } from '@fullcalendar/core/internal-common'
+import * as XLSX from 'xlsx'
+import axios from 'axios'
 
 const props = defineProps({
   empreendimentos: Array,
@@ -240,6 +356,16 @@ const anexos = ref(Array.isArray(props.resultadosAnexos) ? [...props.resultadosA
 const rendered = ref({})
 const zipFiles = ref({})
 const maps = ref({})
+
+// === Estado da planilha de feições cársticas ===
+const planilhaFile = ref(null)
+const planilhaPreviewHeaders = ref([])
+const planilhaPreviewRows = ref([])
+const uploadingPlanilha = ref(false)
+const mostrarUploadFeicoes = ref(false)
+const showPlanilhaPreview = ref(false)
+const loadingPlanilhaPreview = ref(false)
+const planilhaError = ref('')
 
 // === ESTUDOS POSTERIORES (estado local reativo)
 const necessarioEstudos = ref(false)
@@ -408,6 +534,123 @@ const cancelarEdicao = (tipo) => {
 const triggerFileInput = (tipo) => {
   const el = document.getElementById(`fileInput-${tipo}`)
   if (el) el.click()
+}
+
+// === Planilha de feições cársticas ===
+const triggerPlanilhaInput = () => {
+  const el = document.getElementById('planilhaFeicoes-input')
+  if (el) el.click()
+}
+
+const parsePlanilhaFile = async (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result)
+        const wb = XLSX.read(data, { type: 'array' })
+        const ws = wb.Sheets[wb.SheetNames[0]]
+        const rows = XLSX.utils.sheet_to_json(ws, { defval: '' })
+        const headers = rows.length > 0 ? Object.keys(rows[0]) : []
+        resolve({ headers, rows: rows.slice(0, 10) })
+      } catch {
+        resolve({ headers: [], rows: [] })
+      }
+    }
+    reader.readAsArrayBuffer(file)
+  })
+}
+
+const onPlanilhaFileChange = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  planilhaError.value = ''
+  planilhaFile.value = file
+  planilhaPreviewRows.value = []
+  planilhaPreviewHeaders.value = []
+  const { headers, rows } = await parsePlanilhaFile(file)
+  planilhaPreviewHeaders.value = headers
+  planilhaPreviewRows.value = rows
+}
+
+const onPlanilhaDrop = async (event) => {
+  const file = event.dataTransfer.files[0]
+  if (!file) return
+  planilhaError.value = ''
+  planilhaFile.value = file
+  planilhaPreviewRows.value = []
+  planilhaPreviewHeaders.value = []
+  const { headers, rows } = await parsePlanilhaFile(file)
+  planilhaPreviewHeaders.value = headers
+  planilhaPreviewRows.value = rows
+}
+
+const togglePlanilhaPreview = async (modo) => {
+  if (showPlanilhaPreview.value) {
+    showPlanilhaPreview.value = false
+    return
+  }
+  // Se já temos preview em memória, apenas mostrar
+  if (planilhaPreviewRows.value.length > 0) {
+    showPlanilhaPreview.value = true
+    return
+  }
+  // Buscar e parsear o arquivo já enviado via URL
+  const anexo = anexos.value.find(a => a.tipo === 'feicoes')
+  if (!anexo) return
+  const url = anexo.url_publica || anexo.caminho
+  if (!url) return
+  loadingPlanilhaPreview.value = true
+  try {
+    const res = await fetch(url)
+    const buffer = await res.arrayBuffer()
+    const wb = XLSX.read(new Uint8Array(buffer), { type: 'array' })
+    const ws = wb.Sheets[wb.SheetNames[0]]
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' })
+    planilhaPreviewHeaders.value = rows.length > 0 ? Object.keys(rows[0]) : []
+    planilhaPreviewRows.value = rows.slice(0, 10)
+    showPlanilhaPreview.value = true
+  } catch {
+    showPlanilhaPreview.value = true // mostra mensagem de erro
+  } finally {
+    loadingPlanilhaPreview.value = false
+  }
+}
+
+const vincularPlanilha = async () => {
+  if (!planilhaFile.value || !props.campanhaId) return
+  planilhaError.value = ''
+  uploadingPlanilha.value = true
+  const formData = new FormData()
+  formData.append('zip_file', planilhaFile.value)
+  formData.append('campanha_id', props.campanhaId)
+  formData.append('tipo', 'feicoes')
+  formData.append('comentario', observacoes.value.feicoes || '')
+  try {
+    const response = await axios.post(
+      route('sgc.contratada.produtos.espeleo.resultados.upload', {
+        contrato: props.contrato,
+        produto: 'espeleologia'
+      }),
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    )
+    if (response.data.success) {
+      anexos.value = response.data.resultadosAnexos || []
+      emit('update-resultados-anexos', anexos.value)
+      planilhaFile.value = null
+      planilhaPreviewHeaders.value = []
+      planilhaPreviewRows.value = []
+      mostrarUploadFeicoes.value = false
+      showPlanilhaPreview.value = false
+      // mantém preview em memória para exibir imediatamente
+    }
+  } catch (e) {
+    planilhaError.value = e?.response?.data?.message || 'Nao foi possivel vincular a planilha. Verifique o formato (.xlsx, .xls, .csv) e tente novamente.'
+    console.error('Erro ao enviar planilha:', e)
+  } finally {
+    uploadingPlanilha.value = false
+  }
 }
 
 const onFileChange = (event, tipo) => {

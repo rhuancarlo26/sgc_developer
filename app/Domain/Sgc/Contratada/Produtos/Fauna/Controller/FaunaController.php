@@ -442,7 +442,7 @@ public function show($contrato, $produto, $campanhaId)
                 return [
                     'id' => $anexo->id,
                     'tipo_anexo' => $anexo->tipo_anexo,
-                    'caminho' => Storage::url($anexo->caminho),
+                    'caminho' => \App\Helpers\StorageHelper::publicUrl($anexo->caminho),
                     'nome_arquivo' => $anexo->nome_arquivo ?? basename($anexo->caminho),
                     'created_at' => $anexo->created_at,
                 ];

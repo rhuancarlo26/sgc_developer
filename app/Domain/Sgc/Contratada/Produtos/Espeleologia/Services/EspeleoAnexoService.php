@@ -2,6 +2,7 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services;
 
+use App\Helpers\StorageHelper;
 use App\Models\SgcEspeleoAnexo;
 use App\Models\SgcEspeleoCampanha;
 use Illuminate\Http\Request;
@@ -63,13 +64,20 @@ class EspeleoAnexoService
                 'size' => $foto->getSize(),
             ]);
 
+            Log::info('Anexo criado com sucesso', [
+                'anexo_id' => $anexo->id,
+                'campanha_id' => $campanha->id,
+                'caminho' => $caminhoCompleto,
+                'url_publica' => StorageHelper::publicUrl($caminhoCompleto),
+            ]);
+
             $anexos[] = [
                 'id' => $anexo->id,
                 'nome' => $anexo->nome,
-                'caminho' => $anexo->caminho,
+                'caminho' => StorageHelper::publicUrl($anexo->caminho),
                 'tipo' => $anexo->tipo,
                 'legenda' => $anexo->legenda,
-                'url_publica' => Storage::url($anexo->caminho),
+                'url_publica' => StorageHelper::publicUrl($anexo->caminho),
                 'size' => $anexo->size,
             ];
         }

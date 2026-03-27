@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { useLoading } from "@/Composables/useLoading";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.vectorgrid";
@@ -30,6 +31,14 @@ const showLayersPanel = ref(true);
 const activeLayers = ref({});
 const layerColors = ref({});
 const isFullscreen = ref(false);
+
+const isLoadingMap = ref(false);
+const loadingMapMessage = ref('');
+const loadingTilesCount = ref(0);
+const loadingLayerName = ref('');
+const { start: startLoading, stop: stopLoading } = useLoading();
+
+const isLoadingTiles = computed(() => loadingTilesCount.value > 0);
 
 function handleDrawCreated(event) {
   if (!drawnItems.value) return;
@@ -260,6 +269,8 @@ onMounted(async () => {
     attribution: "&copy; OpenStreetMap contributors",
   }).addTo(map.value);
 
+  // Os eventos de tile são rastreados por camada individualmente em toggleLayer
+
   addEmpCoordinatesLayer();
   initTemporaryDrawTools();
 
@@ -268,14 +279,23 @@ onMounted(async () => {
     params.campanha_id = props.campanhaId;
   }
 
-  const { data } = await axios.get("/sgc/contratada/espeleologia/layers", { params });
-  layers.value = data;
+  isLoadingMap.value = true;
+  loadingMapMessage.value = 'Carregando camadas...';
+  startLoading();
+  try {
+    const { data } = await axios.get("/sgc/contratada/espeleologia/layers", { params });
+    layers.value = data;
 
-  // Armazenar cores para cada camada
-  data.forEach((layer, index) => {
-    const key = `${layer.workspace}:${layer.layer_name}`;
-    layerColors.value[key] = getLayerColor(index);
-  });
+    // Armazenar cores para cada camada
+    data.forEach((layer, index) => {
+      const key = `${layer.workspace}:${layer.layer_name}`;
+      layerColors.value[key] = getLayerColor(index);
+    });
+  } finally {
+    isLoadingMap.value = false;
+    loadingMapMessage.value = '';
+    stopLoading();
+  }
 
   map.value.on("click", getFeatureInfo);
   document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -299,7 +319,16 @@ watch(
 function toggleLayer(layer) {
   const key = `${layer.workspace}:${layer.layer_name}`;
   if (activeLayers.value[key]) {
-    map.value.removeLayer(activeLayers.value[key]);
+    // Remover camada: decrementar contador se ainda estava carregando
+    const oldLayer = activeLayers.value[key];
+    if (oldLayer._sgcLoading) {
+      loadingTilesCount.value = Math.max(0, loadingTilesCount.value - 1);
+      if (loadingTilesCount.value === 0) {
+        loadingLayerName.value = '';
+        stopLoading();
+      }
+    }
+    map.value.removeLayer(oldLayer);
     delete activeLayers.value[key];
     return;
   }
@@ -311,7 +340,35 @@ function toggleLayer(layer) {
     version: "1.1.1",
     srs: "EPSG:3857",
     tiled: true,
-    opacity: 0.7, // Aumenta transparência para melhor visualização quando sobrepostas
+    opacity: 0.7,
+  });
+
+  // Rastrear carregamento de tiles desta camada WMS
+  wmsLayer._sgcLoading = true;
+  loadingTilesCount.value++;
+  loadingLayerName.value = layer.title || layer.layer_name || 'camada';
+  startLoading();
+
+  wmsLayer.on('load', () => {
+    if (wmsLayer._sgcLoading) {
+      wmsLayer._sgcLoading = false;
+      loadingTilesCount.value = Math.max(0, loadingTilesCount.value - 1);
+      if (loadingTilesCount.value === 0) {
+        loadingLayerName.value = '';
+        stopLoading();
+      }
+    }
+  });
+
+  wmsLayer.on('tileerror', () => {
+    if (wmsLayer._sgcLoading) {
+      wmsLayer._sgcLoading = false;
+      loadingTilesCount.value = Math.max(0, loadingTilesCount.value - 1);
+      if (loadingTilesCount.value === 0) {
+        loadingLayerName.value = '';
+        stopLoading();
+      }
+    }
   });
 
   wmsLayer.addTo(map.value);
@@ -327,6 +384,10 @@ function toggleLayersPanel() {
 
 async function getFeatureInfo(e) {
   if (Object.keys(activeLayers.value).length === 0) return;
+
+  isLoadingMap.value = true;
+  loadingMapMessage.value = 'Consultando feições...';
+  startLoading();
 
   const size = map.value.getSize();
   const point = map.value.latLngToContainerPoint(e.latlng);
@@ -429,6 +490,10 @@ async function getFeatureInfo(e) {
   // Adiciona meta charset ao popup para forçar UTF-8
   popupContent = `<meta charset="UTF-8">${popupContent}`;
 
+  isLoadingMap.value = false;
+  loadingMapMessage.value = '';
+  stopLoading();
+
   if (popupContent) {
     const popup = L.popup({ maxWidth: 450, className: "custom-popup" })
       .setLatLng(e.latlng)
@@ -468,6 +533,9 @@ async function getFeatureInfo(e) {
       }
     }, 100);
   } else {
+    isLoadingMap.value = false;
+    loadingMapMessage.value = '';
+    stopLoading();
     L.popup()
       .setLatLng(e.latlng)
       .setContent(
@@ -491,6 +559,29 @@ async function getFeatureInfo(e) {
       >
         <!-- Mapa -->
         <div id="map"></div>
+
+        <!-- Overlay de carregamento (fetch inicial e GetFeatureInfo) -->
+        <transition name="map-fade">
+          <div v-if="isLoadingMap" class="map-loading-overlay">
+            <div class="map-loading-box">
+              <div class="spinner-border text-primary" role="status" style="width:2rem;height:2rem;"></div>
+              <span class="mt-2 fw-semibold">{{ loadingMapMessage }}</span>
+            </div>
+          </div>
+        </transition>
+
+        <!-- Overlay de carregamento de tiles de camada WMS (não bloqueia interação) -->
+        <transition name="map-fade">
+          <div v-if="isLoadingTiles && !isLoadingMap" class="map-tiles-overlay">
+            <div class="map-tiles-box">
+              <div class="spinner-border text-primary" role="status" style="width:1.8rem;height:1.8rem;"></div>
+              <div class="mt-2">
+                <div class="fw-semibold" style="font-size:0.88rem;">Carregando camada...</div>
+                <div v-if="loadingLayerName" class="text-muted" style="font-size:0.8rem;">{{ loadingLayerName }}</div>
+              </div>
+            </div>
+          </div>
+        </transition>
 
         <button
           class="fullscreen-btn"
@@ -956,6 +1047,65 @@ async function getFeatureInfo(e) {
 
 .legend-color.preservation {
   background: linear-gradient(135deg, #81c784, #388e3c);
+}
+
+/* === Loading overlay sobre o mapa === */
+.map-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.map-loading-box {
+  background: white;
+  border-radius: 10px;
+  padding: 20px 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+/* Overlay de carregamento de tiles (visível mas não bloqueia interação) */
+.map-tiles-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1500;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.map-tiles-box {
+  background: white;
+  border-radius: 10px;
+  padding: 16px 24px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+/* Transição suave do overlay */
+.map-fade-enter-active,
+.map-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.map-fade-enter-from,
+.map-fade-leave-to {
+  opacity: 0;
 }
 
 /* Scroll suave para o painel */
