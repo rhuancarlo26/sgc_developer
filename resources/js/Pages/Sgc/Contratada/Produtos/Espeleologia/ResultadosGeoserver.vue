@@ -14,9 +14,10 @@
         >
           {{ nomesTipos[tipo] }}
           <i
-            v-if="anexos.find(a => a.tipo === tipo)"
+            v-if="layersForTipo(tipo).length > 0"
             class="fas fa-check-circle text-success ms-1"
           ></i>
+          <span v-if="layersForTipo(tipo).length > 1" class="badge bg-success ms-1">{{ layersForTipo(tipo).length }}</span>
         </a>
       </li>
     </ul>
@@ -101,8 +102,42 @@
 
           <!-- === Demais abas (padrão shapefile) === -->
           <template v-else>
+            <!-- Camadas já vinculadas para este tipo -->
+            <div v-if="layersForTipo(tipo).length > 0" class="mb-4">
+              <h6 class="text-muted mb-2">
+                <i class="fas fa-layer-group me-1"></i>
+                Camadas vinculadas ({{ layersForTipo(tipo).length }}):
+              </h6>
+              <div
+                v-for="(layer, index) in layersForTipo(tipo)"
+                :key="layer.id"
+              >
+                <div class="alert alert-info mb-2 d-flex align-items-center justify-content-between">
+                  <span>
+                    <i class="fas fa-map me-2"></i>
+                    <strong>{{ tipoLabel(tipo, index, layersForTipo(tipo).length) }}</strong>
+                    <small class="text-muted ms-2">— {{ layer.layer_name }}</small>
+                  </span>
+                  <div>
+                    <button @click="toggleRenderLayer(layer)" class="btn btn-sm btn-outline-secondary me-1" type="button">
+                      <i :class="renderedLayers[layer.id] ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                      {{ renderedLayers[layer.id] ? 'Esconder' : 'Ver Mapa' }}
+                    </button>
+                    <button @click="desvincularLayer(layer.id, tipo)" class="btn btn-sm btn-outline-danger" type="button">
+                      <i class="fas fa-unlink"></i>
+                    </button>
+                  </div>
+                </div>
+                <div
+                  v-show="renderedLayers[layer.id]"
+                  :id="'wms-map-' + layer.id"
+                  style="height: 400px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 12px;"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Upload zone (sempre visível para adicionar mais) -->
             <div
-              v-if="!anexos.find(a => a.tipo === tipo)"
               @drop="onDrop($event, tipo)"
               @dragover.prevent
               @dragenter.prevent
@@ -112,7 +147,8 @@
             >
               <p>
                 Arraste .zip do shapefile aqui ou
-                <button type="button" @click.prevent="triggerFileInput(tipo)" class="btn btn-link p-0">clique para selecionar</button>.
+                <button type="button" @click.prevent="triggerFileInput(tipo)" class="btn btn-link p-0">clique para selecionar</button>
+                para {{ layersForTipo(tipo).length > 0 ? 'adicionar mais um mapa' : 'vincular um mapa' }}.
               </p>
               <input
                 :id="'fileInput-' + tipo"
@@ -128,80 +164,23 @@
               <small v-if="errors[tipo]" class="text-danger d-block">{{ errors[tipo] }}</small>
             </div>
 
+            <!-- Preview do shapefile recém-carregado -->
+            <div
+              v-if="rendered[tipo]"
+              :id="'map-' + tipo"
+              style="height: 400px; border: 1px solid #ddd; border-radius: 4px;"
+              class="mb-3"
+            ></div>
+
             <button
-              v-if="features[tipo].length > 0 && !anexos.find(a => a.tipo === tipo)"
+              v-if="features[tipo].length > 0"
               @click="vincularMapa(tipo)"
               class="btn btn-primary mb-3"
               type="button"
             >
-              Vincular Mapa
+              <i class="fas fa-link me-1"></i>
+              Vincular Mapa{{ layersForTipo(tipo).length > 0 ? ' Adicional' : '' }}
             </button>
-
-            <div
-              v-if="anexos.find(a => a.tipo === tipo)"
-              class="alert alert-info mb-3 d-flex align-items-center justify-content-between"
-            >
-              <span>Arquivo vinculado: {{ anexos.find(a => a.tipo === tipo).nome_arquivo }}</span>
-              <div>
-                <button @click="toggleRender(tipo)" class="btn btn-sm btn-outline-secondary me-1" type="button">
-                  <i :class="rendered[tipo] ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                  {{ rendered[tipo] ? 'Esconder Mapa' : 'Ver Mapa' }}
-                </button>
-                <button
-                  @click="removerAnexo(anexos.find(a => a.tipo === tipo).id)"
-                  class="btn btn-sm btn-outline-danger"
-                  type="button"
-                >
-                  <i class="fas fa-trash-alt"></i> Excluir
-                </button>
-              </div>
-            </div>
-
-            <!-- Mapa -->
-            <div
-              v-if="rendered[tipo]"
-              :id="'map-' + tipo"
-              style="height: 600px; border: 1px solid #ddd; border-radius: 4px;"
-              class="mb-3"
-            ></div>
-            <p v-else-if="anexos.find(a => a.tipo === tipo)" class="text-muted">
-              Mapa vinculado, clique no olho para visualizar.
-            </p>
-
-            <!-- Observações -->
-            <div v-if="anexos.find(a => a.tipo === tipo)" class="mt-3">
-              <div v-if="!editando[tipo] && savedObservacoes[tipo]">
-                <div class="p-3 border rounded bg-light">
-                  <strong>Observação:</strong>
-                  <p class="mb-2">{{ observacoes[tipo] }}</p>
-
-                  <button class="btn btn-sm btn-outline-primary me-2" @click="editando[tipo] = true" type="button">
-                    <i class="fas fa-edit"></i> Editar
-                  </button>
-
-                  <button class="btn btn-sm btn-outline-danger" @click="removerObservacao(tipo)" type="button">
-                    <i class="fas fa-trash"></i> Excluir
-                  </button>
-                </div>
-              </div>
-
-              <div v-else>
-                <label class="form-label">Observações</label>
-                <textarea
-                  v-model="observacoes[tipo]"
-                  class="form-control"
-                  rows="4"
-                ></textarea>
-
-                <button class="btn btn-success btn-sm mt-2" @click="salvarObservacao(tipo)" type="button">
-                  <i class="fas fa-save"></i> Salvar Observação
-                </button>
-
-                <button class="btn btn-secondary btn-sm mt-2 ms-2" @click="cancelarEdicao(tipo)" type="button">
-                  Cancelar
-                </button>
-              </div>
-            </div>
           </template>
         </div>
       </div>
@@ -210,7 +189,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, watch } from 'vue'
+import { ref, nextTick, watch, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import axios from 'axios'
 import L from 'leaflet'
@@ -260,6 +239,11 @@ const rendered = ref({})
 const zipFiles = ref({})
 const maps = ref({})
 
+// === GeoServer layers da campanha
+const geoLayers = ref([])
+const renderedLayers = ref({})
+const layerMaps = ref({})
+
 // === ESTUDOS POSTERIORES (estado local reativo)
 const necessarioEstudos = ref(false)
 const estudos = ref([]) // [{ __key, subproduto_id, quantidade, coordenadas: [{__key, lat, lng}] }]
@@ -273,6 +257,78 @@ tipos.forEach(t => {
   rendered.value[t] = false
   zipFiles.value[t] = null
 })
+
+// === Carrega layers do GeoServer vinculadas a esta campanha
+const loadGeoLayers = async () => {
+  if (!props.campanhaId) return
+  try {
+    const { data } = await axios.get(route('sgc.contratada.espeleologia.layers.index'), {
+      params: { campanha_id: props.campanhaId }
+    })
+    geoLayers.value = Array.isArray(data) ? data : []
+  } catch (e) {
+    console.error('Erro ao carregar layers da campanha:', e)
+  }
+}
+
+onMounted(loadGeoLayers)
+watch(() => props.campanhaId, loadGeoLayers)
+
+const layersForTipo = (tipo) => geoLayers.value.filter(l => l.tipo === tipo)
+
+const tipoLabel = (tipo, index, total) => {
+  const base = nomesTipos[tipo] || tipo
+  return total > 1 ? `${base} ${index + 1}` : base
+}
+
+const toggleRenderLayer = async (layer) => {
+  renderedLayers.value = { ...renderedLayers.value, [layer.id]: !renderedLayers.value[layer.id] }
+  if (renderedLayers.value[layer.id]) {
+    await nextTick()
+    setTimeout(() => renderLayerWms(layer), 50)
+  } else {
+    if (layerMaps.value[layer.id]) {
+      try { layerMaps.value[layer.id].remove() } catch (e) { /* noop */ }
+      layerMaps.value[layer.id] = null
+    }
+  }
+}
+
+const renderLayerWms = (layer) => {
+  const container = document.getElementById(`wms-map-${layer.id}`)
+  if (!container) return
+  if (layerMaps.value[layer.id]) {
+    try { layerMaps.value[layer.id].remove() } catch (e) { /* noop */ }
+  }
+  const map = L.map(container).setView([-14.235, -51.925], 6)
+  layerMaps.value[layer.id] = map
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map)
+  L.tileLayer.wms('/sgc/contratada/mapa/wms', {
+    layers: `${layer.workspace}:${layer.layer_name}`,
+    format: 'image/png',
+    transparent: true,
+    version: '1.1.0',
+  }).addTo(map)
+  setTimeout(() => map.invalidateSize(), 300)
+}
+
+const desvincularLayer = async (layerId, tipo) => {
+  if (!confirm('Desvincular este mapa da campanha?')) return
+  try {
+    await axios.delete(route('sgc.contratada.espeleologia.layers.desvincular', layerId), {
+      params: { campanha_id: props.campanhaId }
+    })
+    if (layerMaps.value[layerId]) {
+      try { layerMaps.value[layerId].remove() } catch (e) { /* noop */ }
+      layerMaps.value[layerId] = null
+    }
+    geoLayers.value = geoLayers.value.filter(l => l.id !== layerId)
+  } catch (e) {
+    console.error('Erro ao desvincular layer:', e)
+  }
+}
 
 // === SYNC anexos/observações vindos do backend
 watch(
@@ -485,18 +541,21 @@ const vincularMapa = async (tipo) => {
       { headers: { 'Content-Type': 'multipart/form-data' } }
     )
 
-    // opcional: exibe mensagem ou atualiza array local
     if (response.data.layer) {
-      // cria um stub de "anexo" para manter UX semelhante
-      anexos.value.push({
+      geoLayers.value.push({
         id: response.data.layer.id,
+        layer_name: response.data.layer.layer_name,
+        workspace: response.data.layer.workspace,
+        title: response.data.layer.title,
         tipo,
-        nome_arquivo: response.data.layer.layer_name || response.data.layer.title || 'shapefile',
-        comentario: observacoes.value[tipo] || '',
-        fromGeoServer: true,
       })
-      emit('update-resultados-anexos', anexos.value)
       uploadedFiles.value[tipo] = []
+      zipFiles.value[tipo] = null
+      features.value[tipo] = []
+      if (maps.value[tipo]) {
+        try { maps.value[tipo].remove() } catch (e) { /* noop */ }
+        maps.value[tipo] = null
+      }
       rendered.value[tipo] = false
     }
   } catch (error) {

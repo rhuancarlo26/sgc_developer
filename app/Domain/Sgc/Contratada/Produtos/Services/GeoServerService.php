@@ -13,9 +13,14 @@ class GeoServerService
     public function __construct()
     {
         // Ajuste se necessário
+        #local
         $this->baseUrl  = 'http://localhost:8080/geoserver/rest';
         $this->user     = 'admin';
         $this->password = 'geoserver';
+        #remoto
+        $this->baseUrl  = config('services.geoserver.url') . '/rest';
+        $this->user     = config('services.geoserver.user');
+        $this->password = config('services.geoserver.password');
     }
 
     /**
@@ -94,6 +99,29 @@ class GeoServerService
         ];
 
         $this->request('post', $url, $payload);
+    }
+
+    /**
+     * Faz upload do ZIP do shapefile diretamente para o GeoServer remoto via HTTP.
+     * Substitui createShapefileDatastore + publishLayer quando o GeoServer é remoto,
+     * pois o GeoServer não tem acesso ao filesystem local da aplicação.
+     * O parâmetro ?configure=all publica automaticamente todos os feature types.
+     */
+    public function uploadShapefileDatastore(
+        string $workspace,
+        string $datastore,
+        string $absoluteZipPath
+    ): void {
+        $url = "{$this->baseUrl}/workspaces/{$workspace}/datastores/{$datastore}/file.shp?configure=all&update=overwrite";
+
+        $response = Http::withBasicAuth($this->user, $this->password)
+            ->withHeaders(['Content-Type' => 'application/zip'])
+            ->withBody(file_get_contents($absoluteZipPath), 'application/zip')
+            ->put($url);
+
+        if (! $response->successful()) {
+            throw new \Exception($response->body());
+        }
     }
 
     /**

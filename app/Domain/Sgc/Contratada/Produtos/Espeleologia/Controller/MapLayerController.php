@@ -66,7 +66,7 @@ public function store(Request $request, GeoServerService $geo)
     $layerName = pathinfo($shpPath, PATHINFO_FILENAME);
 
     $tipo = $request->input('tipo');
-    $workspace = 'jonatas-mapas';
+    $workspace = 'ecossistema';
     $isNewLayer = false;
 
     // 5️⃣ Se já existir no banco (workspace + layer), reaproveita e só vincula campanha.
@@ -114,16 +114,13 @@ public function store(Request $request, GeoServerService $geo)
         try {
             $geo->ensureWorkspace($layer->workspace);
 
-            $geo->createShapefileDatastore(
+            // Usa upload direto via HTTP para funcionar com GeoServer remoto.
+            // O GeoServer remoto não tem acesso ao filesystem local da aplicação.
+            $absoluteZipPath = storage_path("app/{$zipPath}");
+            $geo->uploadShapefileDatastore(
                 $layer->workspace,
                 $layer->datastore,
-                $shpPath
-            );
-
-            $geo->publishLayer(
-                $layer->workspace,
-                $layer->datastore,
-                $layer->layer_name
+                $absoluteZipPath
             );
 
             $layer->update([
@@ -154,29 +151,37 @@ public function store(Request $request, GeoServerService $geo)
 
 
 
+    public function desvincular(Request $request, MapLayer $layer)
+    {
+        $request->validate([
+            'campanha_id' => 'required|exists:sgc_espeleo_campanhas,id',
+        ]);
+
+        SgcEspeleoCampanhaLayer::where('campanha_id', $request->input('campanha_id'))
+            ->where('map_layer_id', $layer->id)
+            ->delete();
+
+        return response()->json(['message' => 'Layer desvinculada da campanha.']);
+    }
+
     public function publish(MapLayer $layer, GeoServerService $geo)
     {
         // 1️⃣ Garante que o workspace existe
         $geo->ensureWorkspace($layer->workspace);
 
-        // 2️⃣ Caminho ABSOLUTO do shapefile (exigência do GeoServer)
-        $absolutePath = storage_path("app/{$layer->storage_path}");
+        // 2️⃣ Reconstrói o caminho do ZIP a partir do storage_path do .shp.
+        // Estrutura: shapes/{hash}/{Nome}.shp -> zip em shapes/{hash}.zip
+        $absoluteShpPath = storage_path("app/{$layer->storage_path}");
+        $absoluteZipPath = dirname($absoluteShpPath) . '.zip';
 
-        // 3️⃣ Cria o datastore
-        $geo->createShapefileDatastore(
+        // 3️⃣ Faz upload do ZIP diretamente para o GeoServer remoto
+        $geo->uploadShapefileDatastore(
             $layer->workspace,
             $layer->datastore,
-            $absolutePath
+            $absoluteZipPath
         );
 
-        // 4️⃣ Publica a layer
-        $geo->publishLayer(
-            $layer->workspace,
-            $layer->datastore,
-            $layer->layer_name
-        );
-
-        // 5️⃣ Marca como publicada
+        // 4️⃣ Marca como publicada
         $layer->update([
             'published_at' => now()
         ]);
@@ -216,7 +221,10 @@ public function store(Request $request, GeoServerService $geo)
     public function proxyWms(Request $request)
     {
         // URL base do GeoServer
-        $geoserverUrl = 'http://localhost:8080/geoserver/wms';
+        #local
+        // $geoserverUrl = 'http://localhost:8080/geoserver/wms';
+        #remoto
+        $geoserverUrl = 'https://servicos.dnit.gov.br/DPP/geoserver/wms';
 
         // Repassa TODOS os parâmetros recebidos
         $response = Http::withOptions([

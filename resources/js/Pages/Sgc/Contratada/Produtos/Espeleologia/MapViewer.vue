@@ -74,6 +74,31 @@ const colorPalette = [
   '#FF6F9F', '#00D2FC', '#FFD700', '#FF1493', '#00CED1'
 ];
 
+// Mapa de nomes amigáveis por tipo
+const nomesTipos = {
+  geologico: 'Mapa Geológico',
+  geomorfologico: 'Mapa Geomorfológico',
+  hipsometrico: 'Mapa Hipsométrico',
+  declividades: 'Mapa de Declividades',
+  hidrografico: 'Mapa Hidrográfico',
+  cavidades: 'Cavidades CECAV/SBE',
+  limites_areas: 'Limites de Áreas',
+  potencial_inicial: 'Pot. Espeleológico - Inicial',
+  potencial_reclassificado: 'Pot. Espeleológico - Reclassificado',
+  projeto_engenharia: 'Projeto de Engenharia',
+  estudos_posteriores: 'Estudos Posteriores',
+};
+
+// Retorna label numerado quando há múltiplas layers do mesmo tipo
+function layerLabel(layer) {
+  const base = nomesTipos[layer.tipo] || layer.title || layer.layer_name.replace(/_/g, ' ');
+  if (!layer.tipo) return base;
+  const sameType = layers.value.filter(l => l.tipo === layer.tipo);
+  if (sameType.length <= 1) return base;
+  const idx = sameType.findIndex(l => l.id === layer.id);
+  return `${base} ${idx + 1}`;
+}
+
 // Função para gerar cor baseada no índice da camada
 function getLayerColor(index) {
   return colorPalette[index % colorPalette.length];
@@ -524,9 +549,7 @@ async function getFeatureInfo(e) {
                     class="layer-icon"
                     :style="{ backgroundColor: layerColors[`${layer.workspace}:${layer.layer_name}`] }"
                   ></span>
-                  <span class="layer-name">{{
-                    layer.title || layer.layer_name.replace(/_/g, " ")
-                  }}</span>
+                  <span class="layer-name">{{ layerLabel(layer) }}</span>
                 </label>
               </div>
             </div>
