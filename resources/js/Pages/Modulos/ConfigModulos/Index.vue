@@ -31,7 +31,7 @@ const formatarData = (data) => {
             <Breadcrumb class="align-self-center" :links="[
                 { route: route('modulos.config-modulos.index'), label: `Módulos` }
             ]" />
-            <NavLink route-name="contratos.gestao.create" title="Novo Módulo" :icon="IconCirclePlus"
+            <NavLink route-name="modulos.config-modulos.formulario" title="Novo Módulo" :icon="IconCirclePlus"
                     class="btn btn-info me-2"/>
         </div>
     </template>
