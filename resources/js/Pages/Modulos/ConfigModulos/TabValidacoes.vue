@@ -1,7 +1,7 @@
 <script setup>
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
-import { IconCirclePlus, IconTrash } from "@tabler/icons-vue";
+import { IconCirclePlus, IconTrash, IconDownload } from "@tabler/icons-vue";
 
 const props = defineProps({
     form: { type: Object },
@@ -57,7 +57,10 @@ const removeCampo = (key) => {
 <template>
     <div class="card-header justify-content-between">
         <h3 class="my-0">Campos e Validações</h3>
-        <button type="button" @click="adicionarCampo" class="btn btn-secondary"> <IconCirclePlus class="me-2" /> Adicionar Campo</button>
+        <div class="d-flex gap-2">
+            <button v-if="form.campos.length" type="button" class="btn bg-gray-700"> <IconDownload class="me-2" /> Gerar Planilha Modelo</button>
+            <button type="button" @click="adicionarCampo" class="btn btn-secondary"> <IconCirclePlus class="me-2" /> Adicionar Campo</button>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
