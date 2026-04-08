@@ -1,6 +1,6 @@
 <?php
 
-use App\Domain\Modulos\ConfiguracoesModulos\app\Controllers\ConfiguracoesModulosController;
+use App\Domain\Modulos\ConfiguracoesModulos\Controllers\ConfiguracoesModulosController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('configuracoes-modulos')->group(function () {

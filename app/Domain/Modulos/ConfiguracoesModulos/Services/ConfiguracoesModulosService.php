@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Modulos\ConfiguracoesModulos\app\Services;
+namespace App\Domain\Modulos\ConfiguracoesModulos\Services;
 
 use App\Models\Modulo;
 
