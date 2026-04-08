@@ -6,7 +6,8 @@ import {
     IconLayoutDashboard,
     IconFileCheck,
     IconFileCertificate,
-    IconWorld
+    IconWorld,
+    IconBox
 } from "@tabler/icons-vue"
 
 import NavLink from "@/Components/NavLink.vue";
@@ -77,6 +78,22 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                     <!-- Perfis -->
                                     <NavDropdownLink route-name="cadastros.perfis.listagem"
                                         active-on-route-prefix="cadastros.perfis.*" title="Perfis" />
+                                </NavDropdown>
+
+                                <!-- Módulos -->
+                                <NavDropdown prefix="modulos.*" title="Módulos" :icon="IconBox">
+
+                                    <!-- Dashboard -->
+                                    <NavDropdownLink route-name="cadastros.perfis.listagem"
+                                        active-on-route-prefix="cadastros.perfis.*" title="Dashboard" />
+
+                                    <!-- Módulos -->
+                                    <NavDropdownLink route-name="modulos.config-modulos.index"
+                                        active-on-route-prefix="modulos.config-modulos.*" title="Módulos" />
+
+                                    <!-- Importador -->
+                                    <NavDropdownLink route-name="cadastros.perfis.listagem"
+                                        active-on-route-prefix="cadastros.perfis.*" title="Importador" />
                                 </NavDropdown>
                             </ul>
                         </div>
