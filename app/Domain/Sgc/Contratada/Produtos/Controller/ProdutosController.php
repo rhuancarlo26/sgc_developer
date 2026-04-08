@@ -9,12 +9,11 @@ use App\Models\SgcvwEmpreendimentos;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaService;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoService;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\app\Services\PmqaService;
 use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Services\CampanhaService;
-use App\Models\ServicoPmqaParametro;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcEspeleoProfissional;
-use App\Models\SgcPmqaCampanha;
 use App\Models\SgcPmqaPonto;
 use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
@@ -22,13 +21,11 @@ use App\Models\SgcPmqa;
 use App\Models\SgcPmqaParametroLista;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class ProdutosController extends Controller
 {
@@ -37,19 +34,22 @@ class ProdutosController extends Controller
     protected $espeleoService;
     protected $parametroService;
     protected $execucaoCampanhaService;
+    protected $pmqaService;
 
     public function __construct(
         ProdutosService $produtosService,
         FaunaService $faunaService,
         EspeleoService $espeleoService,
         ParametroService $parametroService,
-        CampanhaService $execucaoCampanhaService
+        CampanhaService $execucaoCampanhaService,
+        PmqaService $pmqaService
     ) {
         $this->produtosService = $produtosService;
         $this->faunaService = $faunaService;
         $this->espeleoService = $espeleoService;
         $this->parametroService = $parametroService;
         $this->execucaoCampanhaService = $execucaoCampanhaService;
+        $this->pmqaService = $pmqaService;
     }
 
     public function index(Request $request, $contrato, $produto): Response
@@ -59,7 +59,7 @@ class ProdutosController extends Controller
 
         $campanhas = match ($produto) {
             'fauna'        => $this->getCampanhasFauna($contrato),
-            'pmqa', 'eia'  => $this->getCampanhasPmqa($contrato),
+            'pmqa', 'eia' => $this->pmqaService->getCampanhas($contrato),
             'espeleologia' => $this->getCampanhasEspeleologia($contrato),
             default        => collect(),
         };
@@ -308,11 +308,7 @@ class ProdutosController extends Controller
     private function createPmqa(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
 
-        $pmqa = SgcPmqa::create([
-            'id_contrato'      => $contrato,
-            'status_aprovacao' => 'Em analise',
-            'subproduto'       => $subproduto,
-        ]);
+        $pmqa = $this->pmqaService->criarCampanha($contrato, $subproduto);
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->pluck('cod_emp')

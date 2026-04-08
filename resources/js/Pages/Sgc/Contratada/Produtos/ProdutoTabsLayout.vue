@@ -21,6 +21,10 @@ const pmqaId = computed(() => {
 })
 
 const setTab = (tab) => {
+    if (tab === "apresentacao") {
+        emit("update:activeTab", tab);
+        return;
+    }
   const baseParams = [props.contratos.id, 'eia', pmqaId.value];
 
   if (tab === "configuracao") {
@@ -73,6 +77,11 @@ const setTab = (tab) => {
 
             <ul class="nav nav-tabs mb-4">
               <li class="nav-item">
+                <a class="nav-link" :class="{ active: activeTab === 'apresentacao' }" @click.prevent="setTab('apresentacao')">
+                  Apresentação
+                </a>
+              </li>
+              <li class="nav-item">
                 <a class="nav-link" :class="{ active: activeTab === 'configuracao' }" @click.prevent="setTab('configuracao')">
                   Configuração
                 </a>
@@ -95,6 +104,9 @@ const setTab = (tab) => {
             </ul>
 
             <div class="tab-content">
+              <div v-show="activeTab === 'apresentacao'">
+                <slot name="apresentacao" />
+              </div>
               <div v-show="activeTab === 'relatorio'">
                 <slot name="relatorio" />
               </div>
