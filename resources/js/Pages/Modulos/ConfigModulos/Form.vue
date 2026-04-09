@@ -6,9 +6,11 @@ import { ref, watch, computed } from "vue";
 import { IconDoorExit, IconDeviceFloppy } from "@tabler/icons-vue";
 import TabInformacoesGerais from "./TabInformacoesGerais.vue"
 import TabValidacoes from "./TabValidacoes.vue"
+import { useToast } from "vue-toastification";
 
 const props = defineProps({
     modulo: { type: Object },
+    tipos: { type: Array },
 });
 
 const form = useForm({
@@ -18,20 +20,25 @@ const form = useForm({
     ...props.modulo
 });
 
-const numeroValidacoes = ref(0)
+const toast = useToast();
 
-
+const TabValidacoesRef = ref(null)
 const salvarModulo = () => {
-    
-    console.log(form)
 
-    // form.transform((data) => Object.assign({}, data))
+    if(!form.campos.length) {
+        toast.error('Os campos para validação não foram preenchidos');
+        return
+    }
 
-    // const url = props.contrato.id ? 'atualizar' : 'store'
+    if(TabValidacoesRef.value.validaCampos()) {
+        toast.error('Preencha os campos obrigatórios da aba Validações');
+        return
+    }
 
-    // form.post(route('contratos.gestao.' + url, props.contrato.id), {
-    //     onSuccess: () => Object.assign(form, props.contrato)
-    // });
+    form.clearErrors()
+
+    const url = props.modulo.id ? 'update' : 'store'
+    form.post(route(`modulos.config-modulos.${url}`, [props.modulo?.id]));
 }
 
 </script>
@@ -76,13 +83,13 @@ const salvarModulo = () => {
                             </div>
 
                             <div class="tab-pane" id="tabs-validacoes-1" role="tabpanel">
-                                <TabValidacoes :form="form" />
+                                <TabValidacoes ref="TabValidacoesRef" :form="form" :tipos="tipos" />
                             </div>
                         </div>
 
                         <div class="card-body">
                             <div class="d-flex justify-content-end">
-                                <button @click="salvarContrato()" type="button" class="btn btn-success" :disabled="form.processing">
+                                <button class="btn btn-success" :disabled="form.processing">
                                     <IconDeviceFloppy class="me-2"/>
                                     {{ form.id ? 'Editar' : 'Salvar' }}
                                 </button>

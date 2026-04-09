@@ -16,8 +16,9 @@ return new class extends Migration
         Schema::create('modulos', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
-            $table->string('planilha_modelo');
-            $table->json('campos')->nullable();
+            $table->string('nome_planilha_modelo')->nullable();
+            $table->string('caminho_planilha_modelo')->nullable();
+            $table->json('campos');
             $table->timestamps();
         });
     }

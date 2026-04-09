@@ -1,21 +1,30 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
-import { IconCirclePlus, IconDots } from '@tabler/icons-vue';
+import { IconCirclePlus, IconDots, IconEye } from '@tabler/icons-vue';
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import ModelSearchForm from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from '@/Components/Table.vue';
+import NavLink from "@/Components/NavLink.vue";
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import NavLink from "@/Components/NavLink.vue";
+import { ref } from "vue";
+import ModalCamposModulo from "./ModalCamposModulo.vue"
 
 const props = defineProps({
-  modulos: Object
+    modulos: Object,
+    tipos: Array,
 })
 
 const formatarData = (data) => {
     if (!data) return '-'
     return format(new Date(data), 'dd/MM/yyyy', { locale: ptBR })
+}
+
+const ModalCamposModuloRef = ref(null)
+
+const mostrarCampos = (modulo) => {
+    ModalCamposModuloRef.value.abrirModal(modulo)
 }
 
 </script>
@@ -52,25 +61,31 @@ const formatarData = (data) => {
                 table-class="table-hover">
                 <template #body="{ item }">
                     <tr class="cursor-pointer">
-                        <td>{{ item.nome }}</td>
-                        <td>{{ item.campos }}</td>
+                        <td class="text-center align-middle">{{ item.nome }}</td>
+                        <td class="text-center align-middle">
+                            <button class="btn btn-sm btn-secondary" @click="mostrarCampos(item)">
+                                <IconEye />
+                            </button>
+                        </td>
                         <td>{{ item.planilha_modelo }}</td>
-                        <td>{{ formatarData(item.created_at) }}</td>
+                        <td class="text-center align-middle">{{ formatarData(item.created_at) }}</td>
                         <td class="text-center">
                             <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
                                     data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
                                 <IconDots/>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="javascript:void(0)">
-                                    Visualizar
-                                </a>
+                                <Link class="dropdown-item" :href="route('modulos.config-modulos.formulario', [item.id])">
+                                    Editar
+                                </Link>
                             </div>
                         </td>
                     </tr>
                 </template>
             </Table>
-        </div>
+    </div>
+
+    <ModalCamposModulo ref="ModalCamposModuloRef" />
 
   </AuthenticatedLayout>
 </template>
