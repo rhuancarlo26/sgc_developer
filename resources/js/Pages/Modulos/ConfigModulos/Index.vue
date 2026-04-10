@@ -1,13 +1,14 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
-import { IconCirclePlus, IconDots, IconEye } from '@tabler/icons-vue';
+import { IconCirclePlus, IconDots, IconEye, IconTrash } from '@tabler/icons-vue';
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import ModelSearchForm from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from '@/Components/Table.vue';
 import NavLink from "@/Components/NavLink.vue";
 import { dateTimeFormat } from '@/Utils/DateTimeUtils';
 import { ref } from "vue";
+import Swal from "sweetalert2";
 import ModalCamposModulo from "./ModalCamposModulo.vue"
 
 const props = defineProps({
@@ -19,6 +20,23 @@ const ModalCamposModuloRef = ref(null)
 
 const mostrarCampos = (modulo) => {
     ModalCamposModuloRef.value.abrirModal(modulo)
+}
+
+const excluir = (moduloId) => {
+    Swal.fire({
+        title: 'Tem certeza?',
+        text: 'Essa ação não poderá ser desfeita!',
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: 'Sim, excluir',
+        cancelButtonText: 'Cancelar'
+    }).then(result => {
+
+        if(result.isConfirmed) {
+            console.log('opa')
+            router.delete(route('modulos.config-modulos.delete', [moduloId]))
+        }
+    })
 }
 
 </script>
@@ -41,42 +59,45 @@ const mostrarCampos = (modulo) => {
 
 
     <div class="card card-body">
-            <!-- Pesquisa -->
-            <ModelSearchForm :columns="[
-                'name',
-                'email',
-                'roles.name',
-                'created_at',
-                'updated_at',
-            ]" />
+        <!-- Pesquisa -->
+        <ModelSearchForm :columns="[
+            'name',
+            'email',
+            'roles.name',
+            'created_at',
+            'updated_at',
+        ]" />
 
-            <!-- Listagem-->
-            <Table :columns="['Nome', 'Campos', 'Planilha Modelo', 'Criado em', 'Ações']" :records="modulos"
-                table-class="table-hover">
-                <template #body="{ item }">
-                    <tr class="cursor-pointer">
-                        <td class="text-center align-middle">{{ item.nome }}</td>
-                        <td class="text-center align-middle">
-                            <button class="btn btn-sm btn-secondary" @click="mostrarCampos(item)">
-                                <IconEye />
+        <!-- Listagem-->
+        <Table :columns="['Nome', 'Campos', 'Planilha Modelo', 'Criado em', 'Ações']" :records="modulos"
+            table-class="table-hover">
+            <template #body="{ item }">
+                <tr class="cursor-pointer">
+                    <td class="text-center align-middle">{{ item.nome }}</td>
+                    <td class="text-center align-middle">
+                        <button class="btn btn-sm btn-secondary" @click="mostrarCampos(item)">
+                            <IconEye />
+                        </button>
+                    </td>
+                    <td>{{ item.planilha_modelo }}</td>
+                    <td class="text-center align-middle">{{ dateTimeFormat(item.created_at) }}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
+                                data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
+                            <IconDots/>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <NavLink route-name="modulos.config-modulos.formulario" :param="item.id" title="Editar"
+                                class="dropdown-item"/>
+
+                            <button @click="excluir(item.id)" class="dropdown-item">
+                                Excluir
                             </button>
-                        </td>
-                        <td>{{ item.planilha_modelo }}</td>
-                        <td class="text-center align-middle">{{ dateTimeFormat(item.created_at) }}</td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
-                                    data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
-                                <IconDots/>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <Link class="dropdown-item" :href="route('modulos.config-modulos.formulario', [item.id])">
-                                    Editar
-                                </Link>
-                            </div>
-                        </td>
-                    </tr>
-                </template>
-            </Table>
+                        </div>
+                    </td>
+                </tr>
+            </template>
+        </Table>
     </div>
 
     <ModalCamposModulo ref="ModalCamposModuloRef" :tipos="tipos" />
