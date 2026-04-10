@@ -61,11 +61,7 @@ const excluir = (moduloId) => {
     <div class="card card-body">
         <!-- Pesquisa -->
         <ModelSearchForm :columns="[
-            'name',
-            'email',
-            'roles.name',
-            'created_at',
-            'updated_at',
+            'nome',
         ]" />
 
         <!-- Listagem-->
