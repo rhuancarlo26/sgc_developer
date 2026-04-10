@@ -2,10 +2,81 @@
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import {IconDeviceFloppy} from "@tabler/icons-vue";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { ref } from "vue";
 
 const props = defineProps({
     form: { type: Object },
 });
+
+const loadPlanilhaModelo = ref(false)
+
+const importarPlanilhaModelo = async ({target}) => {
+    const arquivo = target.files?.[0]
+    if (!arquivo) return
+
+    if(!props.form.campos.length) {
+        await processarCamposPlanilha(arquivo)
+        return
+    }
+
+    const swal_ = await Swal.fire({
+        title: "Existem campos pre cadastrados dentro desse módulo",
+        text: "Ao importar uma nova planilha os campos já existentes serão perdidos. Deseja continuar?",
+        icon: "warning",
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+    })
+
+    if(swal_.isConfirmed) {
+        await processarCamposPlanilha(arquivo)
+    }
+
+    document.getElementById('planilha_modelo').value = ''
+}
+
+const processarCamposPlanilha = async (arquivo) => {
+    props.form.planilha_modelo = arquivo
+
+    const headers = { 'Content-Type': 'multipart/form-data' }
+    const formData = new FormData()
+    formData.append('arquivo', props.form.planilha_modelo)
+
+    delete props.form.errors.planilha_modelo
+
+    loadPlanilhaModelo.value = true
+
+    await axios.post(route('modulos.config-modulos.processar-campos-planilha'), formData, { headers })
+        .then(resp => {
+            let campos = resp.data 
+            if(!Array.isArray(campos)) {
+                campos = Object.values(campos)
+            }
+
+            props.form.campos = campos.map(campo => {
+                return {
+                    nome_campo: campo,
+                    tipo: 'texto',
+                    obrigatorio: null,
+                    regra: null,
+                    valor_min: null,
+                    valor_max: null,
+                    max_caracteres: null,
+                    valor_exemplo: null,
+                }
+            })
+        })
+        .catch(err => {
+            console.log(err)
+            props.form.errors.planilha_modelo = err.response.data?.message
+            props.form.planilha_modelo = null
+        })
+
+    loadPlanilhaModelo.value = false
+}
+
 </script>
 <template>
     <div class="card-header">
@@ -22,8 +93,13 @@ const props = defineProps({
             </div>
             <div class="col-12">
                 <InputLabel value="Planilha Modelo" for="planilha_modelo"/>
-                <input type="file" id="planilha_modelo" name="planilha_modelo" class="form-control"
-                    accept=".xlsx,.csv"/>
+                <div class="d-flex gap-2 align-items-center">
+                    <input type="file" id="planilha_modelo" @change="importarPlanilhaModelo" name="planilha_modelo" class="form-control"
+                        accept=".xlsx,.csv"/>
+                    <div v-if="loadPlanilhaModelo" class="spinner-border text-primary" role="status" style="border-width: 3px">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
                 <InputError :message="form.errors.planilha_modelo"/>
                 <small class="text-secondary">Envie uma planilha modelo. Se contiver dados de exemplo, os tipos serão detectados automaticamente.</small>
             </div>
