@@ -12,7 +12,8 @@ class StoreConfigModuloController extends Controller
 
     public function store(StoreConfigModuloRequest $request)
     {
-        $flashRequest = $this->service->store($request->validated());
-        return to_route('modulos.config-modulos.index')->with('message', $flashRequest);
+        $dataManagement = $this->service->store($request->validated());
+        return to_route('modulos.config-modulos.formulario', [$dataManagement['model']->id])
+            ->with('message', $dataManagement['request']);
     }
 }

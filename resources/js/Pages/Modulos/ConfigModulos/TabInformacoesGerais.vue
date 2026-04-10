@@ -30,11 +30,12 @@ const importarPlanilhaModelo = async ({target}) => {
         focusConfirm: false,
     })
 
-    if(swal_.isConfirmed) {
-        await processarCamposPlanilha(arquivo)
+    if(!swal_.isConfirmed) {
+        document.getElementById('planilha_modelo').value = ''
+        return
     }
 
-    document.getElementById('planilha_modelo').value = ''
+    processarCamposPlanilha(arquivo)
 }
 
 const processarCamposPlanilha = async (arquivo) => {
@@ -69,9 +70,10 @@ const processarCamposPlanilha = async (arquivo) => {
             })
         })
         .catch(err => {
-            console.log(err)
             props.form.errors.planilha_modelo = err.response.data?.message
             props.form.planilha_modelo = null
+
+            document.getElementById('planilha_modelo').value = ''
         })
 
     loadPlanilhaModelo.value = false

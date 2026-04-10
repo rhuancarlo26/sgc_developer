@@ -38,7 +38,9 @@ const salvarModulo = () => {
     form.clearErrors()
 
     const url = props.modulo.id ? 'update' : 'store'
-    form.post(route(`modulos.config-modulos.${url}`, [props.modulo?.id]));
+    form.post(route(`modulos.config-modulos.${url}`, [props.modulo?.id]), {
+        preserveState: false
+    });
 }
 
 </script>

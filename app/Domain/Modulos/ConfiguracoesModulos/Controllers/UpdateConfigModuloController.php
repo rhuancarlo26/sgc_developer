@@ -13,7 +13,8 @@ class UpdateConfigModuloController extends Controller
 
     public function update(Modulo $modulo, UpdateConfigModuloRequest $request)
     {
-        $flashRequest = $this->service->update($modulo, $request->validated());
-        return to_route('modulos.config-modulos.index')->with('message', $flashRequest);
+        $dataManagementRequest = $this->service->update($modulo, $request->validated());
+        return to_route('modulos.config-modulos.formulario', [$modulo->id])
+            ->with('message', $dataManagementRequest);
     }
 }

@@ -28,13 +28,34 @@ class ConfiguracoesModulosService extends BaseModelService
 
     public function store(array $data): array
     {
-        $dataManagement = $this->dataManagement->create(entity: $this->modelClass, infos: $data);
-        return $dataManagement['request'];
+        if (!is_null($data['planilha_modelo'])) {
+            $data = $this->addArquivo($data);
+        }
+
+        return $this->dataManagement->create(entity: $this->modelClass, infos: $data);
     }
 
     public function update(Modulo $modulo, array $data): array
     {
+        if (!is_null($data['planilha_modelo'])) {
+            $data = $this->addArquivo($data);
+        }
+
         $dataManagement = $this->dataManagement->update(entity: $this->modelClass, infos: $data, id: $modulo->id);
         return $dataManagement['request'];
+    }
+
+    private function addArquivo(array $data): array
+    {
+        $arquivo = $data['planilha_modelo'];
+
+        $nomeArquivo = $arquivo->getClientOriginalName();
+        $nomeCaminho = 'Modulos' . DIRECTORY_SEPARATOR . uniqid() .  '_' . $nomeArquivo;
+        $arquivo->storeAs('public' . DIRECTORY_SEPARATOR . $nomeCaminho);
+
+        $data['nome_planilha_modelo'] = $nomeArquivo;
+        $data['caminho_planilha_modelo'] = $nomeCaminho;
+
+        return $data;
     }
 }

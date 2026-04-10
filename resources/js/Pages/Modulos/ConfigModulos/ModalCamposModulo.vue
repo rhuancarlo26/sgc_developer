@@ -71,7 +71,7 @@ defineExpose({ abrirModal });
 							<td class="text-center">{{ c.max_caracteres }}</td>
 							<td class="text-center">
 								<span v-if="c.tipo === 'data'">{{c.valor_exemplo}} OU {{dateTimeFormat(c.valor_exemplo)}} </span>
-								<span v-else>c.valor_exemplo</span>
+								<span v-else>{{ c.valor_exemplo }}</span>
 							</td>
 						</tr>
 					</tbody>

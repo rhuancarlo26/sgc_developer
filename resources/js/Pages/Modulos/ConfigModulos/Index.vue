@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
-import { IconCirclePlus, IconDots, IconEye, IconTrash } from '@tabler/icons-vue';
+import { Head, Link, router, usePage } from "@inertiajs/vue3";
+import { IconCirclePlus, IconDots, IconEye, IconTrash, IconDownload } from '@tabler/icons-vue';
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import ModelSearchForm from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from '@/Components/Table.vue';
@@ -15,6 +15,8 @@ const props = defineProps({
     modulos: Object,
     tipos: Array,
 })
+
+const page = usePage()
 
 const ModalCamposModuloRef = ref(null)
 
@@ -75,7 +77,16 @@ const excluir = (moduloId) => {
                             <IconEye />
                         </button>
                     </td>
-                    <td>{{ item.planilha_modelo }}</td>
+                    <td class="text-center align-middle">
+                        <span v-if="item.nome_planilha_modelo" class="d-flex gap-2 justify-content-center align-items-center">
+                            {{ item.nome_planilha_modelo }}
+                            <a :href="`${page.props.app_url}/storage/${item.caminho_planilha_modelo}`" 
+                                class="btn btn-sm bg-gray-400" download target="_blank">
+                                <IconDownload />
+                            </a>
+                        </span>
+                        <span v-else>-</span>
+                    </td>
                     <td class="text-center align-middle">{{ dateTimeFormat(item.created_at) }}</td>
                     <td class="text-center">
                         <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // para rodar isoladamente
-        // php artisan migrate --path=/database/migrations/2026_04_08_142005_create_modulos_table.php
+        // php artisan migrate --path='database/migrations/2026_04_08_142005_create_modulos_table.php'
         Schema::create('modulos', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('caminho_planilha_modelo')->nullable();
             $table->json('campos');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
