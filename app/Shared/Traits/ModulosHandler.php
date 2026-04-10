@@ -7,10 +7,10 @@ trait ModulosHandler
     public function buscarParams(): array
     {
         return [
-            ['label' => 'Texto', 'value' => 'texto'],
-            ['label' => 'Inteiro', 'value' => 'inteiro'],
-            ['label' => 'Decimal', 'value' => 'decimal'],
-            ['label' => 'Data', 'value' => 'data'],
+            ['label' => 'Texto', 'value' => 'texto', 'tipoInput' => 'text'],
+            ['label' => 'Inteiro', 'value' => 'inteiro', 'tipoInput' => 'number'],
+            ['label' => 'Decimal', 'value' => 'decimal', 'tipoInput' => 'number'],
+            ['label' => 'Data', 'value' => 'data', 'tipoInput' => 'date'],
         ];
     }
 }

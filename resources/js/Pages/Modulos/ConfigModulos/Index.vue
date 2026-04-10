@@ -6,8 +6,7 @@ import Breadcrumb from "@/Components/Breadcrumb.vue";
 import ModelSearchForm from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from '@/Components/Table.vue';
 import NavLink from "@/Components/NavLink.vue";
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { dateTimeFormat } from '@/Utils/DateTimeUtils';
 import { ref } from "vue";
 import ModalCamposModulo from "./ModalCamposModulo.vue"
 
@@ -15,11 +14,6 @@ const props = defineProps({
     modulos: Object,
     tipos: Array,
 })
-
-const formatarData = (data) => {
-    if (!data) return '-'
-    return format(new Date(data), 'dd/MM/yyyy', { locale: ptBR })
-}
 
 const ModalCamposModuloRef = ref(null)
 
@@ -68,7 +62,7 @@ const mostrarCampos = (modulo) => {
                             </button>
                         </td>
                         <td>{{ item.planilha_modelo }}</td>
-                        <td class="text-center align-middle">{{ formatarData(item.created_at) }}</td>
+                        <td class="text-center align-middle">{{ dateTimeFormat(item.created_at) }}</td>
                         <td class="text-center">
                             <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
                                     data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
@@ -85,7 +79,7 @@ const mostrarCampos = (modulo) => {
             </Table>
     </div>
 
-    <ModalCamposModulo ref="ModalCamposModuloRef" />
+    <ModalCamposModulo ref="ModalCamposModuloRef" :tipos="tipos" />
 
   </AuthenticatedLayout>
 </template>

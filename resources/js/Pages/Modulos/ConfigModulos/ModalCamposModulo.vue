@@ -2,6 +2,11 @@
 import Modal from "@/Components/Modal.vue";
 import { ref } from "vue";
 import { IconSquareCheck, IconX } from '@tabler/icons-vue';
+import { dateTimeFormat } from '@/Utils/DateTimeUtils';
+
+const props = defineProps({
+	tipos: Array
+})
 
 const modalMapa = ref(null);
 
@@ -9,12 +14,16 @@ const title = ref('')
 const campos = ref([])
 
 const abrirModal = (modulo) => {
-	console.log(modulo)
 
 	title.value = `Campos do modulo ${modulo.nome}`
 	campos.value = [...modulo.campos]
 
   	modalMapa.value.getBsModal().show();
+}
+
+const formatarTipo = (tipo) => {
+	const tipo_ = props.tipos.find(item => item.value === tipo)
+    return tipo_?.label ?? '-'
 }
 
 defineExpose({ abrirModal });
@@ -41,7 +50,7 @@ defineExpose({ abrirModal });
 					<tbody>
 						<tr v-for="(c, key) in campos" :key="key">
 							<td class="text-center">{{ c.nome_campo }}</td>
-							<td class="text-center">{{ c.tipo }}</td>
+							<td class="text-center">{{ formatarTipo(c.tipo) }}</td>
 							<td class="text-center">
 								<IconSquareCheck v-if="c.obrigatorio" class="text-green" />
 								<IconX v-else class="text-danger" />
@@ -53,7 +62,10 @@ defineExpose({ abrirModal });
 							<td class="text-center">{{ c.valor_min }}</td>
 							<td class="text-center">{{ c.valor_max }}</td>
 							<td class="text-center">{{ c.max_caracteres }}</td>
-							<td class="text-center">{{ c.valor_exemplo }}</td>
+							<td class="text-center">
+								<span v-if="c.tipo === 'data'">{{c.valor_exemplo}} OU {{dateTimeFormat(c.valor_exemplo)}} </span>
+								<span v-else>c.valor_exemplo</span>
+							</td>
 						</tr>
 					</tbody>
 				</table>

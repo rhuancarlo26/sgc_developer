@@ -85,6 +85,11 @@ const validaCampos = () => {
     return validacoesNulos
 }
 
+const defineTipoCampo = (tipo) => {
+    const tipo_ = props.tipos.find(item => item.value === tipo)
+    return tipo_?.tipoInput ?? 'text'
+}
+
 defineExpose({ validaCampos })
 </script>
 
@@ -146,7 +151,7 @@ defineExpose({ validaCampos })
                                 :class="c.validaCampo_max_caracteres ? 'border-danger' : ''"/>
                         </td>
                         <td class="text-center">
-                            <input type="text" v-model="c.valor_exemplo" class="form-control" 
+                            <input :type="defineTipoCampo(c.tipo)" v-model="c.valor_exemplo" class="form-control" 
                                 :class="c.validaCampo_valor_exemplo ? 'border-danger' : ''"/>
                         </td>
                         <td class="text-center">
