@@ -5,6 +5,7 @@ use App\Domain\Modulos\ConfiguracoesModulos\Controllers\CreateConfigModuloContro
 use App\Domain\Modulos\ConfiguracoesModulos\Controllers\StoreConfigModuloController;
 use App\Domain\Modulos\ConfiguracoesModulos\Controllers\UpdateConfigModuloController;
 use App\Domain\Modulos\ConfiguracoesModulos\Controllers\ProcessarCamposPlanilhaController;
+use App\Domain\Modulos\ConfiguracoesModulos\Controllers\GerarPlanilhaModeloController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('configuracoes-modulos')->group(function () {
@@ -15,4 +16,6 @@ Route::prefix('configuracoes-modulos')->group(function () {
     Route::post('/processar-campos-planilha', [ProcessarCamposPlanilhaController::class, 'processarCamposPlanilha'])->name('config-modulos.processar-campos-planilha');
     Route::post('/formulario', [StoreConfigModuloController::class, 'store'])->name('config-modulos.store');
     Route::post('/formulario/atualizar/{modulo?}', [UpdateConfigModuloController::class, 'update'])->name('config-modulos.update');
+
+    Route::get('gerar-planilha-modelo/{modulo}', [GerarPlanilhaModeloController::class, 'gerarPlanilhaModelo'])->name('config-modulos.gerar-planilha-modelo');
 });

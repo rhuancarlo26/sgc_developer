@@ -97,7 +97,10 @@ defineExpose({ validaCampos })
     <div class="card-header justify-content-between">
         <h3 class="my-0">Campos e Validações</h3>
         <div class="d-flex gap-2">
-            <button v-if="form.campos.length" type="button" class="btn bg-gray-700"> <IconDownload class="me-2" /> Gerar Planilha Modelo</button>
+            <a v-if="form.id && form.campos.length" :href="route('modulos.config-modulos.gerar-planilha-modelo', [form.id])" 
+                class="btn bg-gray-700" target="_blank"> 
+                <IconDownload class="me-2" /> Gerar Planilha Modelo
+            </a>
             <button type="button" @click="adicionarCampo" class="btn btn-secondary"> <IconCirclePlus class="me-2" /> Adicionar Campo</button>
         </div>
     </div>

@@ -1,7 +1,7 @@
 <script setup>
 import Modal from "@/Components/Modal.vue";
 import { ref } from "vue";
-import { IconSquareCheck, IconX } from '@tabler/icons-vue';
+import { IconSquareCheck, IconX, IconDownload } from '@tabler/icons-vue';
 import { dateTimeFormat } from '@/Utils/DateTimeUtils';
 
 const props = defineProps({
@@ -11,12 +11,12 @@ const props = defineProps({
 const modalMapa = ref(null);
 
 const title = ref('')
-const campos = ref([])
+const modulo = ref({})
 
-const abrirModal = (modulo) => {
+const abrirModal = (modulo_) => {
 
-	title.value = `Campos do modulo ${modulo.nome}`
-	campos.value = [...modulo.campos]
+	title.value = `Campos do modulo ${modulo_.nome}`
+	modulo.value = { ...modulo_ }
 
   	modalMapa.value.getBsModal().show();
 }
@@ -33,6 +33,13 @@ defineExpose({ abrirModal });
 	<Modal ref="modalMapa" :title="title" modal-dialog-class="modal-xl">
 		<template #body>
 
+			<div class="d-flex justify-content-end mb-3">
+				<a v-if="modulo.id && modulo.campos.length" :href="route('modulos.config-modulos.gerar-planilha-modelo', [modulo.id])" 
+					class="btn bg-gray-700" target="_blank"> 
+					<IconDownload class="me-2" /> Gerar Planilha Modelo
+				</a>
+			</div>
+
 			<div class="table-responsive">
 				<table class="table table-bordered">
 					<thead>
@@ -48,7 +55,7 @@ defineExpose({ abrirModal });
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="(c, key) in campos" :key="key">
+						<tr v-for="(c, key) in modulo.campos" :key="key">
 							<td class="text-center">{{ c.nome_campo }}</td>
 							<td class="text-center">{{ formatarTipo(c.tipo) }}</td>
 							<td class="text-center">
