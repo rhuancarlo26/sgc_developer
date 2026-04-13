@@ -47,7 +47,7 @@ defineExpose({ abrirModal });
 							<th class="text-center">Nome do Campo</th>
 							<th class="text-center">Tipo</th>
 							<th class="text-center col-1">Obrigatório</th>
-							<th class="text-center col-1">Regra</th>
+							<th class="text-center col-1">Limite</th>
 							<th class="text-center col-1">Valor Mín</th>
 							<th class="text-center col-1">Valor Máx</th>
 							<th class="text-center col-1">Max Caracteres</th>

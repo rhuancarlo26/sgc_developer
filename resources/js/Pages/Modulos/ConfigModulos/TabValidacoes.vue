@@ -90,6 +90,10 @@ const defineTipoCampo = (tipo) => {
     return tipo_?.tipoInput ?? 'text'
 }
 
+const selecionarCheckbox = (campo, tipoCheckbox, { target }) => {
+    campo[tipoCheckbox] = target.checked
+}
+
 defineExpose({ validaCampos })
 </script>
 
@@ -115,7 +119,7 @@ defineExpose({ validaCampos })
                         <th class="text-center">Nome do Campo</th>
                         <th class="text-center">Tipo</th>
                         <th class="text-center">Obrigatório</th>
-                        <th class="text-center">Regra</th>
+                        <th class="text-center">Limite</th>
                         <th class="text-center col-1">Valor Mín</th>
                         <th class="text-center col-1">Valor Máx</th>
                         <th class="text-center col-1">Max Caracteres</th>
@@ -136,10 +140,10 @@ defineExpose({ validaCampos })
                             </select>
                         </td>
                         <td class="text-center align-middle">
-                            <input type="checkbox" v-model="c.obrigatorio" class="form-checkbox"/>
+                            <input type="checkbox" @change="selecionarCheckbox(c, 'obrigatorio', $event)" :checked="c.obrigatorio ? true : false" class="form-checkbox"/>
                         </td>
                         <td class="text-center align-middle">
-                            <input type="checkbox" v-model="c.regra" class="form-checkbox"/>
+                            <input type="checkbox" @change="selecionarCheckbox(c, 'regra', $event)" :checked="c.regra" class="form-checkbox"/>
                         </td>
                         <td class="text-center">
                             <input type="number" v-model="c.valor_min" :disabled="!c.regra || !['inteiro', 'decimal'].includes(c.tipo)" class="form-control" 
