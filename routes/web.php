@@ -72,10 +72,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Ambiente Geo
         Route::get('/ambienteGeo', fn() => Inertia::render('AmbienteGeo'))->name('ambienteGeo');
 
-        Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index'])->name('logs');
-
         // SGC
         require __DIR__ . '/../app/Domain/Sgc/Routes/SgcRoutes.php';
+
+        // Módulos
+        require __DIR__ . '/../app/Domain/Modulos/Routes/ModulosRoutes.php';
 
         Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index'])->name('logs');
     });
