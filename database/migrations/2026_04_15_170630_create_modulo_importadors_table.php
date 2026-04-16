@@ -27,6 +27,9 @@ return new class extends Migration
             $table->string('nome_arquivo');
             $table->integer('status');
 
+            $table->integer('load')->default(1);
+            $table->json('desc_erros')->nullable();
+
             $table->timestamps();
         });
     }

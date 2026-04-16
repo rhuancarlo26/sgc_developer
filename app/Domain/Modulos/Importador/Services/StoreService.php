@@ -30,11 +30,11 @@ class StoreService extends BaseModelService
 
         $job = new ProcessarPlanilhaImportadorJob(
             importadorId: $importador->id,
-            caminhoArquivo: $caminhoArquivo
+            caminhoArquivo: $caminhoArquivo,
+            extensaoArquivo: $arquivo->getClientOriginalExtension()
         );
 
-        $job->handle();
-
-        dd($importador->toArray(), $arquivo);
+        // $job->handle();
+        dispatch($job);
     }
 }

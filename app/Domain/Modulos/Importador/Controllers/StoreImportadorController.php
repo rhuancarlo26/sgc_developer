@@ -16,8 +16,12 @@ class StoreImportadorController extends Controller
 
     public function store(StoreImportadorRequest $request)
     {
-        $dataManagement = $this->service->store($request->validated());
-        return to_route('modulos.config-modulos.formulario', [$dataManagement['model']->id])
-            ->with('message', $dataManagement['request']);
+        $this->service->store($request->validated());
+        $dataManagement = [
+            'type'    => 'success',
+            'content' => 'Importação iniciada com sucesso!'
+        ];
+
+        return to_route('modulos.importador.index')->with('message', $dataManagement);
     }
 }

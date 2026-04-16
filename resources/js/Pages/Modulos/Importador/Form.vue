@@ -7,9 +7,12 @@ import { IconDoorExit, IconDeviceFloppy } from "@tabler/icons-vue";
 import CardInformacoesGerais from "./Components/CardInformacoesGerais.vue"
 
 const props = defineProps({
+    moduloImportador: { type: Object },
     modulos: { type: Array },
     contratos: { type: Array },
 });
+
+const labelBreadcrumb = computed(() => props.moduloImportador.id ? 'Importação' : 'Nova Importação')
 
 const form = useForm({
     modulo_id: null,
@@ -17,6 +20,7 @@ const form = useForm({
     campanha: null,
     contrato_id: null,
     arquivo: null,
+    ...props.moduloImportador
 });
 
 const importar = () => {
@@ -35,7 +39,7 @@ const importar = () => {
             <div class="w-100 d-flex justify-content-between align-items-center">
                 <Breadcrumb :links="[
                     { route: route('modulos.importador.index'), label: `Importadores` },
-                    { route: '#', label: 'Nova Importação' }
+                    { route: '#', label: labelBreadcrumb }
                 ]" />
                 <Link class="btn btn-info" :href="route('modulos.importador.index')">
                     <IconDoorExit class="me-2" /> Voltar

@@ -19,7 +19,7 @@ class ImportadorService extends BaseModelService
     public function buscarImportadores(): array
     {
         $modulos = Modulo::all();
-        $importadores = ModuloImportador::all();
+        $importadores = ModuloImportador::with('modulo')->paginate(10);
 
         return [
             'modulos' => $modulos,

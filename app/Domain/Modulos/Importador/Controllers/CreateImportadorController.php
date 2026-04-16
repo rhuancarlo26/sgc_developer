@@ -3,6 +3,7 @@
 namespace App\Domain\Modulos\Importador\Controllers;
 
 use App\Domain\Modulos\Importador\Services\ImportadorService;
+use App\Models\ModuloImportador;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,9 +17,10 @@ class CreateImportadorController extends Controller
         // 
     }
 
-    public function create(): Response
+    public function create(ModuloImportador $importador): Response
     {
         return Inertia::render('Modulos/Importador/Form', [
+            'moduloImportador' => $importador,
             'modulos' => $this->service->buscarModulos(),
             'contratos' => $this->service->buscarContratos(),
         ]);
