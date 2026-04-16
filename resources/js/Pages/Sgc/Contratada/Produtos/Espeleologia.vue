@@ -60,8 +60,15 @@ const goToCreate = () => {
     );
 };
 
-const visualizarCampanha = (campanhaId) => {
+const editarCampanha = (campanhaId) => {
     router.get(route('sgc.contratada.produtos.espeleo.show', [props.contrato, 'espeleologia', campanhaId]));
+};
+
+const visualizarResumoCampanha = (campanhaId) => {
+    router.get(
+        route('sgc.contratada.produtos.espeleo.show', [props.contrato, 'espeleologia', campanhaId]),
+        { modo: 'resumo' }
+    );
 };
 </script>
 
@@ -148,11 +155,18 @@ const visualizarCampanha = (campanhaId) => {
                                                     <td class="text-center">{{ campanha.subproduto || 'N/A' }}</td>
                                                     <td class="text-center">{{ campanha.status || 'N/A' }}</td>
                                                     <td class="text-center">
-                                                        <NavButton
-                                                            type-button="info"
-                                                            title="Visualizar"
-                                                            @click="visualizarCampanha(campanha.id)"
-                                                        />
+                                                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                                            <NavButton
+                                                                type-button="warning"
+                                                                title="Editar"
+                                                                @click="editarCampanha(campanha.id)"
+                                                            />
+                                                            <NavButton
+                                                                type-button="info"
+                                                                title="Visualizar"
+                                                                @click="visualizarResumoCampanha(campanha.id)"
+                                                            />
+                                                        </div>
                                                     </td>
                                                 </tr>
                                                 <tr v-if="!campanhasFiltradas.length">

@@ -5,9 +5,11 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import InputError from '@/Components/InputError.vue';
 import { computed, ref, watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
-import * as XLSX from 'xlsx';
+import axios from 'axios';
 import MapLayer from './MapViewer.vue';
 import ResultadosGeoserver from './ResultadosGeoserver.vue';
+import Resultados from './Resultados.vue';
+import ResultadosProspeccao from './ResultadosProspeccao.vue';
 import VisualizarAnexos from './VisualizarAnexos.vue';
 import Anexos from './Anexos.vue';
 
@@ -23,8 +25,14 @@ const props = defineProps({
   coordenadas: [Object, String, Array],
 });
 
+const isResumoView = computed(() => {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('modo') === 'resumo';
+});
+
 const activeTab = ref('apresentacao');
 const anexosLocais = ref(Array.isArray(props.campanha?.anexos) ? [...props.campanha.anexos] : []);
+const resultadosAnexosLocais = ref(Array.isArray(props.campanha?.resultados_anexos) ? [...props.campanha.resultados_anexos] : []);
 
 const formAprovacao = useForm({
   status: '',
@@ -35,6 +43,14 @@ watch(
   () => props.campanha?.anexos,
   (newVal) => {
     anexosLocais.value = Array.isArray(newVal) ? [...newVal] : [];
+  },
+  { deep: true }
+);
+
+watch(
+  () => props.campanha?.resultados_anexos,
+  (newVal) => {
+    resultadosAnexosLocais.value = Array.isArray(newVal) ? [...newVal] : [];
   },
   { deep: true }
 );
@@ -58,20 +74,118 @@ const hasCoordenadas = computed(() => {
   return false;
 });
 
-const etapasPreenchimento = computed(() => {
+const normalizeText = (value) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+const tiposGeoserverPadrao = [
+  'geologico',
+  'geomorfologico',
+  'hipsometrico',
+  'declividades',
+  'hidrografico',
+  'cavidades',
+  'limites_areas',
+  'potencial_inicial',
+  'potencial_reclassificado',
+  'projeto_engenharia',
+  'estudos_posteriores',
+];
+
+const tiposGeoserverProspeccao = [
+//   'feicoes',
+  'feicoes_carsticas_identificadas',
+  'cavidades_nao_encontradas',
+  'cavidades_cecav_canie',
+  'caminhamento',
+  'raio_de_250m_de_cavidades',
+  'curvas_de_nivel',
+  'extensao_rodovia_prospectada',
+];
+
+const isProspeccao = computed(() => normalizeText(props.campanha?.subproduto).includes('prospeccao'));
+
+const tiposGeoserverEsperados = computed(() =>
+  isProspeccao.value ? tiposGeoserverProspeccao : tiposGeoserverPadrao
+);
+
+const tiposResultadosRegistrados = computed(() => {
+  const resultados = Array.isArray(resultadosAnexosLocais.value) ? resultadosAnexosLocais.value : [];
+  return new Set(resultados.map((item) => item.tipo).filter(Boolean));
+});
+
+const geoLayersCampanha = ref([]);
+
+const carregarGeoLayersCampanha = async () => {
+  if (!props.campanha?.id) {
+    geoLayersCampanha.value = [];
+    return;
+  }
+
+  try {
+    const { data } = await axios.get(route('sgc.contratada.espeleologia.layers.index'), {
+      params: { campanha_id: props.campanha.id },
+    });
+    geoLayersCampanha.value = Array.isArray(data) ? data : [];
+  } catch {
+    geoLayersCampanha.value = [];
+  }
+};
+
+watch(
+  () => props.campanha?.id,
+  () => {
+    carregarGeoLayersCampanha();
+  },
+  { immediate: true }
+);
+
+const tiposGeoserverComMapa = computed(() => {
+  const layers = Array.isArray(geoLayersCampanha.value) ? geoLayersCampanha.value : [];
+  return new Set(layers.map((layer) => layer?.tipo).filter(Boolean));
+});
+
+const subAbasGeoserver = computed(() =>
+  tiposGeoserverEsperados.value.map((tipo) => ({
+    nome: formatAnexoLabel(tipo),
+    completo: tiposGeoserverComMapa.value.has(tipo),
+  }))
+);
+
+const etapasGeoserver = computed(() => subAbasGeoserver.value);
+
+const etapasGeoserverCompletas = computed(() =>
+  etapasGeoserver.value.filter((etapa) => etapa.completo).length
+);
+
+const percentualGeoserver = computed(() => {
+  const total = etapasGeoserver.value.length;
+  if (!total) return 0;
+  return Math.round((etapasGeoserverCompletas.value / total) * 100);
+});
+
+const abasPrimarias = computed(() => {
   const campanha = props.campanha || {};
-  const temDadosApresentacao = Boolean(campanha.cod_emp || campanha.subproduto || campanha.subtrecho || campanha.segmento);
+  const temDadosApresentacao = Boolean(
+    campanha.cod_emp || campanha.subproduto || campanha.subtrecho || campanha.segmento || hasCoordenadas.value
+  );
+  const temResultados = Array.isArray(resultadosAnexosLocais.value) && resultadosAnexosLocais.value.length > 0;
 
   return [
-    { nome: 'Dados de apresentação', completo: temDadosApresentacao },
-    { nome: 'Mapa/coordenadas', completo: hasCoordenadas.value },
-    { nome: 'Metodologia', completo: Boolean((campanha.metodologia || '').trim()) },
-    { nome: 'Resultados/mapas', completo: Array.isArray(campanha.resultados_anexos) && campanha.resultados_anexos.length > 0 },
-    { nome: 'Anexos de imagens', completo: anexosLocais.value.length > 0 },
-    { nome: 'Equipe vinculada', completo: Array.isArray(campanha.profissionais) && campanha.profissionais.length > 0 },
-    { nome: 'Justificativas', completo: Array.isArray(campanha.justificativas) && campanha.justificativas.length > 0 },
+    { nome: 'Apresentação', completo: temDadosApresentacao },
+    { nome: 'Metodologias', completo: Boolean((campanha.metodologia || '').trim()) },
+    { nome: 'Resultados', completo: temResultados },
+    {
+      nome: `Resultados Geoserver (${percentualGeoserver.value}%)`,
+      completo: etapasGeoserverCompletas.value > 0,
+    },
+    { nome: 'Anexos', completo: anexosLocais.value.length > 0 },
   ];
 });
+
+const etapasPreenchimento = computed(() => [...abasPrimarias.value, ...etapasGeoserver.value]);
 
 const etapasCompletas = computed(() => etapasPreenchimento.value.filter((etapa) => etapa.completo).length);
 
@@ -89,45 +203,9 @@ const onUpdateAnexos = (novosAnexos) => {
   anexosLocais.value = Array.isArray(novosAnexos) ? [...novosAnexos] : [];
 };
 
-const planilhaPreviewHeaders = ref([])
-const planilhaPreviewRows = ref([])
-const showPlanilhaPreview = ref(false)
-const loadingPlanilhaPreview = ref(false)
-
-const planilhaFeicoes = computed(() =>
-  Array.isArray(props.campanha?.resultados_anexos)
-    ? props.campanha.resultados_anexos.find(a => a.tipo === 'feicoes') || null
-    : null
-)
-
-const togglePlanilhaPreview = async () => {
-  if (showPlanilhaPreview.value) {
-    showPlanilhaPreview.value = false
-    return
-  }
-  if (planilhaPreviewRows.value.length > 0) {
-    showPlanilhaPreview.value = true
-    return
-  }
-  if (!planilhaFeicoes.value) return
-  const url = planilhaFeicoes.value.caminho
-  if (!url) return
-  loadingPlanilhaPreview.value = true
-  try {
-    const res = await fetch(url)
-    const buffer = await res.arrayBuffer()
-    const wb = XLSX.read(new Uint8Array(buffer), { type: 'array' })
-    const ws = wb.Sheets[wb.SheetNames[0]]
-    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' })
-    planilhaPreviewHeaders.value = rows.length > 0 ? Object.keys(rows[0]) : []
-    planilhaPreviewRows.value = rows.slice(0, 10)
-    showPlanilhaPreview.value = true
-  } catch {
-    showPlanilhaPreview.value = true
-  } finally {
-    loadingPlanilhaPreview.value = false
-  }
-}
+const onUpdateResultadosAnexos = (novosResultados) => {
+  resultadosAnexosLocais.value = Array.isArray(novosResultados) ? [...novosResultados] : [];
+};
 
 const formatAnexoLabel = (tipo) => {
   if (!tipo) return 'Nao informado';
@@ -186,6 +264,17 @@ const salvarAprovacao = () => {
     },
   });
 };
+
+const irParaResumo = () => {
+  router.get(
+    route('sgc.contratada.produtos.espeleo.show', [props.contrato, 'espeleologia', props.campanha.id]),
+    { modo: 'resumo' }
+  );
+};
+
+const irParaEdicao = () => {
+  router.get(route('sgc.contratada.produtos.espeleo.show', [props.contrato, 'espeleologia', props.campanha.id]));
+};
 </script>
 
 <template>
@@ -195,7 +284,7 @@ const salvarAprovacao = () => {
         :links="[
           { route: route('sgc.gestao.listagem', contratos.tipo_contrato), label: 'Gestão de Contratos' },
           { route: route('sgc.contratada.produtos.index', [contrato, 'espeleologia']), label: contratos.contratada },
-          { route: '#', label: `Visualizar Campanha ${campanha.id_campanha || campanha.id}` },
+          { route: '#', label: `${isResumoView ? 'Resumo' : 'Editar'} Campanha ${campanha.id_campanha || campanha.id}` },
         ]"
       />
     </template>
@@ -204,8 +293,142 @@ const salvarAprovacao = () => {
       <template #body>
         <div class="card">
           <div class="card-body">
-            <h2 class="text-center mb-4">VISUALIZAR CAMPANHA: ESPELEOLOGIA</h2>
+            <h2 class="text-center mb-4">
+              {{ isResumoView ? 'RESUMO DA CAMPANHA: ESPELEOLOGIA' : 'EDITAR CAMPANHA: ESPELEOLOGIA' }}
+            </h2>
             <h4 class="mb-3">Status: {{ campanha.status }}</h4>
+
+            <div class="d-flex justify-content-end gap-2 mb-4">
+              <button v-if="isResumoView" class="btn btn-outline-warning" type="button" @click="irParaEdicao">
+                Ir para edição completa
+              </button>
+              <button v-else class="btn btn-outline-info" type="button" @click="irParaResumo">
+                Abrir resumo em tela única
+              </button>
+            </div>
+
+            <template v-if="isResumoView">
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="mb-3">Dados principais</h5>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label mb-1">Empreendimento</label>
+                      <div class="form-control bg-light">{{ campanha.cod_emp || 'Nao informado' }}</div>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label mb-1">Subproduto</label>
+                      <div class="form-control bg-light">{{ campanha.subproduto || 'Nao informado' }}</div>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label mb-1">Subtrecho</label>
+                      <div class="form-control bg-light">{{ campanha.subtrecho || 'Nao informado' }}</div>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label mb-1">Segmento</label>
+                      <div class="form-control bg-light">{{ campanha.segmento || 'Nao informado' }}</div>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label mb-1">Resultados anexados</label>
+                      <div class="form-control bg-light">{{ campanha.resultados_anexos?.length || 0 }}</div>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label mb-1">Anexos</label>
+                      <div class="form-control bg-light">{{ campanha.anexos?.length || 0 }}</div>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label mb-1">Profissionais vinculados</label>
+                      <div class="form-control bg-light">{{ campanha.profissionais?.length || 0 }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="mb-3">Mapa e coordenadas</h5>
+                  <MapLayer :emp_coordenadas="coordenadas" :campanha-id="campanha.id" />
+                </div>
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="mb-3">Metodologia</h5>
+                  <p class="mb-0" style="white-space: pre-wrap;">{{ campanha.metodologia || 'Nenhuma metodologia registrada.' }}</p>
+                </div>
+              </div>
+
+              <div class="card mb-4" v-if="campanha.resultados_anexos?.length">
+                <div class="card-body">
+                  <h5 class="mb-3">Resultados</h5>
+                  <div class="table-responsive">
+                    <table class="table table-bordered mb-0">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Tipo</th>
+                          <th>Arquivo</th>
+                          <th>Observação</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="resultado in campanha.resultados_anexos" :key="resultado.id">
+                          <td>{{ resultado.id }}</td>
+                          <td>{{ formatAnexoLabel(resultado.tipo) }}</td>
+                          <td>{{ resultado.nome_arquivo || 'Nao informado' }}</td>
+                          <td>{{ resultado.comentario || 'Sem observacao' }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mb-4" v-if="campanha.profissionais?.length">
+                <div class="card-body">
+                  <h5 class="mb-3">Equipe vinculada</h5>
+                  <div class="table-responsive">
+                    <table class="table table-bordered mb-0">
+                      <thead>
+                        <tr>
+                          <th>Profissional</th>
+                          <th>Formação</th>
+                          <th>Função</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="profissional in campanha.profissionais" :key="profissional.id">
+                          <td>{{ profissional.profissional || 'Nao informado' }}</td>
+                          <td>{{ profissional.formacao || 'Nao informado' }}</td>
+                          <td>{{ profissional.funcao || 'Nao informado' }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mb-4" v-if="campanha.justificativas?.length">
+                <div class="card-body">
+                  <h5 class="mb-3">Justificativas</h5>
+                  <div v-for="item in campanha.justificativas" :key="item.id" class="border rounded p-3 mb-2">
+                    <p class="mb-1"><strong>Tipo:</strong> {{ item.tipo || 'Nao informado' }}</p>
+                    <p class="mb-1"><strong>Título:</strong> {{ item.titulo || 'Nao informado' }}</p>
+                    <p class="mb-1"><strong>Código SEI:</strong> {{ item.codigo_sei || 'Nao informado' }}</p>
+                    <p class="mb-0"><strong>Texto:</strong> {{ item.justificativa || 'Nao informado' }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card" v-if="anexosLocais.length">
+                <div class="card-body">
+                  <h5 class="mb-3">Anexos</h5>
+                  <VisualizarAnexos :anexos="anexosLocais" />
+                </div>
+              </div>
+            </template>
+
+            <template v-else>
 
             <ul class="nav nav-tabs mb-4">
               <li class="nav-item">
@@ -242,11 +465,11 @@ const salvarAprovacao = () => {
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                       <h5 class="mb-0">Progresso da campanha</h5>
-                      <span class="badge bg-primary">{{ percentualPreenchimento }}%</span>
+                      <span class="badge bg-info text-white">{{ percentualPreenchimento }}%</span>
                     </div>
                     <div class="progress mb-2" style="height: 10px;">
                       <div
-                        class="progress-bar"
+                        class="progress-bar progress-campaign-bar"
                         role="progressbar"
                         :style="{ width: `${percentualPreenchimento}%` }"
                         :aria-valuenow="percentualPreenchimento"
@@ -254,13 +477,39 @@ const salvarAprovacao = () => {
                         aria-valuemax="100"
                       ></div>
                     </div>
-                    <small class="text-muted d-block mb-2">{{ etapasCompletas }} de {{ etapasPreenchimento.length }} etapas preenchidas</small>
+                    <small class="text-muted d-block mb-2">
+                      {{ etapasCompletas }} de {{ etapasPreenchimento.length }} etapas preenchidas (abas + módulos geoserver)
+                    </small>
+                    <small class="text-muted d-block mb-2">
+                      Sub-abas Geoserver com mapa cadastrado: {{ etapasGeoserverCompletas }} de {{ etapasGeoserver.length }}
+                    </small>
+                    <div class="timeline-legend mb-2">
+                      <span class="timeline-legend__item">
+                        <span class="timeline-legend__dot timeline-legend__dot--ok"></span>
+                        Concluído (com mapa cadastrado)
+                      </span>
+                      <span class="timeline-legend__item">
+                        <span class="timeline-legend__dot timeline-legend__dot--pending"></span>
+                        Pendente (sem mapa cadastrado)
+                      </span>
+                    </div>
                     <div class="d-flex flex-wrap gap-2">
                       <span
-                        v-for="etapa in etapasPreenchimento"
+                        v-for="etapa in abasPrimarias"
                         :key="etapa.nome"
-                        class="badge"
-                        :class="etapa.completo ? 'bg-success' : 'bg-secondary'"
+                        class="badge stage-badge"
+                        :class="etapa.completo ? 'stage-badge--ok' : 'stage-badge--pending'"
+                      >
+                        {{ etapa.nome }}
+                      </span>
+                    </div>
+                    <div class="stage-row-label mt-2">Mapas (sub-abas Geoserver)</div>
+                    <div class="d-flex flex-wrap gap-2 mt-1">
+                      <span
+                        v-for="etapa in etapasGeoserver"
+                        :key="`geo-${etapa.nome}`"
+                        class="badge stage-badge"
+                        :class="etapa.completo ? 'stage-badge--ok' : 'stage-badge--pending'"
                       >
                         {{ etapa.nome }}
                       </span>
@@ -342,90 +591,28 @@ const salvarAprovacao = () => {
 
               <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
                 <h4 class="mb-3 text-center">RESULTADOS</h4>
-
-                <!-- Card especial: Planilha de Feições Cársticas -->
-                <div v-if="planilhaFeicoes" class="card mb-4 border-success">
-                  <div class="card-header bg-success bg-opacity-10 d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <span class="fw-semibold">
-                      <i class="fas fa-file-excel text-success me-1"></i>
-                      Planilha de Feições Cársticas
-                    </span>
-                    <div class="d-flex gap-2">
-                      <button
-                        class="btn btn-sm btn-outline-secondary"
-                        type="button"
-                        @click="togglePlanilhaPreview"
-                      >
-                        <span v-if="loadingPlanilhaPreview" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                        <i v-else :class="showPlanilhaPreview ? 'fas fa-eye-slash' : 'fas fa-eye'" class="me-1"></i>
-                        {{ showPlanilhaPreview ? 'Ocultar' : 'Pré-visualizar' }}
-                      </button>
-                      <a
-                        :href="planilhaFeicoes.caminho"
-                        class="btn btn-sm btn-success"
-                        download
-                      >
-                        <i class="fas fa-download me-1"></i> Baixar
-                      </a>
-                    </div>
-                  </div>
-                  <div class="card-body py-2">
-                    <small class="text-muted">
-                      {{ planilhaFeicoes.nome_arquivo }}
-                      <span v-if="planilhaFeicoes.created_at"> — {{ planilhaFeicoes.created_at }}</span>
-                    </small>
-                    <p v-if="planilhaFeicoes.comentario" class="mb-0 mt-1">{{ planilhaFeicoes.comentario }}</p>
-                  </div>
-                  <!-- Preview das 10 primeiras linhas -->
-                  <div v-if="showPlanilhaPreview" class="card-footer p-0">
-                    <div v-if="planilhaPreviewRows.length > 0" class="table-responsive">
-                      <table class="table table-sm table-bordered mb-0" style="font-size:0.8rem;">
-                        <thead class="table-light">
-                          <tr>
-                            <th v-for="col in planilhaPreviewHeaders" :key="col">{{ col }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr v-for="(row, i) in planilhaPreviewRows" :key="i">
-                            <td v-for="col in planilhaPreviewHeaders" :key="col">{{ row[col] ?? '' }}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    <p v-else class="p-3 text-muted mb-0 small">Não foi possível carregar a pré-visualização.</p>
-                  </div>
-                </div>
-
-                <!-- Tabela dos demais resultados (excluindo feicoes que já tem card próprio) -->
-                <table
-                  class="table table-bordered"
-                  v-if="campanha.resultados_anexos && campanha.resultados_anexos.filter(r => r.tipo !== 'feicoes').length"
-                >
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Tipo</th>
-                      <th>Arquivo</th>
-                      <th>Observação</th>
-                      <th>Data</th>
-                      <th>Ação</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="resultado in campanha.resultados_anexos.filter(r => r.tipo !== 'feicoes')" :key="resultado.id">
-                      <td>{{ resultado.id }}</td>
-                      <td>{{ formatAnexoLabel(resultado.tipo) }}</td>
-                      <td>{{ resultado.nome_arquivo || 'Nao informado' }}</td>
-                      <td>{{ resultado.comentario || 'Sem observacao' }}</td>
-                      <td>{{ resultado.created_at || 'Nao informado' }}</td>
-                      <td>
-                        <a v-if="resultado.caminho" :href="resultado.caminho" target="_blank" class="btn btn-link p-0">Abrir</a>
-                        <span v-else>Nenhum arquivo</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div v-else-if="!planilhaFeicoes" class="alert alert-info">Nenhum resultado anexado.</div>
+                <ResultadosProspeccao
+                  v-if="isProspeccao"
+                  :empreendimentos="[]"
+                  :errors="{}"
+                  :campanha-id="campanha.id"
+                  :contrato="Number(contrato)"
+                  :resultados-anexos="resultadosAnexosLocais"
+                  :subprodutos-espeleologia="[]"
+                  :estudos-posteriores="[]"
+                  @update-resultados-anexos="onUpdateResultadosAnexos"
+                />
+                <Resultados
+                  v-else
+                  :empreendimentos="[]"
+                  :errors="{}"
+                  :campanha-id="campanha.id"
+                  :contrato="Number(contrato)"
+                  :resultados-anexos="resultadosAnexosLocais"
+                  :subprodutos-espeleologia="[]"
+                  :estudos-posteriores="[]"
+                  @update-resultados-anexos="onUpdateResultadosAnexos"
+                />
               </div>
 
               <div v-if="activeTab === 'resultadosgeo'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultadosgeo' }">
@@ -474,9 +661,72 @@ const salvarAprovacao = () => {
                 </div>
               </div>
             </div>
+            </template>
           </div>
         </div>
       </template>
     </NavbarContrato>
   </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.progress-campaign-bar {
+  background: linear-gradient(90deg, #0b8f4b 0%, #23b26c 100%);
+}
+
+.stage-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid transparent;
+}
+
+.stage-badge--ok {
+  background-color: #166534;
+  color: #ffffff;
+  border-color: #14532d;
+}
+
+.stage-badge--pending {
+  background-color: #fef3c7;
+  color: #7c2d12;
+  border-color: #f59e0b;
+}
+
+.timeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.timeline-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: #374151;
+}
+
+.timeline-legend__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.timeline-legend__dot--ok {
+  background-color: #166534;
+  border-color: #14532d;
+}
+
+.timeline-legend__dot--pending {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.stage-row-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+</style>

@@ -322,24 +322,24 @@ const emit = defineEmits(['update-resultados-anexos'])
 
 const tipos = [
   'feicoes',
-  'feicoes_carsticas_identificadas',
-  'cavidades_nao_encontradas',
-  'cavidades_cecav_canie',
-  'caminhamento',
-  'raio_de_250m_de_cavidades',
-  'curvas_de_nivel',
-  'extensao_rodovia_prospectada'
+//   'feicoes_carsticas_identificadas',
+//   'cavidades_nao_encontradas',
+//   'cavidades_cecav_canie',
+//   'caminhamento',
+//   'raio_de_250m_de_cavidades',
+//   'curvas_de_nivel',
+//   'extensao_rodovia_prospectada'
 ]
 
 const nomesTipos = {
   feicoes: "Planilha de Feições Cársticas",
-    feicoes_carsticas_identificadas: "Feições Cársticas Identificadas",
-    cavidades_nao_encontradas: "Cavidades Não Encontradas",
-    cavidades_cecav_canie: "Cavidades CECAV/CANIE",
-    caminhamento: "Mapa de Caminhamento",
-    raio_de_250m_de_cavidades: "Raio de 250m de Cavidades",
-    curvas_de_nivel: "Curvas de Nível",
-    extensao_rodovia_prospectada: "Extensão de Rodovia Prospectada"
+    // feicoes_carsticas_identificadas: "Feições Cársticas Identificadas",
+    // cavidades_nao_encontradas: "Cavidades Não Encontradas",
+    // cavidades_cecav_canie: "Cavidades CECAV/CANIE",
+    // caminhamento: "Mapa de Caminhamento",
+    // raio_de_250m_de_cavidades: "Raio de 250m de Cavidades",
+    // curvas_de_nivel: "Curvas de Nível",
+    // extensao_rodovia_prospectada: "Extensão de Rodovia Prospectada"
 }
 
 const rodovia = ref({

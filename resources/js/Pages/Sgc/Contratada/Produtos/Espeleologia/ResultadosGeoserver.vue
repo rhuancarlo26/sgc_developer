@@ -256,7 +256,7 @@ const nomesTiposPadrao = {
 }
 
 const tiposProspeccao = [
-  'feicoes',
+//   'feicoes',
   'feicoes_carsticas_identificadas',
   'cavidades_nao_encontradas',
   'cavidades_cecav_canie',
@@ -267,7 +267,7 @@ const tiposProspeccao = [
 ]
 
 const nomesTiposProspeccao = {
-  feicoes: 'Planilha de Feições Cársticas',
+//   feicoes: 'Planilha de Feições Cársticas',
   feicoes_carsticas_identificadas: 'Feições Cársticas Identificadas',
   cavidades_nao_encontradas: 'Cavidades Não Encontradas',
   cavidades_cecav_canie: 'Cavidades CECAV/CANIE',

@@ -54,7 +54,7 @@ function initTemporaryDrawTools() {
   const drawControl = new L.Control.Draw({
     position: "topleft",
     draw: {
-      polyline: true,
+      polyline: false,
       polygon: false,
       rectangle: false,
       circle: true,

@@ -43,7 +43,7 @@
                   >Metodologias</a
                 >
               </li>
-              <li class="nav-item">
+              <li class="nav-item" v-if="isProspeccao">
                 <a
                   class="nav-link"
                   :class="{ active: activeTab === 'resultados' }"
@@ -103,7 +103,7 @@
                 />
               </div>
               <div
-                v-if="activeTab === 'resultados'"
+                v-if="activeTab === 'resultados' && isProspeccao"
                 class="tab-pane fade"
                 :class="{ 'show active': activeTab === 'resultados' }"
               >
@@ -118,7 +118,7 @@
                   :subprodutos-espeleologia="subprodutosEspeleologia"
                   :estudos-posteriores="draftData.estudosPosteriores ?? []"
                 />
-                <Resultados
+                <!-- <Resultados
                   v-else
                   :empreendimentos="empreendimentos"
                   :errors="errors"
@@ -128,7 +128,7 @@
                   @update-resultados-anexos="updateResultadosAnexos"
                   :subprodutos-espeleologia="subprodutosEspeleologia"
                   :estudos-posteriores="draftData.estudosPosteriores ?? []"
-                />
+                /> -->
             </div>
             <div
               v-if="activeTab === 'resultadosgeo'"
@@ -508,14 +508,15 @@ const changeTab = (tab) => {
   );
 };
 
+// a aba resultados só aparece para subprodutos de prospecção, então o nextTab e previousTab precisam pular essa aba caso não seja de prospecção
 const nextTab = () => {
   const order = [
     "apresentacao",
     "metodologias",
-    "resultados",
+    isProspeccao.value ? "resultados" : null,
     "resultadosgeo",
     "anexos",
-  ];
+  ].filter(Boolean);
   const i = order.indexOf(activeTab.value);
   if (i < order.length - 1) {
     changeTab(order[i + 1]);
@@ -526,10 +527,10 @@ const previousTab = () => {
   const order = [
     "apresentacao",
     "metodologias",
-    "resultados",
+    isProspeccao.value ? "resultados" : null,
     "resultadosgeo",
     "anexos",
-  ];
+  ].filter(Boolean);
   const i = order.indexOf(activeTab.value);
   if (i > 0) {
     changeTab(order[i - 1]);
