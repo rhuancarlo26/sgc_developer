@@ -17,7 +17,7 @@ const selecionarArquivo = ({target}) => {
 
 </script>
 <template>
-    <div class="card mb-4">
+    <div class="card">
         <div class="card-header">
             <h3 class="my-0">Informações Gerais</h3>
         </div>

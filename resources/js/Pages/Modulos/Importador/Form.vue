@@ -4,7 +4,11 @@ import { Head, Link, useForm } from "@inertiajs/vue3";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import { ref, watch, computed } from "vue";
 import { IconDoorExit, IconDeviceFloppy } from "@tabler/icons-vue";
+
 import CardInformacoesGerais from "./Components/CardInformacoesGerais.vue"
+import CardPareceres from "./Components/CardPareceres.vue"
+import CardFotos from "./Components/CardFotos.vue"
+import CardAnexos from "./Components/CardAnexos.vue"
 
 const props = defineProps({
     moduloImportador: { type: Object },
@@ -20,11 +24,28 @@ const form = useForm({
     campanha: null,
     contrato_id: null,
     arquivo: null,
+    parecer_tecnico: null,
+    parecer_analise: null,
+    fotos: [],
+    anexos: [],
     ...props.moduloImportador
 });
 
+const CardFotosRef = ref(null)
+const CardAnexosRef = ref(null)
+
 const importar = () => {
-    form.post(route('modulos.importador.store'))
+
+    if(form.fotos.length && CardFotosRef.value.validarCampos()) {
+        return
+    }
+
+    if(form.anexos.length && CardAnexosRef.value.validarCampos()) {
+        return
+    }
+
+    const method = form.id ? 'update' : 'store'
+    form.post(route(`modulos.importador.${method}`, [form.id]))
 }
 
 </script>
@@ -49,15 +70,21 @@ const importar = () => {
 
         <form @submit.prevent="importar()" :disabled="form.processing">
             <div class="d-flex flex-column">
-                <div class="flex-grow-1">
+                <div class="d-flex flex-column gap-4 flex-grow-1 mb-4">
                     <CardInformacoesGerais :form="form" :modulos="modulos" :contratos="contratos" />
+
+                    <CardPareceres :form="form" />
+
+                    <CardFotos :form="form" ref="CardFotosRef" />
+
+                    <CardAnexos :form="form" ref="CardAnexosRef" />
                 </div>
                 
                 <div class="card-body">
                     <div class="d-flex justify-content-end">
                         <button class="btn btn-success" :disabled="form.processing">
                             <IconDeviceFloppy class="me-2"/>
-                            {{ form.id ? 'Editar' : 'Salvar' }}
+                            Salvar Rascunho
                         </button>
                     </div>
                 </div>

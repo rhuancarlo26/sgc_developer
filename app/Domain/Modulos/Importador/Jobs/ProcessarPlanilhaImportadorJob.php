@@ -33,8 +33,9 @@ class ProcessarPlanilhaImportadorJob implements ShouldQueue
      */
     public function __construct(
         private int $importadorId,
-        private string $caminhoArquivo,
-        private string $extensaoArquivo
+        private ?string $caminhoArquivo,
+        private ?string $extensaoArquivo,
+        private bool $temArquivo = true
     ) {
         $this->erros = collect([]);
     }
@@ -46,6 +47,17 @@ class ProcessarPlanilhaImportadorJob implements ShouldQueue
     {
         $this->importador = ModuloImportador::with('modulo')->find($this->importadorId);
 
+        if ($this->temArquivo)
+            $this->processarArquivo();
+
+        $this->importador->update([
+            'load' => false,
+            'desc_erros' => null
+        ]);
+    }
+
+    public function processarArquivo(): void
+    {
         $caminhoStorageApp = 'app' . DIRECTORY_SEPARATOR . $this->caminhoArquivo;
 
         $arquivo = storage_path($caminhoStorageApp);
@@ -94,11 +106,6 @@ class ProcessarPlanilhaImportadorJob implements ShouldQueue
             DB::rollback();
             throw new Exception($errorsStr);
         }
-
-        $this->importador->update([
-            'load' => false,
-            'desc_erros' => null
-        ]);
 
         DB::commit();
         Storage::delete($this->caminhoArquivo);

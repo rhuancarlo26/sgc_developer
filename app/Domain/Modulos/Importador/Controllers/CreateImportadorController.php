@@ -19,6 +19,8 @@ class CreateImportadorController extends Controller
 
     public function create(ModuloImportador $importador): Response
     {
+        $importador->load(['fotos', 'anexos']);
+
         return Inertia::render('Modulos/Importador/Form', [
             'moduloImportador' => $importador,
             'modulos' => $this->service->buscarModulos(),

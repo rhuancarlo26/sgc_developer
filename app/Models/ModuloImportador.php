@@ -28,4 +28,14 @@ class ModuloImportador extends Model
     {
         return $this->hasMany(ModuloImportadorDados::class, 'modulo_importador_id');
     }
+
+    public function fotos(): HasMany
+    {
+        return $this->hasMany(ModuloImportadorFotos::class, 'modulo_importador_id');
+    }
+
+    public function anexos(): HasMany
+    {
+        return $this->hasMany(ModuloImportadorAnexos::class, 'modulo_importador_id');
+    }
 }

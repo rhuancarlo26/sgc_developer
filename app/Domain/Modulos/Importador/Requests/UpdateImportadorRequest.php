@@ -4,7 +4,7 @@ namespace App\Domain\Modulos\Importador\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreImportadorRequest extends FormRequest
+class UpdateImportadorRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +26,7 @@ class StoreImportadorRequest extends FormRequest
             'mes_ano_referencia' => 'required',
             'campanha' => 'required',
             'contrato_id' => 'required',
-            'arquivo' => 'required|mimes:xlsx,csv',
+            'arquivo' => 'nullable|mimes:xlsx,csv',
 
             'parecer_tecnico' => 'nullable',
             'parecer_analise' => 'nullable',

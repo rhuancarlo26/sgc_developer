@@ -3,13 +3,10 @@
 namespace App\Domain\Modulos\Importador\Services;
 
 use App\Domain\Modulos\Importador\Jobs\ProcessarPlanilhaImportadorJob;
-use App\Models\Contrato;
-use App\Models\Modulo;
 use App\Models\ModuloImportador;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\ModulosHandler;
 use App\Shared\Traits\Searchable;
-use Illuminate\Database\Eloquent\Collection;
 
 class StoreService extends BaseModelService
 {
