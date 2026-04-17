@@ -20,7 +20,7 @@ class ImportadorController extends Controller
     {
         $searchParams = $request->all('columns', 'value');
 
-        $data = $this->service->buscarImportadores();
+        $data = $this->service->buscarImportadores($searchParams);
         return Inertia::render('Modulos/Importador/Index', $data);
     }
 }

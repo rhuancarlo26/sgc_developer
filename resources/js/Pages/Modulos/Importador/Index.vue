@@ -48,7 +48,8 @@ const removerImportacao = (id) => {
     <div class="card card-body">
         <!-- Pesquisa -->
         <ModelSearchForm :columns="[
-            'nome',
+            'modulo.nome',
+            'mes_ano_referencia',
         ]" />
 
         <!-- Listagem-->
