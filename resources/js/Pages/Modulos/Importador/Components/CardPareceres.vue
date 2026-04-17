@@ -16,8 +16,9 @@ const props = defineProps({
         <div class="card-body">
             <div class="col-12 mb-4">
                 <InputLabel for="parecer_tecnico">Parecer Técnico (Liberado para importação)</InputLabel>
-                <textarea v-model="form.parecer_tecnico" id="parecer_tecnico" class="form-control" 
-                    rows="5" :disabled="false">
+                <textarea v-model="form.parecer_tecnico" id="parecer_tecnico" class="form-control" rows="5" 
+                    :disabled="[2, 4].includes(form.status)" 
+                    :style="[2, 4].includes(form.status) ? 'cursor: not-allowed' : ''">
                 </textarea>
                 <InputError :message="form.errors.parecer_tecnico"/>
             </div>
@@ -26,8 +27,9 @@ const props = defineProps({
 
             <div class="col-12 mb-4">
                 <InputLabel for="parecer_tecnico">Parecer de Análise</InputLabel>
-                <textarea v-model="form.parecer_analise" id="parecer_analise" class="form-control" 
-                    rows="5" disabled style="cursor: not-allowed">
+                <textarea v-model="form.parecer_analise" id="parecer_analise" class="form-control" rows="5" 
+                    :disabled="!form.status || [1, 3, 4].includes(form.status)" 
+                    :style="!form.status || [1, 3, 4].includes(form.status) ? 'cursor: not-allowed' : ''">
                 </textarea>
                 <InputError :message="form.errors.parecer_analise"/>
             </div>

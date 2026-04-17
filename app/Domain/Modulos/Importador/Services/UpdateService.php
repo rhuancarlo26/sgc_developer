@@ -10,6 +10,7 @@ use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\ModulosHandler;
 use App\Shared\Traits\Searchable;
 use App\Shared\Utils\DataManagement;
+use Illuminate\Support\Arr;
 
 class UpdateService extends BaseModelService
 {
@@ -29,8 +30,6 @@ class UpdateService extends BaseModelService
         $caminhoArquivo = null;
         $extensaoArquivo = null;
         $arquivo = null;
-
-        // dd($data);
 
         if (!is_null($data['arquivo'])) {
             $arquivo = $data['arquivo'];
@@ -58,5 +57,10 @@ class UpdateService extends BaseModelService
 
         $this->gerenciarImportadorService->gerenciarFotos($importador, $data['fotos'] ?? []);
         $this->gerenciarImportadorService->gerenciarAnexos($importador, $data['anexos'] ?? []);
+
+        if ($data['enviar_analise']) {
+            $dataAnalise = Arr::only($data, 'parecer_tecnico');
+            (new StatusImportadorService)->enviarAnalise($importador, $dataAnalise);
+        }
     }
 }

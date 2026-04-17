@@ -7,6 +7,7 @@ import ModelSearchForm from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from '@/Components/Table.vue';
 import NavLink from "@/Components/NavLink.vue";
 import { dateTimeFormat } from '@/Utils/DateTimeUtils';
+import { badgeStatus } from '@/Utils/ImportadorUtils';
 
 import ModalErros from "./Components/ModalErros.vue"
 import { ref } from "vue";
@@ -19,6 +20,10 @@ const props = defineProps({
 const ModalErrosRef = ref(null)
 const abrirModalErros = (erros) => {
     ModalErrosRef.value.abrirModal(erros)
+}
+
+const removerImportacao = (id) => {
+    router.delete(route('modulos.importador.destroy', [id]))
 }
 
 </script>
@@ -54,8 +59,10 @@ const abrirModalErros = (erros) => {
                     
                     <td class="text-center">{{ item.modulo?.nome }}</td>
                     <td class="text-center">{{ item.mes_ano_referencia }}</td>
-                    <td class="text-center">{{ item.status }}</td>
-                    <td class="text-center">revisao</td>
+                    <td class="text-center">
+                        <span class="badge" :class="badgeStatus(item.status)">{{ item.status_formatado }}</span>
+                    </td>
+                    <td class="text-center">{{ item.revisao }}</td>
                     <td class="text-center">{{ dateTimeFormat(item.updated_at) }}</td>
 
                     <td class="text-center">                        
@@ -73,7 +80,7 @@ const abrirModalErros = (erros) => {
                                 <Link :href="route('modulos.importador.formulario', [item.id])" type="button" class="btn btn-sm btn-info">
                                     <IconEye/>
                                 </Link>
-                                <button type="button" class="btn btn-sm btn-danger">
+                                <button v-if="item.status == 1" @click="removerImportacao(item.id)" type="button" class="btn btn-sm btn-danger">
                                     <IconTrash/>
                                 </button>
                             </template>

@@ -8,6 +8,7 @@ use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\ModulosHandler;
 use App\Shared\Traits\Searchable;
 use App\Shared\Utils\DataManagement;
+use Illuminate\Support\Arr;
 
 class StoreService extends BaseModelService
 {
@@ -32,6 +33,8 @@ class StoreService extends BaseModelService
         $caminhoArquivo = $arquivo->storeAs('Importador' . DIRECTORY_SEPARATOR . uniqid() .  '_' . $nomeArquivo);
 
         $data['nome_arquivo'] = $nomeArquivo;
+        $data['status'] = ModuloImportador::RASCUNHO;
+
         $importador = ModuloImportador::create($data);
 
         $job = new ProcessarPlanilhaImportadorJob(
@@ -45,5 +48,15 @@ class StoreService extends BaseModelService
 
         $this->gerenciarImportadorService->gerenciarFotos($importador, $data['fotos'] ?? []);
         $this->gerenciarImportadorService->gerenciarAnexos($importador, $data['anexos'] ?? []);
+
+        $importador->historicos()->create([
+            'usuario_id' => auth()->user()->id,
+            'status' => ModuloImportador::RASCUNHO,
+        ]);
+
+        if ($data['enviar_analise']) {
+            $dataAnalise = Arr::only($data, 'parecer_tecnico');
+            (new StatusImportadorService)->enviarAnalise($importador, $dataAnalise);
+        }
     }
 }

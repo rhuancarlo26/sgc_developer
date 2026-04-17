@@ -28,10 +28,11 @@ class UpdateImportadorRequest extends FormRequest
             'contrato_id' => 'required',
             'arquivo' => 'nullable|mimes:xlsx,csv',
 
-            'parecer_tecnico' => 'nullable',
+            'parecer_tecnico' => $this->input('enviar_analise') ? 'required' : 'nullable',
             'parecer_analise' => 'nullable',
             'fotos' => 'array',
             'anexos' => 'array',
+            'enviar_analise' => 'required'
         ];
     }
 

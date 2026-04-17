@@ -21,6 +21,11 @@ class ImportadorService extends BaseModelService
         $modulos = Modulo::all();
         $importadores = ModuloImportador::with('modulo')->paginate(10);
 
+        $importadores->getCollection()->each(function ($item) {
+            $item->append('status_formatado');
+            $item->append('revisao');
+        });
+
         return [
             'modulos' => $modulos,
             'importadores' => $importadores,
