@@ -68,21 +68,27 @@ defineExpose({ validarCampos })
                 <span>Nenhuma foto adicionada</span>
             </div>
             
-            <div v-else class="d-flex flex-column gap-6">
+            <div v-else class="d-flex flex-column gap-3">
                 <div class="row" v-for="(f, key) in props.form.fotos" :key="key">
                     <div class="col-lg-3">
                         <InputLabel :for="`upload_foto_${key}`">Arquivo</InputLabel>
                         <input type="file" :id="`upload_foto_${key}`" @change="selecionarArquivo(key, $event)" class="form-control"
                             accept="image/*" :class="f.valida_arquivo ? 'border-danger' : ''"/>
-                        <small v-if="f.nome_arquivo">Arquivo original: <strong>{{f.nome_arquivo}}</strong></small>
+                        <small v-if="f.nome_arquivo">
+                            Arquivo original: <strong>{{f.nome_arquivo}}</strong>
+                            <a :href="`${page.props.app_url}/storage/${f.caminho_arquivo}`" 
+                                title="Ver Foto" class="btn btn-sm btn-ligth ms-1 border-0" target="_blank">
+                                <IconEye class="text-warning" />
+                            </a>
+                        </small>
                     </div>
                     <div class="col-lg-3">
                         <InputLabel for="latitude">Latitude</InputLabel>
-                        <input type="number" v-model="f.latitude" id="latitude" class="form-control" :class="f.valida_latitude ? 'border-danger' : ''"/>
+                        <input type="number" v-model="f.latitude" id="latitude" class="form-control" step="any" :class="f.valida_latitude ? 'border-danger' : ''"/>
                     </div>
                     <div class="col-lg-3">
                         <InputLabel for="longitude">Longitude</InputLabel>
-                        <input type="number" v-model="f.longitude" id="longitude" class="form-control" :class="f.valida_longitude ? 'border-danger' : ''"/>
+                        <input type="number" v-model="f.longitude" id="longitude" class="form-control" step="any" :class="f.valida_longitude ? 'border-danger' : ''"/>
                     </div>
                     <div class="col-lg-3 d-flex gap-2">
                         <div class="flex-grow-1">
@@ -90,10 +96,6 @@ defineExpose({ validarCampos })
                             <input type="text" v-model="f.descricao" id="descricao" class="form-control" :class="f.valida_descricao ? 'border-danger' : ''"/>
                         </div>
                         <div class="d-flex gap-2 mb-2" :class="f.nome_arquivo ? 'align-self-center' : 'align-self-end'">
-                            <a v-if="f.nome_arquivo" :href="`${page.props.app_url}/storage/${f.caminho_arquivo}`" 
-                                title="Ver Foto" class="btn btn-sm btn-warning" target="_blank">
-                                <IconEye />
-                            </a>
                             <button type="button" @click="removerFoto(key)" class="btn btn-sm btn-danger">
                                 <IconTrash />
                             </button>

@@ -66,17 +66,17 @@ const abrirModalErros = (erros) => {
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                             </button>
-                            <template v-else-if="!item.load && item.desc_erros">
-                                <button type="button" @click="abrirModalErros(item.desc_erros)" class="btn btn-sm btn-warning">
+                            <template v-else>
+                                <button v-if="item.desc_erros" type="button" @click="abrirModalErros(item.desc_erros)" class="btn btn-sm btn-warning">
                                     <IconAlertTriangle/>
                                 </button>
+                                <Link :href="route('modulos.importador.formulario', [item.id])" type="button" class="btn btn-sm btn-info">
+                                    <IconEye/>
+                                </Link>
                                 <button type="button" class="btn btn-sm btn-danger">
                                     <IconTrash/>
                                 </button>
                             </template>
-                            <Link v-else :href="route('modulos.importador.formulario', [item.id])" type="button" class="btn btn-sm btn-info">
-                                <IconEye/>
-                            </Link>
                         </div>
                     </td>
                 </tr>

@@ -7,12 +7,21 @@ use App\Models\ModuloImportador;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\ModulosHandler;
 use App\Shared\Traits\Searchable;
+use App\Shared\Utils\DataManagement;
 
 class StoreService extends BaseModelService
 {
     use ModulosHandler, Searchable;
 
     protected string $modelClass = ModuloImportador::class;
+
+    protected GerenciarImportadorService $gerenciarImportadorService;
+
+    public function __construct(DataManagement $dataManagement)
+    {
+        $this->gerenciarImportadorService = new GerenciarImportadorService;
+        return parent::__construct($dataManagement);
+    }
 
     public function store(array $data): void
     {
@@ -33,5 +42,8 @@ class StoreService extends BaseModelService
 
         // $job->handle();
         dispatch($job);
+
+        $this->gerenciarImportadorService->gerenciarFotos($importador, $data['fotos'] ?? []);
+        $this->gerenciarImportadorService->gerenciarAnexos($importador, $data['anexos'] ?? []);
     }
 }

@@ -147,11 +147,11 @@ defineExpose({ validaCampos })
                         </td>
                         <td class="text-center">
                             <input type="number" v-model="c.valor_min" :disabled="!c.regra || !['inteiro', 'decimal'].includes(c.tipo)" class="form-control" 
-                                :class="c.validaCampo_valor_min ? 'border-danger' : ''"/>
+                                :class="c.validaCampo_valor_min ? 'border-danger' : ''" :step="c.tipo === 'decimal' ? 'any' : '0'"/>
                         </td>
                         <td class="text-center">
                             <input type="number" v-model="c.valor_max" :disabled="!c.regra || !['inteiro', 'decimal'].includes(c.tipo)" class="form-control" 
-                                :class="c.validaCampo_valor_max ? 'border-danger' : ''"/>
+                                :class="c.validaCampo_valor_max ? 'border-danger' : ''" :step="c.tipo === 'decimal' ? 'any' : '0'"/>
                         </td>
                         <td class="text-center">
                             <input type="number" v-model="c.max_caracteres" :disabled="!c.regra || !['texto'].includes(c.tipo)" class="form-control" 

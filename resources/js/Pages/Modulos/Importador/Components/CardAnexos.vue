@@ -64,20 +64,26 @@ defineExpose({ validarCampos })
                 <span>Nenhum anexo adicionado</span>
             </div>
             
-            <div v-else class="d-flex flex-column gap-6">
+            <div v-else class="d-flex flex-column gap-3">
                 <div class="row" v-for="(a, key) in props.form.anexos" :key="key">
                     <div class="col-12 d-flex gap-2">
                         <div class="flex-grow-1">
                             <InputLabel :for="`upload_anexo_${key}`">Arquivo</InputLabel>
                             <input type="file" :id="`upload_anexo_${key}`" @change="selecionarArquivo(key, $event)" class="form-control"
                                 :class="a.valida_arquivo ? 'border-danger' : ''"/>
-                            <small v-if="a.nome_arquivo">Arquivo original: <strong>{{a.nome_arquivo}}</strong></small>
+                            <small v-if="a.nome_arquivo">
+                                Arquivo original: <strong>{{a.nome_arquivo}}</strong>
+                                <a :href="`${page.props.app_url}/storage/${a.caminho_arquivo}`" 
+                                    title="Ver Foto" class="btn btn-sm btn-ligth ms-1 border-0" target="_blank">
+                                    <IconDownload class="text-info" />
+                                </a>
+                            </small>
                         </div>
                         <div class="d-flex gap-2 mb-2" :class="a.nome_arquivo ? 'align-self-center' : 'align-self-end'">
-                            <a v-if="a.nome_arquivo" :href="`${page.props.app_url}/storage/${a.caminho_arquivo}`" 
+                            <!-- <a v-if="a.nome_arquivo" :href="`${page.props.app_url}/storage/${a.caminho_arquivo}`" 
                                 title="Ver Foto" class="btn btn-sm btn-info" target="_blank" download>
                                 <IconDownload />
-                            </a>
+                            </a> -->
                             <button type="button" @click="removerAnexo(key)" class="btn btn-sm btn-danger">
                                 <IconTrash />
                             </button>
