@@ -84,8 +84,11 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                 <NavDropdown prefix="modulos.*" title="Módulos" :icon="IconBox">
 
                                     <!-- Dashboard -->
-                                    <NavDropdownLink route-name="cadastros.perfis.listagem"
-                                        active-on-route-prefix="cadastros.perfis.*" title="Dashboard" />
+                                    <!-- <NavDropdownLink route-name="cadastros.perfis.listagem"
+                                        active-on-route-prefix="cadastros.perfis.*" title="Dashboard" /> -->
+                                    <a class="dropdown-item" href="#">
+                                        Dashboard
+                                    </a>
 
                                     <!-- Módulos -->
                                     <NavDropdownLink route-name="modulos.config-modulos.index"
