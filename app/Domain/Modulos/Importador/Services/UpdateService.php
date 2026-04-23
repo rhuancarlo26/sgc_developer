@@ -41,6 +41,7 @@ class UpdateService extends BaseModelService
             $extensaoArquivo = $arquivo->getClientOriginalExtension();
 
             $data['nome_arquivo'] = $nomeArquivo;
+            $data['load'] = true;
         }
 
         if ($data['update_modulo']) {
@@ -48,10 +49,7 @@ class UpdateService extends BaseModelService
             unset($data['update_modulo']);
         }
 
-        $importador->update([
-            ...$data,
-            'load' => true
-        ]);
+        $importador->update($data);
 
         $job = new ProcessarPlanilhaImportadorJob(
             importadorId: $importador->id,
