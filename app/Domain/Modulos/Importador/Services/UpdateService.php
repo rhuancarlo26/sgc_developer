@@ -43,7 +43,15 @@ class UpdateService extends BaseModelService
             $data['nome_arquivo'] = $nomeArquivo;
         }
 
-        $importador->update($data);
+        if ($data['update_modulo']) {
+            $importador->dadosJson()->delete();
+            unset($data['update_modulo']);
+        }
+
+        $importador->update([
+            ...$data,
+            'load' => true
+        ]);
 
         $job = new ProcessarPlanilhaImportadorJob(
             importadorId: $importador->id,

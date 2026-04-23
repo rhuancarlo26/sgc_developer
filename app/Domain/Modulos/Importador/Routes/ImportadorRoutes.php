@@ -2,6 +2,7 @@
 
 use App\Domain\Modulos\Importador\Controllers\ImportadorController;
 use App\Domain\Modulos\Importador\Controllers\CreateImportadorController;
+use App\Domain\Modulos\Importador\Controllers\DadosImportadorController;
 use App\Domain\Modulos\Importador\Controllers\DestroyImportadorController;
 use App\Domain\Modulos\Importador\Controllers\StoreImportadorController;
 use App\Domain\Modulos\Importador\Controllers\UpdateImportadorController;
@@ -19,4 +20,6 @@ Route::prefix('importador-modulo')->group(function () {
 
     Route::post('/enviar-analise/{importador}', [StatusImportadorController::class, 'enviarAnalise'])->name('importador.enviarAnalise');
     Route::post('/aprov-reprov/{importador}/{status}', [StatusImportadorController::class, 'aprovReprov'])->name('importador.aprovReprov');
+
+    Route::get('/buscar-dados/{importador}', [DadosImportadorController::class, 'buscarDados'])->name('importador.buscarDados');
 });

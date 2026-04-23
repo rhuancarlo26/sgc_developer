@@ -55,7 +55,7 @@ class ModuloImportador extends Model
         return $this->belongsTo(Modulo::class, 'modulo_id');
     }
 
-    public function dados(): HasMany
+    public function dadosJson(): HasMany
     {
         return $this->hasMany(ModuloImportadorDados::class, 'modulo_importador_id');
     }

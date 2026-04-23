@@ -66,7 +66,7 @@ const
 
             <ul class="pagination m-0 ms-auto">
                 <li v-for="link in records.links" class="page-item mx-1" :class="{ active: link.active }">
-                    <button v-if="axiosPagination" class="page-link" :class="{ disabled: !link.url }"
+                    <button type="button" v-if="axiosPagination" class="page-link" :class="{ disabled: !link.url }"
                         @click="fetchPageData(link.url)" v-html="link.label" />
                     <Link v-else class="page-link" :class="{ disabled: !link.url }" :href="getUrlWithSearchParams(link.url)"
                         :only="only" v-html="link.label" />
