@@ -96,7 +96,7 @@ class ProcessarPlanilhaImportadorJob implements ShouldQueue
 
             $dados = [...$row, ...$dadosValidacoes['dadosFormatados']];
 
-            $this->importador->dados()->create([
+            $this->importador->dadosJson()->create([
                 'dados' => $dados
             ]);
         });

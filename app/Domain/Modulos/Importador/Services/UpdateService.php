@@ -41,6 +41,12 @@ class UpdateService extends BaseModelService
             $extensaoArquivo = $arquivo->getClientOriginalExtension();
 
             $data['nome_arquivo'] = $nomeArquivo;
+            $data['load'] = true;
+        }
+
+        if ($data['update_modulo']) {
+            $importador->dadosJson()->delete();
+            unset($data['update_modulo']);
         }
 
         $importador->update($data);

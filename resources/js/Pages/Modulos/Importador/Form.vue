@@ -4,11 +4,13 @@ import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import { ref, watch, computed } from "vue";
 import { IconDoorExit, IconDeviceFloppy, IconSend, IconCircleX, IconCircleCheck } from "@tabler/icons-vue";
+import Swal from "sweetalert2";
 
 import CardInformacoesGerais from "./Components/CardInformacoesGerais.vue"
 import CardPareceres from "./Components/CardPareceres.vue"
 import CardFotos from "./Components/CardFotos.vue"
 import CardAnexos from "./Components/CardAnexos.vue"
+import CardDadosPlanilha from "./Components/CardDadosPlanilha.vue"
 
 import { badgeStatus } from '@/Utils/ImportadorUtils';
 
@@ -32,13 +34,14 @@ const form = useForm({
     fotos: [],
     anexos: [],
     enviar_analise: null,
+    update_modulo: null,
     ...props.moduloImportador
 });
 
 const CardFotosRef = ref(null)
 const CardAnexosRef = ref(null)
 
-const importar = (enviarAnalise = false) => {
+const importar = async (enviarAnalise = false) => {
 
     if(form.fotos.length && CardFotosRef.value.validarCampos()) {
         return
@@ -47,6 +50,22 @@ const importar = (enviarAnalise = false) => {
     if(form.anexos.length && CardAnexosRef.value.validarCampos()) {
         return
     }
+
+    if(form.id && form.modulo_id != props.moduloImportador.modulo_id) {
+        await Swal.fire({
+                title: 'Tem certeza?',
+                text: 'O módulo foi alterado, se prosseguir irá excluir todos os dados das planilhas importadas!',
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: 'Sim, Continuar',
+                cancelButtonText: 'Cancelar'
+            }).then(result => {
+
+                if(result.isConfirmed) {
+                    form.update_modulo = true
+                }
+            })
+    }    
 
     form.enviar_analise = enviarAnalise
 
@@ -73,7 +92,7 @@ const aprovReprovImportacao = (status) => {
 
 <template>
 
-    <Head title="Nova Importação" />
+    <Head :title="form.id ? 'Importação' : 'Nova Importação'" />
 
     <AuthenticatedLayout>
 
@@ -96,6 +115,8 @@ const aprovReprovImportacao = (status) => {
             <div class="d-flex flex-column">
                 <div class="d-flex flex-column gap-4 flex-grow-1 mb-4">
                     <CardInformacoesGerais :form="form" :modulos="modulos" :contratos="contratos" />
+
+                    <CardDadosPlanilha v-if="form.id" :form="form" />
 
                     <CardPareceres :form="form" />
 

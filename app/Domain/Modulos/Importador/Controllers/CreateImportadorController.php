@@ -19,7 +19,7 @@ class CreateImportadorController extends Controller
 
     public function create(ModuloImportador $importador): Response
     {
-        $importador->load(['fotos', 'anexos']);
+        $importador->load(['fotos', 'anexos', 'modulo']);
         $importador->append('status_formatado');
 
         return Inertia::render('Modulos/Importador/Form', [

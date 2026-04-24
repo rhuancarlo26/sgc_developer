@@ -21,7 +21,7 @@ class UpdateImportadorRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'modulo_id' => 'required',
             'mes_ano_referencia' => 'required',
             'campanha' => 'required',
@@ -32,8 +32,15 @@ class UpdateImportadorRequest extends FormRequest
             'parecer_analise' => 'nullable',
             'fotos' => 'array',
             'anexos' => 'array',
-            'enviar_analise' => 'required'
+            'enviar_analise' => 'required',
+            'update_modulo' => 'nullable',
         ];
+
+        if ($this->input('update_modulo')) {
+            $rules['arquivo'] = 'required|mimes:xlsx,csv';
+        }
+
+        return $rules;
     }
 
     public function messages(): array
