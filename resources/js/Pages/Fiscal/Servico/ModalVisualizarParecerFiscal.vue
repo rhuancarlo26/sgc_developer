@@ -5,47 +5,49 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="mb-2">
-                            <IconCode class="icon me-2 text-secondary"/>
+                            <IconCode class="icon me-2 text-secondary" />
                             Programa: <strong>{{ servico?.tema?.nome_tema }}</strong>
                         </div>
                         <div class="mb-2">
-                            <IconBriefcase class="icon me-2 text-secondary"/>
+                            <IconBriefcase class="icon me-2 text-secondary" />
                             Tipo: <strong>{{ servico?.tipo?.nome }}</strong>
                         </div>
                         <div class="mb-2">
-                            <IconHome class="icon me-2 text-secondary"/>
+                            <IconHome class="icon me-2 text-secondary" />
                             Status: <strong>
                                 <span v-if="servico?.status_aprovacao === 2" class="badge bg-yellow-lt">
                                     Em análise
                                 </span>
-                            <span v-else-if="servico?.status_aprovacao === 3" class="badge bg-blue-lt">
+                                <span v-else-if="servico?.status_aprovacao === 3" class="badge bg-blue-lt">
                                     Aprovado
                                 </span>
-                            <span v-else-if="servico?.status_aprovacao === 4" class="badge bg-red-lt">
+                                <span v-else-if="servico?.status_aprovacao === 4" class="badge bg-red-lt">
                                     Pendente
                                 </span>
-                        </strong>
+                            </strong>
                         </div>
                         <div class="mb-2" v-if="servico?.status_aprovacao === 2">
                             <textarea name="parecer" id="parecer" class="form-control" v-model="form.parecer"
-                                      rows="5"></textarea>
-                            <InputError :message="form.errors.parecer"/>
+                                rows="5"></textarea>
+                            <InputError :message="form.errors.parecer" />
                         </div>
                         <div class="mb-2" v-if="servico?.status_aprovacao !== 2">
-                            <IconMessage class="icon me-2 text-secondary"/>
+                            <IconMessage class="icon me-2 text-secondary" />
                             Parecer: <strong>{{ form.parecer }}</strong>
                         </div>
                         <div class="mb-2" v-if="servico?.status_aprovacao !== 2">
-                            <IconCalendar class="icon me-2 text-secondary"/>
-                            Data do parece: <strong>{{servico?.parecer.updated_at}}</strong>
+                            <IconCalendar class="icon me-2 text-secondary" />
+                            Data do parece: <strong>{{ formatarData(servico?.parecer?.updated_at) }}</strong>
                         </div>
                     </div>
                 </div>
             </div>
         </template>
         <template #footer>
-            <NavButton @click="emiteParecer(3)" v-if="servico?.status_aprovacao === 2" type-button="success" :icon="IconCheck" title="Aprovar"/>
-            <NavButton @click="emiteParecer(4)" v-if="servico?.status_aprovacao === 2" type-button="danger" :icon="IconCheck" title="Reprovar"/>
+            <NavButton @click="emiteParecer(3)" v-if="servico?.status_aprovacao === 2" type-button="success"
+                :icon="IconCheck" title="Aprovar" />
+            <NavButton @click="emiteParecer(4)" v-if="servico?.status_aprovacao === 2" type-button="danger"
+                :icon="IconCheck" title="Reprovar" />
         </template>
     </Modal>
 </template>
@@ -60,9 +62,9 @@ import {
     IconCheck
 } from "@tabler/icons-vue";
 import Modal from "@/Components/Modal.vue";
-import {ref} from "vue";
+import { ref } from "vue";
 import InputError from "@/Components/InputError.vue";
-import {useForm} from "@inertiajs/vue3";
+import { useForm } from "@inertiajs/vue3";
 import NavButton from "@/Components/NavButton.vue";
 
 const servico = ref(null);
@@ -91,5 +93,19 @@ const emiteParecer = (status) => {
     });
 }
 
-defineExpose({abrirModal});
+const formatarData = (data) => {
+    if (!data) return ''
+
+    const d = new Date(data)
+
+    return d.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    })
+}
+
+defineExpose({ abrirModal });
 </script>

@@ -32,11 +32,11 @@ class ServicoService extends BaseModelService
                 'veiculos.codigo',
                 'equipamentos',
                 'condicionantes',
-                'condicionantes.licenca'
+                'condicionantes.licenca',
+                'parecer'
             ])
             ->where('id_contrato', $contrato->id)
             ->where('deleted_at', null);
-
         return ['servicos' => $query->paginate()->appends($searchParams)];
     }
 

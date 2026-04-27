@@ -13,7 +13,7 @@
 					" />
 				<div class="container-buttons">
 					<Link class="btn btn-info me-2" :href="route('contratos.contratada.servicos.create', contrato.id)">
-					Cadastrar serviço
+						Cadastrar serviço
 					</Link>
 				</div>
 			</div>
@@ -102,12 +102,11 @@
 										Excluir
 									</a>
 									<a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
-										v-if="item.status_aprovacao === 4">
-										Parecer
-									</a>
-									<a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
 										v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4">
 										Enviar para o fiscal
+									</a>
+									<a @click="abrirModalParecerFiscal(item)" v-if="item.status_aprovacao === 3" class="dropdown-item" href="javascript:void(0)">
+										Parecer 
 									</a>
 								</div>
 							</td>
@@ -119,6 +118,7 @@
 
 		<ModalVisualizarLicenca ref="modalVisualizarLicenca" />
 		<ModalVisualizarServico ref="modalVisualizarServico" />
+    <ModalVisualizarParecerFiscal ref="modalVisualizarParecerFiscal" />
 
 	</AuthenticatedLayout>
 </template>
@@ -133,6 +133,9 @@ import Navbar from "../Navbar.vue";
 import { IconDots } from "@tabler/icons-vue";
 import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
 import ModalVisualizarServico from "./ModalVisualizarServico.vue";
+import ModalVisualizarParecerFiscal from "../../../Fiscal/Servico/ModalVisualizarParecerFiscal.vue";
+
+
 import { ref } from "vue";
 
 defineProps({
@@ -142,6 +145,7 @@ defineProps({
 
 const modalVisualizarLicenca = ref();
 const modalVisualizarServico = ref();
+const modalVisualizarParecerFiscal = ref();
 
 const abrirModalLicenca = (servico) => {
 	modalVisualizarLicenca.value.abrirModal(servico);
@@ -157,5 +161,9 @@ const deleteServico = (servico_id) => {
 
 const enviaFiscal = (servico_id) => {
 	router.post(route('contratos.contratada.servicos.envia-fiscal', servico_id));
+}
+
+const abrirModalParecerFiscal = (item) => {
+    modalVisualizarParecerFiscal.value.abrirModal(item);
 }
 </script>
