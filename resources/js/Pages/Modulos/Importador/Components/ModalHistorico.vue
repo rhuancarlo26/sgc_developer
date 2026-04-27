@@ -75,9 +75,9 @@ defineExpose({ abrirModal });
 						</div>
 
 						<div v-if="h.parecer" class="parecer">
-							<strong>Parecer {{h.status == 2 ? 'Técnico' : 'da Análise'}}:</strong>
+							<strong>Parecer {{h.status == 2 ? 'Técnico (Empresa)' : 'da Análise (Fiscal)'}}:</strong>
 							<br>
-							<textarea v-model="h.parecer" id="parecer_tecnico" class="form-control" rows="5" disabled style="cursor: not-allowed" />
+							<div class="border border-1 rounded p-2" v-html="h.parecer"></div>
 						</div>
 					</div>
 				</div>
