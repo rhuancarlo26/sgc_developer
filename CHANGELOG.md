@@ -1,4 +1,15 @@
 # 📦 CHANGELOG – ecossistema-v2
+### [v1.6.0] 27/04/2026
+
+### ✨ Added
+- Criação do módulo de módulos dinâmicos com cadastro, importação de planilha e filtros - #P1A6-196
+- Implementação de importadores com cadastro, anexos, filtros e controle de status
+
+### 🐛 Fixed
+- style: removendo redirecionamento do dashboard dos módulos
+
+### 🧹 Changed
+- wip: apresentando os dados importados da planilha
 
 ### [v1.5.0] 27/04/2026
 - import planilha mont atp fauna
