@@ -3,15 +3,23 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import { ref } from "vue";
 
+import ModalHistorico from "./ModalHistorico.vue"
+
 const props = defineProps({
     form: { type: Object },
 });
 
+const ModalHistoricoRef = ref(null)
+const abrirHistorico = () => {
+    ModalHistoricoRef.value.abrirModal()
+}
+
 </script>
 <template>
     <div class="card">
-        <div class="card-header">
+        <div class="card-header justify-content-between">
             <h3 class="my-0">Pareceres</h3>
+            <button @click="abrirHistorico" type="button" class="btn btn-primary">Histórico</button>
         </div>
         <div class="card-body">
             <div class="col-12 mb-4">
@@ -35,4 +43,6 @@ const props = defineProps({
             </div>
         </div>
     </div>
+
+    <ModalHistorico ref="ModalHistoricoRef" />
 </template>

@@ -10,6 +10,19 @@ const badgeStatus = (status) => {
     return obj[status]
 }
 
+const colorStatus = (status) => {
+
+    const obj = {
+        1: 'secondary',
+        2: 'light',
+        3: 'danger',
+        4: 'primary',
+    }
+
+    return obj[status]
+}
+
 export {
-    badgeStatus
+    badgeStatus,
+    colorStatus
 }
