@@ -7,6 +7,7 @@ use App\Domain\Modulos\Importador\Controllers\DestroyImportadorController;
 use App\Domain\Modulos\Importador\Controllers\StoreImportadorController;
 use App\Domain\Modulos\Importador\Controllers\UpdateImportadorController;
 use App\Domain\Modulos\Importador\Controllers\StatusImportadorController;
+use App\Domain\Modulos\Importador\Controllers\HistoricoImportadorController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('importador-modulo')->group(function () {
@@ -22,4 +23,6 @@ Route::prefix('importador-modulo')->group(function () {
     Route::post('/aprov-reprov/{importador}/{status}', [StatusImportadorController::class, 'aprovReprov'])->name('importador.aprovReprov');
 
     Route::get('/buscar-dados/{importador}', [DadosImportadorController::class, 'buscarDados'])->name('importador.buscarDados');
+
+    Route::get('/buscar-historico/{importador}', [HistoricoImportadorController::class, 'buscarHistorico'])->name('importador.buscarHistorico');
 });
