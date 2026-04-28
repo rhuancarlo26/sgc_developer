@@ -25,4 +25,7 @@ export default defineConfig({
             },
         }),
     ],
+    optimizeDeps: {
+        include: ['leaflet', 'leaflet-measure']
+    }
 });

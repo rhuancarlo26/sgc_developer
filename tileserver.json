@@ -1,0 +1,14 @@
+{
+  "options": {
+    "serveStaticMaps": false,
+    "paths": {
+      "root": "storage/app/tiles"
+    }
+  },
+  "data": {
+    "layers": {
+      "type": "directory",
+      "path": "storage/app/tiles"
+    }
+  }
+}

@@ -30,5 +30,17 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    // Local
+    // 'geoserver' => [
+    //     'url' => env('GEOSERVER_URL', 'http://localhost:8080/geoserver'),
+    //     'user' => env('GEOSERVER_USER', 'admin'),
+    //     'password' => env('GEOSERVER_PASSWORD', 'geoserver'),
+    // ],
+    //Remoto
+    'geoserver' => [
+        'url' => env('GEOSERVER_URL', 'https://servicos.dnit.gov.br/DPP/geoserver'),
+        'user' => env('GEOSERVER_USER', 'admin'),
+        'password' => env('GEOSERVER_PASSWORD', ''),
+    ],
 
 ];
