@@ -264,11 +264,11 @@ function closeAbioModal() {
           </thead>
           <tbody>
             <tr v-for="profissional in profissionalRecords" :key="profissional.id">
-              <td>{{ profissional.profissional || 'Não informado' }}</td>
+              <td>{{ profissional.profissional?.profissional || 'Não informado' }}</td>
               <td>{{ profissional.grupo_faunistico || 'Não informado' }}</td>
-              <td>{{ profissional.formacao || 'Não informado' }}</td>
-              <td>{{ profissional.funcao || 'Não informado' }}</td>
-              <td>{{ profissional.ctf || 'Não informado' }}</td>
+              <td>{{ profissional.profissional?.formacao || 'Não informado' }}</td>
+              <td>{{ profissional.profissional?.funcao || 'Não informado' }}</td>
+              <td>{{ profissional.profissional?.ctf || 'Não informado' }}</td>
             </tr>
           </tbody>
         </table>

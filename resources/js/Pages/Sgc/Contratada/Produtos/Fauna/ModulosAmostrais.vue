@@ -177,13 +177,13 @@ watch(() => props.formModuloAmostral.uf, (newUf) => {
                     <InputError :message="formModuloAmostral.errors.longitude_final" />
                 </div>
             </div>
-            <div class="row mb-4">
+            <!-- <div class="row mb-4">
                 <div class="col-12">
                     <InputLabel value="Shapefile" for="arquivo" />
                     <input @input="formModuloAmostral.arquivo = $event.target.files[0]" type="file" class="form-control" id="arquivo" accept=".shp,.zip" />
                     <InputError :message="formModuloAmostral.errors.arquivo" />
                 </div>
-            </div>
+            </div> -->
             <div class="row mb-4">
                 <div class="col-12">
                     <InputLabel value="Observações" for="obs_modulo" />

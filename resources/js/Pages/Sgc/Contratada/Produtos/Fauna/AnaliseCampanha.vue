@@ -628,35 +628,19 @@ const finalizarAvaliacao = () => {
                                     :resultados-aquatica="props.campanha?.resultadosAquatica || []"
                                     :resultados-cavernicola="props.campanha?.resultadosCavernicola || []"
                                     :consideracoes="props.campanha?.consideracoes"
+
+                                    :can-approve="props.canApprove"
+                                    :status-campanha="props.campanha?.status"
+                                    :analise-form="analiseForms.resultados"
+                                    :current-analise="currentAnalise"
+
+                                    @aprovar="aprovarEtapa('resultados')"
+                                    @rejeitar="rejeitarEtapa('resultados')"
+
                                     @prev="setActiveTab('metodologia')"
                                     @next="setActiveTab('anexos')"
                                 />
-                                <div v-if="props.canApprove && props.campanha?.status === 'Em análise'" class="mt-4">
-                                    <h4 class="text-center">ANÁLISE DA ETAPA</h4>
-                                    <form @submit.prevent="rejeitarEtapa('resultados')">
-                                        <div class="mb-3">
-                                            <label for="observacoes_resultados" class="form-label">Observações (obrigatório para reprovação)</label>
-                                            <textarea
-                                                v-model="analiseForms.resultados.observacoes"
-                                                id="observacoes_resultados"
-                                                class="form-control"
-                                                rows="4"
-                                                placeholder="Digite observações (obrigatório para reprovação)"
-                                            ></textarea>
-                                            <InputError :message="analiseForms.resultados.errors.observacoes" />
-                                            <p v-if="currentAnalise?.status" class="mt-2 text-sm text-gray-600">
-                                                Status atual: {{ currentAnalise.status }} (Análise {{ currentAnalise.analise }})
-                                            </p>
-                                            <p v-if="currentAnalise?.observacoes" class="mt-2 text-sm text-gray-600">
-                                                Observações anteriores: {{ currentAnalise.observacoes }}
-                                            </p>
-                                        </div>
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <NavButton type="submit" type-button="danger" title="Rejeitar" />
-                                            <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('resultados')" />
-                                        </div>
-                                    </form>
-                                </div>
+
                             </div>
                             <!-- Aba Anexos -->
                             <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">

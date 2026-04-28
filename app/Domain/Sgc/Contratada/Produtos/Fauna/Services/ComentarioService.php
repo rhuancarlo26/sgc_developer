@@ -43,6 +43,7 @@ class ComentarioService
         return SgcFaunaComentarios::where('id_contrato', $contratoId)
             ->where('campanha_id', $campanhaId)
             ->whereNull('deleted_at')
+            ->with(['user' => fn($q) => $q->select('id', 'name')])  // ← ADICIONA ISSO
             ->get()
             ->map(function ($comentario) {
                 return [
@@ -50,8 +51,11 @@ class ComentarioService
                     'analise' => $comentario->analise,
                     'etapa' => $comentario->etapa,
                     'comentario' => $comentario->comentario,
+                    'user' => $comentario->user,  // ← ADICIONA ISSO (traz o user completo)
                     'created_at' => $comentario->created_at,
                 ];
             })->toArray();
     }
+
+    
 }

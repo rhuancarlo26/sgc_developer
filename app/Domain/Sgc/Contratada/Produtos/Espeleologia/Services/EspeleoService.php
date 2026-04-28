@@ -7,6 +7,7 @@ use App\Models\SgcEspeleoCampanhaProfissional;
 use App\Models\SgcEspeleoJustificativa;
 use App\Models\SgcEspeleoMetodologia;
 use App\Models\SgcEspeleoResultadoAnexo;
+use App\Models\SgcEspeleoProfissional;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -14,14 +15,15 @@ class EspeleoService
 {
     public function getProfissionaisByContrato($contratoId)
     {
-        return [];
+        return SgcEspeleoProfissional::where('id_contrato', $contratoId)
+            ->get(['id', 'profissional', 'formacao']);
     }
 
     public function salvarCampanha(array $data, $contratoId, $campanhaId = null)
     {
         return DB::transaction(function () use ($data, $contratoId, $campanhaId) {
             Log::info('Iniciando salvamento de campanha', ['campanhaId' => $campanhaId, 'contratoId' => $contratoId, 'data' => $data]);
-            
+
             $campanha = $campanhaId
                 ? SgcEspeleoCampanha::findOrFail($campanhaId)
                 : SgcEspeleoCampanha::where('id_contrato', $contratoId)
@@ -30,9 +32,11 @@ class EspeleoService
                     ->first();
 
             if (!$campanha) {
+                $nextCampanhaId = ((int) SgcEspeleoCampanha::where('id_contrato', $contratoId)->max('id_campanha')) + 1;
+
                 $campanha = SgcEspeleoCampanha::create([
                     'id_contrato' => $contratoId,
-                    'id_campanha' => '3',
+                    'id_campanha' => (string) $nextCampanhaId,
                     'subproduto' => $data['subproduto'] ?? '',
                     'status' => 'Em elaboração',
                 ]);
@@ -46,6 +50,8 @@ class EspeleoService
 
             // Vincular profissionais
             if (isset($data['profissionais']) && is_array($data['profissionais'])) {
+                SgcEspeleoCampanhaProfissional::where('campanha_id', $campanha->id)->delete();
+
                 foreach ($data['profissionais'] as $prof) {
                     Log::info('Tentando vincular profissional', ['prof' => $prof]);
                     SgcEspeleoCampanhaProfissional::create([
@@ -59,9 +65,11 @@ class EspeleoService
 
             // Vincular justificativas
             if (isset($data['justificativas']) && is_array($data['justificativas'])) {
+                SgcEspeleoJustificativa::where('campanha_id', $campanha->id)->delete();
+
                 foreach ($data['justificativas'] as $just) {
                     Log::info('Criando justificativa', ['justificativa' => $just]);
-                    $tipo = $just['tipo'] ?? 'complementar'; 
+                    $tipo = $just['tipo'] ?? 'complementar';
                     SgcEspeleoJustificativa::create([
                         'campanha_id' => $campanha->id,
                         'codigo_sei' => $just['codigo_sei'] ?? null,
@@ -80,11 +88,10 @@ class EspeleoService
             if (isset($data['metodologia']) && !empty($data['metodologia'])) {
                 // Remove se já existir uma para esta campanha (para update)
                 SgcEspeleoMetodologia::where('campanha_id', $campanha->id)->delete();
-                
+
                 SgcEspeleoMetodologia::create([
                     'campanha_id' => $campanha->id,
                     'id_contrato' => $contratoId,
-                    'titulo' => $data['titulo_metodologia'] ?? null,
                     'metodologia' => $data['metodologia'],
                 ]);
                 Log::info('Metodologia salva', ['campanha_id' => $campanha->id, 'metodologia_length' => strlen($data['metodologia'])]);

@@ -14,4 +14,9 @@ class SgcFaunaComentarios extends Model
         return $this->belongsTo(SgcFaunaCampanha::class, 'campanha_id', 'id');
     }
 
+        public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
 }

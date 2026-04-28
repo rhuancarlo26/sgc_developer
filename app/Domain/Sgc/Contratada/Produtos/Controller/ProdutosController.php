@@ -8,6 +8,10 @@ use App\Models\SgcvwEmpreendimentos;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaService;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoService;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Parametro\Services\ParametroService;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Services\CampanhaService;
+use App\Models\SgcPmqa;
+use App\Models\SgcPmqaParametroLista;
 use App\Models\ServicoPmqaParametro;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcEspeleoCampanha;
@@ -47,9 +51,16 @@ class ProdutosController extends Controller
         $subprodutos = $this->produtosService->getSubprodutosByContrato($contrato, $produto);
         $contratoObj = Contrato::findOrFail($contrato);
 
-        $campanhas = $produto === 'fauna'
-            ? $this->getCampanhasFauna($contrato)
-            : $this->getCampanhasEspeleologia($contrato);
+        $campanhas = match ($produto) {
+            'fauna'        => $this->getCampanhasFauna($contrato),
+            'pmqa', 'eia'  => $this->getCampanhasPmqa($contrato),
+            'espeleologia' => $this->getCampanhasEspeleologia($contrato),
+             default        => collect(),
+        };
+
+        // $campanhas = $produto === 'fauna'
+        //     ? $this->getCampanhasFauna($contrato)
+        //     : $this->getCampanhasEspeleologia($contrato);
 
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
@@ -57,7 +68,7 @@ class ProdutosController extends Controller
             'produto' => ucfirst($produto),
             'contratos' => $contratoObj,
             'campanhas' => $campanhas,
-            'canApprove' => Auth::user()->perfis_id === 2 && count(array_filter($campanhas->toArray(), fn($c) => $c['status'] === 'Em análise')) > 0,
+            'canApprove' => Auth::user()->perfis_id === 3 && count(array_filter($campanhas->toArray(), fn($c) => $c['status'] === 'Em análise')) > 0,
         ]);
     }
 
@@ -101,57 +112,94 @@ class ProdutosController extends Controller
         };
     }
 
+
     private function createFauna(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
+        // Busca rascunho aberto para este contrato/subproduto
         $draft = SgcFaunaCampanha::where('id_contrato', $contrato)
             ->where('subproduto', $subproduto)
             ->where('status', 'Em elaboração')
+            ->with([
+                'abios.abio',
+                'profissionais.profissional',
+                'modulos_amostrais',
+                'pontos_quelo_crocod',
+                'pontos_cavernicola',
+                'metodologias',
+                'resultadosTerrestre',
+                'resultadosAquatica',
+                'resultadosCavernicola',
+                'resultados_consideracoes',
+                'anexos',
+            ])
+            ->latest()
             ->first();
 
+        // Se não existe rascunho, cria um novo com o mínimo necessário.
+        // O frontend vai chamar rascunho/inicializar para persistir cod_emp + subproduto,
+        // mas já deixamos o registro criado aqui para ter o campanhaId imediatamente.
         if (!$draft) {
             $draft = SgcFaunaCampanha::create([
-                'id_contrato' => $contrato,
-                'subproduto' => $subproduto,
-                'status' => 'Em elaboração',
+                'id_contrato'    => $contrato,
+                'subproduto'     => $subproduto,
+                'status'         => 'Em elaboração',
+                'etapa_atual'    => 'apresentacao',
+                'versao_analise' => 1,
             ]);
-            Log::info('Draft criado para Fauna', ['draft_id' => $draft->id]);
+
+            Log::info('ProdutosController: rascunho fauna criado', [
+                'draft_id' => $draft->id,
+                'contrato' => $contrato,
+            ]);
         }
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->pluck('cod_emp')
             ->toArray();
 
-        $abios = $this->produtosService->getAbios();
+        $abios         = $this->produtosService->getAbios();
         $profissionais = $this->faunaService->getProfissionaisByContrato($contrato);
 
+        // Se o draft já tem dados preenchidos, passa para o frontend pré-carregar
+        $draftData = $draft->wasRecentlyCreated
+            ? []
+            : \App\Domain\Sgc\Contratada\Produtos\Fauna\Resources\CampanhaResource::toArray($draft);
+
         return inertia('Sgc/Contratada/Produtos/Fauna/Create', [
-            'contrato' => $contrato,
-            'produto' => ucfirst($produto),
-            'contratos' => $contratoObj,
-            'subproduto' => $subproduto,
+            'contrato'        => $contrato,
+            'produto'         => ucfirst($produto),
+            'contratos'       => $contratoObj,
+            'subproduto'      => $subproduto,
             'empreendimentos' => $empreendimentos,
-            'abios' => $abios,
-            'profissionais' => $profissionais,
-            'campanhaId' => $draft->id,
-            'draftData' => $draft->toArray(),
+            'abios'           => $abios,
+            'profissionais'   => $profissionais,
+            'campanhaId'      => $draft->id,
+            'etapaAtual'      => $draft->etapa_atual ?? 'apresentacao',
+            'draftData'       => $draftData,
+            'ufs'             => \App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\CampanhaController::getUfs(),
+            'biomas'          => \App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\CampanhaController::getBiomas(),
         ]);
     }
+
+    // --------------------------------------------------------------------------
+    // Método 2: getCampanhasFauna
+    // Mudança: exclui rascunhos da listagem — o usuário não deve ver rascunhos
+    // na tabela principal, só campanhas já submetidas
+    // --------------------------------------------------------------------------
 
     private function getCampanhasFauna($contrato)
     {
         return SgcFaunaCampanha::where('id_contrato', $contrato)
             ->get(['id', 'id_campanha', 'cod_emp', 'data_ini', 'data_fim', 'status', 'subproduto'])
-            ->map(function ($campanha) {
-                return [
-                    'id' => $campanha->id,
-                    'id_campanha' => $campanha->id_campanha ?? 'N/A',
-                    'empreendimento' => $campanha->cod_emp ?? 'N/A',
-                    'data_inicial' => $campanha->data_ini ?? 'N/A',
-                    'data_final' => $campanha->data_fim ?? 'N/A',
-                    'status' => $campanha->status ?? 'Em análise',
-                    'subproduto' => $campanha->subproduto ?? 'N/A',
-                ];
-            });
+            ->map(fn($campanha) => [
+                'id'           => $campanha->id,
+                'id_campanha'  => $campanha->id_campanha ?? 'N/A',
+                'empreendimento' => $campanha->cod_emp ?? 'N/A',
+                'data_inicial' => $campanha->data_ini ?? 'N/A',
+                'data_final'   => $campanha->data_fim ?? 'N/A',
+                'status'       => $campanha->status ?? 'Em análise',
+                'subproduto'   => $campanha->subproduto ?? 'N/A',
+            ]);
     }
 
     private function createEspeleologia(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
@@ -281,103 +329,248 @@ class ProdutosController extends Controller
 
     private function createPmqa(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
-        $draft = SgcPmqaCampanha::where('id_contrato', $contrato)
-            ->where('subproduto', $subproduto)
-            ->where('status', 'Em elaboração')
-            ->first();
 
-        if (!$draft) {
-            $draft = SgcPmqaCampanha::create([
-                'id_contrato' => $contrato,
-                'subproduto' => $subproduto,
-                'fase' => 'criacao',
-                'status' => 'Em elaboração',
-            ]);
-            Log::info('Draft criado para PMQA', ['draft_id' => $draft->id]);
-        }
-        $todosOsPontos = SgcPmqaPonto::where('campanha_id', $draft->id)->get();
-
-        $perPage = 15; // Ou o número de itens que quiser por página
-        $currentPage = request('page', 1);
-        $offset = ($currentPage * $perPage) - $perPage;
-
-
-        $pontosPaginados = new LengthAwarePaginator(
-            $todosOsPontos->slice($offset, $perPage), // Pega apenas os itens para a página atual
-            $todosOsPontos->count(), // Conta o total de itens
-            $perPage, // Itens por página
-            $currentPage, // Página atual
-            ['path' => request()->url()] // Define o URL base para os links de paginação
-        );
-
-        $listaId = $request->input('lista_id', 5);
-
-        // 1. BUSCAR A LISTA
-        $lista = DB::table('sgc_pmqa_parametros_lista')
-            ->where('id', $listaId)
-            ->first();
-
-        // 2. BUSCAR PARÂMETROS DA LISTA (com paginação)
-        $parametrosIds = DB::table('sgc_pmqa_parametro_pivot')
-            ->where('lista_id', $listaId)
-            ->pluck('parametro_id');
-
-        $parametrosPaginados = ServicoPmqaParametro::whereIn('id', $parametrosIds)
-            ->paginate(15, ['*'], 'page_parametros');
-
-        // 3. ESTRUTURA FINAL
-        $listaComParametros = [
-            'id' => $lista->id,
-            'nome' => $lista->nome,
-            'created_at' => $lista->created_at,
-            'parametros' => $parametrosPaginados // ✅ PAGINADO!
-        ];
-
-        // ✅ 2 LINHAS MÁGICAS!
-        $listasPaginadas = new \Illuminate\Pagination\LengthAwarePaginator(
-            [$listaComParametros],
-            1,
-            15,
-            1,
-            ['path' => request()->url()]
-        );
-
-        // --dd($request);
+        $pmqa = SgcPmqa::create([
+            'id_contrato'      => $contrato,
+            'status_aprovacao' => 'Em analise',
+            'subproduto'       => $subproduto,
+        ]);
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->pluck('cod_emp')
             ->toArray();
 
-        $parametro = ServicoPmqaParametro::all();
-
         return inertia('Sgc/Contratada/Produtos/Pmqa/Create', [
-            'contrato' => $contrato,
-            'produto' => ucfirst($produto),
-            'contratos' => $contratoObj,
-            'subproduto' => $subproduto,
+            'contrato'        => $contrato,
+            'produto'         => ucfirst($produto),
+            'contratos'       => $contratoObj,
+            'subproduto'      => $subproduto,
             'empreendimentos' => $empreendimentos,
-            'campanhaId' => $draft->id,
-            'draftData' => $draft->toArray(),
-            'fase_atual' => $draft->fase,
-            'pontos' => $pontosPaginados,
-            'parametros' => $parametro,
-            'listas' => $listasPaginadas
+            'pmqa'            => $pmqa,
         ]);
     }
 
+    public function aprovarPmqa(Request $request, $contrato, $produto, $pmqa): RedirectResponse
+    {
+        $pmqaModel = SgcPmqa::where('id', $pmqa)
+            ->where('id_contrato', $contrato)
+            ->firstOrFail();
+
+        $pmqaModel->update([
+            'status_aprovacao' => 'Em elaboração',
+            'aprovado_por'     => Auth::getName(),
+            'aprovado_em'      => now(),
+        ]);
+
+        return back()->with('success', 'Campanha aprovada com sucesso!');
+    }
+
+
+    public function updatePmqa(Request $request, $contrato)
+    {
+        $data = $request->validate([
+            'id'            => 'required|exists:sgc_pmqa,id',
+            'cod_emp'       => 'nullable|string',
+            'tema'          => 'nullable',
+            'especificacao' => 'nullable|string',
+            'introducao'    => 'nullable|string',
+            'justificativa' => 'nullable|string',
+            'objetivos'     => 'nullable|string',
+            'metodologia'   => 'nullable|string',
+            'publico_alvo'  => 'nullable|string',
+        ]);
+
+        $pmqa = SgcPmqa::findOrFail($data['id']);
+
+        $pmqa->update([
+            'cod_emp'       => $data['cod_emp'],
+            'tema'          => is_array($data['tema']) ? $data['tema']['id'] : $data['tema'],
+            'especificacao' => $data['especificacao'],
+            'introducao'    => $data['introducao'],
+            'justificativa' => $data['justificativa'],
+            'objetivos'     => $data['objetivos'],
+            'metodologia'   => $data['metodologia'],
+            'publico_alvo'  => $data['publico_alvo'],
+        ]);
+
+        return redirect()
+            ->route('sgc.contratada.produtos.index', [
+                'contrato' => $contrato,
+                'produto'  => 'eia',
+            ])
+            ->with('success', 'Campanha de Fauna salva com sucesso!');
+    }
+
+
+
     private function getCampanhasPmqa($contrato)
     {
-        return SgcPmqaCampanha::where('id_contrato', $contrato)
-            ->get(['id', 'id_campanha', 'fase', 'status', 'subproduto', 'created_at'])
-            ->map(function ($campanha) {
-                return [
-                    'id' => $campanha->id,
-                    'id_campanha' => $campanha->id_campanha ?? 'N/A',
-                    'fase' => $campanha->fase ?? 'criacao',
-                    'status' => $campanha->status ?? 'Em elaboração',
-                    'subproduto' => $campanha->subproduto ?? 'N/A',
-                    'criado_em' => $campanha->created_at->format('d/m/Y'),
-                ];
-            });
+        $pmqas = SgcPmqa::where('id_contrato', $contrato)->get();
+
+        $resumoVinc = $this->getResumoVinculacoesPmqa($pmqas->pluck('id')->all());
+
+        return $pmqas->map(function ($pmqa) use ($resumoVinc) {
+            return [
+                'id'             => $pmqa->id,
+                'id_campanha'    => $pmqa->id,
+                'id_contrato'    => $pmqa->id_contrato,
+                'chave'          => $pmqa->chave ?? null,
+                'tipo'           => $pmqa->tipo ?? 'PMQA',
+
+                'empreendimento' => $pmqa->cod_emp ?? 'N/A',
+                'subproduto'     => $pmqa->tipo ?? 'PMQA',
+                'data_inicial'   => $pmqa->created_at ? $pmqa->created_at->format('d/m/Y') : 'N/A',
+                'data_final'     => 'N/A',
+                'status'         => $pmqa->status_aprovacao ?? 'rascunho',
+
+                'vinculacoesResumo' => $resumoVinc[$pmqa->id] ?? [
+                    'total_listas' => 0,
+                    'total_pontos' => 0,
+                    'total_pontos_vinculados' => 0,
+                ],
+
+                'tema'           => $pmqa->tema,
+                'cod_emp'        => $pmqa->cod_emp,
+                'especificacao'  => $pmqa->especificacao,
+                'introducao'     => $pmqa->introducao,
+                'justificativa'  => $pmqa->justificativa,
+                'objetivos'      => $pmqa->objetivos,
+                'metodologia'    => $pmqa->metodologia,
+                'publico_alvo'   => $pmqa->publico_alvo,
+
+                'status_aprovacao' => $pmqa->status_aprovacao,
+                'created_at'       => optional($pmqa->created_at)->toISOString(),
+                'updated_at'       => optional($pmqa->updated_at)->toISOString(),
+                'deleted_at'       => optional($pmqa->deleted_at)->toISOString(),
+            ];
+        });
     }
+
+
+    private function createPmqaByCampanha(
+        Request $request,
+        $contrato,
+        $produto,
+        $contratoObj,
+        $campanhaId
+    ): Response {
+        $pmqa = SgcPmqa::where('id', $campanhaId)
+            ->where('id_contrato', $contrato)
+            ->firstOrFail();
+
+        $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+            ->pluck('cod_emp')
+            ->toArray();
+
+        $searchParams = $request->only(['columns', 'value']);
+        $tabParametros = $this->parametroService->index($pmqa, $searchParams);
+        $listasVinculacoes = SgcPmqaParametroLista::with(['pontos'])
+            ->where('pmqa_id', $pmqa->id)
+            ->get();
+
+        $vinculacoes = SgcPmqaPonto::with(['lista', 'vinculacao'])
+            ->where('pmqa_id', $pmqa->id)
+            ->get();
+        Log::info('Create PMQA payload', [
+            'pmqa_id' => $pmqa->id,
+            'vinculacoes_count' => $vinculacoes->count(),
+            'component' => 'Sgc/Contratada/Produtos/Pmqa/Create',
+        ]);
+
+        $searchExec = $request->only(['columns', 'value']);
+        $execucao = $this->execucaoCampanhaService->index($pmqa, $searchExec);
+
+        return inertia('Sgc/Contratada/Produtos/Pmqa/Create', [
+            'contrato'        => $contrato,
+            'produto'         => ucfirst($produto),
+            'contratos'       => $contratoObj,
+            'subproduto'      => $pmqa->subproduto,
+            'empreendimentos' => $empreendimentos,
+            'pmqa'            => $pmqa,
+            'subStep'         => (int) $request->query('subStep', 1),
+            ...$tabParametros,
+            'vinculacoes' => $vinculacoes,
+            'listasVinculacoes' => $listasVinculacoes,
+            ...$execucao,
+        ]);
+    }
+
+    private function getResumoVinculacoesPmqa(array $pmqaIds): array
+    {
+        if (empty($pmqaIds)) return [];
+
+        $listasPorPmqa = SgcPmqaParametroLista::query()
+            ->whereIn('pmqa_id', $pmqaIds)
+            ->selectRaw('pmqa_id, COUNT(*) as total_listas')
+            ->groupBy('pmqa_id')
+            ->pluck('total_listas', 'pmqa_id')
+            ->toArray();
+
+        $pontosPorPmqa = SgcPmqaPonto::query()
+            ->whereIn('pmqa_id', $pmqaIds)
+            ->selectRaw('pmqa_id, COUNT(*) as total_pontos')
+            ->groupBy('pmqa_id')
+            ->pluck('total_pontos', 'pmqa_id')
+            ->toArray();
+
+        $pontosVinculadosPorPmqa = DB::table('sgc_pmqa_config_ponto_lista as vpl')
+            ->whereIn('vpl.pmqa_id', $pmqaIds)
+            ->selectRaw('vpl.pmqa_id, COUNT(DISTINCT vpl.ponto_id) as total_pontos_vinculados')
+            ->groupBy('vpl.pmqa_id')
+            ->pluck('total_pontos_vinculados', 'pmqa_id')
+            ->toArray();
+
+        $map = [];
+        foreach ($pmqaIds as $id) {
+            $map[$id] = [
+                'total_listas' => $listasPorPmqa[$id] ?? 0,
+                'total_pontos' => $pontosPorPmqa[$id] ?? 0,
+                'total_pontos_vinculados' => $pontosVinculadosPorPmqa[$id] ?? 0,
+            ];
+        }
+
+        return $map;
+    }
+
+    private function getVinculacoesParaTabela(int $pmqaId): array
+    {
+        $rows = DB::table('sgc_pmqa_parametros_lista as l')
+            ->leftJoin('sgc_pmqa_config_ponto_lista as pl', 'pl.lista_id', '=', 'l.id')
+            ->leftJoin('sgc_pmqa_pontos as p', 'p.id', '=', 'pl.ponto_id')
+            ->where('l.pmqa_id', $pmqaId)
+            ->orderBy('l.id')
+            ->orderBy('p.id')
+            ->get([
+                'l.id as lista_id',
+                'l.nome as lista_nome',
+                'p.id as ponto_id',
+                'p.nome_ponto_coleta',
+            ]);
+
+        $grouped = [];
+
+        foreach ($rows as $r) {
+            if (!isset($grouped[$r->lista_id])) {
+                $grouped[$r->lista_id] = [
+                    'id' => (int) $r->lista_id,
+                    'nome' => $r->lista_nome,
+                    'pontos' => [],
+                ];
+            }
+
+            if ($r->ponto_id) {
+                $grouped[$r->lista_id]['pontos'][] = [
+                    'id' => (int) $r->ponto_id,
+                    'nome_ponto_coleta' => $r->nome_ponto_coleta,
+                ];
+            }
+        }
+
+        return [
+            'data' => array_values($grouped),
+            'links' => [],
+        ];
+    }
+
+
 }

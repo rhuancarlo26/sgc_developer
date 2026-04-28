@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import NavButton from '@/Components/NavButton.vue';
@@ -8,19 +8,65 @@ const props = defineProps({
     resultadosTerrestre: Array,
     resultadosAquatica: Array,
     resultadosCavernicola: Array,
-    consideracoes: String
+    consideracoes: String,
+
+    canApprove: Boolean,
+    statusCampanha: String,
+    analiseForm: Object,
+    currentAnalise: Object
 });
 
-defineEmits(['next','prev']);
+const emit = defineEmits(['next','prev','aprovar','rejeitar']);
 
 const subtab = ref('terrestre');
+
+const temPlanilha = computed(() => {
+    return (
+        (props.resultadosTerrestre?.length || 0) ||
+        (props.resultadosAquatica?.length || 0) ||
+        (props.resultadosCavernicola?.length || 0)
+    );
+});
 </script>
 
 <template>
 <div class="card">
 <div class="card-body">
 
-<h4 class="mb-3 text-center">RESULTADOS</h4>
+<h4 class="mb-3 text-center">RESULTADOS</h4>    
+
+<!-- ANÁLISE NO TOPO -->
+<div v-if="canApprove && statusCampanha === 'Em análise'" class="mb-4">
+
+    <h5 class="text-center mb-3">ANÁLISE DA ETAPA</h5>
+
+    <div class="mb-3">
+        <label class="form-label">Observações (obrigatório para reprovação)</label>
+
+        <textarea
+            v-model="analiseForm.observacoes"
+            class="form-control"
+            rows="3"
+            placeholder="Digite observações"
+        ></textarea>
+
+        <InputError :message="analiseForm.errors?.observacoes" />
+
+        <p v-if="currentAnalise?.status" class="mt-2 text-sm text-gray-600">
+            Status atual: {{ currentAnalise.status }} (Análise {{ currentAnalise.analise }})
+        </p>
+
+        <p v-if="currentAnalise?.observacoes" class="mt-2 text-sm text-gray-600">
+            Observações anteriores: {{ currentAnalise.observacoes }}
+        </p>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+        <NavButton type="button" type-button="danger" title="Rejeitar" @click="$emit('rejeitar')" />
+        <NavButton type="button" type-button="success" title="Aprovar" @click="$emit('aprovar')" />
+    </div>
+
+</div>
 
 <!-- SUBTABS -->
 <ul class="nav nav-tabs mb-4">
@@ -37,6 +83,12 @@ const subtab = ref('terrestre');
            @click.prevent="subtab='cavernicola'">Fauna Cavernícola</a>
     </li>
 </ul>
+
+<!-- NAV TOPO -->
+<div v-if="temPlanilha" class="d-flex justify-content-between mb-3 sticky-top bg-white py-2">
+    <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
+    <NavButton type-button="primary" title="Avançar" @click="$emit('next')" />
+</div>
 
 <!-- ====================== TERRESTRE ====================== -->
 <div v-if="subtab==='terrestre'">
@@ -388,7 +440,7 @@ const subtab = ref('terrestre');
 </div>
 
 <!-- Navegação -->
-<div class="d-flex justify-content-between mt-4">
+<div v-if="!temPlanilha" class="d-flex justify-content-between mt-4">
     <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
     <NavButton type-button="primary" title="Avançar" @click="$emit('next')" />
 </div>

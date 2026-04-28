@@ -5,6 +5,7 @@ import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import { ref, computed } from 'vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import NavButton from '@/Components/NavButton.vue';
+import PreviewApresentacaoModal from '../Pmqa/Components/Modals/PreviewApresentacaoModal.vue';
 
 const props = defineProps({
     subprodutos: { type: Array, default: () => [] },
@@ -14,9 +15,12 @@ const props = defineProps({
     campanhas: { type: Array, default: () => [] },
     canApprove: { type: Boolean, default: false },
     auth: { type: Object, required: true },
+    vinculacoes: { type: Object },
 });
 
 console.log('Auth:', props.auth);
+
+const previewModal = ref(null);
 
 // Lista de produtos disponíveis
 const produtos = [
@@ -38,6 +42,15 @@ const produtos = [
 const selectedProduto = ref(props.produto.toLowerCase());
 const selectedSubproduto = ref('');
 
+// Estado para ordenação
+const sortColumn = ref('id_campanha');
+const sortDirection = ref('asc'); // 'asc' ou 'desc'
+
+// Helpers
+const isEia = computed(() => selectedProduto.value === 'eia');
+const isEspeleologia = computed(() => selectedProduto.value === 'espeleologia');
+const isEmElaboracao = (c) => c.status === 'Em elaboração';
+
 // Atualizar a rota quando o produto mudar
 const updateProduto = () => {
   router.get(
@@ -58,6 +71,53 @@ const uniqueSubprodutos = computed(() => {
   return [...new Set(descriptions)];
 });
 
+// Função para alternar ordenação
+const toggleSort = (column) => {
+  if (sortColumn.value === column) {
+    // Se clicar na mesma coluna, inverte a direção
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    // Se clicar em coluna diferente, começa com ascendente
+    sortColumn.value = column;
+    sortDirection.value = 'asc';
+  }
+};
+
+// Computado para campanhas ordenadas
+const campanhasOrdenadas = computed(() => {
+  const items = [...props.campanhas];
+
+  items.sort((a, b) => {
+    let valorA = a[sortColumn.value];
+    let valorB = b[sortColumn.value];
+
+    // Tratamento para valores nulos/undefined
+    if (valorA === null || valorA === undefined) valorA = '';
+    if (valorB === null || valorB === undefined) valorB = '';
+
+    // Conversão para datas se for coluna de data
+    if (sortColumn.value === 'data_inicial' || sortColumn.value === 'data_final') {
+      valorA = new Date(valorA).getTime() || 0;
+      valorB = new Date(valorB).getTime() || 0;
+    }
+
+    // Comparação de números
+    if (sortDirection.value === 'asc') {
+      return valorA > valorB ? 1 : valorA < valorB ? -1 : 0;
+    } else {
+      return valorA < valorB ? 1 : valorA > valorB ? -1 : 0;
+    }
+  });
+
+  return items;
+});
+
+// Helper para mostrar ícone de ordenação
+const getSortIcon = (column) => {
+  if (sortColumn.value !== column) return '⇅'; // Ícone neutro
+  return sortDirection.value === 'asc' ? '↑' : '↓';
+};
+
 // Redirecionar para criação com validação de subproduto
 const goToCreate = () => {
   if (!selectedSubproduto.value) {
@@ -77,9 +137,43 @@ const goToCreate = () => {
   );
 };
 
+const continuarCampanha = (campanha) => {
+    router.get(
+        route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
+        { subproduto: campanha.subproduto },
+        { preserveState: true, preserveScroll: true }
+    );
+};
+
 // Redirecionar para visualização
-const visualizarCampanha = (campanhaId) => {
-  router.get(route('sgc.contratada.produtos.show', [props.contrato, selectedProduto.value, campanhaId]));
+const visualizarCampanha = (campanha, modulo = null) => {
+  // Para EIA, abrir modal de preview
+  if (isEia.value) {
+    previewModal.value.abrirModal(campanha);
+    return;
+  }
+
+  // Para Espeleologia, passar módulo como parâmetro
+  const parametroModulo = isEspeleologia.value ? 'espeleologia' : modulo;
+
+  router.get(
+    route('sgc.contratada.produtos.show', [
+      props.contrato,
+      selectedProduto.value,
+      campanha.id,
+      parametroModulo,
+    ])
+  );
+};
+
+// Gerenciar PMQA (específico para EIA)
+const gerenciarCampanha = (pmqaId) => {
+  router.get(
+    route(
+      'contratos.contratada.sgc.pmqa.configuracao.ponto.index',
+      [props.contrato, selectedProduto.value, pmqaId]
+    )
+  );
 };
 
 // Redirecionar para análise
@@ -87,9 +181,17 @@ const analisarCampanha = (campanhaId) => {
   router.get(route('sgc.contratada.produtos.analise', [props.contrato, selectedProduto.value, campanhaId]));
 };
 
-// Redirecionar para edição
-const editarCampanha = (campanhaId) => {
-  router.get(route('sgc.contratada.produtos.edit', [props.contrato, selectedProduto.value, campanhaId]));
+const editarCampanha = (campanha) => {
+  router.get(
+    route('sgc.contratada.produtos.edit', [props.contrato, selectedProduto.value, campanha.id]),
+    { subproduto: campanha.subproduto },
+    { preserveState: true, preserveScroll: true }
+  );
+};
+
+const excluirCampanha = (campanhaId) => {
+    if (!confirm('Tem certeza que deseja excluir esta campanha? Esta ação não pode ser desfeita.')) return;
+    router.delete(route('sgc.contratada.produtos.destroy', [props.contrato, selectedProduto.value, campanhaId]));
 };
 </script>
 
@@ -161,21 +263,39 @@ const editarCampanha = (campanhaId) => {
                 <div class="block-card">
                   <h4 class="text-center mb-4">CAMPANHAS DE {{ produtos.find(p => p.routeParam === selectedProduto.value)?.title.toUpperCase() || produto.toUpperCase() }}</h4>
                   <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered table-hover">
                       <thead>
                         <tr>
-                          <th class="text-center">ID Campanha</th>
-                          <th class="text-center">Empreendimento</th>
-                          <th class="text-center">Subproduto</th>
-                          <th class="text-center">Data Inicial</th>
-                          <th class="text-center">Data Final</th>
-                          <th class="text-center">Status</th>
+                          <th class="text-center sortable-header" @click="toggleSort('id_campanha')">
+                            Campanha
+                            <span class="sort-icon">{{ getSortIcon('id_campanha') }}</span>
+                          </th>
+                          <th class="text-center sortable-header" @click="toggleSort('empreendimento')">
+                            Empreendimento
+                            <span class="sort-icon">{{ getSortIcon('empreendimento') }}</span>
+                          </th>
+                          <th class="text-center sortable-header" @click="toggleSort('subproduto')">
+                            Subproduto
+                            <span class="sort-icon">{{ getSortIcon('subproduto') }}</span>
+                          </th>
+                          <th class="text-center sortable-header" @click="toggleSort('data_inicial')">
+                            Data Inicial
+                            <span class="sort-icon">{{ getSortIcon('data_inicial') }}</span>
+                          </th>
+                          <th class="text-center sortable-header" @click="toggleSort('data_final')">
+                            Data Final
+                            <span class="sort-icon">{{ getSortIcon('data_final') }}</span>
+                          </th>
+                          <th class="text-center sortable-header" @click="toggleSort('status')">
+                            Status
+                            <span class="sort-icon">{{ getSortIcon('status') }}</span>
+                          </th>
                           <th class="text-center">Ação</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr v-for="campanha in props.campanhas" :key="campanha.id">
-                          <td class="text-center">{{ campanha.id || 'N/A' }}</td>
+                        <tr v-for="campanha in campanhasOrdenadas" :key="campanha.id">
+                          <td class="text-center">{{ campanha.id_campanha || 'N/A' }}</td>
                           <td class="text-center">{{ campanha.empreendimento || 'N/A' }}</td>
                           <td class="text-center">{{ campanha.subproduto || 'N/A' }}</td>
                           <td class="text-center">{{ campanha.data_inicial || 'N/A' }}</td>
@@ -190,6 +310,10 @@ const editarCampanha = (campanhaId) => {
                               class="status-circle status-circle-rejected"
                             ></span>
                             <span
+                              v-else-if="campanha.status === 'rascunho'"
+                              class="status-circle status-circle-rejected"
+                            ></span>
+                            <span
                               v-else-if="campanha.status === 'Em análise'"
                               class="status-circle status-circle-in-analysis"
                             ></span>
@@ -200,22 +324,51 @@ const editarCampanha = (campanhaId) => {
                             {{ campanha.status || 'N/A' }}
                           </td>
                           <td class="text-center">
+                            <!-- Visualizar -->
                             <NavButton
                               type-button="info"
                               title="Visualizar"
-                              @click="visualizarCampanha(campanha.id)"
+                              @click="visualizarCampanha(campanha, isEspeleologia ? 'espeleologia' : null)"
                             />
+                            
+                            <!-- Gerenciar PMQA (EIA) -->
+                            <NavButton
+                              v-if="isEia && campanha.status?.trim() === 'Em elaboração'"
+                              type-button="primary"
+                              title="Gerenciar"
+                              @click="gerenciarCampanha(campanha.id)"
+                            />
+
+                            <!-- Continuar (Em elaboração, não é perfil 3) -->
+                            <NavButton
+                              v-if="campanha.status === 'Em elaboração' && (props.auth.user.perfis_id ?? 0) !== 3"
+                              type-button="warning"
+                              title="Editar"
+                              @click="continuarCampanha(campanha)"
+                            />
+                            
+                            <!-- Analisar (Em análise, perfil com permissão) -->
                             <NavButton
                               v-if="canApprove && campanha.status === 'Em análise'"
                               type-button="success"
                               title="Analisar"
                               @click="analisarCampanha(campanha.id)"
                             />
+                            
+                            <!-- Excluir (Em elaboração, não é perfil 4) -->
                             <NavButton
-                              v-if="(campanha.status === 'Rejeitada' || campanha.status === 'Em elaboração') && (props.auth.user.perfis_id ?? 0) !== 2"
+                              v-if="campanha.status === 'Em elaboração' && (props.auth.user.perfis_id ?? 0) !== 4"
+                              type-button="danger"
+                              title="Excluir"
+                              @click="excluirCampanha(campanha.id)"
+                            />
+
+                            <!-- Editar Rejeitada (Rejeitada, não é perfil 3) -->
+                            <NavButton
+                              v-if="campanha.status === 'Rejeitada' && (props.auth.user.perfis_id ?? 0) !== 3"
                               type-button="warning"
                               title="Editar"
-                              @click="editarCampanha(campanha.id)"
+                              @click="editarCampanha(campanha)"
                             />
                           </td>
                         </tr>
@@ -232,6 +385,15 @@ const editarCampanha = (campanhaId) => {
         </div>
       </template>
     </NavbarContrato>
+
+    <!-- Modal de Preview (EIA) -->
+    <PreviewApresentacaoModal
+      ref="previewModal"
+      :contrato="contrato"
+      :produto="produto"
+      @aprovado="(id) => atualizarStatus(id, 'Em elaboracao')"
+      @reprovado="(id) => atualizarStatus(id, 'Reprovado')"
+    />
   </AuthenticatedLayout>
 </template>
 
@@ -334,6 +496,34 @@ const editarCampanha = (campanhaId) => {
 }
 
 .status-circle-draft {
-  background-color: #6c757d; /* Cor para "Em elaboração" */
+  background-color: #6c757d;
+}
+
+/* ─── Estilos para ordenação ─────────────────────────────────────────────── */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  padding: 0.75rem !important;
+  transition: background-color 0.2s ease;
+  font-weight: 600;
+}
+
+.sortable-header:hover {
+  background-color: #f0f0f0;
+}
+
+.sortable-header.active {
+  background-color: #e8e8e8;
+}
+
+.sort-icon {
+  margin-left: 6px;
+  font-size: 0.85em;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.sortable-header:hover .sort-icon {
+  opacity: 1;
 }
 </style>

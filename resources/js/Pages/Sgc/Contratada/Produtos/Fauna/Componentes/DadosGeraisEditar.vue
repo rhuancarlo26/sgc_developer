@@ -3,6 +3,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import NavButton from '@/Components/NavButton.vue';
 import Table from '@/Components/Table.vue';
+import { router } from '@inertiajs/vue3';
 import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
 import { ref, computed } from 'vue';
@@ -33,6 +34,18 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  contrato: {
+        type: [Number, String],
+        required: false,
+    },
+    produto: {
+        type: String,
+        required: false,
+    },
+    campanhaId: {
+        type: [Number, String],
+        required: false,
+    },
 });
 
 console.log('Props.form:', props.form);
@@ -154,6 +167,60 @@ const statusOptions = [
   { value: 'Ativo', label: 'Ativo' },
   { value: 'Inativo', label: 'Inativo' },
 ];
+
+const excluirProfissional = (profissionalVinculoId) => {
+    // Confirmação
+    if (!confirm('Tem certeza que deseja remover este profissional da campanha?\n\nEsta ação é irreversível.')) {
+        return;
+    }
+
+    // Validar que temos as informações necessárias
+    if (!props.contrato || !props.produto || !props.campanhaId) {
+        console.error('Dados insuficientes para deletar profissional:', {
+            contrato: props.contrato,
+            produto: props.produto,
+            campanhaId: props.campanhaId,
+        });
+        alert('Erro: informações da campanha não disponíveis. Recarregue a página.');
+        return;
+    }
+
+    // Construir URL manualmente
+    const url = route('sgc.contratada.produtos.profissional.destroy', [
+        props.contrato,
+        props.produto.toLowerCase(),
+        props.campanhaId,
+        profissionalVinculoId,
+    ]);
+
+    console.log('Deletando profissional - URL:', url);
+
+    // Usar fetch direto para NÃO disparar Inertia
+    fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest', // ← Indica que é AJAX
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Response:', data);
+
+        if (data.success) {
+            // Remover do array - ISSO ATUALIZA O FRONT
+            emit('excluir-profissional', profissionalVinculoId);
+            alert('✅ Profissional removido com sucesso!');
+        } else {
+            alert('❌ Erro: ' + (data.message || 'Tente novamente.'));
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('❌ Erro de conexão. Tente novamente.');
+    });
+};
 </script>
 
 <template>
@@ -340,12 +407,12 @@ const statusOptions = [
               <td>{{ item.grupo_faunistico || 'N/A' }}</td>
               <td class="text-center" style="min-width: 100px;">
                 <NavButton
-                  @click="$emit('excluir-profissional', item.id)"
-                  type-button="danger"
-                  title="Excluir"
-                  :disabled="disabled"
+                    @click="excluirProfissional(item.id)"
+                    type-button="danger"
+                    title="Excluir"
+                    :disabled="disabled"
                 >
-                  <i class="bi bi-trash"></i>
+                    <i class="bi bi-trash"></i>
                 </NavButton>
               </td>
             </tr>

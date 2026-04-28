@@ -5,7 +5,7 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import InputError from '@/Components/InputError.vue';
 import NavButton from '@/Components/NavButton.vue';
 import { ref, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, usePage  } from '@inertiajs/vue3';
 import DadosGeraisEditar from './Componentes/DadosGeraisEditar.vue';
 import ModulosAmostraisEditar from './Componentes/ModulosAmostraisEditar.vue';
 import QueloniosCrocodilianosEditar from './Componentes/QueloniosCrocodilianosEditar.vue';
@@ -69,10 +69,15 @@ const etapaMap = {
   anexos: ['anexos'],
 };
 
+const page = usePage();
+
+// Se subproduto não vem do campanha, pega da URL
+const subprodutoFromUrl = new URLSearchParams(window.location.search).get('subproduto');
+
 // Formulário principal para edição da campanha
 const form = useForm({
   cod_emp: props.campanha.cod_emp || '',
-  subproduto: props.campanha.subproduto || '',
+  subproduto: props.campanha.subproduto || subprodutoFromUrl || '',
   data_campanha_inicial: props.campanha.data_ini || '',
   data_campanha_final: props.campanha.data_fim || '',
   periodo: props.campanha.periodo || '',
@@ -382,18 +387,54 @@ const excluirProfissional = (id) => {
 };
 
 const salvarNovoProfissional = (novoProfissional) => {
-  form.post(route('profissionais.store'), {
-    data: novoProfissional,
-    onSuccess: (page) => {
-      const novoProfissionalRetornado = page.props.flash.novoProfissional;
-      if (novoProfissionalRetornado) {
-        props.profissionais.push({
-          id: novoProfissionalRetornado.id,
-          profissional: novoProfissionalRetornado.profissional,
-          formacao: novoProfissionalRetornado.formacao,
-        });
-      }
+  console.log('Salvando novo profissional:', novoProfissional);
+ 
+  // Validações básicas no front
+  if (!novoProfissional.profissional || !novoProfissional.formacao || !novoProfissional.cpf) {
+    alert('❌ Preencha os campos obrigatórios: Nome, Formação e CPF.');
+    return;
+  }
+ 
+  const url = route('sgc.contratada.produtos.profissional.store', [
+    props.contrato,
+    props.produto.toLowerCase(),
+  ]);
+ 
+  // Usar fetch para evitar problemas com Inertia
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-Inertia': 'false',
     },
+    body: JSON.stringify(novoProfissional),
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Response:', data);
+ 
+    if (data.success) {
+      // Adicionar o novo profissional à lista
+      props.profissionais.push({
+        id: data.profissional.id,
+        profissional: data.profissional.profissional,
+        formacao: data.profissional.formacao,
+      });
+ 
+      alert('✅ Profissional cadastrado com sucesso!');
+      
+      // Fechar o modal (emitir evento para o filho)
+      // Você pode resetar o formulário aqui se necessário
+      
+    } else {
+      alert('❌ Erro: ' + (data.message || 'Tente novamente.'));
+    }
+  })
+  .catch(error => {
+    console.error('Erro ao salvar profissional:', error);
+    alert('❌ Erro de conexão. Tente novamente.');
   });
 };
 
@@ -431,10 +472,14 @@ const analiseAtualPorEtapa = computed(() => {
   }, null);
 });
 
+
 // Computed para comentários por análise
 const comentariosPorAnalise = computed(() => (analise) => {
   return props.comentarios
-    .filter(c => c.analise === analise.analise && c.etapa === analise.etapa && c.campanha_id === props.campanha.id)
+    .filter(c => 
+      c.etapa === analise.etapa &&      
+      c.campanha_id === analise.id_campanha
+    )
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 });
 
@@ -454,9 +499,7 @@ const submitForm = () => {
   if (form.obs) formData.append('observacoes', form.obs);
   if (form.nao_se_aplica) formData.append('nao_se_aplica', form.nao_se_aplica);
   if (form.consideracoes) formData.append('consideracoes', form.consideracoes);
-  if (form.planilha_terrestre)   formData.append('planilha_terrestre', form.planilha_terrestre);
-  if (form.planilha_aquatica)    formData.append('planilha_aquatica', form.planilha_aquatica);
-  if (form.planilha_cavernicola) formData.append('planilha_cavernicola', form.planilha_cavernicola);
+
 
 
   form.abios.forEach((abio, index) => {
@@ -709,6 +752,9 @@ const excluirAnexo = (anexoId) => {
                     :profissional-records="form.profissionais"
                     :sub-step="subStep"
                     :disabled="etapasStatus['caracterizacao_area'] === 'Aprovada'"
+                    :contrato="props.contrato"
+                    :produto="props.produto"
+                    :campanhaId="props.campanha.id"
                     @vincular-abio="vincularAbio"
                     @excluir-abio="excluirAbio"
                     @salvar-novo-profissional="salvarNovoProfissional"
@@ -907,36 +953,50 @@ const excluirAnexo = (anexoId) => {
                             'analise-item-current': analise.id === analiseAtualPorEtapa?.id
                           }"
                         >
-                          <div class="analise-content">
-                            <div class="analise-header">
-                              <span class="etapa">Análise {{ analise.analise }} - {{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}</span>
-                              <span class="analise-date">{{ analise.created_at ? new Date(analise.created_at).toLocaleString('pt-BR') : 'Data não informada' }}</span>
-                            </div>
-                            <div class="analise-text">{{ analise.observacoes || 'Não informado' }}</div>
-                            <div class="comentarios-list mt-2">
-                              <h6>Seus Comentários:</h6>
-                              <div v-if="comentariosPorAnalise(analise).length">
-                                <div v-for="comentario in comentariosPorAnalise(analise)" :key="comentario.id" class="comentario-content">
-                                  <div class="d-flex align-items-start">
-                                    <div class="flex-grow-1">
-                                      <span class="comentario-text">{{ comentario.comentario }}</span>
-                                      <span class="comentario-date">Salvo em: {{ new Date(comentario.created_at).toLocaleString('pt-BR') }}</span>
+                        <!-- DEBUG - dentro do loop das análises -->
+                        <!-- <div style="background: yellow; padding: 10px; margin-bottom: 10px; font-size: 12px;">
+                          <strong>Análise objeto:</strong> {{ JSON.stringify(analise) }}<br>
+                          <strong>analise.analise:</strong> {{ analise.analise }}<br>
+                          <strong>analise.etapa:</strong> {{ analise.etapa }}<br>
+                          <strong>analise.id:</strong> {{ analise.id }}<br>
+                          <strong>Props comentarios:</strong> {{ JSON.stringify(props.comentarios) }}<br>
+                          <strong>Filtrados:</strong> {{ comentariosPorAnalise(analise) }}
+                        </div> -->
+
+  
+                            <div class="analise-content">
+                              <div class="analise-header">
+                                <span class="etapa">Análise - {{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}</span>
+                                <span class="analise-date">
+                                  {{ analise.fiscal?.name || 'Fiscal N/A' }} - {{ analise.created_at ? new Date(analise.created_at).toLocaleString('pt-BR') : 'Data não informada' }}
+                                </span>
+                              </div>
+                              <div class="analise-text">{{ analise.comentario || 'Não informado' }}</div>
+                              <div class="comentarios-list mt-2">
+                                <h6>Seus Comentários:</h6>
+                                <div v-if="comentariosPorAnalise(analise).length">
+                                  <div v-for="comentario in comentariosPorAnalise(analise)" :key="comentario.id" class="comentario-content">
+                                    <div class="d-flex align-items-start">
+                                      <div class="flex-grow-1">
+                                        <span class="comentario-user" style="font-weight: 500; color: #084298;">{{ comentario.user?.name || 'Usuário N/A' }}</span>
+                                        <span class="comentario-text">{{ comentario.comentario }}</span>
+                                        <span class="comentario-date">Salvo em: {{ new Date(comentario.created_at).toLocaleString('pt-BR') }}</span>
+                                      </div>
+                                      <button
+                                        v-if="props.campanha.status === 'Rejeitada' && analise.id === analiseAtualPorEtapa?.id"
+                                        class="btn btn-link text-danger p-0 ms-2"
+                                        title="Excluir Comentário"
+                                        @click="excluirComentario(comentario.id)"
+                                      >
+                                        x
+                                      </button>
                                     </div>
-                                    <button
-                                      v-if="props.campanha.status === 'Rejeitada' && analise.id === analiseAtualPorEtapa?.id"
-                                      class="btn btn-link text-danger p-0 ms-2"
-                                      title="Excluir Comentário"
-                                      @click="excluirComentario(comentario.id)"
-                                    >
-                                      x
-                                    </button>
                                   </div>
                                 </div>
+                                <div v-else class="comentario-content">
+                                  <span class="comentario-label">Nenhum comentário salvo para esta análise.</span>
+                                </div>
                               </div>
-                              <div v-else class="comentario-content">
-                                <span class="comentario-label">Nenhum comentário salvo para esta análise.</span>
-                              </div>
-                            </div>
                             <form 
                               v-if="props.campanha.status === 'Rejeitada' && analise.id === analiseAtualPorEtapa?.id"
                               @submit.prevent="salvarComentario"

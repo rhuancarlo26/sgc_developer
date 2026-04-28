@@ -112,7 +112,7 @@ class CampanhaService
         $this->pontoService->salvarPontosQuelonios($contrato, $campanha->id, $data['pontos_quelo_crocod'] ?? [], $data['nao_se_aplica_quelo'] ?? false);
         $this->pontoService->salvarPontosCavernicola($contrato, $campanha->id, $data['pontos_cavernicola'] ?? [], $data['nao_se_aplica_cavernicola'] ?? false);
         $this->metodologiaService->salvarMetodologias($contrato, $campanha->id, $data['metodologias'] ?? []);
-        $this->resultadoService->salvarResultados($contrato, $data['planilha'] ?? null, $campanha->id, $data['consideracoes'] ?? null);
+        // $this->resultadoService->salvarResultados($contrato, $data['planilha'] ?? null, $campanha->id, $data['consideracoes'] ?? null);
         $this->anexoService->salvarAnexos($contrato, $campanha->id, $data['anexos'] ?? []);
 
         return $campanha->id;
@@ -146,6 +146,106 @@ class CampanhaService
                 $this->anexoService->salvarAnexos($campanha->id_contrato, $campanha->id, $data['anexos'] ?? []);
                 break;
         }
+    }
+
+    // --------------------------------------------------------------------------
+    // Método 1: salvarSubDadosApresentacao
+    // Usado pelo SalvarEtapaCampanhaController na etapa 'apresentacao'.
+    // Chama os sub-serviços exatamente como o salvarCampanha já faz.
+    // --------------------------------------------------------------------------
+
+    public function salvarSubDadosApresentacao($contratoId, $campanhaId, array $data): void
+    {
+        $this->profissionalService->salvarProfissionais(
+            $contratoId,
+            $campanhaId,
+            $data['profissionais'] ?? []
+        );
+
+        $this->moduloAmostralService->salvarModulosAmostrais(
+            $contratoId,
+            $campanhaId,
+            $data['modulos_amostrais'] ?? []
+        );
+
+        $this->pontoService->salvarPontosQuelonios(
+            $contratoId,
+            $campanhaId,
+            $data['pontos_quelo_crocod'] ?? [],
+            $data['nao_se_aplica_quelo'] ?? false
+        );
+
+        $this->pontoService->salvarPontosCavernicola(
+            $contratoId,
+            $campanhaId,
+            $data['pontos_cavernicola'] ?? [],
+            $data['nao_se_aplica_cavernicola'] ?? false
+        );
+    }
+
+    // --------------------------------------------------------------------------
+    // Método 2: salvarMetodologias (wrapper público para o SalvarEtapaController)
+    // --------------------------------------------------------------------------
+
+    public function salvarMetodologias($contratoId, $campanhaId, array $metodologias): void
+    {
+        $this->metodologiaService->salvarMetodologias($contratoId, $campanhaId, $metodologias);
+    }
+
+    // --------------------------------------------------------------------------
+    // Método 3: salvarResultadosPorTipo (wrapper público)
+    // --------------------------------------------------------------------------
+
+    public function salvarResultadosPorTipo($contratoId, $campanhaId, $file, ?string $consideracoes, string $tipo): void
+    {
+        $this->resultadoService->salvarResultados($contratoId, $file, $campanhaId, $consideracoes, $tipo);
+    }
+
+    // --------------------------------------------------------------------------
+    // Método 4: salvarAnexos (wrapper público)
+    // --------------------------------------------------------------------------
+
+    public function salvarAnexos($contratoId, $campanhaId, array $anexos): void
+    {
+        $this->anexoService->salvarAnexos($contratoId, $campanhaId, $anexos);
+    }
+
+    // --------------------------------------------------------------------------
+    // Método 5: getRascunhoAberto
+    // Usado pelo ProdutosController para pré-carregar rascunho na tela de Create
+    // --------------------------------------------------------------------------
+
+    public function getRascunhoAberto($contratoId, string $subproduto, string $codEmp): ?array
+    {
+        $campanha = \App\Models\SgcFaunaCampanha::where('id_contrato', $contratoId)
+            ->where('subproduto', $subproduto)
+            ->where('cod_emp', $codEmp)
+            ->where('status', 'rascunho')
+            ->with([
+                'abios.abio',
+                'profissionais.profissional',
+                'modulos_amostrais',
+                'pontos_quelo_crocod',
+                'pontos_cavernicola',
+                'metodologias',
+                'resultadosTerrestre',
+                'resultadosAquatica',
+                'resultadosCavernicola',
+                'resultados_consideracoes',
+                'anexos',
+            ])
+            ->latest()
+            ->first();
+
+        if (!$campanha) {
+            return null;
+        }
+
+        return [
+            'campanha_id' => $campanha->id,
+            'etapa_atual' => $campanha->etapa_atual ?? 'apresentacao',
+            'dados'       => \App\Domain\Sgc\Contratada\Produtos\Fauna\Resources\CampanhaResource::toArray($campanha),
+        ];
     }
 
     public function getProfissionaisByContrato($contratoId)

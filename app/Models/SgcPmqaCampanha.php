@@ -2,31 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class SgcPmqaCampanha extends Model
 {
+    use HasFactory;
+
     protected $table = 'sgc_pmqa_campanhas';
+    protected $guarded = ['id', 'created_at'];
 
-    protected $fillable = [
-        'id_contrato',
-        'subproduto',
-        'fase',
-        'status',
-        'id_campanha',
-        'observacoes',
-        'created_at',
-        'update_at'
-    ];
-
-    public function pontos(): HasMany
+    public function pontos(): BelongsToMany
     {
-        return $this->hasMany(SgcPmqaPonto::class, 'camapanha_id');
+        return $this->belongsToMany(
+            SgcPmqaPonto::class,
+            'sgc_pmqa_campanhas_pontos',
+            'sgc_pmqa_campanha_id',  // Foreign key da tabela atual (campanhas) na pivot
+            'ponto_id'      // Foreign key da tabela relacionada (pontos) na pivot
+        );
     }
 
-    public function parametros(): HasMany
+    public function campanha_pontos()
     {
-        return $this->hasMany(SgcPmqaParametro::class, 'campanha_id');
+        return $this->hasMany(SgcPmqaCampanhasPonto::class, 'sgc_pmqa_campanha_id');
     }
 }

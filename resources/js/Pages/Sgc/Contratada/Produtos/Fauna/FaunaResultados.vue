@@ -263,10 +263,20 @@ const excluirResultado = (tipo, index) => {
     updateCharts();
 };
 
-// NAVEGAÇÃO
-const downloadModelo = () => {
-    alert('Os modelos oficiais estão na área de Modelos dentro do sistema.');
+const downloadModelos = () => {
+    window.open(
+        route('sgc.contratada.produtos.fauna.modelos.download'),
+        '_blank'
+    );
 };
+
+const temPlanilha = computed(() => {
+    return (
+        resultados.value.terrestre.length ||
+        resultados.value.aquatica.length ||
+        resultados.value.cavernicola.length
+    );
+});
 
 const avancar = () => {
     props.formResultados.consideracoes = consideracoes.value;
@@ -281,7 +291,7 @@ const avancar = () => {
 
         <!-- Botão Modelos -->
         <div class="mb-3">
-            <button class="btn btn-secondary" type="button" @click="downloadModelo">
+            <button class="btn btn-secondary" type="button" @click="downloadModelos">
                 Ver Modelos Disponíveis
             </button>
         </div>
@@ -299,6 +309,12 @@ const avancar = () => {
                 </button>
             </li>
         </ul>
+
+        <!-- NAV TOPO (só aparece se tiver planilha) -->
+        <div v-if="temPlanilha" class="d-flex justify-content-between mb-3">
+            <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
+            <NavButton type-button="primary" title="Avançar" @click="avancar" />
+        </div>
 
         <!-- GRÁFICOS AGORA NO TOPO -->
         <div v-if="previewAtivo.length" class="mt-3 mb-4">
@@ -425,7 +441,7 @@ const avancar = () => {
         </div>
 
         <!-- Navegação -->
-        <div class="d-flex justify-content-between">
+        <div v-if="!temPlanilha" class="d-flex justify-content-between">
             <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
             <NavButton type-button="primary" title="Avançar" @click="avancar" />
         </div>

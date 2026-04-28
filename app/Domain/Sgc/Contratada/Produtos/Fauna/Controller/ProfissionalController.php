@@ -19,15 +19,43 @@ class ProfissionalController extends Controller
     public function storeProfissional(StoreProfissionalRequest $request, $contrato, $produto)
     {
         try {
-            $this->profissionalService->salvarProfissional($contrato, $request->validated());
+
+            $profissional = $this->profissionalService->salvarProfissional($contrato, $request->validated());
+
+            Log::info('ProfessionalController: Profissional salvo com sucesso', [
+                'profissional_id' => $profissional->id,
+                'contrato' => $contrato,
+                'produto' => $produto,
+            ]);
+
+            if ($request->expectsJson() || $request->header('X-Inertia') === 'false') {
+                return response()->json([
+                    'message' => 'Profissional salvo com sucesso!',
+                    'success' => true,
+                    'profissional' => $profissional,
+                ], 201);
+            }
+
             return redirect()->back()->with('success', 'Profissional salvo com sucesso!');
+
         } catch (\Exception $e) {
-            Log::error('ProfissionalController: Erro ao salvar profissional', [
+            Log::error('ProfessionalController: Erro ao salvar profissional', [
                 'contrato' => $contrato,
                 'produto' => $produto,
                 'erro' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->withErrors(['error' => 'Erro ao salvar profissional: ' . $e->getMessage()]);
+
+            $errorMessage = 'Erro ao salvar profissional: ' . $e->getMessage();
+
+            if ($request->expectsJson() || $request->header('X-Inertia') === 'false') {
+                return response()->json([
+                    'message' => $errorMessage,
+                    'success' => false,
+                ], 500);
+            }
+
+            return redirect()->back()->withErrors(['error' => $errorMessage]);
         }
     }
 }
