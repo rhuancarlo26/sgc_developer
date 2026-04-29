@@ -11,7 +11,7 @@
 					{ route: '#', label: contrato.contratada }
 				]
 					" />
-				<div class="container-buttons">
+				<div class="container-buttons" v-if="can('contratos.contratada.servicos.create')">
 					<Link class="btn btn-info me-2" :href="route('contratos.contratada.servicos.create', contrato.id)">
 						Cadastrar serviço
 					</Link>
@@ -98,14 +98,15 @@
 										Editar
 									</a>
 									<a @click="deleteServico(item.id)" class="dropdown-item" href="javascript:void(0)"
-										v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4">
+										v-if="(item.status_aprovacao === 1 || item.status_aprovacao === 4) && can('contratos.contratada.servicos.delete')">
 										Excluir
 									</a>
 									<a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
-										v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4">
+										v-if="item.status_aprovacao === 1 || item.status_aprovacao === 4 && can('contratos.contratada.servicos.envia-fiscal')">
 										Enviar para o fiscal
 									</a>
-									<a @click="abrirModalParecerFiscal(item)" v-if="item.status_aprovacao === 3" class="dropdown-item" href="javascript:void(0)">
+									<a @click="abrirModalParecerFiscal(item)" v-if="item.status_aprovacao === 3"
+									 class="dropdown-item" href="javascript:void(0)">
 										Parecer 
 									</a>
 								</div>
@@ -137,6 +138,7 @@ import ModalVisualizarParecerFiscal from "../../../Fiscal/Servico/ModalVisualiza
 
 
 import { ref } from "vue";
+import { can } from "@/Utils/PermissionUtils";
 
 defineProps({
 	contrato: Object,

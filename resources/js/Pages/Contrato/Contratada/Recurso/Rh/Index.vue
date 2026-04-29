@@ -40,7 +40,7 @@ const excluirRh = (rh_id) => {
           { route: '#', label: contrato.contratada }
         ]
           " />
-        <div class="container-buttons">
+        <div class="container-buttons" v-if="can('contratos.contratada.recurso.rh.create')">
           <Link class="btn btn-info me-2" :href="route('contratos.contratada.recurso.rh.create', contrato.id)">
           Cadastrar RH
           </Link>
@@ -81,11 +81,11 @@ const excluirRh = (rh_id) => {
                   <a @click="abrirModal(item)" class="dropdown-item" href="javascript:void(0)">
                     Visualizar
                   </a>
-                  <a class="dropdown-item"
+                  <a class="dropdown-item" v-if="can('contratos.contratada.recurso.rh.create')"
                     :href="route('contratos.contratada.recurso.rh.create', { contrato: contrato.id, rh: item.id })">
                     Editar
                   </a>
-                  <a @click="excluirRh(item.id)" class="dropdown-item" href="javascript:void(0)">
+                  <a @click="excluirRh(item.id)" class="dropdown-item" href="javascript:void(0)" v-if="can('contratos.contratada.recurso.rh.destroy_rh')">
                     Excluir
                   </a>
                 </div>

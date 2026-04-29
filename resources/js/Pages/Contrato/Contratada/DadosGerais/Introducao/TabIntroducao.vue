@@ -29,7 +29,7 @@ const enviarIntroducao = () => {
         <textarea v-model="form.introducao" class="form-control" rows="5"></textarea>
         <InputError :message="form.errors.nome"/>
     </div>
-    <div class="text-end">
+    <div class="text-end" v-if="can('contratos.contratada.update_introducao.index')">
         <button @click="enviarIntroducao()" type="button" class="btn btn-success">Salvar</button>
     </div>
 </template>
