@@ -57,7 +57,7 @@ const excluirObservacao = (observacao_id) => {
         <tr v-for="observacao in contrato.historico" :key="observacao.id">
           <td>{{ observacao.observacao }}</td>
           <td @click.stop>
-            <span class="dropdown" v-if="can('contratos.contratada.dados_gerais.index')">
+            <span class="dropdown" v-if="can('contratos.contratada.update_historico')">
               <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown"
                 aria-expanded="false">
                 <IconDots />
