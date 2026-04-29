@@ -88,7 +88,7 @@ const dtAlerta = (data) => {
     <h3 class="my-0">Licenciamento</h3>
   </div>
   <!-- <h4>Licenciamento</h4> -->
-  <div class="mb-4">
+  <div class="mb-4" v-if="can('contratos.contratada.store_licenciamento')">
     <div class="row g-2">
       <div class="col">
         <v-select :options="numero_licencas" label="numero_licenca" v-model="form.licenca">
@@ -98,7 +98,7 @@ const dtAlerta = (data) => {
         </v-select>
       </div>
       <div class="col-auto">
-        <a @click="salvarLicenca()" href="javascript:void(0)" class="btn btn-success" aria-label="Button">
+        <a @click="salvarLicenca()" href="javascript:void(0)" class="btn btn-success" aria-label="Button" >
           Salvar
         </a>
       </div>
@@ -183,7 +183,7 @@ const dtAlerta = (data) => {
                   :href="route('licenca.documento.visualizar', licenca.documento.id)">
                   Visualizar PDF
                 </a>
-                <a @click="excluirLicenciamento(licenca.id)" class="dropdown-item" href="javascript:void(0)">
+                <a @click="excluirLicenciamento(licenca.id)" class="dropdown-item" href="javascript:void(0)" v-if="can('contratos.contratada.delete_licenciamento')">
                   Excluir
                 </a>
               </div>
@@ -193,7 +193,7 @@ const dtAlerta = (data) => {
       </tbody>
     </table>
   </div>
-  <div class="mb-4">
+  <div class="mb-4" v-if="can('contratos.contratada.store_licenciamento_observacao')">
     <h4>Observação</h4>
     <div class="form-group mb-4">
       <textarea v-model="form_observacao.observacao" class="form-control" rows="5"></textarea>
@@ -217,10 +217,10 @@ const dtAlerta = (data) => {
         <tr v-for="observacao in contrato.licenciamento_observacoes" :key="observacao.id">
           <td>{{ observacao.observacao }}</td>
           <td>
-            <button @click="excluirObservacao(observacao.id)" type="button" class="btn btn-danger me-2">
+            <button @click="excluirObservacao(observacao.id)" type="button" class="btn btn-danger me-2" v-if="can('contratos.contratada.delete_licenciamento_observacao')">
               <IconTrash />
             </button>
-            <button @click="editarObservacao(observacao)" type="button" class="btn btn-primary">
+            <button @click="editarObservacao(observacao)" type="button" class="btn btn-primary" v-if="can('contratos.contratada.update_licenciamento_observacao')">
               <IconPencil />
             </button>
           </td>

@@ -9,6 +9,7 @@ import { Head, Link, router } from "@inertiajs/vue3";
 import { ref } from "vue";
 import { IconDots } from "@tabler/icons-vue";
 import ModalDetalheVeiculo from "./ModalDetalheVeiculo.vue";
+import { can } from "@/Utils/PermissionUtils";
 
 const refDetalhes = ref();
 
@@ -40,7 +41,7 @@ const excluirVeiculo = (veiculo_id) => {
     { route: '#', label: contrato.contratada }
   ]
     " />
-        <div class="container-buttons">
+        <div class="container-buttons" v-if="can('contratos.contratada.recurso.veiculo.create')">
           <Link class="btn btn-info me-2" :href="route('contratos.contratada.recurso.veiculo.create', contrato.id)">
           Cadastrar veiculos
           </Link>
@@ -70,11 +71,11 @@ const excluirVeiculo = (veiculo_id) => {
                   <a @click="abrirModal(item)" class="dropdown-item" href="javascript:void(0)">
                     Visualizar
                   </a>
-                  <a class="dropdown-item"
+                  <a class="dropdown-item"  v-if="can('contratos.contratada.recurso.veiculo.create')"
                     :href="route('contratos.contratada.recurso.veiculo.create', { contrato: contrato.id, veiculo: item.id })">
                     Editar
                   </a>
-                  <a @click="excluirVeiculo(item.id)" class="dropdown-item" href="javascript:void(0)">
+                  <a @click="excluirVeiculo(item.id)" class="dropdown-item" href="javascript:void(0)" v-if="can('contratos.contratada.recurso.veiculo.destroy_veiculo')">
                     Excluir
                   </a>
                 </div>
