@@ -13,6 +13,7 @@ use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use Illuminate\Support\Facades\DB;
+use App\Shared\Utils\MailUtil;
 
 class ServicoService extends BaseModelService
 {
@@ -26,7 +27,7 @@ class ServicoService extends BaseModelService
             ->with([
                 'tipo',
                 'tema',
-//                'status',
+                //                'status',
                 'rhs',
                 'veiculos',
                 'veiculos.codigo',
@@ -130,7 +131,7 @@ class ServicoService extends BaseModelService
             ->join('programas AS p', 'p.id', '=', 'servicos.servico')
             ->join('temas AS t', 't.id', '=', 'p.cod_tema')
             ->leftJoin('servico_parecer AS sp', 'sp.fk_servico', '=', 'servicos.id')
-//            ->when($contratoId, fn($query) => $query->where('id_contrato', $id))
+            //            ->when($contratoId, fn($query) => $query->where('id_contrato', $id))
             ->orderBy('servicos.id');
 
         if ($id) {
@@ -138,10 +139,33 @@ class ServicoService extends BaseModelService
             return $query->first();
         }
 
-//        if (session()->get('auth')['id_perfil'] == '2' || session()->get('auth')['id_perfil'] == '4') {
-//            $query->whereIn('status_aprovacao', [2, 3, 4]);
-//        }
+        //        if (session()->get('auth')['id_perfil'] == '2' || session()->get('auth')['id_perfil'] == '4') {
+        //            $query->whereIn('status_aprovacao', [2, 3, 4]);
+        //        }
 
         return $query->get();
+    }
+
+    public function enviaEmailFiscal(Servicos $servico): void
+    {
+        $servico->load([
+            'contrato.users.roles',
+            'tema',
+            'tipo',
+        ]);
+
+        $emails = $servico->contrato->users
+            ->filter(fn($user) => $user->hasRole('Fiscal'))
+            ->pluck('email')
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        MailUtil::sendServicoFiscal(
+            $emails,
+            'Novo serviço encaminhado para fiscalização',
+            $servico
+        );
     }
 }

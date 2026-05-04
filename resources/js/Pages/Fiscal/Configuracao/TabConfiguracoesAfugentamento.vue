@@ -9,13 +9,13 @@
             <ModelSearchForm :search-columns="{}" />
 
             <!-- Listagem -->
-            <Table :columns="['#', 'Serviço', 'Parecer','Status Aprovação', 'Ação']" :records="servicos"
+            <Table :columns="['#', 'Serviço', 'Parecer', 'Status Aprovação', 'Ação']" :records="servicos"
                 table-class="table-hover">
                 <template #body="{ item }">
                     <tr>
-                        <td class="text-center">{{item.id}}</tD>
-                        <td class="text-center">{{item.tema.nome_tema}} - {{ item.tipo?.nome }}</td>
-                        <td> {{item.parecer_afugentamento?.parecer}}</td>
+                        <td class="text-center">{{ item.id }}</tD>
+                        <td class="text-center">{{ item.tema.nome_tema }} - {{ item.tipo?.nome }}</td>
+                        <td> {{ item.parecer_afugentamento?.parecer }}</td>
                         <td class="text-center">
                             <span v-if="item.parecer_afugentamento?.fk_status === 1" class="badge bg-yellow-lt">
                                 Em análise
@@ -36,10 +36,12 @@
                                 <IconDots />
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-<!--                                <a @click="abrirModalServicoFiscal(item)" class="dropdown-item" href="javascript:void(0)">-->
-<!--                                    Visualizar-->
-<!--                                </a>-->
-                                <a @click="abrirModalParecerFiscal(item)" class="dropdown-item" href="javascript:void(0)">
+                                <!-- <a @click="abrirModalServicoFiscal(item)" class="dropdown-item"
+                                    href="javascript:void(0)">
+                                    Visualizar
+                                </a> -->
+                                <a @click="abrirModalParecerFiscal(item)" class="dropdown-item"
+                                    href="javascript:void(0)" v-if="item.parecer_afugentamento?.fk_status">
                                     Parecer
                                 </a>
                             </div>
@@ -51,7 +53,7 @@
     </Navbar>
 
     <ModalParecerAfugentamento ref="modalParecerAfugentamento" />
-<!--    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />-->
+       <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />
 
 </template>
 

@@ -18,6 +18,8 @@ class EnviaServicoFiscalController extends Controller
         $servico['status_aprovacao'] = 2;
         $this->servicoService->updateServico($servico->toArray());
 
+        $this->servicoService->enviaEmailFiscal($servico);
+        
         return to_route('contratos.contratada.servicos.index', [
             'contrato' => $servico->id_contrato
         ])->with('message', ['type' => 'success', 'content' => 'Enviado para o fiscal!']);
