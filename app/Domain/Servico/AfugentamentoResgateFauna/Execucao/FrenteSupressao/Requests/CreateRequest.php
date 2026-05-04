@@ -20,6 +20,7 @@ class CreateRequest extends FormRequest
             'longitude_final' => 'required',
             'data_inicial' => 'required',
             'data_final' => 'required',
+            'obs' => 'nullable'
         ];
     }
 }
