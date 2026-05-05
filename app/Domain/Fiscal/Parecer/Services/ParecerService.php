@@ -14,6 +14,7 @@ use App\Shared\Traits\Searchable;
 use App\Models\Contrato;
 use App\Models\ServicoContOcorrSupervisaoParecerConfiguracao;
 use App\Models\ServicoPassagemFaunaParecerConfiguracao;
+use App\Shared\Utils\MailUtil;
 
 class ParecerService extends BaseModelService
 {
@@ -29,6 +30,23 @@ class ParecerService extends BaseModelService
             $this->dataManagement->update(entity: ServicoParecer::class, infos: $post, id: $post['id_parecer']);
         }
         $response = $this->dataManagement->update(entity: Servicos::class, infos: $post, id: $post['fk_servico']);
+
+        $servico = Servicos::find($post['fk_servico']);
+
+        $servico->load([
+            'user',
+            'parecer',
+            'tipo',
+            'tema',
+        ]);
+
+        if (isset($servico->user->email)) {
+            MailUtil::sendParecerFiscal(
+                [$servico->user->email],
+                'Parecer final da fiscalização',
+                $servico
+            );
+        }
 
         return [
             'request' => $response['request']

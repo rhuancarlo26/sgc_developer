@@ -7,7 +7,6 @@ const servico = ref(null);
 
 const abrirModal = (item) => {
     servico.value = item;
-    console.log(servico.value);
     modalServico.value.getBsModal().show();
 }
 
@@ -220,7 +219,7 @@ defineExpose({ abrirModal });
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="condicionante in servico.condicionantes" :key="condicionante.id">
+                                            <tr v-for="condicionante in servico?.condicionantes" :key="condicionante.id">
                                                 <td>{{ condicionante.licenca?.numero_licenca }}</td>
                                                 <td>{{ condicionante.descricao }}</td>
                                             </tr>

@@ -80,7 +80,7 @@ const excluirLicencaCondicionante = (condicionante_id, licenca_id) => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="condicionante in servico.condicionantes" :key="condicionante.id">
+            <tr v-for="condicionante in servico?.condicionantes" :key="condicionante.id">
               <td>{{ condicionante.licenca?.numero_licenca }}</td>
               <td>{{ condicionante.descricao }}</td>
               <td>
