@@ -29,14 +29,28 @@ class UpdateService extends BaseModelService
     {
         $caminhoArquivo = null;
         $extensaoArquivo = null;
-        $arquivo = null;
+        $arquivo = $data['arquivo'] ?? null;
 
-        if (!is_null($data['arquivo'])) {
-            $arquivo = $data['arquivo'];
-            unset($data['arquivo']);
+        $fotos = $data['fotos'] ?? [];
+        $anexos = $data['anexos'] ?? [];
 
+        $enviarAnalise = filter_var($data['enviar_analise'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $updateModulo = filter_var($data['update_modulo'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        unset(
+            $data['fotos'],
+            $data['anexos'],
+            $data['enviar_analise'],
+            $data['update_modulo'],
+            $data['arquivo']
+        );
+
+        if (!is_null($arquivo)) {
             $nomeArquivo = $arquivo->getClientOriginalName();
-            $caminhoArquivo = $arquivo->storeAs('Importador' . DIRECTORY_SEPARATOR . uniqid() .  '_' . $nomeArquivo);
+
+            $caminhoArquivo = $arquivo->storeAs(
+                'Importador' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nomeArquivo
+            );
 
             $extensaoArquivo = $arquivo->getClientOriginalExtension();
 
@@ -44,9 +58,8 @@ class UpdateService extends BaseModelService
             $data['load'] = true;
         }
 
-        if ($data['update_modulo']) {
+        if ($updateModulo) {
             $importador->dadosJson()->delete();
-            unset($data['update_modulo']);
         }
 
         $importador->update($data);
@@ -58,14 +71,15 @@ class UpdateService extends BaseModelService
             temArquivo: !is_null($arquivo)
         );
 
-        // $job->handle();
         dispatch($job);
 
-        $this->gerenciarImportadorService->gerenciarFotos($importador, $data['fotos'] ?? []);
-        $this->gerenciarImportadorService->gerenciarAnexos($importador, $data['anexos'] ?? []);
+        $this->gerenciarImportadorService->gerenciarFotos($importador, $fotos);
 
-        if ($data['enviar_analise']) {
-            $dataAnalise = Arr::only($data, 'parecer_tecnico');
+        $this->gerenciarImportadorService->gerenciarAnexos($importador, $anexos);
+
+        if ($enviarAnalise) {
+            $dataAnalise = Arr::only($data, ['parecer_tecnico']);
+
             (new StatusImportadorService)->enviarAnalise($importador, $dataAnalise);
         }
     }
