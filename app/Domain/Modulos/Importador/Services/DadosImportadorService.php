@@ -2,9 +2,12 @@
 
 namespace App\Domain\Modulos\Importador\Services;
 
+use App\Domain\Modulos\Importador\Jobs\ProcessarPlanilhaImportadorJob;
 use App\Models\ModuloImportador;
+use App\Models\ModuloImportadorDados;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class DadosImportadorService extends Controller
@@ -110,5 +113,37 @@ class DadosImportadorService extends Controller
             'next_page_url' => $page < $lastPage ? $buildPageUrl($page + 1) : null,
             'prev_page_url' => $page > 1 ? $buildPageUrl($page - 1) : null,
         ];
+    }
+
+    public function importarPlanilha(ModuloImportador $importador, UploadedFile $arquivo): void
+    {
+        if ($importador->dadosJson()->exists()) {
+            throw new \RuntimeException('Já existem dados importados para esta planilha.');
+        }
+
+        $nomeArquivo = $arquivo->getClientOriginalName();
+
+        $caminhoArquivo = $arquivo->storeAs(
+            'Importador' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nomeArquivo
+        );
+
+        $importador->update([
+            'nome_arquivo' => $nomeArquivo,
+            'load' => false,
+            'desc_erros' => null,
+        ]);
+
+        $job = new ProcessarPlanilhaImportadorJob(
+            importadorId: $importador->id,
+            caminhoArquivo: $caminhoArquivo,
+            extensaoArquivo: $arquivo->getClientOriginalExtension()
+        );
+
+        dispatch($job);
+    }
+
+    public function excluirDados(ModuloImportador $importador): int
+    {
+        return ModuloImportadorDados::where('modulo_importador_id', $importador->id)->delete();
     }
 }

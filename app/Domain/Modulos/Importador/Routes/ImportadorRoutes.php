@@ -23,6 +23,8 @@ Route::prefix('importador-modulo')->group(function () {
     Route::post('/aprov-reprov/{importador}/{status}', [StatusImportadorController::class, 'aprovReprov'])->name('importador.aprovReprov');
 
     Route::get('/buscar-dados/{importador}', [DadosImportadorController::class, 'buscarDados'])->name('importador.buscarDados');
+    Route::post('/importar-planilha/{importador}', [DadosImportadorController::class, 'importarPlanilha'])->name('importador.importarPlanilha');
+    Route::delete('/excluir-dados/{importador}', [DadosImportadorController::class, 'excluirDados'])->name('importador.excluirDados');
 
     Route::get('/buscar-historico/{importador}', [HistoricoImportadorController::class, 'buscarHistorico'])->name('importador.buscarHistorico');
 });

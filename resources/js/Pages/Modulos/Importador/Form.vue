@@ -40,37 +40,56 @@ const form = useForm({
 
 const CardFotosRef = ref(null)
 const CardAnexosRef = ref(null)
+const temDadosPlanilha = ref(false);
+const CardDadosPlanilhaRef = ref(null);
+const CardInformacoesGeraisRef = ref(null);
 
 const importar = async (enviarAnalise = false) => {
 
-    if(form.fotos.length && CardFotosRef.value.validarCampos()) {
+    if (form.fotos.length && CardFotosRef.value.validarCampos()) {
         return
     }
 
-    if(form.anexos.length && CardAnexosRef.value.validarCampos()) {
+    if (form.anexos.length && CardAnexosRef.value.validarCampos()) {
         return
     }
 
-    if(form.id && form.modulo_id != props.moduloImportador.modulo_id) {
+    if (form.id && form.modulo_id != props.moduloImportador.modulo_id) {
         await Swal.fire({
-                title: 'Tem certeza?',
-                text: 'O módulo foi alterado, se prosseguir irá excluir todos os dados das planilhas importadas!',
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: 'Sim, Continuar',
-                cancelButtonText: 'Cancelar'
-            }).then(result => {
+            title: 'Tem certeza?',
+            text: 'O módulo foi alterado, se prosseguir irá excluir todos os dados das planilhas importadas!',
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: 'Sim, Continuar',
+            cancelButtonText: 'Cancelar'
+        }).then(result => {
 
-                if(result.isConfirmed) {
-                    form.update_modulo = true
-                }
-            })
-    }    
+            if (result.isConfirmed) {
+                form.update_modulo = true
+            }
+        })
+    }
 
     form.enviar_analise = enviarAnalise
 
     const method = form.id ? 'update' : 'store'
-    form.post(route(`modulos.importador.${method}`, [form.id]))
+
+    if (temDadosPlanilha.value) {
+        form.arquivo = null;
+    }
+
+    form.post(route(`modulos.importador.${method}`, [form.id]), {
+        preserveScroll: true,
+        forceFormData: true,
+        onSuccess: () => {
+            form.arquivo = null;
+
+            CardInformacoesGeraisRef.value?.limparArquivo?.();
+
+            temDadosPlanilha.value = true;
+            CardDadosPlanilhaRef.value?.buscarDados?.();
+        },
+    })
 }
 
 const enviarAnalise = () => {
@@ -88,6 +107,31 @@ const aprovReprovImportacao = (status) => {
     })
 }
 
+const importarSomentePlanilha = () => {
+    if (!form.id) {
+        alert("Salve o rascunho antes de importar a planilha.");
+        return;
+    }
+
+    if (!form.arquivo) {
+        alert("Selecione uma planilha para importar.");
+        return;
+    }
+
+    form.post(route("modulos.importador.importarPlanilha", [form.id]), {
+        preserveScroll: true,
+        forceFormData: true,
+        onSuccess: () => {
+            form.arquivo = null;
+
+            CardInformacoesGeraisRef.value?.limparArquivo?.();
+
+            temDadosPlanilha.value = true;
+            CardDadosPlanilhaRef.value?.buscarDados?.();
+        },
+    });
+};
+
 </script>
 
 <template>
@@ -103,7 +147,8 @@ const aprovReprovImportacao = (status) => {
                         { route: route('modulos.importador.index'), label: `Importadores` },
                         { route: '#', label: labelBreadcrumb }
                     ]" />
-                    <span v-if="form.id" class="badge" :class="badgeStatus(form.status)">{{ form.status_formatado }}</span>
+                    <span v-if="form.id" class="badge" :class="badgeStatus(form.status)">{{ form.status_formatado
+                    }}</span>
                 </div>
                 <Link class="btn btn-info" :href="route('modulos.importador.index')">
                     <IconDoorExit class="me-2" /> Voltar
@@ -114,9 +159,12 @@ const aprovReprovImportacao = (status) => {
         <form @submit.prevent="importar()" :disabled="form.processing">
             <div class="d-flex flex-column">
                 <div class="d-flex flex-column gap-4 flex-grow-1 mb-4">
-                    <CardInformacoesGerais :form="form" :modulos="modulos" :contratos="contratos" />
+                    <CardInformacoesGerais ref="CardInformacoesGeraisRef" :form="form" :modulos="modulos"
+                        :contratos="contratos" :tem-dados-planilha="temDadosPlanilha"
+                        @importar-planilha="importarSomentePlanilha" />
 
-                    <CardDadosPlanilha v-if="form.id" :form="form" />
+                    <CardDadosPlanilha v-if="form.id" ref="CardDadosPlanilhaRef" :form="form"
+                        @tem-dados-changed="temDadosPlanilha = $event" />
 
                     <CardPareceres :form="form" />
 
@@ -124,26 +172,26 @@ const aprovReprovImportacao = (status) => {
 
                     <CardAnexos :form="form" ref="CardAnexosRef" />
                 </div>
-                
+
                 <div class="card-body">
                     <div class="d-flex justify-content-end gap-2">
                         <template v-if="[1, 3, null].includes(form.status)">
                             <button class="btn btn-light" :disabled="form.processing">
-                                <IconDeviceFloppy class="me-2"/>
+                                <IconDeviceFloppy class="me-2" />
                                 Salvar Rascunho
                             </button>
                             <button @click="enviarAnalise" type="button" class="btn btn-primary">
-                                <IconSend class="me-2"/>
+                                <IconSend class="me-2" />
                                 Enviar para Análise
                             </button>
                         </template>
                         <template v-else-if="[2].includes(form.status)">
                             <button type="button" @click="aprovReprovImportacao(3)" class="btn btn-danger">
-                                <IconCircleX class="me-2"/>
+                                <IconCircleX class="me-2" />
                                 Reprovar
                             </button>
                             <button type="button" @click="aprovReprovImportacao(4)" class="btn btn-success">
-                                <IconCircleCheck class="me-2"/>
+                                <IconCircleCheck class="me-2" />
                                 Aprovar
                             </button>
                         </template>

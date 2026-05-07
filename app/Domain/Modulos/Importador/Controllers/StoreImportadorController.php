@@ -11,11 +11,12 @@ class StoreImportadorController extends Controller
     public function __construct(
         private StoreService $service
     ) {
-        // 
+        //
     }
 
     public function store(StoreImportadorRequest $request)
     {
+        
         $this->service->store($request->validated());
         $dataManagement = [
             'type'    => 'success',
