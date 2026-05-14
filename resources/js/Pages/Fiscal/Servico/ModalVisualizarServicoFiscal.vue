@@ -52,7 +52,7 @@ defineExpose({ abrirModal });
                     </h2>
                     <div id="objetivos" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
                         <div class="accordion-body pt-0">
-                            {{ servico?.objetivo }}
+                            {{ servico?.objetivos }}
                         </div>
                     </div>
                 </div>
