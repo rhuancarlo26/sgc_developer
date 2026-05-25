@@ -1,5 +1,6 @@
 <?php
 
+use App\Shared\Base\Auth\Controllers\UserAccessController;
 use Illuminate\Support\Facades\Route;
 use App\Shared\Base\User\Controllers\UserController;
 use App\Shared\Base\Role\Controllers\RoleController;
@@ -24,3 +25,5 @@ Route::prefix('cadastros')->group(function () {
         Route::delete('/deletar/{role}',    [RoleController::class, 'destroy'])->name('cadastros.perfis.deletar');
     });
 });
+
+Route::get('/user-accesses', [UserAccessController::class, 'index'])->name('user-accesses.index');
