@@ -16,6 +16,14 @@ const props = defineProps({
     rh: Object
 })
 
+const toSelectValue = (value) => {
+    if (value === null || value === undefined) {
+        return null;
+    }
+
+    return Number(value);
+};
+
 const form = useForm({
     id: null,
     id_contrato: props.contrato.id,
@@ -34,7 +42,9 @@ const form = useForm({
     curriculum_latte: null,
     curriculum_pdf: null,
     foto_perfil: null,
-    ...props.rh
+    ...props.rh,
+    conselho_classe: toSelectValue(props.rh?.conselho_classe),
+    status: toSelectValue(props.rh?.status),
 });
 
 const form_documento = useForm({
@@ -225,12 +235,12 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                                     <InputLabel value="Conselho de classe" for="conselho_classe" />
                                     <select name="conselho_classe" id="conselho_classe" class="form-control form-select"
                                         v-model="form.conselho_classe">
-                                        <option value="1">Sim</option>
-                                        <option value="0">Não</option>
+                                        <option :value="1">Sim</option>
+                                        <option :value="0">Não</option>
                                     </select>
                                     <InputError :message="form.errors.conselho_classe" />
                                 </div>
-                                <div v-if="form.conselho_classe" class="col form-group">
+                                <div v-if="form.conselho_classe == 1" class="col form-group">
                                     <InputLabel value="Número de registro" for="numero_registro" />
                                     <input type="text" name="numero_registro" id="numero_registro" class="form-control"
                                         v-model="form.numero_registro">
@@ -240,8 +250,8 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                                     <InputLabel value="Status" for="status" />
                                     <select name="status" id="status" class="form-control form-select"
                                         v-model="form.status">
-                                        <option value="1">Ativo</option>
-                                        <option value="0">Inativo</option>
+                                        <option :value="1">Ativo</option>
+                                        <option :value="0">Inativo</option>
                                     </select>
                                     <InputError :message="form.errors.status" />
                                 </div>
