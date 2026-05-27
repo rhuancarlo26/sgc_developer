@@ -114,7 +114,7 @@ defineExpose({abrirModal});
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="ponto in pontosFiltrados" :key="ponto.id">
+                        <tr v-for="ponto in pontos" :key="ponto.id">
                             <td class="text-center">
                                 <label class="form-check">
                                     <input class="form-check-input" type="checkbox" :value="ponto.id"
