@@ -1,4 +1,17 @@
 # 📦 CHANGELOG – ecossistema-v2
+### [v1.7.0] 27/05/2026
+
+### ✨ Added
+- Melhoria na tela visual de permissões - #P1A6-200
+- Adicionar validação de emails - #P1A6-195
+- Implementação do botão de excluir as tabelas e as multiplas escolha de fotos - #P1A6-139
+
+### 🐛 Fixed
+- Ajustes nas regras, comportamento de permissões - #P1A6-200
+- Liberação do campo observação - #P1A6-199
+- Correção campo status - #P1A6-248
+- Ajuste de pontos para nova campanha - #P1A6-250
+
 ### [v1.6.0] 27/04/2026
 
 ### ✨ Added
