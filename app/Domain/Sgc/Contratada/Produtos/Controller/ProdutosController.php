@@ -58,9 +58,19 @@ class ProdutosController extends Controller
              default        => collect(),
         };
 
-        // $campanhas = $produto === 'fauna'
-        //     ? $this->getCampanhasFauna($contrato)
-        //     : $this->getCampanhasEspeleologia($contrato);
+        $mostrarArquivadas = request()->boolean('arquivadas');
+        $query = SgcFaunaCampanha::where('id_contrato', $contrato);
+        if ($mostrarArquivadas) {
+            $query->whereNotNull('arquivada_em');
+        } else {
+            $query->whereNull('arquivada_em');
+        }
+
+        $totalArquivadas = SgcFaunaCampanha::where('id_contrato', $contrato)
+            ->whereNotNull('arquivada_em')
+            ->count();
+
+        $campanhas = $query->get();
 
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
@@ -68,6 +78,8 @@ class ProdutosController extends Controller
             'produto' => ucfirst($produto),
             'contratos' => $contratoObj,
             'campanhas' => $campanhas,
+            'mostrarArquivadas' => $mostrarArquivadas,
+            'totalArquivadas' => $totalArquivadas,
             'canApprove' => Auth::user()->perfis_id === 3 && count(array_filter($campanhas->toArray(), fn($c) => $c['status'] === 'Em análise')) > 0,
         ]);
     }

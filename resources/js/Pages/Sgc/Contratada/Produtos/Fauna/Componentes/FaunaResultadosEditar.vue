@@ -42,6 +42,14 @@ const previewAtivo = computed(
     () => resultados.value[activeTipo.value] || []
 );
 
+const temPlanilha = computed(() => {
+    return (
+        (resultados.value.terrestre?.length || 0) ||
+        (resultados.value.aquatica?.length || 0) ||
+        (resultados.value.cavernicola?.length || 0)
+    );
+});
+
 // Quando resultadosRecords vindo do pai mudar (ex: carregou do banco), sincroniza
 watch(
     () => props.resultadosRecords,
@@ -339,6 +347,12 @@ const avancar = () => {
             </li>
         </ul>
 
+        <!-- NAVEGAÇÃO TOPO -->
+        <div v-if="temPlanilha" class="d-flex justify-content-between mb-3 sticky-top bg-white py-2">
+            <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
+            <NavButton type-button="primary" title="Avançar" @click="avancar" />
+        </div>
+
         <!-- GRÁFICOS -->
         <div v-if="previewAtivo.length" class="mt-3 mb-4">
             <h5>Gráficos — {{ labelTipoAtivo }}</h5>
@@ -493,7 +507,7 @@ const avancar = () => {
         </div>
 
         <!-- NAVEGAÇÃO -->
-        <div class="d-flex justify-content-between">
+        <div v-if="!temPlanilha" class="d-flex justify-content-between">
             <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
             <NavButton type-button="primary" title="Avançar" @click="avancar" />
         </div>

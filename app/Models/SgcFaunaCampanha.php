@@ -19,12 +19,14 @@ class SgcFaunaCampanha extends Model
         'cod_emp',
         'subproduto',
         'status',
+        'arquivada_em',
         'etapa_atual',
         'versao_analise'
     ];
 
     protected $casts = [
         'id_campanha' => 'integer',
+        'arquivada_em' => 'datetime',
     ];
 
     public function contrato()

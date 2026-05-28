@@ -1,8 +1,11 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 import InputLabel from '@/Components/InputLabel.vue';
+import InputError from '@/Components/InputError.vue';
 import NavButton from '@/Components/NavButton.vue';
+import Highcharts from 'highcharts';
+
 
 const props = defineProps({
     resultadosTerrestre: Array,
@@ -20,6 +23,23 @@ const emit = defineEmits(['next','prev','aprovar','rejeitar']);
 
 const subtab = ref('terrestre');
 
+const tipos = [
+    { key: 'terrestre', label: 'Fauna Terrestre' },
+    { key: 'aquatica', label: 'Fauna Aquática' },
+    { key: 'cavernicola', label: 'Fauna Cavernícola' },
+];
+
+const labelTipoAtivo = computed(() => tipos.find(t => t.key === subtab.value)?.label || '');
+
+const resultadosPorTipo = computed(() => ({
+    terrestre: props.resultadosTerrestre || [],
+    aquatica: props.resultadosAquatica || [],
+    cavernicola: props.resultadosCavernicola || [],
+}));
+
+const previewAtivo = computed(() => resultadosPorTipo.value[subtab.value] || []);
+
+
 const temPlanilha = computed(() => {
     return (
         (props.resultadosTerrestre?.length || 0) ||
@@ -27,6 +47,207 @@ const temPlanilha = computed(() => {
         (props.resultadosCavernicola?.length || 0)
     );
 });
+
+function pastelColor() {
+    const grupo = Math.floor(Math.random() * 3);
+    let hue;
+
+    if (grupo === 0) {
+        hue = 190 + Math.random() * 40;
+    } else if (grupo === 1) {
+        hue = 90 + Math.random() * 50;
+    } else {
+        hue = 40 + Math.random() * 20;
+    }
+
+    const saturation = 35 + Math.random() * 20;
+    const lightness = 65 + Math.random() * 10;
+
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
+
+const classColorMap = {};
+
+function colorByClass(classe) {
+    const key = String(classe || '').trim().toLowerCase();
+    if (!key) return '#cccccc';
+
+    if (!classColorMap[key]) {
+        classColorMap[key] = pastelColor();
+    }
+
+    return classColorMap[key];
+}
+
+function getValue(linha, keys) {
+    for (const key of keys) {
+        const value = linha?.[key];
+
+        if (value !== undefined && value !== null && value !== '') {
+            return value;
+        }
+    }
+
+    return '';
+}
+
+function mapClasseToGrupo(classeRaw) {
+    if (subtab.value !== 'terrestre') {
+        return String(classeRaw || '').trim() || 'Não classificado';
+    }
+
+    const classe = String(classeRaw || '').trim().toLowerCase();
+
+    if (classe === 'aves') return 'Avifauna';
+    if (classe === 'mammalia') return 'Mastofauna';
+    if (classe === 'reptilia' || classe === 'amphibia') return 'Herpetofauna';
+
+    return 'Não classificado';
+}
+
+function getClasseFromLinha(linha) {
+    return getValue(linha, ['classe', 'Classe']);
+}
+
+function getEspecieFromLinha(linha) {
+    return getValue(linha, [
+        'especie',
+        'espécie',
+        'Espécie',
+        'Especie',
+        'nome_cientifico',
+        'Nome cientifico',
+        'Nome científico',
+        'Nome Cientifico',
+    ]);
+}
+
+function getAbundanciaFromLinha(linha) {
+    const value = getValue(linha, ['abundancia', 'Abundancia', 'Abundância']);
+    const parsed = Number(String(value).replace(',', '.'));
+
+    return Number.isFinite(parsed) ? parsed : 0;
+}
+
+const riquezaPorGrupo = computed(() => {
+    const grupos = {};
+
+    previewAtivo.value.forEach(linha => {
+        const grupo = mapClasseToGrupo(getClasseFromLinha(linha));
+        const especie = String(getEspecieFromLinha(linha)).trim();
+
+        if (!especie) return;
+
+        if (!grupos[grupo]) grupos[grupo] = new Set();
+
+        grupos[grupo].add(especie);
+    });
+
+    return Object.entries(grupos).map(([grupo, set]) => ({
+        grupo,
+        valor: set.size,
+    }));
+});
+
+const abundanciaPorClasse = computed(() => {
+    const grupos = {};
+
+    previewAtivo.value.forEach(linha => {
+        const grupo = mapClasseToGrupo(getClasseFromLinha(linha));
+
+        if (!grupos[grupo]) grupos[grupo] = 0;
+
+        grupos[grupo] += getAbundanciaFromLinha(linha);
+    });
+
+    return Object.entries(grupos)
+        .map(([grupo, valor]) => ({ grupo, valor }))
+        .filter(item => item.valor > 0)
+        .sort((a, b) => b.valor - a.valor);
+});
+
+const chartRiquezaRef = ref(null);
+const chartAbundanciaRef = ref(null);
+
+let chartRiqueza = null;
+let chartAbundancia = null;
+
+function createChart(container, options) {
+    if (!container) return null;
+
+    return Highcharts.chart({
+        ...options,
+        chart: { ...options.chart, renderTo: container },
+    });
+}
+
+function destroyCharts() {
+    chartRiqueza?.destroy();
+    chartAbundancia?.destroy();
+    chartRiqueza = null;
+    chartAbundancia = null;
+}
+
+function updateCharts() {
+    nextTick(() => {
+        destroyCharts();
+
+        if (!previewAtivo.value.length || !chartRiquezaRef.value || !chartAbundanciaRef.value) {
+            return;
+        }
+
+        chartRiqueza = createChart(chartRiquezaRef.value, {
+            chart: { type: 'pie' },
+            title: { text: 'Riqueza' },
+            subtitle: { text: labelTipoAtivo.value },
+            tooltip: { pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y} espécies)' },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.percentage:.1f}%' },
+                },
+            },
+            series: [{
+                name: 'Riqueza',
+                data: riquezaPorGrupo.value.map(r => ({
+                    name: r.grupo,
+                    y: r.valor,
+                    color: colorByClass(r.grupo),
+                })),
+            }],
+            credits: { enabled: false },
+        });
+
+        chartAbundancia = createChart(chartAbundanciaRef.value, {
+            chart: { type: 'pie' },
+            title: { text: 'Abundância' },
+            subtitle: { text: labelTipoAtivo.value },
+            tooltip: { pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y} registros)' },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.percentage:.1f}%' },
+                },
+            },
+            series: [{
+                name: 'Classes',
+                data: abundanciaPorClasse.value.map(c => ({
+                    name: c.grupo,
+                    y: c.valor,
+                    color: colorByClass(c.grupo),
+                })),
+            }],
+            credits: { enabled: false },
+        });
+    });
+}
+
+onMounted(updateCharts);
+onBeforeUnmount(destroyCharts);
+watch(subtab, updateCharts);
+watch(previewAtivo, updateCharts, { deep: true });
+
+
 </script>
 
 <template>
@@ -89,6 +310,22 @@ const temPlanilha = computed(() => {
     <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
     <NavButton type-button="primary" title="Avançar" @click="$emit('next')" />
 </div>
+
+<!-- GRÁFICOS -->
+<div v-if="previewAtivo.length" class="mt-3 mb-4">
+    <h5>Gráficos — {{ labelTipoAtivo }}</h5>
+
+    <div class="row mt-3">
+        <div class="col-md-6 mb-4">
+            <div ref="chartRiquezaRef" style="width:100%; height:400px;"></div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div ref="chartAbundanciaRef" style="width:100%; height:400px;"></div>
+        </div>
+    </div>
+</div>
+
 
 <!-- ====================== TERRESTRE ====================== -->
 <div v-if="subtab==='terrestre'">

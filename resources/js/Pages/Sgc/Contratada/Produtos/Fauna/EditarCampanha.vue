@@ -44,6 +44,16 @@ const props = defineProps({
   },
 });
 
+console.log('campanha recebida:', props.campanha);
+console.log('datas:', {
+  data_ini: props.campanha.data_ini,
+  data_fim: props.campanha.data_fim,
+  data_inicial: props.campanha.data_inicial,
+  data_final: props.campanha.data_final,
+  data_campanha_inicial: props.campanha.data_campanha_inicial,
+  data_campanha_final: props.campanha.data_campanha_final,
+});
+
 const activeTab = ref('apresentacao');
 const subStep = ref(1);
 const showModal = ref(false);
@@ -69,17 +79,61 @@ const etapaMap = {
   anexos: ['anexos'],
 };
 
+// Mapeamento de subStep para etapa EXATA (apenas para aba 'apresentacao')
+const subStepToEtapa = {
+  1: 'apresentacao_geral',
+  2: 'caracterizacao_area',
+  3: 'modulos_amostrais',
+  4: 'pontos_quelo_crocod',
+  5: 'pontos_cavernicola',
+};
+
+// Computed: retorna array com APENAS a etapa atual (não todas as 5)
+const etapaAtual = computed(() => {
+  if (activeTab.value === 'apresentacao') {
+    return [subStepToEtapa[subStep.value]];
+  }
+  return etapaMap[activeTab.value] || [];
+});
+
 const page = usePage();
 
 // Se subproduto não vem do campanha, pega da URL
 const subprodutoFromUrl = new URLSearchParams(window.location.search).get('subproduto');
 
+const formatDateForInput = (date) => {
+  if (!date) return '';
+
+  if (typeof date === 'string' && date.includes('/')) {
+    const [day, month, year] = date.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+
+  return String(date).split(' ')[0].slice(0, 10);
+};
+
 // Formulário principal para edição da campanha
 const form = useForm({
   cod_emp: props.campanha.cod_emp || '',
   subproduto: props.campanha.subproduto || subprodutoFromUrl || '',
-  data_campanha_inicial: props.campanha.data_ini || '',
-  data_campanha_final: props.campanha.data_fim || '',
+  // data_campanha_inicial: props.campanha.data_ini || '',
+  // data_campanha_final: props.campanha.data_fim || '',
+
+  // data_campanha_inicial: formatDateForInput(props.campanha.data_ini),
+  // data_campanha_final: formatDateForInput(props.campanha.data_fim),
+
+  data_campanha_inicial: formatDateForInput(
+  props.campanha.data_ini ||
+  props.campanha.data_inicial ||
+  props.campanha.data_campanha_inicial
+  ),
+
+  data_campanha_final: formatDateForInput(
+    props.campanha.data_fim ||
+    props.campanha.data_final ||
+    props.campanha.data_campanha_final
+  ),
+
   periodo: props.campanha.periodo || '',
   obs: props.campanha.observacoes || '',
   abio: { id_abio: null },
@@ -425,8 +479,6 @@ const salvarNovoProfissional = (novoProfissional) => {
  
       alert('✅ Profissional cadastrado com sucesso!');
       
-      // Fechar o modal (emitir evento para o filho)
-      // Você pode resetar o formulário aqui se necessário
       
     } else {
       alert('❌ Erro: ' + (data.message || 'Tente novamente.'));
@@ -687,9 +739,8 @@ const excluirAnexo = (anexoId) => {
                 >Anexos</a>
               </li>
             </ul>
-
             <!-- Alerta para análises rejeitadas -->
-            <div v-if="!props.isDraft && props.campanha.analises?.some(a => a.status === 'Rejeitada' && etapaMap[activeTab]?.includes(a.etapa))" class="alert alert-warning d-flex align-items-center mb-4">
+            <div v-if="!props.isDraft && props.campanha.analises?.some(a => a.status === 'Rejeitada' && etapaAtual?.includes(a.etapa))" class="alert alert-warning d-flex align-items-center mb-4">
               <svg class="bi me-2" width="24" height="24" fill="currentColor">
                 <use xlink:href="/bootstrap-icons.svg#exclamation-triangle" />
               </svg>
@@ -702,6 +753,15 @@ const excluirAnexo = (anexoId) => {
                 Ver Análise
               </button>
             </div>
+
+            <!-- Alerta para análises Aprovadas -->
+            <div v-if="!props.isDraft && props.campanha.analises?.some(a => a.status === 'Aprovada' && etapaAtual?.includes(a.etapa))" class="alert alert-success d-flex align-items-center mb-4" style="border-color: #28a745; background-color: #d4edda;">
+              <svg class="bi me-2" width="24" height="24" fill="#28a745">
+                <use xlink:href="/bootstrap-icons.svg#check-circle-fill" />
+              </svg>
+              <span style="color: #155724; font-weight: 500;">✓ Etapa aprovada pelo Fiscal.</span>
+            </div>
+
 
             <form @submit.prevent="submitForm" enctype="multipart/form-data">
               <div class="tab-content">
@@ -826,6 +886,7 @@ const excluirAnexo = (anexoId) => {
                     :resultados-records="form.resultados"
                     :set-active-tab="setActiveTab"
                     :disabled="etapasStatus['resultados'] === 'Aprovada'"
+                    @update:resultadosRecords="form.resultados = $event"
                     @prev="setActiveTab('metodologia')"
                     @next="setActiveTab('anexos')"
                   />
@@ -953,17 +1014,7 @@ const excluirAnexo = (anexoId) => {
                             'analise-item-current': analise.id === analiseAtualPorEtapa?.id
                           }"
                         >
-                        <!-- DEBUG - dentro do loop das análises -->
-                        <!-- <div style="background: yellow; padding: 10px; margin-bottom: 10px; font-size: 12px;">
-                          <strong>Análise objeto:</strong> {{ JSON.stringify(analise) }}<br>
-                          <strong>analise.analise:</strong> {{ analise.analise }}<br>
-                          <strong>analise.etapa:</strong> {{ analise.etapa }}<br>
-                          <strong>analise.id:</strong> {{ analise.id }}<br>
-                          <strong>Props comentarios:</strong> {{ JSON.stringify(props.comentarios) }}<br>
-                          <strong>Filtrados:</strong> {{ comentariosPorAnalise(analise) }}
-                        </div> -->
 
-  
                             <div class="analise-content">
                               <div class="analise-header">
                                 <span class="etapa">Análise - {{ etapas.find(e => e.value === analise.etapa)?.label || analise.etapa }}</span>

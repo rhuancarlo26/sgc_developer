@@ -436,6 +436,36 @@ class CampanhaController extends Controller
         }
     }
 
+    public function arquivar($contrato, $produto, $campanha)
+    {
+        $campanhaObj = SgcFaunaCampanha::where('id_contrato', $contrato)
+            ->where('id', $campanha)
+            ->firstOrFail();
+
+        $campanhaObj->update([
+            'arquivada_em' => now(),
+        ]);
+
+        return redirect()
+            ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+            ->with('success', 'Campanha arquivada com sucesso.');
+    }
+
+    public function restaurar($contrato, $produto, $campanha)
+    {
+        $campanhaObj = SgcFaunaCampanha::where('id_contrato', $contrato)
+            ->where('id', $campanha)
+            ->firstOrFail();
+
+        $campanhaObj->update([
+            'arquivada_em' => null,
+        ]);
+
+        return redirect()
+            ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+            ->with('success', 'Campanha restaurada com sucesso.');
+    }
+
 
     // -------------------------------------------------------------------------
     // Dados estáticos centralizados — usados aqui e no ProdutosController
@@ -454,4 +484,126 @@ class CampanhaController extends Controller
     {
         return ['Amazônia', 'Caatinga', 'Cerrado', 'Mata Atlântica', 'Pampa', 'Pantanal'];
     }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // APROVAR TODAS AS ETAPAS DE UMA VEZ
+    // ─────────────────────────────────────────────────────────────────────
+    public function aprovarTudo($contrato, $produto, $campanha)
+    {
+        if (Auth::user()->perfis_id !== 3) {
+            return redirect()->back()->withErrors(['error' => 'Acesso negado. Apenas fiscais podem aprovar.']);
+        }
+
+        try {
+            $campanhaObj = SgcFaunaCampanha::findOrFail($campanha);
+
+            if ($campanhaObj->status !== 'Em análise') {
+                return redirect()
+                    ->route('sgc.contratada.produtos.analise', [$contrato, $produto, $campanha])
+                    ->withErrors(['error' => 'Campanha não está em análise.']);
+            }
+
+            // Etapas a serem aprovadas
+            $etapas = [
+                'apresentacao_geral',
+                'caracterizacao_area',
+                'modulos_amostrais',
+                'pontos_quelo_crocod',
+                'pontos_cavernicola',
+                'metodologia',
+                'resultados',
+                'anexos',
+            ];
+
+            // Aprovar todas as etapas
+            foreach ($etapas as $etapa) {
+                $this->faunaFiscalService->salvarAnaliseEtapa($contrato, $campanha, [
+                    'etapa' => $etapa,
+                    'status' => 'Aprovada',
+                    'observacoes' => null,
+                ]);
+            }
+
+            // Mudar status da campanha para Aprovada
+            $campanhaObj->update(['status' => 'Aprovada']);
+
+            return redirect()
+                ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+                ->with('success', 'Campanha aprovada com sucesso!');
+
+        } catch (\Exception $e) {
+            Log::error('CampanhaController@aprovarTudo: erro', [
+                'contrato_id' => $contrato,
+                'campanha_id' => $campanha,
+                'erro' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->withErrors(['error' => 'Erro ao aprovar campanha: ' . $e->getMessage()]);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // REPROVAR TODAS AS ETAPAS DE UMA VEZ (COM JUSTIFICATIVA COMUM)
+    // ─────────────────────────────────────────────────────────────────────
+    public function reprovarTudo(Request $request, $contrato, $produto, $campanha)
+    {
+        if (Auth::user()->perfis_id !== 3) {
+            return redirect()->back()->withErrors(['error' => 'Acesso negado. Apenas fiscais podem reprovar.']);
+        }
+
+        try {
+            $validated = $request->validate([
+                'comentario' => 'required|string|min:10',
+            ], [
+                'comentario.required' => 'A justificativa é obrigatória.',
+                'comentario.min' => 'A justificativa deve ter no mínimo 10 caracteres.',
+            ]);
+
+            $campanhaObj = SgcFaunaCampanha::findOrFail($campanha);
+
+            if ($campanhaObj->status !== 'Em análise') {
+                return redirect()
+                    ->route('sgc.contratada.produtos.analise', [$contrato, $produto, $campanha])
+                    ->withErrors(['error' => 'Campanha não está em análise.']);
+            }
+
+            // Etapas a serem reprovadas
+            $etapas = [
+                'apresentacao_geral',
+                'caracterizacao_area',
+                'modulos_amostrais',
+                'pontos_quelo_crocod',
+                'pontos_cavernicola',
+                'metodologia',
+                'resultados',
+                'anexos',
+            ];
+
+            // Reprovar todas as etapas com o MESMO comentário
+            foreach ($etapas as $etapa) {
+                $this->faunaFiscalService->salvarAnaliseEtapa($contrato, $campanha, [
+                    'etapa' => $etapa,
+                    'status' => 'Rejeitada',
+                    'observacoes' => $validated['comentario'],
+                ]);
+            }
+
+            // Mudar status da campanha para Rejeitada
+            $campanhaObj->update(['status' => 'Rejeitada']);
+
+            return redirect()
+                ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+                ->with('success', 'Campanha rejeitada com sucesso!');
+
+        } catch (\Exception $e) {
+            Log::error('CampanhaController@reprovarTudo: erro', [
+                'contrato_id' => $contrato,
+                'campanha_id' => $campanha,
+                'erro' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->withErrors(['error' => 'Erro ao reprovar campanha: ' . $e->getMessage()]);
+        }
+    }
+
 }

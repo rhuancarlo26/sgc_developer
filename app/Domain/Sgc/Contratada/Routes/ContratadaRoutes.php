@@ -115,6 +115,10 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
     Route::post('produtos/{produto}/abio', [StoreProdutoAbioController::class, 'store'])->name('sgc.contratada.produtos.abio.store');
     Route::delete('produtos/{produto}/abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.delete');
 
+    Route::get('produtos/fauna/modelos/download', [CampanhaController::class, 'downloadModelos'])
+    ->middleware('auth')
+    ->name('sgc.contratada.produtos.fauna.modelos.download');
+    
     // PREFIX COM MIDDLEWARE route-permission
     Route::prefix('{contrato}/produtos/{produto}')->middleware(['auth'])->group(function () {
         Route::get('/', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
@@ -133,7 +137,11 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::get('campanhas/{campanhaId}/{modulo?}', [CampanhaController::class, 'show'])->name('sgc.contratada.produtos.show');
         Route::get('fauna/campanhas/{campanha}/analise', [CampanhaController::class, 'analise'])->name('sgc.contratada.produtos.analise');
         Route::post('fauna/campanhas/{campanha}/analise', [CampanhaController::class, 'salvarAnalise'])->name('sgc.contratada.produtos.salvarAnalise');
-        Route::post('/campanhas/{campanha}/finalizar-avaliacao', [CampanhaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.finalizarAvaliacao');
+                
+        // Aprovar ou Reprovar tudo
+        Route::post('fauna/campanhas/{campanha}/aprovar-tudo', [CampanhaController::class, 'aprovarTudo'])->name('sgc.contratada.produtos.aprovarTudo');
+        Route::post('fauna/campanhas/{campanha}/reprovar-tudo', [CampanhaController::class, 'reprovarTudo'])->name('sgc.contratada.produtos.reprovarTudo');
+        
         Route::get('campanha/{campanha}/edit', [CampanhaController::class, 'edit'])->name('sgc.contratada.produtos.edit');
         Route::post('campanha/{campanha}/update', [CampanhaController::class, 'update'])->name('sgc.contratada.produtos.update');
 
@@ -142,7 +150,12 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('campanha/{campanha}/comentario', [ComentarioController::class, 'salvarComentario'])->name('sgc.contratada.produtos.comentario');
         Route::delete('campanha/{campanha}/comentario/{comentario}', [ComentarioController::class, 'destroyComentario'])->name('sgc.contratada.produtos.comentario.destroy');
         Route::delete('campanha/{campanha}/anexo/{anexoId}', [AnexoController::class, 'destroyAnexo'])->name('sgc.contratada.produtos.anexo.destroy');
-        Route::delete('campanha/{campanhaId}/destroy', DestroyCampanhaController::class)->name('sgc.contratada.produtos.destroy');        
+        Route::delete('campanha/{campanhaId}/destroy', DestroyCampanhaController::class)->name('sgc.contratada.produtos.destroy');
+
+        Route::post('campanha/{campanha}/arquivar', [CampanhaController::class, 'arquivar'])->name('sgc.contratada.produtos.arquivar');
+        Route::post('campanha/{campanha}/restaurar', [CampanhaController::class, 'restaurar'])->name('sgc.contratada.produtos.restaurar');
+        
+        Route::post('/campanhas/{campanha}/finalizar-avaliacao', [CampanhaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.finalizarAvaliacao');
 
         // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {
@@ -195,6 +208,8 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         // Rotas para MapPageController
         Route::get('/espeleologia/mapa/viewer', [MapPageController::class, 'viewer'])->name('sgc.contratada.espeleologia.mapa.viewer');
         Route::get('/espeleologia/mapa/create', [MapPageController::class, 'create'])->name('sgc.contratada.espeleologia.mapa.create');
+
+
 
 
 });

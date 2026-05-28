@@ -16,9 +16,11 @@ const props = defineProps({
     canApprove: { type: Boolean, default: false },
     auth: { type: Object, required: true },
     vinculacoes: { type: Object },
+    mostrarArquivadas: { type: Boolean, default: false },
+    totalArquivadas: { type: Number, default: 0 },
 });
 
-console.log('Auth:', props.auth);
+const isPerfil3 = computed(() => (props.auth.user.perfis_id ?? 0) === 3);
 
 const previewModal = ref(null);
 
@@ -193,6 +195,109 @@ const excluirCampanha = (campanhaId) => {
     if (!confirm('Tem certeza que deseja excluir esta campanha? Esta ação não pode ser desfeita.')) return;
     router.delete(route('sgc.contratada.produtos.destroy', [props.contrato, selectedProduto.value, campanhaId]));
 };
+
+const getStatusLabel = (status) => {
+  if (status === 'Rejeitada') return 'Em revisão';
+  return status || 'N/A';
+};
+
+const showModalAprovarTudo = ref(false);
+const showModalReprovarTudo = ref(false);
+const campanhaEmAnalise = ref(null);
+const justificativaReprovacao = ref('');
+const erroReprovacao = ref('');
+
+const abrirModalAprovarTudo = (campanha) => {
+  campanhaEmAnalise.value = campanha;
+  showModalAprovarTudo.value = true;
+};
+
+const abrirModalReprovarTudo = (campanha) => {
+  campanhaEmAnalise.value = campanha;
+  justificativaReprovacao.value = '';
+  erroReprovacao.value = '';
+  showModalReprovarTudo.value = true;
+};
+
+const confirmarAprovarTudo = () => {
+  if (!campanhaEmAnalise.value) return;
+  
+  router.post(
+    route('sgc.contratada.produtos.aprovarTudo', [props.contrato, selectedProduto.value, campanhaEmAnalise.value.id]),
+    {},
+    {
+      onSuccess: () => {
+        showModalAprovarTudo.value = false;
+        alert('✅ Campanha aprovada com sucesso!');
+      },
+      onError: (errors) => {
+        console.error('Erro ao aprovar:', errors);
+        alert('❌ Erro: ' + (Object.values(errors).join(', ') || 'Tente novamente.'));
+      },
+    }
+  );
+};
+
+const confirmarReprovarTudo = () => {
+  if (!campanhaEmAnalise.value) return;
+  
+  if (!justificativaReprovacao.value.trim()) {
+    erroReprovacao.value = 'A justificativa é obrigatória.';
+    return;
+  }
+
+  if (justificativaReprovacao.value.trim().length < 10) {
+    erroReprovacao.value = 'A justificativa deve ter no mínimo 10 caracteres.';
+    return;
+  }
+
+  router.post(
+    route('sgc.contratada.produtos.reprovarTudo', [props.contrato, selectedProduto.value, campanhaEmAnalise.value.id]),
+    { comentario: justificativaReprovacao.value },
+    {
+      onSuccess: () => {
+        showModalReprovarTudo.value = false;
+        alert('✅ Campanha rejeitada com sucesso!');
+      },
+      onError: (errors) => {
+        console.error('Erro ao reprovar:', errors);
+        erroReprovacao.value = 'comentario' in errors ? errors.comentario : 'Erro ao reprovar campanha.';
+      },
+    }
+  );
+};
+
+// Arquivar e restaurar campanhas
+const verArquivadas = () => {
+  router.get(
+    route('sgc.contratada.produtos.index', [props.contrato, selectedProduto.value]),
+    { arquivadas: true },
+    { preserveState: true, preserveScroll: true }
+  );
+};
+
+const verAtivas = () => {
+  router.get(
+    route('sgc.contratada.produtos.index', [props.contrato, selectedProduto.value]),
+    {},
+    { preserveState: true, preserveScroll: true }
+  );
+};
+
+const arquivarCampanha = (campanha) => {
+  if (!confirm(`Arquivar a campanha ${campanha.id_campanha || campanha.id}?`)) return;
+
+  router.post(
+    route('sgc.contratada.produtos.arquivar', [props.contrato, selectedProduto.value, campanha.id])
+  );
+};
+
+const restaurarCampanha = (campanha) => {
+  router.post(
+    route('sgc.contratada.produtos.restaurar', [props.contrato, selectedProduto.value, campanha.id])
+  );
+};
+
 </script>
 
 <template>
@@ -261,7 +366,25 @@ const excluirCampanha = (campanhaId) => {
               <!-- Tabela de Campanhas -->
               <div class="col-md-12 mt-4">
                 <div class="block-card">
-                  <h4 class="text-center mb-4">CAMPANHAS DE {{ produtos.find(p => p.routeParam === selectedProduto.value)?.title.toUpperCase() || produto.toUpperCase() }}</h4>
+                  <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div style="width: 140px;"></div>
+
+                    <h4 class="text-center m-0">
+                      {{ props.mostrarArquivadas
+                        ? 'CAMPANHAS ARQUIVADAS'
+                        : 'CAMPANHAS DE ' + (produtos.find(p => p.routeParam === selectedProduto.value)?.title.toUpperCase() || produto.toUpperCase())
+                      }}
+                    </h4>
+
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-secondary archived-toggle"
+                      @click="props.mostrarArquivadas ? verAtivas() : verArquivadas()"
+                    >
+                      {{ props.mostrarArquivadas ? 'Ver ativas' : `Arquivadas (${props.totalArquivadas})` }}
+                    </button>
+                  </div>
+                  
                   <div class="table-responsive">
                     <table class="table table-bordered table-hover">
                       <thead>
@@ -321,7 +444,8 @@ const excluirCampanha = (campanhaId) => {
                               v-else-if="campanha.status === 'Em elaboração'"
                               class="status-circle status-circle-draft"
                             ></span>
-                            {{ campanha.status || 'N/A' }}
+                            <!-- {{ campanha.status || 'N/A' }} -->
+                            {{ getStatusLabel(campanha.status) }}
                           </td>
                           <td class="text-center">
                             <!-- Visualizar -->
@@ -354,6 +478,45 @@ const excluirCampanha = (campanhaId) => {
                               title="Analisar"
                               @click="analisarCampanha(campanha.id)"
                             />
+
+                          <NavButton
+                            v-if="isPerfil3 && !props.mostrarArquivadas"
+                            type-button="secondary"
+                            title="Arquivar"
+                            @click="arquivarCampanha(campanha)"
+                          />
+                          <NavButton
+                            v-if="isPerfil3 && props.mostrarArquivadas"
+                            type-button="warning"
+                            title="Restaurar"
+                            @click="restaurarCampanha(campanha)"
+                          />
+
+                          <!-- Menu de Análise em Massa (dropdown) -->
+                          <div v-if="canApprove && campanha.status === 'Em análise'" class="dropdown d-inline-block">
+                            <button
+                              class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                              type="button"
+                              :id="`dropdownMenu-${campanha.id}`"
+                              data-bs-toggle="dropdown"
+                              aria-expanded="false"
+                            >
+                              ⋮ 
+                            </button>
+                            <ul :aria-labelledby="`dropdownMenu-${campanha.id}`" class="dropdown-menu">
+                              <li>
+                                <a class="dropdown-item text-success" href="#" @click.prevent="abrirModalAprovarTudo(campanha)">
+                                  <strong>✓ Aprovar</strong>
+                                </a>
+                              </li>
+                              <li>
+                                <a class="dropdown-item text-danger" href="#" @click.prevent="abrirModalReprovarTudo(campanha)">
+                                  <strong>✗ Reprovar</strong>
+                                </a>
+                              </li>
+                            </ul>
+
+                          </div>
                             
                             <!-- Excluir (Em elaboração, não é perfil 4) -->
                             <NavButton
@@ -373,7 +536,9 @@ const excluirCampanha = (campanhaId) => {
                           </td>
                         </tr>
                         <tr v-if="!props.campanhas.length">
-                          <td colspan="7" class="text-center">Nenhuma campanha disponível.</td>
+                          <td colspan="7" class="text-center">
+                            {{ props.mostrarArquivadas ? 'Nenhuma campanha arquivada.' : 'Nenhuma campanha disponível.' }}
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -383,6 +548,62 @@ const excluirCampanha = (campanhaId) => {
             </div>
           </div>
         </div>
+
+        <!-- Modal Aprovar Tudo -->
+        <div class="modal fade" :class="{ 'show d-block': showModalAprovarTudo }" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Aprovar Campanha</h5>
+                <button type="button" class="btn-close btn-close-white" @click="showModalAprovarTudo = false"></button>
+              </div>
+              <div class="modal-body">
+                <p class="mb-0">
+                  <strong>Tem certeza que deseja aprovar TODAS as etapas da campanha <span class="text-primary">{{ campanhaEmAnalise?.id_campanha }}</span>?</strong>
+                </p>
+                <p class="text-muted mt-2">Esta ação não pode ser desfeita. O status da campanha será alterado para <strong>Aprovada</strong>.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="showModalAprovarTudo = false">Cancelar</button>
+                <button type="button" class="btn btn-success" @click="confirmarAprovarTudo">Sim, Aprovar Tudo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-if="showModalAprovarTudo" class="modal-backdrop fade show"></div>
+
+        <!-- Modal Reprovar Tudo -->
+        <div class="modal fade" :class="{ 'show d-block': showModalReprovarTudo }" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Reprovar Campanha</h5>
+                <button type="button" class="btn-close btn-close-white" @click="showModalReprovarTudo = false"></button>
+              </div>
+              <div class="modal-body">
+                <p><strong>Campanha: {{ campanhaEmAnalise?.id_campanha }}</strong></p>
+                <p class="text-muted">Digite a justificativa para reprovar TODAS as etapas dessa campanha.</p>
+                <div class="mb-3">
+                  <label class="form-label">Justificativa *</label>
+                  <textarea
+                    v-model="justificativaReprovacao"
+                    class="form-control"
+                    rows="5"
+                    placeholder="Descreva os motivos da reprovação (mínimo 10 caracteres)..."
+                  ></textarea>
+                  <small v-if="erroReprovacao" class="text-danger d-block mt-2">{{ erroReprovacao }}</small>
+                  <small class="text-muted d-block mt-1">{{ justificativaReprovacao.length }} caracteres</small>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="showModalReprovarTudo = false">Cancelar</button>
+                <button type="button" class="btn btn-danger" @click="confirmarReprovarTudo">Sim, Reprovar Tudo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-if="showModalReprovarTudo" class="modal-backdrop fade show"></div>
+
       </template>
     </NavbarContrato>
 
@@ -525,5 +746,10 @@ const excluirCampanha = (campanhaId) => {
 
 .sortable-header:hover .sort-icon {
   opacity: 1;
+}
+
+.archived-toggle {
+  min-width: 140px;
+  font-weight: 500;
 }
 </style>

@@ -126,6 +126,19 @@ const shouldShowEtapa = (etapa, index) => {
     return index === 0 || groupedAnalises.value[index - 1].etapa !== etapa;
 };
 
+const avancarParaProximaEtapa = (etapaAtual) => {
+    const indexAtual = etapas.findIndex(e => e.value === etapaAtual);
+    const proximaEtapa = etapas[indexAtual + 1];
+
+    if (!proximaEtapa) return;
+
+    activeTab.value = proximaEtapa.tab;
+
+    if (proximaEtapa.tab === 'apresentacao') {
+        subStep.value = proximaEtapa.subStep;
+    }
+};
+
 const setActiveTab = (tab) => {
     activeTab.value = tab;
     if (tab === 'apresentacao') {
@@ -174,11 +187,24 @@ const salvarAnalise = (etapa) => {
     form.post(
         route('sgc.contratada.produtos.salvarAnalise', [props.contrato, props.produto.toLowerCase(), props.campanha.id]),
         {
+            // onSuccess: () => {
+            //     form.reset('status', 'observacoes');
+            //     router.reload({ only: ['analises'] });
+            //     alert(`Análise da etapa ${etapas.find(e => e.value === etapa)?.label || etapa} salva com sucesso!`);
+            // },
             onSuccess: () => {
                 form.reset('status', 'observacoes');
-                router.reload({ only: ['analises'] });
+
+                router.reload({
+                    only: ['analises'],
+                    onSuccess: () => {
+                        avancarParaProximaEtapa(etapa);
+                    },
+                });
+
                 alert(`Análise da etapa ${etapas.find(e => e.value === etapa)?.label || etapa} salva com sucesso!`);
             },
+
             onError: (errors) => {
                 console.error('Erro ao salvar análise da etapa', { etapa, errors });
                 alert('Erro ao salvar análise: ' + (Object.values(errors).join(', ') || 'Verifique os dados e tente novamente.'));
@@ -347,7 +373,7 @@ const finalizarAvaliacao = () => {
                                         <span class="badge bg-success text-white">Aprovado</span>
                                     </div>
                                     <div v-else-if="getEtapaStatus('apresentacao_geral') === 'Rejeitada'" class="status-container">
-                                        <span class="badge bg-danger text-white">Rejeitada</span>
+                                        <span class="badge bg-danger text-white">Reprovada</span>
                                     </div>
                                     <div v-else class="status-container">
                                         <span class="badge bg-warning text-white">Pendente</span>
@@ -384,7 +410,7 @@ const finalizarAvaliacao = () => {
                                                 </p>
                                             </div>
                                             <div class="d-flex justify-content-end gap-2">
-                                                <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                                <NavButton type="submit" type-button="danger" title="Reprovar" />
                                                 <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('apresentacao_geral')" />
                                             </div>
                                         </form>
@@ -396,7 +422,7 @@ const finalizarAvaliacao = () => {
                                         <span class="badge bg-success text-white">Aprovado</span>
                                     </div>
                                     <div v-else-if="getEtapaStatus('caracterizacao_area') === 'Rejeitada'" class="status-container">
-                                        <span class="badge bg-danger text-white">Rejeitada</span>
+                                        <span class="badge bg-danger text-white">Reprovada</span>
                                     </div>
                                     <div v-else class="status-container">
                                         <span class="badge bg-warning text-white">Pendente</span>
@@ -430,7 +456,7 @@ const finalizarAvaliacao = () => {
                                                 </p>
                                             </div>
                                             <div class="d-flex justify-content-end gap-2">
-                                                <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                                <NavButton type="submit" type-button="danger" title="Reprovar" />
                                                 <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('caracterizacao_area')" />
                                             </div>
                                         </form>
@@ -441,7 +467,7 @@ const finalizarAvaliacao = () => {
                                         <span class="badge bg-success text-white">Aprovado</span>
                                     </div>
                                     <div v-else-if="getEtapaStatus('modulos_amostrais') === 'Rejeitada'" class="status-container">
-                                        <span class="badge bg-danger text-white">Rejeitada</span>
+                                        <span class="badge bg-danger text-white">Reprovada</span>
                                     </div>
                                     <div v-else class="status-container">
                                         <span class="badge bg-warning text-white">Pendente</span>
@@ -474,7 +500,7 @@ const finalizarAvaliacao = () => {
                                                 </p>
                                             </div>
                                             <div class="d-flex justify-content-end gap-2">
-                                                <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                                <NavButton type="submit" type-button="danger" title="Reprovar" />
                                                 <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('modulos_amostrais')" />
                                             </div>
                                         </form>
@@ -485,7 +511,7 @@ const finalizarAvaliacao = () => {
                                         <span class="badge bg-success text-white">Aprovado</span>
                                     </div>
                                     <div v-else-if="getEtapaStatus('pontos_quelo_crocod') === 'Rejeitada'" class="status-container">
-                                        <span class="badge bg-danger text-white">Rejeitada</span>
+                                        <span class="badge bg-danger text-white">Reprovada</span>
                                     </div>
                                     <div v-else class="status-container">
                                         <span class="badge bg-warning text-white">Pendente</span>
@@ -518,7 +544,7 @@ const finalizarAvaliacao = () => {
                                                 </p>
                                             </div>
                                             <div class="d-flex justify-content-end gap-2">
-                                                <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                                <NavButton type="submit" type-button="danger" title="Reprovar" />
                                                 <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('pontos_quelo_crocod')" />
                                             </div>
                                         </form>
@@ -529,7 +555,7 @@ const finalizarAvaliacao = () => {
                                         <span class="badge bg-success text-white">Aprovado</span>
                                     </div>
                                     <div v-else-if="getEtapaStatus('pontos_cavernicola') === 'Rejeitada'" class="status-container">
-                                        <span class="badge bg-danger text-white">Rejeitada</span>
+                                        <span class="badge bg-danger text-white">Reprovada</span>
                                     </div>
                                     <div v-else class="status-container">
                                         <span class="badge bg-warning text-white">Pendente</span>
@@ -562,7 +588,7 @@ const finalizarAvaliacao = () => {
                                                 </p>
                                             </div>
                                             <div class="d-flex justify-content-end gap-2">
-                                                <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                                <NavButton type="submit" type-button="danger" title="Reprovar" />
                                                 <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('pontos_cavernicola')" />
                                             </div>
                                         </form>
@@ -575,7 +601,7 @@ const finalizarAvaliacao = () => {
                                     <span class="badge bg-success text-white">Aprovado</span>
                                 </div>
                                 <div v-else-if="getEtapaStatus('metodologia') === 'Rejeitada'" class="status-container">
-                                    <span class="badge bg-danger text-white">Rejeitada</span>
+                                    <span class="badge bg-danger text-white">Reprovada</span>
                                 </div>
                                 <div v-else class="status-container">
                                     <span class="badge bg-warning text-white">Pendente</span>
@@ -606,7 +632,7 @@ const finalizarAvaliacao = () => {
                                             </p>
                                         </div>
                                         <div class="d-flex justify-content-end gap-2">
-                                            <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                            <NavButton type="submit" type-button="danger" title="Reprovar" />
                                             <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('metodologia')" />
                                         </div>
                                     </form>
@@ -618,7 +644,7 @@ const finalizarAvaliacao = () => {
                                     <span class="badge bg-success text-white">Aprovado</span>
                                 </div>
                                 <div v-else-if="getEtapaStatus('resultados') === 'Rejeitada'" class="status-container">
-                                    <span class="badge bg-danger text-white">Rejeitada</span>
+                                    <span class="badge bg-danger text-white">Reprovada</span>
                                 </div>
                                 <div v-else class="status-container">
                                     <span class="badge bg-warning text-white">Pendente</span>
@@ -649,7 +675,7 @@ const finalizarAvaliacao = () => {
                                     <span class="badge bg-success text-white">Aprovado</span>
                                 </div>
                                 <div v-else-if="getEtapaStatus('anexos') === 'Rejeitada'" class="status-container">
-                                    <span class="badge bg-danger text-white">Rejeitada</span>
+                                    <span class="badge bg-danger text-white">Reprovada</span>
                                 </div>
                                 <div v-else class="status-container">
                                     <span class="badge bg-warning text-white">Pendente</span>
@@ -672,7 +698,7 @@ const finalizarAvaliacao = () => {
                                                 <td class="py-2 px-4 border-b">{{ anexo.nome_arquivo || 'Não informado' }}</td>
                                                 <td class="py-2 px-4 border-b">{{ anexo.created_at || 'Não informado' }}</td>
                                                 <td class="py-2 px-4 border-b">
-                                                    <a v-if="anexo.caminho" :href="'/storage/' + anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
+                                                    <a v-if="anexo.caminho" :href="'' + anexo.caminho" target="_blank" class="btn btn-link">Visualizar</a>
                                                     <span v-else>Nenhum arquivo</span>
                                                 </td>
                                             </tr>
@@ -703,7 +729,7 @@ const finalizarAvaliacao = () => {
                                             </p>
                                         </div>
                                         <div class="d-flex justify-content-end gap-2">
-                                            <NavButton type="submit" type-button="danger" title="Rejeitar" />
+                                            <NavButton type="submit" type-button="danger" title="Reprovar" />
                                             <NavButton type="button" type-button="success" title="Aprovar" @click="aprovarEtapa('anexos')" />
                                         </div>
                                     </form>
