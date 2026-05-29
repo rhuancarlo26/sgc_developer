@@ -153,6 +153,10 @@ const formResultados = useForm({
     produto: props.produto,
 });
 
+// Resultados de Atropelamento (separado)
+const planilhaAtropelamento = ref(null);
+const consideracoesAtropelamento = ref('');
+
 // Tabelas - Inicializar com dados do draft
 const abioRecords = ref(props.draftData?.abios ?? []);
 const profissionalRecords = ref(props.draftData?.profissionais ?? []);
@@ -253,7 +257,7 @@ const salvarDadosGerais = (consideracoesData = {}) => {
         formData.append(`metodologias[${index}][metodologia]`, metodo.metodologia || '');
     });
 
-    // Enviar até 3 planilhas separadas
+    // Planilhas por tipo (fauna regular)
     if (formResultados.planilha_terrestre) {
         formData.append('planilha_terrestre', formResultados.planilha_terrestre);
     }
@@ -262,6 +266,14 @@ const salvarDadosGerais = (consideracoesData = {}) => {
     }
     if (formResultados.planilha_cavernicola) {
         formData.append('planilha_cavernicola', formResultados.planilha_cavernicola);
+    }
+
+    // Planilha de resultados de atropelamento
+    if (planilhaAtropelamento.value) {
+        formData.append('planilha_atropelamento', planilhaAtropelamento.value);
+    }
+    if (consideracoesAtropelamento.value) {
+        formData.append('consideracoes_atropelamento', consideracoesAtropelamento.value);
     }
 
 
@@ -869,7 +881,9 @@ onMounted(() => {
                                 />
                             </div>
                             <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
+                                <!-- Fauna regular -->
                                 <FaunaResultados
+                                    v-if="!isAtropelamento"
                                     :form-resultados="formResultados"
                                     :resultados-records.sync="resultadosRecords"
                                     :id-campanha="formDadosGerais.id || props.contrato"
@@ -877,6 +891,51 @@ onMounted(() => {
                                     @prev="setActiveTab('metodologia')"
                                     @next="setActiveTab('anexos')"
                                 />
+                                <!-- Atropelamento: UI simplificada -->
+                                <div v-else>
+                                    <h4 class="text-center mb-4 fw-bold">Resultados — Atropelamento de Fauna</h4>
+                                    <div class="card p-4 mb-4">
+                                        <div class="d-flex gap-3 mb-4">
+                                            <a
+                                                :href="route('sgc.contratada.produtos.fauna.atropelamento.modelo', [props.contrato, props.produto.toLowerCase()])"
+                                                class="btn btn-outline-success"
+                                                download
+                                            >
+                                                ⬇ Baixar Planilha Modelo
+                                            </a>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Planilha de Resultados</label>
+                                            <input
+                                                type="file"
+                                                class="form-control"
+                                                accept=".xlsx,.xls"
+                                                @change="planilhaAtropelamento = $event.target.files[0]"
+                                            />
+                                            <small class="text-muted">Formatos aceitos: .xlsx, .xls (máx. 10MB)</small>
+                                            <div v-if="planilhaAtropelamento" class="mt-2 text-success small">
+                                                Arquivo selecionado: {{ planilhaAtropelamento.name }}
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Considerações</label>
+                                            <textarea
+                                                v-model="consideracoesAtropelamento"
+                                                class="form-control"
+                                                rows="4"
+                                                placeholder="Descreva as considerações sobre os resultados..."
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <button type="button" class="btn btn-outline-secondary px-4" @click="setActiveTab('metodologia')">
+                                            Voltar
+                                        </button>
+                                        <button type="button" class="btn btn-primary px-4" @click="setActiveTab('anexos')">
+                                            Avançar
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div v-if="activeTab === 'anexos'" class="tab-pane fade show active">
                                 <h3 class="text-center mb-4 fw-bold">Anexos</h3>

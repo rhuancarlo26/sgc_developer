@@ -19,7 +19,9 @@ class SgcFaunaCampanha extends Model
         'cod_emp',
         'subproduto',
         'status',
-        'versao_analise'
+        'versao_analise',
+        'planilha_atropelamento',
+        'consideracoes_atropelamento',
     ];
 
     public function contrato()
@@ -92,6 +94,8 @@ class SgcFaunaCampanha extends Model
         return $this->hasMany(SgcFaunaResultadosCavernicola::class, 'id_campanha', 'id');
     }
 
-
-
+    public function atropelamento_campanhas()
+    {
+        return $this->hasMany(SgcFaunaAtropelamentoCampanha::class, 'campanha_id', 'id');
+    }
 }

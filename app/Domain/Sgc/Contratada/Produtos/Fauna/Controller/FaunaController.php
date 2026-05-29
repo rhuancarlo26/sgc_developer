@@ -1098,8 +1098,9 @@ public function show($contrato, $produto, $campanhaId)
             'metodologias',
             'analises',
             'anexos',
-            'resultados', // Garante que a relação está carregada
+            'resultados',
             'resultados_consideracoes',
+            'atropelamento_campanhas',
         ])->findOrFail($campanhaId);
 
         $subproduto = $request->query('subproduto');
@@ -1187,10 +1188,29 @@ public function show($contrato, $produto, $campanhaId)
         ->whereNull('deleted_at')
         ->get();
 
+        $atropelamentoCampanhas = $campanha->atropelamento_campanhas->map(function ($ac) {
+            return [
+                'id' => $ac->id,
+                'rodovia' => $ac->rodovia,
+                'data_inicial' => $ac->data_inicial,
+                'data_final' => $ac->data_final,
+                'uf_inicial' => $ac->uf_inicial,
+                'uf_final' => $ac->uf_final,
+                'km_inicial' => $ac->km_inicial,
+                'km_final' => $ac->km_final,
+                'latitude_inicial' => $ac->latitude_inicial,
+                'longitude_inicial' => $ac->longitude_inicial,
+                'latitude_final' => $ac->latitude_final,
+                'longitude_final' => $ac->longitude_final,
+                'obs' => $ac->obs,
+            ];
+        })->toArray();
+
         return Inertia::render('Sgc/Contratada/Produtos/Fauna/EditarCampanha', [
             'campanha' => array_merge($campanha->toArray(), [
             'resultados' => $resultados,
             'resultados_consideracoes' => $campanha->resultados_consideracoes->consideracoes ?? null,
+            'atropelamento_campanhas' => $atropelamentoCampanhas,
         ]),
             'contrato' => $contrato,
             'produto' => $produto,
@@ -1283,6 +1303,21 @@ public function show($contrato, $produto, $campanhaId)
                 'anexos.ctf' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
                 'anexos.anuencia_colecoes' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
                 'anexos.oficio_atividades_campo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'anexos.rfaef' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'anexos.cartas_anuencia' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'atropelamento_campanha' => 'nullable|array',
+                'atropelamento_campanha.*.rodovia' => 'nullable|string',
+                'atropelamento_campanha.*.data_inicial' => 'nullable|date',
+                'atropelamento_campanha.*.data_final' => 'nullable|date',
+                'atropelamento_campanha.*.uf_inicial' => 'nullable|string|size:2',
+                'atropelamento_campanha.*.uf_final' => 'nullable|string|size:2',
+                'atropelamento_campanha.*.km_inicial' => 'nullable|numeric',
+                'atropelamento_campanha.*.km_final' => 'nullable|numeric',
+                'atropelamento_campanha.*.latitude_inicial' => 'nullable|numeric',
+                'atropelamento_campanha.*.longitude_inicial' => 'nullable|numeric',
+                'atropelamento_campanha.*.latitude_final' => 'nullable|numeric',
+                'atropelamento_campanha.*.longitude_final' => 'nullable|numeric',
+                'atropelamento_campanha.*.obs' => 'nullable|string',
             ]);
 
             // Forçar parsing correto de abios
@@ -1306,6 +1341,7 @@ public function show($contrato, $produto, $campanhaId)
 
             $validated['anexos'] = $request->file('anexos') ?? [];
             $validated['planilha'] = $request->file('planilha');
+            $validated['atropelamento_campanha'] = $request->input('atropelamento_campanha', []);
 
             DB::beginTransaction();
             $campanhaId = $this->faunaService->atualizarCampanha($contrato, $campanhaId, $validated);

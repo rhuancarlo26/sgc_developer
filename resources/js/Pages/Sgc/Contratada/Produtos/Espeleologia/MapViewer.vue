@@ -16,6 +16,7 @@ const props = defineProps({
   campanhaId: [Number, String],
   produto: String,
   emp_coordenadas: [Object, String],
+  somenteTrecho: { type: Boolean, default: false },
 });
 console.log("MapViewer Props:", props.emp_coordenadas); // Log para verificar os dados recebidos
 
@@ -272,33 +273,35 @@ onMounted(async () => {
   // Os eventos de tile são rastreados por camada individualmente em toggleLayer
 
   addEmpCoordinatesLayer();
-  initTemporaryDrawTools();
-
-  const params = {};
-  if (props.campanhaId) {
-    params.campanha_id = props.campanhaId;
-  }
-
-  isLoadingMap.value = true;
-  loadingMapMessage.value = 'Carregando camadas...';
-  startLoading();
-  try {
-    const { data } = await axios.get("/sgc/contratada/espeleologia/layers", { params });
-    layers.value = data;
-
-    // Armazenar cores para cada camada
-    data.forEach((layer, index) => {
-      const key = `${layer.workspace}:${layer.layer_name}`;
-      layerColors.value[key] = getLayerColor(index);
-    });
-  } finally {
-    isLoadingMap.value = false;
-    loadingMapMessage.value = '';
-    stopLoading();
-  }
-
-  map.value.on("click", getFeatureInfo);
   document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+  if (!props.somenteTrecho) {
+    initTemporaryDrawTools();
+
+    const params = {};
+    if (props.campanhaId) {
+      params.campanha_id = props.campanhaId;
+    }
+
+    isLoadingMap.value = true;
+    loadingMapMessage.value = 'Carregando camadas...';
+    startLoading();
+    try {
+      const { data } = await axios.get("/sgc/contratada/espeleologia/layers", { params });
+      layers.value = data;
+
+      data.forEach((layer, index) => {
+        const key = `${layer.workspace}:${layer.layer_name}`;
+        layerColors.value[key] = getLayerColor(index);
+      });
+    } finally {
+      isLoadingMap.value = false;
+      loadingMapMessage.value = '';
+      stopLoading();
+    }
+
+    map.value.on("click", getFeatureInfo);
+  }
 });
 
 onUnmounted(() => {
@@ -592,6 +595,7 @@ async function getFeatureInfo(e) {
         </button>
 
         <button
+          v-if="!somenteTrecho"
           class="clear-drawings-btn"
           @click="clearTemporaryDrawings"
           title="Limpar desenhos temporarios"
@@ -600,7 +604,7 @@ async function getFeatureInfo(e) {
         </button>
 
         <!-- Painel de controle de camadas -->
-        <div class="layers-panel" :class="{ hidden: !showLayersPanel }">
+        <div v-if="!somenteTrecho" class="layers-panel" :class="{ hidden: !showLayersPanel }">
           <div class="panel-header">
             <h2>Camadas do Mapa</h2>
             <button
@@ -655,6 +659,7 @@ async function getFeatureInfo(e) {
 
         <!-- Botão para mostrar/esconder o painel -->
         <button
+          v-if="!somenteTrecho"
           class="toggle-panel-btn"
           :class="{ expanded: showLayersPanel }"
           @click="toggleLayersPanel"

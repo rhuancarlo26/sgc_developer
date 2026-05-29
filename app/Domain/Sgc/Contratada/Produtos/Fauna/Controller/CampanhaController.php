@@ -21,6 +21,11 @@ use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CampanhaController extends Controller
 {
@@ -42,7 +47,9 @@ class CampanhaController extends Controller
         $validated['planilha_terrestre']   = $request->file('planilha_terrestre');
         $validated['planilha_aquatica']    = $request->file('planilha_aquatica');
         $validated['planilha_cavernicola'] = $request->file('planilha_cavernicola');
-
+        $validated['atropelamento_campanha'] = $request->input('atropelamento_campanha', []);
+        $validated['planilha_atropelamento'] = $request->file('planilha_atropelamento');
+        $validated['consideracoes_atropelamento'] = $request->input('consideracoes_atropelamento');
 
         try {
             DB::beginTransaction();
@@ -99,11 +106,12 @@ class CampanhaController extends Controller
                 ];
             }, (array) $request->input('profissionais', []));
             $validated['anexos'] = $request->file('anexos') ?? [];
-            // $validated['planilha'] = $request->file('planilha');
             $validated['planilha_terrestre']   = $request->file('planilha_terrestre');
             $validated['planilha_aquatica']    = $request->file('planilha_aquatica');
             $validated['planilha_cavernicola'] = $request->file('planilha_cavernicola');
-
+            $validated['atropelamento_campanha'] = $request->input('atropelamento_campanha', []);
+            $validated['planilha_atropelamento'] = $request->file('planilha_atropelamento');
+            $validated['consideracoes_atropelamento'] = $request->input('consideracoes_atropelamento');
 
             DB::beginTransaction();
             $campanhaId = $this->campanhaService->atualizarCampanha($contrato, $campanhaId, $validated);
@@ -155,12 +163,12 @@ class CampanhaController extends Controller
                     'pontos_quelo_crocod',
                     'pontos_cavernicola',
                     'metodologias',
-                    // 'resultados',
                     'resultadosTerrestre',
                     'resultadosAquatica',
                     'resultadosCavernicola',
                     'resultados_consideracoes',
-                    'anexos'
+                    'anexos',
+                    'atropelamento_campanhas',
                 ])->findOrFail($campanhaId);
                 Log::debug('FaunaController: resultados por grupo', [
                     'campanha_id'          => $campanhaId,
@@ -197,6 +205,7 @@ class CampanhaController extends Controller
             'anexos',
             'resultados',
             'resultados_consideracoes',
+            'atropelamento_campanhas',
         ])->findOrFail($campanhaId);
 
         if (!in_array($campanha->status, ['Rejeitada', 'Em elaboração'])) {
@@ -376,6 +385,44 @@ class CampanhaController extends Controller
         }
     }
 
+    public function downloadModeloAtropelamento(): StreamedResponse
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Resultados Atropelamento');
+
+        $headers = [
+            'Data do Registro', 'Rodovia', 'KM', 'Latitude', 'Longitude',
+            'Classe', 'Ordem', 'Família', 'Gênero', 'Espécie',
+            'Nome Científico', 'Nome Comum', 'Sexo', 'Faixa Etária',
+            'Condição do Animal', 'Status Conservação IUCN', 'Status Conservação MMA', 'Observações',
+        ];
+
+        foreach ($headers as $col => $header) {
+            $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . '1';
+            $sheet->setCellValue($cell, $header);
+        }
+
+        $headerRange = 'A1:' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers)) . '1';
+        $sheet->getStyle($headerRange)->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2E7D32']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        foreach (range('A', \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers))) as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, 'modelo_atropelamento_fauna.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
     private function mapCampanhaData($campanha)
     {
         $modulosManuais = SgcFaunaModuloAmostral::where('campanha_id', $campanha->id)->get();
@@ -447,6 +494,28 @@ class CampanhaController extends Controller
                 'resultadosCavernicola' => !empty($campanha->resultadosCavernicola) ? $campanha->resultadosCavernicola->toArray() : null,
 
             'consideracoes' => $campanha->resultados_consideracoes ? $campanha->resultados_consideracoes->consideracoes : null,
+            'planilha_atropelamento' => $campanha->planilha_atropelamento
+                ? \App\Helpers\StorageHelper::publicUrl($campanha->planilha_atropelamento)
+                : null,
+            'planilha_atropelamento_path' => $campanha->planilha_atropelamento,
+            'consideracoes_atropelamento' => $campanha->consideracoes_atropelamento,
+            'atropelamento_campanhas' => $campanha->relationLoaded('atropelamento_campanhas') && $campanha->atropelamento_campanhas
+                ? $campanha->atropelamento_campanhas->map(fn($ac) => [
+                    'id' => $ac->id,
+                    'rodovia' => $ac->rodovia,
+                    'data_inicial' => $ac->data_inicial,
+                    'data_final' => $ac->data_final,
+                    'uf_inicial' => $ac->uf_inicial,
+                    'uf_final' => $ac->uf_final,
+                    'km_inicial' => $ac->km_inicial,
+                    'km_final' => $ac->km_final,
+                    'latitude_inicial' => $ac->latitude_inicial,
+                    'longitude_inicial' => $ac->longitude_inicial,
+                    'latitude_final' => $ac->latitude_final,
+                    'longitude_final' => $ac->longitude_final,
+                    'obs' => $ac->obs,
+                ])->toArray()
+                : [],
             'abios' => empty($campanha->abios) ? null : $campanha->abios->map(function ($abio) {
                 return [
                     'id' => $abio->id,

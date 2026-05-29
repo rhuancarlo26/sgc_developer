@@ -141,6 +141,7 @@ Route::prefix('/contratada')->group(function () {
         Route::post('abio/store', [StoreProdutoAbioController::class, 'store'])->name('sgc.contratada.produtos.abio.store');
         Route::delete('abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.destroy');
         Route::post('salvar-campanha', [CampanhaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.salvar_campanha');
+        Route::get('fauna/atropelamento/modelo-planilha', [CampanhaController::class, 'downloadModeloAtropelamento'])->name('sgc.contratada.produtos.fauna.atropelamento.modelo');
         Route::post('profissional/store', [ProfissionalController::class, 'storeProfissional'])->name('sgc.contratada.produtos.profissional.store');
         Route::post('resultados/store', [CampanhaController::class, 'storeResultados'])->name('sgc.contratada.produtos.resultados.store');
         Route::get('campanhas/{campanhaId}/{modulo?}', [CampanhaController::class, 'show'])->name('sgc.contratada.produtos.show');
