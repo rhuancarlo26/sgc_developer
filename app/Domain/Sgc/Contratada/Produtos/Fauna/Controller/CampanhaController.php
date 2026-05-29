@@ -20,6 +20,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CampanhaController extends Controller
 {
@@ -93,8 +98,9 @@ class CampanhaController extends Controller
                 'resultadosCavernicola',
                 'resultados_consideracoes',
                 'anexos',
+                'atropelamento_campanhas',
             ])->findOrFail($campanhaId);
-            
+
             Log::debug('FaunaController: resultados por grupo', [
                 'campanha_id'          => $campanhaId,
                 'terrestre_count'      => $campanha->resultadosTerrestre->count(),
@@ -211,10 +217,13 @@ class CampanhaController extends Controller
                 'formacao'         => $p['profissional']['formacao'] ?? null,
             ], (array) $request->input('profissionais', []));
 
-            $validated['anexos']               = $request->file('anexos') ?? [];
-            // $validated['planilha_terrestre']   = $request->file('planilha_terrestre');
-            // $validated['planilha_aquatica']    = $request->file('planilha_aquatica');
-            // $validated['planilha_cavernicola'] = $request->file('planilha_cavernicola');
+            $validated['anexos']                       = $request->file('anexos') ?? [];
+            $validated['planilha_terrestre']           = $request->file('planilha_terrestre');
+            $validated['planilha_aquatica']            = $request->file('planilha_aquatica');
+            $validated['planilha_cavernicola']         = $request->file('planilha_cavernicola');
+            $validated['atropelamento_campanha']       = $request->input('atropelamento_campanha', []);
+            $validated['planilha_atropelamento']       = $request->file('planilha_atropelamento');
+            $validated['consideracoes_atropelamento']  = $request->input('consideracoes_atropelamento');
 
             DB::beginTransaction();
             $this->campanhaService->atualizarCampanha($contrato, $campanhaId, $validated);
@@ -483,6 +492,46 @@ class CampanhaController extends Controller
     public static function getBiomas(): array
     {
         return ['Amazônia', 'Caatinga', 'Cerrado', 'Mata Atlântica', 'Pampa', 'Pantanal'];
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // DOWNLOAD — planilha modelo de resultados de atropelamento
+    // ─────────────────────────────────────────────────────────────────────
+    public function downloadModeloAtropelamento(): StreamedResponse
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Resultados Atropelamento');
+
+        $headers = [
+            'Data do Registro', 'Rodovia', 'KM', 'Latitude', 'Longitude',
+            'Classe', 'Ordem', 'Família', 'Gênero', 'Espécie',
+            'Nome Científico', 'Nome Comum', 'Sexo', 'Faixa Etária',
+            'Condição do Animal', 'Status Conservação IUCN', 'Status Conservação MMA', 'Observações',
+        ];
+
+        foreach ($headers as $col => $header) {
+            $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . '1';
+            $sheet->setCellValue($cell, $header);
+        }
+
+        $headerRange = 'A1:' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers)) . '1';
+        $sheet->getStyle($headerRange)->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2E7D32']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        foreach (range('A', \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers))) as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, 'modelo_atropelamento_fauna.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 
     // ─────────────────────────────────────────────────────────────────────

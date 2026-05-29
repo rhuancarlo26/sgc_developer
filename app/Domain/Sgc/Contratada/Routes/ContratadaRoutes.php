@@ -132,6 +132,7 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('rascunho/{campanhaId}/etapa/{etapa}', SalvarEtapaCampanhaController::class)->name('sgc.contratada.produtos.rascunho.etapa');
         Route::post('rascunho/{campanhaId}/submeter', SubmeterCampanhaController::class)->name('sgc.contratada.produtos.rascunho.submeter');
 
+        Route::get('fauna/atropelamento/modelo-planilha', [CampanhaController::class, 'downloadModeloAtropelamento'])->name('sgc.contratada.produtos.fauna.atropelamento.modelo');
         Route::post('profissional/store', [ProfissionalController::class, 'storeProfissional'])->name('sgc.contratada.produtos.profissional.store');
         // Route::get('campanhas/{campanhaId}', [CampanhaController::class, 'show'])->name('sgc.contratada.produtos.show');
         Route::get('campanhas/{campanhaId}/{modulo?}', [CampanhaController::class, 'show'])->name('sgc.contratada.produtos.show');

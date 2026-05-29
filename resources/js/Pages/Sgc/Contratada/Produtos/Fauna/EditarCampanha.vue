@@ -4,10 +4,11 @@ import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import InputError from '@/Components/InputError.vue';
 import NavButton from '@/Components/NavButton.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useForm, router, usePage  } from '@inertiajs/vue3';
 import DadosGeraisEditar from './Componentes/DadosGeraisEditar.vue';
 import ModulosAmostraisEditar from './Componentes/ModulosAmostraisEditar.vue';
+import CampanhaAtropelamento from './CampanhaAtropelamento.vue';
 import QueloniosCrocodilianosEditar from './Componentes/QueloniosCrocodilianosEditar.vue';
 import FaunaCavernicolaEditar from './Componentes/FaunaCavernicolaEditar.vue';
 import MetodologiaEditar from './Componentes/MetodologiaEditar.vue';
@@ -57,6 +58,28 @@ console.log('datas:', {
 const activeTab = ref('apresentacao');
 const subStep = ref(1);
 const showModal = ref(false);
+
+const isAtropelamento = ref(false);
+onMounted(() => {
+    if (props.campanha.subproduto?.toLowerCase().includes('atropelamento')) {
+        isAtropelamento.value = true;
+    }
+});
+
+// Atropelamento
+const planilhaAtropelamento = ref(null);
+const consideracoesAtropelamento = ref(props.campanha.consideracoes_atropelamento || '');
+const atropelamentoCampanhaRecords = ref(
+    (props.campanha.atropelamento_campanhas || []).map(ac => ({ ...ac }))
+);
+const formCampanhaAtrop = ref({
+    rodovia: null, data_inicial: null, data_final: null,
+    uf_inicial: null, uf_final: null,
+    km_inicial: null, km_final: null,
+    latitude_inicial: null, longitude_inicial: null,
+    latitude_final: null, longitude_final: null,
+    obs: null, errors: {},
+});
 const modalEtapa = ref('');
 
 // Mapeamento de etapas para labels
@@ -535,6 +558,23 @@ const comentariosPorAnalise = computed(() => (analise) => {
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 });
 
+const adicionarCampanhaAtrop = () => {
+    const f = formCampanhaAtrop.value;
+    if (f.data_inicial && f.data_final && f.uf_inicial && f.uf_final) {
+        atropelamentoCampanhaRecords.value.push({ ...f, id: f.id || Date.now() });
+        Object.assign(formCampanhaAtrop.value, {
+            rodovia: null, data_inicial: null, data_final: null,
+            uf_inicial: null, uf_final: null, km_inicial: null, km_final: null,
+            latitude_inicial: null, longitude_inicial: null,
+            latitude_final: null, longitude_final: null, obs: null,
+        });
+    }
+};
+
+const excluirCampanhaAtrop = (id) => {
+    atropelamentoCampanhaRecords.value = atropelamentoCampanhaRecords.value.filter(ac => ac.id !== id);
+};
+
 const submitForm = () => {
   console.log('form.abios antes de enviar:', JSON.stringify(form.abios, null, 2));
   console.log('form.profissionais antes de enviar:', JSON.stringify(form.profissionais, null, 2));
@@ -618,6 +658,20 @@ const submitForm = () => {
     if (form.anexos[tipo]) {
       formData.append(`anexos[${tipo}]`, form.anexos[tipo]);
     }
+  });
+
+  // Planilha e considerações de atropelamento
+  if (planilhaAtropelamento.value) formData.append('planilha_atropelamento', planilhaAtropelamento.value);
+  if (consideracoesAtropelamento.value) formData.append('consideracoes_atropelamento', consideracoesAtropelamento.value);
+  atropelamentoCampanhaRecords.value.forEach((c, i) => {
+    if (c.rodovia) formData.append(`atropelamento_campanha[${i}][rodovia]`, c.rodovia);
+    if (c.data_inicial) formData.append(`atropelamento_campanha[${i}][data_inicial]`, c.data_inicial);
+    if (c.data_final)   formData.append(`atropelamento_campanha[${i}][data_final]`, c.data_final);
+    if (c.uf_inicial)   formData.append(`atropelamento_campanha[${i}][uf_inicial]`, c.uf_inicial);
+    if (c.uf_final)     formData.append(`atropelamento_campanha[${i}][uf_final]`, c.uf_final);
+    if (c.km_inicial != null) formData.append(`atropelamento_campanha[${i}][km_inicial]`, c.km_inicial);
+    if (c.km_final   != null) formData.append(`atropelamento_campanha[${i}][km_final]`,   c.km_final);
+    if (c.obs) formData.append(`atropelamento_campanha[${i}][obs]`, c.obs);
   });
 
   console.log('Enviando formData:', Array.from(formData.entries()));
@@ -823,8 +877,9 @@ const excluirAnexo = (anexoId) => {
                     @next="subStep = 3"
                     @prev="prevSubStep"
                   />
+                  <!-- SubStep 3 fauna regular: Módulos amostrais -->
                   <ModulosAmostraisEditar
-                    v-if="subStep === 3"
+                    v-if="subStep === 3 && !isAtropelamento"
                     :form="form"
                     :modulo-records="form.modulos_amostrais"
                     :ufs="props.ufs"
@@ -836,8 +891,23 @@ const excluirAnexo = (anexoId) => {
                     @next="subStep = 4"
                     @prev="prevSubStep"
                   />
+                  <!-- SubStep 3 atropelamento: Campanhas de atropelamento -->
+                  <CampanhaAtropelamento
+                    v-if="subStep === 3 && isAtropelamento"
+                    :form-campanha="formCampanhaAtrop"
+                    :campanha-records="atropelamentoCampanhaRecords"
+                    :ufs="props.ufs"
+                    @adicionar-campanha="adicionarCampanhaAtrop"
+                    @excluir-campanha="excluirCampanhaAtrop"
+                    @next="setActiveTab('metodologia')"
+                    @prev="prevSubStep"
+                  >
+                    <template #footer>
+                      <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/3</h4>
+                    </template>
+                  </CampanhaAtropelamento>
                   <QueloniosCrocodilianosEditar
-                    v-if="subStep === 4"
+                    v-if="subStep === 4 && !isAtropelamento"
                     :form="form"
                     :ponto-records="form.pontos_quelo_crocod"
                     :sub-step="subStep"
@@ -852,7 +922,7 @@ const excluirAnexo = (anexoId) => {
                     </template>
                   </QueloniosCrocodilianosEditar>
                   <FaunaCavernicolaEditar
-                    v-if="subStep === 5"
+                    v-if="subStep === 5 && !isAtropelamento"
                     :form="form"
                     :ponto-records="form.pontos_cavernicola"
                     :sub-step="subStep"
@@ -881,7 +951,9 @@ const excluirAnexo = (anexoId) => {
                   />
                 </div>
                 <div v-if="activeTab === 'resultados'" class="tab-pane fade" :class="{ 'show active': activeTab === 'resultados' }">
+                  <!-- Fauna regular -->
                   <ResultadosEditar
+                    v-if="!isAtropelamento"
                     :form="form"
                     :resultados-records="form.resultados"
                     :set-active-tab="setActiveTab"
@@ -890,6 +962,37 @@ const excluirAnexo = (anexoId) => {
                     @prev="setActiveTab('metodologia')"
                     @next="setActiveTab('anexos')"
                   />
+                  <!-- Atropelamento -->
+                  <div v-else>
+                    <h4 class="text-center mb-4 fw-bold">Resultados — Atropelamento de Fauna</h4>
+                    <div class="card p-4 mb-4">
+                      <div class="d-flex gap-3 mb-4">
+                        <a :href="route('sgc.contratada.produtos.fauna.atropelamento.modelo', [props.contrato, props.produto.toLowerCase()])"
+                           class="btn btn-outline-success" download>⬇ Baixar Planilha Modelo</a>
+                      </div>
+                      <div v-if="props.campanha.planilha_atropelamento" class="alert alert-info d-flex align-items-center gap-3 mb-3">
+                        <span>Planilha atual:</span>
+                        <a :href="props.campanha.planilha_atropelamento" target="_blank" class="fw-semibold">Visualizar planilha enviada</a>
+                        <small class="text-muted ms-auto">(nova planilha substitui a atual)</small>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Nova Planilha de Resultados</label>
+                        <input type="file" class="form-control" accept=".xlsx,.xls"
+                          @change="planilhaAtropelamento = $event.target.files[0]" />
+                        <small class="text-muted">Formatos aceitos: .xlsx, .xls (máx. 10MB)</small>
+                        <div v-if="planilhaAtropelamento" class="mt-2 text-success small">Arquivo: {{ planilhaAtropelamento.name }}</div>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Considerações</label>
+                        <textarea v-model="consideracoesAtropelamento" class="form-control" rows="4"
+                          placeholder="Descreva as considerações sobre os resultados..."></textarea>
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                      <button type="button" class="btn btn-outline-secondary px-4" @click="setActiveTab('metodologia')">Voltar</button>
+                      <button type="button" class="btn btn-primary px-4" @click="setActiveTab('anexos')">Avançar</button>
+                    </div>
+                  </div>
                 </div>
                 <div v-if="activeTab === 'anexos'" class="tab-pane fade" :class="{ 'show active': activeTab === 'anexos' }">
                   <h4 class="mb-3" style="text-align: center;">ANEXOS</h4>

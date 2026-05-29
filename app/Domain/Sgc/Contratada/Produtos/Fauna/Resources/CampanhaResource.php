@@ -31,7 +31,12 @@ class CampanhaResource
             'resultadosTerrestre'     => $campanha->resultadosTerrestre?->toArray() ?? [],
             'resultadosAquatica'      => $campanha->resultadosAquatica?->toArray() ?? [],
             'resultadosCavernicola'   => $campanha->resultadosCavernicola?->toArray() ?? [],
-            'consideracoes'           => $campanha->resultados_consideracoes?->consideracoes,
+            'consideracoes'                => $campanha->resultados_consideracoes?->consideracoes,
+            'planilha_atropelamento'       => $campanha->planilha_atropelamento
+                ? \App\Helpers\StorageHelper::publicUrl($campanha->planilha_atropelamento)
+                : null,
+            'consideracoes_atropelamento'  => $campanha->consideracoes_atropelamento,
+            'atropelamento_campanhas'      => self::mapAtropelamentoCampanhas($campanha),
             'abios'                   => self::mapAbios($campanha),
             'profissionais'           => self::mapProfissionais($campanha),
             'modulos_amostrais'       => self::mapModulosAmostrais($campanha),
@@ -256,6 +261,29 @@ class CampanhaResource
             'caminho'      => Storage::url($anexo->caminho),
             'nome_arquivo' => $anexo->nome_arquivo ?? basename($anexo->caminho),
             'created_at'   => $anexo->created_at,
+        ])->toArray();
+    }
+
+    private static function mapAtropelamentoCampanhas($campanha): array
+    {
+        if (!$campanha->relationLoaded('atropelamento_campanhas') || $campanha->atropelamento_campanhas?->isEmpty()) {
+            return [];
+        }
+
+        return $campanha->atropelamento_campanhas->map(fn($ac) => [
+            'id'               => $ac->id,
+            'rodovia'          => $ac->rodovia,
+            'data_inicial'     => $ac->data_inicial,
+            'data_final'       => $ac->data_final,
+            'uf_inicial'       => $ac->uf_inicial,
+            'uf_final'         => $ac->uf_final,
+            'km_inicial'       => $ac->km_inicial,
+            'km_final'         => $ac->km_final,
+            'latitude_inicial' => $ac->latitude_inicial,
+            'longitude_inicial'=> $ac->longitude_inicial,
+            'latitude_final'   => $ac->latitude_final,
+            'longitude_final'  => $ac->longitude_final,
+            'obs'              => $ac->obs,
         ])->toArray();
     }
 

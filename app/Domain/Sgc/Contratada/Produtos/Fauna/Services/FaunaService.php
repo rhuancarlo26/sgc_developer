@@ -15,6 +15,7 @@ use App\Models\SgcFaunaAnexo;
 use App\Models\SgcFaunaCampanhaAbios;
 use App\Models\SgcFaunaComentarios;
 use App\Models\SgcFaunaAnaliseEtapa;
+use App\Models\SgcFaunaAtropelamentoCampanha;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -136,27 +137,37 @@ class FaunaService
             }
         }
 
+        // Salvar campanhas de atropelamento
+        if (!empty($data['atropelamento_campanha'])) {
+            foreach ($data['atropelamento_campanha'] as $campData) {
+                SgcFaunaAtropelamentoCampanha::create([
+                    'campanha_id' => $campanha->id,
+                    'id_contrato' => $contratoId,
+                    'rodovia' => $campData['rodovia'] ?? null,
+                    'data_inicial' => $campData['data_inicial'] ?? null,
+                    'data_final' => $campData['data_final'] ?? null,
+                    'uf_inicial' => $campData['uf_inicial'] ?? null,
+                    'uf_final' => $campData['uf_final'] ?? null,
+                    'km_inicial' => $campData['km_inicial'] ?? null,
+                    'km_final' => $campData['km_final'] ?? null,
+                    'latitude_inicial' => $campData['latitude_inicial'] ?? null,
+                    'longitude_inicial' => $campData['longitude_inicial'] ?? null,
+                    'latitude_final' => $campData['latitude_final'] ?? null,
+                    'longitude_final' => $campData['longitude_final'] ?? null,
+                    'obs' => $campData['obs'] ?? null,
+                ]);
+            }
+        }
+
         // Salvar resultados e considerações
         if (!empty($data['planilha']) && $data['planilha']->isValid()) {
             $this->salvarResultados($contratoId, $data['planilha'], $campanha->id, $data['consideracoes'] ?? null);
-        }
-
-        // Salvar considerações
-        if (!empty($data['consideracoes'])) {
+        } elseif (!empty($data['consideracoes'])) {
             SgcFaunaResultadosConsideracoes::create([
                 'id_contrato' => $contratoId,
                 'id_campanha' => $campanha->id,
                 'consideracoes' => $data['consideracoes'],
             ]);
-        }
-
-        // Salvar resultados e atualizar id_campanha
-        if (!empty($data['planilha']) && $data['planilha']->isValid()) {
-            $result = $this->salvarResultados($contratoId, $data['planilha'], null);
-            SgcFaunaResultados::where('id_contrato', $contratoId)
-                ->whereNull('id_campanha')
-                ->where('created_at', '>=', now()->subSeconds(30))
-                ->update(['id_campanha' => $campanha->id]);
         }
 
         // Salvar anexos
@@ -616,6 +627,29 @@ class FaunaService
         } else {
             // Se pontos_cavernicola não for enviado ou nao_se_aplica_cavernicola for true, deleta todos os pontos
             SgcFaunaCavernicola::where('id_campanha', $campanha->id)->delete();
+        }
+
+        // Atualiza campanhas de atropelamento
+        if (isset($data['atropelamento_campanha'])) {
+            SgcFaunaAtropelamentoCampanha::where('campanha_id', $campanha->id)->delete();
+            foreach ($data['atropelamento_campanha'] as $campData) {
+                SgcFaunaAtropelamentoCampanha::create([
+                    'campanha_id' => $campanha->id,
+                    'id_contrato' => $contrato,
+                    'rodovia' => $campData['rodovia'] ?? null,
+                    'data_inicial' => $campData['data_inicial'] ?? null,
+                    'data_final' => $campData['data_final'] ?? null,
+                    'uf_inicial' => $campData['uf_inicial'] ?? null,
+                    'uf_final' => $campData['uf_final'] ?? null,
+                    'km_inicial' => $campData['km_inicial'] ?? null,
+                    'km_final' => $campData['km_final'] ?? null,
+                    'latitude_inicial' => $campData['latitude_inicial'] ?? null,
+                    'longitude_inicial' => $campData['longitude_inicial'] ?? null,
+                    'latitude_final' => $campData['latitude_final'] ?? null,
+                    'longitude_final' => $campData['longitude_final'] ?? null,
+                    'obs' => $campData['obs'] ?? null,
+                ]);
+            }
         }
 
        // Atualiza metodologias

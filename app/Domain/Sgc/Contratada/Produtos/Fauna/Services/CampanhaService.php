@@ -4,6 +4,7 @@ namespace App\Domain\Sgc\Contratada\Produtos\Fauna\Services;
 
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcFaunaCampanhaAbios;
+use App\Models\SgcFaunaAtropelamentoCampanha;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -86,6 +87,47 @@ class CampanhaService
             );
         }
 
+        // Salvar campanhas de atropelamento
+        if (!empty($data['atropelamento_campanha'])) {
+            foreach ($data['atropelamento_campanha'] as $campData) {
+                SgcFaunaAtropelamentoCampanha::create([
+                    'campanha_id' => $campanha->id,
+                    'id_contrato' => $contratoId,
+                    'rodovia' => $campData['rodovia'] ?? null,
+                    'data_inicial' => $campData['data_inicial'] ?? null,
+                    'data_final' => $campData['data_final'] ?? null,
+                    'uf_inicial' => $campData['uf_inicial'] ?? null,
+                    'uf_final' => $campData['uf_final'] ?? null,
+                    'km_inicial' => $campData['km_inicial'] ?? null,
+                    'km_final' => $campData['km_final'] ?? null,
+                    'latitude_inicial' => $campData['latitude_inicial'] ?? null,
+                    'longitude_inicial' => $campData['longitude_inicial'] ?? null,
+                    'latitude_final' => $campData['latitude_final'] ?? null,
+                    'longitude_final' => $campData['longitude_final'] ?? null,
+                    'obs' => $campData['obs'] ?? null,
+                ]);
+            }
+        }
+
+        // Salvar planilha de resultados de atropelamento
+        $planilhaPath = null;
+        if (!empty($data['planilha_atropelamento']) && $data['planilha_atropelamento']->isValid()) {
+            $file = $data['planilha_atropelamento'];
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $planilhaPath = $file->storeAs('fauna_atropelamento', $filename, 'public');
+        }
+
+        $updateFields = [];
+        if ($planilhaPath) {
+            $updateFields['planilha_atropelamento'] = $planilhaPath;
+        }
+        if (isset($data['consideracoes_atropelamento'])) {
+            $updateFields['consideracoes_atropelamento'] = $data['consideracoes_atropelamento'];
+        }
+        if (!empty($updateFields)) {
+            $campanha->update($updateFields);
+        }
+
         $this->anexoService->salvarAnexos($contratoId, $campanha->id, $data['anexos'] ?? []);
 
         return $campanha->id;
@@ -112,6 +154,46 @@ class CampanhaService
         $this->pontoService->salvarPontosQuelonios($contrato, $campanha->id, $data['pontos_quelo_crocod'] ?? [], $data['nao_se_aplica_quelo'] ?? false);
         $this->pontoService->salvarPontosCavernicola($contrato, $campanha->id, $data['pontos_cavernicola'] ?? [], $data['nao_se_aplica_cavernicola'] ?? false);
         $this->metodologiaService->salvarMetodologias($contrato, $campanha->id, $data['metodologias'] ?? []);
+        // Atualizar campanhas de atropelamento
+        if (isset($data['atropelamento_campanha'])) {
+            SgcFaunaAtropelamentoCampanha::where('campanha_id', $campanha->id)->delete();
+            foreach ($data['atropelamento_campanha'] as $campData) {
+                SgcFaunaAtropelamentoCampanha::create([
+                    'campanha_id' => $campanha->id,
+                    'id_contrato' => $contrato,
+                    'rodovia' => $campData['rodovia'] ?? null,
+                    'data_inicial' => $campData['data_inicial'] ?? null,
+                    'data_final' => $campData['data_final'] ?? null,
+                    'uf_inicial' => $campData['uf_inicial'] ?? null,
+                    'uf_final' => $campData['uf_final'] ?? null,
+                    'km_inicial' => $campData['km_inicial'] ?? null,
+                    'km_final' => $campData['km_final'] ?? null,
+                    'latitude_inicial' => $campData['latitude_inicial'] ?? null,
+                    'longitude_inicial' => $campData['longitude_inicial'] ?? null,
+                    'latitude_final' => $campData['latitude_final'] ?? null,
+                    'longitude_final' => $campData['longitude_final'] ?? null,
+                    'obs' => $campData['obs'] ?? null,
+                ]);
+            }
+        }
+
+        // Atualizar planilha de resultados de atropelamento
+        $updateFields = [];
+        if (!empty($data['planilha_atropelamento']) && $data['planilha_atropelamento']->isValid()) {
+            $file = $data['planilha_atropelamento'];
+            $filename = time() . '_' . $file->getClientOriginalName();
+            if ($campanha->planilha_atropelamento) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($campanha->planilha_atropelamento);
+            }
+            $updateFields['planilha_atropelamento'] = $file->storeAs('fauna_atropelamento', $filename, 'public');
+        }
+        if (array_key_exists('consideracoes_atropelamento', $data)) {
+            $updateFields['consideracoes_atropelamento'] = $data['consideracoes_atropelamento'];
+        }
+        if (!empty($updateFields)) {
+            $campanha->update($updateFields);
+        }
+
         // $this->resultadoService->salvarResultados($contrato, $data['planilha'] ?? null, $campanha->id, $data['consideracoes'] ?? null);
         $this->anexoService->salvarAnexos($contrato, $campanha->id, $data['anexos'] ?? []);
 
