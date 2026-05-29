@@ -238,6 +238,8 @@ const form = useForm({
     ctf: null,
     anuencia_colecoes: null,
     oficio_atividades_campo: null,
+    rfaef: null,
+    cartas_anuencia: null,
   },
 });
 
@@ -524,6 +526,33 @@ const anexoTipos = [
   'anuencia_colecoes',
   'oficio_atividades_campo',
 ];
+
+const anexoTiposAtropelamento = [
+  'registro_fotografico',
+  'ctf',
+  'dados_secundarios',
+  'art',
+  'rfaef',
+  'cartas_anuencia',
+];
+
+const anexoLabelsMap = {
+  anuencia_proprietarios:  'Anuência dos Proprietários',
+  registro_fotografico:    'Registro Fotográfico',
+  dados_secundarios:       'Dados Secundários',
+  art:                     'ART',
+  ret:                     'RET',
+  cr:                      'CR',
+  ctf:                     'CTF',
+  anuencia_colecoes:       'Anuência de Coleções',
+  oficio_atividades_campo: 'Ofício de Atividades de Campo',
+  rfaef:                   'Formulário de Registro de Atropelamentos (RFAEF)',
+  cartas_anuencia:         'Cartas de Anuência',
+};
+
+const anexoTiposAtivos = computed(() =>
+  isAtropelamento.value ? anexoTiposAtropelamento : anexoTipos
+);
 
 const formatAnexoLabel = (tipo) => {
   return tipo
@@ -998,8 +1027,8 @@ const excluirAnexo = (anexoId) => {
                   <h4 class="mb-3" style="text-align: center;">ANEXOS</h4>
                   <form @submit.prevent="submitForm" enctype="multipart/form-data">
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          <div v-for="tipo in anexoTipos" :key="tipo">
-                              <label class="form-label">{{ formatAnexoLabel(tipo) }}</label>
+                          <div v-for="tipo in anexoTiposAtivos" :key="tipo">
+                              <label class="form-label">{{ anexoLabelsMap[tipo] || formatAnexoLabel(tipo) }}</label>
                               <input
                                   type="file"
                                   @change="updateAnexo(tipo, $event.target.files[0])"

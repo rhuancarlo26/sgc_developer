@@ -125,6 +125,7 @@ const anexos = ref({
     anuencia_proprietarios: null, registro_fotografico: null,
     dados_secundarios: null, art: null, ret: null, cr: null,
     ctf: null, anuencia_colecoes: null, oficio_atividades_campo: null,
+    rfaef: null, cartas_anuencia: null,
 });
 
 const anexosLabels = {
@@ -138,6 +139,19 @@ const anexosLabels = {
     anuencia_colecoes:       'Anuência de Coleções',
     oficio_atividades_campo: 'Ofício de Atividades de Campo',
 };
+
+const anexosLabelsAtropelamento = {
+    registro_fotografico: 'Registro Fotográfico',
+    ctf:                  'CTF',
+    dados_secundarios:    'Dados Secundários',
+    art:                  'ART',
+    rfaef:                'Formulário de Registro de Atropelamentos (RFAEF)',
+    cartas_anuencia:      'Cartas de Anuência',
+};
+
+const anexosLabelsAtivos = computed(() =>
+    isAtropelamento.value ? anexosLabelsAtropelamento : anexosLabels
+);
 
 // ─── Preview de anexos ────────────────────────────────────────────────────────
 const previewFile = ref(null);
@@ -849,7 +863,7 @@ const closePreview = () => {
                                 <h3 class="text-center mb-4 fw-bold">Anexos</h3>
 
                                 <div class="row g-4">
-                                    <div v-for="(label, tipo) in anexosLabels" :key="tipo" class="col-md-6">
+                                    <div v-for="(label, tipo) in anexosLabelsAtivos" :key="tipo" class="col-md-6">
                                         <div class="anexo-card shadow-sm p-3 rounded bg-white">
                                             <label class="form-label fw-semibold">{{ label }}</label>
                                             <input
