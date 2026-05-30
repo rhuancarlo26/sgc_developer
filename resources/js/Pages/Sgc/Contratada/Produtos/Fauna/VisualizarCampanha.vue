@@ -88,8 +88,22 @@ const salvarAprovacao = () => {
     });
 };
 
+const anexoLabels = {
+    anuencia_proprietarios:  'Anuência dos Proprietários',
+    registro_fotografico:    'Registro Fotográfico',
+    dados_secundarios:       'Dados Secundários',
+    art:                     'ART',
+    ret:                     'RET',
+    cr:                      'CR',
+    ctf:                     'CTF',
+    anuencia_colecoes:       'Anuência de Coleções',
+    oficio_atividades_campo: 'Ofício de Atividades de Campo',
+    rfaef:                   'Formulário de Registro de Atropelamentos (RFAEF)',
+    cartas_anuencia:         'Cartas de Anuência',
+};
+
 const formatAnexoLabel = (tipo) =>
-    tipo.replace(/_/g, ' ').split(' ')
+    anexoLabels[tipo] ?? tipo.replace(/_/g, ' ').split(' ')
         .map(w => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
 

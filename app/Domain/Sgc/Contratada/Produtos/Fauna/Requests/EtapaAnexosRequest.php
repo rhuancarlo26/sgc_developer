@@ -24,6 +24,8 @@ class EtapaAnexosRequest extends FormRequest
             'anexos.ctf'                     => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'anexos.anuencia_colecoes'       => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'anexos.oficio_atividades_campo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.rfaef'                   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'anexos.cartas_anuencia'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ];
     }
 }

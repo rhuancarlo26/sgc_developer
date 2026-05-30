@@ -259,7 +259,7 @@ class CampanhaResource
             'id'           => $anexo->id,
             'tipo_anexo'   => $anexo->tipo_anexo,
             'caminho'      => Storage::url($anexo->caminho),
-            'nome_arquivo' => $anexo->nome_arquivo ?? basename($anexo->caminho),
+            'nome_arquivo' => $anexo->nome ?? basename($anexo->caminho),
             'created_at'   => $anexo->created_at,
         ])->toArray();
     }
