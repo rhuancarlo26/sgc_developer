@@ -198,6 +198,23 @@ class SalvarEtapaCampanhaController extends Controller
                 );
             }
 
+            // Planilha e considerações de atropelamento
+            if (!empty($validated['planilha_atropelamento'])) {
+                $file = $request->file('planilha_atropelamento');
+                if ($file && $file->isValid()) {
+                    $filename = time() . '_' . $file->getClientOriginalName();
+                    if ($campanha->planilha_atropelamento) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($campanha->planilha_atropelamento);
+                    }
+                    $campanha->update([
+                        'planilha_atropelamento' => $file->storeAs('fauna_atropelamento', $filename, 'public'),
+                    ]);
+                }
+            }
+            if (isset($validated['consideracoes_atropelamento'])) {
+                $campanha->update(['consideracoes_atropelamento' => $validated['consideracoes_atropelamento']]);
+            }
+
             $campanha->update([
                 'etapa_atual' => $this->avancarEtapa($campanha->etapa_atual, 'resultados'),
             ]);

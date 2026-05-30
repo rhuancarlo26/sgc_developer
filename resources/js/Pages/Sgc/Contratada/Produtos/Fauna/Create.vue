@@ -424,6 +424,12 @@ const salvarResultados = async () => {
     if (formResultados.consideracoes)
         fd.append('consideracoes', formResultados.consideracoes);
 
+    // Atropelamento
+    if (planilhaAtropelamento.value)
+        fd.append('planilha_atropelamento', planilhaAtropelamento.value);
+    if (consideracoesAtropelamento.value)
+        fd.append('consideracoes_atropelamento', consideracoesAtropelamento.value);
+
     const ok = await salvarEtapa('resultados', fd);
     if (ok) setActiveTab('anexos');
 };
@@ -644,7 +650,7 @@ const closePreview = () => {
             <template #body>
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="text-center mb-4">CADASTRAR {{ props.produto.toUpperCase() }}</h2>
+                        <h2 class="text-center mb-4">{{ isAtropelamento ? 'CADASTRAR ATROPELAMENTO DE FAUNA' : 'CADASTRAR ' + props.produto.toUpperCase() }}</h2>
 
                         <!-- Aviso de salvamento automático -->
                         <div v-if="campanhaId" class="alert alert-success py-1 mb-3 small">
@@ -853,7 +859,7 @@ const closePreview = () => {
                                     </div>
                                     <div class="d-flex justify-content-between mt-2">
                                         <button type="button" class="btn btn-outline-secondary px-4" @click="setActiveTab('metodologia')">Voltar</button>
-                                        <button type="button" class="btn btn-primary px-4" @click="setActiveTab('anexos')">Avançar</button>
+                                        <button type="button" class="btn btn-primary px-4" :disabled="salvando" @click="salvarResultados">{{ salvando ? 'Salvando...' : 'Avançar' }}</button>
                                     </div>
                                 </div>
                             </div>

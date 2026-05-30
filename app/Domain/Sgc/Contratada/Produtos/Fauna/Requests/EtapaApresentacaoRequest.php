@@ -65,6 +65,16 @@ class EtapaApresentacaoRequest extends FormRequest
             'pontos_cavernicola.*.temperatura_media_externa'       => 'nullable|numeric',
             'pontos_cavernicola.*.umidade_relativa_interna'        => 'nullable|numeric',
             'pontos_cavernicola.*.umidade_relativa_externa'        => 'nullable|numeric',
+
+            'atropelamento_campanha'                   => 'nullable|array',
+            'atropelamento_campanha.*.rodovia'          => 'nullable|string',
+            'atropelamento_campanha.*.data_inicial'     => 'nullable|date',
+            'atropelamento_campanha.*.data_final'       => 'nullable|date',
+            'atropelamento_campanha.*.uf_inicial'       => 'nullable|string|size:2',
+            'atropelamento_campanha.*.uf_final'         => 'nullable|string|size:2',
+            'atropelamento_campanha.*.km_inicial'       => 'nullable|numeric',
+            'atropelamento_campanha.*.km_final'         => 'nullable|numeric',
+            'atropelamento_campanha.*.obs'              => 'nullable|string',
         ];
     }
 

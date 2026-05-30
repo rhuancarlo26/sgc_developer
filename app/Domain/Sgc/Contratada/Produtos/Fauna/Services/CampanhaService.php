@@ -263,6 +263,25 @@ class CampanhaService
             $data['pontos_cavernicola'] ?? [],
             $data['nao_se_aplica_cavernicola'] ?? false
         );
+
+        // Campanhas de atropelamento
+        if (isset($data['atropelamento_campanha'])) {
+            SgcFaunaAtropelamentoCampanha::where('campanha_id', $campanhaId)->delete();
+            foreach ($data['atropelamento_campanha'] as $campData) {
+                SgcFaunaAtropelamentoCampanha::create([
+                    'campanha_id'      => $campanhaId,
+                    'id_contrato'      => $contratoId,
+                    'rodovia'          => $campData['rodovia'] ?? null,
+                    'data_inicial'     => $campData['data_inicial'] ?? null,
+                    'data_final'       => $campData['data_final'] ?? null,
+                    'uf_inicial'       => $campData['uf_inicial'] ?? null,
+                    'uf_final'         => $campData['uf_final'] ?? null,
+                    'km_inicial'       => $campData['km_inicial'] ?? null,
+                    'km_final'         => $campData['km_final'] ?? null,
+                    'obs'              => $campData['obs'] ?? null,
+                ]);
+            }
+        }
     }
 
     // --------------------------------------------------------------------------
