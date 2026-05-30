@@ -371,7 +371,7 @@ const closePreview = () => { previewUrl.value = null; };
                                                 <!-- Info + ação -->
                                                 <div class="p-2 flex-grow-1 d-flex flex-column justify-content-between">
                                                     <div>
-                                                        <div class="fw-semibold small text-truncate" :title="formatAnexoLabel(anexo.tipo_anexo)">
+                                                        <div class="fw-semibold small" style="word-break:break-word;">
                                                             {{ formatAnexoLabel(anexo.tipo_anexo) }}
                                                         </div>
                                                         <div class="text-muted" style="font-size:0.7rem; word-break:break-all;">
