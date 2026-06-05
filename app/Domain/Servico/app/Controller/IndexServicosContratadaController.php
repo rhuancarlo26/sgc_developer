@@ -11,15 +11,19 @@ use Inertia\Response;
 
 class IndexServicosContratadaController extends Controller
 {
-    public function __construct(private readonly ServicoService $servicoService)
-    {
-    }
+    public function __construct(private readonly ServicoService $servicoService) {}
 
     public function index(Contrato $contrato, Request $request): Response
     {
         $searchParams = $request->all('searchColumn', 'searchValue');
 
-        $response = $this->servicoService->listarServicos($contrato, $searchParams);
+        $filtros = $request->only([
+            'filtro_tema_id',
+            'filtro_servico_id',
+            'filtro_status_aprovacao',
+        ]);
+
+        $response = $this->servicoService->listarServicos($contrato, $searchParams, $filtros);
 
         return Inertia::render('Contrato/Contratada/Servicos/Index', [
             'contrato' => $contrato,

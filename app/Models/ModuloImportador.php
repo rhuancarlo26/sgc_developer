@@ -74,4 +74,14 @@ class ModuloImportador extends Model
     {
         return $this->hasMany(ModuloImportadorHistorico::class, 'modulo_importador_id');
     }
+
+    public function contrato()
+    {
+        return $this->belongsTo(Contrato::class, 'contrato_id');
+    }
+
+    public function servico()
+    {
+        return $this->belongsTo(Servicos::class, 'servico_id');
+    }
 }

@@ -3,6 +3,8 @@
 namespace App\Domain\Modulos\Importador\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\ModuloImportador;
+use Illuminate\Validation\Validator;
 
 class UpdateImportadorRequest extends FormRequest
 {
@@ -26,14 +28,14 @@ class UpdateImportadorRequest extends FormRequest
             'mes_ano_referencia' => 'required',
             'campanha' => 'required',
             'contrato_id' => 'required',
+            'servico_id' => ['nullable', 'exists:servicos,id'],
             'arquivo' => 'nullable|mimes:xlsx,csv',
-
-            'parecer_tecnico' => $this->input('enviar_analise') ? 'required' : 'nullable',
+            'parecer_tecnico' => $this->boolean('enviar_analise') ? 'required' : 'nullable',
             'parecer_analise' => 'nullable',
-            'fotos' => 'array',
-            'anexos' => 'array',
-            'enviar_analise' => 'required',
-            'update_modulo' => 'nullable',
+            'fotos' => ['nullable', 'array'],
+            'anexos' => ['nullable', 'array'],
+            'enviar_analise' => ['required', 'boolean'],
+            'update_modulo' => ['nullable', 'boolean'],
         ];
 
         if ($this->input('update_modulo')) {
@@ -50,9 +52,35 @@ class UpdateImportadorRequest extends FormRequest
             'mes_ano_referencia.required' => 'O campo Referência (Mês/Ano) é obrigatório',
             'campanha.required' => 'O campo Campanha é obrigatório',
             'contrato_id.required' => 'O campo Contrato é obrigatório',
-
             'arquivo.required' => 'O campo planilha é obrigatório',
             'arquivo.mimes' => 'A planilha precisa ter as extensões .xlsx OU .csv',
+            'parecer_tecnico.required' => 'O campo Parecer Técnico é obrigatório para enviar para análise.',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            if (!$this->filled('servico_id') || !$this->filled('campanha')) {
+                return;
+            }
+
+            $importadorAtual = $this->route('importador');
+
+            $jaExiste = ModuloImportador::query()
+                ->where('servico_id', $this->input('servico_id'))
+                ->where('campanha', $this->input('campanha'))
+                ->when($importadorAtual, function ($query) use ($importadorAtual) {
+                    $query->where('id', '!=', $importadorAtual->id);
+                })
+                ->exists();
+
+            if ($jaExiste) {
+                $validator->errors()->add(
+                    'campanha',
+                    'Essa campanha já foi cadastrada para este serviço. Selecione outra campanha.'
+                );
+            }
+        });
     }
 }

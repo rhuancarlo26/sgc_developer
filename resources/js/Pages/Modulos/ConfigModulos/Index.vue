@@ -34,7 +34,7 @@ const excluir = (moduloId) => {
         cancelButtonText: 'Cancelar'
     }).then(result => {
 
-        if(result.isConfirmed) {
+        if (result.isConfirmed) {
             console.log('opa')
             router.delete(route('modulos.config-modulos.delete', [moduloId]))
         }
@@ -45,69 +45,71 @@ const excluir = (moduloId) => {
 
 <template>
 
-  <Head title="Modulos" />
+    <Head title="Modulos" />
 
-  <AuthenticatedLayout>
+    <AuthenticatedLayout>
 
-    <template #header>
-        <div class="w-100 d-flex justify-content-between">
-            <Breadcrumb class="align-self-center" :links="[
-                { route: route('modulos.config-modulos.index'), label: `Módulos` }
+        <template #header>
+            <div class="w-100 d-flex justify-content-between">
+                <Breadcrumb class="align-self-center" :links="[
+                    { route: route('modulos.config-modulos.index'), label: `Módulos` }
+                ]" />
+                <NavLink route-name="modulos.config-modulos.formulario" title="Novo Módulo" :icon="IconCirclePlus"
+                    class="btn btn-info me-2" />
+            </div>
+        </template>
+
+
+        <div class="card card-body">
+            <!-- Pesquisa -->
+            <ModelSearchForm :columns="[
+                'nome',
             ]" />
-            <NavLink route-name="modulos.config-modulos.formulario" title="Novo Módulo" :icon="IconCirclePlus"
-                    class="btn btn-info me-2"/>
-        </div>
-    </template>
 
-
-    <div class="card card-body">
-        <!-- Pesquisa -->
-        <ModelSearchForm :columns="[
-            'nome',
-        ]" />
-
-        <!-- Listagem-->
-        <Table :columns="['Nome', 'Campos', 'Planilha Modelo', 'Criado em', 'Ações']" :records="modulos"
-            table-class="table-hover">
-            <template #body="{ item }">
-                <tr class="cursor-pointer">
-                    <td class="text-center align-middle">{{ item.nome }}</td>
-                    <td class="text-center align-middle">
-                        <button class="btn btn-sm btn-secondary" @click="mostrarCampos(item)">
-                            <IconEye />
-                        </button>
-                    </td>
-                    <td class="text-center align-middle">
-                        <span v-if="item.nome_planilha_modelo" class="d-flex gap-2 justify-content-center align-items-center">
-                            {{ item.nome_planilha_modelo }}
-                            <a :href="`${page.props.app_url}/storage/${item.caminho_planilha_modelo}`" 
-                                class="btn btn-sm bg-gray-400" download target="_blank">
-                                <IconDownload />
-                            </a>
-                        </span>
-                        <span v-else>-</span>
-                    </td>
-                    <td class="text-center align-middle">{{ dateTimeFormat(item.created_at) }}</td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
-                                data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
-                            <IconDots/>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <NavLink route-name="modulos.config-modulos.formulario" :param="item.id" title="Editar"
-                                class="dropdown-item"/>
-
-                            <button @click="excluir(item.id)" class="dropdown-item">
-                                Excluir
+            <!-- Listagem-->
+            <Table :columns="['Nome', 'Campos', 'Planilha Modelo Gerada', 'Criado em', 'Ações']" :records="modulos"
+                table-class="table-hover">
+                <template #body="{ item }">
+                    <tr class="cursor-pointer">
+                        <td class="text-center align-middle">{{ item.nome }}</td>
+                        <td class="text-center align-middle">
+                            <button class="btn btn-sm btn-secondary" @click="mostrarCampos(item)">
+                                <IconEye />
                             </button>
-                        </div>
-                    </td>
-                </tr>
-            </template>
-        </Table>
-    </div>
+                        </td>
+        
+                        <td class="text-center align-middle">
+                            {{ item.nome_planilha_modelo }}
+                            <a v-if="item.id && item.campos?.length"
+                                :href="route('modulos.config-modulos.gerar-planilha-modelo', [item.id])"
+                                class="btn btn-sm bg-gray-400 ms-2" target="_blank" title="Gerar Planilha Modelo">
+                                <IconDownload class="me-1" />
 
-    <ModalCamposModulo ref="ModalCamposModuloRef" :tipos="tipos" />
+                            </a>
 
-  </AuthenticatedLayout>
+                            <span v-else>-</span>
+                        </td>
+                        <td class="text-center align-middle">{{ dateTimeFormat(item.created_at) }}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-icon btn-info dropdown-toggle p-2"
+                                data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="false">
+                                <IconDots />
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <NavLink route-name="modulos.config-modulos.formulario" :param="item.id" title="Editar"
+                                    class="dropdown-item" />
+
+                                <button @click="excluir(item.id)" class="dropdown-item">
+                                    Excluir
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </template>
+            </Table>
+        </div>
+
+        <ModalCamposModulo ref="ModalCamposModuloRef" :tipos="tipos" />
+
+    </AuthenticatedLayout>
 </template>

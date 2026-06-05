@@ -47,8 +47,13 @@ class ProcessarPlanilhaImportadorJob implements ShouldQueue
     {
         $this->importador = ModuloImportador::with('modulo')->find($this->importadorId);
 
-        if ($this->temArquivo)
+        if (!$this->importador) {
+            return;
+        }
+
+        if ($this->temArquivo) {
             $this->processarArquivo();
+        }
 
         $this->importador->update([
             'load' => false,
@@ -260,13 +265,13 @@ class ProcessarPlanilhaImportadorJob implements ShouldQueue
         return null;
     }
 
-    public function failed(Exception|QueryException $e): void
+    public function failed(\Throwable $e): void
     {
         $moduloImportador = ModuloImportador::find($this->importadorId);
 
-        $messageError = match (get_class($e)) {
-            Exception::class => 'Erros de validacao sobre a planilha enviada',
-            QueryException::class => 'Erro ao gravar arquivo no banco de dados!',
+        $messageError = match (true) {
+            $e instanceof QueryException => 'Erro ao gravar arquivo no banco de dados!',
+            $e instanceof Exception => 'Erros de validacao sobre a planilha enviada',
             default => "Erro no processamento do job - " . get_class($e)
         };
 
@@ -279,11 +284,15 @@ class ProcessarPlanilhaImportadorJob implements ShouldQueue
             'importadorId' => $this->importadorId
         ]);
 
-        $moduloImportador->update([
-            'load' => false,
-            'desc_erros' => [...$errorsArr]
-        ]);
+        if ($moduloImportador) {
+            $moduloImportador->update([
+                'load' => false,
+                'desc_erros' => [...$errorsArr]
+            ]);
+        }
 
-        Storage::deleteDirectory($this->caminhoArquivo);
+        if ($this->caminhoArquivo && Storage::exists($this->caminhoArquivo)) {
+            Storage::delete($this->caminhoArquivo);
+        }
     }
 }

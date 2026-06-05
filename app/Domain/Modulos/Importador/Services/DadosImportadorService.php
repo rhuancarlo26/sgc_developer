@@ -139,7 +139,7 @@ class DadosImportadorService extends Controller
             extensaoArquivo: $arquivo->getClientOriginalExtension()
         );
 
-        dispatch($job);
+        dispatch_sync($job);
     }
 
     public function excluirDados(ModuloImportador $importador): int
