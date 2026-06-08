@@ -15,6 +15,11 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
     }
 
+
+    protected $commands = [
+        \App\Shared\Console\Commands\CheckTableStructure::class,
+    ];
+
     /**
      * Register the commands for the application.
      */
