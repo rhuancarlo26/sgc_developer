@@ -24,39 +24,67 @@ class StoreService extends BaseModelService
         return parent::__construct($dataManagement);
     }
 
-    public function store(array $data): void
+    public function store(array $data): ModuloImportador
     {
         $arquivo = $data['arquivo'];
-        unset($data['arquivo']);
+        $importador = null;
 
-        $nomeArquivo = $arquivo->getClientOriginalName();
-        $caminhoArquivo = $arquivo->storeAs('Importador' . DIRECTORY_SEPARATOR . uniqid() .  '_' . $nomeArquivo);
+        try {
+            $fotos = $data['fotos'] ?? [];
+            $anexos = $data['anexos'] ?? [];
+            $enviarAnalise = filter_var($data['enviar_analise'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
-        $data['nome_arquivo'] = $nomeArquivo;
-        $data['status'] = ModuloImportador::RASCUNHO;
+            unset(
+                $data['arquivo'],
+                $data['fotos'],
+                $data['anexos'],
+                $data['enviar_analise'],
+                $data['continuar_formulario']
+            );
 
-        $importador = ModuloImportador::create($data);
+            $nomeArquivo = $arquivo->getClientOriginalName();
 
-        $job = new ProcessarPlanilhaImportadorJob(
-            importadorId: $importador->id,
-            caminhoArquivo: $caminhoArquivo,
-            extensaoArquivo: $arquivo->getClientOriginalExtension()
-        );
+            $caminhoArquivo = $arquivo->storeAs(
+                'Importador' . DIRECTORY_SEPARATOR . uniqid() . '_' . $nomeArquivo
+            );
 
-        // $job->handle();
-        dispatch($job);
+            $data['nome_arquivo'] = $nomeArquivo;
+            $data['status'] = ModuloImportador::RASCUNHO;
 
-        $this->gerenciarImportadorService->gerenciarFotos($importador, $data['fotos'] ?? []);
-        $this->gerenciarImportadorService->gerenciarAnexos($importador, $data['anexos'] ?? []);
+            $importador = ModuloImportador::create($data);
 
-        $importador->historicos()->create([
-            'usuario_id' => auth()->user()->id,
-            'status' => ModuloImportador::RASCUNHO,
-        ]);
+            $job = new ProcessarPlanilhaImportadorJob(
+                importadorId: $importador->id,
+                caminhoArquivo: $caminhoArquivo,
+                extensaoArquivo: $arquivo->getClientOriginalExtension()
+            );
 
-        if ($data['enviar_analise']) {
-            $dataAnalise = Arr::only($data, 'parecer_tecnico');
-            (new StatusImportadorService)->enviarAnalise($importador, $dataAnalise);
+            dispatch_sync($job);
+
+            $this->gerenciarImportadorService->gerenciarFotos($importador, $fotos);
+            $this->gerenciarImportadorService->gerenciarAnexos($importador, $anexos);
+
+            $importador->historicos()->create([
+                'usuario_id' => auth()->user()->id,
+                'status' => ModuloImportador::RASCUNHO,
+            ]);
+
+            if ($enviarAnalise) {
+                $dataAnalise = Arr::only($data, 'parecer_tecnico');
+                (new StatusImportadorService)->enviarAnalise($importador, $dataAnalise);
+            }
+
+            return $importador;
+        } catch (\Throwable $e) {
+            if ($importador && $importador->exists) {
+                $importador->dadosJson()->delete();
+                $importador->fotos()->delete();
+                $importador->anexos()->delete();
+                $importador->historicos()->delete();
+                $importador->delete();
+            }
+
+            throw $e;
         }
     }
 }

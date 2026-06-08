@@ -43,14 +43,18 @@ const notificarEstadoDados = () => {
 const buscarDados = () => {
     carregando.value = true;
 
-    axios.get(route('modulos.importador.buscarDados', [route().params.importador]))
+    return axios.get(route('modulos.importador.buscarDados', [route().params.importador]))
         .then(resp => {
             dados.value = { ...resp.data };
             notificarEstadoDados();
+
+            return resp.data;
         })
         .catch(() => {
             dados.value = { data: [] };
             notificarEstadoDados();
+
+            return { data: [] };
         })
         .finally(() => {
             carregando.value = false;

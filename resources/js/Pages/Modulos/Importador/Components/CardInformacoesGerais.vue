@@ -2,18 +2,34 @@
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import { IconFileImport } from "@tabler/icons-vue";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 const props = defineProps({
     form: { type: Object },
     modulos: { type: Array },
     contratos: { type: Array },
     temDadosPlanilha: { type: Boolean, default: false },
+    contextoImportador: {
+        type: Object,
+        default: () => ({}),
+    },
+    campanhasDisponiveis: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const emit = defineEmits(["importar-planilha"]);
 
-const campanhas = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const campanhas = computed(() => {
+    return props.campanhasDisponiveis?.length
+        ? props.campanhasDisponiveis
+        : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+});
+
+const veioDoServico = computed(() => {
+    return !!props.contextoImportador?.origem_servico;
+});
 
 const inputArquivoRef = ref(null);
 const inputArquivoKey = ref(0);
@@ -52,7 +68,7 @@ defineExpose({
                         <span>Módulo <span class="text-danger">*</span></span>
                     </InputLabel>
                     <v-select v-model="form.modulo_id" :options="modulos" :reduce="option => option.id" label="nome"
-                        :disabled="[2, 4].includes(form.status)" />
+                        :disabled="[2, 4].includes(form.status) || veioDoServico" />
                     <InputError :message="form.errors.modulo_id" />
                 </div>
                 <div class="col-lg-4 mb-4">
@@ -75,7 +91,7 @@ defineExpose({
                         <span>Contrato <span class="text-danger">*</span></span>
                     </InputLabel>
                     <v-select v-model="form.contrato_id" :options="contratos" :reduce="option => option.id"
-                        label="numero_contrato" :disabled="[2, 4].includes(form.status)" />
+                        label="numero_contrato" :disabled="[2, 4].includes(form.status) || veioDoServico" />
                     <InputError :message="form.errors.contrato_id" />
                 </div>
                 <div class="col-lg-8 mb-4">

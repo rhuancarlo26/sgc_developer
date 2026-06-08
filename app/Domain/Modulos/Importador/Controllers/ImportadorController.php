@@ -13,14 +13,30 @@ class ImportadorController extends Controller
     public function __construct(
         private ImportadorService $service
     ) {
-        // 
+        //
     }
 
     public function index(Request $request): Response
     {
         $searchParams = $request->all('columns', 'value');
 
-        $data = $this->service->buscarImportadores($searchParams);
+        $contexto = $request->only([
+            'contrato_id',
+            'modulo_id',
+            'servico_id',
+            'tema_id',
+            'origem_servico',
+        ]);
+
+        $filtros = $request->only([
+            'filtro_modulo_id',
+            'filtro_tema_id',
+            'campanha',
+            'updated_at',
+        ]);
+
+        $data = $this->service->buscarImportadores($searchParams, $contexto, $filtros);
+
         return Inertia::render('Modulos/Importador/Index', $data);
     }
 }

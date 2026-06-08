@@ -71,7 +71,7 @@ class UpdateService extends BaseModelService
             temArquivo: !is_null($arquivo)
         );
 
-        dispatch($job);
+        dispatch_sync($job);
 
         $this->gerenciarImportadorService->gerenciarFotos($importador, $fotos);
 

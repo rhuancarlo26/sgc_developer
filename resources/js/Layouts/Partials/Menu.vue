@@ -95,8 +95,8 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                         active-on-route-prefix="modulos.config-modulos.*" title="Módulos" />
 
                                     <!-- Importador -->
-                                    <NavDropdownLink route-name="modulos.importador.index"
-                                        active-on-route-prefix="modulos.importador.*" title="Importador" />
+                                    <!-- <NavDropdownLink route-name="modulos.importador.index"
+                                        active-on-route-prefix="modulos.importador.*" title="Importador" /> -->
                                 </NavDropdown>
                             </ul>
                         </div>
