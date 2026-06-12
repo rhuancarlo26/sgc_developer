@@ -21,9 +21,9 @@ class DestroyEquipamentoRecursoController extends Controller
 
             $this->equimentoRecursoService->delete($equipamento);
 
-            return to_route('contratos.contratada.recurso.equipamento.index', ['contrato' => $equipamento->id_contrato])->with('message', $response);
+            return to_route('contratos.contratada.recurso.equipamento.index', ['contrato' => $equipamento->id_contrato])->with('message', ['type' => 'success', 'content' => 'Equipamento excluído com sucesso!']);
         } catch (\Exception $e) {
-            return to_route('contratos.contratada.recurso.equipamento.index', ['contrato' => $equipamento->id_contrato])->with('message', $response);
+            return to_route('contratos.contratada.recurso.equipamento.index', ['contrato' => $equipamento->id_contrato])->with('message', ['type' => 'error', 'content' => 'Falha ao excluir o equipamento!']);
         }
     }
 }
