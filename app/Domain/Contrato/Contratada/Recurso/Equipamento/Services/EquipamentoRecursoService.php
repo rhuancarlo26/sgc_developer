@@ -79,6 +79,9 @@ class EquipamentoRecursoService extends BaseModelService
             foreach ($documentos as $value) {
                 Storage::delete($value->arquivo);
             }
+
+            $this->modelClassDocumento::Where('cod_equipamento', $equipamento->id)->delete();
+
             return ['type' => 'success', 'content' => 'Documentos excluídos com sucesso!'];
         } catch (\Exception $th) {
             return ['type' => 'error', 'content' => $th->getMessage()];

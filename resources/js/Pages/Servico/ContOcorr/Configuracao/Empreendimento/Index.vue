@@ -85,7 +85,7 @@ const abrirFormShapefile = (item) => {
 							<td class="w-8">
 								<template v-if="item.licenca?.segmentos">
 									<span v-for="br in item.licenca.segmentos" :key="br" class="badge bg-warning text-white m-1">
-										{{ br.rodovias.rodovia }}
+										{{ br.rodovias?.rodovia }}
 									</span>
 								</template>
 							</td>
