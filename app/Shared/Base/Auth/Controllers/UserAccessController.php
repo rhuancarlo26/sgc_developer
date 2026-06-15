@@ -14,7 +14,7 @@ class UserAccessController extends Controller
     {
         $accesses = UserAccess::query()
             ->with('user:id,name,email')
-            ->select(['id', 'user_id', 'ip_address', 'user_agent', 'logged_in_at'])
+            ->select(['user_id', 'ip_address', 'user_agent', 'logged_in_at'])
             ->when($request->search, function ($query, $search) {
                 $query->whereHas('user', fn($q) =>
                     $q->where('name', 'like', "%{$search}%")
