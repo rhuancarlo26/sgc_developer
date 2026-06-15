@@ -5,6 +5,7 @@ namespace App\Domain\Modulos\Importador\Services;
 use App\Domain\Modulos\Importador\Jobs\ProcessarPlanilhaImportadorJob;
 use App\Models\ModuloImportador;
 use App\Models\ModuloImportadorDados;
+use App\Models\Servicos;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -12,6 +13,37 @@ use Illuminate\Support\Facades\DB;
 
 class DadosImportadorService extends Controller
 {
+    public function buscarDadosServico(Servicos $servico): array
+    {
+        return ModuloImportador::query()
+            ->with('modulo:id,nome,campos')
+            ->where('servico_id', $servico->id)
+            ->whereHas('dadosJson')
+            ->orderByDesc('updated_at')
+            ->get()
+            ->map(function (ModuloImportador $importador) {
+                $importador->append('status_formatado');
+                $dados = $importador->dadosJson()
+                    ->limit(10)
+                    ->get(['id', 'modulo_importador_id', 'dados']);
+
+                return [
+                    'id' => $importador->id,
+                    'modulo' => $importador->modulo?->only(['id', 'nome', 'campos']),
+                    'campanha' => $importador->campanha,
+                    'mes_ano_referencia' => $importador->mes_ano_referencia,
+                    'status' => $importador->status,
+                    'status_formatado' => $importador->status_formatado,
+                    'total_dados' => $importador->dadosJson()->count(),
+                    'dados' => $dados
+                        ->map(fn(ModuloImportadorDados $item) => $item->dados)
+                        ->values(),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
     public function buscarDados(ModuloImportador $importador, Request $request): array
     {
         $page = max((int) $request->get('page', 1), 1);

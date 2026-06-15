@@ -31,6 +31,12 @@ const veioDoServico = computed(() => {
     return !!props.contextoImportador?.origem_servico;
 });
 
+const podeAlterarPlanilha = computed(() => {
+    return [1, 3, null, undefined].includes(
+        props.form.status === null || props.form.status === undefined ? props.form.status : Number(props.form.status)
+    );
+});
+
 const inputArquivoRef = ref(null);
 const inputArquivoKey = ref(0);
 
@@ -102,19 +108,23 @@ defineExpose({
                     <div class="input-group">
                         <input :key="inputArquivoKey" ref="inputArquivoRef" type="file" id="upload_arquivo"
                             @change="selecionarArquivo" class="form-control" accept=".xlsx,.csv"
-                            :disabled="[2, 4].includes(form.status) || temDadosPlanilha" />
+                            :disabled="!podeAlterarPlanilha || temDadosPlanilha" />
 
                         <button type="button" class="btn btn-primary"
-                            :disabled="[2, 4].includes(form.status) || temDadosPlanilha || form.processing || !form.arquivo"
+                            :disabled="!podeAlterarPlanilha || temDadosPlanilha || form.processing || !form.arquivo"
                             @click="importarPlanilha" title="Importar planilha">
                             <IconFileImport class="me-1" :size="18" />
                             Importar
                         </button>
                     </div>
 
-                    <small v-if="temDadosPlanilha" class="text-warning d-block mt-1">
+                    <small v-if="temDadosPlanilha && podeAlterarPlanilha" class="text-warning d-block mt-1">
                         Já existem dados importados para esta planilha. Para importar novamente, exclua os dados atuais
                         no botão "Excluir dados da Planilha".
+                    </small>
+
+                    <small v-else-if="temDadosPlanilha" class="text-muted d-block mt-1">
+                        A planilha fica bloqueada durante a análise fiscal e após aprovação.
                     </small>
 
                     <InputError :message="form.errors.arquivo" />

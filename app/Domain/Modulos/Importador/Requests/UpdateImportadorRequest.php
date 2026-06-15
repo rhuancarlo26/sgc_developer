@@ -4,6 +4,7 @@ namespace App\Domain\Modulos\Importador\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\ModuloImportador;
+use App\Models\Servicos;
 use Illuminate\Validation\Validator;
 
 class UpdateImportadorRequest extends FormRequest
@@ -33,6 +34,7 @@ class UpdateImportadorRequest extends FormRequest
             'parecer_tecnico' => $this->boolean('enviar_analise') ? 'required' : 'nullable',
             'parecer_analise' => 'nullable',
             'fotos' => ['nullable', 'array'],
+            'fotos.*.arquivo' => ['nullable', 'image', 'max:10240'],
             'anexos' => ['nullable', 'array'],
             'enviar_analise' => ['required', 'boolean'],
             'update_modulo' => ['nullable', 'boolean'],
@@ -55,6 +57,8 @@ class UpdateImportadorRequest extends FormRequest
             'arquivo.required' => 'O campo planilha é obrigatório',
             'arquivo.mimes' => 'A planilha precisa ter as extensões .xlsx OU .csv',
             'parecer_tecnico.required' => 'O campo Parecer Técnico é obrigatório para enviar para análise.',
+            'fotos.*.arquivo.image' => 'As fotos precisam estar em um formato de imagem válido.',
+            'fotos.*.arquivo.max' => 'Cada foto deve ter no máximo 10MB.',
         ];
     }
 
@@ -65,7 +69,34 @@ class UpdateImportadorRequest extends FormRequest
                 return;
             }
 
+            $servicoAprovado = Servicos::query()
+                ->where('id', $this->input('servico_id'))
+                ->where('status_aprovacao', 3)
+                ->exists();
+
+            if (!$servicoAprovado) {
+                $validator->errors()->add(
+                    'servico_id',
+                    'O importador só será habilitado após a aprovação do fiscal no cadastro do serviço.'
+                );
+
+                return;
+            }
+
             $importadorAtual = $this->route('importador');
+
+            if (
+                $importadorAtual
+                && !in_array((int) $importadorAtual->status, [ModuloImportador::RASCUNHO, ModuloImportador::REPROVADO], true)
+                && ($this->hasFile('arquivo') || $this->boolean('update_modulo'))
+            ) {
+                $validator->errors()->add(
+                    'arquivo',
+                    'A planilha só pode ser alterada enquanto a importação estiver em rascunho ou reprovada pelo fiscal.'
+                );
+
+                return;
+            }
 
             $jaExiste = ModuloImportador::query()
                 ->where('servico_id', $this->input('servico_id'))

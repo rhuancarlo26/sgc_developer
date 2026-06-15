@@ -36,6 +36,13 @@ class StatusImportadorController extends Controller
 
     public function enviarAnalise(ModuloImportador $importador, AnalisarImportadorRequest $request): RedirectResponse
     {
+        if (!$this->importadorHabilitado($importador)) {
+            return back()->with('message', [
+                'type' => 'warning',
+                'content' => 'O importador só será habilitado após a aprovação do fiscal no cadastro do serviço.',
+            ]);
+        }
+
         $this->service->enviarAnalise($importador, $request->validated());
 
         $dataManagement = [
@@ -48,6 +55,13 @@ class StatusImportadorController extends Controller
 
     public function aprovReprov(ModuloImportador $importador, int $status, AprovReprovImportadorRequest $request): RedirectResponse
     {
+        if (!$this->importadorHabilitado($importador)) {
+            return back()->with('message', [
+                'type' => 'warning',
+                'content' => 'O importador só será habilitado após a aprovação do fiscal no cadastro do serviço.',
+            ]);
+        }
+
         $this->service->aprovReprov($importador, $status, $request->validated());
 
         $dataManagement = [
@@ -56,5 +70,16 @@ class StatusImportadorController extends Controller
         ];
 
         return $this->redirectImportador($importador, $dataManagement);
+    }
+
+    private function importadorHabilitado(ModuloImportador $importador): bool
+    {
+        if (!$importador->servico_id) {
+            return true;
+        }
+
+        return $importador->servico()
+            ->where('status_aprovacao', 3)
+            ->exists();
     }
 }

@@ -220,8 +220,12 @@ const aprovReprovImportacao = (status) => {
 };
 
 const tratarErroImportacao = (errors = {}) => {
+    const erroFoto = Object.entries(errors)
+        .find(([campo]) => campo.startsWith("fotos."))?.[1];
+
     const mensagem =
         errors.arquivo
+        ?? erroFoto
         ?? errors.campanha
         ?? errors.modulo_id
         ?? errors.contrato_id
