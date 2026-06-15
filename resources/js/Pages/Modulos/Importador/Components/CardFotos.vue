@@ -18,6 +18,10 @@ const modalMetadadosRef = ref(null);
 const fotoMetadadosSelecionada = ref(null);
 
 const tituloModalMetadados = ref("Metadados da Foto");
+const TAMANHO_MAX_FOTO_MB = 10;
+const TAMANHO_MAX_FOTO_BYTES = TAMANHO_MAX_FOTO_MB * 1024 * 1024;
+const LADO_MAXIMO_FOTO = 1920;
+const QUALIDADE_FOTO = 0.82;
 
 const normalizarMetadados = (metadados) => {
     if (!metadados) {
@@ -161,6 +165,60 @@ const formatarDataExif = (valor) => {
     return String(valor).replace(/^(\d{4}):(\d{2}):(\d{2})/, "$1-$2-$3");
 };
 
+const compactarImagem = (arquivo) => {
+    return new Promise((resolve) => {
+        if (!arquivo.type?.startsWith("image/") || arquivo.size <= TAMANHO_MAX_FOTO_BYTES) {
+            resolve(arquivo);
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            const img = new Image();
+
+            img.onload = () => {
+                const escala = Math.min(
+                    1,
+                    LADO_MAXIMO_FOTO / Math.max(img.width, img.height)
+                );
+
+                const canvas = document.createElement("canvas");
+                canvas.width = Math.max(1, Math.round(img.width * escala));
+                canvas.height = Math.max(1, Math.round(img.height * escala));
+
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        resolve(arquivo);
+                        return;
+                    }
+
+                    const nomeBase = arquivo.name.replace(/\.[^.]+$/, "");
+                    const arquivoCompactado = new File(
+                        [blob],
+                        `${nomeBase}_compactada.jpg`,
+                        {
+                            type: "image/jpeg",
+                            lastModified: arquivo.lastModified,
+                        }
+                    );
+
+                    resolve(arquivoCompactado.size < arquivo.size ? arquivoCompactado : arquivo);
+                }, "image/jpeg", QUALIDADE_FOTO);
+            };
+
+            img.onerror = () => resolve(arquivo);
+            img.src = reader.result;
+        };
+
+        reader.onerror = () => resolve(arquivo);
+        reader.readAsDataURL(arquivo);
+    });
+};
+
 const extrairDadosDaImagem = async (arquivo) => {
     try {
         const metadados = await exifr.parse(arquivo, [
@@ -206,13 +264,16 @@ const selecionarMultiplosArquivos = async ({ target }) => {
 
     for (const arquivo of arquivos) {
         const dadosImagem = await extrairDadosDaImagem(arquivo);
+        const arquivoEnvio = await compactarImagem(arquivo);
 
         props.form.fotos.push({
-            arquivo,
+            arquivo: arquivoEnvio,
             latitude: dadosImagem.latitude,
             longitude: dadosImagem.longitude,
             data_captura: dadosImagem.data_captura,
             descricao: null,
+            nome_original: arquivo.name,
+            compactada: arquivoEnvio.name !== arquivo.name,
 
             tentouExtrairCoordenadas: true,
             possuiCoordenadasExif: dadosImagem.possuiCoordenadas,
@@ -230,11 +291,14 @@ const selecionarArquivo = async (key, { target }) => {
     }
 
     const dadosImagem = await extrairDadosDaImagem(arquivo);
+    const arquivoEnvio = await compactarImagem(arquivo);
 
-    props.form.fotos[key].arquivo = arquivo;
+    props.form.fotos[key].arquivo = arquivoEnvio;
     props.form.fotos[key].latitude = dadosImagem.latitude;
     props.form.fotos[key].longitude = dadosImagem.longitude;
     props.form.fotos[key].data_captura = dadosImagem.data_captura;
+    props.form.fotos[key].nome_original = arquivo.name;
+    props.form.fotos[key].compactada = arquivoEnvio.name !== arquivo.name;
     props.form.fotos[key].tentouExtrairCoordenadas = true;
     props.form.fotos[key].possuiCoordenadasExif = dadosImagem.possuiCoordenadas;
 
@@ -292,6 +356,11 @@ const validarCampos = () => {
         delete item.valida_descricao;
 
         if (!item.arquivo && !item.nome_arquivo) {
+            item.valida_arquivo = true;
+            erros.push(true);
+        }
+
+        if (item.arquivo?.size > TAMANHO_MAX_FOTO_BYTES) {
             item.valida_arquivo = true;
             erros.push(true);
         }
@@ -383,6 +452,14 @@ defineExpose({ validarCampos });
                         <small v-if="f.arquivo">
                             Arquivo selecionado:
                             <strong>{{ f.arquivo.name }}</strong>
+                        </small>
+
+                        <small v-if="f.arquivo?.size > TAMANHO_MAX_FOTO_BYTES" class="text-danger d-block">
+                            A foto deve ter no mÃ¡ximo {{ TAMANHO_MAX_FOTO_MB }}MB.
+                        </small>
+
+                        <small v-else-if="f.compactada" class="text-muted d-block">
+                            Foto compactada automaticamente para envio.
                         </small>
 
                         <small v-else-if="f.nome_arquivo">

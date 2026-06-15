@@ -5,11 +5,13 @@ namespace App\Domain\Modulos\Importador\Controllers;
 use App\Domain\Modulos\Importador\Services\ImportadorService;
 use App\Models\ModuloImportador;
 use App\Shared\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Modulo;
 use App\Models\Contrato;
+use App\Models\Servicos;
 
 class CreateImportadorController extends Controller
 {
@@ -19,7 +21,7 @@ class CreateImportadorController extends Controller
         //
     }
 
-    public function create(ModuloImportador $importador, Request $request): Response
+    public function create(ModuloImportador $importador, Request $request): Response|RedirectResponse
     {
         $contexto = $request->only([
             'contrato_id',
@@ -64,6 +66,13 @@ class CreateImportadorController extends Controller
             }
         }
 
+        if (!$this->servicoAprovado($contexto['servico_id'] ?? null)) {
+            return back()->with('message', [
+                'type' => 'warning',
+                'content' => 'O importador só será habilitado após a aprovação do fiscal no cadastro do serviço.',
+            ]);
+        }
+
         $campanhasUsadas = ModuloImportador::query()
             ->when($contexto['contrato_id'] ?? null, function ($query, $contratoId) {
                 $query->where('contrato_id', $contratoId);
@@ -93,5 +102,17 @@ class CreateImportadorController extends Controller
             'contextoImportador' => $contexto,
             'campanhasDisponiveis' => $campanhasDisponiveis,
         ]);
+    }
+
+    private function servicoAprovado(?int $servicoId): bool
+    {
+        if (!$servicoId) {
+            return true;
+        }
+
+        return Servicos::query()
+            ->where('id', $servicoId)
+            ->where('status_aprovacao', 3)
+            ->exists();
     }
 }

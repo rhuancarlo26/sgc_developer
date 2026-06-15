@@ -232,4 +232,9 @@ class Servicos extends Model
     {
         return $this->belongsTo(ModuloImportador::class, 'modulo_importador_id');
     }
+
+    public function moduloImportadores(): HasMany
+    {
+        return $this->hasMany(ModuloImportador::class, 'servico_id');
+    }
 }

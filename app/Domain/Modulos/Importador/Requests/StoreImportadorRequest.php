@@ -3,6 +3,7 @@
 namespace App\Domain\Modulos\Importador\Requests;
 
 use App\Models\ModuloImportador;
+use App\Models\Servicos;
 use Illuminate\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -33,6 +34,7 @@ class StoreImportadorRequest extends FormRequest
             'parecer_tecnico' => $this->input('enviar_analise') ? 'required' : 'nullable',
             'parecer_analise' => 'nullable',
             'fotos' => 'array',
+            'fotos.*.arquivo' => ['nullable', 'image', 'max:10240'],
             'anexos' => 'array',
             'enviar_analise' => ['required', 'boolean'],
             'continuar_formulario' => ['nullable', 'boolean']
@@ -48,6 +50,8 @@ class StoreImportadorRequest extends FormRequest
             'contrato_id.required' => 'O campo Contrato é obrigatório',
             'arquivo.required' => 'O campo planilha é obrigatório',
             'arquivo.mimes' => 'A planilha precisa ter as extensões .xlsx OU .csv',
+            'fotos.*.arquivo.image' => 'As fotos precisam estar em um formato de imagem válido.',
+            'fotos.*.arquivo.max' => 'Cada foto deve ter no máximo 10MB.',
         ];
     }
 
@@ -55,6 +59,20 @@ class StoreImportadorRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             if (!$this->filled('servico_id') || !$this->filled('campanha')) {
+                return;
+            }
+
+            $servicoAprovado = Servicos::query()
+                ->where('id', $this->input('servico_id'))
+                ->where('status_aprovacao', 3)
+                ->exists();
+
+            if (!$servicoAprovado) {
+                $validator->errors()->add(
+                    'servico_id',
+                    'O importador só será habilitado após a aprovação do fiscal no cadastro do serviço.'
+                );
+
                 return;
             }
 

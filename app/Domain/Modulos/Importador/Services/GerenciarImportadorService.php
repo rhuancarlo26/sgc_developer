@@ -57,7 +57,7 @@ class GerenciarImportadorService
             if (isset($f['arquivo'])) {
                 $dadosFoto = [
                     ...$dadosFoto,
-                    'data_captura' => $this->formatarDataCaptura($metadados['data_captura'] ?? null),
+                    'data_captura' => $this->formatarDataCaptura($metadados['data_captura'] ?? ($f['data_captura'] ?? null)),
                     'fabricante' => $metadados['fabricante'] ?? null,
                     'modelo' => $metadados['modelo'] ?? null,
                     'largura' => $metadados['largura'] ?? null,
@@ -199,8 +199,28 @@ class GerenciarImportadorService
             'orientacao' => $exif['IFD0']['Orientation'] ?? null,
             'largura' => $exif['COMPUTED']['Width'] ?? null,
             'altura' => $exif['COMPUTED']['Height'] ?? null,
-            'metadados_completos' => $this->limparMetadadosParaJson($exif),
+            'metadados_completos' => $this->metadadosEssenciais($exif),
         ];
+    }
+
+    private function metadadosEssenciais(array $exif): array
+    {
+        return $this->limparMetadadosParaJson([
+            'arquivo' => $exif['FILE'] ?? [],
+            'imagem' => [
+                'largura' => $exif['COMPUTED']['Width'] ?? null,
+                'altura' => $exif['COMPUTED']['Height'] ?? null,
+                'orientacao' => $exif['IFD0']['Orientation'] ?? null,
+                'fabricante' => $exif['IFD0']['Make'] ?? null,
+                'modelo' => $exif['IFD0']['Model'] ?? null,
+            ],
+            'captura' => [
+                'data_original' => $exif['EXIF']['DateTimeOriginal'] ?? null,
+                'data_digitalizada' => $exif['EXIF']['DateTimeDigitized'] ?? null,
+                'data_imagem' => $exif['IFD0']['DateTime'] ?? null,
+            ],
+            'gps' => $exif['GPS'] ?? [],
+        ]);
     }
 
     private function converterGpsParaDecimal(array $coordenada, string $referencia): ?float
@@ -244,6 +264,11 @@ class GerenciarImportadorService
         }
 
         try {
+            if (preg_match('/^\d{4}-\d{2}-\d{2}/', $data)) {
+                return \Carbon\Carbon::parse(substr($data, 0, 19))
+                    ->format('Y-m-d H:i:s');
+            }
+
             return \Carbon\Carbon::createFromFormat('Y:m:d H:i:s', substr($data, 0, 19))
                 ->format('Y-m-d H:i:s');
         } catch (\Throwable $e) {

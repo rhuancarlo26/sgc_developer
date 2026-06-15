@@ -22,6 +22,7 @@ Route::prefix('importador-modulo')->group(function () {
     Route::post('/enviar-analise/{importador}', [StatusImportadorController::class, 'enviarAnalise'])->name('importador.enviarAnalise');
     Route::post('/aprov-reprov/{importador}/{status}', [StatusImportadorController::class, 'aprovReprov'])->name('importador.aprovReprov');
 
+    Route::get('/buscar-dados-servico/{servico}', [DadosImportadorController::class, 'buscarDadosServico'])->name('importador.buscarDadosServico');
     Route::get('/buscar-dados/{importador}', [DadosImportadorController::class, 'buscarDados'])->name('importador.buscarDados');
     Route::post('/importar-planilha/{importador}', [DadosImportadorController::class, 'importarPlanilha'])->name('importador.importarPlanilha');
     Route::delete('/excluir-dados/{importador}', [DadosImportadorController::class, 'excluirDados'])->name('importador.excluirDados');

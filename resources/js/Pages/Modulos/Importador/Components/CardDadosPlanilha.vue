@@ -36,6 +36,12 @@ const temDados = computed(() => {
     return totalRegistros.value > 0;
 });
 
+const podeAlterarPlanilha = computed(() => {
+    return [1, 3, null, undefined].includes(
+        props.form.status === null || props.form.status === undefined ? props.form.status : Number(props.form.status)
+    );
+});
+
 const notificarEstadoDados = () => {
     emit('tem-dados-changed', temDados.value);
 };
@@ -71,7 +77,7 @@ const updateRecordsState = (registros) => {
 };
 
 const excluirDadosPlanilha = async () => {
-    if (!temDados.value || excluindo.value) {
+    if (!temDados.value || excluindo.value || !podeAlterarPlanilha.value) {
         return;
     }
 
@@ -106,10 +112,10 @@ const excluirDadosPlanilha = async () => {
 
             buscarDados();
         })
-        .catch(() => {
+        .catch((error) => {
             Swal.fire({
                 title: 'Erro',
-                text: 'Não foi possível excluir os dados da planilha.',
+                text: error.response?.data?.message ?? 'Não foi possível excluir os dados da planilha.',
                 icon: 'error',
             });
         })
@@ -128,8 +134,9 @@ defineExpose({
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="my-0">Dados Planilha</h3>
 
-            <button v-if="temDados" type="button" class="btn btn-danger" :disabled="excluindo || carregando"
-                @click="excluirDadosPlanilha">
+            <button v-if="temDados" type="button" class="btn btn-danger"
+                :disabled="excluindo || carregando || !podeAlterarPlanilha" @click="excluirDadosPlanilha"
+                :title="podeAlterarPlanilha ? 'Excluir dados da planilha' : 'Disponível apenas em rascunho ou após reprovação.'">
                 <span v-if="excluindo" class="spinner-border spinner-border-sm me-2" role="status"
                     aria-hidden="true"></span>
 
