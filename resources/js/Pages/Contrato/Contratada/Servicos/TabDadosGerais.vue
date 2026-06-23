@@ -2,7 +2,7 @@
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import { useForm } from "@inertiajs/vue3";
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
 
 const props = defineProps({
@@ -36,11 +36,23 @@ const form = useForm({
     ...props.servico,
 });
 
+const temaSelecionado = computed(() => {
+    return !!(form.tema?.id ?? form.tema);
+});
+
+const servicoSelecionado = computed(() => {
+    return !!(form.tipo?.id ?? form.tipo);
+});
+
+const podeSalvar = computed(() => {
+    return temaSelecionado.value && servicoSelecionado.value && !form.processing;
+});
+
 const servicosDisponiveis = computed(() => {
     const temaId = Number(form.tema?.id ?? form.tema);
 
     if (!temaId) {
-        return props.tipos;
+        return [];
     }
 
     const servicoAtualId = Number(form.id ?? props.servico?.id);
@@ -56,23 +68,60 @@ const servicosDisponiveis = computed(() => {
     });
 });
 
+watch(
+    () => form.tema?.id ?? form.tema,
+    (novoTema, temaAnterior) => {
+        if (temaAnterior !== undefined && Number(novoTema) !== Number(temaAnterior)) {
+            form.tipo = null;
+        }
+    }
+);
+
+const scrollParaTopo = () => {
+    setTimeout(() => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
+    }, 100);
+};
+
 const salvarServico = () => {
+    if (!podeSalvar.value) {
+        return;
+    }
+
     form.id_contrato = props.contrato?.id;
 
     if (form.id) {
-        form.patch(route("contratos.contratada.servicos.update"));
+        form.patch(route("contratos.contratada.servicos.update"), {
+            preserveScroll: false,
+            preserveState: true,
+            onSuccess: () => {
+                scrollParaTopo();
+            },
+        });
     } else {
-        form.post(route("contratos.contratada.servicos.store"));
+        form.post(route("contratos.contratada.servicos.store"), {
+            preserveScroll: false,
+            preserveState: false,
+            onSuccess: () => {
+                scrollParaTopo();
+            },
+        });
     }
 };
 </script>
+
 <template>
     <form @submit.prevent="salvarServico()">
         <div class="row mb-4">
             <div class="col form-group">
-                <InputLabel value="Tema" for="tema" />
+                <InputLabel for="tema">
+                    <span>Tema <span class="text-danger">*</span></span>
+                </InputLabel>
 
-                <v-select :options="temas" label="nome_tema" v-model="form.tema">
+                <v-select :options="temas" label="nome_tema" v-model="form.tema" :disabled="form.processing">
                     <template #no-options="{ }">
                         Nenhum registro encontrado.
                     </template>
@@ -82,9 +131,13 @@ const salvarServico = () => {
             </div>
 
             <div class="col form-group">
-                <InputLabel value="Serviço (módulo importado)" for="servico" />
+                <InputLabel for="servico">
+                    <span>Serviço (módulo importado) <span class="text-danger">*</span></span>
+                </InputLabel>
 
-                <v-select :options="servicosDisponiveis" label="nome" v-model="form.tipo">
+                <v-select :options="servicosDisponiveis" label="nome" v-model="form.tipo"
+                    :disabled="!temaSelecionado || form.processing"
+                    :placeholder="!temaSelecionado ? 'Selecione um tema para habilitar o campo de serviço' : 'Selecione o serviço'">
                     <template #no-options="{ }">
                         Nenhum módulo encontrado.
                     </template>
@@ -102,6 +155,7 @@ const salvarServico = () => {
                 <InputError :message="form.errors.especificacao" />
             </div>
         </div>
+
         <div class="row mb-4">
             <div class="col form-group">
                 <InputLabel value="Introdução" for="introducao" />
@@ -110,6 +164,7 @@ const salvarServico = () => {
                 <InputError :message="form.errors.introducao" />
             </div>
         </div>
+
         <div class="row mb-4">
             <div class="col form-group">
                 <InputLabel value="Justificativa" for="justificativa" />
@@ -118,6 +173,7 @@ const salvarServico = () => {
                 <InputError :message="form.errors.justificativa" />
             </div>
         </div>
+
         <div class="row mb-4">
             <div class="col form-group">
                 <InputLabel value="Objetivos" for="objetivo" />
@@ -126,6 +182,7 @@ const salvarServico = () => {
                 <InputError :message="form.errors.objetivos" />
             </div>
         </div>
+
         <div class="row mb-4">
             <div class="col form-group">
                 <InputLabel value="Metodologia" for="metodologia" />
@@ -134,6 +191,7 @@ const salvarServico = () => {
                 <InputError :message="form.errors.metodologia" />
             </div>
         </div>
+
         <div class="row mb-4">
             <div class="col form-group">
                 <InputLabel value="Público alvo" for="publico_alvo" />
@@ -142,8 +200,10 @@ const salvarServico = () => {
                 <InputError :message="form.errors.publico_alvo" />
             </div>
         </div>
+
         <div class="mb-4 d-flex justify-content-end">
-            <button type="submit" class="btn btn-success" :disabled="form.processing">
+            <button type="submit" class="btn btn-success" :disabled="!podeSalvar"
+                :title="!podeSalvar ? 'Selecione o tema e o serviço para salvar' : 'Salvar'">
                 <IconDeviceFloppy class="me-2" />
                 Salvar
             </button>
