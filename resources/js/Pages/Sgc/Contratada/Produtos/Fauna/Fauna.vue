@@ -55,6 +55,8 @@ const isEmElaboracao = (c) => c.status === 'Em elaboração';
 
 // Atualizar a rota quando o produto mudar
 const updateProduto = () => {
+  selectedSubproduto.value = '';
+
   router.get(
     route('sgc.contratada.produtos.index', [props.contrato, selectedProduto.value]),
     {},
@@ -73,6 +75,14 @@ const uniqueSubprodutos = computed(() => {
   return [...new Set(descriptions)];
 });
 
+const campanhasFiltradas = computed(() => {
+  if (!selectedSubproduto.value) {
+    return props.campanhas;
+  }
+
+  return props.campanhas.filter(campanha => campanha.subproduto === selectedSubproduto.value);
+});
+
 // Função para alternar ordenação
 const toggleSort = (column) => {
   if (sortColumn.value === column) {
@@ -87,7 +97,7 @@ const toggleSort = (column) => {
 
 // Computado para campanhas ordenadas
 const campanhasOrdenadas = computed(() => {
-  const items = [...props.campanhas];
+  const items = [...campanhasFiltradas.value];
 
   items.sort((a, b) => {
     let valorA = a[sortColumn.value];
@@ -547,7 +557,7 @@ const restaurarCampanha = (campanha) => {
                             />
                           </td>
                         </tr>
-                        <tr v-if="!props.campanhas.length">
+                        <tr v-if="!campanhasOrdenadas.length">
                           <td colspan="7" class="text-center">
                             {{ props.mostrarArquivadas ? 'Nenhuma campanha arquivada.' : 'Nenhuma campanha disponível.' }}
                           </td>

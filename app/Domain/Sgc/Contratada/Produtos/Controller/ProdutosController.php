@@ -17,6 +17,7 @@ use App\Models\SgcPmqaPonto;
 use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
 use App\Models\SgcModulo;
+use App\Models\SgcMalarigeno;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
 
@@ -49,27 +50,21 @@ class ProdutosController extends Controller
     {
         $subprodutos = $this->produtosService->getSubprodutosByContrato($contrato, $produto);
         $contratoObj = Contrato::findOrFail($contrato);
+        $mostrarArquivadas = $request->boolean('arquivadas');
 
         $campanhas = match ($produto) {
-            'fauna'        => $this->getCampanhasFauna($contrato),
+            'fauna'        => $this->getCampanhasFauna($contrato, $mostrarArquivadas),
             'pmqa', 'eia'  => $this->getCampanhasPmqa($contrato),
             'espeleologia' => $this->getCampanhasEspeleologia($contrato),
+            'malarigeno'   => $this->getCampanhasMalarigeno($contrato),
              default        => collect(),
         };
 
-        $mostrarArquivadas = request()->boolean('arquivadas');
-        $query = SgcFaunaCampanha::where('id_contrato', $contrato);
-        if ($mostrarArquivadas) {
-            $query->whereNotNull('arquivada_em');
-        } else {
-            $query->whereNull('arquivada_em');
-        }
-
-        $totalArquivadas = SgcFaunaCampanha::where('id_contrato', $contrato)
-            ->whereNotNull('arquivada_em')
-            ->count();
-
-        $campanhas = $query->get();
+        $totalArquivadas = $produto === 'fauna'
+            ? SgcFaunaCampanha::where('id_contrato', $contrato)
+                ->whereNotNull('arquivada_em')
+                ->count()
+            : 0;
 
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
@@ -237,9 +232,14 @@ class ProdutosController extends Controller
     // na tabela principal, só campanhas já submetidas
     // --------------------------------------------------------------------------
 
-    private function getCampanhasFauna($contrato)
+    private function getCampanhasFauna($contrato, bool $mostrarArquivadas = false)
     {
         return SgcFaunaCampanha::where('id_contrato', $contrato)
+            ->when(
+                $mostrarArquivadas,
+                fn($query) => $query->whereNotNull('arquivada_em'),
+                fn($query) => $query->whereNull('arquivada_em')
+            )
             ->get(['id', 'id_campanha', 'cod_emp', 'data_ini', 'data_fim', 'status', 'subproduto'])
             ->map(fn($campanha) => [
                 'id'           => $campanha->id,
@@ -375,6 +375,22 @@ class ProdutosController extends Controller
                     'subproduto' => $campanha->subproduto ?? 'N/A',
                 ];
             });
+    }
+
+    private function getCampanhasMalarigeno($contrato)
+    {
+        return SgcMalarigeno::where('id_contrato', $contrato)
+            ->latest()
+            ->get(['id', 'subproduto', 'status', 'created_at'])
+            ->map(fn($campanha) => [
+                'id' => $campanha->id,
+                'id_campanha' => $campanha->id,
+                'empreendimento' => 'N/A',
+                'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A',
+                'data_final' => 'N/A',
+                'status' => $campanha->status ?? 'Em elaboração',
+                'subproduto' => $campanha->subproduto ?? 'N/A',
+            ]);
     }
 
     private function createPmqa(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
