@@ -8,18 +8,17 @@ use App\Models\SgcvwEmpreendimentos;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaService;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoService;
-use App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Parametro\Services\ParametroService;
-use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Services\CampanhaService;
 use App\Models\SgcPmqa;
 use App\Models\SgcPmqaParametroLista;
-use App\Models\ServicoPmqaParametro;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcEspeleoProfissional;
-use App\Models\SgcPmqaCampanha;
 use App\Models\SgcPmqaPonto;
 use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
+use App\Models\SgcModulo;
+use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
+use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
 
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -112,6 +111,10 @@ class ProdutosController extends Controller
             // Se o produto for 'pmqa' OU 'eia', chamamos a função de criação do PMQA.
             // Passamos a variável $produto original ('eia') para que a tela mantenha o título correto.
             return $this->createPmqa($request, $contrato, $produto, $contratoObj, $subproduto);
+
+        } elseif ($produto === 'malarigeno') {
+            return $this->createMalarigeno($request,$contrato,$produto,$contratoObj,$subproduto);    
+
         } else {
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
         }
@@ -122,6 +125,41 @@ class ProdutosController extends Controller
             'pmqa' => $this->getCampanhasPmqa($contrato),
             default => $this->getCampanhasEspeleologia($contrato)
         };
+    }
+
+    private function createMalarigeno(
+        Request $request,
+        $contrato,
+        $produto,
+        $contratoObj,
+        $subproduto
+    ): Response
+    {
+        $modulos = SgcModulo::query()
+            ->select(['id', 'nome', 'nome_planilha_modelo', 'caminho_planilha_modelo', 'campos', 'created_at'])
+            ->get();
+
+        return inertia('Sgc/Contratada/Produtos/Malarigeno/Create', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => $modulos,
+        ]);
+    }
+
+    public function store(StoreMalarigenoRequest $request, $contrato, $produto)
+    {
+        if ($produto !== 'malarigeno') {
+            abort(404);
+        }
+
+        $validated = $request->validated();
+        $validated['contrato_id'] = $contrato;
+
+        $malarigeno = (new MalarigenoService())->store($validated);
+
+        return back()->with('success', 'Malarígeno salvo com sucesso!');
     }
 
 

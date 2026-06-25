@@ -187,11 +187,6 @@ const salvarAnalise = (etapa) => {
     form.post(
         route('sgc.contratada.produtos.salvarAnalise', [props.contrato, props.produto.toLowerCase(), props.campanha.id]),
         {
-            // onSuccess: () => {
-            //     form.reset('status', 'observacoes');
-            //     router.reload({ only: ['analises'] });
-            //     alert(`Análise da etapa ${etapas.find(e => e.value === etapa)?.label || etapa} salva com sucesso!`);
-            // },
             onSuccess: () => {
                 form.reset('status', 'observacoes');
 

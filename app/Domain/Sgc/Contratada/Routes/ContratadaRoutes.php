@@ -33,6 +33,14 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\InitializarRascunhoCampa
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SalvarEtapaCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SubmeterCampanhaController;
 
+use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\ConfiguracoesModulosController;
+use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\CreateConfigModuloController;
+use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\StoreConfigModuloController;
+use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\UpdateConfigModuloController;
+use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\ProcessarCamposPlanilhaController;
+use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\GerarPlanilhaModeloController;
+use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\DeleteConfigModuloController;
+
 use App\Mail\StatusChanged;
 use Illuminate\Support\Facades\Mail;
 
@@ -187,6 +195,19 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
             require __DIR__ . '/../../Contratada/Produtos/Pmqa/Relatorio/app/Routes/RelatorioRoutes.php';
 
         });
+
+        Route::prefix('modulos/configuracoes')
+            ->name('sgc.contratada.produtos.modulos.configuracoes.')
+            ->group(function () {
+                Route::get('/', [ConfiguracoesModulosController::class, 'index'])->name('index');
+                Route::get('/formulario/{modulo?}', [CreateConfigModuloController::class, 'index'])->name('formulario');
+                Route::post('/processar-campos-planilha', [ProcessarCamposPlanilhaController::class, 'processarCamposPlanilha'])->name('processar-campos-planilha');
+                Route::post('/formulario', [StoreConfigModuloController::class, 'store'])->name('store');
+                Route::post('/formulario/atualizar/{modulo?}', [UpdateConfigModuloController::class, 'update'])->name('update');
+                Route::delete('/formulario/excluir/{modulo?}', [DeleteConfigModuloController::class, 'delete'])->name('delete');
+                Route::get('/gerar-planilha-modelo/{modulo}', [GerarPlanilhaModeloController::class, 'gerarPlanilhaModelo'])->name('gerar-planilha-modelo');
+        });
+
     });
 
         /**

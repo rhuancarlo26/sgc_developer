@@ -58,10 +58,9 @@ watch(
         resultados.value.terrestre   = Array.isArray(v.terrestre)   ? v.terrestre   : [];
         resultados.value.aquatica    = Array.isArray(v.aquatica)    ? v.aquatica    : [];
         resultados.value.cavernicola = Array.isArray(v.cavernicola) ? v.cavernicola : [];
-        emit('update:resultadosRecords', { ...resultados.value });
         updateCharts();
     },
-    { deep: true, immediate: true }
+    { immediate: true }
 );
 
 // Sincronizar considerações com o form pai

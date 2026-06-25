@@ -284,6 +284,13 @@ const verAtivas = () => {
   );
 };
 
+// Ir para configurações do módulo (rota nomeada) — abre em nova aba
+const goToModulosConfiguracoes = () => {
+  const url = route('sgc.contratada.produtos.modulos.configuracoes.index', [props.contrato, selectedProduto.value]);
+  const w = window.open(url, '_blank');
+  if (w) w.opener = null;
+};
+
 const arquivarCampanha = (campanha) => {
   if (!confirm(`Arquivar a campanha ${campanha.id_campanha || campanha.id}?`)) return;
 
@@ -356,6 +363,11 @@ const restaurarCampanha = (campanha) => {
                       <div class="col-md-6 mb-4">
                         <div class="block-card block-card-short action-button bg-primary text-white cursor-pointer" @click="goToCreate">
                           Cadastrar
+                        </div>
+                      </div>
+                      <div class="col-md-6 mb-4">
+                        <div class="block-card block-card-short action-button bg-info text-white cursor-pointer" @click="goToModulosConfiguracoes">
+                          Configurações
                         </div>
                       </div>
                     </div>

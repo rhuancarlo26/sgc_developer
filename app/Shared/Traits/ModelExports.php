@@ -47,7 +47,16 @@ class ModelExports implements FromCollection, WithMapping, WithHeadings, WithStr
 
   public function headings(): array
   {
-    return array_map(fn ($header) => Str::headline(ucfirst(str_replace('.', "_>_", $header))), $this->mapping);
+    return array_map(function ($header) {
+      $display = str_replace('.', "_>_", $header);
+
+      // Preserve already uppercased identifiers like "TESTE1" (avoid inserting spaces)
+      if (preg_match('/^[A-Z0-9_]+$/', $display)) {
+        return $display;
+      }
+
+      return Str::headline(ucfirst($display));
+    }, $this->mapping);
   }
 
   public function styles(Worksheet $sheet): mixed

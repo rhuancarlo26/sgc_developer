@@ -35,37 +35,6 @@ class CampanhaController extends Controller
         protected ModeloService $modeloService,
     ) {}
 
-    // -------------------------------------------------------------------------
-    // VISUALIZAR
-    // -------------------------------------------------------------------------
-
-    // public function show($contrato, $produto, $campanhaId,)
-    // {
-    //     $campanha = SgcFaunaCampanha::with([
-    //         'abios.abio',
-    //         'profissionais.profissional',
-    //         'modulos_amostrais',
-    //         'pontos_quelo_crocod',
-    //         'pontos_cavernicola',
-    //         'metodologias',
-    //         'resultadosTerrestre',
-    //         'resultadosAquatica',
-    //         'resultadosCavernicola',
-    //         'resultados_consideracoes',
-    //         'anexos',
-    //     ])->findOrFail($campanhaId);
-
-    //     return Inertia::render('Sgc/Contratada/Produtos/Fauna/VisualizarCampanha', [
-    //         'campanha'   => CampanhaResource::toArray($campanha),
-    //         'contrato'   => $campanha->id_contrato,
-    //         'produto'    => $campanha->subproduto,
-    //         'contratos'  => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
-    //         'canApprove' => Auth::user()->perfis_id === 2 && $campanha->status === 'Em análise',
-    //     ]);
-    // }
-
-
-
     public function show($contrato, $produto, $campanhaId, $modulo = null)
     {
         $moduloativo = "Fauna";
