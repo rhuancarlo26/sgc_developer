@@ -28,7 +28,8 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                 <NavLink route-name="dashboard" title="Dashboard" :icon="IconLayoutDashboard" />
 
                                 <!-- Contratos -->
-                                <NavDropdown prefix="contratos.*" title="Fases de licenciamento" :icon="IconLayoutDashboard">
+                                <NavDropdown prefix="contratos.*" title="Fases de licenciamento"
+                                    :icon="IconLayoutDashboard">
 
                                     <!-- Gestão Ambiental -->
                                     <NavDropdownLink route-name="contratos.gestao.listagem" param-name="tipo"
@@ -51,7 +52,7 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                 <NavLink route-name="licenca.index" title="Licenças" :icon="IconFileCheck" />
 
                                 <!-- Ambiente Geo -->
-<!--                                <NavLink route-name="ambienteGeo" title="Ambiente Geo" :icon="IconWorld" />-->
+                                <!--                                <NavLink route-name="ambienteGeo" title="Ambiente Geo" :icon="IconWorld" />-->
 
                                 <!-- Fiscal -->
                                 <NavDropdown prefix="fiscal.*" title="Fiscal" :icon="IconFileCertificate">
@@ -78,6 +79,9 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
                                     <!-- Perfis -->
                                     <NavDropdownLink route-name="cadastros.perfis.listagem"
                                         active-on-route-prefix="cadastros.perfis.*" title="Perfis" />
+
+                                    <NavDropdownLink route-name="user-accesses.index"
+                                        active-on-route-prefix="user-accesses.index" title="Acessos" />
                                 </NavDropdown>
 
                                 <!-- Módulos -->

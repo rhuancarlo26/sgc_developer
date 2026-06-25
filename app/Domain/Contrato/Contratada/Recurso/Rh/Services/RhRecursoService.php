@@ -14,6 +14,23 @@ class RhRecursoService extends BaseModelService
 {
     use Searchable, Deletable;
 
+    private const RH_FILLABLE = [
+        'id_contrato',
+        'nome',
+        'telefone',
+        'cpf',
+        'email',
+        'profissao',
+        'funcao',
+        'ctf',
+        'ctf_validade',
+        'conselho_classe',
+        'numero_registro',
+        'status',
+        'obs',
+        'curriculum_latte',
+    ];
+
     protected string $modelClass = RecursoRh::class;
     protected string $modelClassDocumento = RecursoRhDocumento::class;
     protected string $modelClassDocumentoBaixa = RecursoRhDocumentoBaixa::class;
@@ -31,7 +48,10 @@ class RhRecursoService extends BaseModelService
 
     public function salvarRh($request): array
     {
-        $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+        $response = $this->dataManagement->create(
+            entity: $this->modelClass,
+            infos: $this->filterRhFields($request)
+        );
 
         return [
             'rh' => $response['model']['id'],
@@ -41,9 +61,18 @@ class RhRecursoService extends BaseModelService
 
     public function updateRh($request): array
     {
-        $response = $this->dataManagement->update(entity: $this->modelClass, infos: $request, id: $request['id']);
+        $response = $this->dataManagement->update(
+            entity: $this->modelClass,
+            infos: $this->filterRhFields($request),
+            id: $request['id']
+        );
 
         return ['request' => $response['request']];
+    }
+
+    private function filterRhFields(array $request): array
+    {
+        return array_intersect_key($request, array_flip(self::RH_FILLABLE));
     }
 
     public function salvarDocumentoRh($request): array

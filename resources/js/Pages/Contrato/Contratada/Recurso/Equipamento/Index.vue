@@ -43,7 +43,7 @@ const abrirModal = (equipamento) => {
     { route: '#', label: contrato.contratada }
   ]
     " />
-        <div class="container-buttons">
+        <div class="container-buttons" v-if="can('contratos.contratada.recurso.equipamento.create')">
           <Link class="btn btn-info me-2" :href="route('contratos.contratada.recurso.equipamento.create', contrato.id)">
           Cadastrar equipamentos
           </Link>
@@ -71,7 +71,7 @@ const abrirModal = (equipamento) => {
                 </a>
                 <NavLink route-name="contratos.contratada.recurso.equipamento.create" title="" :icon="IconEdit"
                          :param="{ contrato: contrato.id, equipamento: item.id }" class="btn btn-lg btn-info m-1"/>
-                <a @click="excluirEquipamento(item.id)" class="btn btn-lg btn-danger" title="Excluir" href="javascript:void(0)">
+                <a @click="excluirEquipamento(item.id)" class="btn btn-lg btn-danger" title="Excluir" href="javascript:void(0)" v-if="can('contratos.contratada.recurso.equipamento.destroy_equipamento')">
                   <IconTrash />
                 </a>
               </td>

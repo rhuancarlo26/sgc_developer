@@ -40,7 +40,7 @@
                                     Visualizar
                                 </a>
                                 <a @click="abrirModalParecerFiscal(item)" class="dropdown-item"
-                                    href="javascript:void(0)">
+                                    href="javascript:void(0)" v-if="item.parecer_ocorrencia?.fk_status">
                                     Parecer
                                 </a>
                             </div>

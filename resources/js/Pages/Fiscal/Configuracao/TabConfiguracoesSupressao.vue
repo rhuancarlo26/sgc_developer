@@ -9,18 +9,19 @@
             <ModelSearchForm :search-columns="{}" />
 
             <!-- Listagem -->
-            <Table :columns="['#', 'Serviço', 'Parecer','Status Aprovação', 'Ação']" :records="servicos"
+            <Table :columns="['#', 'Serviço', 'Parecer', 'Status Aprovação', 'Ação']" :records="servicos"
                 table-class="table-hover">
                 <template #body="{ item }">
                     <tr>
-                        <td class="text-center">{{item.id}}</tD>
-                        <td class="text-center">{{item.tema.nome_tema}} - {{ item.tipo?.nome }}</td>
-                        <td> {{item.parecer_supressao_vegetacao?.parecer}}</td>
+                        <td class="text-center">{{ item.id }}</tD>
+                        <td class="text-center">{{ item.tema.nome_tema }} - {{ item.tipo?.nome }}</td>
+                        <td> {{ item.parecer_supressao_vegetacao?.parecer }}</td>
                         <td class="text-center">
                             <span v-if="item.parecer_supressao_vegetacao?.fk_status === 1" class="badge bg-yellow-lt">
                                 Em análise
                             </span>
-                            <span v-else-if="item.parecer_supressao_vegetacao?.fk_status === 3" class="badge bg-blue-lt">
+                            <span v-else-if="item.parecer_supressao_vegetacao?.fk_status === 3"
+                                class="badge bg-blue-lt">
                                 Aprovado
                             </span>
                             <span v-else-if="item.parecer_supressao_vegetacao?.fk_status === 2" class="badge bg-red-lt">
@@ -36,10 +37,11 @@
                                 <IconDots />
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-<!--                                <a @click="abrirModalServicoFiscal(item)" class="dropdown-item" href="javascript:void(0)">-->
-<!--                                    Visualizar-->
-<!--                                </a>-->
-                                <a @click="abrirModalParecerFiscal(item)" class="dropdown-item" href="javascript:void(0)">
+                                <!--                                <a @click="abrirModalServicoFiscal(item)" class="dropdown-item" href="javascript:void(0)">-->
+                                <!--                                    Visualizar-->
+                                <!--                                </a>-->
+                                <a @click="abrirModalParecerFiscal(item)" class="dropdown-item"
+                                    href="javascript:void(0)" v-if="item.parecer_supressao_vegetacao?.fk_status">
                                     Parecer
                                 </a>
                             </div>
@@ -51,7 +53,7 @@
     </Navbar>
 
     <ModalParecerSupressao ref="modalParecerSupressao" />
-<!--    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />-->
+    <!--    <ModalVisualizarServicoFiscal ref="modalVisualizarServicoFiscal" />-->
 
 </template>
 

@@ -31,7 +31,7 @@ const updateModal = (itemFrente) => {
     form.data_final = itemFrente.data_final
         ? itemFrente.data_final.split(' ')[0]
         : null;
-
+    form.obs = itemFrente.obs
     modalDetalhes.value.getBsModal().show();
 }
 
@@ -53,6 +53,7 @@ const form = useForm({
     data_inicial: null,
     data_final: null,
     processing: false,
+    obs: null,
     errors: {}
 });
 
@@ -215,11 +216,16 @@ defineExpose({ abrirModal, updateModal });
                                             </div>
                                         </div>
 
+                                        <div class="d-flex">
+                                            <div class="col-lg-12 me-2">
+                                                <InputLabel value="Observação" for="observacao" />
+                                                <textarea name="observacao" id="observacao" rows="5"
+                                                    class="form-control" v-model="form.obs"></textarea>
+                                                <InputError :message="form.errors.obs" />
+                                            </div>
+                                        </div>
+
                                         <div class="mt-2">
-                                            <a @click="" href="#" class="btn btn-danger me-2" aria-label="Button"
-                                                :disabled="form.processing">
-                                                Cancelar
-                                            </a>
                                             <button type="submit" class="btn btn-success" aria-label="Button"
                                                 :disabled="form.processing">
                                                 Salvar

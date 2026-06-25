@@ -13,7 +13,7 @@ class DataManagement
     public function create($entity, $infos): array
     {
         try {
-            $model   = $entity::create([...$infos, 'user_id' => Auth::user()->id]);
+            $model   = $entity::create([...$infos, 'user_id' => Auth::user()->id, 'create_by' => Auth::user()->id]);
             $type    = 'success';
             $content = 'Registro cadastrado!';
             $error = '';

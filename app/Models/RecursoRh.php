@@ -12,6 +12,11 @@ class RecursoRh extends Model
     protected $table = 'rh';
     protected $guarded = ['id', 'created_at'];
 
+    protected $casts = [
+        'status' => 'boolean',
+        'conselho_classe' => 'boolean',
+    ];
+
     public function documentos()
     {
         return $this->hasMany(RecursoRhDocumento::class, 'cod_rh');

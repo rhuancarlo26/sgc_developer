@@ -182,7 +182,11 @@ import {
 } from "@tabler/icons-vue";
 import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
 import ModalVisualizarServico from "./ModalVisualizarServico.vue";
+import ModalVisualizarParecerFiscal from "../../../Fiscal/Servico/ModalVisualizarParecerFiscal.vue";
+
+
 import { ref } from "vue";
+import { can } from "@/Utils/PermissionUtils";
 
 const props = defineProps({
     contrato: Object,
@@ -315,6 +319,7 @@ const limparFiltros = () => {
 
 const modalVisualizarLicenca = ref();
 const modalVisualizarServico = ref();
+const modalVisualizarParecerFiscal = ref();
 
 const abrirModalLicenca = (servico) => {
     modalVisualizarLicenca.value.abrirModal(servico);

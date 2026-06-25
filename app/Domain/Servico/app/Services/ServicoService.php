@@ -15,6 +15,7 @@ use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Shared\Utils\MailUtil;
 
 class ServicoService extends BaseModelService
 {
@@ -36,6 +37,7 @@ class ServicoService extends BaseModelService
             ->with([
                 'tipo',
                 'tema',
+                // 'status',
                 'rhs',
                 'veiculos',
                 'veiculos.codigo',

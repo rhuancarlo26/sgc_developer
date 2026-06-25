@@ -62,7 +62,8 @@ const abrirModalVisualizarServico = (item) => {
                 <a @click="abrirModalVisualizarServico(item)" class="dropdown-item" href="javascript:void(0)">
                   Visualizar
                 </a>
-                <a @click="abrirModalParecer(item)" class="dropdown-item" href="javascript:void(0)">
+                <a @click="abrirModalParecer(item)" class="dropdown-item" href="javascript:void(0)"
+                  v-if="item.parecer_atropelamento?.fk_status">
                   Parecer
                 </a>
               </div>

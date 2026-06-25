@@ -7,7 +7,6 @@ const servico = ref(null);
 
 const abrirModal = (item) => {
     servico.value = item;
-    console.log(servico.value);
     modalServico.value.getBsModal().show();
 }
 
@@ -53,7 +52,7 @@ defineExpose({ abrirModal });
                     </h2>
                     <div id="objetivos" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
                         <div class="accordion-body pt-0">
-                            {{ servico?.objetivo }}
+                            {{ servico?.objetivos }}
                         </div>
                     </div>
                 </div>
@@ -210,7 +209,24 @@ defineExpose({ abrirModal });
                     </h2>
                     <div id="licencas" class="accordion-collapse collapse" data-bs-parent="#accordion-example">
                         <div class="accordion-body pt-0">
-                            Licença
+                            <div class="card-body">
+                                <div class="table-responsive mb-4">
+                                    <table class="table table-hover non-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Licença</th>
+                                                <th>Condicionante</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="condicionante in servico?.condicionantes" :key="condicionante.id">
+                                                <td>{{ condicionante.licenca?.numero_licenca }}</td>
+                                                <td>{{ condicionante.descricao }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -94,8 +94,8 @@ const props = defineProps({
                                                 title="Fauna - Atropelamento da Fauna" />
                                         </NavDropdown>
 
-                                        <NavLink route-name="contratos.contratada.dados_gerais.index"
-                                            :param="contrato.id" title="Acompanhamentos" :icon="IconLayoutDashboard" />
+                                        <!-- <NavLink route-name="contratos.contratada.dados_gerais.index"
+                                            :param="contrato.id" title="Acompanhamentos" :icon="IconLayoutDashboard" /> -->
                                     </ul>
                                 </div>
                             </div>

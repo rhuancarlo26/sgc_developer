@@ -9,13 +9,13 @@
             <ModelSearchForm :search-columns="{}" />
 
             <!-- Listagem -->
-            <Table :columns="['#', 'Serviço', 'Parecer','Status Aprovação', 'Ação']" :records="servicos"
+            <Table :columns="['#', 'Serviço', 'Parecer', 'Status Aprovação', 'Ação']" :records="servicos"
                 table-class="table-hover">
                 <template #body="{ item }">
                     <tr>
-                        <td class="text-center">{{item.id}}</tD>
-                        <td class="text-center">{{item.tema.nome_tema}} - {{ item.tipo?.nome }}</td>
-                        <td> {{item.parecer_pmqa?.parecer}}</td>
+                        <td class="text-center">{{ item.id }}</tD>
+                        <td class="text-center">{{ item.tema.nome_tema }} - {{ item.tipo?.nome }}</td>
+                        <td> {{ item.parecer_pmqa?.parecer }}</td>
                         <td class="text-center">
                             <span v-if="item.parecer_pmqa?.fk_status === 1" class="badge bg-yellow-lt">
                                 Em análise
@@ -39,7 +39,8 @@
                                 <a @click="abriVisualizacao(item)" class="dropdown-item" href="javascript:void(0)">
                                     Visualizar
                                 </a>
-                                <a @click="abrirModalParecerFiscal(item)" class="dropdown-item" href="javascript:void(0)">
+                                <a @click="abrirModalParecerFiscal(item)" class="dropdown-item"
+                                    v-if="item.parecer_pmqa?.fk_status" href="javascript:void(0)">
                                     Parecer
                                 </a>
                             </div>

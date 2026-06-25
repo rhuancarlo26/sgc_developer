@@ -40,7 +40,7 @@ const excluirAnexo = (anexo_id) => {
 
 </script>
 <template>
-    <div class="row mb-4">
+    <div class="row mb-4" v-if="can('contratos.contratada.update_anexo')">
         <div class="card-header mb-4 mt-4">
             <h3 class="my-0">Anexos</h3>
         </div>
@@ -88,10 +88,10 @@ const excluirAnexo = (anexo_id) => {
                            :href="route('contratos.contratada.visualizar_anexo', anexo.id)">
                             Visualizar
                         </a>
-                        <a @click="Object.assign(form, anexo)" class="dropdown-item" href="javascript:void(0)">
+                        <a @click="Object.assign(form, anexo)" class="dropdown-item" href="javascript:void(0)" v-if="can('contratos.contratada.store_anexo')">
                             Editar
                         </a>
-                        <a @click="excluirAnexo(anexo.id)" class="dropdown-item" href="javascript:void(0)">
+                        <a @click="excluirAnexo(anexo.id)" class="dropdown-item" href="javascript:void(0)" v-if="can('contratos.contratada.store_anexo')">
                             Excluir
                         </a>
                     </div>
