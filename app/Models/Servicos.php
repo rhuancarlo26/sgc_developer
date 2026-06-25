@@ -16,12 +16,6 @@ class Servicos extends Model
     protected $table = 'servicos';
     protected $guarded = ['id', 'created_at'];
 
-    //    public function status(): BelongsTo
-    //    {
-    //        return $this->belongsTo(ServicoStatus::class, 'status_aprovacao');
-    //    }
-
-
 
     public function contrato(): BelongsTo
     {
@@ -33,9 +27,10 @@ class Servicos extends Model
         return $this->belongsTo(related: ServicoTema::class, foreignKey: 'tema_servico');
     }
 
-    public function tipo(): BelongsTo
+    // MODULO IMPORTADO 
+    public function tipo()
     {
-        return $this->belongsTo(related: ServicoTipo::class, foreignKey: 'servico');
+        return $this->belongsTo(Modulo::class, 'servico');
     }
 
     public function servico_rhs()
@@ -233,8 +228,13 @@ class Servicos extends Model
         return $this->hasMany(Destinacao::class, 'servico_id');
     }
 
-    public function user()
+    public function moduloImportador()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(ModuloImportador::class, 'modulo_importador_id');
+    }
+
+    public function moduloImportadores(): HasMany
+    {
+        return $this->hasMany(ModuloImportador::class, 'servico_id');
     }
 }

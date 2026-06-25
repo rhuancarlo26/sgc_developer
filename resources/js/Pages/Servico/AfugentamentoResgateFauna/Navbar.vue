@@ -6,6 +6,7 @@ import { IconLayoutDashboard } from '@tabler/icons-vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import NavLink from '@/Components/NavLink.vue';
 import axios from "axios";
+import CardDadosImportadosServico from "@/Pages/Modulos/Importador/Components/CardDadosImportadosServico.vue";
 import { onMounted, ref } from "vue";
 
 const props = defineProps({
@@ -14,6 +15,7 @@ const props = defineProps({
 });
 
 const aprovacao = ref({});
+const abaAtiva = ref('servico');
 
 onMounted(() => {
     getAprovacao();
@@ -24,6 +26,10 @@ const getAprovacao = () => {
         .then(response => {
             aprovacao.value = response.data.aprovacao
         })
+}
+
+const abrirDadosImportados = () => {
+    abaAtiva.value = 'dados_importados';
 }
 
 </script>
@@ -41,7 +47,7 @@ const getAprovacao = () => {
                             <div class="container-xl">
                                 <div class="row flex-fill align-items-center">
                                     <div class="col">
-                                        <ul class="navbar-nav">
+                                        <ul class="navbar-nav" :class="{ 'dados-importados-ativo': abaAtiva === 'dados_importados' }">
                                             <NavDropdown
                                                 prefix="contratos.contratada.servicos.afugentamento.resgate.fauna.configuracao*"
                                                 title="Configurações" :icon="IconLayoutDashboard">
@@ -97,6 +103,16 @@ const getAprovacao = () => {
                                                     title="Pareceres" :icon="IconLayoutDashboard" />
                                             </template>
 
+                                            <li class="nav-item pastel-2 aba-dados-importados" :class="{ active: abaAtiva === 'dados_importados' }">
+                                                <button type="button" class="nav-link w-100"
+                                                    :class="{ active: abaAtiva === 'dados_importados' }"
+                                                    :aria-current="abaAtiva === 'dados_importados' ? 'page' : null"
+                                                    @click="abrirDadosImportados">
+                                                    <IconLayoutDashboard class="me-1" />
+                                                    <span class="nav-link-title">Dados importados</span>
+                                                </button>
+                                            </li>
+
                                         </ul>
                                     </div>
                                 </div>
@@ -105,9 +121,17 @@ const getAprovacao = () => {
                     </div>
                 </header>
                 <div class="mt-2 card card-body">
-                    <slot name="body" />
+                    <CardDadosImportadosServico v-if="abaAtiva === 'dados_importados'" :servico="servico" />
+                    <slot v-else name="body" />
                 </div>
             </div>
         </template>
     </Navbar>
 </template>
+
+<style scoped>
+.dados-importados-ativo :deep(.nav-item.active:not(.aba-dados-importados) > .nav-link) {
+    background: transparent;
+    color: inherit;
+}
+</style>

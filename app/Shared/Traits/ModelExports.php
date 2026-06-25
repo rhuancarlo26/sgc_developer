@@ -17,15 +17,17 @@ class ModelExports implements FromCollection, WithMapping, WithHeadings, WithStr
 {
   private iterable $data = [];
   private array $mapping;
+  private bool $formatUcFirst;
 
   /**
    * @param iterable $data Dados a serem exportados
    * @param $mapping Colunas;Propriedades a serem exibidas
    */
-  public function __construct($data, $mapping)
+  public function __construct($data, $mapping, $formatUcFirst = true)
   {
     $this->data = $data;
     $this->mapping = $mapping;
+    $this->formatUcFirst = $formatUcFirst;
   }
 
   public function collection()
@@ -47,7 +49,9 @@ class ModelExports implements FromCollection, WithMapping, WithHeadings, WithStr
 
   public function headings(): array
   {
-    return array_map(fn ($header) => Str::headline(ucfirst(str_replace('.', "_>_", $header))), $this->mapping);
+    return $this->formatUcFirst ?
+      array_map(fn($header) => Str::headline(ucfirst(str_replace('.', "_>_", $header))), $this->mapping) :
+      $this->mapping;
   }
 
   public function styles(Worksheet $sheet): mixed

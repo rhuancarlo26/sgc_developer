@@ -8,16 +8,14 @@ use Illuminate\Http\Request;
 
 class UpdateServicosContratadaController extends Controller
 {
-    public function __construct(private readonly ServicoService $servicoService)
-    {
-    }
+    public function __construct(private readonly ServicoService $servicoService) {}
 
     public function index(Request $request)
     {
         $post = [
             ...$request->all(),
             'servico' => $request->tipo['id'],
-            'tema_servico' => $request->tema['id']
+            'tema_servico' => $request->tema['id'],
         ];
 
         $response = $this->servicoService->updateServico($post);

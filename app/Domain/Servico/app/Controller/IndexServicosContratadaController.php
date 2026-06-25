@@ -17,7 +17,14 @@ class IndexServicosContratadaController extends Controller
     {
         $searchParams = $request->all('searchColumn', 'searchValue');
 
-        $response = $this->servicoService->listarServicos($contrato, $searchParams);
+        $filtros = $request->only([
+            'filtro_tema_id',
+            'filtro_servico_id',
+            'filtro_status_aprovacao',
+        ]);
+
+        $response = $this->servicoService->listarServicos($contrato, $searchParams, $filtros);
+
         return Inertia::render('Contrato/Contratada/Servicos/Index', [
             'contrato' => $contrato,
             ...$response

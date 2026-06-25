@@ -16,8 +16,11 @@ const props = defineProps({
 
 const recordsState = ref({ ...props.records });
 
+const emit = defineEmits(['updateRecordsState'])
+
 function updateRecordsState(records) {
     recordsState.value = { ...records }
+    emit('updateRecordsState', records)
 }
 
 </script>
