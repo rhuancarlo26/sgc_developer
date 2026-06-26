@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import { ref, computed } from "vue";
+import { ref, computed, nextTick } from "vue";
 import { IconDoorExit, IconDeviceFloppy, IconSend, IconCircleX, IconCircleCheck } from "@tabler/icons-vue";
 import Swal from "sweetalert2";
 
@@ -141,6 +141,14 @@ const buscarDadosPlanilhaAposImportar = (tentativa = 1) => {
     }, 1000);
 };
 
+const atualizarTabelaPlanilha = async () => {
+    await nextTick();
+
+    if (CardDadosPlanilhaRef.value?.buscarDados) {
+        buscarDadosPlanilhaAposImportar();
+    }
+};
+
 const importar = async (enviarAnalise = false) => {
     if (form.fotos.length && CardFotosRef.value?.validarCampos?.()) {
         return;
@@ -186,20 +194,21 @@ const importar = async (enviarAnalise = false) => {
 
     form.post(route(`modulos.importador.${method}`, params), {
         preserveScroll: true,
-        preserveState: true,
+
+        preserveState: "errors",
+
         forceFormData: true,
 
-        onSuccess: () => {
+        onSuccess: async () => {
             form.arquivo = null;
 
             CardInformacoesGeraisRef.value?.limparArquivo?.();
 
-            if (form.id) {
-                CardDadosPlanilhaRef.value?.buscarDados?.();
-            }
+            await atualizarTabelaPlanilha();
         },
 
         onError: (errors) => {
+            limparArquivoSelecionado();
             tratarErroImportacao(errors);
         },
 
@@ -215,7 +224,18 @@ const enviarAnalise = () => {
 
 const aprovReprovImportacao = (status) => {
     form.post(route("modulos.importador.aprovReprov", [form.id, status]), {
-        preserveScroll: true,
+        preserveScroll: false,
+        preserveState: false,
+
+        onSuccess: () => {
+            form.status = status;
+            form.status_formatado = status === 4 ? "Aprovado" : "Reprovado";
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+            });
+        },
     });
 };
 
@@ -267,14 +287,13 @@ const importarSomentePlanilha = () => {
 
         form.post(route("modulos.importador.store"), {
             preserveScroll: true,
-            preserveState: true,
+            preserveState: "errors",
             forceFormData: true,
 
-            onSuccess: () => {
+            onSuccess: async () => {
                 limparArquivoSelecionado();
-                setTimeout(() => {
-                    buscarDadosPlanilhaAposImportar();
-                }, 1000);
+
+                await atualizarTabelaPlanilha();
             },
 
             onError: (errors) => {
@@ -296,12 +315,12 @@ const importarSomentePlanilha = () => {
         preserveState: true,
         forceFormData: true,
 
-        onSuccess: () => {
+        onSuccess: async () => {
             limparArquivoSelecionado();
 
             temDadosPlanilha.value = true;
 
-            buscarDadosPlanilhaAposImportar();
+            await atualizarTabelaPlanilha();
         },
 
         onError: (errors) => {

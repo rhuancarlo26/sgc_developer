@@ -6,6 +6,7 @@ use App\Domain\Modulos\Importador\Requests\UpdateImportadorRequest;
 use App\Domain\Modulos\Importador\Services\UpdateService;
 use App\Models\ModuloImportador;
 use App\Shared\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 
 class UpdateImportadorController extends Controller
 {
@@ -17,6 +18,7 @@ class UpdateImportadorController extends Controller
 
     public function update(ModuloImportador $importador, UpdateImportadorRequest $request)
     {
+
         $this->service->update($importador, $request->validated());
 
         $importador->refresh();

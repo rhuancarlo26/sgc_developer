@@ -103,7 +103,17 @@ const abrirSeletorFotos = () => {
 };
 
 const campoVazio = (valor) => {
-    return valor === "" || valor === null || valor === undefined;
+    return (
+        valor === "" ||
+        valor === null ||
+        valor === undefined ||
+        Number.isNaN(valor) ||
+        String(valor).trim() === "NaN"
+    );
+};
+
+const primeiroValorPreenchido = (campo) => {
+    return props.form.fotos.find((foto) => !campoVazio(foto[campo]))?.[campo] ?? null;
 };
 
 const valorPadrao = (campo, key) => {
@@ -111,37 +121,34 @@ const valorPadrao = (campo, key) => {
         return "";
     }
 
-    const primeiraFoto = props.form.fotos?.[0];
-
-    if (!primeiraFoto || campoVazio(primeiraFoto[campo])) {
-        return "";
-    }
-
-    return primeiraFoto[campo];
+    return primeiroValorPreenchido(campo) ?? "";
 };
 
 const aplicarValoresPadraoNasFotos = () => {
-    const primeiraFoto = props.form.fotos?.[0];
+    const latitudePadrao = primeiroValorPreenchido("latitude");
+    const longitudePadrao = primeiroValorPreenchido("longitude");
+    const dataCapturaPadrao = primeiroValorPreenchido("data_captura");
+    const descricaoPadrao = primeiroValorPreenchido("descricao");
 
-    if (!primeiraFoto) {
-        return;
-    }
-
-    props.form.fotos.forEach((foto, key) => {
-        if (key === 0) {
-            return;
+    props.form.fotos.forEach((foto) => {
+        if (campoVazio(foto.latitude) && !campoVazio(latitudePadrao)) {
+            foto.latitude = latitudePadrao;
+            foto.latitude_preenchida_automaticamente = true;
         }
 
-        if (campoVazio(foto.latitude) && !campoVazio(primeiraFoto.latitude)) {
-            foto.latitude = primeiraFoto.latitude;
+        if (campoVazio(foto.longitude) && !campoVazio(longitudePadrao)) {
+            foto.longitude = longitudePadrao;
+            foto.longitude_preenchida_automaticamente = true;
         }
 
-        if (campoVazio(foto.longitude) && !campoVazio(primeiraFoto.longitude)) {
-            foto.longitude = primeiraFoto.longitude;
+        if (campoVazio(foto.data_captura) && !campoVazio(dataCapturaPadrao)) {
+            foto.data_captura = dataCapturaPadrao;
+            foto.data_preenchida_automaticamente = true;
         }
 
-        if (campoVazio(foto.descricao) && !campoVazio(primeiraFoto.descricao)) {
-            foto.descricao = primeiraFoto.descricao;
+        if (campoVazio(foto.descricao) && !campoVazio(descricaoPadrao)) {
+            foto.descricao = descricaoPadrao;
+            foto.descricao_preenchida_automaticamente = true;
         }
     });
 };
@@ -219,37 +226,95 @@ const compactarImagem = (arquivo) => {
     });
 };
 
+const limparMetadadosParaEnvio = (valor) => {
+    try {
+        return JSON.parse(JSON.stringify(valor, (chave, item) => {
+            if (item instanceof Date) {
+                return formatarDataExif(item);
+            }
+
+            if (typeof item === "bigint") {
+                return item.toString();
+            }
+
+            if (
+                item instanceof ArrayBuffer ||
+                item instanceof Uint8Array ||
+                item instanceof Int8Array ||
+                item instanceof Uint16Array ||
+                item instanceof Int16Array ||
+                item instanceof Uint32Array ||
+                item instanceof Int32Array
+            ) {
+                return "[dados binários]";
+            }
+
+            return item;
+        }));
+    } catch (e) {
+        return null;
+    }
+};
+
+const normalizarNumero = (valor) => {
+    const numero = Number(valor);
+
+    if (valor === null || valor === undefined || valor === "" || Number.isNaN(numero)) {
+        return null;
+    }
+
+    return numero;
+};
+
 const extrairDadosDaImagem = async (arquivo) => {
     try {
-        const metadados = await exifr.parse(arquivo, [
-            "latitude",
-            "longitude",
-            "DateTimeOriginal",
-            "DateTimeDigitized",
-            "DateTime",
-        ]);
+        const metadadosGerais = await exifr.parse(arquivo, {
+            tiff: true,
+            ifd0: true,
+            exif: true,
+            gps: true,
+            jfif: true,
+            ihdr: true,
+            xmp: true,
+            icc: true,
+            iptc: true,
+            mergeOutput: true,
+            reviveValues: true,
+        });
 
-        const latitude = metadados?.latitude ?? null;
-        const longitude = metadados?.longitude ?? null;
+        const gps = await exifr.gps(arquivo).catch(() => null);
+
+        const latitude = normalizarNumero(gps?.latitude ?? metadadosGerais?.latitude ?? null);
+        const longitude = normalizarNumero(gps?.longitude ?? metadadosGerais?.longitude ?? null);
 
         const dataCaptura = formatarDataExif(
-            metadados?.DateTimeOriginal
-            ?? metadados?.DateTimeDigitized
-            ?? metadados?.DateTime
+            metadadosGerais?.DateTimeOriginal
+            ?? metadadosGerais?.DateTimeDigitized
+            ?? metadadosGerais?.DateTime
+            ?? metadadosGerais?.CreateDate
             ?? null
         );
+
+        const metadados = limparMetadadosParaEnvio({
+            ...metadadosGerais,
+            latitude_extraida: latitude,
+            longitude_extraida: longitude,
+            data_captura_extraida: dataCaptura,
+        });
 
         return {
             latitude,
             longitude,
             data_captura: dataCaptura,
-            possuiCoordenadas: !!latitude && !!longitude,
+            metadados,
+            possuiCoordenadas: !campoVazio(latitude) && !campoVazio(longitude),
         };
     } catch (error) {
         return {
             latitude: null,
             longitude: null,
             data_captura: null,
+            metadados: null,
             possuiCoordenadas: false,
         };
     }
@@ -271,6 +336,7 @@ const selecionarMultiplosArquivos = async ({ target }) => {
             latitude: dadosImagem.latitude,
             longitude: dadosImagem.longitude,
             data_captura: dadosImagem.data_captura,
+            metadados: dadosImagem.metadados,
             descricao: null,
             nome_original: arquivo.name,
             compactada: arquivoEnvio.name !== arquivo.name,
@@ -297,6 +363,7 @@ const selecionarArquivo = async (key, { target }) => {
     props.form.fotos[key].latitude = dadosImagem.latitude;
     props.form.fotos[key].longitude = dadosImagem.longitude;
     props.form.fotos[key].data_captura = dadosImagem.data_captura;
+    props.form.fotos[key].metadados = dadosImagem.metadados;
     props.form.fotos[key].nome_original = arquivo.name;
     props.form.fotos[key].compactada = arquivoEnvio.name !== arquivo.name;
     props.form.fotos[key].tentouExtrairCoordenadas = true;
@@ -524,7 +591,13 @@ defineExpose({ validarCampos });
                         <InputLabel :for="`data_captura_${key}`">Data/Hora </InputLabel>
 
                         <input type="text" :value="formatarDataHoraFoto(f.data_captura)" :id="`data_captura_${key}`"
-                            class="form-control" placeholder="Sem data no metadado" />
+                            class="form-control" :placeholder="key > 0 && valorPadrao('data_captura', key)
+                                ? formatarDataHoraFoto(valorPadrao('data_captura', key))
+                                : 'Sem data no metadado'" />
+                        <small v-if="key > 0 && campoVazio(f.data_captura) && valorPadrao('data_captura', key)"
+                            class="text-muted">
+                            Usará o valor da primeira foto.
+                        </small>
 
                         <small v-if="campoVazio(f.data_captura)" class="text-muted">
                             Não encontrada nos metadados.
@@ -538,7 +611,11 @@ defineExpose({ validarCampos });
                             <input type="text" v-model="f.descricao" :id="`descricao_${key}`" class="form-control"
                                 :placeholder="valorPadrao('descricao', key)"
                                 :class="f.valida_descricao ? 'border-danger' : ''"
-                                :disabled="[2, 4].includes(form.status)" />
+                                :disabled="[2, 4].includes(form.status)" @blur="aplicarValoresPadraoNasFotos" />
+
+                            <small v-if="f.descricao_preenchida_automaticamente" class="text-success d-block">
+                                Preenchido automaticamente.
+                            </small>
 
                             <small v-if="key > 0 && campoVazio(f.descricao) && valorPadrao('descricao', key)"
                                 class="text-muted">

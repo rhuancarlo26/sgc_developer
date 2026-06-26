@@ -5,6 +5,7 @@ namespace App\Domain\Modulos\Importador\Services;
 use App\Models\ModuloImportador;
 use App\Models\ModuloImportadorAnexos;
 use App\Models\ModuloImportadorFotos;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 
 class GerenciarImportadorService
@@ -13,14 +14,18 @@ class GerenciarImportadorService
     {
         $idsFotos = [];
 
-        foreach ($fotos ?? [] as $f) {
+        $primeiraFoto = $fotos[0] ?? [];
+
+        foreach ($fotos ?? [] as $index => $f) {
             $dataF = [];
-            $metadados = [];
+
+            $metadadosFront = $this->normalizarMetadadosFront($f['metadados'] ?? null);
+            $metadadosArquivo = [];
 
             if (isset($f['arquivo'])) {
                 $arquivoF_ = $f['arquivo'];
 
-                $metadados = $this->extrairMetadadosFoto($arquivoF_);
+                $metadadosArquivo = $this->extrairMetadadosFoto($arquivoF_);
 
                 $nomeArquivoF_ = $arquivoF_->getClientOriginalName();
 
@@ -38,34 +43,87 @@ class GerenciarImportadorService
                 $dataF['caminho_arquivo'] = $nomeCaminhoF_;
             }
 
+            $descricao = trim((string) (
+                $f['descricao']
+                ?? $primeiraFoto['descricao']
+                ?? ''
+            ));
+
+            if ($descricao === '') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    "fotos.{$index}.descricao" => 'A descrição da foto é obrigatória.',
+                ]);
+            }
+
             $latitude = $this->valorPreenchido($f['latitude'] ?? null)
                 ? $f['latitude']
-                : ($metadados['latitude'] ?? null);
+                : (
+                    $metadadosArquivo['latitude']
+                    ?? $metadadosFront['latitude_extraida']
+                    ?? $metadadosFront['latitude']
+                    ?? $primeiraFoto['latitude']
+                    ?? null
+                );
 
             $longitude = $this->valorPreenchido($f['longitude'] ?? null)
                 ? $f['longitude']
-                : ($metadados['longitude'] ?? null);
+                : (
+                    $metadadosArquivo['longitude']
+                    ?? $metadadosFront['longitude_extraida']
+                    ?? $metadadosFront['longitude']
+                    ?? $primeiraFoto['longitude']
+                    ?? null
+                );
+
+            $dataCaptura = $this->formatarDataCaptura(
+                $metadadosArquivo['data_captura']
+                    ?? ($f['data_captura'] ?? null)
+                    ?? ($metadadosFront['data_captura_extraida'] ?? null)
+                    ?? ($metadadosFront['DateTimeOriginal'] ?? null)
+                    ?? ($metadadosFront['DateTimeDigitized'] ?? null)
+                    ?? ($metadadosFront['DateTime'] ?? null)
+                    ?? ($metadadosFront['CreateDate'] ?? null)
+                    ?? ($primeiraFoto['data_captura'] ?? null)
+            );
+
+            $metadadosCompletos = $metadadosArquivo['metadados_completos']
+                ?? $metadadosFront
+                ?? null;
+
+            $descricao = trim((string) ($f['descricao'] ?? ''));
+
+            if ($descricao === '') {
+                throw ValidationException::withMessages([
+                    "fotos.{$index}.descricao" => 'A descrição da foto é obrigatória.',
+                ]);
+            }
 
             $dadosFoto = [
                 'modulo_importador_id' => $importador->id,
                 'latitude' => $latitude,
                 'longitude' => $longitude,
-                'descricao' => $f['descricao'] ?? null,
-                ...$dataF
+                'descricao' => $descricao,
+                'data_captura' => $dataCaptura,
+                'fabricante' => $metadadosArquivo['fabricante']
+                    ?? ($metadadosFront['Make'] ?? null)
+                    ?? ($metadadosFront['fabricante'] ?? null),
+                'modelo' => $metadadosArquivo['modelo']
+                    ?? ($metadadosFront['Model'] ?? null)
+                    ?? ($metadadosFront['modelo'] ?? null),
+                'largura' => $metadadosArquivo['largura']
+                    ?? ($metadadosFront['ImageWidth'] ?? null)
+                    ?? ($metadadosFront['ExifImageWidth'] ?? null)
+                    ?? ($metadadosFront['PixelXDimension'] ?? null),
+                'altura' => $metadadosArquivo['altura']
+                    ?? ($metadadosFront['ImageHeight'] ?? null)
+                    ?? ($metadadosFront['ExifImageHeight'] ?? null)
+                    ?? ($metadadosFront['PixelYDimension'] ?? null),
+                'orientacao' => $metadadosArquivo['orientacao']
+                    ?? ($metadadosFront['Orientation'] ?? null)
+                    ?? ($metadadosFront['orientacao'] ?? null),
+                'metadados' => $metadadosCompletos,
+                ...$dataF,
             ];
-
-            if (isset($f['arquivo'])) {
-                $dadosFoto = [
-                    ...$dadosFoto,
-                    'data_captura' => $this->formatarDataCaptura($metadados['data_captura'] ?? ($f['data_captura'] ?? null)),
-                    'fabricante' => $metadados['fabricante'] ?? null,
-                    'modelo' => $metadados['modelo'] ?? null,
-                    'largura' => $metadados['largura'] ?? null,
-                    'altura' => $metadados['altura'] ?? null,
-                    'orientacao' => $metadados['orientacao'] ?? null,
-                    'metadados' => $metadados['metadados_completos'] ?? null,
-                ];
-            }
 
             $foto = ModuloImportadorFotos::updateOrCreate(
                 ['id' => $f['id'] ?? null],
@@ -140,6 +198,27 @@ class GerenciarImportadorService
 
                 $item->delete();
             });
+    }
+
+    private function normalizarMetadadosFront($metadados): ?array
+    {
+        if (!$metadados) {
+            return null;
+        }
+
+        if (is_array($metadados)) {
+            return $this->limparMetadadosParaJson($metadados);
+        }
+
+        if (is_string($metadados)) {
+            $decoded = json_decode($metadados, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $this->limparMetadadosParaJson($decoded);
+            }
+        }
+
+        return null;
     }
 
     private function valorPreenchido($valor): bool

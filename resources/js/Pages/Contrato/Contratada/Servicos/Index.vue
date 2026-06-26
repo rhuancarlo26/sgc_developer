@@ -122,14 +122,13 @@
                                         </a>
 
                                         <a class="dropdown-item"
-                                            v-if="[1, 4].includes(statusAprovacao(item))"
+                                            v-if="[1, 4].includes(statusAprovacao(item)) || !item.servico"
                                             :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
-                                            Editar
+                                            {{ !item.servico ? 'Vincular serviço' : 'Editar' }}
                                         </a>
 
                                         <a @click="deleteServico(item.id)" class="dropdown-item"
-                                            href="javascript:void(0)"
-                                            v-if="[1, 4].includes(statusAprovacao(item))">
+                                            href="javascript:void(0)" v-if="[1, 4].includes(statusAprovacao(item))">
                                             Excluir
                                         </a>
 
@@ -144,9 +143,9 @@
                                         </a>
                                     </div>
 
-                                    <Link v-if="statusAprovacao(item) === 3"
-                                        class="btn btn-icon btn-danger p-2" title="Importador do módulo"
-                                        target="_blank" rel="noopener" :href="route('modulos.importador.index', {
+                                    <Link v-if="statusAprovacao(item) === 3 && item.servico"
+                                        class="btn btn-icon btn-danger p-2" title="Importador do módulo" target="_blank"
+                                        rel="noopener" :href="route('modulos.importador.index', {
                                             contrato_id: contrato.id,
                                             modulo_id: item.servico,
                                             servico_id: item.id,

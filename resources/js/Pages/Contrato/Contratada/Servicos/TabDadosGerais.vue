@@ -48,6 +48,22 @@ const podeSalvar = computed(() => {
     return temaSelecionado.value && servicoSelecionado.value && !form.processing;
 });
 
+const registroExistente = computed(() => {
+    return !!form.id;
+});
+
+const registroLegadoSemServico = computed(() => {
+    return registroExistente.value && !(form.servico ?? form.tipo?.id ?? form.tipo);
+});
+
+const podeEditarServico = computed(() => {
+    return !registroExistente.value || registroLegadoSemServico.value;
+});
+
+const podeEditarTema = computed(() => {
+    return !registroExistente.value || !form.tema_servico;
+});
+
 const servicosDisponiveis = computed(() => {
     const temaId = Number(form.tema?.id ?? form.tema);
 
@@ -121,7 +137,8 @@ const salvarServico = () => {
                     <span>Tema <span class="text-danger">*</span></span>
                 </InputLabel>
 
-                <v-select :options="temas" label="nome_tema" v-model="form.tema" :disabled="form.processing">
+                <v-select :options="temas" label="nome_tema" v-model="form.tema"
+                    :disabled="form.processing || !podeEditarTema">
                     <template #no-options="{ }">
                         Nenhum registro encontrado.
                     </template>
@@ -136,12 +153,17 @@ const salvarServico = () => {
                 </InputLabel>
 
                 <v-select :options="servicosDisponiveis" label="nome" v-model="form.tipo"
-                    :disabled="!temaSelecionado || form.processing"
+                    :disabled="!temaSelecionado || form.processing || !podeEditarServico"
                     :placeholder="!temaSelecionado ? 'Selecione um tema para habilitar o campo de serviço' : 'Selecione o serviço'">
                     <template #no-options="{ }">
                         Nenhum módulo encontrado.
                     </template>
                 </v-select>
+
+                <small v-if="registroLegadoSemServico" class="text-warning d-block mt-1">
+                    Este registro é legado e ainda não possui serviço vinculado. Selecione um serviço para liberar o
+                    importador.
+                </small>
 
                 <InputError :message="form.errors.tipo" />
             </div>
