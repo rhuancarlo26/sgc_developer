@@ -31,7 +31,13 @@ class StatusImportadorController extends Controller
             ])->with('message', $dataManagement);
         }
 
-        return to_route('modulos.importador.index')->with('message', $dataManagement);
+        return to_route('modulos.importador.formulario', [
+            'importador' => $importador->id,
+            'contrato_id' => $importador->contrato_id,
+            'modulo_id' => $importador->modulo_id,
+            'servico_id' => $importador->servico_id,
+            'origem_servico' => $importador->servico_id ? true : null,
+        ])->with('message', $dataManagement);
     }
 
     public function enviarAnalise(ModuloImportador $importador, AnalisarImportadorRequest $request): RedirectResponse
