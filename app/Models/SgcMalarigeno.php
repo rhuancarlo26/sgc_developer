@@ -31,4 +31,9 @@ class SgcMalarigeno extends Model
     {
         return $this->hasMany(SgcMalarigenoAnexo::class, 'sgc_malarigeno_id');
     }
+
+    public function modulo()
+    {
+        return $this->belongsTo(SgcModulo::class, 'modulo_id');
+    }
 }

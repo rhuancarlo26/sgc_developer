@@ -210,16 +210,10 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
 
     });
 
-        /**
-     * CONFERIR NOVAMENTE E CAPTURAR IMPRESSÕES DE VIEW DO DOCUMENTO
-     * ESTABELECER ROTA ESPECÍFICA PRA ESPELEOLOGIA
-     *
-     */
 
-        //  Route::post('/{contrato}/produtos/{produto}/resultados/upload', [ResultadoController::class, 'upload'])->name('sgc.contratada.produtos.fauna.resultados.upload');
 
-    // Rotas para MapLayerController
-    // routes/web.php ou routes/api.php
+        // Rotas para MapLayerController
+        // routes/web.php ou routes/api.php
 
         Route::get('/mapa/wms', [MapLayerController::class, 'proxyWms']);
 

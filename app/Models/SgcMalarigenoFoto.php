@@ -22,6 +22,7 @@ class SgcMalarigenoFoto extends Model
     protected $casts = [
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
+        'data_captura' => 'datetime',
         'metadados' => 'array',
     ];
 
