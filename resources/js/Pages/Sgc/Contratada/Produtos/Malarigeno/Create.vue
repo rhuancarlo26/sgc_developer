@@ -13,8 +13,8 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import * as XLSX from 'xlsx';
-import CardFotos from '../Modulos/Importador/Components/CardFotos.vue';
-import CardAnexos from '../Modulos/Importador/Components/CardAnexos.vue';
+import CardFotos from './Components/CardFotos.vue';
+import CardAnexos from './Components/CardAnexos.vue';
 
 const props = defineProps({
     contrato: [String, Number],

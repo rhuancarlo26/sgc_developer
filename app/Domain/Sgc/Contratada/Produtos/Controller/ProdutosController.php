@@ -17,7 +17,7 @@ use App\Models\SgcPmqaPonto;
 use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
 use App\Models\SgcModulo;
-use App\Models\SgcMalarigeno;
+use App\Models\SgcModuloCampanha;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
 
@@ -52,12 +52,14 @@ class ProdutosController extends Controller
         $contratoObj = Contrato::findOrFail($contrato);
         $mostrarArquivadas = $request->boolean('arquivadas');
 
-        $campanhas = match ($produto) {
-            'fauna'        => $this->getCampanhasFauna($contrato, $mostrarArquivadas),
-            'pmqa', 'eia'  => $this->getCampanhasPmqa($contrato),
-            'espeleologia' => $this->getCampanhasEspeleologia($contrato),
-            'malarigeno'   => $this->getCampanhasMalarigeno($contrato),
-             default        => collect(),
+        $moduloProduto = SgcModulo::where('produto_slug', $produto)->exists();
+
+        $campanhas = match (true) {
+            $produto === 'fauna'                       => $this->getCampanhasFauna($contrato, $mostrarArquivadas),
+            in_array($produto, ['pmqa', 'eia'], true)   => $this->getCampanhasPmqa($contrato),
+            $produto === 'espeleologia'                 => $this->getCampanhasEspeleologia($contrato),
+            $moduloProduto                              => $this->getCampanhasModulo($contrato, $produto),
+            default                                     => collect(),
         };
 
         $totalArquivadas = $produto === 'fauna'
@@ -75,7 +77,19 @@ class ProdutosController extends Controller
             'mostrarArquivadas' => $mostrarArquivadas,
             'totalArquivadas' => $totalArquivadas,
             'canApprove' => Auth::user()->perfis_id === 3 && count(array_filter($campanhas->toArray(), fn($c) => $c['status'] === 'Em análise')) > 0,
+            'produtosModulo' => $this->produtosModuloDisponiveis(),
+            'isModuloProduto' => $moduloProduto,
         ]);
+    }
+
+    private function produtosModuloDisponiveis()
+    {
+        return SgcModulo::query()
+            ->whereNotNull('produto_slug')
+            ->select('produto_slug', 'produto_titulo')
+            ->distinct()
+            ->orderBy('produto_titulo')
+            ->get();
     }
 
     public function create(Request $request, $contrato, $produto): Response
@@ -83,6 +97,12 @@ class ProdutosController extends Controller
         Log::info('Acessando create', ['contrato' => $contrato, 'produto' => $produto, 'subproduto' => $request->query('subproduto')]);
         $contratoObj = Contrato::findOrFail($contrato);
         $subproduto = $request->query('subproduto');
+
+        // Produtos criados dinamicamente a partir de um módulo (exceto o 'malarigeno' legado,
+        // que continua exigindo subproduto do catálogo externo normalmente) não dependem desse catálogo.
+        if ($produto !== 'malarigeno' && SgcModulo::where('produto_slug', $produto)->exists()) {
+            return $this->createModuloProduto($request, $contrato, $produto, $contratoObj, $subproduto);
+        }
 
         if (!$subproduto) {
             Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
@@ -108,7 +128,7 @@ class ProdutosController extends Controller
             return $this->createPmqa($request, $contrato, $produto, $contratoObj, $subproduto);
 
         } elseif ($produto === 'malarigeno') {
-            return $this->createMalarigeno($request,$contrato,$produto,$contratoObj,$subproduto);    
+            return $this->createModuloProduto($request, $contrato, $produto, $contratoObj, $subproduto);
 
         } else {
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
@@ -122,7 +142,7 @@ class ProdutosController extends Controller
         };
     }
 
-    private function createMalarigeno(
+    private function createModuloProduto(
         Request $request,
         $contrato,
         $produto,
@@ -131,6 +151,7 @@ class ProdutosController extends Controller
     ): Response
     {
         $modulos = SgcModulo::query()
+            ->where('produto_slug', $produto)
             ->select(['id', 'nome', 'nome_planilha_modelo', 'caminho_planilha_modelo', 'campos', 'created_at'])
             ->get();
 
@@ -145,16 +166,17 @@ class ProdutosController extends Controller
 
     public function store(StoreMalarigenoRequest $request, $contrato, $produto)
     {
-        if ($produto !== 'malarigeno') {
+        if (!SgcModulo::where('produto_slug', $produto)->exists()) {
             abort(404);
         }
 
         $validated = $request->validated();
         $validated['contrato_id'] = $contrato;
+        $validated['produto'] = $produto;
 
         $malarigeno = (new MalarigenoService())->store($validated);
 
-        return back()->with('success', 'Malarígeno salvo com sucesso!');
+        return back()->with('success', ucfirst($produto) . ' salvo com sucesso!');
     }
 
 
@@ -377,9 +399,10 @@ class ProdutosController extends Controller
             });
     }
 
-    private function getCampanhasMalarigeno($contrato)
+    private function getCampanhasModulo($contrato, $produto)
     {
-        return SgcMalarigeno::where('id_contrato', $contrato)
+        return SgcModuloCampanha::where('id_contrato', $contrato)
+            ->where('produto', $produto)
             ->latest()
             ->get(['id', 'subproduto', 'status', 'created_at'])
             ->map(fn($campanha) => [

@@ -15,7 +15,7 @@ use App\Models\SgcFaunaCampanhaAbios;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcFaunaAnaliseEtapa;
 use App\Models\SgcFaunaCampanhaProfissional;
-use App\Models\SgcMalarigeno;
+use App\Models\SgcModuloCampanha;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -40,8 +40,9 @@ class CampanhaController extends Controller
     public function show($contrato, $produto, $campanhaId, $modulo = null)
     {
         if ($produto === 'malarigeno') {
-            $campanha = SgcMalarigeno::with(['modulo', 'fotos', 'anexos'])
+            $campanha = SgcModuloCampanha::with(['modulo', 'fotos', 'anexos'])
                 ->where('id_contrato', $contrato)
+                ->where('produto', 'malarigeno')
                 ->findOrFail($campanhaId);
 
             $campanhaData = [

@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SgcMalarigeno extends Model
+class SgcModuloCampanha extends Model
 {
-    protected $table = 'sgc_malarigeno';
+    protected $table = 'sgc_modulo_campanhas';
 
     protected $fillable = [
         'id_contrato',
+        'produto',
         'subproduto',
         'modulo_id',
         'status',
@@ -24,12 +25,12 @@ class SgcMalarigeno extends Model
 
     public function fotos()
     {
-        return $this->hasMany(SgcMalarigenoFoto::class, 'sgc_malarigeno_id');
+        return $this->hasMany(SgcModuloCampanhaFoto::class, 'campanha_id');
     }
 
     public function anexos()
     {
-        return $this->hasMany(SgcMalarigenoAnexo::class, 'sgc_malarigeno_id');
+        return $this->hasMany(SgcModuloCampanhaAnexo::class, 'campanha_id');
     }
 
     public function modulo()

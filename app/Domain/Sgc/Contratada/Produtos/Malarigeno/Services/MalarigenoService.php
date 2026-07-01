@@ -2,15 +2,15 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services;
 
-use App\Models\SgcMalarigeno;
-use App\Models\SgcMalarigenoFoto;
-use App\Models\SgcMalarigenoAnexo;
+use App\Models\SgcModuloCampanha;
+use App\Models\SgcModuloCampanhaFoto;
+use App\Models\SgcModuloCampanhaAnexo;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class MalarigenoService
 {
-    public function store(array $data): SgcMalarigeno
+    public function store(array $data): SgcModuloCampanha
     {
         $arquivo = $data['arquivo'] ?? null;
         $fotos = $data['fotos'] ?? [];
@@ -34,8 +34,9 @@ class MalarigenoService
         }
 
         $data['status'] = $enviarAnalise ? 'Em análise' : 'Em elaboração';
+        $data['produto'] = $data['produto'] ?? 'malarigeno';
 
-        $malarigeno = SgcMalarigeno::create($data);
+        $malarigeno = SgcModuloCampanha::create($data);
 
         try {
             $this->gerenciarFotos($malarigeno, $fotos);
@@ -51,7 +52,7 @@ class MalarigenoService
         }
     }
 
-    private function gerenciarFotos(SgcMalarigeno $malarigeno, array $fotos): void
+    private function gerenciarFotos(SgcModuloCampanha $malarigeno, array $fotos): void
     {
         $idsFotos = [];
 
@@ -80,7 +81,7 @@ class MalarigenoService
                 : ($metadados['longitude'] ?? null);
 
             $dadosFoto = [
-                'sgc_malarigeno_id' => $malarigeno->id,
+                'campanha_id' => $malarigeno->id,
                 'latitude' => $latitude,
                 'longitude' => $longitude,
                 'descricao' => $f['descricao'] ?? null,
@@ -92,7 +93,7 @@ class MalarigenoService
                 $dadosFoto['metadados'] = $metadados['metadados_completos'] ?? null;
             }
 
-            $foto = SgcMalarigenoFoto::updateOrCreate(
+            $foto = SgcModuloCampanhaFoto::updateOrCreate(
                 ['id' => $f['id'] ?? null],
                 $dadosFoto
             );
@@ -100,14 +101,14 @@ class MalarigenoService
             $idsFotos[] = $foto->id;
         }
 
-        SgcMalarigenoFoto::query()
-            ->where('sgc_malarigeno_id', $malarigeno->id)
+        SgcModuloCampanhaFoto::query()
+            ->where('campanha_id', $malarigeno->id)
             ->when(count($idsFotos), fn($query) => $query->whereNotIn('id', $idsFotos))
             ->when(count($idsFotos) === 0, fn($query) => $query)
             ->delete();
     }
 
-    private function gerenciarAnexos(SgcMalarigeno $malarigeno, array $anexos): void
+    private function gerenciarAnexos(SgcModuloCampanha $malarigeno, array $anexos): void
     {
         $idsAnexos = [];
 
@@ -124,10 +125,10 @@ class MalarigenoService
                 $dataA['caminho_arquivo'] = $caminho;
             }
 
-            $anexo = SgcMalarigenoAnexo::updateOrCreate(
+            $anexo = SgcModuloCampanhaAnexo::updateOrCreate(
                 ['id' => $a['id'] ?? null],
                 [
-                    'sgc_malarigeno_id' => $malarigeno->id,
+                    'campanha_id' => $malarigeno->id,
                     ...$dataA,
                 ]
             );
@@ -135,8 +136,8 @@ class MalarigenoService
             $idsAnexos[] = $anexo->id;
         }
 
-        SgcMalarigenoAnexo::query()
-            ->where('sgc_malarigeno_id', $malarigeno->id)
+        SgcModuloCampanhaAnexo::query()
+            ->where('campanha_id', $malarigeno->id)
             ->when(count($idsAnexos), fn($query) => $query->whereNotIn('id', $idsAnexos))
             ->when(count($idsAnexos) === 0, fn($query) => $query)
             ->delete();

@@ -3,9 +3,13 @@
 namespace App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use App\Shared\Traits\ProdutosReservados;
 
 class StoreConfigModuloRequest extends FormRequest
 {
+    use ProdutosReservados;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -25,6 +29,8 @@ class StoreConfigModuloRequest extends FormRequest
             'nome' => 'required',
             'planilha_modelo' => 'nullable|mimes:xlsx,csv',
             'campos' => 'required|array',
+            'produto_slug' => ['nullable', 'string', 'max:50', 'alpha_dash', Rule::notIn($this->produtosReservados())],
+            'produto_titulo' => 'nullable|required_with:produto_slug|string|max:255',
         ];
     }
 
@@ -33,6 +39,8 @@ class StoreConfigModuloRequest extends FormRequest
         return [
             '*.required' => 'O campo é obrigatório',
             'planilha_modelo.mimes' => 'A planilha modelo precisa ter as extensões .xlsx OU .csv',
+            'produto_slug.not_in' => 'Esse nome já é usado por um produto do sistema, escolha outro.',
+            'produto_titulo.required_with' => 'Informe o título do produto.',
         ];
     }
 }

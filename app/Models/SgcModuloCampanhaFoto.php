@@ -4,12 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SgcMalarigenoFoto extends Model
+class SgcModuloCampanhaFoto extends Model
 {
-    protected $table = 'sgc_malarigeno_fotos';
+    protected $table = 'sgc_modulo_campanha_fotos';
 
     protected $fillable = [
-        'sgc_malarigeno_id',
+        'campanha_id',
         'nome_arquivo',
         'caminho_arquivo',
         'latitude',
@@ -26,8 +26,8 @@ class SgcMalarigenoFoto extends Model
         'metadados' => 'array',
     ];
 
-    public function malarigeno()
+    public function campanha()
     {
-        return $this->belongsTo(SgcMalarigeno::class, 'sgc_malarigeno_id');
+        return $this->belongsTo(SgcModuloCampanha::class, 'campanha_id');
     }
 }

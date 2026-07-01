@@ -39,7 +39,7 @@ class ModelExports implements FromCollection, WithMapping, WithHeadings, WithStr
 
     foreach ($this->mapping as $col) {
 
-      $mapping[] = eval('return $data->' . str_replace('.', '->', $col) . ';');
+      $mapping[] = data_get($data, $col);
     }
 
     return $mapping;

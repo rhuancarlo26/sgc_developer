@@ -13,12 +13,15 @@ const props = defineProps({
     tipos: { type: Array },
     contrato: [String, Number],
     produto: String,
+    produtosDisponiveis: { type: Array, default: () => [] },
 });
 
 const form = useForm({
     nome: null,
     planilha_modelo: null,
     campos: [],
+    produto_slug: null,
+    produto_titulo: null,
     ...props.modulo
 });
 
@@ -91,6 +94,7 @@ const salvarModulo = () => {
                                     :form="form"
                                     :contrato="props.contrato"
                                     :produto="props.produto"
+                                    :produtos-disponiveis="props.produtosDisponiveis"
                                 />
                             </div>
 

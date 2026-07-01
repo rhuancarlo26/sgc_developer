@@ -18,14 +18,16 @@ const props = defineProps({
     vinculacoes: { type: Object },
     mostrarArquivadas: { type: Boolean, default: false },
     totalArquivadas: { type: Number, default: 0 },
+    produtosModulo: { type: Array, default: () => [] },
+    isModuloProduto: { type: Boolean, default: false },
 });
 
 const isPerfil3 = computed(() => (props.auth.user.perfis_id ?? 0) === 3);
 
 const previewModal = ref(null);
 
-// Lista de produtos disponíveis
-const produtos = [
+// Lista de produtos disponíveis: os fixos do sistema + os criados dinamicamente a partir de um módulo
+const produtosFixos = [
   { title: "Fauna", routeParam: "fauna" },
   { title: "Espeleologia", routeParam: "espeleologia" },
   { title: "Patrimônio", routeParam: "patrimonio" },
@@ -39,6 +41,14 @@ const produtos = [
   { title: "ASV", routeParam: "asv" },
   { title: "Viagens", routeParam: "viagens" },
 ];
+
+const produtos = computed(() => {
+  const dinamicos = (props.produtosModulo ?? [])
+    .filter(p => !produtosFixos.some(fixo => fixo.routeParam === p.produto_slug))
+    .map(p => ({ title: p.produto_titulo, routeParam: p.produto_slug }));
+
+  return [...produtosFixos, ...dinamicos];
+});
 
 // Estado reativo para produto e subproduto
 const selectedProduto = ref(props.produto.toLowerCase());
@@ -132,7 +142,7 @@ const getSortIcon = (column) => {
 
 // Redirecionar para criação com validação de subproduto
 const goToCreate = () => {
-  if (!selectedSubproduto.value) {
+  if (!selectedSubproduto.value && !props.isModuloProduto) {
     alert('Por favor, selecione um subproduto antes de cadastrar.');
     return;
   }
@@ -338,7 +348,7 @@ const restaurarCampanha = (campanha) => {
         <div class="card">
           <div class="card-body">
             <h2 class="text-center mb-4">{{ produtos.find(p => p.routeParam === selectedProduto.value)?.title.toUpperCase() || produto.toUpperCase() }}</h2>
-            <div v-if="!subprodutos.length" class="alert alert-danger">
+            <div v-if="!subprodutos.length && !isModuloProduto" class="alert alert-danger">
               Nenhum dado encontrado para {{ produtos.find(p => p.routeParam === selectedProduto.value)?.title || produto }}.
             </div>
             <div v-else class="row">
