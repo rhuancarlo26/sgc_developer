@@ -14,10 +14,10 @@ class UpdateServicosContratadaController extends Controller
 
     public function index(Request $request)
     {
-        $servicoId = data_get($request->input('tipo'), 'id', $request->input('tipo'));
+        $servicoModImpId = data_get($request->input('tipo'), 'id', $request->input('tipo'));
         $temaId = data_get($request->input('tema'), 'id', $request->input('tema'));
 
-        if (!$servicoId || !$temaId) {
+        if (!$servicoModImpId || !$temaId) {
             throw ValidationException::withMessages([
                 'tipo' => 'O campo Serviço é obrigatório.',
                 'tema' => 'O campo Tema é obrigatório.',
@@ -27,7 +27,7 @@ class UpdateServicosContratadaController extends Controller
         $duplicado = Servicos::query()
             ->where('id_contrato', $request->id_contrato)
             ->where('tema_servico', $temaId)
-            ->where('servico', $servicoId)
+            ->where('servico_mod_imp_id', $servicoModImpId)
             ->where('id', '!=', $request->id)
             ->whereNull('deleted_at')
             ->exists();
@@ -40,8 +40,8 @@ class UpdateServicosContratadaController extends Controller
 
         $post = [
             ...$request->all(),
-            'servico' => $servicoId,
             'tema_servico' => $temaId,
+            'servico_mod_imp_id' => $servicoModImpId,
         ];
 
         $response = $this->servicoService->updateServico($post);

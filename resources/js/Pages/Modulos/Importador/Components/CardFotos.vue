@@ -1,9 +1,10 @@
 <script setup>
 import InputLabel from "@/Components/InputLabel.vue";
-import { IconCamera, IconTrash, IconEye, IconDatabase } from "@tabler/icons-vue";
+import { IconCamera, IconTrash, IconEye, IconDatabase, IconFileTypeZip, IconPlaylistAdd } from "@tabler/icons-vue";
 import Modal from "@/Components/Modal.vue";
 import { ref } from "vue";
 import exifr from "exifr";
+import JSZip from "jszip";
 import { usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
@@ -13,6 +14,8 @@ const props = defineProps({
 const page = usePage();
 
 const inputFotosMultiplasRef = ref(null);
+const inputZipFotosRef = ref(null);
+const carregandoZip = ref(false);
 
 const modalMetadadosRef = ref(null);
 const fotoMetadadosSelecionada = ref(null);
@@ -37,6 +40,129 @@ const normalizarMetadados = (metadados) => {
     }
 
     return metadados;
+};
+
+const abrirSeletorZipFotos = () => {
+    inputZipFotosRef.value?.click();
+};
+
+const extensaoImagemValida = (nomeArquivo) => {
+    return /\.(jpe?g|png|webp|tiff?|heic|heif)$/i.test(nomeArquivo || "");
+};
+
+const nomeArquivoDoZip = (caminho) => {
+    return String(caminho || "")
+        .split("/")
+        .pop()
+        .split("\\")
+        .pop();
+};
+
+const mimePorExtensao = (nomeArquivo) => {
+    const nome = String(nomeArquivo || "").toLowerCase();
+
+    if (nome.endsWith(".jpg") || nome.endsWith(".jpeg")) {
+        return "image/jpeg";
+    }
+
+    if (nome.endsWith(".png")) {
+        return "image/png";
+    }
+
+    if (nome.endsWith(".webp")) {
+        return "image/webp";
+    }
+
+    if (nome.endsWith(".tif") || nome.endsWith(".tiff")) {
+        return "image/tiff";
+    }
+
+    if (nome.endsWith(".heic")) {
+        return "image/heic";
+    }
+
+    if (nome.endsWith(".heif")) {
+        return "image/heif";
+    }
+
+    return "image/jpeg";
+};
+
+const montarFotoParaFormulario = async (arquivo) => {
+    const dadosImagem = await extrairDadosDaImagem(arquivo);
+    const arquivoEnvio = await compactarImagem(arquivo);
+
+    return {
+        arquivo: arquivoEnvio,
+        latitude: dadosImagem.latitude,
+        longitude: dadosImagem.longitude,
+        data_captura: dadosImagem.data_captura,
+        metadados: dadosImagem.metadados,
+        descricao: null,
+        nome_original: arquivo.name,
+        compactada: arquivoEnvio.name !== arquivo.name,
+
+        tentouExtrairCoordenadas: true,
+        possuiCoordenadasExif: dadosImagem.possuiCoordenadas,
+        origem_zip: true,
+    };
+};
+
+const selecionarZipFotos = async ({ target }) => {
+    const arquivoZip = target.files?.[0];
+
+    if (!arquivoZip) {
+        return;
+    }
+
+    if (!String(arquivoZip.name).toLowerCase().endsWith(".zip")) {
+        alert("Selecione um arquivo .zip válido.");
+        target.value = "";
+        return;
+    }
+
+    carregandoZip.value = true;
+
+    try {
+        const zip = await JSZip.loadAsync(arquivoZip);
+
+        const entradasImagem = Object.values(zip.files).filter((entrada) => {
+            return !entrada.dir && extensaoImagemValida(entrada.name);
+        });
+
+        if (!entradasImagem.length) {
+            alert("Nenhuma imagem foi encontrada dentro do arquivo .zip.");
+            target.value = "";
+            return;
+        }
+
+        for (const entrada of entradasImagem) {
+            const nomeOriginal = nomeArquivoDoZip(entrada.name);
+
+            const blob = await entrada.async("blob");
+
+            const arquivoImagem = new File(
+                [blob],
+                nomeOriginal,
+                {
+                    type: mimePorExtensao(nomeOriginal),
+                    lastModified: arquivoZip.lastModified,
+                }
+            );
+
+            const foto = await montarFotoParaFormulario(arquivoImagem);
+
+            props.form.fotos.push(foto);
+        }
+
+        aplicarValoresPadraoNasFotos();
+    } catch (error) {
+        console.error("Erro ao processar ZIP de imagens:", error);
+        alert("Não foi possível processar o arquivo .zip. Verifique se ele contém imagens válidas.");
+    } finally {
+        carregandoZip.value = false;
+        target.value = "";
+    }
 };
 
 const temMetadados = (foto) => {
@@ -328,23 +454,13 @@ const selecionarMultiplosArquivos = async ({ target }) => {
     }
 
     for (const arquivo of arquivos) {
-        const dadosImagem = await extrairDadosDaImagem(arquivo);
-        const arquivoEnvio = await compactarImagem(arquivo);
+        const foto = await montarFotoParaFormulario(arquivo);
+        foto.origem_zip = false;
 
-        props.form.fotos.push({
-            arquivo: arquivoEnvio,
-            latitude: dadosImagem.latitude,
-            longitude: dadosImagem.longitude,
-            data_captura: dadosImagem.data_captura,
-            metadados: dadosImagem.metadados,
-            descricao: null,
-            nome_original: arquivo.name,
-            compactada: arquivoEnvio.name !== arquivo.name,
-
-            tentouExtrairCoordenadas: true,
-            possuiCoordenadasExif: dadosImagem.possuiCoordenadas,
-        });
+        props.form.fotos.push(foto);
     }
+
+    aplicarValoresPadraoNasFotos();
 
     target.value = "";
 };
@@ -441,11 +557,6 @@ const validarCampos = () => {
             item.valida_longitude = true;
             erros.push(true);
         }
-
-        if (campoVazio(item.descricao)) {
-            item.valida_descricao = true;
-            erros.push(true);
-        }
     });
 
     return erros.length;
@@ -489,15 +600,24 @@ defineExpose({ validarCampos });
                 <input ref="inputFotosMultiplasRef" type="file" class="d-none" accept="image/*" multiple
                     @change="selecionarMultiplosArquivos" />
 
-                <button type="button" @click="abrirSeletorFotos" class="btn btn-light"
+                <input ref="inputZipFotosRef" type="file" class="d-none"
+                    accept=".zip,application/zip,application/x-zip-compressed" @change="selecionarZipFotos" />
+
+                <button type="button" @click="abrirSeletorFotos" class="btn btn-outline-primary"
                     :disabled="[2, 4].includes(form.status)">
                     <IconCamera class="me-2" />
                     Adicionar Fotos
                 </button>
 
+                <button type="button" @click="abrirSeletorZipFotos" class="btn btn-outline-warning"
+                    :disabled="[2, 4].includes(form.status) || carregandoZip">
+                    <IconFileZip class="me-2" />
+                 <IconFileTypeZip class="me-2"/>   {{ carregandoZip ? "Processando ZIP..." : "Importar ZIP de fotos" }}
+                </button>
+
                 <button type="button" @click="addFoto" class="btn btn-outline-secondary"
                     :disabled="[2, 4].includes(form.status)">
-                    Adicionar Linha
+                  <IconPlaylistAdd class="me-2" />  Adicionar Linha
                 </button>
             </div>
         </div>
@@ -609,9 +729,8 @@ defineExpose({ validarCampos });
                             <InputLabel :for="`descricao_${key}`">Descrição</InputLabel>
 
                             <input type="text" v-model="f.descricao" :id="`descricao_${key}`" class="form-control"
-                                :placeholder="valorPadrao('descricao', key)"
-                                :class="f.valida_descricao ? 'border-danger' : ''"
-                                :disabled="[2, 4].includes(form.status)" @blur="aplicarValoresPadraoNasFotos" />
+                                :placeholder="valorPadrao('descricao', key)" :disabled="[2, 4].includes(form.status)"
+                                @blur="aplicarValoresPadraoNasFotos" />
 
                             <small v-if="f.descricao_preenchida_automaticamente" class="text-success d-block">
                                 Preenchido automaticamente.
@@ -623,7 +742,7 @@ defineExpose({ validarCampos });
                             </small>
                         </div>
 
-                        <div v-if="[1, 3, null].includes(form.status)" class="d-flex gap-2 mb-2"
+                        <div v-if="[1, 3, null].includes(form.status)" class="d-flex gap-2 mb-4"
                             :class="f.nome_arquivo || f.arquivo ? 'align-self-center' : 'align-self-end'">
                             <button type="button" @click="removerFoto(key)" class="btn btn-sm btn-danger">
                                 <IconTrash />
