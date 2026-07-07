@@ -15,6 +15,7 @@ use App\Models\SgcFaunaCampanhaAbios;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcFaunaAnaliseEtapa;
 use App\Models\SgcFaunaCampanhaProfissional;
+use App\Models\SgcModulo;
 use App\Models\SgcModuloCampanha;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,10 +40,10 @@ class CampanhaController extends Controller
 
     public function show($contrato, $produto, $campanhaId, $modulo = null)
     {
-        if ($produto === 'malarigeno') {
+        if ($produto === 'malarigeno' || SgcModulo::where('produto_slug', $produto)->exists()) {
             $campanha = SgcModuloCampanha::with(['modulo', 'fotos', 'anexos'])
                 ->where('id_contrato', $contrato)
-                ->where('produto', 'malarigeno')
+                ->where('produto', $produto)
                 ->findOrFail($campanhaId);
 
             $campanhaData = [
@@ -79,7 +80,7 @@ class CampanhaController extends Controller
                 'campanha' => $campanhaData,
                 'campanha_id' => $campanhaId,
                 'contrato' => $campanha->id_contrato,
-                'produto' => 'malarigeno',
+                'produto' => $produto,
                 'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
                 'canApprove' => Auth::user()->perfis_id === 3 && $campanha->status === 'Em análise',
             ]);

@@ -135,7 +135,7 @@ onMounted(loadPlanilha);
                     <div class="card-body">
                         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
                             <div>
-                                <h2 class="mb-1">VISUALIZAR CAMPANHA MALARÍGENO</h2>
+                                <h2 class="mb-1">VISUALIZAR CAMPANHA {{ (props.produto || '').toUpperCase() }}</h2>
                                 <div class="text-muted">{{ props.campanha.subproduto || 'Subproduto não informado' }}</div>
                             </div>
                             <span class="badge fs-6" :class="statusClass">{{ props.campanha.status || 'N/A' }}</span>

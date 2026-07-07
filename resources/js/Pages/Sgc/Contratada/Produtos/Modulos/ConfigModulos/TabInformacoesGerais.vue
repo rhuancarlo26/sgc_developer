@@ -23,10 +23,16 @@ const slugify = (texto) => {
         .replace(/^-+|-+$/g, '');
 };
 
+// Opção de criar um novo produto está desativada a pedido do cliente, mas o
+// código foi mantido (oculto) para facilitar uma futura reativação.
+const permitirCriarProduto = false;
+
 const produtoOption = ref(
-    props.form.produto_slug
-        ? (props.produtosDisponiveis.some(p => p.produto_slug === props.form.produto_slug) ? 'existente' : 'novo')
-        : 'nenhum'
+    permitirCriarProduto
+        ? (props.form.produto_slug
+            ? (props.produtosDisponiveis.some(p => p.produto_slug === props.form.produto_slug) ? 'existente' : 'novo')
+            : 'nenhum')
+        : 'existente'
 );
 
 const alterarProdutoOption = (opcao) => {
@@ -151,13 +157,14 @@ const processarCamposPlanilha = async (arquivo) => {
             </div>
 
             <div class="col-12">
-                <InputLabel value="Produto"/>
+                <InputLabel>
+                    <span>Produto <span class="text-danger">*</span></span>
+                </InputLabel>
                 <small class="text-secondary d-block mb-2">
-                    Vincule este módulo a um produto já existente (ele passa a aparecer no seletor de módulos desse produto)
-                    ou crie um novo produto, que passa a aparecer no menu de produtos do contrato.
+                    Vincule este módulo a um produto já existente (ele passa a aparecer no seletor de módulos desse produto).
                 </small>
 
-                <div class="d-flex gap-3 mb-2">
+                <div v-if="permitirCriarProduto" class="d-flex gap-3 mb-2">
                     <div class="form-check">
                         <input class="form-check-input" type="radio" id="produtoOptionNenhum" value="nenhum"
                             :checked="produtoOption === 'nenhum'" @change="alterarProdutoOption('nenhum')"/>
@@ -175,12 +182,13 @@ const processarCamposPlanilha = async (arquivo) => {
                     </div>
                 </div>
 
-                <select v-if="produtoOption === 'existente'" class="form-select" :value="form.produto_slug" @change="selecionarProdutoExistente">
+                <select v-if="!permitirCriarProduto || produtoOption === 'existente'" class="form-select" required
+                    :value="form.produto_slug" @change="selecionarProdutoExistente">
                     <option value="" disabled>Selecione um produto</option>
                     <option v-for="p in produtosDisponiveis" :key="p.produto_slug" :value="p.produto_slug">{{ p.produto_titulo }}</option>
                 </select>
 
-                <div v-if="produtoOption === 'novo'">
+                <div v-if="permitirCriarProduto && produtoOption === 'novo'">
                     <input type="text" class="form-control" placeholder="Título do novo produto"
                         :value="form.produto_titulo" @input="atualizarNovoProdutoTitulo"/>
                     <small v-if="slugPreview" class="text-secondary d-block mt-1">Identificador: <code>{{ slugPreview }}</code></small>
