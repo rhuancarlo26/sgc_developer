@@ -27,15 +27,27 @@ class GerenciarImportadorService
 
                 $metadadosArquivo = $this->extrairMetadadosFoto($arquivoF_);
 
-                $nomeArquivoF_ = $arquivoF_->getClientOriginalName();
+                $nomeArquivoF_ = $f['nome_original']
+                    ?? $arquivoF_->getClientOriginalName();
+
+                $extensao = $arquivoF_->getClientOriginalExtension()
+                    ?: pathinfo($nomeArquivoF_, PATHINFO_EXTENSION)
+                    ?: 'jpg';
+
+                $nomePadronizado = 'foto_importador_'
+                    . $importador->id
+                    . '_'
+                    . now()->format('YmdHis')
+                    . '_'
+                    . uniqid()
+                    . '.'
+                    . strtolower($extensao);
 
                 $nomeCaminhoF_ = 'Modulos_Importador'
                     . DIRECTORY_SEPARATOR
                     . 'Fotos'
                     . DIRECTORY_SEPARATOR
-                    . uniqid()
-                    . '_'
-                    . $nomeArquivoF_;
+                    . $nomePadronizado;
 
                 $arquivoF_->storeAs('public' . DIRECTORY_SEPARATOR . $nomeCaminhoF_);
 
@@ -43,17 +55,17 @@ class GerenciarImportadorService
                 $dataF['caminho_arquivo'] = $nomeCaminhoF_;
             }
 
-            $descricao = trim((string) (
-                $f['descricao']
-                ?? $primeiraFoto['descricao']
-                ?? ''
-            ));
+            // $descricao = trim((string) (
+            //     $f['descricao']
+            //     ?? $primeiraFoto['descricao']
+            //     ?? ''
+            // ));
 
-            if ($descricao === '') {
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    "fotos.{$index}.descricao" => 'A descrição da foto é obrigatória.',
-                ]);
-            }
+            // if ($descricao === '') {
+            //     throw \Illuminate\Validation\ValidationException::withMessages([
+            //         "fotos.{$index}.descricao" => 'A descrição da foto é obrigatória.',
+            //     ]);
+            // }
 
             $latitude = $this->valorPreenchido($f['latitude'] ?? null)
                 ? $f['latitude']
@@ -90,13 +102,21 @@ class GerenciarImportadorService
                 ?? $metadadosFront
                 ?? null;
 
-            $descricao = trim((string) ($f['descricao'] ?? ''));
+            // $descricao = trim((string) ($f['descricao'] ?? ''));
 
-            if ($descricao === '') {
-                throw ValidationException::withMessages([
-                    "fotos.{$index}.descricao" => 'A descrição da foto é obrigatória.',
-                ]);
-            }
+            // if ($descricao === '') {
+            //     throw ValidationException::withMessages([
+            //         "fotos.{$index}.descricao" => 'A descrição da foto é obrigatória.',
+            //     ]);
+            // }
+
+            $descricao = $this->valorPreenchido($f['descricao'] ?? null)
+                ? trim((string) $f['descricao'])
+                : (
+                    $this->valorPreenchido($primeiraFoto['descricao'] ?? null)
+                    ? trim((string) $primeiraFoto['descricao'])
+                    : null
+                );
 
             $dadosFoto = [
                 'modulo_importador_id' => $importador->id,

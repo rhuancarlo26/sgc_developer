@@ -35,7 +35,6 @@ class UpdateImportadorRequest extends FormRequest
             'parecer_analise' => 'nullable',
             'fotos' => ['nullable', 'array'],
             'fotos.*.id' => ['nullable'],
-            'fotos.*.arquivo' => ['nullable', 'file', 'image'],
             'fotos.*.nome_arquivo' => ['nullable'],
             'fotos.*.caminho_arquivo' => ['nullable'],
             'fotos.*.nome_original' => ['nullable'],

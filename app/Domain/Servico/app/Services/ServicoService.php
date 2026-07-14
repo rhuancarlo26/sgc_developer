@@ -28,6 +28,7 @@ class ServicoService extends BaseModelService
         $baseFiltroQuery = Servicos::query()
             ->with([
                 'tipo',
+                'moduloImportado',
                 'tema',
             ])
             ->where('id_contrato', $contrato->id)
@@ -36,14 +37,17 @@ class ServicoService extends BaseModelService
         $query = $this->search(...$searchParams)
             ->with([
                 'tipo',
+                'moduloImportado',
                 'tema',
-                // 'status',
                 'rhs',
                 'veiculos',
                 'veiculos.codigo',
                 'equipamentos',
                 'condicionantes',
                 'condicionantes.licenca',
+                'retornosConfeccao.usuario:id,name',
+                'retornosConfeccao.tema:id,nome_tema',
+                'retornosConfeccao.moduloImportado:id,nome',
             ])
             ->where('id_contrato', $contrato->id)
             ->whereNull('deleted_at')
@@ -51,7 +55,7 @@ class ServicoService extends BaseModelService
                 $query->where('tema_servico', $temaId);
             })
             ->when($filtros['filtro_servico_id'] ?? null, function ($query, $servicoId) {
-                $query->where('servico', $servicoId);
+                $query->where('servico_mod_imp_id', $servicoId);
             })
             ->when($filtros['filtro_status_aprovacao'] ?? null, function ($query, $status) {
                 $query->where('status_aprovacao', $status);
@@ -82,7 +86,7 @@ class ServicoService extends BaseModelService
 
         $servicosFiltro = (clone $baseFiltroQuery)
             ->get()
-            ->pluck('tipo')
+            ->pluck('moduloImportado')
             ->filter()
             ->unique('id')
             ->values()
@@ -120,16 +124,20 @@ class ServicoService extends BaseModelService
             ->where('tipo', 6)
             ->get();
 
-        if ($servico) {
+        if ($servico?->exists) {
             $servico->load([
                 'tipo',
                 'tema',
+                'moduloImportado',
                 'rhs',
                 'veiculos',
                 'veiculos.codigo',
                 'equipamentos',
                 'condicionantes',
                 'condicionantes.licenca',
+                'retornosConfeccao.usuario:id,name',
+                'retornosConfeccao.tema:id,nome_tema',
+                'retornosConfeccao.moduloImportado:id,nome',
             ]);
         }
 
@@ -143,7 +151,7 @@ class ServicoService extends BaseModelService
                 'id',
                 'id_contrato',
                 'tema_servico',
-                'servico',
+                'servico_mod_imp_id',
             ]);
 
         return [

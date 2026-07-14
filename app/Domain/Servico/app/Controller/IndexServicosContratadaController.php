@@ -25,8 +25,14 @@ class IndexServicosContratadaController extends Controller
 
         $response = $this->servicoService->listarServicos($contrato, $searchParams, $filtros);
 
+        $podeVoltarConfeccao = $request->user()?->hasAnyRole([
+            'Super Admin',
+            'Administrador',
+        ]) ?? false;
+
         return Inertia::render('Contrato/Contratada/Servicos/Index', [
             'contrato' => $contrato,
+            'podeVoltarConfeccao' => $podeVoltarConfeccao,
             ...$response
         ]);
     }
