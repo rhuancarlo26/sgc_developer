@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Domain\Servico\MonitoraFauna\Configuracao\ModuloAmostral\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreRequest extends FormRequest
+{
+  public function rules(): array
+  {
+    return [
+      'id_servico' => ['required'],
+      'data_cadastro' => ['required'],
+      'tamanho_modulo' => ['required'],
+      'uf' => ['required'],
+      'municipio' => ['required'],
+      'bioma' => ['required'],
+      'fitofisionomia' => ['required'],
+      'latitude_inicial' => ['required'],
+      'longitude_inicial' => ['required'],
+      'latitude_final' => ['required'],
+      'longitude_final' => ['required'],
+      'obs' => ['required'],
+      'arquivo' => ['nullable','mimes:zip'],
+      'arquivoArmadilha' => ['nullable','file', 'mimes:xlsx,xls']
+    ];
+  }
+
+  public function messages(): array
+  {
+    return [];
+  }
+
+  public function authorize(): bool
+  {
+    return true;
+  }
+}
