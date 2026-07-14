@@ -55,18 +55,6 @@ class GerenciarImportadorService
                 $dataF['caminho_arquivo'] = $nomeCaminhoF_;
             }
 
-            // $descricao = trim((string) (
-            //     $f['descricao']
-            //     ?? $primeiraFoto['descricao']
-            //     ?? ''
-            // ));
-
-            // if ($descricao === '') {
-            //     throw \Illuminate\Validation\ValidationException::withMessages([
-            //         "fotos.{$index}.descricao" => 'A descrição da foto é obrigatória.',
-            //     ]);
-            // }
-
             $latitude = $this->valorPreenchido($f['latitude'] ?? null)
                 ? $f['latitude']
                 : (
@@ -101,14 +89,6 @@ class GerenciarImportadorService
             $metadadosCompletos = $metadadosArquivo['metadados_completos']
                 ?? $metadadosFront
                 ?? null;
-
-            // $descricao = trim((string) ($f['descricao'] ?? ''));
-
-            // if ($descricao === '') {
-            //     throw ValidationException::withMessages([
-            //         "fotos.{$index}.descricao" => 'A descrição da foto é obrigatória.',
-            //     ]);
-            // }
 
             $descricao = $this->valorPreenchido($f['descricao'] ?? null)
                 ? trim((string) $f['descricao'])

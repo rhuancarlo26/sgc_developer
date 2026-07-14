@@ -9,6 +9,7 @@ import {
     IconDoorExit,
     IconSearch,
     IconX,
+    IconDownload,
 } from "@tabler/icons-vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Table from "@/Components/Table.vue";
@@ -45,6 +46,7 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+
 });
 
 const ModalErrosRef = ref(null);
@@ -81,6 +83,24 @@ const contextoFormulario = computed(() => ({
     tema_id: props.contextoImportador.tema_id,
     origem_servico: props.contextoImportador.origem_servico,
 }));
+
+const veioDoServico = computed(() => {
+    return !!props.contextoImportador?.origem_servico;
+});
+
+const podeBaixarModeloVinculado = computed(() => {
+    return veioDoServico.value && !!props.contextoImportador?.modulo_id;
+});
+
+const linkModeloPlanilha = computed(() => {
+    if (!podeBaixarModeloVinculado.value) {
+        return "#";
+    }
+
+    return route("modulos.config-modulos.gerar-planilha-modelo", [
+        props.contextoImportador.modulo_id,
+    ]);
+});
 
 const limparParametrosVazios = (params) => {
     return Object.fromEntries(
@@ -165,9 +185,8 @@ const removerImportacao = (id) => {
         </template>
 
         <div class="card card-body">
-            <div class="row align-items-end g-3 mb-4">
-
-                <div class="col-lg-2">
+            <div class="row align-items-end mb-3">
+                <div class="col-lg-3">
                     <label class="form-label fw-bold">Tema</label>
 
                     <v-select v-model="filtrosForm.filtro_tema_id" :options="temasFiltro" :reduce="option => option.id"
@@ -189,7 +208,7 @@ const removerImportacao = (id) => {
                     </v-select>
                 </div>
 
-                <div class="col-lg-2">
+                <div class="col-lg-3">
                     <label class="form-label fw-bold">Campanha</label>
 
                     <v-select v-model="filtrosForm.campanha" :options="campanhasFiltro"
@@ -206,8 +225,8 @@ const removerImportacao = (id) => {
                     <input type="date" class="form-control" v-model="filtrosForm.updated_at" />
                 </div>
 
-                <div class="col-lg-auto d-flex gap-2">
-                    <button type="button" class="btn btn-primary" title="Pesquisar" @click="pesquisar">
+                <div class="d-flex justify-content-between col-1">
+                    <button type="button" class="btn btn-outline-primary" title="Pesquisar" @click="pesquisar">
                         <IconSearch />
                     </button>
 
@@ -216,10 +235,18 @@ const removerImportacao = (id) => {
                     </button>
                 </div>
 
-                <div class="col-lg-auto ms-auto d-flex justify-content-end">
-                    <Link :href="route('modulos.importador.formulario', contextoFormulario)" class="btn btn-info">
+            </div>
+            <div class="row mb-3">
+                <div class="col-lg-auto ms-auto d-flex justify-content-end gap-2">
+                    <a v-if="podeBaixarModeloVinculado" :href="linkModeloPlanilha" class="btn btn-info"
+                        target="_blank" title="Baixar modelo da planilha vinculada ao serviço">
+                        <IconDownload class="me-2" />
+                        Baixar modelo
+                    </a>
+
+                    <Link :href="route('modulos.importador.formulario', contextoFormulario)" class="btn btn-success">
                         <IconCirclePlus class="me-2" />
-                        Nova Importação
+                        {{ veioDoServico ? 'Importar planilha' : 'Nova Importação' }}
                     </Link>
                 </div>
             </div>
