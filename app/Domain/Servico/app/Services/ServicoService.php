@@ -25,6 +25,9 @@ class ServicoService extends BaseModelService
 
     public function listarServicos(Contrato $contrato, array $searchParams, array $filtros = []): array
     {
+
+        $this->limparVinculosModulosExcluidos($contrato->id);
+
         $baseFiltroQuery = Servicos::query()
             ->with([
                 'tipo',
@@ -108,7 +111,17 @@ class ServicoService extends BaseModelService
 
     public function createServicos($contrato, $servico): array
     {
-        $tipos = Modulo::orderBy('nome')->get(['id', 'nome']);
+        $this->limparVinculosModulosExcluidos($contrato->id);
+
+        if ($servico?->exists) {
+            $servico->refresh();
+        }
+
+        $tipos = Modulo::query()
+            ->whereNull('deleted_at')
+            ->orderBy('nome')
+            ->get(['id', 'nome']);
+            
         $temas = ServicoTema::all();
 
         $rhs = RecursoRh::where('id_contrato', $contrato->id)->get();
@@ -144,6 +157,8 @@ class ServicoService extends BaseModelService
         $servicosUsados = Servicos::query()
             ->where('id_contrato', $contrato->id)
             ->whereNull('deleted_at')
+            ->whereNotNull('servico_mod_imp_id')
+            ->whereHas('moduloImportado')
             ->when($servico?->id, function ($query) use ($servico) {
                 $query->where('id', '!=', $servico->id);
             })
@@ -259,5 +274,23 @@ class ServicoService extends BaseModelService
     public function buscarContratos(): Collection
     {
         return Contrato::all();
+    }
+
+    private function limparVinculosModulosExcluidos(?int $contratoId = null): void
+    {
+        DB::table('servicos as s')
+            ->leftJoin('modulos as m', 'm.id', '=', 's.servico_mod_imp_id')
+            ->whereNotNull('s.servico_mod_imp_id')
+            ->when($contratoId, function ($query) use ($contratoId) {
+                $query->where('s.id_contrato', $contratoId);
+            })
+            ->where(function ($query) {
+                $query->whereNull('m.id')
+                    ->orWhereNotNull('m.deleted_at');
+            })
+            ->update([
+                's.servico_mod_imp_id' => null,
+                's.updated_at' => now(),
+            ]);
     }
 }

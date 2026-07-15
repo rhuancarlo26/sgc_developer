@@ -77,9 +77,9 @@ const excluir = (moduloId) => {
                                 <IconEye />
                             </button>
                         </td>
-        
+
                         <td class="text-center align-middle">
-                            {{ item.nome_planilha_modelo }}
+                         <span><strong> Modelo </strong></span> - {{ item.nome_planilha_modelo || item.nome }}
                             <a v-if="item.id && item.campos?.length"
                                 :href="route('modulos.config-modulos.gerar-planilha-modelo', [item.id])"
                                 class="btn btn-sm bg-gray-400 ms-2" target="_blank" title="Gerar Planilha Modelo">
