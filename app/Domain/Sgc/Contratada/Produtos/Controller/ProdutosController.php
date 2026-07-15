@@ -3,6 +3,7 @@
 namespace App\Domain\Sgc\Contratada\Produtos\Controller;
 
 use App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Parametro\Services\ParametroService;
+use App\Models\SgcPatrimonioEquipe;
 use App\Shared\Http\Controllers\Controller;
 use App\Models\Contrato;
 use App\Models\SgcvwEmpreendimentos;
@@ -17,6 +18,7 @@ use App\Models\SgcEspeleoProfissional;
 use App\Models\SgcPmqaPonto;
 use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
+use App\Models\SgcPatrimonioPaipa;
 use App\Models\SgcPmqa;
 use App\Models\SgcPmqaParametroLista;
 use Illuminate\Http\RedirectResponse;
@@ -61,6 +63,7 @@ class ProdutosController extends Controller
             'fauna'        => $this->getCampanhasFauna($contrato),
             'pmqa', 'eia' => $this->pmqaService->getCampanhas($contrato),
             'espeleologia' => $this->getCampanhasEspeleologia($contrato),
+            'patrimonio'   => $this->getCampanhasPatrimonio($contrato),
             default        => collect(),
         };
 
@@ -112,13 +115,9 @@ class ProdutosController extends Controller
 
         if ($produto === 'fauna') {
             return $this->createFauna($request, $contrato, $produto, $contratoObj, $subproduto);
+        } elseif ($produto === 'patrimonio') {
+            return $this->createPatrimonio($request, $contrato, $produto, $contratoObj, $subproduto);
         } elseif ($produto === 'pmqa' || $produto === 'eia') {
-        // CONFERIR
-        // if ($produto === 'fauna') {
-        //     return $this->createFauna($request, $contrato, $produto, $contratoObj, $subproduto);
-        // } elseif ($produto === 'pmqa' || $produto === 'eia') { // <-- MUDANÇA AQUI
-        //     // Se o produto for 'pmqa' OU 'eia', chamamos a função de criação do PMQA.
-        //     // Passamos a variável $produto original ('eia') para que a tela mantenha o título correto.
             return $this->createPmqa($request, $contrato, $produto, $contratoObj, $subproduto);
         } else {
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
@@ -565,5 +564,124 @@ class ProdutosController extends Controller
             'data' => array_values($grouped),
             'links' => [],
         ];
+    }
+
+    private function createPatrimonio(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
+    {
+      $paipaId = $request->query('paipa_id');
+
+      $paipa = $paipaId
+        ? SgcPatrimonioPaipa::where('contrato_id', $contrato)->findOrFail($paipaId)
+        : SgcPatrimonioPaipa::where('contrato_id', $contrato)
+          ->where('subproduto', $subproduto)
+          ->where('status', 'Em elaboração')
+          ->first();
+
+      if (!$paipa) {
+        $paipa = SgcPatrimonioPaipa::create([
+          'contrato_id' => $contrato,
+          'subproduto' => $subproduto,
+          'status' => 'Em elaboração',
+          'versao' => 1,
+        ]);
+      }
+
+      $paipa->load('equipe');
+
+      $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+            ->get(['id',
+              'cod_emp',
+              'br',
+              'uf',
+              'subtrecho_ini',
+              'subtrecho_fin',
+              'subtrecho_ini2',
+              'subtrecho_fin3',
+              'subtrecho_ini3',
+              'subtrecho_fin32',
+              'km_ini',
+              'km_fin',
+              'km_ini2',
+              'km_fin2',
+              'km_ini3',
+              'km_fin3',
+              'extensao',
+              'tipo_de_intervencao',
+              'descricao',
+              'bioma',
+              'coordenadas',
+              ])
+            ->map(function ($empreendimento) {
+                return [
+                  'id' => $empreendimento->id,
+                  'cod_emp' => $empreendimento->cod_emp,
+                  'br' => $empreendimento->br,
+                  'uf' => $empreendimento->uf,
+                  'subtrecho_ini' => $empreendimento->subtrecho_ini,
+                  'subtrecho_fin' => $empreendimento->subtrecho_fin,
+                  'subtrecho_ini2' => $empreendimento->subtrecho_ini2,
+                  'subtrecho_fin3' => $empreendimento->subtrecho_fin3,
+                  'subtrecho_ini3' => $empreendimento->subtrecho_ini3,
+                  'subtrecho_fin32' => $empreendimento->subtrecho_fin32,
+                  'km_ini' => $empreendimento->km_ini,
+                  'km_fin' => $empreendimento->km_fin,
+                  'km_ini2' => $empreendimento->km_ini2,
+                  'km_fin2' => $empreendimento->km_fin2,
+                  'km_ini3' => $empreendimento->km_ini3,
+                  'km_fin3' => $empreendimento->km_fin3,
+                  'extensao' => $empreendimento->extensao,
+                  'tipo_de_intervencao' => $empreendimento->tipo_de_intervencao,
+                  'descricao' => $empreendimento->descricao,
+                  'bioma' => $empreendimento->bioma,
+                  'coordenadas' => $empreendimento->coordenadas,
+                ];
+            })
+            ->toArray();
+
+      $profissionais = SgcPatrimonioEquipe::ativo()
+        ->orderBy('nome')
+        ->get([
+          'id',
+          'nome',
+          'cpf',
+          'cnpj',
+          'email',
+          'profissao',
+          'funcao',
+          'conselho_classe',
+          'numero_registro',
+          'carteira_profissional',
+          'ct',
+          'obs',
+        ]);
+
+        return inertia('Sgc/Contratada/Produtos/Patrimonio/Create', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'empreendimentos' => $empreendimentos,
+            'paipa' => $paipa,
+            'paipaId' => $paipa->id,
+            'profissionais' => $profissionais,
+        ]);
+    }
+
+    private function getCampanhasPatrimonio($contrato)
+    {
+      return SgcPatrimonioPaipa::where('contrato_id', $contrato)
+        ->with('empreendimento')
+        ->get()
+        ->map(function ($paipa) {
+          return [
+            'id' => $paipa->id,
+            'id_campanha' => $paipa->id,
+            'empreendimento' => $paipa->empreendimento?->cod_emp ?? 'N/A',
+            'data_inicial' => $paipa->created_at?->format('d/m/Y') ?? 'N/A',
+            'data_final' => 'N/A',
+            'status' => $paipa->status ?? 'Em elaboração',
+            'subproduto' => $paipa->subproduto ?? 'N/A',
+          ];
+        });
     }
 }

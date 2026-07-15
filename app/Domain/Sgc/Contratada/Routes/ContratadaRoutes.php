@@ -146,6 +146,10 @@ Route::prefix('/contratada')->group(function () {
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Relatorio/app/Routes/RelatorioRoutes.php';
 
         });
+
+        Route::prefix('/ptr')->group(function () {
+            require __DIR__ . '/../../Contratada/Produtos/Patrimonio/App/Routes/PatrimonioRoutes.php';
+        });
     });
 
     Route::post('/espeleo/resultados/upload',                             [EspeleoCampanhaController::class,                       'uploadResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.upload');

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SgcvwEmpreendimentos extends Model
 {
@@ -16,6 +17,7 @@ class SgcvwEmpreendimentos extends Model
     {
         return SgcvwEstudos::where('cod_emp', $this->cod_emp)->get();
     }
+    
     public function changelogs()
     {
         return $this->hasMany(ChangeLog::class, 'record_id')
@@ -38,5 +40,10 @@ class SgcvwEmpreendimentos extends Model
         }
 
         return null;
+    }
+
+    public function paipas(): HasMany
+    {
+        return $this->hasMany(SgcPatrimonioPaipa::class, 'empreendimento_id', 'id');
     }
 }
