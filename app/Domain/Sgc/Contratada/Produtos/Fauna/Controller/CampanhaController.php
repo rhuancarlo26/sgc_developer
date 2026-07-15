@@ -88,20 +88,20 @@ class CampanhaController extends Controller
 
         $moduloativo = "Fauna";
         $campanhaData = null;
-        
+
         // ✅ Se for Espeleologia, carrega o modelo específico
         if ($modulo === 'espeleologia') {
             Log::debug('CampanhaController: Módulo de Espeleologia acessado', [
                 'campanha_id' => $campanhaId,
             ]);
-            
+
             $campanha = SgcEspeleoCampanha::findOrFail($campanhaId);
             $moduloativo = "Espeleologia";
-            
+
             // ✅ Para Espeleologia, converte o modelo diretamente para array
             // sem usar CampanhaResource (que é específico de Fauna)
             $campanhaData = $campanha->toArray();
-            
+
         } else {
             // ✅ Senão, carrega Fauna normalmente (compatível com produção)
             $campanha = SgcFaunaCampanha::with([
@@ -125,11 +125,11 @@ class CampanhaController extends Controller
                 'aquatica_count'       => $campanha->resultadosAquatica->count(),
                 'cavernicola_count'    => $campanha->resultadosCavernicola->count(),
             ]);
-            
+
             // ✅ Para Fauna, usa CampanhaResource (como em produção)
             $campanhaData = CampanhaResource::toArray($campanha);
         }
-        
+
         // ✅ Busca empreendimento (funciona para ambos os módulos)
         $empreendimento = SgcvwEmpreendimentos::where('cod_emp', $campanha->cod_emp)->first();
         $coordenadas = $empreendimento->coordenadas ?? null;
@@ -367,7 +367,7 @@ class CampanhaController extends Controller
 
     // -------------------------------------------------------------------------
     // Download dos modelos de planilhas
-    // 
+    //
     public function downloadModelos()
     {
         $zipPath = $this->modeloService->gerarZipModelos();
@@ -385,7 +385,7 @@ class CampanhaController extends Controller
         // ────────────────────────────────────────────────────────────────
         // VALIDAÇÕES
         // ────────────────────────────────────────────────────────────────
-        
+
         if (Auth::user()->perfis_id === 3) {
             return response()->json([
                 'message' => 'Acesso negado. Fiscais não podem deletar profissionais.',
@@ -672,5 +672,4 @@ class CampanhaController extends Controller
             return redirect()->back()->withErrors(['error' => 'Erro ao reprovar campanha: ' . $e->getMessage()]);
         }
     }
-
 }

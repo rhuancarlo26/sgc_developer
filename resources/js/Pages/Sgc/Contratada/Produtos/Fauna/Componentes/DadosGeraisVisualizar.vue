@@ -47,7 +47,7 @@ function closeAbioModal() {
   <div class="card">
     <div class="card-body">
       <h4 class="mb-3" style="text-align: center;">DADOS GERAIS DA CAMPANHA</h4>
-      
+
       <!-- Dados da Campanha -->
       <div v-if="campanha && Object.keys(campanha).length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div>

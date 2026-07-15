@@ -43,7 +43,7 @@ const salvar = () => {
 const isReadonly = computed(() => !form.id);
 </script>
 
-<template #body>
+<template>
     <form @submit.prevent="salvar">
         <div class="row mb-4">
             <div class="col form-group">

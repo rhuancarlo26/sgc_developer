@@ -2,48 +2,56 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\Controller;
 
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Parametro\Services\ParametroService;
+use App\Models\SgcPatrimonioEquipe;
 use App\Shared\Http\Controllers\Controller;
 use App\Models\Contrato;
 use App\Models\SgcvwEmpreendimentos;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaService;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoService;
-use App\Models\SgcPmqa;
-use App\Models\SgcPmqaParametroLista;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\app\Services\PmqaService;
+use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Services\CampanhaService;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcEspeleoProfissional;
 use App\Models\SgcPmqaPonto;
 use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
-use App\Models\SgcModulo;
-use App\Models\SgcModuloCampanha;
-use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
-use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
-
+use App\Models\SgcPatrimonioPaipa;
+use App\Models\SgcPmqa;
+use App\Models\SgcPmqaParametroLista;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class ProdutosController extends Controller
 {
     protected $produtosService;
     protected $faunaService;
     protected $espeleoService;
+    protected $parametroService;
+    protected $execucaoCampanhaService;
+    protected $pmqaService;
 
     public function __construct(
         ProdutosService $produtosService,
         FaunaService $faunaService,
-        EspeleoService $espeleoService
+        EspeleoService $espeleoService,
+        ParametroService $parametroService,
+        CampanhaService $execucaoCampanhaService,
+        PmqaService $pmqaService
     ) {
         $this->produtosService = $produtosService;
         $this->faunaService = $faunaService;
         $this->espeleoService = $espeleoService;
+        $this->parametroService = $parametroService;
+        $this->execucaoCampanhaService = $execucaoCampanhaService;
+        $this->pmqaService = $pmqaService;
     }
 
     public function index(Request $request, $contrato, $produto): Response
@@ -54,19 +62,17 @@ class ProdutosController extends Controller
 
         $moduloProduto = SgcModulo::where('produto_slug', $produto)->exists();
 
-        $campanhas = match (true) {
-            $produto === 'fauna'                       => $this->getCampanhasFauna($contrato, $mostrarArquivadas),
-            in_array($produto, ['pmqa', 'eia'], true)   => $this->getCampanhasPmqa($contrato),
-            $produto === 'espeleologia'                 => $this->getCampanhasEspeleologia($contrato),
-            $moduloProduto                              => $this->getCampanhasModulo($contrato, $produto),
-            default                                     => collect(),
+        $campanhas = match ($produto) {
+            'fauna'        => $this->getCampanhasFauna($contrato),
+            'pmqa', 'eia' => $this->pmqaService->getCampanhas($contrato),
+            'espeleologia' => $this->getCampanhasEspeleologia($contrato),
+            'patrimonio'   => $this->getCampanhasPatrimonio($contrato),
+            default        => collect(),
         };
 
-        $totalArquivadas = $produto === 'fauna'
-            ? SgcFaunaCampanha::where('id_contrato', $contrato)
-                ->whereNotNull('arquivada_em')
-                ->count()
-            : 0;
+        // $campanhas = $produto === 'fauna'
+        //     ? $this->getCampanhasFauna($contrato)
+        //     : $this->getCampanhasEspeleologia($contrato);
 
         return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
             'subprodutos' => $subprodutos,
@@ -94,9 +100,20 @@ class ProdutosController extends Controller
 
     public function create(Request $request, $contrato, $produto): Response
     {
-        Log::info('Acessando create', ['contrato' => $contrato, 'produto' => $produto, 'subproduto' => $request->query('subproduto')]);
+
         $contratoObj = Contrato::findOrFail($contrato);
         $subproduto = $request->query('subproduto');
+        $campanhaId = $request->query('campanha_id');
+
+        if ($campanhaId && in_array($produto, ['pmqa', 'eia'])) {
+            return $this->createPmqaByCampanha($request, $contrato, $produto, $contratoObj, $campanhaId);
+        }
+
+        //CONFERIR ESSES TRECHOS
+        // if (!$subproduto) {
+        // Log::info('Acessando create', ['contrato' => $contrato, 'produto' => $produto, 'subproduto' => $request->query('subproduto')]);
+        // $contratoObj = Contrato::findOrFail($contrato);
+        // $subproduto = $request->query('subproduto');
 
         // Produtos criados dinamicamente a partir de um módulo (exceto o 'malarigeno' legado,
         // que continua exigindo subproduto do catálogo externo normalmente) não dependem desse catálogo.
@@ -119,12 +136,11 @@ class ProdutosController extends Controller
             ]);
         }
 
-        // Atualizar o método create()
         if ($produto === 'fauna') {
             return $this->createFauna($request, $contrato, $produto, $contratoObj, $subproduto);
-        } elseif ($produto === 'pmqa' || $produto === 'eia') { // <-- MUDANÇA AQUI
-            // Se o produto for 'pmqa' OU 'eia', chamamos a função de criação do PMQA.
-            // Passamos a variável $produto original ('eia') para que a tela mantenha o título correto.
+        } elseif ($produto === 'patrimonio') {
+            return $this->createPatrimonio($request, $contrato, $produto, $contratoObj, $subproduto);
+        } elseif ($produto === 'pmqa' || $produto === 'eia') {
             return $this->createPmqa($request, $contrato, $produto, $contratoObj, $subproduto);
 
         } elseif ($produto === 'malarigeno') {
@@ -134,7 +150,6 @@ class ProdutosController extends Controller
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
         }
 
-        // Atualizar o método index()
         $campanhas = match ($produto) {
             'fauna' => $this->getCampanhasFauna($contrato),
             'pmqa' => $this->getCampanhasPmqa($contrato),
@@ -335,7 +350,7 @@ class ProdutosController extends Controller
 
         // Carregar metodologia relacionada
         $metodologia = $draft->metodologia ? $draft->metodologia->metodologia : '';
-         $resultadosAnexos = $draft->resultadoAnexos()->get()->map(function ($anexo) {
+        $resultadosAnexos = $draft->resultadoAnexos()->get()->map(function ($anexo) {
             return [
                 'id' => $anexo->id,
                 'nome_arquivo' => $anexo->nome_arquivo,
@@ -344,24 +359,22 @@ class ProdutosController extends Controller
             ];
         })->toArray();
 
-         // Carregar estudos posteriores já salvos para essa campanha
         $estudosPosteriores = SgcEspeleoEstudosPosteriores::where('campanha_id', $draft->id)
             ->get(['id', 'subproduto_id', 'quantidade', 'coordenadas', 'necessario'])
             ->toArray();
 
-        // Buscar subprodutos da família Espeleologia
         $subprodutosEspeleologia = SgcvwSubprodutos::where('familia', 'Espeleologia')
             ->where('contrato_id', $contrato)
             ->orderBy('descricao_revisada')
-            ->get(['id', 'descricao_revisada']) 
+            ->get(['id', 'descricao_revisada'])
             ->map(function ($s) {
                 return [
                     'id' => $s->id,
                     'descricao_revisada' => $s->descricao_revisada
                 ];
             })
-            ->values() 
-            ->toArray(); 
+            ->values()
+            ->toArray();
 
 
         return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
@@ -373,13 +386,12 @@ class ProdutosController extends Controller
             'campanhaId' => $draft->id,
             'draftData' => $draft->toArray(),
             'profissionais' => $profissionais,
-            'justificativas' => $justificativas, 
+            'justificativas' => $justificativas,
             'metodologia' => $metodologia,
             'resultados_anexos' => $resultadosAnexos,
             'subprodutosEspeleologia' => $subprodutosEspeleologia,
             'estudosPosteriores' => $estudosPosteriores,
         ]);
-
     }
 
     private function getCampanhasEspeleologia($contrato)
@@ -419,11 +431,7 @@ class ProdutosController extends Controller
     private function createPmqa(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
 
-        $pmqa = SgcPmqa::create([
-            'id_contrato'      => $contrato,
-            'status_aprovacao' => 'Em analise',
-            'subproduto'       => $subproduto,
-        ]);
+        $pmqa = $this->pmqaService->criarCampanha($contrato, $subproduto);
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->pluck('cod_emp')
@@ -453,6 +461,27 @@ class ProdutosController extends Controller
 
         return back()->with('success', 'Campanha aprovada com sucesso!');
     }
+
+    // public function reprovarPmqa(Request $request, $contrato, $produto, $pmqa): \Illuminate\Http\RedirectResponse
+    // {
+    //     $data = $request->validate([
+    //         'motivo' => 'nullable|string|max:1000',
+    //     ]);
+
+    //     $pmqaModel = SgcPmqa::where('id', $pmqa)
+    //         ->where('id_contrato', $contrato)
+    //         ->firstOrFail();
+
+    //     $pmqaModel->update([
+    //         'status_aprovacao'  => 'Reprovado',
+    //         'reprovado_por'     => Auth::id(),
+    //         'reprovado_em'      => now(),
+    //         'motivo_reprovacao' => $data['motivo'] ?? null,
+    //     ]);
+
+    //     return back()->with('error', 'Campanha reprovada.');
+    // }
+
 
 
     public function updatePmqa(Request $request, $contrato)
@@ -661,5 +690,162 @@ class ProdutosController extends Controller
         ];
     }
 
+    private function createPatrimonio(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
+    {
+      $paipaId = $request->query('paipa_id');
 
+      $paipa = $paipaId
+        ? SgcPatrimonioPaipa::where('contrato_id', $contrato)->findOrFail($paipaId)
+        : SgcPatrimonioPaipa::where('contrato_id', $contrato)
+          ->where('subproduto', $subproduto)
+          ->where('status', 'Em elaboração')
+          ->first();
+
+      if (!$paipa) {
+        $paipa = SgcPatrimonioPaipa::create([
+          'contrato_id' => $contrato,
+          'subproduto' => $subproduto,
+          'status' => 'Em elaboração',
+          'versao' => 1,
+        ]);
+      }
+
+      $paipa->load('equipe');
+
+      $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+            ->get(['id',
+              'cod_emp',
+              'br',
+              'uf',
+              'subtrecho_ini',
+              'subtrecho_fin',
+              'subtrecho_ini2',
+              'subtrecho_fin3',
+              'subtrecho_ini3',
+              'subtrecho_fin32',
+              'km_ini',
+              'km_fin',
+              'km_ini2',
+              'km_fin2',
+              'km_ini3',
+              'km_fin3',
+              'extensao',
+              'tipo_de_intervencao',
+              'descricao',
+              'bioma',
+              'coordenadas',
+              ])
+            ->map(function ($empreendimento) {
+                return [
+                  'id' => $empreendimento->id,
+                  'cod_emp' => $empreendimento->cod_emp,
+                  'br' => $empreendimento->br,
+                  'uf' => $empreendimento->uf,
+                  'subtrecho_ini' => $empreendimento->subtrecho_ini,
+                  'subtrecho_fin' => $empreendimento->subtrecho_fin,
+                  'subtrecho_ini2' => $empreendimento->subtrecho_ini2,
+                  'subtrecho_fin3' => $empreendimento->subtrecho_fin3,
+                  'subtrecho_ini3' => $empreendimento->subtrecho_ini3,
+                  'subtrecho_fin32' => $empreendimento->subtrecho_fin32,
+                  'km_ini' => $empreendimento->km_ini,
+                  'km_fin' => $empreendimento->km_fin,
+                  'km_ini2' => $empreendimento->km_ini2,
+                  'km_fin2' => $empreendimento->km_fin2,
+                  'km_ini3' => $empreendimento->km_ini3,
+                  'km_fin3' => $empreendimento->km_fin3,
+                  'extensao' => $empreendimento->extensao,
+                  'tipo_de_intervencao' => $empreendimento->tipo_de_intervencao,
+                  'descricao' => $empreendimento->descricao,
+                  'bioma' => $empreendimento->bioma,
+                  'coordenadas' => $empreendimento->coordenadas,
+                ];
+            })
+            ->toArray();
+
+      $profissionais = SgcPatrimonioEquipe::ativo()
+        ->orderBy('nome')
+        ->get([
+          'id',
+          'nome',
+          'cpf',
+          'cnpj',
+          'email',
+          'profissao',
+          'funcao',
+          'conselho_classe',
+          'numero_registro',
+          'carteira_profissional',
+          'ct',
+          'obs',
+        ]);
+
+        return inertia('Sgc/Contratada/Produtos/Patrimonio/Create', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'empreendimentos' => $empreendimentos,
+            'paipa' => $paipa,
+            'paipaId' => $paipa->id,
+            'profissionais' => $profissionais,
+        ]);
+
+        return back()->with('success', 'Campanha aprovada com sucesso!');
+    }
+
+
+    public function updatePmqa(Request $request, $contrato)
+    {
+        $data = $request->validate([
+            'id'            => 'required|exists:sgc_pmqa,id',
+            'cod_emp'       => 'nullable|string',
+            'tema'          => 'nullable',
+            'especificacao' => 'nullable|string',
+            'introducao'    => 'nullable|string',
+            'justificativa' => 'nullable|string',
+            'objetivos'     => 'nullable|string',
+            'metodologia'   => 'nullable|string',
+            'publico_alvo'  => 'nullable|string',
+        ]);
+
+        $pmqa = SgcPmqa::findOrFail($data['id']);
+
+        $pmqa->update([
+            'cod_emp'       => $data['cod_emp'],
+            'tema'          => is_array($data['tema']) ? $data['tema']['id'] : $data['tema'],
+            'especificacao' => $data['especificacao'],
+            'introducao'    => $data['introducao'],
+            'justificativa' => $data['justificativa'],
+            'objetivos'     => $data['objetivos'],
+            'metodologia'   => $data['metodologia'],
+            'publico_alvo'  => $data['publico_alvo'],
+        ]);
+
+        return redirect()
+            ->route('sgc.contratada.produtos.index', [
+                'contrato' => $contrato,
+                'produto'  => 'eia',
+            ])
+            ->with('success', 'Campanha de Fauna salva com sucesso!');
+    }
+
+
+
+    private function getCampanhasPatrimonio($contrato)
+    {
+      return SgcPatrimonioPaipa::where('contrato_id', $contrato)
+        ->with('empreendimento')
+        ->get()
+        ->map(function ($paipa) {
+          return [
+            'id' => $paipa->id,
+            'id_campanha' => $paipa->id,
+            'empreendimento' => $paipa->empreendimento?->cod_emp ?? 'N/A',
+            'data_inicial' => $paipa->created_at?->format('d/m/Y') ?? 'N/A',
+            'data_final' => 'N/A',
+            'status' => $paipa->status ?? 'Em elaboração',
+            'subproduto' => $paipa->subproduto ?? 'N/A',
+          ];
+        });
+    }
 }

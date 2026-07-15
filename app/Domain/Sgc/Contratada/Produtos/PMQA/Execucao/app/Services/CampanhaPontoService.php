@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Services;
+
+use App\Models\ServicoPmqaCampanha;
+use App\Models\ServicoPmqaCampanhaPonto;
+use App\Models\SgcPmqaCampanhasPonto;
+use App\Models\SgcPmqaExecCampanha;
+use App\Shared\Abstract\BaseModelService;
+use App\Shared\Traits\Deletable;
+use App\Shared\Traits\Searchable;
+
+class CampanhaPontoService extends BaseModelService
+{
+    use Searchable, Deletable;
+
+    protected string $modelClass = SgcPmqaCampanhasPonto::class;
+
+    public function index(SgcPmqaExecCampanha $campanha, $searchParams): array
+    {
+        $pontos = $this->searchAllColumns(...$searchParams)
+            ->with([
+                'ponto.lista.parametros_vinculados.parametro',
+                'coleta.arquivos',
+                'medicao.parametros',
+                'medicao.arquivos',
+            ])
+            ->where('sgc_pmqa_campanha_id', $campanha->id)
+            ->paginate()
+            ->appends($searchParams);
+        return ['pontos' => $pontos];
+    }
+}

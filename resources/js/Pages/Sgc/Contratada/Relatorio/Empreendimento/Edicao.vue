@@ -88,9 +88,9 @@
         <div class="row align-items-end">
           <div class="col-md-8">
             <label for="filtroContrato" class="form-label fw-bold">Filtrar por Contrato Ambiental:</label>
-            <select 
+            <select
               id="filtroContrato"
-              v-model="filtroContrato" 
+              v-model="filtroContrato"
               class="form-select"
               @change="aplicarFiltro"
             >
@@ -101,8 +101,8 @@
             </select>
           </div>
           <div class="col-md-4">
-            <button 
-              v-if="filtroContrato" 
+            <button
+              v-if="filtroContrato"
               @click="limparFiltros"
               class="btn btn-outline-secondary w-100"
             >
@@ -143,7 +143,7 @@
                           <strong>{{ log.user?.name || 'Usuário desconhecido' }}</strong>
                           alterou <strong>{{ log.field }}</strong>
                         </p>
-                        
+
                         <!-- Separação DE/PARA com visual melhorado -->
                         <div class="row g-2">
                           <div class="col-md-6">
@@ -200,7 +200,7 @@
     >
       <thead class="table-dark">
         <tr>
-          <th 
+          <th
             v-for="coluna in todasColunas"
             :key="coluna"
             v-show="colunasVisiveis.includes(coluna) && !camposocultos.includes(coluna)"
@@ -368,14 +368,14 @@ const camposfixos = computed(() => {
  */
 function formatarData(data) {
   if (!data) return '';
-  
+
   const dataObj = new Date(data);
   const dia = String(dataObj.getDate()).padStart(2, '0');
   const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
   const ano = dataObj.getFullYear();
   const horas = String(dataObj.getHours()).padStart(2, '0');
   const minutos = String(dataObj.getMinutes()).padStart(2, '0');
-  
+
   return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
 }
 
@@ -386,31 +386,31 @@ function formatarData(data) {
  */
 function formatarDataCurta(data) {
   if (!data) return '';
-  
+
   const dataObj = new Date(data);
   const hoje = new Date();
   const ontem = new Date(hoje);
   ontem.setDate(ontem.getDate() - 1);
-  
+
   // Compara apenas as datas (sem hora)
   const ehHoje = dataObj.toDateString() === hoje.toDateString();
   const ehOntem = dataObj.toDateString() === ontem.toDateString();
-  
+
   if (ehHoje) {
     const horas = String(dataObj.getHours()).padStart(2, '0');
     const minutos = String(dataObj.getMinutes()).padStart(2, '0');
     return `hoje ${horas}:${minutos}`;
   }
-  
+
   if (ehOntem) {
     return 'ontem';
   }
-  
+
   // Formato padrão DD/MM/YY
   const dia = String(dataObj.getDate()).padStart(2, '0');
   const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
   const ano = String(dataObj.getFullYear()).slice(-2);
-  
+
   return `${dia}/${mes}/${ano}`;
 }
 
@@ -424,20 +424,20 @@ function obterDataUltimaAlteracao(linha, coluna) {
   if (!linha.changelogs || !Array.isArray(linha.changelogs)) {
     return null;
   }
-  
+
   const alteracoesDosCampo = linha.changelogs.filter(log => log.field === coluna);
-  
+
   if (alteracoesDosCampo.length === 0) {
     return null;
   }
-  
+
   // Encontra a data mais recente
   const dataMaisRecente = alteracoesDosCampo.reduce((mais_recente, log) => {
     const dataAtual = new Date(log.created_at);
     const dataMais = new Date(mais_recente.created_at);
     return dataAtual > dataMais ? log : mais_recente;
   });
-  
+
   return dataMaisRecente.created_at;
 }
 
@@ -663,7 +663,7 @@ function toggleSelecionarTodos(event) {
   if (checked) {
     // Adicionar as filtradas + manter as fixas
     colunasVisiveis.value = [...colunasFixas, ...colunasFiltradas];
-    
+
     // Adicionar changelogs se tiver
     if (colunasVisiveis.value.includes(colunaTravada) === false) {
       colunasVisiveis.value.push(colunaTravada);

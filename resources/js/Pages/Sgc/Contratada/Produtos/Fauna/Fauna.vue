@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import NavButton from '@/Components/NavButton.vue';
 import PreviewApresentacaoModal from '../Pmqa/Components/Modals/PreviewApresentacaoModal.vue';
@@ -63,6 +63,15 @@ const isEia = computed(() => selectedProduto.value === 'eia');
 const isEspeleologia = computed(() => selectedProduto.value === 'espeleologia');
 const isEmElaboracao = (c) => c.status === 'Em elaboração';
 
+
+watch(
+  () => props.produto,
+  (produto) => {
+    selectedProduto.value = produto.toLowerCase();
+    selectedSubproduto.value = '';
+  }
+);
+
 // Atualizar a rota quando o produto mudar
 const updateProduto = () => {
   selectedSubproduto.value = '';
@@ -77,6 +86,19 @@ const updateProduto = () => {
       onSuccess: () => console.log('Produto alterado com sucesso:', selectedProduto.value),
     }
   );
+};
+
+const normalizarTexto = (texto) => {
+  return texto
+    ?.trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+};
+
+const isSubprodutoPaipa = (subproduto) => {
+  return normalizarTexto(subproduto)
+    ?.startsWith('elaboracao do projeto de avaliacao');
 };
 
 // Lista única de descrições de subprodutos
@@ -146,7 +168,14 @@ const goToCreate = () => {
     alert('Por favor, selecione um subproduto antes de cadastrar.');
     return;
   }
+
   const subproduto = selectedSubproduto.value;
+
+  if (selectedProduto.value === 'patrimonio' && !isSubprodutoPaipa(subproduto)) {
+    alert('Este subproduto de patrimônio ainda não possui tela de cadastro implementada.');
+    return;
+  }
+
   router.get(
     route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
     { subproduto },
@@ -198,7 +227,6 @@ const gerenciarCampanha = (pmqaId) => {
   );
 };
 
-// Redirecionar para análise
 const analisarCampanha = (campanhaId) => {
   router.get(route('sgc.contratada.produtos.analise', [props.contrato, selectedProduto.value, campanhaId]));
 };
@@ -241,7 +269,7 @@ const abrirModalReprovarTudo = (campanha) => {
 
 const confirmarAprovarTudo = () => {
   if (!campanhaEmAnalise.value) return;
-  
+
   router.post(
     route('sgc.contratada.produtos.aprovarTudo', [props.contrato, selectedProduto.value, campanhaEmAnalise.value.id]),
     {},
@@ -260,7 +288,7 @@ const confirmarAprovarTudo = () => {
 
 const confirmarReprovarTudo = () => {
   if (!campanhaEmAnalise.value) return;
-  
+
   if (!justificativaReprovacao.value.trim()) {
     erroReprovacao.value = 'A justificativa é obrigatória.';
     return;
@@ -416,7 +444,7 @@ const restaurarCampanha = (campanha) => {
                       {{ props.mostrarArquivadas ? 'Ver ativas' : `Arquivadas (${props.totalArquivadas})` }}
                     </button>
                   </div>
-                  
+
                   <div class="table-responsive">
                     <table class="table table-bordered table-hover">
                       <thead>
@@ -486,7 +514,7 @@ const restaurarCampanha = (campanha) => {
                               title="Visualizar"
                               @click="visualizarCampanha(campanha, isEspeleologia ? 'espeleologia' : null)"
                             />
-                            
+
                             <!-- Gerenciar PMQA (EIA) -->
                             <NavButton
                               v-if="isEia && campanha.status?.trim() === 'Em elaboração'"
@@ -502,7 +530,7 @@ const restaurarCampanha = (campanha) => {
                               title="Editar"
                               @click="continuarCampanha(campanha)"
                             />
-                            
+
                             <!-- Analisar (Em análise, perfil com permissão) -->
                             <NavButton
                               v-if="canApprove && campanha.status === 'Em análise'"
@@ -533,7 +561,7 @@ const restaurarCampanha = (campanha) => {
                               data-bs-toggle="dropdown"
                               aria-expanded="false"
                             >
-                              ⋮ 
+                              ⋮
                             </button>
                             <ul :aria-labelledby="`dropdownMenu-${campanha.id}`" class="dropdown-menu">
                               <li>
@@ -549,7 +577,7 @@ const restaurarCampanha = (campanha) => {
                             </ul>
 
                           </div>
-                            
+
                             <!-- Excluir (Em elaboração, não é perfil 4) -->
                             <NavButton
                               v-if="campanha.status === 'Em elaboração' && (props.auth.user.perfis_id ?? 0) !== 4"
