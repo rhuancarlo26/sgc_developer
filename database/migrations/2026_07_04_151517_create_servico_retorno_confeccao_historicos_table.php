@@ -14,7 +14,7 @@ return new class extends Migration
 
         Schema::create('servico_retorno_confeccao_historicos', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('servico_id');
+            $table->foreignId('servico_id')->constrained('servicos')->cascadeOnDelete();
             $table->foreignId('contrato_id')->constrained('contratos')->cascadeOnDelete();
             $table->unsignedInteger('tema_servico')->nullable();
             $table->foreignId('servico_mod_imp_id')->nullable()->constrained('modulos')->nullOnDelete();
@@ -23,7 +23,6 @@ return new class extends Migration
             $table->integer('status_novo')->default(1);
             $table->longText('motivo');
             $table->timestamps();
-            $table->foreign('servico_id')->references('id')->on('servicos')->cascadeOnDelete();
         });
     }
 
