@@ -315,10 +315,24 @@ const temHistoricoRetorno = (item) => {
 };
 
 const nomeServicoExibicao = (item) => {
-    return item?.modulo_importado?.nome
-        ?? item?.tipo?.nome
-        ?? item?.servico
-        ?? "-";
+    const possuiModuloImportado =
+        item?.servico_mod_imp_id !== null
+        && item?.servico_mod_imp_id !== undefined
+        && item?.servico_mod_imp_id !== "";
+
+    if (possuiModuloImportado) {
+        return item?.modulo_importado?.nome ?? "-";
+    }
+
+    if (
+        item?.servico !== null
+        && item?.servico !== undefined
+        && item?.servico !== ""
+    ) {
+        return String(item.servico);
+    }
+
+    return "-";
 };
 
 const servicoTipoId = (item) => {
