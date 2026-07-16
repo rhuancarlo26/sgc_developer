@@ -18,6 +18,8 @@ import ProdutoTabsLayout from "../../ProdutoTabsLayout.vue";
 
 const props = defineProps({
     contrato: {type: Object},
+    produto: {type: String},
+    pmqa: {type: Object},
     servico: {type: Object},
     resultado: {type: Object},
     parametros: {type: Array},
@@ -26,7 +28,7 @@ const props = defineProps({
 });
 
 const form = useForm({
-    fk_resultado: props.resultado.id,
+    sgc_resultado_id: props.resultado.id,
     parametro_id: null,
     analises: [],
     graf_analise_parametro: null
@@ -34,7 +36,7 @@ const form = useForm({
 
 const form_iqa = useForm({
     id: null,
-    fk_resultado: props.resultado.id,
+    sgc_resultado_id: props.resultado.id,
     analise_iqa: null,
     ...props.resultado.analise_iqa,
     graf_analise_iqa: null,
@@ -42,7 +44,7 @@ const form_iqa = useForm({
 
 let form_outra_analise = useForm({
     id: null,
-    fk_resultado: props.resultado.id,
+    sgc_resultado_id: props.resultado.id,
     nome: null,
     arquivo: null,
     analise: null
@@ -50,7 +52,7 @@ let form_outra_analise = useForm({
 
 const reset_form_outra_analise = () => {
     form_outra_analise.id = null,
-        form_outra_analise.resultado_id = props.resultado.id,
+        form_outra_analise.sgc_resultado_id = props.resultado.id,
         form_outra_analise.nome = null,
         form_outra_analise.arquivo = null,
         form_outra_analise.analise = null
@@ -75,6 +77,26 @@ const captureChart = (opcao, parametro_id = null) => {
         chart = document.getElementById('div-parametro-iqa')
     }
 
+    if (!chart) {
+        console.error('Elemento do gráfico não encontrado para captura.');
+        return;
+    }
+
+    const canvas = chart.querySelector('canvas');
+
+    if (canvas) {
+        if (opcao === 1) {
+            form.graf_analise_parametro = canvas.toDataURL('image/png');
+
+            salvarAnalise();
+        } else {
+            form_iqa.graf_analise_iqa = canvas.toDataURL('image/png');
+
+            salvarAnaliseIqa();
+        }
+        return;
+    }
+
     html2canvas(chart, {
         useCORS: true,
         allowTaint: true
@@ -94,36 +116,50 @@ const captureChart = (opcao, parametro_id = null) => {
 const salvarAnalise = () => {
     const url = props.resultado.analises.filter(analise => analise.parametro_id === form.parametro_id).length ? 'update_analise' : 'store_analise';
 
-    form.post(route('contratos.contratada.servicos.pmqa.resultado.' + url, {
+    form.analises = {...form.analises};
+
+    form.post(route('contratos.contratada.sgc.pmqa.resultado.' + url, {
         contrato: props.contrato.id,
-        servico: props.servico.id,
+        produto: props.produto,
+        pmqa: props.pmqa.id,
         resultado: props.resultado.id
-    }))
+    }), {
+        preserveScroll: true,
+        onSuccess: () => console.info('Análise do parâmetro salva com sucesso.'),
+        onError: (errors) => console.error('Erro ao salvar análise do parâmetro:', errors),
+    })
 
 }
 
 const salvarAnaliseIqa = () => {
     const url = form_iqa.id ? 'update_analise_iqa' : 'store_analise_iqa'
 
-    form_iqa.post(route('contratos.contratada.servicos.pmqa.resultado.' + url, {
+    form_iqa.post(route('contratos.contratada.sgc.pmqa.resultado.' + url, {
         contrato: props.contrato.id,
-        servico: props.servico.id,
+        produto: props.produto,
+        pmqa: props.pmqa.id,
         resultado: props.resultado.id
-    }))
+    }), {
+        preserveScroll: true,
+        onSuccess: () => console.info('Análise IQA salva com sucesso.'),
+        onError: (errors) => console.error('Erro ao salvar análise IQA:', errors),
+    })
 }
 
 const salvarOutraAnalise = () => {
     if (form_outra_analise.id) {
 
-        form_outra_analise.post(route('contratos.contratada.servicos.pmqa.resultado.update_outra_analise', {
+        form_outra_analise.post(route('contratos.contratada.sgc.pmqa.resultado.update_outra_analise', {
             contrato: props.contrato.id,
-            servico: props.servico.id,
+            produto: props.produto,
+            pmqa: props.pmqa.id,
             resultado: props.resultado.id
         }))
     } else {
-        form_outra_analise.post(route('contratos.contratada.servicos.pmqa.resultado.store_outra_analise', {
+        form_outra_analise.post(route('contratos.contratada.sgc.pmqa.resultado.store_outra_analise', {
             contrato: props.contrato.id,
-            servico: props.servico.id,
+            produto: props.produto,
+            pmqa: props.pmqa.id,
             resultado: props.resultado.id
         }))
     }
@@ -278,27 +314,31 @@ const activeTab = ref("resultados");
             class="tab-pane"
             role="tabpanel"
           >
-            <BarChart
-              :style="{ height: '70px', position: 'relative' }"
+            <div
               :id="'divs-parametro-' + parametro.id"
               :name="'divs-parametro-' + parametro.id"
-              :chart_data="parametro.datasets"
-              :chart_options="{
-                responsive: true,
-                scales: { x: { display: false } },
-                plugins: {
-                  tooltip: { enabled: false },
-                  title: { display: true, text: `Gráfico de ${parametro.parametro}` },
-                  datalabels: {
-                    display: true,
-                    color: 'white',
-                    align: 'top',
-                    font: { weight: 'bold' },
-                    formatter: (value) => value !== null ? parseFloat(value) : ''
+              style="height: 70px; position: relative;"
+            >
+              <BarChart
+                :chart_data="parametro.datasets"
+                :chart_options="{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: { x: { display: false } },
+                  plugins: {
+                    tooltip: { enabled: false },
+                    title: { display: true, text: `Gráfico de ${parametro.parametro}` },
+                    datalabels: {
+                      display: true,
+                      color: 'white',
+                      align: 'top',
+                      font: { weight: 'bold' },
+                      formatter: (value) => value !== null ? parseFloat(value) : ''
+                    }
                   }
-                }
-              }"
-            />
+                }"
+              />
+            </div>
 
             <div class="card mb-4">
               <DivTabelaParametro :parametro="parametro" />
@@ -333,12 +373,16 @@ const activeTab = ref("resultados");
           </div>
 
           <div class="tab-pane" id="tabs-parametro-iqa" role="tabpanel">
-            <BarChart
-              id="div-parametro-iqa"
-              :style="{ height: '70px', position: 'relative' }"
-              :chart_data="chartDataIqa"
-              :options="horizontalLine"
-            />
+            <div id="div-parametro-iqa" style="height: 70px; position: relative;">
+              <BarChart
+                :chart_data="chartDataIqa"
+                :chart_options="{
+                  ...horizontalLine,
+                  responsive: true,
+                  maintainAspectRatio: false
+                }"
+              />
+            </div>
 
             <div class="card mb-4">
               <DivTabelaMedirIqaVue />
@@ -453,12 +497,13 @@ const activeTab = ref("resultados");
                           <td>{{ outraAnalise.analise }}</td>
                           <td>
                             <a
-                              v-if="outraAnalise.caminho"
+                              v-if="outraAnalise.caminho_arquivo"
                               class="btn btn-icon btn-primary me-1"
                               target="_blank"
-                              :href="route('contratos.contratada.servicos.pmqa.resultado.visualizar_outra_analise', {
+                              :href="route('contratos.contratada.sgc.pmqa.resultado.visualizar_outra_analise', {
                                 contrato: contrato.id,
-                                servico: servico.id,
+                                produto: produto,
+                                pmqa: pmqa.id,
                                 resultado: resultado.id,
                                 outra_analise: outraAnalise.id
                               })"
@@ -480,9 +525,10 @@ const activeTab = ref("resultados");
                             >
                               <Link
                                 :onBefore="confirmation.show"
-                                :href="route('contratos.contratada.servicos.pmqa.resultado.delete_outra_analise', {
+                                :href="route('contratos.contratada.sgc.pmqa.resultado.delete_outra_analise', {
                                   contrato: contrato.id,
-                                  servico: servico.id,
+                                  produto: produto,
+                                  pmqa: pmqa.id,
                                   resultado: resultado.id,
                                   outra_analise: outraAnalise.id
                                 })"
@@ -509,4 +555,3 @@ const activeTab = ref("resultados");
     </template>
   </ProdutoTabsLayout>
 </template>
-

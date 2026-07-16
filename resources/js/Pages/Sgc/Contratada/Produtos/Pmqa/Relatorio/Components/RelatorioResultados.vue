@@ -1,7 +1,7 @@
 <script setup>
 import {usePage} from '@inertiajs/vue3';
-import {ref} from 'vue';
 import {computed} from 'vue';
+import BarChart from "@/Components/BarChart.vue";
 
 const props = defineProps({
     relatorio: {type: Object}
@@ -21,7 +21,7 @@ const parametrosVinculados = computed(() => {
 
     if (parametrosUnicos) {
         parametrosCompletos = parametrosUnicos.map(parametro => {
-            let analise = props.relatorio.resultado?.analises.find(analise => analise.fk_parametro === parametro.id);
+            let analise = props.relatorio.resultado?.analises.find(analise => analise.parametro_id === parametro.id);
             if (analise) {
                 return {
                     ...parametro,
@@ -35,6 +35,108 @@ const parametrosVinculados = computed(() => {
 
     return parametrosCompletos;
 });
+
+const chartDataIqa = computed(() => {
+    const labels = [];
+    const datasets = [];
+
+    props.relatorio?.resultado?.campanhas?.forEach(campanha => {
+        const data = [];
+
+        campanha.campanha_pontos?.forEach(campanhaPonto => {
+            const ponto = campanhaPonto.ponto;
+            const medicao = campanhaPonto.medicao;
+
+            if (ponto?.nome_ponto_coleta || ponto?.nomepontocoleta) {
+                labels.push(ponto.nome_ponto_coleta ?? ponto.nomepontocoleta);
+            }
+
+            if (medicao?.iqa !== null && medicao?.iqa !== undefined) {
+                data.push(medicao.iqa);
+            }
+        });
+
+        if (data.length) {
+            datasets.push({
+                label: campanha.nome_campanha ?? campanha.nome,
+                backgroundColor: colorFromString(campanha.nome_campanha ?? campanha.nome),
+                data,
+            });
+        }
+    });
+
+    return {
+        labels: [...new Set(labels)],
+        datasets,
+    };
+});
+
+const chartDataParametro = (parametroId) => {
+    const datasets = [];
+    let maxSize = 0;
+
+    props.relatorio?.resultado?.campanhas?.forEach(campanha => {
+        campanha.campanha_pontos?.forEach(campanhaPonto => {
+            const ponto = campanhaPonto.ponto;
+            const medicoes = campanhaPonto.medicao?.parametros
+                ?.filter(medicaoParametro => Number(medicaoParametro.parametro_id) === Number(parametroId))
+                ?.map(medicaoParametro => medicaoParametro.medicao) ?? [];
+
+            if (medicoes.length) {
+                maxSize = Math.max(maxSize, medicoes.length);
+                const label = ponto?.nome_ponto_coleta ?? ponto?.nomepontocoleta ?? `Ponto ${ponto?.id ?? ''}`;
+
+                datasets.push({
+                    label,
+                    backgroundColor: colorFromString(label),
+                    data: medicoes,
+                });
+            }
+        });
+    });
+
+    return {
+        labels: Array.from({length: maxSize}, (_, index) => index + 1),
+        datasets,
+    };
+};
+
+const hasChartData = (chartData) => chartData.datasets?.some(dataset => dataset.data?.length);
+
+const baseChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+        padding: {
+            top: 4,
+            right: 8,
+            bottom: 2,
+            left: 4,
+        },
+    },
+    plugins: {
+        legend: {
+            position: 'bottom',
+            labels: {
+                boxWidth: 8,
+                font: {
+                    size: 9,
+                },
+            },
+        },
+        tooltip: {
+            enabled: false,
+        },
+    },
+};
+
+const colorFromString = (value) => {
+    const hash = String(value)
+        .split('')
+        .reduce((currentHash, char) => ((currentHash << 5) - currentHash) + char.charCodeAt(0), 0);
+
+    return `#${Math.abs(hash).toString(16).slice(-6).padStart(6, '0')}`;
+};
 </script>
 <template>
     <div>
@@ -42,9 +144,17 @@ const parametrosVinculados = computed(() => {
         <hr>
         <div class="mb-4" v-if="relatorio.resultado?.analise_iqa">
             <h4>IQA</h4>
-            <img class="mb-2"
+            <img
+                 v-if="relatorio.resultado?.analise_iqa?.graf_analise_iqa"
+                 class="mb-2"
                  :src="usePage().props.app_url + '/storage/' + relatorio.resultado?.analise_iqa?.graf_analise_iqa"
                  alt="Gráfico">
+            <div v-else-if="hasChartData(chartDataIqa)" class="relatorio-chart mb-2">
+                <BarChart
+                     :chart_data="chartDataIqa"
+                     :chart_options="baseChartOptions"
+                />
+            </div>
 
             <div>
                 <span><strong>Análise: </strong>{{ relatorio.resultado?.analise_iqa?.analise_iqa }}</span>
@@ -54,12 +164,43 @@ const parametrosVinculados = computed(() => {
         <div class="mb-4" v-for="parametro in parametrosVinculados" :key="parametro.id">
             <hr>
             <h4>{{ parametro.parametro }}</h4>
-            <img class="mb-2" :src="usePage().props.app_url + '/storage/' + parametro.analise?.graf_analise_parametro"
+            <img
+                 v-if="parametro.analise?.graf_analise_parametro"
+                 class="mb-2"
+                 :src="usePage().props.app_url + '/storage/' + parametro.analise?.graf_analise_parametro"
                  alt="Gráfico">
+            <div v-else-if="hasChartData(chartDataParametro(parametro.id))" class="relatorio-chart mb-2">
+                <BarChart
+                     :chart_data="chartDataParametro(parametro.id)"
+                     :chart_options="{
+                         ...baseChartOptions,
+                         scales: { x: { display: false } },
+                         plugins: {
+                             ...baseChartOptions.plugins,
+                             title: {
+                                 display: true,
+                                 text: `Gráfico de ${parametro.parametro}`,
+                                 font: { size: 11 },
+                                 padding: { bottom: 4 },
+                             },
+                         },
+                     }"
+                />
+            </div>
 
-            <div>
+            <div v-if="parametro.analise?.analise_parametro">
                 <span><strong>Análise: </strong>{{ parametro.analise?.analise_parametro }}</span>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+.relatorio-chart {
+    width: 100%;
+    max-width: 620px;
+    height: 145px;
+    margin: 0 auto 12px;
+    position: relative;
+}
+</style>

@@ -28,11 +28,34 @@ const pontosVinculados = computed(() => {
                         <th class="text-center">Pt. coleta</th>
                         <th class="text-center">Latitude</th>
                         <th class="text-center">Longitude</th>
+                        <th class="text-center">UF</th>
+                        <th class="text-center">Municipio</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="ponto in pontosVinculados" :key="ponto.id">
+                        <td class="text-center">{{ ponto.id }}</td>
+                        <td class="text-center">{{ ponto.nomepontocoleta ?? ponto.nome_ponto_coleta }}</td>
+                        <td class="text-center">{{ ponto.lat_x }}</td>
+                        <td class="text-center">{{ ponto.long_y }}</td>
+                        <td class="text-center">{{ ponto.uf ?? ponto.UF }}</td>
+                        <td class="text-center">{{ ponto.municipio }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h5 class="mt-3">Caracterização e referência</h5>
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table card-table table-bordered">
+                    <thead>
+                    <tr>
+                        <th class="text-center">Cod. ponto</th>
                         <th class="text-center">Classificação</th>
                         <th class="text-center">Classe</th>
                         <th class="text-center">Tipo de ambiente</th>
-                        <th class="text-center">UF</th>
-                        <th class="text-center">Municipio</th>
                         <th class="text-center">Bacia hidrografica</th>
                         <th class="text-center">Km rodovia</th>
                         <th class="text-center">Estaca</th>
@@ -40,17 +63,12 @@ const pontosVinculados = computed(() => {
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="ponto in pontosVinculados" :key="ponto.id">
+                    <tr v-for="ponto in pontosVinculados" :key="`referencia-${ponto.id}`">
                         <td class="text-center">{{ ponto.id }}</td>
-                        <td class="text-center">{{ ponto.nome_ponto_coleta }}</td>
-                        <td class="text-center">{{ ponto.lat_x }}</td>
-                        <td class="text-center">{{ ponto.long_y }}</td>
                         <td class="text-center">{{ ponto.classificacao }}</td>
                         <td class="text-center">{{ ponto.classe }}</td>
-                        <td class="text-center">{{ ponto.tipo_ambiente }}</td>
-                        <td class="text-center">{{ ponto.UF }}</td>
-                        <td class="text-center">{{ ponto.municipio }}</td>
-                        <td class="text-center">{{ ponto.bacia_hidrografica }}</td>
+                        <td class="text-center">{{ ponto.tipoambiente ?? ponto.tipo_ambiente }}</td>
+                        <td class="text-center">{{ ponto.baciahidrografica ?? ponto.bacia_hidrografica }}</td>
                         <td class="text-center">{{ ponto.km_rodovia }}</td>
                         <td class="text-center">{{ ponto.estaca }}</td>
                         <td class="text-center">{{ ponto.observacoes }}</td>

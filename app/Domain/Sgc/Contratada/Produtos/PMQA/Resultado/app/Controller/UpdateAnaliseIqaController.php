@@ -19,7 +19,7 @@ class UpdateAnaliseIqaController extends Controller
     {
     }
 
-    public function index(Contrato $contrato, SgcPmqa $pmqa, SgcPmqaResultado $resultado, UpdateAnaliseIqaRequest $request): RedirectResponse
+    public function index(Contrato $contrato, string $produto, SgcPmqa $pmqa, SgcPmqaResultado $resultado, UpdateAnaliseIqaRequest $request): RedirectResponse
     {
         $image = $request->validated('graf_analise_iqa');
 
@@ -35,6 +35,6 @@ class UpdateAnaliseIqaController extends Controller
 
         $response = $this->resultadoService->updateAnaliseIqa($post);
 
-        return to_route('contratos.contratada.sgc.pmqa.resultado.resultado', ['contrato' => $contrato->id, 'pmqa' => $pmqa->id, 'resultado' => $resultado->id])->with('message', $response['request']);
+        return to_route('contratos.contratada.sgc.pmqa.resultado.resultado', ['contrato' => $contrato->id, 'produto' => $produto, 'pmqa' => $pmqa->id, 'resultado' => $resultado->id])->with('message', $response['request']);
     }
 }

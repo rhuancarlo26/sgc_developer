@@ -11,7 +11,12 @@ const props = defineProps({
     <div class="mb-4" v-for="outraAnalise in relatorio.resultado?.outras_analises" :key="outraAnalise.id">
         <hr>
         <h4>{{ outraAnalise.nome }}</h4>
-        <img class="mb-2" :src="usePage().props.app_url + '/storage/' + outraAnalise.caminho_arquivo" alt="Gráfico">
+        <img
+            v-if="outraAnalise.caminho_arquivo"
+            class="mb-2"
+            :src="usePage().props.app_url + '/storage/' + outraAnalise.caminho_arquivo"
+            alt="Gráfico"
+        >
         <div>
             <span><strong>Análise: </strong>{{ outraAnalise.analise }}</span>
         </div>

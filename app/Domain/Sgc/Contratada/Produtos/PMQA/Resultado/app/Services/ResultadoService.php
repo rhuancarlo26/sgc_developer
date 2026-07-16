@@ -4,9 +4,7 @@ namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Resultado\app\Services;
 
 use App\Models\ServicoPmqaParametro;
 use App\Models\ServicoPmqaResultado;
-use App\Models\ServicoPmqaResultadoAnaliseIqa;
 use App\Models\SgcPmqaResultadoAnaliseParametro;
-use App\Models\ServicoPmqaResultadoOutraAnalise;
 use App\Models\SgcPmqa;
 use App\Models\SgcPmqaCampanha;
 use App\Models\SgcPmqaResultado;
@@ -58,7 +56,7 @@ class ResultadoService extends BaseModelService
 
         return $this->dataManagement->create(entity: $this->modelClassAnalise, infos: [
             ...$request,
-            'graf_analise_parametro' => str_replace("public\\", "", $path)
+            'graf_analise_parametro' => $this->normalizePublicPath($path)
         ]);
     }
 
@@ -69,7 +67,7 @@ class ResultadoService extends BaseModelService
 
         return $this->dataManagement->create(entity: $this->modelClassAnaliseIqa, infos: [
             ...$request,
-            'graf_analise_iqa' => str_replace("public\\", "", $path)
+            'graf_analise_iqa' => $this->normalizePublicPath($path)
         ]);
     }
 
@@ -85,16 +83,16 @@ class ResultadoService extends BaseModelService
             'sgc_resultado_id' => $request['sgc_resultado_id'],
             'nome' => $request['nome'],
             'extensao' => $tipo,
-            'caminho_arquivo' => str_replace("public\\", "", $caminho),
+            'caminho_arquivo' => $this->normalizePublicPath($caminho),
             'analise' => $request['analise']
         ]);
     }
 
     public function updateOutraAnalise(array $request): array
     {
-        if ($outraAnalise = ServicoPmqaResultadoOutraAnalise::find($request['id'])) {
-            if ($outraAnalise->caminho) {
-                Storage::delete('public' . DIRECTORY_SEPARATOR . $outraAnalise->caminho);
+        if ($outraAnalise = $this->modelClassOutraAnalise::find($request['id'])) {
+            if ($outraAnalise->caminho_arquivo) {
+                Storage::delete('public' . DIRECTORY_SEPARATOR . $outraAnalise->caminho_arquivo);
             }
         }
 
@@ -107,7 +105,7 @@ class ResultadoService extends BaseModelService
         return $this->dataManagement->update(entity: $this->modelClassOutraAnalise, infos: [
             'sgc_resultado_id' => $request['sgc_resultado_id'],
             'tipo' => $tipo,
-            'caminho_arquivo' => str_replace("public\\", "", $caminho),
+            'caminho_arquivo' => $this->normalizePublicPath($caminho),
             'nome' => $request['nome'],
             'analise' => $request['analise']
         ], id: $request['id']);
@@ -127,12 +125,12 @@ class ResultadoService extends BaseModelService
         if ($analise) {
             $response = $this->dataManagement->update(entity: $this->modelClassAnalise, infos: [
                 ...$request,
-                'graf_analise_parametro' => str_replace("public\\", "", $path)
+                'graf_analise_parametro' => $this->normalizePublicPath($path)
             ], id: $analise->id);
         } else {
             $response = $this->dataManagement->create(entity: $this->modelClassAnalise, infos: [
                 ...$request,
-                'graf_analise_parametro' => str_replace("public\\", "", $path)
+                'graf_analise_parametro' => $this->normalizePublicPath($path)
             ]);
         }
 
@@ -141,7 +139,7 @@ class ResultadoService extends BaseModelService
 
     public function updateAnaliseIqa(array $request): array
     {
-        $analiseIqa = ServicoPmqaResultadoAnaliseIqa::where('sgc_resultado_id', $request['sgc_resultado_id'])->first();
+        $analiseIqa = $this->modelClassAnaliseIqa::where('sgc_resultado_id', $request['sgc_resultado_id'])->first();
 
         if (isset($analiseIqa->graf_analise_iqa)) {
             Storage::delete('public' . DIRECTORY_SEPARATOR . $analiseIqa->graf_analise_iqa);
@@ -152,7 +150,7 @@ class ResultadoService extends BaseModelService
 
         return $this->dataManagement->update(entity: $this->modelClassAnaliseIqa, infos: [
             ...$request,
-            'graf_analise_iqa' => str_replace("public\\", "", $path)
+            'graf_analise_iqa' => $this->normalizePublicPath($path)
         ], id: $request['id']);
     }
 
@@ -170,11 +168,18 @@ class ResultadoService extends BaseModelService
         return $this->dataManagement->delete(entity: $this->modelClass, id: $resultado->id);
     }
 
-    public function destroyOutraAnalise(ServicoPmqaResultadoOutraAnalise $outra_analise): array
+    public function destroyOutraAnalise(SgcPmqaResultadoOutraAnalise $outra_analise): array
     {
-        Storage::delete('public' . DIRECTORY_SEPARATOR . $outra_analise->caminho);
+        Storage::delete('public' . DIRECTORY_SEPARATOR . $outra_analise->caminho_arquivo);
 
         return $this->dataManagement->delete(entity: $this->modelClassOutraAnalise, id: $outra_analise->id);
+    }
+
+    private function normalizePublicPath(string $path): string
+    {
+        $path = str_replace('\\', '/', $path);
+
+        return preg_replace('#^public/#', '', $path);
     }
 
     public function getRandomColor(): string

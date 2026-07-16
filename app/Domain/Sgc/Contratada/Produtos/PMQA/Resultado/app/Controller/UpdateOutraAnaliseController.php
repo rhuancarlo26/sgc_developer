@@ -20,10 +20,10 @@ class UpdateOutraAnaliseController extends Controller
   {
   }
 
-  public function index(Contrato $contrato, SgcPmqa $pmqa, SgcPmqaResultado $resultado, UpdateOutraAnaliseRequest $request): RedirectResponse
+  public function index(Contrato $contrato, string $produto, SgcPmqa $pmqa, SgcPmqaResultado $resultado, UpdateOutraAnaliseRequest $request): RedirectResponse
   {
     $response = $this->resultadoService->updateOutraAnalise($request->validated());
 
-    return to_route('contratos.contratada.sgc.pmqa.resultado.resultado', ['contrato' => $contrato->id, 'pmqa' => $pmqa->id, 'resultado' => $resultado->id])->with('message', $response['request']);
+    return to_route('contratos.contratada.sgc.pmqa.resultado.resultado', ['contrato' => $contrato->id, 'produto' => $produto, 'pmqa' => $pmqa->id, 'resultado' => $resultado->id])->with('message', $response['request']);
   }
 }

@@ -24,7 +24,9 @@ class RelatorioService extends BaseModelService
                 'resultado.analises',
                 'resultado.analise_iqa',
                 'resultado.outras_analises',
-                'resultado.campanhas.pontos.lista.parametros'
+                'resultado.campanhas.pontos.lista.parametros',
+                'resultado.campanhas.campanha_pontos.ponto',
+                'resultado.campanhas.campanha_pontos.medicao.parametros'
             ])
             ->where('pmqa_id', $pmqa->id)
             ->paginate()
