@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed, watch, defineProps, nextTick } from 'vue';
-import MapSgc from '@/Components/MapSgc.vue';
 
 const props = defineProps({
   paipaId: [Number, String],
@@ -24,7 +23,8 @@ const TipoVariavel = {
 
 const nivelSelecionado = ref('');
 const formMetodologia = ref({});
-const mapasRef = ref({});
+const mapasLeaflet = ref({});
+const wmsLayers = ref({});
 
 const labelsGrupo = {
   INFORMACOES_GERAIS: 'Informações Gerais',
@@ -281,24 +281,62 @@ watch(
           valor: '',
           data: '',
           arquivo: null,
-          geo_json: null,
           shapefile_id: null,
           codigo_sei: '',
           enviando: false,
+          workspace: null,
+          layer_name: null,
         };
       }
     });
   },
   { immediate: true }
 );
-const setMapaRef = (nomeCampo, el) => {
-  if (el) {
-    mapasRef.value[nomeCampo] = el;
-  }
-};
 
 const selecionarShapefile = (campo, arquivo) => {
   formMetodologia.value[campo.nome].arquivo = arquivo;
+};
+
+const getMapaId = (campo) => `mapa-shapefile-${campo.ordem}`;
+
+const renderizarMapaWms = async (campo) => {
+  const item = formMetodologia.value[campo.nome];
+
+  if (!item.workspace || !item.layer_name) return;
+
+  await nextTick();
+
+  const id = getMapaId(campo);
+  const container = document.getElementById(id);
+
+  if (!container) return;
+
+  if (!mapasLeaflet.value[id]) {
+    mapasLeaflet.value[id] = L.map(container).setView([-14.235, -51.925], 6);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap',
+    }).addTo(mapasLeaflet.value[id]);
+  }
+
+  if (wmsLayers.value[id]) {
+    mapasLeaflet.value[id].removeLayer(wmsLayers.value[id]);
+  }
+
+  wmsLayers.value[id] = L.tileLayer.wms('/sgc/contratada/mapa/wms', {
+    layers: `${item.workspace}:${item.layer_name}`,
+    format: 'image/png',
+    transparent: true,
+    version: '1.1.1',
+    srs: 'EPSG:3857',
+    tiled: true,
+    opacity: 0.7,
+  }).addTo(mapasLeaflet.value[id]);
+
+  setTimeout(() => {
+    mapasLeaflet.value[id].invalidateSize();
+  }, 300);
 };
 
 const enviarShapefile = async (campo) => {
@@ -321,38 +359,25 @@ const enviarShapefile = async (campo) => {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
-    item.geo_json = typeof response.data.data.geo_json === 'string'
-      ? response.data.data.geo_json
-      : JSON.stringify(response.data.data.geo_json);
+    const shapefile = response.data.data;
 
-    const geojsonDebug = JSON.parse(item.geo_json);
+    item.workspace = shapefile.workspace ?? shapefile.layer?.workspace ?? null;
+    item.layer_name = shapefile.layer_name ?? shapefile.layer?.layer_name ?? null;
+    item.shapefile_id = shapefile.id;
 
-    console.log('GeoJSON recebido:', geojsonDebug);
-    console.log('Total de features:', geojsonDebug.features?.length);
-    console.log('Primeira geometria:', geojsonDebug.features?.[0]?.geometry);
-    item.shapefile_id = response.data.data.id;
+    if (!item.workspace || !item.layer_name) {
+      console.warn('O upload foi concluido, mas o backend nao retornou workspace/layer_name para renderizar WMS.', shapefile);
+      return;
+    }
 
     await nextTick();
-    await visualizarShapefile(campo);
+    await renderizarMapaWms(campo);
   } catch (error) {
     console.error('Erro ao enviar shapefile:', error.response?.data || error);
   } finally {
     item.enviando = false;
   }
 };
-
-const visualizarShapefile = async (campo) => {
-  const item = formMetodologia.value[campo.nome];
-  const mapa = mapasRef.value[campo.nome];
-
-  if (!mapa || !item.geo_json) return;
-
-  await nextTick();
-
-  mapa.renderMapa();
-  mapa.setGeoJson(item.geo_json);
-};
-
 
 defineEmits(['voltar']);
 </script>
@@ -474,19 +499,20 @@ defineEmits(['voltar']);
                   <button
                     type="button"
                     class="btn btn-sm btn-outline-primary"
-                    :disabled="!formMetodologia[campo.nome].geo_json"
-                    @click="visualizarShapefile(campo)"
+                    :disabled="!formMetodologia[campo.nome].workspace || !formMetodologia[campo.nome].layer_name"
+                    @click="renderizarMapaWms(campo)"
                   >
                     Visualizar
                   </button>
                 </div>
 
-                <div v-if="formMetodologia[campo.nome].geo_json" class="mt-3">
-                  <MapSgc
-                    :ref="el => setMapaRef(campo.nome, el)"
-                    height="350px"
-                    width="100%"
-                    :manual-render="true"
+                <div
+                  v-if="formMetodologia[campo.nome].workspace && formMetodologia[campo.nome].layer_name"
+                  class="mt-3"
+                >
+                  <div
+                    :id="getMapaId(campo)"
+                    class="mapa-shapefile"
                   />
                 </div>
               </div>
@@ -519,19 +545,20 @@ defineEmits(['voltar']);
                   <button
                     type="button"
                     class="btn btn-sm btn-outline-primary"
-                    :disabled="!formMetodologia[campo.nome].geo_json"
-                    @click="visualizarShapefile(campo)"
+                    :disabled="!formMetodologia[campo.nome].workspace || !formMetodologia[campo.nome].layer_name"
+                    @click="renderizarMapaWms(campo)"
                   >
                     Visualizar mapa
                   </button>
                 </div>
 
-                <div v-if="formMetodologia[campo.nome].geo_json" class="mt-3">
-                  <MapSgc
-                    :ref="el => setMapaRef(campo.nome, el)"
-                    height="350px"
-                    width="100%"
-                    :manual-render="true"
+                <div
+                  v-if="formMetodologia[campo.nome].workspace && formMetodologia[campo.nome].layer_name"
+                  class="mt-3"
+                >
+                  <div
+                    :id="getMapaId(campo)"
+                    class="mapa-shapefile"
                   />
                 </div>
               </div>
@@ -565,5 +592,8 @@ defineEmits(['voltar']);
 </template>
 
 <style scoped>
-
+  .mapa-shapefile {
+    height: 350px;
+    width: 100%;
+  }
 </style>

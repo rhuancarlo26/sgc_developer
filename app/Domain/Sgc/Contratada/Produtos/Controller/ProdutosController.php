@@ -8,21 +8,18 @@ use App\Models\SgcvwEmpreendimentos;
 use App\Domain\Sgc\Contratada\Produtos\Services\ProdutosService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\FaunaService;
 use App\Domain\Sgc\Contratada\Produtos\Espeleologia\Services\EspeleoService;
-use App\Domain\Sgc\Contratada\Produtos\PMQA\Configuracao\Parametro\Services\ParametroService;
-use App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Services\CampanhaService;
 use App\Models\SgcPmqa;
 use App\Models\SgcPmqaParametroLista;
-use App\Models\ServicoPmqaParametro;
 use App\Models\SgcFaunaCampanha;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcEspeleoProfissional;
-use App\Models\SgcPmqaCampanha;
 use App\Models\SgcPmqaPonto;
 use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
-
+use App\Models\SgcPatrimonioPaipa;
+use App\Models\SgcPatrimonioEquipe;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +68,7 @@ class ProdutosController extends Controller
     //         ->count();
 
     //     $campanhas = $query->get();
-        
+
     //     return inertia('Sgc/Contratada/Produtos/Fauna/Fauna', [
     //         'subprodutos' => $subprodutos,
     //         'contrato' => $contrato,
@@ -116,6 +113,7 @@ class ProdutosController extends Controller
             $campanhas = match ($produto) {
                 'pmqa', 'eia'  => $this->getCampanhasPmqa($contrato),
                 'espeleologia' => $this->getCampanhasEspeleologia($contrato),
+                'patrimonio'   => $this->getCampanhasPatrimonio($contrato),
                 default        => collect(),
             };
         }
@@ -164,7 +162,10 @@ class ProdutosController extends Controller
             // Se o produto for 'pmqa' OU 'eia', chamamos a função de criação do PMQA.
             // Passamos a variável $produto original ('eia') para que a tela mantenha o título correto.
             return $this->createPmqa($request, $contrato, $produto, $contratoObj, $subproduto);
-        } else {
+        } elseif ($produto === 'patrimonio') {
+            return $this->createPatrimonio($request, $contrato, $produto, $contratoObj, $subproduto);
+        }
+        else {
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
         }
 
@@ -172,6 +173,7 @@ class ProdutosController extends Controller
         $campanhas = match ($produto) {
             'fauna' => $this->getCampanhasFauna($contrato),
             'pmqa' => $this->getCampanhasPmqa($contrato),
+            'patrimonio' => $this->getCampanhasPatrimonio($contrato),
             default => $this->getCampanhasEspeleologia($contrato)
         };
     }
@@ -345,15 +347,15 @@ class ProdutosController extends Controller
         $subprodutosEspeleologia = SgcvwSubprodutos::where('familia', 'Espeleologia')
             ->where('contrato_id', $contrato)
             ->orderBy('descricao_revisada')
-            ->get(['id', 'descricao_revisada']) 
+            ->get(['id', 'descricao_revisada'])
             ->map(function ($s) {
                 return [
                     'id' => $s->id,
                     'descricao_revisada' => $s->descricao_revisada
                 ];
             })
-            ->values() 
-            ->toArray(); 
+            ->values()
+            ->toArray();
 
 
         return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
@@ -365,7 +367,7 @@ class ProdutosController extends Controller
             'campanhaId' => $draft->id,
             'draftData' => $draft->toArray(),
             'profissionais' => $profissionais,
-            'justificativas' => $justificativas, 
+            'justificativas' => $justificativas,
             'metodologia' => $metodologia,
             'resultados_anexos' => $resultadosAnexos,
             'subprodutosEspeleologia' => $subprodutosEspeleologia,
@@ -636,5 +638,61 @@ class ProdutosController extends Controller
         ];
     }
 
+  private function createPatrimonio(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
+  {
+    $paipaId = $request->query('paipa_id');
+
+    $paipa = $paipaId
+      ? SgcPatrimonioPaipa::where('id', $paipaId)
+        ->where('contrato_id', $contrato)
+        ->with('equipe')
+        ->firstOrFail()
+      : SgcPatrimonioPaipa::firstOrCreate(
+        [
+          'contrato_id' => $contrato,
+          'subproduto' => $subproduto,
+          'status' => 'Em elaboração',
+        ],
+        [
+          'versao' => 1,
+        ]
+      );
+
+    $paipa->load('equipe');
+
+    $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+      ->get();
+
+    $profissionais = SgcPatrimonioEquipe::ativo()
+      ->orderBy('nome')
+      ->get();
+
+    return inertia('Sgc/Contratada/Produtos/Patrimonio/Create', [
+      'contrato' => $contrato,
+      'produto' => ucfirst($produto),
+      'contratos' => $contratoObj,
+      'subproduto' => $subproduto,
+      'empreendimentos' => $empreendimentos,
+      'paipa' => $paipa,
+      'paipaId' => $paipa->id,
+      'profissionais' => $profissionais,
+    ]);
+  }
+
+  private function getCampanhasPatrimonio($contrato)
+  {
+    return SgcPatrimonioPaipa::where('contrato_id', $contrato)
+      ->with('empreendimento')
+      ->get()
+      ->map(fn ($paipa) => [
+        'id' => $paipa->id,
+        'id_campanha' => $paipa->id,
+        'empreendimento' => $paipa->empreendimento?->cod_emp ?? 'N/A',
+        'data_inicial' => $paipa->created_at?->format('d/m/Y') ?? 'N/A',
+        'data_final' => 'N/A',
+        'status' => $paipa->status ?? 'Em elaboração',
+        'subproduto' => $paipa->subproduto ?? 'N/A',
+      ]);
+  }
 
 }
