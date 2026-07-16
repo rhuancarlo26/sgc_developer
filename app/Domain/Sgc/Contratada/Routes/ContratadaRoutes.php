@@ -143,11 +143,28 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('/campanha/{campanhaId}/update-partial',              [CampanhaController::class,                              'updatePartial'])->name('sgc.contratada.produtos.updatePartial');
         Route::delete('campanha/{campanha}/anexo/{anexoId}',              [AnexoController::class,                                 'destroyAnexo'])->name('sgc.contratada.produtos.anexo.destroy');
 
+        Route::post('campanha/{campanha}/arquivar', [CampanhaController::class, 'arquivar'])->name('sgc.contratada.produtos.arquivar');
+        Route::post('campanha/{campanha}/restaurar', [CampanhaController::class, 'restaurar'])->name('sgc.contratada.produtos.restaurar');
+
+        // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {
-            Route::post('salvar-campanha',                                [EspeleoCampanhaController::class,                       'salvarCampanha'])->name('sgc.contratada.produtos.espeleo.salvar_campanha');
-            Route::post('profissional/store',                             [EspeleoCampanhaController::class,                       'storeProfissional'])->name('sgc.contratada.produtos.espeleo.profissional.store');
-            Route::get('profissionais',                                   [EspeleoCampanhaController::class,                       'getProfissionais'])->name('sgc.contratada.produtos.espeleo.profissionais');
+            Route::post('salvar-campanha', [EspeleoCampanhaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.espeleo.salvar_campanha');
+            Route::post('profissional/store', [EspeleoCampanhaController::class, 'storeProfissional'])->name('sgc.contratada.produtos.espeleo.profissional.store');
+            Route::get('profissionais', [EspeleoCampanhaController::class, 'getProfissionais'])->name('sgc.contratada.produtos.espeleo.profissionais');
+            Route::get('campanhas/{campanhaId}', [EspeleoCampanhaController::class, 'show'])->name('sgc.contratada.produtos.espeleo.show');
+            Route::post('campanhas/{campanhaId}/approve', [EspeleoCampanhaController::class, 'approve'])->name('sgc.contratada.produtos.espeleo.approve')->middleware('auth', 'role:analista');
+            Route::post('resultados/upload', [EspeleoCampanhaController::class, 'uploadResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.upload');
+            Route::post('planilha-feicoes/upload', [EspeleoCampanhaController::class, 'uploadPlanilhaFeicoes'])->name('sgc.contratada.produtos.espeleo.planilha_feicoes.upload');
+            Route::post('resultados/{id}/update', [EspeleoCampanhaController::class, 'updateResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.update');
+            Route::delete('resultados/{id}/delete', [EspeleoCampanhaController::class, 'deleteResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.delete');
+            Route::post('anexos/upload', [EspeleoCampanhaController::class, 'uploadAnexo'])->name('sgc.contratada.produtos.espeleo.anexos.upload');
+            Route::post('anexos/{id}/update', [EspeleoCampanhaController::class, 'updateAnexo'])->name('sgc.contratada.produtos.espeleo.anexos.update');
+            Route::delete('anexos/{id}/delete', [EspeleoCampanhaController::class, 'deleteAnexo'])->name('sgc.contratada.produtos.espeleo.anexos.delete');
+            Route::post('estudos/store', [EspeleoCampanhaController::class, 'storeEstudosPosteriores'])->name('sgc.contratada.produtos.espeleo.estudos.store');
         });
+
+        Route::patch('/pmqa-update',                                      [ProdutosController::class,                              'updatePmqa'])->name('sgc.contratada.produtos.pmqa.update');
+        Route::patch('/pmqa/{pmqa}/aprovar',                              [ProdutosController::class,                              'aprovarPmqa'])->name('sgc.contratada.produtos.pmqa.aprovar');
 
         Route::prefix('/recursos-pmqa')->group(function () {
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/Ponto/Routes/PontoRoutes.php';
@@ -173,9 +190,20 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
     Route::post('/espeleologia/resultados/{id}/update',                   [EspeleoCampanhaController::class,                       'updateResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.update');
     Route::post('/espeleologia/estudos/store',                            [EspeleoCampanhaController::class,                       'storeEstudosPosteriores'])->name('sgc.contratada.produtos.espeleo.estudos.store');
 
-    // Route::post('/{contrato}/produtos/{produto}/resultados/upload',       [ResultadoController::class, 'upload'])->name('sgc.contratada.produtos.fauna.resultados.upload');
+        //  Route::post('/{contrato}/produtos/{produto}/resultados/upload', [ResultadoController::class, 'upload'])->name('sgc.contratada.produtos.fauna.resultados.upload');
 
+    // Rotas para MapLayerController
+    // routes/web.php ou routes/api.php
 
+        Route::get('/mapa/wms', [MapLayerController::class, 'proxyWms']);
 
+        Route::post('/espeleologia/layers/upload-shapefile', [MapLayerController::class, 'store'])->name('sgc.contratada.espeleologia.layers.upload_shapefile');
+        Route::post('/espeleologia/layers/{layer}/publish', [MapLayerController::class, 'publish'])->name('sgc.contratada.espeleologia.layers.publish');
+        Route::get('/espeleologia/layers', [MapLayerController::class, 'index'])->name('sgc.contratada.espeleologia.layers.index');
+        Route::delete('/espeleologia/layers/{layer}/desvincular', [MapLayerController::class, 'desvincular'])->name('sgc.contratada.espeleologia.layers.desvincular');
+        // Rotas para MapPageController
+        Route::get('/espeleologia/mapa/viewer', [MapPageController::class, 'viewer'])->name('sgc.contratada.espeleologia.mapa.viewer');
+        Route::get('/espeleologia/mapa/create', [MapPageController::class, 'create'])->name('sgc.contratada.espeleologia.mapa.create');
 
 });
+

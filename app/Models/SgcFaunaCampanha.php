@@ -50,7 +50,7 @@ class SgcFaunaCampanha extends Model
     {
         return $this->hasMany(SgcFaunaModuloAmostral::class, 'campanha_id', 'id');
     }
-   
+
     public function pontos_quelo_crocod()
     {
         return $this->hasMany(SgcFaunaQuelonios::class, 'id_campanha', 'id');
@@ -83,7 +83,7 @@ class SgcFaunaCampanha extends Model
 
     public function analises()
     {
-        return $this->hasMany(SgcFaunaAnaliseEtapa::class, 'id_campanha'); 
+        return $this->hasMany(SgcFaunaAnaliseEtapa::class, 'id_campanha');
     }
 
     public function resultadosTerrestre()

@@ -1,0 +1,20 @@
+[22-Apr-2026 09:12:46 America/Fortaleza] PHP Warning:  require(/home1/anama565/sgcdeveloper.online/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home1/anama565/sgcdeveloper.online/public/index.php on line 34
+[22-Apr-2026 09:12:46 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required '/home1/anama565/sgcdeveloper.online/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php83/root/usr/share/pear') in /home1/anama565/sgcdeveloper.online/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home1/anama565/sgcdeveloper.online/public/index.php on line 34
+[22-Apr-2026 09:12:50 America/Fortaleza] PHP Warning:  require(/home1/anama565/sgcdeveloper.online/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home1/anama565/sgcdeveloper.online/public/index.php on line 34
+[22-Apr-2026 09:12:50 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required '/home1/anama565/sgcdeveloper.online/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php83/root/usr/share/pear') in /home1/anama565/sgcdeveloper.online/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home1/anama565/sgcdeveloper.online/public/index.php on line 34
+[22-Apr-2026 09:33:13 America/Fortaleza] PHP Warning:  require(/home1/anama565/sgcdeveloper.online/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home1/anama565/sgcdeveloper.online/public/index.php on line 34
+[22-Apr-2026 09:33:13 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required '/home1/anama565/sgcdeveloper.online/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php83/root/usr/share/pear') in /home1/anama565/sgcdeveloper.online/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home1/anama565/sgcdeveloper.online/public/index.php on line 34
+[28-Apr-2026 14:35:16 America/Fortaleza] PHP Warning:  require(/home1/anama565/sgcdeveloper.online/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home1/anama565/sgcdeveloper.online/public/index.php on line 34
+[28-Apr-2026 14:35:16 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required '/home1/anama565/sgcdeveloper.online/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php83/root/usr/share/pear') in /home1/anama565/sgcdeveloper.online/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home1/anama565/sgcdeveloper.online/public/index.php on line 34

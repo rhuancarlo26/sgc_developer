@@ -38,6 +38,37 @@ class CampanhaController extends Controller
         protected ModeloService $modeloService,
     ) {}
 
+    // -------------------------------------------------------------------------
+    // VISUALIZAR
+    // -------------------------------------------------------------------------
+
+    // public function show($contrato, $produto, $campanhaId,)
+    // {
+    //     $campanha = SgcFaunaCampanha::with([
+    //         'abios.abio',
+    //         'profissionais.profissional',
+    //         'modulos_amostrais',
+    //         'pontos_quelo_crocod',
+    //         'pontos_cavernicola',
+    //         'metodologias',
+    //         'resultadosTerrestre',
+    //         'resultadosAquatica',
+    //         'resultadosCavernicola',
+    //         'resultados_consideracoes',
+    //         'anexos',
+    //     ])->findOrFail($campanhaId);
+
+    //     return Inertia::render('Sgc/Contratada/Produtos/Fauna/VisualizarCampanha', [
+    //         'campanha'   => CampanhaResource::toArray($campanha),
+    //         'contrato'   => $campanha->id_contrato,
+    //         'produto'    => $campanha->subproduto,
+    //         'contratos'  => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
+    //         'canApprove' => Auth::user()->perfis_id === 3 && $campanha->status === 'Em análise',
+    //     ]);
+    // }
+
+
+
     public function show($contrato, $produto, $campanhaId, $modulo = null)
     {
         if ($produto === 'malarigeno' || SgcModulo::where('produto_slug', $produto)->exists()) {
@@ -141,7 +172,7 @@ class CampanhaController extends Controller
             'contrato'   => $campanha->id_contrato,
             'produto'    => $campanha->subproduto,
             'contratos'  => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
-            'canApprove' => Auth::user()->perfis_id === 2 && $campanha->status === 'Em análise',
+            'canApprove' => Auth::user()->perfis_id === 3 && $campanha->status === 'Em análise',
             'coordenadas' => $coordenadas,
         ]);
     }
@@ -235,13 +266,10 @@ class CampanhaController extends Controller
                 'formacao'         => $p['profissional']['formacao'] ?? null,
             ], (array) $request->input('profissionais', []));
 
-            $validated['anexos']                       = $request->file('anexos') ?? [];
-            $validated['planilha_terrestre']           = $request->file('planilha_terrestre');
-            $validated['planilha_aquatica']            = $request->file('planilha_aquatica');
-            $validated['planilha_cavernicola']         = $request->file('planilha_cavernicola');
-            $validated['atropelamento_campanha']       = $request->input('atropelamento_campanha', []);
-            $validated['planilha_atropelamento']       = $request->file('planilha_atropelamento');
-            $validated['consideracoes_atropelamento']  = $request->input('consideracoes_atropelamento');
+            $validated['anexos']               = $request->file('anexos') ?? [];
+            // $validated['planilha_terrestre']   = $request->file('planilha_terrestre');
+            // $validated['planilha_aquatica']    = $request->file('planilha_aquatica');
+            // $validated['planilha_cavernicola'] = $request->file('planilha_cavernicola');
 
             DB::beginTransaction();
             $this->campanhaService->atualizarCampanha($contrato, $campanhaId, $validated);
@@ -493,7 +521,6 @@ class CampanhaController extends Controller
             ->with('success', 'Campanha restaurada com sucesso.');
     }
 
-
     // -------------------------------------------------------------------------
     // Dados estáticos centralizados — usados aqui e no ProdutosController
     // -------------------------------------------------------------------------
@@ -512,9 +539,6 @@ class CampanhaController extends Controller
         return ['Amazônia', 'Caatinga', 'Cerrado', 'Mata Atlântica', 'Pampa', 'Pantanal'];
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // DOWNLOAD — planilha modelo de resultados de atropelamento
-    // ─────────────────────────────────────────────────────────────────────
     public function downloadModeloAtropelamento(): StreamedResponse
     {
         $spreadsheet = new Spreadsheet();

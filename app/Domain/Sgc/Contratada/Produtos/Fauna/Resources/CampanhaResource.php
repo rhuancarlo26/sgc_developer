@@ -31,12 +31,7 @@ class CampanhaResource
             'resultadosTerrestre'     => $campanha->resultadosTerrestre?->toArray() ?? [],
             'resultadosAquatica'      => $campanha->resultadosAquatica?->toArray() ?? [],
             'resultadosCavernicola'   => $campanha->resultadosCavernicola?->toArray() ?? [],
-            'consideracoes'                => $campanha->resultados_consideracoes?->consideracoes,
-            'planilha_atropelamento'       => $campanha->planilha_atropelamento
-                ? \App\Helpers\StorageHelper::publicUrl($campanha->planilha_atropelamento)
-                : null,
-            'consideracoes_atropelamento'  => $campanha->consideracoes_atropelamento,
-            'atropelamento_campanhas'      => self::mapAtropelamentoCampanhas($campanha),
+            'consideracoes'           => $campanha->resultados_consideracoes?->consideracoes,
             'abios'                   => self::mapAbios($campanha),
             'profissionais'           => self::mapProfissionais($campanha),
             'modulos_amostrais'       => self::mapModulosAmostrais($campanha),
@@ -259,7 +254,7 @@ class CampanhaResource
             'id'           => $anexo->id,
             'tipo_anexo'   => $anexo->tipo_anexo,
             'caminho'      => Storage::url($anexo->caminho),
-            'nome_arquivo' => $anexo->nome ?? basename($anexo->caminho),
+            'nome_arquivo' => $anexo->nome_arquivo ?? basename($anexo->caminho),
             'created_at'   => $anexo->created_at,
         ])->toArray();
     }
@@ -299,7 +294,7 @@ class CampanhaResource
             'etapa'      => $analise->etapa,
             'status'     => $analise->status,
             'comentario' => $analise->comentario,
-            'fiscal'     => $analise->fiscal ? [  
+            'fiscal'     => $analise->fiscal ? [
                 'id'   => $analise->fiscal->id,
                 'name' => $analise->fiscal->name,
             ] : null,

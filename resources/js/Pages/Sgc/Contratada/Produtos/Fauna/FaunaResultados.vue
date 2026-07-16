@@ -272,9 +272,9 @@ const downloadModelos = () => {
 
 const temPlanilha = computed(() => {
     return (
-        resultados.value.terrestre.length ||
-        resultados.value.aquatica.length ||
-        resultados.value.cavernicola.length
+        (resultados.value.terrestre?.length || 0) ||
+        (resultados.value.aquatica?.length || 0) ||
+        (resultados.value.cavernicola?.length || 0)
     );
 });
 
@@ -310,8 +310,8 @@ const avancar = () => {
             </li>
         </ul>
 
-        <!-- NAV TOPO (só aparece se tiver planilha) -->
-        <div v-if="temPlanilha" class="d-flex justify-content-between mb-3">
+        <!-- NAVEGAÇÃO TOPO -->
+        <div v-if="temPlanilha" class="d-flex justify-content-between mb-3 sticky-top bg-white py-2">
             <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />
             <NavButton type-button="primary" title="Avançar" @click="avancar" />
         </div>
@@ -440,6 +440,7 @@ const avancar = () => {
             <textarea v-model="consideracoes" class="form-control" rows="4"></textarea>
         </div>
 
+        <!-- NAVEGAÇÃO -->
         <!-- Navegação -->
         <div v-if="!temPlanilha" class="d-flex justify-content-between">
             <NavButton type-button="secondary" title="Voltar" @click="$emit('prev')" />

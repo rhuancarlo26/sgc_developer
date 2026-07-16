@@ -273,35 +273,33 @@ onMounted(async () => {
   // Os eventos de tile são rastreados por camada individualmente em toggleLayer
 
   addEmpCoordinatesLayer();
-  document.addEventListener("fullscreenchange", handleFullscreenChange);
+  initTemporaryDrawTools();
 
-  if (!props.somenteTrecho) {
-    initTemporaryDrawTools();
-
-    const params = {};
-    if (props.campanhaId) {
-      params.campanha_id = props.campanhaId;
-    }
-
-    isLoadingMap.value = true;
-    loadingMapMessage.value = 'Carregando camadas...';
-    startLoading();
-    try {
-      const { data } = await axios.get("/sgc/contratada/espeleologia/layers", { params });
-      layers.value = data;
-
-      data.forEach((layer, index) => {
-        const key = `${layer.workspace}:${layer.layer_name}`;
-        layerColors.value[key] = getLayerColor(index);
-      });
-    } finally {
-      isLoadingMap.value = false;
-      loadingMapMessage.value = '';
-      stopLoading();
-    }
-
-    map.value.on("click", getFeatureInfo);
+  const params = {};
+  if (props.campanhaId) {
+    params.campanha_id = props.campanhaId;
   }
+
+  isLoadingMap.value = true;
+  loadingMapMessage.value = 'Carregando camadas...';
+  startLoading();
+  try {
+    const { data } = await axios.get("/sgc/contratada/espeleologia/layers", { params });
+    layers.value = data;
+
+    // Armazenar cores para cada camada
+    data.forEach((layer, index) => {
+      const key = `${layer.workspace}:${layer.layer_name}`;
+      layerColors.value[key] = getLayerColor(index);
+    });
+  } finally {
+    isLoadingMap.value = false;
+    loadingMapMessage.value = '';
+    stopLoading();
+  }
+
+  map.value.on("click", getFeatureInfo);
+  document.addEventListener("fullscreenchange", handleFullscreenChange);
 });
 
 onUnmounted(() => {

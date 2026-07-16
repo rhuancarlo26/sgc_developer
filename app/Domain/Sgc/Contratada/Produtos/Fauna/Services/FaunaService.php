@@ -45,7 +45,7 @@ class FaunaService
                 $profissional = SgcFaunaProfissionais::where('id_contrato', $contratoId)
                     ->where('profissional', $profissionalData['profissional'])
                     ->first();
-                
+
                 if ($profissional) {
                     SgcFaunaCampanhaProfissional::create([
                         'campanha_id' => $campanha->id,
@@ -168,6 +168,15 @@ class FaunaService
                 'id_campanha' => $campanha->id,
                 'consideracoes' => $data['consideracoes'],
             ]);
+        }
+
+        // Salvar resultados e atualizar id_campanha
+        if (!empty($data['planilha']) && $data['planilha']->isValid()) {
+            $result = $this->salvarResultados($contratoId, $data['planilha'], null);
+            SgcFaunaResultados::where('id_contrato', $contratoId)
+                ->whereNull('id_campanha')
+                ->where('created_at', '>=', now()->subSeconds(30))
+                ->update(['id_campanha' => $campanha->id]);
         }
 
         // Salvar anexos

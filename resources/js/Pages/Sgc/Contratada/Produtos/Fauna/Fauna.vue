@@ -26,8 +26,8 @@ const isPerfil3 = computed(() => (props.auth.user.perfis_id ?? 0) === 3);
 
 const previewModal = ref(null);
 
-// Lista de produtos disponíveis: os fixos do sistema + os criados dinamicamente a partir de um módulo
-const produtosFixos = [
+// Lista de produtos disponíveis
+const produtos = [
   { title: "Fauna", routeParam: "fauna" },
   { title: "Espeleologia", routeParam: "espeleologia" },
   { title: "Patrimônio", routeParam: "patrimonio" },
@@ -227,6 +227,7 @@ const gerenciarCampanha = (pmqaId) => {
   );
 };
 
+// Redirecionar para análise
 const analisarCampanha = (campanhaId) => {
   router.get(route('sgc.contratada.produtos.analise', [props.contrato, selectedProduto.value, campanhaId]));
 };
@@ -539,44 +540,43 @@ const restaurarCampanha = (campanha) => {
                               @click="analisarCampanha(campanha.id)"
                             />
 
-                          <NavButton
-                            v-if="isPerfil3 && !props.mostrarArquivadas"
-                            type-button="secondary"
-                            title="Arquivar"
-                            @click="arquivarCampanha(campanha)"
-                          />
-                          <NavButton
-                            v-if="isPerfil3 && props.mostrarArquivadas"
-                            type-button="warning"
-                            title="Restaurar"
-                            @click="restaurarCampanha(campanha)"
-                          />
+                            <NavButton
+                              v-if="isPerfil3 && !props.mostrarArquivadas"
+                              type-button="secondary"
+                              title="Arquivar"
+                              @click="arquivarCampanha(campanha)"
+                            />
+                            <NavButton
+                              v-if="isPerfil3 && props.mostrarArquivadas"
+                              type-button="warning"
+                              title="Restaurar"
+                              @click="restaurarCampanha(campanha)"
+                            />
 
-                          <!-- Menu de Análise em Massa (dropdown) -->
-                          <div v-if="canApprove && campanha.status === 'Em análise'" class="dropdown d-inline-block">
-                            <button
-                              class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                              type="button"
-                              :id="`dropdownMenu-${campanha.id}`"
-                              data-bs-toggle="dropdown"
-                              aria-expanded="false"
-                            >
-                              ⋮
-                            </button>
-                            <ul :aria-labelledby="`dropdownMenu-${campanha.id}`" class="dropdown-menu">
-                              <li>
-                                <a class="dropdown-item text-success" href="#" @click.prevent="abrirModalAprovarTudo(campanha)">
-                                  <strong>✓ Aprovar</strong>
-                                </a>
-                              </li>
-                              <li>
-                                <a class="dropdown-item text-danger" href="#" @click.prevent="abrirModalReprovarTudo(campanha)">
-                                  <strong>✗ Reprovar</strong>
-                                </a>
-                              </li>
-                            </ul>
-
-                          </div>
+                            <!-- Menu de Análise em Massa (dropdown) -->
+                            <div v-if="canApprove && campanha.status === 'Em análise'" class="dropdown d-inline-block">
+                              <button
+                                class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                type="button"
+                                :id="`dropdownMenu-${campanha.id}`"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                              >
+                                ⋮
+                              </button>
+                              <ul :aria-labelledby="`dropdownMenu-${campanha.id}`" class="dropdown-menu">
+                                <li>
+                                  <a class="dropdown-item text-success" href="#" @click.prevent="abrirModalAprovarTudo(campanha)">
+                                    <strong>✓ Aprovar</strong>
+                                  </a>
+                                </li>
+                                <li>
+                                  <a class="dropdown-item text-danger" href="#" @click.prevent="abrirModalReprovarTudo(campanha)">
+                                    <strong>✗ Reprovar</strong>
+                                  </a>
+                                </li>
+                              </ul>
+                            </div>
 
                             <!-- Excluir (Em elaboração, não é perfil 4) -->
                             <NavButton

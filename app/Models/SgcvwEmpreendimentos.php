@@ -17,7 +17,7 @@ class SgcvwEmpreendimentos extends Model
     {
         return SgcvwEstudos::where('cod_emp', $this->cod_emp)->get();
     }
-    
+
     public function changelogs()
     {
         return $this->hasMany(ChangeLog::class, 'record_id')

@@ -146,9 +146,9 @@ const form = useForm({
   // data_campanha_final: formatDateForInput(props.campanha.data_fim),
 
   data_campanha_inicial: formatDateForInput(
-  props.campanha.data_ini ||
-  props.campanha.data_inicial ||
-  props.campanha.data_campanha_inicial
+    props.campanha.data_ini ||
+    props.campanha.data_inicial ||
+    props.campanha.data_campanha_inicial
   ),
 
   data_campanha_final: formatDateForInput(
@@ -467,18 +467,18 @@ const excluirProfissional = (id) => {
 
 const salvarNovoProfissional = (novoProfissional) => {
   console.log('Salvando novo profissional:', novoProfissional);
- 
+
   // Validações básicas no front
   if (!novoProfissional.profissional || !novoProfissional.formacao || !novoProfissional.cpf) {
     alert('❌ Preencha os campos obrigatórios: Nome, Formação e CPF.');
     return;
   }
- 
+
   const url = route('sgc.contratada.produtos.profissional.store', [
     props.contrato,
     props.produto.toLowerCase(),
   ]);
- 
+
   // Usar fetch para evitar problemas com Inertia
   fetch(url, {
     method: 'POST',
@@ -493,7 +493,7 @@ const salvarNovoProfissional = (novoProfissional) => {
   .then(response => response.json())
   .then(data => {
     console.log('Response:', data);
- 
+
     if (data.success) {
       // Adicionar o novo profissional à lista
       props.profissionais.push({
@@ -501,10 +501,10 @@ const salvarNovoProfissional = (novoProfissional) => {
         profissional: data.profissional.profissional,
         formacao: data.profissional.formacao,
       });
- 
+
       alert('✅ Profissional cadastrado com sucesso!');
-      
-      
+
+
     } else {
       alert('❌ Erro: ' + (data.message || 'Tente novamente.'));
     }
@@ -580,8 +580,8 @@ const analiseAtualPorEtapa = computed(() => {
 // Computed para comentários por análise
 const comentariosPorAnalise = computed(() => (analise) => {
   return props.comentarios
-    .filter(c => 
-      c.etapa === analise.etapa &&      
+    .filter(c =>
+      c.etapa === analise.etapa &&
       c.campanha_id === analise.id_campanha
     )
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -908,7 +908,7 @@ const excluirAnexo = (anexoId) => {
                   />
                   <!-- SubStep 3 fauna regular: Módulos amostrais -->
                   <ModulosAmostraisEditar
-                    v-if="subStep === 3 && !isAtropelamento"
+                    v-if="subStep === 3"
                     :form="form"
                     :modulo-records="form.modulos_amostrais"
                     :ufs="props.ufs"
@@ -936,7 +936,7 @@ const excluirAnexo = (anexoId) => {
                     </template>
                   </CampanhaAtropelamento>
                   <QueloniosCrocodilianosEditar
-                    v-if="subStep === 4 && !isAtropelamento"
+                    v-if="subStep === 4"
                     :form="form"
                     :ponto-records="form.pontos_quelo_crocod"
                     :sub-step="subStep"
@@ -1140,8 +1140,8 @@ const excluirAnexo = (anexoId) => {
                           v-for="analise in analisesRejeitadas"
                           :key="analise.id"
                           class="analise-item"
-                          :class="{ 
-                            'analise-item-even': analisesRejeitadas.indexOf(analise) % 2 === 0, 
+                          :class="{
+                            'analise-item-even': analisesRejeitadas.indexOf(analise) % 2 === 0,
                             'analise-item-odd': analisesRejeitadas.indexOf(analise) % 2 !== 0,
                             'analise-item-current': analise.id === analiseAtualPorEtapa?.id
                           }"
@@ -1180,7 +1180,7 @@ const excluirAnexo = (anexoId) => {
                                   <span class="comentario-label">Nenhum comentário salvo para esta análise.</span>
                                 </div>
                               </div>
-                            <form 
+                            <form
                               v-if="props.campanha.status === 'Rejeitada' && analise.id === analiseAtualPorEtapa?.id"
                               @submit.prevent="salvarComentario"
                               class="mt-2"
