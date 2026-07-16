@@ -18,6 +18,9 @@ use App\Models\DashexcelEmpreendimentos;
 use App\Models\SgcvwEmpreendimentos;
 use App\Models\SgcvwEstudos;
 use App\Models\Sgcvwempfases;
+use App\Models\SgcFaunaCampanha;
+use App\Models\SgcEspeleoCampanha;
+use App\Models\SgcPmqa;
 use App\Models\ChangeLog;
 
 use Illuminate\Support\Facades\Schema;
@@ -270,6 +273,71 @@ class EmpreendimentosController extends Controller
         // filtros em estudos para a timeline - Item Edital 5.3.1
         $iphan_emp_estudos_521 = SgcvwEstudos::where(['cod_emp' => $empreendimentos2->cod_emp])->where('item_edital', 'like', '%5.2.1%')->get();
         $iphan_emp_estudos_531 = SgcvwEstudos::where(['cod_emp' => $empreendimentos2->cod_emp])->where('item_edital', 'like', '%5.3.1%')->get();
+        
+            $campanhasDetalhadas = collect();
+
+            $campanhasFauna = SgcFaunaCampanha::where('cod_emp', $empreendimentos2->cod_emp)
+                ->where('id_contrato', $empreendimentos2->contrato_id)
+                ->where('status', 'Aprovada')
+                ->get(['id', 'id_campanha', 'subproduto', 'status', 'data_ini', 'data_fim', 'sei_dnit'])
+                ->map(fn ($campanha) => [
+                    'produto' => 'Fauna',
+                    'campanha_id' => $campanha->id,
+                    'identificador' => $campanha->id_campanha ?? $campanha->id,
+                    'subproduto' => $campanha->subproduto,
+                    'status' => $campanha->status,
+                    'data_inicial' => $campanha->data_ini,
+                    'data_final' => $campanha->data_fim,
+                    'sei_dnit' => $campanha->sei_dnit,
+                ]);
+
+            $campanhasEspeleologia = SgcEspeleoCampanha::where('cod_emp', $empreendimentos2->cod_emp)
+                ->where('id_contrato', $empreendimentos2->contrato_id)
+                ->where('status', 'Aprovada')
+                ->get(['id', 'id_campanha', 'subproduto', 'status', 'created_at'])
+                ->map(fn ($campanha) => [
+                    'produto' => 'Espeleologia',
+                    'campanha_id' => $campanha->id,
+                    'identificador' => $campanha->id_campanha ?? $campanha->id,
+                    'subproduto' => $campanha->subproduto,
+                    'status' => $campanha->status,
+                    'data_inicial' => $campanha->created_at,
+                    'data_final' => null,
+                    'sei_dnit' => null,
+                ]);
+
+            $campanhasPmqa = SgcPmqa::where('cod_emp', $empreendimentos2->cod_emp)
+                ->where('id_contrato', $empreendimentos2->contrato_id)
+                ->where('status_aprovacao', 'Aprovada')
+                ->get(['id', 'subproduto', 'status_aprovacao', 'created_at'])
+                ->map(fn ($campanha) => [
+                    'produto' => 'PMQA',
+                    'campanha_id' => $campanha->id,
+                    'identificador' => $campanha->id,
+                    'subproduto' => $campanha->subproduto,
+                    'status' => $campanha->status_aprovacao,
+                    'data_inicial' => $campanha->created_at,
+                    'data_final' => null,
+                    'sei_dnit' => null,
+                ]);
+
+            $campanhasDetalhadas = $campanhasDetalhadas
+                ->merge($campanhasFauna)
+                ->merge($campanhasEspeleologia)
+                ->merge($campanhasPmqa)
+                ->sortBy([
+                    ['produto', 'asc'],
+                    ['identificador', 'desc'],
+                ])
+                ->values();
+
+            $campanhasPorProduto = $campanhasDetalhadas
+                ->groupBy('produto')
+                ->map(fn ($itens, $produto) => [
+                    'produto' => $produto,
+                    'quantidade' => $itens->count(),
+                ])
+                ->values();
 
         return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/Index', [
             ...$contratos,
@@ -291,6 +359,8 @@ class EmpreendimentosController extends Controller
             // IPHAN
             'iphan_emp_estudos_521' => $iphan_emp_estudos_521,
             'iphan_emp_estudos_531' => $iphan_emp_estudos_531,
+            'campanhas_por_produto' => $campanhasPorProduto,
+            'campanhas_detalhadas' => $campanhasDetalhadas,
         ]);
     }
     public function search(Request $request)

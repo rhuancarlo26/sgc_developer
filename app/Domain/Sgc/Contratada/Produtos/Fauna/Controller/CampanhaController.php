@@ -15,9 +15,11 @@ use App\Models\SgcFaunaCampanhaAbios;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcFaunaAnaliseEtapa;
 use App\Models\SgcFaunaCampanhaProfissional;
+use App\Models\SgcMalarigeno;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -35,44 +37,72 @@ class CampanhaController extends Controller
         protected ModeloService $modeloService,
     ) {}
 
-    // -------------------------------------------------------------------------
-    // VISUALIZAR
-    // -------------------------------------------------------------------------
-
-    // public function show($contrato, $produto, $campanhaId,)
-    // {
-    //     $campanha = SgcFaunaCampanha::with([
-    //         'abios.abio',
-    //         'profissionais.profissional',
-    //         'modulos_amostrais',
-    //         'pontos_quelo_crocod',
-    //         'pontos_cavernicola',
-    //         'metodologias',
-    //         'resultadosTerrestre',
-    //         'resultadosAquatica',
-    //         'resultadosCavernicola',
-    //         'resultados_consideracoes',
-    //         'anexos',
-    //     ])->findOrFail($campanhaId);
-
-    //     return Inertia::render('Sgc/Contratada/Produtos/Fauna/VisualizarCampanha', [
-    //         'campanha'   => CampanhaResource::toArray($campanha),
-    //         'contrato'   => $campanha->id_contrato,
-    //         'produto'    => $campanha->subproduto,
-    //         'contratos'  => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
-    //         'canApprove' => Auth::user()->perfis_id === 3 && $campanha->status === 'Em análise',
-    //     ]);
-    // }
-
-
-
     public function show($contrato, $produto, $campanhaId, $modulo = null)
     {
+        if ($produto === 'malarigeno') {
+            $campanha = SgcMalarigeno::with(['modulo', 'fotos', 'anexos', 'analises.fiscal'])
+                ->where('id_contrato', $contrato)
+                ->findOrFail($campanhaId);
+
+            $campanhaData = [
+                'id' => $campanha->id,
+                'id_contrato' => $campanha->id_contrato,
+                'subproduto' => $campanha->subproduto,
+                'modulo_id' => $campanha->modulo_id,
+                'modulo' => $campanha->modulo?->only(['id', 'nome', 'nome_planilha_modelo']),
+                'status' => $campanha->status,
+                'planilha_nome' => $campanha->planilha_nome,
+                'planilha_caminho' => $campanha->planilha_caminho,
+                'planilha_url' => $campanha->planilha_caminho ? Storage::url($campanha->planilha_caminho) : null,
+                'created_at' => optional($campanha->created_at)->format('d/m/Y H:i'),
+                'updated_at' => optional($campanha->updated_at)->format('d/m/Y H:i'),
+                'fotos' => $campanha->fotos->map(fn($foto) => [
+                    'id' => $foto->id,
+                    'nome_arquivo' => $foto->nome_arquivo,
+                    'caminho_arquivo' => $foto->caminho_arquivo,
+                    'url' => $foto->caminho_arquivo ? Storage::url($foto->caminho_arquivo) : null,
+                    'latitude' => $foto->latitude,
+                    'longitude' => $foto->longitude,
+                    'data_captura' => optional($foto->data_captura)->format('d/m/Y H:i'),
+                    'descricao' => $foto->descricao,
+                ])->values(),
+                'anexos' => $campanha->anexos->map(fn($anexo) => [
+                    'id' => $anexo->id,
+                    'nome_arquivo' => $anexo->nome_arquivo,
+                    'caminho_arquivo' => $anexo->caminho_arquivo,
+                    'url' => $anexo->caminho_arquivo ? Storage::url($anexo->caminho_arquivo) : null,
+                ])->values(),
+                'analises' => $campanha->analises->map(fn($analise) => [
+                    'id' => $analise->id,
+                    'versao' => $analise->versao_analise,
+                    'status' => $analise->status,
+                    'observacoes' => $analise->observacoes,
+                    'fiscal' => $analise->fiscal ? [
+                        'id' => $analise->fiscal->id,
+                        'name' => $analise->fiscal->name,
+                    ] : null,
+                    'created_at' => optional($analise->created_at)->format('d/m/Y H:i'),
+                ])->values(),
+            ];
+
+            return Inertia::render('Sgc/Contratada/Produtos/Malarigeno/VisualizarCampanha', [
+                'campanha' => $campanhaData,
+                'campanha_id' => $campanhaId,
+                'contrato' => $campanha->id_contrato,
+                'produto' => 'malarigeno',
+                'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
+                'canApprove' => Auth::user()->perfis_id === 3 && $campanha->status === 'Em análise',
+            ]);
+        }
+
         $moduloativo = "Fauna";
         $campanhaData = null;
         
+        $isEspeleologia = strtolower((string) $produto) === 'espeleologia'
+            || strtolower((string) $modulo) === 'espeleologia';
+
         // ✅ Se for Espeleologia, carrega o modelo específico
-        if ($modulo === 'espeleologia') {
+        if ($isEspeleologia && strtolower((string) $produto) !== 'fauna') {
             Log::debug('CampanhaController: Módulo de Espeleologia acessado', [
                 'campanha_id' => $campanhaId,
             ]);
@@ -98,8 +128,9 @@ class CampanhaController extends Controller
                 'resultadosCavernicola',
                 'resultados_consideracoes',
                 'anexos',
+                'atropelamento_campanhas',
             ])->findOrFail($campanhaId);
-            
+
             Log::debug('FaunaController: resultados por grupo', [
                 'campanha_id'          => $campanhaId,
                 'terrestre_count'      => $campanha->resultadosTerrestre->count(),
@@ -122,7 +153,7 @@ class CampanhaController extends Controller
             'contrato'   => $campanha->id_contrato,
             'produto'    => $campanha->subproduto,
             'contratos'  => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
-            'canApprove' => Auth::user()->perfis_id === 3 && $campanha->status === 'Em análise',
+            'canApprove' => Auth::user()->perfis_id === 2 && $campanha->status === 'Em análise',
             'coordenadas' => $coordenadas,
         ]);
     }
@@ -216,10 +247,13 @@ class CampanhaController extends Controller
                 'formacao'         => $p['profissional']['formacao'] ?? null,
             ], (array) $request->input('profissionais', []));
 
-            $validated['anexos']               = $request->file('anexos') ?? [];
-            // $validated['planilha_terrestre']   = $request->file('planilha_terrestre');
-            // $validated['planilha_aquatica']    = $request->file('planilha_aquatica');
-            // $validated['planilha_cavernicola'] = $request->file('planilha_cavernicola');
+            $validated['anexos']                       = $request->file('anexos') ?? [];
+            $validated['planilha_terrestre']           = $request->file('planilha_terrestre');
+            $validated['planilha_aquatica']            = $request->file('planilha_aquatica');
+            $validated['planilha_cavernicola']         = $request->file('planilha_cavernicola');
+            $validated['atropelamento_campanha']       = $request->input('atropelamento_campanha', []);
+            $validated['planilha_atropelamento']       = $request->file('planilha_atropelamento');
+            $validated['consideracoes_atropelamento']  = $request->input('consideracoes_atropelamento');
 
             DB::beginTransaction();
             $this->campanhaService->atualizarCampanha($contrato, $campanhaId, $validated);
@@ -441,7 +475,7 @@ class CampanhaController extends Controller
         }
     }
 
-        public function arquivar($contrato, $produto, $campanha)
+    public function arquivar($contrato, $produto, $campanha)
     {
         $campanhaObj = SgcFaunaCampanha::where('id_contrato', $contrato)
             ->where('id', $campanha)
@@ -471,6 +505,7 @@ class CampanhaController extends Controller
             ->with('success', 'Campanha restaurada com sucesso.');
     }
 
+
     // -------------------------------------------------------------------------
     // Dados estáticos centralizados — usados aqui e no ProdutosController
     // -------------------------------------------------------------------------
@@ -488,7 +523,10 @@ class CampanhaController extends Controller
     {
         return ['Amazônia', 'Caatinga', 'Cerrado', 'Mata Atlântica', 'Pampa', 'Pantanal'];
     }
-    
+
+    // ─────────────────────────────────────────────────────────────────────
+    // DOWNLOAD — planilha modelo de resultados de atropelamento
+    // ─────────────────────────────────────────────────────────────────────
     public function downloadModeloAtropelamento(): StreamedResponse
     {
         $spreadsheet = new Spreadsheet();

@@ -14,6 +14,7 @@ class SgcFaunaCampanha extends Model
         'data_ini',
         'data_fim',
         'periodo',
+        'sei_dnit',
         'observacoes',
         'num_abio',
         'cod_emp',
@@ -21,11 +22,14 @@ class SgcFaunaCampanha extends Model
         'status',
         'arquivada_em',
         'etapa_atual',
-        'versao_analise'
+        'versao_analise',
+        'planilha_atropelamento',
+        'consideracoes_atropelamento'
     ];
 
     protected $casts = [
         'id_campanha' => 'integer',
+        'sei_dnit' => 'integer',
         'arquivada_em' => 'datetime',
     ];
 
@@ -99,6 +103,10 @@ class SgcFaunaCampanha extends Model
         return $this->hasMany(SgcFaunaResultadosCavernicola::class, 'id_campanha', 'id');
     }
 
+    public function atropelamento_campanhas()
+    {
+        return $this->hasMany(SgcFaunaAtropelamentoCampanha::class, 'campanha_id', 'id');
+    }
 
 
 }

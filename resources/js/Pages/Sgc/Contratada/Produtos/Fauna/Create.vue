@@ -42,17 +42,16 @@ const campanhaId = ref(props.campanhaId ?? null);
 const salvando = ref(false);
 const erroSalvamento = ref(null);
 
-// ─── Computed: detecta subproduto Atropelamento ───────────────────────────────
-const isAtropelamento = computed(() =>
-    props.subproduto?.toLowerCase().includes('atropelamento') ?? false
-);
-
 // ─── Formulários — inicializados com draftData se existir ────────────────────
 const form = reactive({
     cod_emp: props.draftData?.cod_emp ?? '',
-    familia: props.produto === 'Fauna' ? 'Fauna' : (props.draftData?.familia ?? ''),
+    subproduto: props.subproduto ?? props.draftData?.subproduto ?? props.produto,
     id_campanha: props.draftData?.id_campanha ?? '' 
 });
+
+const isAtropelamento = computed(() =>
+    props.subproduto?.toLowerCase().includes('atropelamento') ?? false
+);
 
 const formCampanha = reactive({
     rodovia: null, data_inicial: null, data_final: null,
@@ -67,6 +66,7 @@ const formDadosGerais = reactive({
     data_campanha_inicial: props.draftData?.data_campanha_inicial ?? '',
     data_campanha_final:   props.draftData?.data_campanha_final   ?? '',
     periodo:               props.draftData?.periodo               ?? '',
+    sei_dnit:              props.draftData?.sei_dnit              ?? '',
     obs:                   props.draftData?.observacoes           ?? '',
     errors:                {},
 });
@@ -117,9 +117,9 @@ const resultadosRecords      = ref({
     cavernicola: props.draftData?.resultadosCavernicola ?? [],
 });
 
-// ─── Atropelamento ────────────────────────────────────────────────────────────
-const planilhaAtropelamento      = ref(null);
-const consideracoesAtropelamento = ref('');
+// Atropelamento
+const planilhaAtropelamento       = ref(null);
+const consideracoesAtropelamento  = ref('');
 
 // ─── Anexos ───────────────────────────────────────────────────────────────────
 const anexos = ref({
@@ -179,6 +179,7 @@ function buildApresentacaoPayload() {
     fd.append('data_campanha_inicial',     formDadosGerais.data_campanha_inicial ?? '');
     fd.append('data_campanha_final',       formDadosGerais.data_campanha_final   ?? '');
     fd.append('periodo',                   formDadosGerais.periodo               ?? '');
+    fd.append('sei_dnit',                  formDadosGerais.sei_dnit              ?? '');
     fd.append('observacoes',               formDadosGerais.obs                   ?? '');
     fd.append('nao_se_aplica_quelo',       naoSeAplicaQuelonios.value ? '1' : '0');
     fd.append('nao_se_aplica_cavernicola', naoSeAplicaCavernicola.value ? '1' : '0');
@@ -206,20 +207,24 @@ function buildApresentacaoPayload() {
         fd.append(`modulos_amostrais[${i}][latitude_final]`,    m.latitude_final    ?? '');
         fd.append(`modulos_amostrais[${i}][longitude_final]`,   m.longitude_final   ?? '');
         fd.append(`modulos_amostrais[${i}][obs]`,               m.obs               ?? '');
-        if (m.arquivo) fd.append(`modulos_amostrais[${i}][arquivo]`, m.arquivo);
+            if (m.arquivo) fd.append(`modulos_amostrais[${i}][arquivo]`, m.arquivo);
     });
 
     // Campanhas de atropelamento
     campanhaRecords.value.forEach((c, i) => {
-        fd.append(`atropelamento_campanha[${i}][rodovia]`,      c.rodovia      ?? '');
-        fd.append(`atropelamento_campanha[${i}][data_inicial]`, c.data_inicial ?? '');
-        fd.append(`atropelamento_campanha[${i}][data_final]`,   c.data_final   ?? '');
-        fd.append(`atropelamento_campanha[${i}][uf_inicial]`,   c.uf_inicial   ?? '');
-        fd.append(`atropelamento_campanha[${i}][uf_final]`,     c.uf_final     ?? '');
+        fd.append(`atropelamento_campanha[${i}][rodovia]`,            c.rodovia            ?? '');
+        fd.append(`atropelamento_campanha[${i}][data_inicial]`,       c.data_inicial        ?? '');
+        fd.append(`atropelamento_campanha[${i}][data_final]`,         c.data_final          ?? '');
+        fd.append(`atropelamento_campanha[${i}][uf_inicial]`,         c.uf_inicial          ?? '');
+        fd.append(`atropelamento_campanha[${i}][uf_final]`,           c.uf_final            ?? '');
         if (c.km_inicial != null) fd.append(`atropelamento_campanha[${i}][km_inicial]`, c.km_inicial);
         if (c.km_final   != null) fd.append(`atropelamento_campanha[${i}][km_final]`,   c.km_final);
         if (c.obs) fd.append(`atropelamento_campanha[${i}][obs]`, c.obs);
     });
+
+    // Planilha e considerações de atropelamento
+    if (planilhaAtropelamento.value)       fd.append('planilha_atropelamento',      planilhaAtropelamento.value);
+    if (consideracoesAtropelamento.value)  fd.append('consideracoes_atropelamento', consideracoesAtropelamento.value);
 
     pontoRecords.value.forEach((p, i) => {
         fd.append(`pontos_quelo_crocod[${i}][ponto_de_coleta]`,    p.ponto_de_coleta    ?? '');
@@ -248,7 +253,7 @@ function buildApresentacaoPayload() {
 }
 
 /**
- * Salva uma etapa via POST rascunho/{id}/etapa/{etapa}.
+ * Salva uma etapa via PATCH rascunho/{id}/etapa/{etapa}.
  * Retorna true se ok, false se erro.
  */
 async function salvarEtapa(etapa, formData) {
@@ -266,7 +271,7 @@ async function salvarEtapa(etapa, formData) {
         ]);
 
         const response = await fetch(url, {
-            method: 'POST',
+            method: 'POST',  // ← POST em vez de PATCH
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json',
@@ -299,8 +304,8 @@ async function salvarEtapa(etapa, formData) {
  */
 const inicializarRascunho = async () => {
 
-    if (!form.cod_emp || !form.familia || !form.id_campanha) {
-        alert('Selecione o empreendimento, campanha e família antes de avançar.');
+    if (!form.cod_emp || !form.id_campanha) {
+        alert('Selecione o empreendimento e a campanha antes de avançar.');
         return;
     }
 
@@ -329,7 +334,7 @@ const inicializarRascunho = async () => {
                 body: JSON.stringify({
                     campanha_id: campanhaId.value,
                     cod_emp:    form.cod_emp,
-                    subproduto: props.subproduto ?? form.familia,
+                    subproduto: props.subproduto ?? form.subproduto ?? props.produto,
                     id_campanha: form.id_campanha, 
                 }),
             }
@@ -350,7 +355,22 @@ const inicializarRascunho = async () => {
     }
 };
 
-// ─── Total de sub-etapas dinâmico ─────────────────────────────────────────────
+const adicionarCampanha = () => {
+    if (formCampanha.data_inicial && formCampanha.data_final && formCampanha.uf_inicial && formCampanha.uf_final) {
+        campanhaRecords.value.push({ ...formCampanha, id: Date.now() });
+        Object.assign(formCampanha, {
+            rodovia: null, data_inicial: null, data_final: null,
+            uf_inicial: null, uf_final: null, km_inicial: null, km_final: null,
+            latitude_inicial: null, longitude_inicial: null,
+            latitude_final: null, longitude_final: null, obs: null,
+        });
+    }
+};
+
+const excluirCampanha = (id) => {
+    campanhaRecords.value = campanhaRecords.value.filter(c => c.id !== id);
+};
+
 const totalSubSteps = computed(() => isAtropelamento.value ? 3 : 5);
 
 const nextSubStep = async () => {
@@ -381,23 +401,6 @@ const prevSubStep = () => {
 const setActiveTab = (tab) => {
     activeTab.value = tab;
     if (tab === 'apresentacao') subStep.value = totalSubSteps.value;
-};
-
-// ─── CAMPANHAS DE ATROPELAMENTO ───────────────────────────────────────────────
-const adicionarCampanha = () => {
-    if (formCampanha.data_inicial && formCampanha.data_final && formCampanha.uf_inicial && formCampanha.uf_final) {
-        campanhaRecords.value.push({ ...formCampanha, id: Date.now() });
-        Object.assign(formCampanha, {
-            rodovia: null, data_inicial: null, data_final: null,
-            uf_inicial: null, uf_final: null, km_inicial: null, km_final: null,
-            latitude_inicial: null, longitude_inicial: null,
-            latitude_final: null, longitude_final: null, obs: null,
-        });
-    }
-};
-
-const excluirCampanha = (id) => {
-    campanhaRecords.value = campanhaRecords.value.filter(c => c.id !== id);
 };
 
 const salvarMetodologia = async () => {
@@ -649,9 +652,7 @@ const closePreview = () => {
             <template #body>
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="text-center mb-4">
-                            {{ isAtropelamento ? 'CADASTRAR ATROPELAMENTO DE FAUNA' : 'CADASTRAR ' + props.produto.toUpperCase() }}
-                        </h2>
+                        <h2 class="text-center mb-4">{{ isAtropelamento ? 'CADASTRAR ATROPELAMENTO DE FAUNA' : 'CADASTRAR ' + props.produto.toUpperCase() }}</h2>
 
                         <!-- Aviso de salvamento automático -->
                         <div v-if="campanhaId" class="alert alert-success py-1 mb-3 small">
@@ -689,7 +690,7 @@ const closePreview = () => {
                             <!-- ── ABA APRESENTAÇÃO ─────────────────────────── -->
                             <div v-if="activeTab === 'apresentacao'" class="tab-pane fade show active">
 
-                                <!-- Sub-etapa 1: Empreendimento + Família -->
+                                <!-- Sub-etapa 1: Empreendimento + Campanha -->
                                 <div v-if="subStep === 1">
                                     <h4 class="mb-3 text-center">APRESENTAÇÃO</h4>
                                     <form @submit.prevent="inicializarRascunho">
@@ -710,8 +711,8 @@ const closePreview = () => {
                                             </select>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Família</label>
-                                            <input v-model="form.familia" type="text" class="form-control" :disabled="props.produto === 'Fauna'" required />
+                                            <label class="form-label">Subproduto</label>
+                                            <input :value="props.subproduto || form.subproduto || 'Fauna'" type="text" class="form-control" disabled />
                                         </div>
                                         <div class="d-flex justify-content-end">
                                             <NavButton type="submit" type-button="primary" title="Avançar" :disabled="salvando" />
@@ -720,7 +721,7 @@ const closePreview = () => {
                                     </form>
                                 </div>
 
-                                <!-- Sub-etapa 2: Dados Gerais -->
+                                <!-- Sub-etapas 2 a N -->
                                 <DadosGerais
                                     v-if="subStep === 2"
                                     :form-dados-gerais="formDadosGerais"
@@ -740,11 +741,11 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ totalSubSteps }}</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                     </template>
                                 </DadosGerais>
 
-                                <!-- Sub-etapa 3: Módulos Amostrais (somente fauna regular) -->
+                                <!-- SubStep 3: Módulos (fauna regular) -->
                                 <ModulosAmostragem
                                     v-if="subStep === 3 && !isAtropelamento"
                                     :form-modulo-amostral="formModuloAmostral"
@@ -757,11 +758,11 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ totalSubSteps }}</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                     </template>
                                 </ModulosAmostragem>
 
-                                <!-- Sub-etapa 3: Campanhas de Atropelamento -->
+                                <!-- SubStep 3: Campanhas de atropelamento -->
                                 <CampanhaAtropelamento
                                     v-if="subStep === 3 && isAtropelamento"
                                     :form-campanha="formCampanha"
@@ -773,11 +774,10 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ totalSubSteps }}</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/3</h4>
                                     </template>
                                 </CampanhaAtropelamento>
 
-                                <!-- Sub-etapa 4: Quelônios/Crocodilianos (somente fauna regular) -->
                                 <QueloniosCrocodilian
                                     v-if="subStep === 4 && !isAtropelamento"
                                     v-model:naoSeAplica="naoSeAplicaQuelonios"
@@ -789,11 +789,10 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ totalSubSteps }}</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                     </template>
                                 </QueloniosCrocodilian>
 
-                                <!-- Sub-etapa 5: Fauna Cavernícola (somente fauna regular) -->
                                 <FaunaCavernic
                                     v-if="subStep === 5 && !isAtropelamento"
                                     v-model:naoSeAplica="naoSeAplicaCavernicola"
@@ -805,7 +804,7 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ totalSubSteps }}</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
                                     </template>
                                 </FaunaCavernic>
                             </div>
@@ -824,7 +823,6 @@ const closePreview = () => {
 
                             <!-- ── ABA RESULTADOS ──────────────────────────── -->
                             <div v-if="activeTab === 'resultados'" class="tab-pane fade show active">
-
                                 <!-- Fauna regular -->
                                 <FaunaResultados
                                     v-if="!isAtropelamento"
@@ -835,7 +833,6 @@ const closePreview = () => {
                                     @prev="setActiveTab('metodologia')"
                                     @next="salvarResultados"
                                 />
-
                                 <!-- Atropelamento: planilha + considerações -->
                                 <div v-else>
                                     <h4 class="text-center mb-4 fw-bold">Resultados — Atropelamento de Fauna</h4>
@@ -864,9 +861,7 @@ const closePreview = () => {
                                     </div>
                                     <div class="d-flex justify-content-between mt-2">
                                         <button type="button" class="btn btn-outline-secondary px-4" @click="setActiveTab('metodologia')">Voltar</button>
-                                        <button type="button" class="btn btn-primary px-4" :disabled="salvando" @click="salvarResultados">
-                                            {{ salvando ? 'Salvando...' : 'Avançar' }}
-                                        </button>
+                                        <button type="button" class="btn btn-primary px-4" :disabled="salvando" @click="salvarResultados">{{ salvando ? 'Salvando...' : 'Avançar' }}</button>
                                     </div>
                                 </div>
                             </div>

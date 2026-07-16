@@ -18,6 +18,7 @@ class StoreCampanhaRequest extends FormRequest
             'data_campanha_inicial' => 'nullable|date',
             'data_campanha_final' => 'nullable|date',
             'periodo' => 'nullable|string|max:255',
+            'sei_dnit' => 'nullable|integer',
             'observacoes' => 'nullable|string',
             'id_abio' => 'nullable|array',
             'cod_emp' => 'required|string|max:255',

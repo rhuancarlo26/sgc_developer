@@ -21,6 +21,7 @@ class CampanhaResource
             'data_campanha_inicial'   => $campanha->data_ini,
             'data_campanha_final'     => $campanha->data_fim,
             'periodo'                 => $campanha->periodo,
+            'sei_dnit'                => $campanha->sei_dnit,
             'observacoes'             => $campanha->observacoes,
             'nao_se_aplica'           => $campanha->nao_se_aplica ?? false,
             'status'                  => $campanha->status,

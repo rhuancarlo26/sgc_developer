@@ -101,6 +101,16 @@ function closeAbioModal() {
           />
         </div>
         <div>
+          <InputLabel value="SEI DNIT" for="sei_dnit" />
+          <input
+            type="text"
+            class="form-control"
+            id="sei_dnit"
+            :value="campanha.sei_dnit || 'Não informado'"
+            disabled
+          />
+        </div>
+        <div>
           <InputLabel value="OBSERVAÇÕES" for="observacoes" />
           <input
             type="text"

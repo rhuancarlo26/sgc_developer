@@ -78,6 +78,7 @@ class SalvarEtapaCampanhaController extends Controller
                 'etapa_atual'               => 'apresentacao',
                 'id_campanha'               => $validated['id_campanha'] ?? $campanha->id_campanha,
                 'cod_emp'                   => $validated['cod_emp'] ?? $campanha->cod_emp,
+                'sei_dnit'                  => $validated['sei_dnit'] ?? $campanha->sei_dnit,
                 'nao_se_aplica_quelo'       => $validated['nao_se_aplica_quelo'] ?? false,
                 'nao_se_aplica_cavernicola' => $validated['nao_se_aplica_cavernicola'] ?? false,
             ]);

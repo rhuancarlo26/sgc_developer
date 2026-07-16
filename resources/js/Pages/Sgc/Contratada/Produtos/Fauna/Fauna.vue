@@ -55,6 +55,8 @@ const isEmElaboracao = (c) => c.status === 'Em elaboração';
 
 // Atualizar a rota quando o produto mudar
 const updateProduto = () => {
+  selectedSubproduto.value = '';
+
   router.get(
     route('sgc.contratada.produtos.index', [props.contrato, selectedProduto.value]),
     {},
@@ -73,6 +75,14 @@ const uniqueSubprodutos = computed(() => {
   return [...new Set(descriptions)];
 });
 
+const campanhasFiltradas = computed(() => {
+  if (!selectedSubproduto.value) {
+    return props.campanhas;
+  }
+
+  return props.campanhas.filter(campanha => campanha.subproduto === selectedSubproduto.value);
+});
+
 // Função para alternar ordenação
 const toggleSort = (column) => {
   if (sortColumn.value === column) {
@@ -87,7 +97,7 @@ const toggleSort = (column) => {
 
 // Computado para campanhas ordenadas
 const campanhasOrdenadas = computed(() => {
-  const items = [...props.campanhas];
+  const items = [...campanhasFiltradas.value];
 
   items.sort((a, b) => {
     let valorA = a[sortColumn.value];
@@ -284,6 +294,13 @@ const verAtivas = () => {
   );
 };
 
+// Ir para configurações do módulo (rota nomeada) — abre em nova aba
+const goToModulosConfiguracoes = () => {
+  const url = route('sgc.contratada.produtos.modulos.configuracoes.index', [props.contrato, selectedProduto.value]);
+  const w = window.open(url, '_blank');
+  if (w) w.opener = null;
+};
+
 const arquivarCampanha = (campanha) => {
   if (!confirm(`Arquivar a campanha ${campanha.id_campanha || campanha.id}?`)) return;
 
@@ -356,6 +373,11 @@ const restaurarCampanha = (campanha) => {
                       <div class="col-md-6 mb-4">
                         <div class="block-card block-card-short action-button bg-primary text-white cursor-pointer" @click="goToCreate">
                           Cadastrar
+                        </div>
+                      </div>
+                      <div class="col-md-6 mb-4">
+                        <div class="block-card block-card-short action-button bg-info text-white cursor-pointer" @click="goToModulosConfiguracoes">
+                          Configurações
                         </div>
                       </div>
                     </div>
@@ -479,43 +501,44 @@ const restaurarCampanha = (campanha) => {
                               @click="analisarCampanha(campanha.id)"
                             />
 
-                            <NavButton
-                              v-if="isPerfil3 && !props.mostrarArquivadas"
-                              type-button="secondary"
-                              title="Arquivar"
-                              @click="arquivarCampanha(campanha)"
-                            />
-                            <NavButton
-                              v-if="isPerfil3 && props.mostrarArquivadas"
-                              type-button="warning"
-                              title="Restaurar"
-                              @click="restaurarCampanha(campanha)"
-                            />
+                          <NavButton
+                            v-if="isPerfil3 && !props.mostrarArquivadas"
+                            type-button="secondary"
+                            title="Arquivar"
+                            @click="arquivarCampanha(campanha)"
+                          />
+                          <NavButton
+                            v-if="isPerfil3 && props.mostrarArquivadas"
+                            type-button="warning"
+                            title="Restaurar"
+                            @click="restaurarCampanha(campanha)"
+                          />
 
-                            <!-- Menu de Análise em Massa (dropdown) -->
-                            <div v-if="canApprove && campanha.status === 'Em análise'" class="dropdown d-inline-block">
-                              <button
-                                class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                type="button"
-                                :id="`dropdownMenu-${campanha.id}`"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                              >
-                                ⋮ 
-                              </button>
-                              <ul :aria-labelledby="`dropdownMenu-${campanha.id}`" class="dropdown-menu">
-                                <li>
-                                  <a class="dropdown-item text-success" href="#" @click.prevent="abrirModalAprovarTudo(campanha)">
-                                    <strong>✓ Aprovar</strong>
-                                  </a>
-                                </li>
-                                <li>
-                                  <a class="dropdown-item text-danger" href="#" @click.prevent="abrirModalReprovarTudo(campanha)">
-                                    <strong>✗ Reprovar</strong>
-                                  </a>
-                                </li>
-                              </ul>
-                            </div>
+                          <!-- Menu de Análise em Massa (dropdown) -->
+                          <div v-if="canApprove && campanha.status === 'Em análise'" class="dropdown d-inline-block">
+                            <button
+                              class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                              type="button"
+                              :id="`dropdownMenu-${campanha.id}`"
+                              data-bs-toggle="dropdown"
+                              aria-expanded="false"
+                            >
+                              ⋮ 
+                            </button>
+                            <ul :aria-labelledby="`dropdownMenu-${campanha.id}`" class="dropdown-menu">
+                              <li>
+                                <a class="dropdown-item text-success" href="#" @click.prevent="abrirModalAprovarTudo(campanha)">
+                                  <strong>✓ Aprovar</strong>
+                                </a>
+                              </li>
+                              <li>
+                                <a class="dropdown-item text-danger" href="#" @click.prevent="abrirModalReprovarTudo(campanha)">
+                                  <strong>✗ Reprovar</strong>
+                                </a>
+                              </li>
+                            </ul>
+
+                          </div>
                             
                             <!-- Excluir (Em elaboração, não é perfil 4) -->
                             <NavButton
@@ -534,8 +557,10 @@ const restaurarCampanha = (campanha) => {
                             />
                           </td>
                         </tr>
-                        <tr v-if="!props.campanhas.length">
-                          <td colspan="7" class="text-center">Nenhuma campanha disponível.</td>
+                        <tr v-if="!campanhasOrdenadas.length">
+                          <td colspan="7" class="text-center">
+                            {{ props.mostrarArquivadas ? 'Nenhuma campanha arquivada.' : 'Nenhuma campanha disponível.' }}
+                          </td>
                         </tr>
                       </tbody>
                     </table>

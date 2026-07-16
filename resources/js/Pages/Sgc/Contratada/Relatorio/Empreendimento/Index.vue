@@ -15,6 +15,7 @@ import { ref } from "vue";
 import TableDadosGerais from "./TableDadosGerais/TableDadosGerais.vue";
 import TableStatus from "./TableStatus/TableStatus.vue";
 import TableForuns from "./TableForuns/TableForuns.vue";
+import TableInfoGerais from "./TableInfoGerais/TableInfoGerais.vue";
 import NavLink from "@/Components/NavLink.vue";
 import { IconZoomCheck } from "@tabler/icons-vue";
 import { computed } from 'vue';
@@ -36,6 +37,8 @@ const props = defineProps({
     asv_emp_estudos:Object,
     iphan_emp_estudos_521:Object,
     iphan_emp_estudos_531:Object,
+	campanhas_por_produto: Array,
+	campanhas_detalhadas: Array,
 });
 
 const showAnalisesTab = computed(() => {
@@ -258,6 +261,16 @@ function getEmpreendimentoRoute(emp) {
 											<IconCircleX class="text-danger"/>
 										</a>
 									</li>
+									<li class="nav-item" role="presentation">
+										<a href="#informacoesgerais" class="nav-link d-flex justify-content-between" data-bs-toggle="tab" aria-selected="false"
+											tabindex="-1" role="tab">
+											<span>
+												Dados Técnicos
+											</span>
+											<IconCircleCheck class="text-success"/>
+											<IconCircleX class="text-danger"/>
+										</a>
+									</li>
 								</ul>
 							</div>
 							<div class="card-body" style="padding: 0; margin-top: 1.5%;">
@@ -307,12 +320,14 @@ function getEmpreendimentoRoute(emp) {
 										:estudos="estudos"
 										:subprodutos/>
 									</div>
-									<div class="tab-pane" id="foruns" role="tabpanel">
-									<TableForuns
+									<div class="tab-pane" id="informacoesgerais" role="tabpanel">
+									<TableInfoGerais
 										:contrato="contratos.data[0]"
 										:empreendimentos="empreendimentos"
 										:estudos="estudos"
 										:empreendimentos2="empreendimentos2"
+										:campanhas_por_produto="campanhas_por_produto"
+										:campanhas_detalhadas="campanhas_detalhadas"
 										:subprodutos/>
 									</div>
 
