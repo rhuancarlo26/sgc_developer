@@ -54,10 +54,6 @@ const form = reactive({
     id_campanha: props.draftData?.id_campanha ?? ''
 });
 
-const isAtropelamento = computed(() =>
-    props.subproduto?.toLowerCase().includes('atropelamento') ?? false
-);
-
 const formCampanha = reactive({
     rodovia: null, data_inicial: null, data_final: null,
     uf_inicial: null, uf_final: null,
@@ -356,22 +352,6 @@ const inicializarRascunho = async () => {
     } finally {
         salvando.value = false;
     }
-};
-
-const adicionarCampanha = () => {
-    if (formCampanha.data_inicial && formCampanha.data_final && formCampanha.uf_inicial && formCampanha.uf_final) {
-        campanhaRecords.value.push({ ...formCampanha, id: Date.now() });
-        Object.assign(formCampanha, {
-            rodovia: null, data_inicial: null, data_final: null,
-            uf_inicial: null, uf_final: null, km_inicial: null, km_final: null,
-            latitude_inicial: null, longitude_inicial: null,
-            latitude_final: null, longitude_final: null, obs: null,
-        });
-    }
-};
-
-const excluirCampanha = (id) => {
-    campanhaRecords.value = campanhaRecords.value.filter(c => c.id !== id);
 };
 
 const totalSubSteps = computed(() => isAtropelamento.value ? 3 : 5);

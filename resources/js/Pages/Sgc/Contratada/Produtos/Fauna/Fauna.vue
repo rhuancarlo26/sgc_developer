@@ -27,7 +27,7 @@ const isPerfil3 = computed(() => (props.auth.user.perfis_id ?? 0) === 3);
 const previewModal = ref(null);
 
 // Lista de produtos disponíveis
-const produtos = [
+const produtosFixos = [
   { title: "Fauna", routeParam: "fauna" },
   { title: "Espeleologia", routeParam: "espeleologia" },
   { title: "Patrimônio", routeParam: "patrimonio" },
@@ -191,7 +191,7 @@ const goToCreate = () => {
 const continuarCampanha = (campanha) => {
     router.get(
         route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
-        { subproduto: campanha.subproduto },
+        { subproduto: campanha.subproduto, paipa_id: campanha.id },
         { preserveState: true, preserveScroll: true }
     );
 };
@@ -233,6 +233,15 @@ const analisarCampanha = (campanhaId) => {
 };
 
 const editarCampanha = (campanha) => {
+  if (selectedProduto.value === 'patrimonio') {
+    router.get(
+      route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
+      { subproduto: campanha.subproduto, paipa_id: campanha.id },
+      { preserveState: true, preserveScroll: true }
+    );
+    return;
+  }
+
   router.get(
     route('sgc.contratada.produtos.edit', [props.contrato, selectedProduto.value, campanha.id]),
     { subproduto: campanha.subproduto },
