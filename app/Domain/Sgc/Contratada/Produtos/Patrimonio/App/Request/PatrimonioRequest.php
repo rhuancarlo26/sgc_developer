@@ -40,7 +40,7 @@ class PatrimonioRequest extends FormRequest
         return [
             'tipo.required' => 'O tipo do subproduto é obrigatório',
             'tipo.in' => 'O tipo informado é inválido',
-            'empreendimento.required' => 'O empreendimento deve ser selecionado',
+            'empreendimento_id.required' => 'O empreendimento deve ser selecionado',
         ];
     }
 

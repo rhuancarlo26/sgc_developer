@@ -14,4 +14,25 @@ class PatrimonioShapefileRepository implements ShapefileRepositoryInterface
       ['geo_json' => $geoJson]
     );
   }
+
+  public function salvarLayer(
+    int $patrimonioId,
+    string $nomeCampo,
+    string $workspace,
+    string $datastore,
+    string $layerName,
+    string $storagePath
+  ): SgcPatrimonioShapefile {
+    return SgcPatrimonioShapefile::updateOrCreate(
+      ['patrimonio_paipa_id' => $patrimonioId, 'nome_campo' => $nomeCampo],
+      [
+        'geo_json' => ['type' => 'FeatureCollection', 'features' => []],
+        'workspace' => $workspace,
+        'datastore' => $datastore,
+        'layer_name' => $layerName,
+        'storage_path' => $storagePath,
+        'published_at' => now(),
+      ]
+    );
+  }
 }
