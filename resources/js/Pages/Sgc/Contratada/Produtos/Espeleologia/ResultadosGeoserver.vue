@@ -220,6 +220,7 @@ import axios from 'axios'
 import L from 'leaflet'
 import * as shapefile from 'shapefile'
 import JSZip from 'jszip'
+import proj4 from 'proj4'
 
 const props = defineProps({
   empreendimentos: Array,
@@ -609,6 +610,67 @@ const onDrop = (event, tipo) => {
   processFiles(files, tipo)
 }
 
+// Shapefiles podem vir em qualquer sistema de coordenadas (ex.: UTM, em metros).
+// A lib 'shapefile' só le a geometria crua do .shp e não aplica o .prj, então o
+// Leaflet acabaria recebendo "longitude/latitude" fora do intervalo válido para
+// qualquer shapefile que não esteja já em graus (lat/lon). Por isso reprojetamos
+// para EPSG:4326 usando o .prj do próprio ZIP antes de desenhar no mapa.
+const isValidLngLat = (coord) =>
+  Array.isArray(coord) &&
+  Number.isFinite(coord[0]) &&
+  Number.isFinite(coord[1]) &&
+  Math.abs(coord[0]) <= 180 &&
+  Math.abs(coord[1]) <= 90
+
+const firstCoordinate = (coords) => {
+  if (!Array.isArray(coords)) return null
+  if (typeof coords[0] === 'number') return coords
+  for (const c of coords) {
+    const found = firstCoordinate(c)
+    if (found) return found
+  }
+  return null
+}
+
+const mapCoordinates = (coords, fn) => {
+  if (typeof coords[0] === 'number') return fn(coords)
+  return coords.map((c) => mapCoordinates(c, fn))
+}
+
+const reprojectFeatures = (feats, transform) =>
+  feats.map((f) => (f.geometry
+    ? { ...f, geometry: { ...f.geometry, coordinates: mapCoordinates(f.geometry.coordinates, transform) } }
+    : f))
+
+// Só reprojeta se de fato precisar; se já estiver em lat/lon (caso de hoje) ou se
+// algo der errado na leitura/parse do .prj, mantém o comportamento atual (sem reprojeção).
+const reprojectToWgs84 = async (zip, shpName, feats) => {
+  if (!feats.length) return feats
+
+  const sample = firstCoordinate(feats.find(f => f.geometry)?.geometry?.coordinates)
+  if (!sample || isValidLngLat(sample)) return feats
+
+  const prjEntry = zip.file(shpName.replace(/\.shp$/i, '.prj'))
+  if (!prjEntry) {
+    console.warn('Shapefile sem .prj: não é possível confirmar o sistema de coordenadas, pré-visualização pode ficar incorreta.')
+    return feats
+  }
+
+  try {
+    const wkt = await prjEntry.async('text')
+    const srcProj = proj4(wkt)
+    const result = reprojectFeatures(feats, ([x, y]) => proj4(srcProj, 'EPSG:4326', [x, y]))
+
+    const reprojectedSample = firstCoordinate(result.find(f => f.geometry)?.geometry?.coordinates)
+    if (!isValidLngLat(reprojectedSample)) throw new Error('Reprojeção retornou coordenadas fora do intervalo esperado')
+
+    return result
+  } catch (e) {
+    console.error('Falha ao reprojetar shapefile a partir do .prj:', e)
+    return feats
+  }
+}
+
 const processFiles = async (files, tipo) => {
   uploadedFiles.value[tipo] = files
   features.value[tipo] = []
@@ -624,7 +686,7 @@ const processFiles = async (files, tipo) => {
     if (!shpName) return
     const shpBuffer = await zip.file(shpName).async('arraybuffer')
     const geojson = await shapefile.read(shpBuffer, null, { name: 'features' })
-    features.value[tipo] = geojson.features || []
+    features.value[tipo] = await reprojectToWgs84(zip, shpName, geojson.features || [])
     rendered.value[tipo] = true
     await nextTick()
     renderMap(tipo)
@@ -715,7 +777,11 @@ const renderMap = async (tipo) => {
 
   if (features.value[tipo] && features.value[tipo].length > 0) {
     const layer = L.geoJSON(features.value[tipo]).addTo(map)
-    map.fitBounds(layer.getBounds().pad(0.1))
+    try {
+      map.fitBounds(layer.getBounds().pad(0.1))
+    } catch (e) {
+      console.error(`Não foi possível ajustar os limites do mapa (${tipo}); mantendo a visão padrão.`, e)
+    }
   }
 
   setTimeout(() => map.invalidateSize(), 300)
