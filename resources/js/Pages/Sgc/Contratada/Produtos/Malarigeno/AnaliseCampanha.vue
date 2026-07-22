@@ -127,7 +127,7 @@ onMounted(loadPlanilha);
             :links="[
                 { route: route('sgc.gestao.listagem', props.contratos.tipo_contrato), label: 'Gestão de Contratos' },
                 { route: route('sgc.contratada.produtos.index', [props.contrato, props.produto]), label: props.contratos.contratada },
-                { route: '#', label: `Analisar Campanha ${props.campanha.id || props.campanha_id}` },
+                { route: '#', label: `Analisar Campanha ${props.campanha.id_campanha || props.campanha.id || props.campanha_id}` },
             ]"
         />
 
@@ -152,13 +152,25 @@ onMounted(loadPlanilha);
                         </div>
 
                         <div class="row g-3 mb-4">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="info-box">
                                     <span>Campanha</span>
-                                    <strong>{{ props.campanha.id || 'N/A' }}</strong>
+                                    <strong>{{ props.campanha.id_campanha || 'N/A' }}</strong>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
+                                <div class="info-box">
+                                    <span>Empreendimento</span>
+                                    <strong>{{ props.campanha.cod_emp || 'N/A' }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="info-box">
+                                    <span>SEI DNIT</span>
+                                    <strong>{{ props.campanha.sei_dnit || 'N/A' }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
                                 <div class="info-box">
                                     <span>Planilha Modelo</span>
                                     <strong>{{ props.campanha.modulo?.nome || 'N/A' }}</strong>
@@ -168,12 +180,6 @@ onMounted(loadPlanilha);
                                 <div class="info-box">
                                     <span>Criada em</span>
                                     <strong>{{ props.campanha.created_at || 'N/A' }}</strong>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="info-box">
-                                    <span>Versão Análise</span>
-                                    <strong>{{ props.campanha.versao_analise }}</strong>
                                 </div>
                             </div>
                         </div>

@@ -15,6 +15,9 @@ class StoreMalarigenoRequest extends FormRequest
     {
         return [
             'contrato_id' => 'required|integer|exists:contratos,id',
+            'cod_emp' => 'required|string|max:255',
+            'id_campanha' => 'required|integer|min:1',
+            'sei_dnit' => 'nullable|string|max:255',
             'subproduto' => 'required|string',
             'modulo_id' => 'required|integer|exists:sgc_modulos,id',
             'arquivo' => 'required|mimes:xlsx,csv',
@@ -34,6 +37,9 @@ class StoreMalarigenoRequest extends FormRequest
     {
         return [
             'contrato_id.required' => 'O contrato é obrigatório.',
+            'cod_emp.required' => 'O empreendimento é obrigatório.',
+            'id_campanha.required' => 'O ID da campanha é obrigatório.',
+            'sei_dnit.max' => 'O campo SEI DNIT deve ter no máximo 255 caracteres.',
             'subproduto.required' => 'O subproduto é obrigatório.',
             'modulo_id.required' => 'O módulo é obrigatório.',
             'arquivo.required' => 'O arquivo da planilha é obrigatório.',

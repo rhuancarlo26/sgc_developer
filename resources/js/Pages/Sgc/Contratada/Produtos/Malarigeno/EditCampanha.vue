@@ -19,6 +19,7 @@ import CardAnexos from '../Modulos/Importador/Components/CardAnexos.vue';
 const props = defineProps({
     campanha: Object,
     modulos: Array,
+    empreendimentos: { type: Array, default: () => [] },
     contrato: [String, Number],
     produto: String,
     contratos: { type: Object, default: () => ({ contratada: 'Contratada', tipo_contrato: null }) },
@@ -34,6 +35,9 @@ const fotosOriginais = (props.campanha?.fotos || []).map(f => f.id);
 const anexosOriginais = (props.campanha?.anexos || []).map(a => a.id);
 
 const form = useForm({
+    cod_emp: props.campanha?.cod_emp || '',
+    id_campanha: props.campanha?.id_campanha || null,
+    sei_dnit: props.campanha?.sei_dnit || '',
     subproduto: props.campanha?.subproduto || '',
     modulo_id: props.campanha?.modulo_id || null,
     arquivo: null,
@@ -212,6 +216,9 @@ const submitForm = () => {
 
     const fd = new FormData();
 
+    fd.append('cod_emp', form.cod_emp);
+    fd.append('id_campanha', form.id_campanha);
+    fd.append('sei_dnit', form.sei_dnit || '');
     fd.append('subproduto', form.subproduto);
     if (form.modulo_id) fd.append('modulo_id', form.modulo_id);
     if (form.arquivo) fd.append('arquivo', form.arquivo);
@@ -298,6 +305,39 @@ const voltar = () => {
                     </div>
                     <div class="card-body">
                         <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="codEmpSelect" class="form-label fw-semibold">Empreendimento <span class="text-danger">*</span></label>
+                                <select id="codEmpSelect" class="form-select" v-model="form.cod_emp" required>
+                                    <option value="" disabled>Selecione um empreendimento</option>
+                                    <option v-for="empreendimento in props.empreendimentos" :key="empreendimento" :value="empreendimento">
+                                        {{ empreendimento }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="idCampanha" class="form-label fw-semibold">ID da Campanha <span class="text-danger">*</span></label>
+                                <input
+                                    id="idCampanha"
+                                    v-model.number="form.id_campanha"
+                                    type="number"
+                                    min="1"
+                                    class="form-control"
+                                    required
+                                />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="seiDnit" class="form-label fw-semibold">SEI DNIT</label>
+                                <input
+                                    id="seiDnit"
+                                    v-model="form.sei_dnit"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Informe o número SEI DNIT"
+                                />
+                            </div>
+
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">Subproduto <span class="text-danger">*</span></label>
                                 <input

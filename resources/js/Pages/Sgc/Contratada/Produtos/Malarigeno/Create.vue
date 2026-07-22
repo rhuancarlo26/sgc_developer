@@ -12,6 +12,7 @@ import {
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { useToast } from 'vue-toastification';
 import * as XLSX from 'xlsx';
 import CardFotos from '../Modulos/Importador/Components/CardFotos.vue';
 import CardAnexos from '../Modulos/Importador/Components/CardAnexos.vue';
@@ -21,6 +22,7 @@ const props = defineProps({
     produto: { type: String, default: 'Malarigeno' },
     contratos: { type: Object, default: () => ({ contratada: 'Contratada', tipo_contrato: null }) },
     modulos: { type: Array, default: () => [] },
+    empreendimentos: { type: Array, default: () => [] },
     subproduto: { type: [String, Number], default: null },
 });
 
@@ -28,6 +30,7 @@ const selectedFileName = ref(null);
 const previewColumns = ref([]);
 const previewRows = ref([]);
 const fileError = ref(null);
+const toast = useToast();
 const inputArquivoRef = ref(null);
 const CardFotosRef = ref(null);
 const CardAnexosRef = ref(null);
@@ -37,6 +40,9 @@ const menuWidth = ref(200);
 
 const form = useForm({
     contrato_id: props.contrato,
+    cod_emp: '',
+    id_campanha: null,
+    sei_dnit: '',
     subproduto: props.subproduto,
     modulo_id: null,
     arquivo: null,
@@ -85,11 +91,13 @@ const submitForm = () => {
     console.log('Malarigeno: submitForm', { url, form });
 
     form.post(url, {
-        preserveScroll: true,
+        preserveScroll: false,
         preserveState: true,
         forceFormData: true,
         onSuccess: () => {
             console.log('Malarigeno: form enviado com sucesso');
+            toast.success('Campanha cadastrada com sucesso.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             form.arquivo = null;
             resetPreview();
             if (inputArquivoRef.value) {
@@ -206,11 +214,52 @@ const handleFileChange = (event) => {
 
             <div class="flex-fill content-column">
                 <div class="card mb-3">
+                    <div class="card-body text-center">
+                        <h2 class="mb-2">CADASTRAR CAMPANHA MALARÍGENO</h2>
+                        <p class="text-muted mb-0 fs-5">{{ form.subproduto || 'Subproduto não informado' }}</p>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
                     <div class="card-header">
                         <h3 class="my-0">Informações Gerais</h3>
                     </div>
                     <div class="card-body">
                         <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="codEmpSelect" class="form-label fw-semibold">Empreendimento <span class="text-danger">*</span></label>
+                                <select id="codEmpSelect" class="form-select" v-model="form.cod_emp" required>
+                                    <option value="" disabled>Selecione um empreendimento</option>
+                                    <option v-for="empreendimento in props.empreendimentos" :key="empreendimento" :value="empreendimento">
+                                        {{ empreendimento }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="idCampanha" class="form-label fw-semibold">ID da Campanha <span class="text-danger">*</span></label>
+                                <input
+                                    id="idCampanha"
+                                    v-model.number="form.id_campanha"
+                                    type="number"
+                                    min="1"
+                                    class="form-control"
+                                    placeholder="Informe o ID da campanha"
+                                    required
+                                />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="seiDnit" class="form-label fw-semibold">SEI DNIT</label>
+                                <input
+                                    id="seiDnit"
+                                    v-model="form.sei_dnit"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Informe o número SEI DNIT"
+                                />
+                            </div>
+
                             <div class="col-md-6 mb-3">
                                 <label for="moduloSelect" class="form-label fw-semibold">Planilha modelo <span class="text-danger">*</span></label>
                                 <div class="input-group">

@@ -11,6 +11,18 @@ const props = defineProps({
 
 const page = usePage()
 
+const getAnexoUrl = (anexo) => {
+    if (anexo?.url) {
+        return anexo.url;
+    }
+
+    if (anexo?.caminho_arquivo) {
+        return `${page.props.app_url}/storage/${String(anexo.caminho_arquivo).replace(/\\/g, '/')}`;
+    }
+
+    return null;
+}
+
 const selecionarArquivo = (key, {target}) => {
     props.form.anexos[key].arquivo = target.files?.[0]
 
@@ -73,8 +85,8 @@ defineExpose({ validarCampos })
                                 :class="a.valida_arquivo ? 'border-danger' : ''" :disabled="[2, 4].includes(form.status)"/>
                             <small v-if="a.nome_arquivo">
                                 Arquivo original: <strong>{{a.nome_arquivo}}</strong>
-                                <a :href="`${page.props.app_url}/storage/${a.caminho_arquivo}`" 
-                                    title="Ver Foto" class="btn btn-sm btn-ligth ms-1 border-0" target="_blank">
+                                <a v-if="getAnexoUrl(a)" :href="getAnexoUrl(a)" 
+                                    title="Ver Anexo" class="btn btn-sm btn-ligth ms-1 border-0" target="_blank" rel="noopener">
                                     <IconDownload class="text-info" />
                                 </a>
                             </small>

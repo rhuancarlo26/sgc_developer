@@ -33,7 +33,7 @@ export const produtoConfig = {
     temEtapas: false,
     temArquivo: false,
     temVinculacoes: false,
-    colunas: ['id_campanha', 'data_inicial', 'status', 'subproduto'],
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
     acoes: ['visualizar', 'editar', 'analisar', 'arquivar', 'restaurar', 'excluir', 'aprovar', 'reprovar'],
     modalPreview: false,
     showModulo: false,

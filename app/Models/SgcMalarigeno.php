@@ -10,6 +10,9 @@ class SgcMalarigeno extends Model
 
     protected $fillable = [
         'id_contrato',
+        'cod_emp',
+        'id_campanha',
+        'sei_dnit',
         'subproduto',
         'modulo_id',
         'status',
@@ -23,6 +26,7 @@ class SgcMalarigeno extends Model
 
     protected $casts = [
         'id_contrato' => 'integer',
+        'id_campanha' => 'integer',
         'modulo_id' => 'integer',
         'versao_analise' => 'integer',
         'aprovado_por' => 'integer',

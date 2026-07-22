@@ -82,6 +82,10 @@ const getVisualizarRoute = (campanha) => {
     return route('contratos.contratada.sgc.pmqa.configuracao.ponto.index', [contratoId, 'eia', campanha.campanha_id]);
   }
 
+  if (campanha.produto === 'Malarígeno') {
+    return route('sgc.contratada.produtos.malarigeno.show', [contratoId, 'malarigeno', campanha.campanha_id]);
+  }
+
   return '#';
 };
 

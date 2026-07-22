@@ -12,6 +12,18 @@ const props = defineProps({
 
 const page = usePage();
 
+const getFotoUrl = (foto) => {
+    if (foto?.url) {
+        return foto.url;
+    }
+
+    if (foto?.caminho_arquivo) {
+        return `${page.props.app_url}/storage/${String(foto.caminho_arquivo).replace(/\\/g, '/')}`;
+    }
+
+    return null;
+};
+
 const inputFotosMultiplasRef = ref(null);
 
 const modalMetadadosRef = ref(null);
@@ -389,8 +401,8 @@ defineExpose({ validarCampos });
                             Arquivo original:
                             <strong>{{ f.nome_arquivo }}</strong>
 
-                            <a :href="`${page.props.app_url}/storage/${String(f.caminho_arquivo).replace(/\\/g, '/')}`"
-                                title="Ver Foto" class="btn btn-sm btn-light ms-1 border-0" target="_blank">
+                            <a v-if="getFotoUrl(f)" :href="getFotoUrl(f)"
+                                title="Ver Foto" class="btn btn-sm btn-light ms-1 border-0" target="_blank" rel="noopener">
                                 <IconEye class="text-warning" />
                             </a>
 

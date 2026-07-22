@@ -29,6 +29,9 @@ class MalarigenoCampanhaController extends Controller
 
         $campanhaData = [
             'id' => $campanha->id,
+            'id_campanha' => $campanha->id_campanha,
+            'cod_emp' => $campanha->cod_emp,
+            'sei_dnit' => $campanha->sei_dnit,
             'id_contrato' => $campanha->id_contrato,
             'subproduto' => $campanha->subproduto,
             'modulo_id' => $campanha->modulo_id,
@@ -98,6 +101,9 @@ class MalarigenoCampanhaController extends Controller
 
         $campanhaData = [
             'id' => $campanhaObj->id,
+            'id_campanha' => $campanhaObj->id_campanha,
+            'cod_emp' => $campanhaObj->cod_emp,
+            'sei_dnit' => $campanhaObj->sei_dnit,
             'id_contrato' => $campanhaObj->id_contrato,
             'subproduto' => $campanhaObj->subproduto,
             'modulo_id' => $campanhaObj->modulo_id,
@@ -106,6 +112,7 @@ class MalarigenoCampanhaController extends Controller
             'versao_analise' => $campanhaObj->versao_analise,
             'planilha_nome' => $campanhaObj->planilha_nome,
             'planilha_url' => $campanhaObj->planilha_caminho ? Storage::url($campanhaObj->planilha_caminho) : null,
+            'created_at' => optional($campanhaObj->created_at)->format('d/m/Y H:i'),
             'fotos' => $campanhaObj->fotos->map(fn($foto) => [
                 'id' => $foto->id,
                 'url' => $foto->caminho_arquivo ? Storage::url($foto->caminho_arquivo) : null,
@@ -283,9 +290,16 @@ class MalarigenoCampanhaController extends Controller
             ->select(['id', 'nome', 'nome_planilha_modelo'])
             ->get();
 
+        $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+            ->pluck('cod_emp')
+            ->toArray();
+
         return Inertia::render('Sgc/Contratada/Produtos/Malarigeno/EditCampanha', [
             'campanha' => [
                 'id' => $campanha->id,
+                'cod_emp' => $campanha->cod_emp,
+                'id_campanha' => $campanha->id_campanha,
+                'sei_dnit' => $campanha->sei_dnit,
                 'subproduto' => $campanha->subproduto,
                 'modulo_id' => $campanha->modulo_id,
                 'modulo' => $campanha->modulo?->only(['id', 'nome', 'nome_planilha_modelo']),
@@ -306,6 +320,7 @@ class MalarigenoCampanhaController extends Controller
                 ]),
             ],
             'modulos' => $modulos,
+            'empreendimentos' => $empreendimentos,
             'contrato' => $contrato,
             'produto' => $produto,
             'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
@@ -329,6 +344,9 @@ class MalarigenoCampanhaController extends Controller
         }
 
         $validated = request()->validate([
+            'cod_emp' => 'required|string|max:255',
+            'id_campanha' => 'required|integer|min:1',
+            'sei_dnit' => 'nullable|string|max:255',
             'subproduto' => 'required|string|max:255',
             'modulo_id' => 'nullable|exists:sgc_modulos,id',
             'arquivo' => 'nullable|file|mimes:xlsx,xls',
@@ -342,6 +360,9 @@ class MalarigenoCampanhaController extends Controller
             DB::beginTransaction();
 
             $updateData = [
+                'cod_emp' => $validated['cod_emp'],
+                'id_campanha' => $validated['id_campanha'],
+                'sei_dnit' => $validated['sei_dnit'] ?? null,
                 'subproduto' => $validated['subproduto'],
                 'modulo_id' => $validated['modulo_id'],
             ];

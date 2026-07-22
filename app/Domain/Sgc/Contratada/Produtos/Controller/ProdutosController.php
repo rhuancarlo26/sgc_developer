@@ -134,12 +134,17 @@ class ProdutosController extends Controller
             ->select(['id', 'nome', 'nome_planilha_modelo', 'caminho_planilha_modelo', 'campos', 'created_at'])
             ->get();
 
+        $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+            ->pluck('cod_emp')
+            ->toArray();
+
         return inertia('Sgc/Contratada/Produtos/Malarigeno/Create', [
             'contrato' => $contrato,
             'produto' => ucfirst($produto),
             'contratos' => $contratoObj,
             'subproduto' => $subproduto,
             'modulos' => $modulos,
+            'empreendimentos' => $empreendimentos,
         ]);
     }
 
@@ -383,11 +388,11 @@ class ProdutosController extends Controller
     {
         return SgcMalarigeno::where('id_contrato', $contrato)
             ->latest()
-            ->get(['id', 'subproduto', 'status', 'created_at'])
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
             ->map(fn($campanha) => [
                 'id' => $campanha->id,
-                'id_campanha' => $campanha->id,
-                'empreendimento' => 'N/A',
+                'id_campanha' => $campanha->id_campanha ?? 'N/A',
+                'empreendimento' => $campanha->cod_emp ?? 'N/A',
                 'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A',
                 'data_final' => 'N/A',
                 'status' => $campanha->status ?? 'Em elaboração',
