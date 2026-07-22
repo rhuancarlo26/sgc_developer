@@ -34,6 +34,11 @@ const toast = useToast();
 const inputArquivoRef = ref(null);
 const CardFotosRef = ref(null);
 const CardAnexosRef = ref(null);
+const localErrors = ref({
+    cod_emp: '',
+    id_campanha: '',
+    modulo_id: '',
+});
 
 // default compact menu width (change this value in code to adjust)
 const menuWidth = ref(200);
@@ -55,6 +60,10 @@ const form = useForm({
 const salvarRascunho = () => {
     console.log('Malarigeno: salvarRascunho chamado', form);
 
+    if (!validateRequiredFields()) {
+        return;
+    }
+
     if (CardFotosRef.value?.validarCampos?.()) {
         console.log('Malarigeno: validação de fotos falhou');
         return;
@@ -71,6 +80,10 @@ const salvarRascunho = () => {
 
 const enviarParaAnalise = () => {
     console.log('Malarigeno: enviarParaAnalise chamado', form);
+
+    if (!validateRequiredFields()) {
+        return;
+    }
 
     if (CardFotosRef.value?.validarCampos?.()) {
         console.log('Malarigeno: validação de fotos falhou');
@@ -110,6 +123,37 @@ const submitForm = () => {
     });
 };
 
+const validateRequiredFields = () => {
+    localErrors.value.cod_emp = '';
+    localErrors.value.id_campanha = '';
+    localErrors.value.modulo_id = '';
+
+    if (!form.cod_emp) {
+        localErrors.value.cod_emp = 'Selecione o empreendimento para continuar.';
+    }
+
+    if (!form.id_campanha || Number(form.id_campanha) < 1) {
+        localErrors.value.id_campanha = 'Informe o ID da campanha para continuar.';
+    }
+
+    if (form.arquivo && !form.modulo_id) {
+        localErrors.value.modulo_id = 'Selecione um modelo de planilha para continuar.';
+    }
+
+    if (localErrors.value.cod_emp || localErrors.value.id_campanha || localErrors.value.modulo_id) {
+        toast.error('Preencha os campos obrigatórios antes de salvar.');
+        return false;
+    }
+
+    return true;
+};
+
+const clearLocalError = (field) => {
+    if (localErrors.value[field]) {
+        localErrors.value[field] = '';
+    }
+};
+
 const resetPreview = () => {
     selectedFileName.value = null;
     previewColumns.value = [];
@@ -119,6 +163,7 @@ const resetPreview = () => {
 
 const limparArquivo = () => {
     form.arquivo = null;
+    clearLocalError('modulo_id');
     resetPreview();
 
     if (inputArquivoRef.value) {
@@ -228,12 +273,14 @@ const handleFileChange = (event) => {
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="codEmpSelect" class="form-label fw-semibold">Empreendimento <span class="text-danger">*</span></label>
-                                <select id="codEmpSelect" class="form-select" v-model="form.cod_emp" required>
+                                <select id="codEmpSelect" class="form-select" :class="{ 'is-invalid': localErrors.cod_emp || form.errors.cod_emp }" v-model="form.cod_emp" @change="clearLocalError('cod_emp')" required>
                                     <option value="" disabled>Selecione um empreendimento</option>
                                     <option v-for="empreendimento in props.empreendimentos" :key="empreendimento" :value="empreendimento">
                                         {{ empreendimento }}
                                     </option>
                                 </select>
+                                <small v-if="localErrors.cod_emp" class="invalid-feedback d-block">{{ localErrors.cod_emp }}</small>
+                                <small v-else-if="form.errors.cod_emp" class="invalid-feedback d-block">{{ form.errors.cod_emp }}</small>
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -244,9 +291,13 @@ const handleFileChange = (event) => {
                                     type="number"
                                     min="1"
                                     class="form-control"
+                                    :class="{ 'is-invalid': localErrors.id_campanha || form.errors.id_campanha }"
+                                    @input="clearLocalError('id_campanha')"
                                     placeholder="Informe o ID da campanha"
                                     required
                                 />
+                                <small v-if="localErrors.id_campanha" class="invalid-feedback d-block">{{ localErrors.id_campanha }}</small>
+                                <small v-else-if="form.errors.id_campanha" class="invalid-feedback d-block">{{ form.errors.id_campanha }}</small>
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -261,23 +312,26 @@ const handleFileChange = (event) => {
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="moduloSelect" class="form-label fw-semibold">Planilha modelo <span class="text-danger">*</span></label>
+                                <label for="moduloSelect" class="form-label fw-semibold">Planilha modelo <span class="text-muted">(necessária apenas se enviar a planilha)</span></label>
                                 <div class="input-group">
-                                    <select id="moduloSelect" class="form-select" v-model="form.modulo_id">
+                                    <select id="moduloSelect" class="form-select" :class="{ 'is-invalid': localErrors.modulo_id || form.errors.modulo_id }" v-model="form.modulo_id" @change="clearLocalError('modulo_id')">
                                         <option value="" disabled>Selecione uma planilha modelo</option>
                                         <option v-for="modulo in props.modulos" :key="modulo.id" :value="modulo.id">{{ modulo.nome || 'Módulo sem nome' }}</option>
                                     </select>
                                     <a v-if="form.modulo_id" :href="route('sgc.contratada.produtos.modulos.configuracoes.gerar-planilha-modelo', [props.contrato, props.produto.toLowerCase(), form.modulo_id])" class="btn btn-primary">Baixar</a>
                                     <button v-else type="button" class="btn btn-secondary" disabled>Baixar</button>
                                 </div>
+                                <small v-if="localErrors.modulo_id" class="invalid-feedback d-block">{{ localErrors.modulo_id }}</small>
+                                <small v-else-if="form.errors.modulo_id" class="invalid-feedback d-block">{{ form.errors.modulo_id }}</small>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="upload_arquivo" class="form-label fw-semibold">Upload da Planilha (.csv/.xlsx) <span class="text-danger">*</span></label>
+                                <label for="upload_arquivo" class="form-label fw-semibold">Upload da Planilha (.csv/.xlsx) <span class="text-muted">(opcional)</span></label>
                                 <div class="input-group">
                                     <input ref="inputArquivoRef" type="file" id="upload_arquivo" @change="handleFileChange" class="form-control" accept=".xlsx,.csv" />
                                     <button type="button" class="btn btn-primary" :disabled="!selectedFileName" @click="limparArquivo">Limpar</button>
                                 </div>
+                                <small class="text-muted d-block mt-2">Se não enviar a planilha agora, você ainda pode salvar a campanha e anexar depois.</small>
                                 <small v-if="selectedFileName" class="text-muted d-block mt-2 text-truncate d-inline-block" style="max-width: 100%;">
                                     Arquivo: <strong>{{ selectedFileName }}</strong>
                                 </small>

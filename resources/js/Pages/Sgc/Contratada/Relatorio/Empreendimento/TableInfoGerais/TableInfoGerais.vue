@@ -67,7 +67,7 @@ const formatarSei = (valor) => {
 };
 
 const getVisualizarRoute = (campanha) => {
-  const contratoId = props.contrato?.id;
+  const contratoId = campanha?.contrato_id || props.empreendimentos2?.contrato_id || props.contrato?.id;
   if (!contratoId || !campanha?.campanha_id) return '#';
 
   if (campanha.produto === 'Fauna') {

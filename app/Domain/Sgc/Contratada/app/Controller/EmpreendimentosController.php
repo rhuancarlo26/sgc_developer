@@ -280,9 +280,10 @@ class EmpreendimentosController extends Controller
             $campanhasFauna = SgcFaunaCampanha::where('cod_emp', $empreendimentos2->cod_emp)
                 ->where('id_contrato', $empreendimentos2->contrato_id)
                 ->where('status', 'Aprovada')
-                ->get(['id', 'id_campanha', 'subproduto', 'status', 'data_ini', 'data_fim', 'sei_dnit'])
+                ->get(['id', 'id_contrato', 'id_campanha', 'subproduto', 'status', 'data_ini', 'data_fim', 'sei_dnit'])
                 ->map(fn ($campanha) => [
                     'produto' => 'Fauna',
+                    'contrato_id' => $campanha->id_contrato,
                     'campanha_id' => $campanha->id,
                     'identificador' => $campanha->id_campanha ?? $campanha->id,
                     'subproduto' => $campanha->subproduto,
@@ -295,9 +296,10 @@ class EmpreendimentosController extends Controller
             $campanhasEspeleologia = SgcEspeleoCampanha::where('cod_emp', $empreendimentos2->cod_emp)
                 ->where('id_contrato', $empreendimentos2->contrato_id)
                 ->where('status', 'Aprovada')
-                ->get(['id', 'id_campanha', 'subproduto', 'status', 'created_at'])
+                ->get(['id', 'id_contrato', 'id_campanha', 'subproduto', 'status', 'created_at'])
                 ->map(fn ($campanha) => [
                     'produto' => 'Espeleologia',
+                    'contrato_id' => $campanha->id_contrato,
                     'campanha_id' => $campanha->id,
                     'identificador' => $campanha->id_campanha ?? $campanha->id,
                     'subproduto' => $campanha->subproduto,
@@ -310,9 +312,10 @@ class EmpreendimentosController extends Controller
             $campanhasPmqa = SgcPmqa::where('cod_emp', $empreendimentos2->cod_emp)
                 ->where('id_contrato', $empreendimentos2->contrato_id)
                 ->where('status_aprovacao', 'Aprovada')
-                ->get(['id', 'subproduto', 'status_aprovacao', 'created_at'])
+                ->get(['id', 'id_contrato', 'subproduto', 'status_aprovacao', 'created_at'])
                 ->map(fn ($campanha) => [
                     'produto' => 'PMQA',
+                    'contrato_id' => $campanha->id_contrato,
                     'campanha_id' => $campanha->id,
                     'identificador' => $campanha->id,
                     'subproduto' => $campanha->subproduto,
@@ -325,9 +328,10 @@ class EmpreendimentosController extends Controller
             $campanhasMalarigeno = SgcMalarigeno::where('cod_emp', $empreendimentos2->cod_emp)
                 ->where('id_contrato', $empreendimentos2->contrato_id)
                 ->where('status', 'Aprovada')
-                ->get(['id', 'id_campanha', 'subproduto', 'status', 'created_at', 'sei_dnit'])
+                ->get(['id', 'id_contrato', 'id_campanha', 'subproduto', 'status', 'created_at', 'sei_dnit'])
                 ->map(fn ($campanha) => [
                     'produto' => 'Malarígeno',
+                    'contrato_id' => $campanha->id_contrato,
                     'campanha_id' => $campanha->id,
                     'identificador' => $campanha->id_campanha ?? $campanha->id,
                     'subproduto' => $campanha->subproduto,

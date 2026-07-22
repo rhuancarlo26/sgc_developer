@@ -19,8 +19,8 @@ class StoreMalarigenoRequest extends FormRequest
             'id_campanha' => 'required|integer|min:1',
             'sei_dnit' => 'nullable|string|max:255',
             'subproduto' => 'required|string',
-            'modulo_id' => 'required|integer|exists:sgc_modulos,id',
-            'arquivo' => 'required|mimes:xlsx,csv',
+            'modulo_id' => 'nullable|integer|exists:sgc_modulos,id|required_with:arquivo',
+            'arquivo' => 'nullable|mimes:xlsx,csv',
             'fotos' => 'array',
             'fotos.*.arquivo' => 'nullable|image',
             'fotos.*.latitude' => 'nullable|numeric',
@@ -41,8 +41,7 @@ class StoreMalarigenoRequest extends FormRequest
             'id_campanha.required' => 'O ID da campanha é obrigatório.',
             'sei_dnit.max' => 'O campo SEI DNIT deve ter no máximo 255 caracteres.',
             'subproduto.required' => 'O subproduto é obrigatório.',
-            'modulo_id.required' => 'O módulo é obrigatório.',
-            'arquivo.required' => 'O arquivo da planilha é obrigatório.',
+            'modulo_id.required_with' => 'Selecione um modelo de planilha ao enviar o arquivo.',
             'arquivo.mimes' => 'A planilha precisa ser .xlsx ou .csv.',
         ];
     }
