@@ -151,6 +151,44 @@ public function store(Request $request, GeoServerService $geo)
 
 
 
+    /**
+     * Aplica (ou substitui) um estilo temático na layer: uma cor por valor
+     * distinto de uma coluna do shapefile (ex.: Grau de Potencial -> Baixo/Médio/Alto).
+     */
+    public function applyTheme(Request $request, MapLayer $layer, GeoServerService $geo)
+    {
+        $validated = $request->validate([
+            'campo' => 'required|string|max:255',
+            'categorias' => 'required|array|min:1',
+            'categorias.*.valor' => 'required|string|max:255',
+            'categorias.*.cor' => 'required|string|max:20',
+        ]);
+
+        $styleName = 'tema_' . $layer->layer_name;
+
+        $sld = $geo->buildCategorizedSld($styleName, $validated['campo'], $validated['categorias']);
+
+        try {
+            $geo->uploadOrUpdateStyle($layer->workspace, $styleName, $sld);
+            $geo->setLayerDefaultStyle($layer->workspace, $layer->layer_name, $styleName);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => 'Erro ao aplicar tema no GeoServer',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
+
+        $layer->update([
+            'thematic_field' => $validated['campo'],
+            'thematic_style' => $validated['categorias'],
+        ]);
+
+        return response()->json([
+            'message' => 'Tema aplicado com sucesso.',
+            'layer' => $layer,
+        ]);
+    }
+
     public function desvincular(Request $request, MapLayer $layer)
     {
         $request->validate([
@@ -204,6 +242,8 @@ public function store(Request $request, GeoServerService $geo)
                     'map_layers.layer_name',
                     'map_layers.workspace',
                     'map_layers.title',
+                    'map_layers.thematic_field',
+                    'map_layers.thematic_style',
                     'scl.tipo',
                 ]);
         } else {
@@ -212,6 +252,8 @@ public function store(Request $request, GeoServerService $geo)
                 'map_layers.layer_name',
                 'map_layers.workspace',
                 'map_layers.title',
+                'map_layers.thematic_field',
+                'map_layers.thematic_style',
             ]);
         }
 

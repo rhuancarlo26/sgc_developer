@@ -25,6 +25,10 @@ class MapLayer extends Model
         'crs',
         'bbox',
 
+        // Mapa temático (estilização por atributo)
+        'thematic_field',
+        'thematic_style',
+
         // Arquivos
         'storage_path',
         'published_at',
@@ -34,6 +38,7 @@ class MapLayer extends Model
 
     protected $casts = [
         'bbox' => 'array',
+        'thematic_style' => 'array',
         'visible' => 'boolean'
     ];
 

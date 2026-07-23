@@ -276,19 +276,7 @@ class ProdutosController extends Controller
 
     private function createEspeleologia(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
-        $draft = SgcEspeleoCampanha::where('id_contrato', $contrato)
-            ->where('subproduto', $subproduto)
-            ->where('status', 'Em elaboração')
-            ->first();
-
-        if (!$draft) {
-            $draft = SgcEspeleoCampanha::create([
-                'id_contrato' => $contrato,
-                'id_campanha' => '3',
-                'subproduto' => $subproduto,
-                'status' => 'Em elaboração',
-            ]);
-        }
+        $draft = $this->espeleoService->obterOuCriarRascunho($contrato, $subproduto);
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->select('cod_emp', 'subtrecho_ini', 'subtrecho_fin', 'km_ini', 'km_fin', 'tipo_de_intervencao', 'descricao', 'bioma', 'coordenadas')

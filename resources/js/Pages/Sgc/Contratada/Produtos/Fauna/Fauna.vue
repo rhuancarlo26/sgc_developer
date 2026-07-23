@@ -175,15 +175,26 @@ const visualizarCampanha = (campanha, modulo = null) => {
     return;
   }
 
-  // Para Espeleologia, passar módulo como parâmetro
-  const parametroModulo = isEspeleologia.value ? 'espeleologia' : modulo;
+  // Espeleologia tem controller/rota dedicados, que carregam os relacionamentos
+  // (justificativas, metodologia, anexos, resultados, profissionais) — a rota
+  // genérica de Fauna não faz esse eager loading e devolve a campanha incompleta.
+  if (isEspeleologia.value) {
+    router.get(
+      route('sgc.contratada.produtos.espeleo.show', [
+        props.contrato,
+        'espeleologia',
+        campanha.id,
+      ])
+    );
+    return;
+  }
 
   router.get(
     route('sgc.contratada.produtos.show', [
       props.contrato,
       selectedProduto.value,
       campanha.id,
-      parametroModulo,
+      modulo,
     ])
   );
 };

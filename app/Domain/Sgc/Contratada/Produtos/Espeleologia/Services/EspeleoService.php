@@ -19,6 +19,54 @@ class EspeleoService
             ->get(['id', 'profissional', 'formacao']);
     }
 
+    public function proximoIdCampanha($contratoId): string
+    {
+        return (string) (((int) SgcEspeleoCampanha::where('id_contrato', $contratoId)->max('id_campanha')) + 1);
+    }
+
+    /**
+     * Serializa, via lock nomeado do MySQL, qualquer trecho que precise calcular
+     * o próximo id_campanha e gravar a campanha — evita que duas requisições
+     * concorrentes para o mesmo contrato computem o mesmo número (não há
+     * constraint de unicidade no banco para id_contrato+id_campanha).
+     */
+    public function comLockDeCampanha($contratoId, \Closure $callback)
+    {
+        $lockName = 'espeleo_id_campanha_contrato_' . $contratoId;
+        $obtido = DB::selectOne('SELECT GET_LOCK(?, 10) AS obtido', [$lockName]);
+
+        if (!$obtido || (int) $obtido->obtido !== 1) {
+            throw new \RuntimeException('Não foi possível obter o lock para gerar o número da campanha de espeleologia.');
+        }
+
+        try {
+            return $callback();
+        } finally {
+            DB::select('SELECT RELEASE_LOCK(?)', [$lockName]);
+        }
+    }
+
+    public function obterOuCriarRascunho($contratoId, $subproduto)
+    {
+        return $this->comLockDeCampanha($contratoId, function () use ($contratoId, $subproduto) {
+            $campanha = SgcEspeleoCampanha::where('id_contrato', $contratoId)
+                ->where('subproduto', $subproduto)
+                ->where('status', 'Em elaboração')
+                ->first();
+
+            if (!$campanha) {
+                $campanha = SgcEspeleoCampanha::create([
+                    'id_contrato' => $contratoId,
+                    'id_campanha' => $this->proximoIdCampanha($contratoId),
+                    'subproduto' => $subproduto,
+                    'status' => 'Em elaboração',
+                ]);
+            }
+
+            return $campanha;
+        });
+    }
+
     public function salvarCampanha(array $data, $contratoId, $campanhaId = null)
     {
         return DB::transaction(function () use ($data, $contratoId, $campanhaId) {
@@ -26,21 +74,7 @@ class EspeleoService
 
             $campanha = $campanhaId
                 ? SgcEspeleoCampanha::findOrFail($campanhaId)
-                : SgcEspeleoCampanha::where('id_contrato', $contratoId)
-                    ->where('subproduto', $data['subproduto'] ?? '')
-                    ->where('status', 'Em elaboração')
-                    ->first();
-
-            if (!$campanha) {
-                $nextCampanhaId = ((int) SgcEspeleoCampanha::where('id_contrato', $contratoId)->max('id_campanha')) + 1;
-
-                $campanha = SgcEspeleoCampanha::create([
-                    'id_contrato' => $contratoId,
-                    'id_campanha' => (string) $nextCampanhaId,
-                    'subproduto' => $data['subproduto'] ?? '',
-                    'status' => 'Em elaboração',
-                ]);
-            }
+                : $this->obterOuCriarRascunho($contratoId, $data['subproduto'] ?? '');
 
             $campanha->fill($data);
             $campanha->id_contrato = $contratoId;

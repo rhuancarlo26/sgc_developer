@@ -221,6 +221,7 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('/espeleologia/layers/{layer}/publish', [MapLayerController::class, 'publish'])->name('sgc.contratada.espeleologia.layers.publish');
         Route::get('/espeleologia/layers', [MapLayerController::class, 'index'])->name('sgc.contratada.espeleologia.layers.index');
         Route::delete('/espeleologia/layers/{layer}/desvincular', [MapLayerController::class, 'desvincular'])->name('sgc.contratada.espeleologia.layers.desvincular');
+        Route::post('/espeleologia/layers/{layer}/tema', [MapLayerController::class, 'applyTheme'])->name('sgc.contratada.espeleologia.layers.tema');
         // Rotas para MapPageController
         Route::get('/espeleologia/mapa/viewer', [MapPageController::class, 'viewer'])->name('sgc.contratada.espeleologia.mapa.viewer');
         Route::get('/espeleologia/mapa/create', [MapPageController::class, 'create'])->name('sgc.contratada.espeleologia.mapa.create');

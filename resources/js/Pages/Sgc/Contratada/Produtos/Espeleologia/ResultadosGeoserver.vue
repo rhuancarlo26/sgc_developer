@@ -150,11 +150,30 @@
                     </button>
                   </div>
                 </div>
-                <div
-                  v-show="renderedLayers[layer.id]"
-                  :id="'wms-map-' + layer.id"
-                  style="height: 400px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 12px;"
-                ></div>
+                <div v-show="renderedLayers[layer.id]" class="mb-3">
+                  <div
+                    :id="'wms-map-' + layer.id"
+                    style="height: 400px; border: 1px solid #ddd; border-radius: 4px;"
+                  ></div>
+                  <div
+                    v-if="Array.isArray(layer.thematic_style) && layer.thematic_style.length > 0"
+                    class="d-flex flex-wrap gap-3 align-items-center mt-2 p-2 border rounded bg-white"
+                  >
+                    <small class="text-muted fw-bold me-1">
+                      Legenda{{ layer.thematic_field ? ' (' + layer.thematic_field + ')' : '' }}:
+                    </small>
+                    <span
+                      v-for="cat in layer.thematic_style"
+                      :key="cat.valor"
+                      class="d-flex align-items-center gap-1"
+                    >
+                      <span
+                        :style="{ background: cat.cor, width: '14px', height: '14px', display: 'inline-block', borderRadius: '3px', border: '1px solid rgba(0,0,0,0.15)' }"
+                      ></span>
+                      <small>{{ cat.valor }}</small>
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -193,6 +212,54 @@
               style="height: 400px; border: 1px solid #ddd; border-radius: 4px;"
               class="mb-3"
             ></div>
+
+            <!-- Mapa Temático: estilizar por valor de uma coluna do shapefile -->
+            <div
+              v-if="features[tipo].length > 0 && colunasDisponiveis(tipo).length > 0"
+              class="border rounded p-3 mb-3 bg-light"
+            >
+              <div class="form-check mb-2">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  :id="'tema-ativo-' + tipo"
+                  v-model="temaAtivo[tipo]"
+                />
+                <label class="form-check-label fw-bold" :for="'tema-ativo-' + tipo">
+                  Estilizar como Mapa Temático (cor por atributo)
+                </label>
+              </div>
+
+              <template v-if="temaAtivo[tipo]">
+                <label class="form-label">Coluna do atributo</label>
+                <select
+                  class="form-control mb-3"
+                  v-model="temaCampo[tipo]"
+                  @change="selecionarCampoTema(tipo)"
+                >
+                  <option value="">-- selecione a coluna --</option>
+                  <option v-for="col in colunasDisponiveis(tipo)" :key="col" :value="col">
+                    {{ col }}
+                  </option>
+                </select>
+
+                <div v-if="(temaCategorias[tipo] || []).length > 0">
+                  <label class="form-label d-block">Cor por valor encontrado</label>
+                  <div
+                    v-for="cat in temaCategorias[tipo]"
+                    :key="cat.valor"
+                    class="d-flex align-items-center gap-2 mb-2"
+                  >
+                    <input
+                      type="color"
+                      v-model="cat.cor"
+                      style="width: 40px; height: 32px; padding: 0; border: none;"
+                    />
+                    <span>{{ cat.valor }}</span>
+                  </div>
+                </div>
+              </template>
+            </div>
 
             <button
               v-if="features[tipo].length > 0"
@@ -298,6 +365,12 @@ const rendered = ref({})
 const zipFiles = ref({})
 const maps = ref({})
 
+// === Mapa Temático (cor por valor de uma coluna do shapefile)
+const temaAtivo = ref({})
+const temaCampo = ref({})
+const temaCategorias = ref({})
+const paletaTema = ['#d73027', '#fc8d59', '#fee08b', '#91cf60', '#1a9850', '#4575b4', '#984ea3', '#999999']
+
 // === Estados de carregamento ===
 const isLoading = ref(false)
 const loadingMessage = ref('')
@@ -323,6 +396,9 @@ const ensureTiposState = (tiposLista) => {
     if (!(t in savedObservacoes.value)) savedObservacoes.value[t] = ''
     if (!(t in rendered.value)) rendered.value[t] = false
     if (!(t in zipFiles.value)) zipFiles.value[t] = null
+    if (!(t in temaAtivo.value)) temaAtivo.value[t] = false
+    if (!(t in temaCampo.value)) temaCampo.value[t] = ''
+    if (!(t in temaCategorias.value)) temaCategorias.value[t] = []
   })
 }
 
@@ -685,9 +761,12 @@ const processFiles = async (files, tipo) => {
     const shpName = Object.keys(zip.files).find(n => n.endsWith('.shp'))
     if (!shpName) return
     const shpBuffer = await zip.file(shpName).async('arraybuffer')
-    const geojson = await shapefile.read(shpBuffer, null, { name: 'features' })
+    const dbfEntry = zip.file(shpName.replace(/\.shp$/i, '.dbf'))
+    const dbfBuffer = dbfEntry ? await dbfEntry.async('arraybuffer') : null
+    const geojson = await shapefile.read(shpBuffer, dbfBuffer, { name: 'features' })
     features.value[tipo] = await reprojectToWgs84(zip, shpName, geojson.features || [])
     rendered.value[tipo] = true
+    resetTema(tipo)
     await nextTick()
     renderMap(tipo)
   } catch (e) {
@@ -724,16 +803,39 @@ const vincularMapa = async (tipo) => {
     )
 
     if (response.data.layer) {
+      const layerId = response.data.layer.id
+
       geoLayers.value.push({
-        id: response.data.layer.id,
+        id: layerId,
         layer_name: response.data.layer.layer_name,
         workspace: response.data.layer.workspace,
         title: response.data.layer.title,
         tipo,
       })
+
+      const categorias = temaCategorias.value[tipo] || []
+      const temaConfigurado = temaAtivo.value[tipo] && temaCampo.value[tipo] && categorias.length > 0
+      if (temaConfigurado) {
+        try {
+          loadingMessage.value = 'Aplicando mapa temático...'
+          await axios.post(
+            route('sgc.contratada.espeleologia.layers.tema', layerId),
+            { campo: temaCampo.value[tipo], categorias }
+          )
+          const geoLayer = geoLayers.value.find((l) => l.id === layerId)
+          if (geoLayer) {
+            geoLayer.thematic_field = temaCampo.value[tipo]
+            geoLayer.thematic_style = categorias
+          }
+        } catch (temaError) {
+          console.error('Erro ao aplicar mapa temático:', temaError)
+        }
+      }
+
       uploadedFiles.value[tipo] = []
       zipFiles.value[tipo] = null
       features.value[tipo] = []
+      resetTema(tipo)
       if (maps.value[tipo]) {
         try { maps.value[tipo].remove() } catch (e) { /* noop */ }
         maps.value[tipo] = null
@@ -785,6 +887,40 @@ const renderMap = async (tipo) => {
   }
 
   setTimeout(() => map.invalidateSize(), 300)
+}
+
+// === Mapa Temático: colunas do .dbf disponíveis para o tipo, e seleção de valores/cores
+const colunasDisponiveis = (tipo) => {
+  const comPropriedades = (features.value[tipo] || []).find(
+    (f) => f.properties && Object.keys(f.properties).length > 0
+  )
+  return comPropriedades ? Object.keys(comPropriedades.properties) : []
+}
+
+const selecionarCampoTema = (tipo) => {
+  const campo = temaCampo.value[tipo]
+  if (!campo) {
+    temaCategorias.value[tipo] = []
+    return
+  }
+
+  const valores = [...new Set(
+    (features.value[tipo] || [])
+      .map((f) => f.properties?.[campo])
+      .filter((v) => v !== undefined && v !== null && v !== '')
+      .map((v) => String(v))
+  )]
+
+  temaCategorias.value[tipo] = valores.map((valor, i) => ({
+    valor,
+    cor: paletaTema[i % paletaTema.length],
+  }))
+}
+
+const resetTema = (tipo) => {
+  temaAtivo.value[tipo] = false
+  temaCampo.value[tipo] = ''
+  temaCategorias.value[tipo] = []
 }
 
 const removerAnexo = (id) => {
