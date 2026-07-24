@@ -52,6 +52,30 @@ export const produtoConfig = {
     }
   },
 
+  rima: {
+    nome: 'RIMA',
+    temEtapas: false,
+    temArquivo: false,
+    temVinculacoes: false,
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
+    acoes: ['visualizar', 'editar', 'analisar', 'arquivar', 'restaurar', 'excluir', 'aprovar', 'reprovar'],
+    modalPreview: false,
+    showModulo: false,
+    passaModulo: null,
+    rotaNome: {
+      index: 'sgc.contratada.produtos.index',
+      create: 'sgc.contratada.produtos.create',
+      show: 'sgc.contratada.produtos.rima.show',
+      analise: 'sgc.contratada.produtos.rima.analise',
+      edit: 'sgc.contratada.produtos.rima.edit',
+      destroy: 'sgc.contratada.produtos.destroy',
+      aprovarTudo: 'sgc.contratada.produtos.rima.aprovarTudo',
+      reprovarTudo: 'sgc.contratada.produtos.rima.reprovarTudo',
+      arquivar: null,
+      restaurar: null,
+    }
+  },
+
   eia: {
     nome: 'EIA',
     temEtapas: false,

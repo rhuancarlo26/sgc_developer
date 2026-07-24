@@ -33,6 +33,7 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\InitializarRascunhoCampa
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SalvarEtapaCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SubmeterCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Controller\MalarigenoCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Rima\Controller\RimaCampanhaController;
 
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\ConfiguracoesModulosController;
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\CreateConfigModuloController;
@@ -177,6 +178,16 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::get('malarigeno/campanhas/{campanha}/edit', [MalarigenoCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.malarigeno.edit');
         Route::post('malarigeno/campanhas/{campanha}/update', [MalarigenoCampanhaController::class, 'update'])->name('sgc.contratada.produtos.malarigeno.update');
 
+        // Rotas para RIMA - Análise e Aprovação
+        Route::get('rima/campanhas/{campanha}', [RimaCampanhaController::class, 'show'])->name('sgc.contratada.produtos.rima.show');
+        Route::get('rima/campanhas/{campanha}/analise', [RimaCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.rima.analise');
+        Route::post('rima/campanhas/{campanha}/analise', [RimaCampanhaController::class, 'salvarAnalise'])->name('sgc.contratada.produtos.rima.salvarAnalise');
+        Route::post('rima/campanhas/{campanha}/aprovar-tudo', [RimaCampanhaController::class, 'aprovarTudo'])->name('sgc.contratada.produtos.rima.aprovarTudo');
+        Route::post('rima/campanhas/{campanha}/reprovar-tudo', [RimaCampanhaController::class, 'reprovarTudo'])->name('sgc.contratada.produtos.rima.reprovarTudo');
+        Route::post('rima/campanhas/{campanha}/finalizar-avaliacao', [RimaCampanhaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.rima.finalizarAvaliacao');
+        Route::get('rima/campanhas/{campanha}/edit', [RimaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.rima.edit');
+        Route::post('rima/campanhas/{campanha}/update', [RimaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.rima.update');
+
         // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {
             Route::post('salvar-campanha', [EspeleoCampanhaController::class, 'salvarCampanha'])->name('sgc.contratada.produtos.espeleo.salvar_campanha');
@@ -232,6 +243,7 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('/espeleologia/layers/{layer}/publish', [MapLayerController::class, 'publish'])->name('sgc.contratada.espeleologia.layers.publish');
         Route::get('/espeleologia/layers', [MapLayerController::class, 'index'])->name('sgc.contratada.espeleologia.layers.index');
         Route::delete('/espeleologia/layers/{layer}/desvincular', [MapLayerController::class, 'desvincular'])->name('sgc.contratada.espeleologia.layers.desvincular');
+        Route::post('/espeleologia/layers/{layer}/tema', [MapLayerController::class, 'applyTheme'])->name('sgc.contratada.espeleologia.layers.tema');
         // Rotas para MapPageController
         Route::get('/espeleologia/mapa/viewer', [MapPageController::class, 'viewer'])->name('sgc.contratada.espeleologia.mapa.viewer');
         Route::get('/espeleologia/mapa/create', [MapPageController::class, 'create'])->name('sgc.contratada.espeleologia.mapa.create');

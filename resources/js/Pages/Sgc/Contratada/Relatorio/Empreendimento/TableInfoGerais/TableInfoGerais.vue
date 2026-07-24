@@ -86,6 +86,10 @@ const getVisualizarRoute = (campanha) => {
     return route('sgc.contratada.produtos.malarigeno.show', [contratoId, 'malarigeno', campanha.campanha_id]);
   }
 
+  if (campanha.produto === 'Rima') {
+    return route('sgc.contratada.produtos.rima.show', [contratoId, 'rima', campanha.campanha_id]);
+  }
+
   return '#';
 };
 

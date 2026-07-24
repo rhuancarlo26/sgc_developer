@@ -22,6 +22,7 @@ use App\Models\SgcFaunaCampanha;
 use App\Models\SgcEspeleoCampanha;
 use App\Models\SgcPmqa;
 use App\Models\SgcMalarigeno;
+use App\Models\SgcRima;
 use App\Models\ChangeLog;
 
 use Illuminate\Support\Facades\Schema;
@@ -341,11 +342,28 @@ class EmpreendimentosController extends Controller
                     'sei_dnit' => $campanha->sei_dnit,
                 ]);
 
+            $campanhasRima = SgcRima::where('cod_emp', $empreendimentos2->cod_emp)
+                ->where('id_contrato', $empreendimentos2->contrato_id)
+                ->where('status', 'Aprovada')
+                ->get(['id', 'id_contrato', 'id_campanha', 'subproduto', 'status', 'created_at', 'sei_dnit'])
+                ->map(fn ($campanha) => [
+                    'produto' => 'Rima',
+                    'contrato_id' => $campanha->id_contrato,
+                    'campanha_id' => $campanha->id,
+                    'identificador' => $campanha->id_campanha ?? $campanha->id,
+                    'subproduto' => $campanha->subproduto,
+                    'status' => $campanha->status,
+                    'data_inicial' => $campanha->created_at,
+                    'data_final' => null,
+                    'sei_dnit' => $campanha->sei_dnit,
+                ]);
+
             $campanhasDetalhadas = $campanhasDetalhadas
                 ->merge($campanhasFauna)
                 ->merge($campanhasEspeleologia)
                 ->merge($campanhasPmqa)
                 ->merge($campanhasMalarigeno)
+                ->merge($campanhasRima)
                 ->sortBy([
                     ['produto', 'asc'],
                     ['identificador', 'desc'],

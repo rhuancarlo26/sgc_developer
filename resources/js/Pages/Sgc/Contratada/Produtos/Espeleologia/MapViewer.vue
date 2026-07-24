@@ -16,6 +16,7 @@ const props = defineProps({
   campanhaId: [Number, String],
   produto: String,
   emp_coordenadas: [Object, String],
+  somenteTrecho: { type: Boolean, default: false },
 });
 console.log("MapViewer Props:", props.emp_coordenadas); // Log para verificar os dados recebidos
 
@@ -97,6 +98,16 @@ const nomesTipos = {
   projeto_engenharia: 'Projeto de Engenharia',
   estudos_posteriores: 'Estudos Posteriores',
 };
+
+// Camadas ativas que têm mapa temático configurado (para a legenda)
+const legendasAtivas = computed(() =>
+  layers.value.filter(
+    (l) =>
+      activeLayers.value[`${l.workspace}:${l.layer_name}`] &&
+      Array.isArray(l.thematic_style) &&
+      l.thematic_style.length > 0
+  )
+);
 
 // Retorna label numerado quando há múltiplas layers do mesmo tipo
 function layerLabel(layer) {
@@ -272,33 +283,35 @@ onMounted(async () => {
   // Os eventos de tile são rastreados por camada individualmente em toggleLayer
 
   addEmpCoordinatesLayer();
-  initTemporaryDrawTools();
-
-  const params = {};
-  if (props.campanhaId) {
-    params.campanha_id = props.campanhaId;
-  }
-
-  isLoadingMap.value = true;
-  loadingMapMessage.value = 'Carregando camadas...';
-  startLoading();
-  try {
-    const { data } = await axios.get("/sgc/contratada/espeleologia/layers", { params });
-    layers.value = data;
-
-    // Armazenar cores para cada camada
-    data.forEach((layer, index) => {
-      const key = `${layer.workspace}:${layer.layer_name}`;
-      layerColors.value[key] = getLayerColor(index);
-    });
-  } finally {
-    isLoadingMap.value = false;
-    loadingMapMessage.value = '';
-    stopLoading();
-  }
-
-  map.value.on("click", getFeatureInfo);
   document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+  if (!props.somenteTrecho) {
+    initTemporaryDrawTools();
+
+    const params = {};
+    if (props.campanhaId) {
+      params.campanha_id = props.campanhaId;
+    }
+
+    isLoadingMap.value = true;
+    loadingMapMessage.value = 'Carregando camadas...';
+    startLoading();
+    try {
+      const { data } = await axios.get("/sgc/contratada/espeleologia/layers", { params });
+      layers.value = data;
+
+      data.forEach((layer, index) => {
+        const key = `${layer.workspace}:${layer.layer_name}`;
+        layerColors.value[key] = getLayerColor(index);
+      });
+    } finally {
+      isLoadingMap.value = false;
+      loadingMapMessage.value = '';
+      stopLoading();
+    }
+
+    map.value.on("click", getFeatureInfo);
+  }
 });
 
 onUnmounted(() => {
@@ -592,6 +605,7 @@ async function getFeatureInfo(e) {
         </button>
 
         <button
+          v-if="!somenteTrecho"
           class="clear-drawings-btn"
           @click="clearTemporaryDrawings"
           title="Limpar desenhos temporarios"
@@ -600,7 +614,7 @@ async function getFeatureInfo(e) {
         </button>
 
         <!-- Painel de controle de camadas -->
-        <div class="layers-panel" :class="{ hidden: !showLayersPanel }">
+        <div v-if="!somenteTrecho" class="layers-panel" :class="{ hidden: !showLayersPanel }">
           <div class="panel-header">
             <h2>Camadas do Mapa</h2>
             <button
@@ -655,6 +669,7 @@ async function getFeatureInfo(e) {
 
         <!-- Botão para mostrar/esconder o painel -->
         <button
+          v-if="!somenteTrecho"
           class="toggle-panel-btn"
           :class="{ expanded: showLayersPanel }"
           @click="toggleLayersPanel"
@@ -669,7 +684,18 @@ async function getFeatureInfo(e) {
           }}</span>
         </button>
 
-        <!-- Legenda informativa -->
+        <!-- Legenda das camadas com mapa temático ativo -->
+        <div v-if="legendasAtivas.length > 0" class="map-legend">
+          <div v-for="layer in legendasAtivas" :key="layer.id" class="legend-group">
+            <div class="legend-title">
+              {{ layerLabel(layer) }}<template v-if="layer.thematic_field"> — {{ layer.thematic_field }}</template>
+            </div>
+            <div v-for="cat in layer.thematic_style" :key="cat.valor" class="legend-item">
+              <span class="legend-color" :style="{ background: cat.cor }"></span>
+              <span>{{ cat.valor }}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1007,46 +1033,53 @@ async function getFeatureInfo(e) {
   margin: 0;
 }
 
-/* Legenda do mapa */
+/* Legenda do mapa (mapas temáticos ativos) */
 .map-legend {
   position: absolute;
   bottom: 30px;
   right: 30px;
+  max-width: 260px;
+  max-height: 45vh;
+  overflow-y: auto;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 10px;
-  padding: 12px 18px;
+  padding: 12px 16px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
   z-index: 900;
   display: flex;
-  gap: 15px;
+  flex-direction: column;
+  gap: 10px;
   border: 1px solid #eee;
+}
+
+.legend-group + .legend-group {
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+}
+
+.legend-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 4px;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: #444;
+  margin-bottom: 2px;
 }
 
 .legend-color {
   display: inline-block;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 4px;
-  margin-right: 6px;
-}
-
-.legend-color.caves {
-  background: linear-gradient(135deg, #8d6e63, #5d4037);
-}
-
-.legend-color.rivers {
-  background: linear-gradient(135deg, #4fc3f7, #0288d1);
-}
-
-.legend-color.preservation {
-  background: linear-gradient(135deg, #81c784, #388e3c);
+  margin-right: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
 }
 
 /* === Loading overlay sobre o mapa === */

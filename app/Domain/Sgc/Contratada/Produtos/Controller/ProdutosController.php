@@ -18,8 +18,11 @@ use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
 use App\Models\SgcModulo;
 use App\Models\SgcMalarigeno;
+use App\Models\SgcRima;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
+use App\Domain\Sgc\Contratada\Produtos\Rima\Requests\StoreRimaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Rima\Services\RimaService;
 
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -57,6 +60,7 @@ class ProdutosController extends Controller
             'pmqa', 'eia'  => $this->getCampanhasPmqa($contrato),
             'espeleologia' => $this->getCampanhasEspeleologia($contrato),
             'malarigeno'   => $this->getCampanhasMalarigeno($contrato),
+            'rima'         => $this->getCampanhasRima($contrato),
              default        => collect(),
         };
 
@@ -110,6 +114,9 @@ class ProdutosController extends Controller
         } elseif ($produto === 'malarigeno') {
             return $this->createMalarigeno($request,$contrato,$produto,$contratoObj,$subproduto);    
 
+        } elseif ($produto === 'rima') {
+            return $this->createRima($request, $contrato, $produto, $contratoObj, $subproduto);
+
         } else {
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
         }
@@ -148,20 +155,63 @@ class ProdutosController extends Controller
         ]);
     }
 
-    public function store(StoreMalarigenoRequest $request, $contrato, $produto)
+    public function store(Request $request, $contrato, $produto)
     {
-        if ($produto !== 'malarigeno') {
-            abort(404);
+        if ($produto === 'malarigeno') {
+            $validated = $request->validate(
+                (new StoreMalarigenoRequest())->rules(),
+                (new StoreMalarigenoRequest())->messages()
+            );
+            $validated['contrato_id'] = $contrato;
+
+            $malarigeno = (new MalarigenoService())->store($validated);
+
+            return redirect()
+                ->route('sgc.contratada.produtos.malarigeno.show', [$contrato, $produto, $malarigeno->id])
+                ->with('success', 'Malarígeno salvo com sucesso!');
         }
 
-        $validated = $request->validated();
-        $validated['contrato_id'] = $contrato;
+        if ($produto === 'rima') {
+            $validated = request()->validate(
+                (new StoreRimaRequest())->rules(),
+                (new StoreRimaRequest())->messages()
+            );
+            $validated['contrato_id'] = $contrato;
 
-        $malarigeno = (new MalarigenoService())->store($validated);
+            $rima = (new RimaService())->store($validated);
 
-        return redirect()
-            ->route('sgc.contratada.produtos.malarigeno.show', [$contrato, $produto, $malarigeno->id])
-            ->with('success', 'Malarígeno salvo com sucesso!');
+            return redirect()
+                ->route('sgc.contratada.produtos.rima.show', [$contrato, $produto, $rima->id])
+                ->with('success', 'RIMA salvo com sucesso!');
+        }
+
+        abort(404);
+    }
+
+    private function createRima(
+        Request $request,
+        $contrato,
+        $produto,
+        $contratoObj,
+        $subproduto
+    ): Response
+    {
+        $modulos = SgcModulo::query()
+            ->select(['id', 'nome', 'nome_planilha_modelo', 'caminho_planilha_modelo', 'campos', 'created_at'])
+            ->get();
+
+        $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+            ->pluck('cod_emp')
+            ->toArray();
+
+        return inertia('Sgc/Contratada/Produtos/Rima/Create', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => $modulos,
+            'empreendimentos' => $empreendimentos,
+        ]);
     }
 
 
@@ -261,19 +311,7 @@ class ProdutosController extends Controller
 
     private function createEspeleologia(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
-        $draft = SgcEspeleoCampanha::where('id_contrato', $contrato)
-            ->where('subproduto', $subproduto)
-            ->where('status', 'Em elaboração')
-            ->first();
-
-        if (!$draft) {
-            $draft = SgcEspeleoCampanha::create([
-                'id_contrato' => $contrato,
-                'id_campanha' => '3',
-                'subproduto' => $subproduto,
-                'status' => 'Em elaboração',
-            ]);
-        }
+        $draft = $this->espeleoService->obterOuCriarRascunho($contrato, $subproduto);
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->select('cod_emp', 'subtrecho_ini', 'subtrecho_fin', 'km_ini', 'km_fin', 'tipo_de_intervencao', 'descricao', 'bioma', 'coordenadas')
@@ -387,6 +425,22 @@ class ProdutosController extends Controller
     private function getCampanhasMalarigeno($contrato)
     {
         return SgcMalarigeno::where('id_contrato', $contrato)
+            ->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn($campanha) => [
+                'id' => $campanha->id,
+                'id_campanha' => $campanha->id_campanha ?? 'N/A',
+                'empreendimento' => $campanha->cod_emp ?? 'N/A',
+                'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A',
+                'data_final' => 'N/A',
+                'status' => $campanha->status ?? 'Em elaboração',
+                'subproduto' => $campanha->subproduto ?? 'N/A',
+            ]);
+    }
+
+    private function getCampanhasRima($contrato)
+    {
+        return SgcRima::where('id_contrato', $contrato)
             ->latest()
             ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
             ->map(fn($campanha) => [
