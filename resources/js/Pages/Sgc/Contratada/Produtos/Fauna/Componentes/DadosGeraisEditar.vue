@@ -282,6 +282,21 @@ const excluirProfissional = (profissionalVinculoId) => {
         </div>
       </div>
       <div class="row mb-3">
+        <div class="col-12 col-md-6">
+          <InputLabel value="SEI DNIT" for="sei_dnit" />
+          <input
+            type="number"
+            id="sei_dnit"
+            class="form-control"
+            min="0"
+            step="1"
+            v-model="form.sei_dnit"
+            :disabled="disabled"
+          />
+          <InputError :message="form.errors.sei_dnit" />
+        </div>
+      </div>
+      <div class="row mb-3">
         <div class="col-12">
           <InputLabel value="Observações" for="obs" />
           <textarea

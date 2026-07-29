@@ -18,6 +18,7 @@ class EtapaApresentacaoRequest extends FormRequest
             'data_campanha_inicial'    => 'nullable|date',
             'data_campanha_final'      => 'nullable|date|after_or_equal:data_campanha_inicial',
             'periodo'                  => 'nullable|string|max:255',
+            'sei_dnit'                 => 'nullable|integer',
             'cod_emp'                  => 'nullable|string|max:255',
             'observacoes'              => 'nullable|string',
             'nao_se_aplica_quelo'      => 'nullable|boolean',

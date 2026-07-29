@@ -4,6 +4,7 @@ import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import * as XLSX from 'xlsx';
+import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
     campanha: { type: Object, default: () => ({}) },
@@ -15,6 +16,7 @@ const props = defineProps({
 });
 
 const previewFoto = ref(null);
+const showAnalysisModal = ref(false);
 const planilhaColumns = ref([]);
 const planilhaRows = ref([]);
 const planilhaLoading = ref(false);
@@ -23,11 +25,22 @@ const currentPage = ref(1);
 const rowsPerPage = 10;
 
 const statusClass = computed(() => ({
-    'bg-warning text-dark': props.campanha.status === 'Em análise',
-    'bg-success': props.campanha.status === 'Aprovada',
-    'bg-danger': props.campanha.status === 'Rejeitada',
-    'bg-secondary': props.campanha.status === 'Em elaboração',
+    'bg-warning text-white': props.campanha.status === 'Em análise',
+    'bg-success text-white': props.campanha.status === 'Aprovada',
+    'bg-danger text-white': props.campanha.status === 'Rejeitada',
+    'bg-secondary text-white': props.campanha.status === 'Em elaboração',
 }));
+
+const statusDisplay = computed(() => {
+    if (props.campanha.status === 'Rejeitada') {
+        return 'Em revisão';
+    }
+    return props.campanha.status;
+});
+
+const canEdit = computed(() => {
+    return ['Rejeitada', 'Em elaboração'].includes(props.campanha.status);
+});
 
 const fotos = computed(() => Array.isArray(props.campanha.fotos) ? props.campanha.fotos : []);
 const anexos = computed(() => Array.isArray(props.campanha.anexos) ? props.campanha.anexos : []);
@@ -124,7 +137,7 @@ onMounted(loadPlanilha);
                 :links="[
                     { route: route('sgc.gestao.listagem', props.contratos.tipo_contrato), label: 'Gestão de Contratos' },
                     { route: route('sgc.contratada.produtos.index', [props.contrato, props.produto]), label: props.contratos.contratada },
-                    { route: '#', label: `Visualizar Campanha ${props.campanha.id || props.campanha_id}` },
+                    { route: '#', label: `Visualizar Campanha ${props.campanha.id_campanha || props.campanha.id || props.campanha_id}` },
                 ]"
             />
         </template>
@@ -133,37 +146,45 @@ onMounted(loadPlanilha);
             <template #body>
                 <div class="card">
                     <div class="card-body">
-                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-                            <div>
-                                <h2 class="mb-1">VISUALIZAR CAMPANHA {{ (props.produto || '').toUpperCase() }}</h2>
-                                <div class="text-muted">{{ props.campanha.subproduto || 'Subproduto não informado' }}</div>
+                        <div v-if="props.campanha.analises && props.campanha.analises.length > 0" class="alert alert-info mb-3 d-flex justify-content-between align-items-center" style="cursor: pointer;" @click="showAnalysisModal = true">
+                            <span>
+                                <i class="bi bi-info-circle me-2"></i>
+                                {{ props.campanha.analises.length }} análise{{ props.campanha.analises.length !== 1 ? 's' : '' }} registrada{{ props.campanha.analises.length !== 1 ? 's' : '' }}
+                            </span>
+                            <span class="badge bg-info text-white">Clique para visualizar</span>
+                        </div>
+
+                        <div class="text-center mb-4">
+                            <h2 class="mb-2">VISUALIZAR CAMPANHA MALARÍGENO</h2>
+                            <p class="text-muted mb-3 fs-5">{{ props.campanha.subproduto || 'Subproduto não informado' }}</p>
+                            <div class="d-inline-block">
+                                <span class="badge fs-4 px-3 py-2 fw-bold text-white" :class="statusClass">{{ statusDisplay || 'N/A' }}</span>
                             </div>
-                            <span class="badge fs-6" :class="statusClass">{{ props.campanha.status || 'N/A' }}</span>
                         </div>
 
                         <div class="row g-3 mb-4">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="info-box">
                                     <span>Campanha</span>
-                                    <strong>{{ props.campanha.id || 'N/A' }}</strong>
+                                    <strong>{{ props.campanha.id_campanha || 'N/A' }}</strong>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
+                                <div class="info-box">
+                                    <span>Empreendimento</span>
+                                    <strong>{{ props.campanha.cod_emp || 'N/A' }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="info-box">
+                                    <span>SEI DNIT</span>
+                                    <strong>{{ props.campanha.sei_dnit || 'N/A' }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
                                 <div class="info-box">
                                     <span>Planilha Modelo</span>
                                     <strong>{{ props.campanha.modulo?.nome || 'N/A' }}</strong>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="info-box">
-                                    <span>Criada em</span>
-                                    <strong>{{ props.campanha.created_at || 'N/A' }}</strong>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="info-box">
-                                    <span>Atualizada em</span>
-                                    <strong>{{ props.campanha.updated_at || 'N/A' }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -263,6 +284,62 @@ onMounted(loadPlanilha);
                             </div>
                             <div v-else class="empty-state">Nenhum anexo vinculado.</div>
                         </section>
+
+                        <!-- Seção de Edição para Contratadas -->
+                        <section v-if="canEdit" class="mt-4 pt-4 border-top">
+                            <h4 class="section-title">Editar Campanha</h4>
+                            <p class="text-muted mb-3">Esta campanha está em revisão. Você pode editar os dados e resubmeter para análise.</p>
+                            <Link
+                                :href="route('sgc.contratada.produtos.malarigeno.edit', [props.contrato, props.produto, props.campanha.id])"
+                                class="btn btn-primary"
+                            >
+                                <i class="bi bi-pencil"></i> Editar Campanha
+                            </Link>
+                        </section>
+
+                        <!-- Seção de Análise para Fiscais -->
+                        <section v-if="props.canApprove" class="mt-4 pt-4 border-top">
+                            <h4 class="section-title">Análise da Campanha</h4>
+                            <p class="text-muted mb-3">Como fiscal, você pode analisar e aprovar ou reprovar esta campanha.</p>
+                            <Link
+                                :href="route('sgc.contratada.produtos.malarigeno.analise', [props.contrato, props.produto, props.campanha.id])"
+                                class="btn btn-primary"
+                            >
+                                <i class="bi bi-check2-square"></i> Ir para Análise
+                            </Link>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- Modal de Análises -->
+                <div v-if="showAnalysisModal && props.campanha.analises && props.campanha.analises.length > 0" class="modal-backdrop-custom" @click.self="showAnalysisModal = false">
+                    <div class="preview-modal" style="max-width: 600px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Histórico de Análises</h5>
+                            <button type="button" class="btn-close" @click="showAnalysisModal = false"></button>
+                        </div>
+                        <div class="modal-analysis-content">
+                            <div v-for="analise in props.campanha.analises" :key="analise.id" class="card mb-2">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong>Versão {{ analise.versao }}</strong>
+                                            <!-- <span :class="['badge', analise.status === 'Aprovada' ? 'bg-success' : 'bg-danger']">
+                                                {{ analise.status }}
+                                            </span> -->
+                                        </div>
+                                        <small class="text-muted">{{ analise.created_at }}</small>
+                                    </div>
+                                    <p class="mb-2 small">
+                                        <strong>Fiscal:</strong> {{ analise.fiscal?.name || 'N/A' }}
+                                    </p>
+                                    <div v-if="analise.observacoes" class="alert alert-info small mb-0">
+                                        <strong>Observações:</strong>
+                                        <p class="mb-0 mt-1">{{ analise.observacoes }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -333,12 +410,14 @@ onMounted(loadPlanilha);
 
 .sheet-table-wrapper {
     max-height: 520px;
+    overflow-x: auto;
 }
 
 .sheet-table-wrapper th,
 .sheet-table-wrapper td {
-    max-width: 280px;
-    overflow-wrap: anywhere;
+    max-width: 320px;
+    min-width: 120px;
+    overflow-wrap: break-word;
     vertical-align: top;
 }
 
@@ -408,5 +487,10 @@ onMounted(loadPlanilha);
     max-height: 70vh;
     object-fit: contain;
     background: #f8f9fa;
+}
+
+.modal-analysis-content {
+    max-height: 60vh;
+    overflow-y: auto;
 }
 </style>

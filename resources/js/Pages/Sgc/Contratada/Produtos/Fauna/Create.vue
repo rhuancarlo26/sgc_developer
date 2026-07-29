@@ -66,6 +66,7 @@ const formDadosGerais = reactive({
     data_campanha_inicial: props.draftData?.data_campanha_inicial ?? '',
     data_campanha_final:   props.draftData?.data_campanha_final   ?? '',
     periodo:               props.draftData?.periodo               ?? '',
+    sei_dnit:              props.draftData?.sei_dnit              ?? '',
     obs:                   props.draftData?.observacoes           ?? '',
     errors:                {},
 });
@@ -178,6 +179,7 @@ function buildApresentacaoPayload() {
     fd.append('data_campanha_inicial',     formDadosGerais.data_campanha_inicial ?? '');
     fd.append('data_campanha_final',       formDadosGerais.data_campanha_final   ?? '');
     fd.append('periodo',                   formDadosGerais.periodo               ?? '');
+    fd.append('sei_dnit',                  formDadosGerais.sei_dnit              ?? '');
     fd.append('observacoes',               formDadosGerais.obs                   ?? '');
     fd.append('nao_se_aplica_quelo',       naoSeAplicaQuelonios.value ? '1' : '0');
     fd.append('nao_se_aplica_cavernicola', naoSeAplicaCavernicola.value ? '1' : '0');

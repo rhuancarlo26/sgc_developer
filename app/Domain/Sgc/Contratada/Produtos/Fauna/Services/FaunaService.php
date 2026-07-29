@@ -32,6 +32,7 @@ class FaunaService
             'data_ini' => $data['data_campanha_inicial'] ?? null,
             'data_fim' => $data['data_campanha_final'] ?? null,
             'periodo' => $data['periodo'] ?? null,
+            'sei_dnit' => $data['sei_dnit'] ?? null,
             'observacoes' => $data['observacoes'] ?? null,
             'cod_emp' => $data['cod_emp'] ?? null,
             'subproduto' => $data['subproduto'] ?? null,
@@ -162,7 +163,10 @@ class FaunaService
         // Salvar resultados e considerações
         if (!empty($data['planilha']) && $data['planilha']->isValid()) {
             $this->salvarResultados($contratoId, $data['planilha'], $campanha->id, $data['consideracoes'] ?? null);
-        } elseif (!empty($data['consideracoes'])) {
+        }
+
+        // Salvar considerações
+        if (!empty($data['consideracoes'])) {
             SgcFaunaResultadosConsideracoes::create([
                 'id_contrato' => $contratoId,
                 'id_campanha' => $campanha->id,
@@ -211,6 +215,7 @@ class FaunaService
                     'data_ini' => $data['data_campanha_inicial'] ?? null,
                     'data_fim' => $data['data_campanha_final'] ?? null,
                     'periodo' => $data['periodo'] ?? null,
+                    'sei_dnit' => $data['sei_dnit'] ?? null,
                     'observacoes' => $data['observacoes'] ?? null,
                     'cod_emp' => $data['cod_emp'] ?? null,
                     'nao_se_aplica_quelo' => $data['nao_se_aplica_quelo'] ?? false,

@@ -89,8 +89,11 @@ class CampanhaController extends Controller
         $moduloativo = "Fauna";
         $campanhaData = null;
         
+        $isEspeleologia = strtolower((string) $produto) === 'espeleologia'
+            || strtolower((string) $modulo) === 'espeleologia';
+
         // ✅ Se for Espeleologia, carrega o modelo específico
-        if ($modulo === 'espeleologia') {
+        if ($isEspeleologia && strtolower((string) $produto) !== 'fauna') {
             Log::debug('CampanhaController: Módulo de Espeleologia acessado', [
                 'campanha_id' => $campanhaId,
             ]);

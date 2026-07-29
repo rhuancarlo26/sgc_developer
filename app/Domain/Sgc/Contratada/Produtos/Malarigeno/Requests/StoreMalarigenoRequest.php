@@ -3,7 +3,6 @@
 namespace App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreMalarigenoRequest extends FormRequest
 {
@@ -16,13 +15,12 @@ class StoreMalarigenoRequest extends FormRequest
     {
         return [
             'contrato_id' => 'required|integer|exists:contratos,id',
-            'subproduto' => 'nullable|string',
-            'modulo_id' => [
-                'required',
-                'integer',
-                Rule::exists('sgc_modulos', 'id')->where('produto_slug', $this->route('produto')),
-            ],
-            'arquivo' => 'required|mimes:xlsx,csv',
+            'cod_emp' => 'required|string|max:255',
+            'id_campanha' => 'required|integer|min:1',
+            'sei_dnit' => 'nullable|string|max:255',
+            'subproduto' => 'required|string',
+            'modulo_id' => 'nullable|integer|exists:sgc_modulos,id|required_with:arquivo',
+            'arquivo' => 'nullable|mimes:xlsx,csv',
             'fotos' => 'array',
             'fotos.*.arquivo' => 'nullable|image',
             'fotos.*.latitude' => 'nullable|numeric',
@@ -39,9 +37,11 @@ class StoreMalarigenoRequest extends FormRequest
     {
         return [
             'contrato_id.required' => 'O contrato é obrigatório.',
-            'modulo_id.required' => 'O módulo é obrigatório.',
-            'modulo_id.exists' => 'O módulo selecionado não pertence a este produto.',
-            'arquivo.required' => 'O arquivo da planilha é obrigatório.',
+            'cod_emp.required' => 'O empreendimento é obrigatório.',
+            'id_campanha.required' => 'O ID da campanha é obrigatório.',
+            'sei_dnit.max' => 'O campo SEI DNIT deve ter no máximo 255 caracteres.',
+            'subproduto.required' => 'O subproduto é obrigatório.',
+            'modulo_id.required_with' => 'Selecione um modelo de planilha ao enviar o arquivo.',
             'arquivo.mimes' => 'A planilha precisa ser .xlsx ou .csv.',
         ];
     }

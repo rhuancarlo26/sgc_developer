@@ -18,10 +18,16 @@ use App\Models\SgcvwSubprodutos;
 use App\Models\SgcEspeleoEstudosPosteriores;
 use App\Models\SgcModulo;
 use App\Models\SgcModuloCampanha;
+use App\Models\SgcMalarigeno;
+use App\Models\SgcRima;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
+use App\Domain\Sgc\Contratada\Produtos\Rima\Requests\StoreRimaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Rima\Services\RimaService;
+use App\Domain\Sgc\Contratada\Modulo\Services\ModuloCampanhaService;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
@@ -58,6 +64,8 @@ class ProdutosController extends Controller
             $produto === 'fauna'                       => $this->getCampanhasFauna($contrato, $mostrarArquivadas),
             in_array($produto, ['pmqa', 'eia'], true)   => $this->getCampanhasPmqa($contrato),
             $produto === 'espeleologia'                 => $this->getCampanhasEspeleologia($contrato),
+            $produto === 'malarigeno'                   => $this->getCampanhasMalarigeno($contrato),
+            $produto === 'rima'                         => $this->getCampanhasRima($contrato),
             $moduloProduto                              => $this->getCampanhasModulo($contrato, $produto),
             default                                     => collect(),
         };
@@ -98,9 +106,9 @@ class ProdutosController extends Controller
         $contratoObj = Contrato::findOrFail($contrato);
         $subproduto = $request->query('subproduto');
 
-        // Produtos criados dinamicamente a partir de um módulo (exceto o 'malarigeno' legado,
-        // que continua exigindo subproduto do catálogo externo normalmente) não dependem desse catálogo.
-        if ($produto !== 'malarigeno' && SgcModulo::where('produto_slug', $produto)->exists()) {
+        // Produtos criados dinamicamente a partir de um módulo (exceto 'malarigeno' e 'rima', legados,
+        // que continuam exigindo subproduto do catálogo externo normalmente) não dependem desse catálogo.
+        if (!in_array($produto, ['malarigeno', 'rima'], true) && SgcModulo::where('produto_slug', $produto)->exists()) {
             return $this->createModuloProduto($request, $contrato, $produto, $contratoObj, $subproduto);
         }
 
@@ -128,7 +136,10 @@ class ProdutosController extends Controller
             return $this->createPmqa($request, $contrato, $produto, $contratoObj, $subproduto);
 
         } elseif ($produto === 'malarigeno') {
-            return $this->createModuloProduto($request, $contrato, $produto, $contratoObj, $subproduto);
+            return $this->createMalarigeno($request,$contrato,$produto,$contratoObj,$subproduto);
+
+        } elseif ($produto === 'rima') {
+            return $this->createRima($request, $contrato, $produto, $contratoObj, $subproduto);
 
         } else {
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
@@ -164,19 +175,121 @@ class ProdutosController extends Controller
         ]);
     }
 
-    public function store(StoreMalarigenoRequest $request, $contrato, $produto)
+    private function createMalarigeno(
+        Request $request,
+        $contrato,
+        $produto,
+        $contratoObj,
+        $subproduto
+    ): Response
     {
-        if (!SgcModulo::where('produto_slug', $produto)->exists()) {
-            abort(404);
+        $modulos = SgcModulo::query()
+            ->select(['id', 'nome', 'nome_planilha_modelo', 'caminho_planilha_modelo', 'campos', 'created_at'])
+            ->get();
+
+        $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+            ->pluck('cod_emp')
+            ->toArray();
+
+        return inertia('Sgc/Contratada/Produtos/Malarigeno/Create', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => $modulos,
+            'empreendimentos' => $empreendimentos,
+        ]);
+    }
+
+    public function store(Request $request, $contrato, $produto)
+    {
+        if ($produto === 'malarigeno') {
+            $validated = $request->validate(
+                (new StoreMalarigenoRequest())->rules(),
+                (new StoreMalarigenoRequest())->messages()
+            );
+            $validated['contrato_id'] = $contrato;
+
+            $malarigeno = (new MalarigenoService())->store($validated);
+
+            return redirect()
+                ->route('sgc.contratada.produtos.malarigeno.show', [$contrato, $produto, $malarigeno->id])
+                ->with('success', 'Malarígeno salvo com sucesso!');
         }
 
-        $validated = $request->validated();
-        $validated['contrato_id'] = $contrato;
-        $validated['produto'] = $produto;
+        if ($produto === 'rima') {
+            $validated = request()->validate(
+                (new StoreRimaRequest())->rules(),
+                (new StoreRimaRequest())->messages()
+            );
+            $validated['contrato_id'] = $contrato;
 
-        $malarigeno = (new MalarigenoService())->store($validated);
+            $rima = (new RimaService())->store($validated);
 
-        return back()->with('success', ucfirst($produto) . ' salvo com sucesso!');
+            return redirect()
+                ->route('sgc.contratada.produtos.rima.show', [$contrato, $produto, $rima->id])
+                ->with('success', 'RIMA salvo com sucesso!');
+        }
+
+        if (SgcModulo::where('produto_slug', $produto)->exists()) {
+            $validated = $request->validate([
+                'subproduto' => 'nullable|string',
+                'modulo_id' => [
+                    'required',
+                    'integer',
+                    Rule::exists('sgc_modulos', 'id')->where('produto_slug', $produto),
+                ],
+                'arquivo' => 'required|mimes:xlsx,csv',
+                'fotos' => 'array',
+                'fotos.*.arquivo' => 'nullable|image',
+                'fotos.*.latitude' => 'nullable|numeric',
+                'fotos.*.longitude' => 'nullable|numeric',
+                'fotos.*.data_captura' => 'nullable|string',
+                'fotos.*.descricao' => 'nullable|string',
+                'anexos' => 'array',
+                'anexos.*.arquivo' => 'nullable|file',
+                'enviar_analise' => 'required|boolean',
+            ], [
+                'modulo_id.required' => 'O módulo é obrigatório.',
+                'modulo_id.exists' => 'O módulo selecionado não pertence a este produto.',
+                'arquivo.required' => 'O arquivo da planilha é obrigatório.',
+                'arquivo.mimes' => 'A planilha precisa ser .xlsx ou .csv.',
+            ]);
+            $validated['contrato_id'] = $contrato;
+            $validated['produto'] = $produto;
+
+            (new ModuloCampanhaService())->store($validated);
+
+            return back()->with('success', ucfirst($produto) . ' salvo com sucesso!');
+        }
+
+        abort(404);
+    }
+
+    private function createRima(
+        Request $request,
+        $contrato,
+        $produto,
+        $contratoObj,
+        $subproduto
+    ): Response
+    {
+        $modulos = SgcModulo::query()
+            ->select(['id', 'nome', 'nome_planilha_modelo', 'caminho_planilha_modelo', 'campos', 'created_at'])
+            ->get();
+
+        $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+            ->pluck('cod_emp')
+            ->toArray();
+
+        return inertia('Sgc/Contratada/Produtos/Rima/Create', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => $modulos,
+            'empreendimentos' => $empreendimentos,
+        ]);
     }
 
 
@@ -397,6 +510,38 @@ class ProdutosController extends Controller
                 'id' => $campanha->id,
                 'id_campanha' => $campanha->id,
                 'empreendimento' => 'N/A',
+                'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A',
+                'data_final' => 'N/A',
+                'status' => $campanha->status ?? 'Em elaboração',
+                'subproduto' => $campanha->subproduto ?? 'N/A',
+            ]);
+    }
+
+    private function getCampanhasMalarigeno($contrato)
+    {
+        return SgcMalarigeno::where('id_contrato', $contrato)
+            ->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn($campanha) => [
+                'id' => $campanha->id,
+                'id_campanha' => $campanha->id_campanha ?? 'N/A',
+                'empreendimento' => $campanha->cod_emp ?? 'N/A',
+                'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A',
+                'data_final' => 'N/A',
+                'status' => $campanha->status ?? 'Em elaboração',
+                'subproduto' => $campanha->subproduto ?? 'N/A',
+            ]);
+    }
+
+    private function getCampanhasRima($contrato)
+    {
+        return SgcRima::where('id_contrato', $contrato)
+            ->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn($campanha) => [
+                'id' => $campanha->id,
+                'id_campanha' => $campanha->id_campanha ?? 'N/A',
+                'empreendimento' => $campanha->cod_emp ?? 'N/A',
                 'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A',
                 'data_final' => 'N/A',
                 'status' => $campanha->status ?? 'Em elaboração',

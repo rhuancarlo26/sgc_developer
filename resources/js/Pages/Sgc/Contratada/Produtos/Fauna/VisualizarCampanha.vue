@@ -114,6 +114,8 @@ const isPdf  = (url) => /\.pdf(\?.*)?$/i.test(url ?? '');
 const previewUrl = ref(null);
 const openPreview = (url) => { previewUrl.value = url; };
 const closePreview = () => { previewUrl.value = null; };
+
+const formatStatus = (status) => status === 'Rejeitada' ? 'Reprovada' : status;
 </script>
 
 <template>
@@ -138,7 +140,7 @@ const closePreview = () => { previewUrl.value = null; };
                             'bg-success': campanha.status === 'Aprovada',
                             'bg-danger': campanha.status === 'Rejeitada',
                             'bg-secondary': campanha.status === 'Em elaboração',
-                        }">{{ campanha.status }}</span></h4>
+                        }">{{ formatStatus(campanha.status) }}</span></h4>
 
                         <ul class="nav nav-tabs mb-4">
                             <li class="nav-item">

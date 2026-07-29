@@ -32,6 +32,8 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\DestroyCampanhaControlle
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\InitializarRascunhoCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SalvarEtapaCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SubmeterCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Controller\MalarigenoCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Rima\Controller\RimaCampanhaController;
 
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\ConfiguracoesModulosController;
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\CreateConfigModuloController;
@@ -165,6 +167,26 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('campanha/{campanha}/restaurar', [CampanhaController::class, 'restaurar'])->name('sgc.contratada.produtos.restaurar');
         
         Route::post('/campanhas/{campanha}/finalizar-avaliacao', [CampanhaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.finalizarAvaliacao');
+
+        // Rotas para Malarígeno - Análise e Aprovação
+        Route::get('malarigeno/campanhas/{campanha}', [MalarigenoCampanhaController::class, 'show'])->name('sgc.contratada.produtos.malarigeno.show');
+        Route::get('malarigeno/campanhas/{campanha}/analise', [MalarigenoCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.malarigeno.analise');
+        Route::post('malarigeno/campanhas/{campanha}/analise', [MalarigenoCampanhaController::class, 'salvarAnalise'])->name('sgc.contratada.produtos.malarigeno.salvarAnalise');
+        Route::post('malarigeno/campanhas/{campanha}/aprovar-tudo', [MalarigenoCampanhaController::class, 'aprovarTudo'])->name('sgc.contratada.produtos.malarigeno.aprovarTudo');
+        Route::post('malarigeno/campanhas/{campanha}/reprovar-tudo', [MalarigenoCampanhaController::class, 'reprovarTudo'])->name('sgc.contratada.produtos.malarigeno.reprovarTudo');
+        Route::post('malarigeno/campanhas/{campanha}/finalizar-avaliacao', [MalarigenoCampanhaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.malarigeno.finalizarAvaliacao');
+        Route::get('malarigeno/campanhas/{campanha}/edit', [MalarigenoCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.malarigeno.edit');
+        Route::post('malarigeno/campanhas/{campanha}/update', [MalarigenoCampanhaController::class, 'update'])->name('sgc.contratada.produtos.malarigeno.update');
+
+        // Rotas para RIMA - Análise e Aprovação
+        Route::get('rima/campanhas/{campanha}', [RimaCampanhaController::class, 'show'])->name('sgc.contratada.produtos.rima.show');
+        Route::get('rima/campanhas/{campanha}/analise', [RimaCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.rima.analise');
+        Route::post('rima/campanhas/{campanha}/analise', [RimaCampanhaController::class, 'salvarAnalise'])->name('sgc.contratada.produtos.rima.salvarAnalise');
+        Route::post('rima/campanhas/{campanha}/aprovar-tudo', [RimaCampanhaController::class, 'aprovarTudo'])->name('sgc.contratada.produtos.rima.aprovarTudo');
+        Route::post('rima/campanhas/{campanha}/reprovar-tudo', [RimaCampanhaController::class, 'reprovarTudo'])->name('sgc.contratada.produtos.rima.reprovarTudo');
+        Route::post('rima/campanhas/{campanha}/finalizar-avaliacao', [RimaCampanhaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.rima.finalizarAvaliacao');
+        Route::get('rima/campanhas/{campanha}/edit', [RimaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.rima.edit');
+        Route::post('rima/campanhas/{campanha}/update', [RimaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.rima.update');
 
         // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {

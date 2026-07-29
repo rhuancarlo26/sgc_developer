@@ -2,15 +2,15 @@
 
 namespace App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services;
 
-use App\Models\SgcModuloCampanha;
-use App\Models\SgcModuloCampanhaFoto;
-use App\Models\SgcModuloCampanhaAnexo;
+use App\Models\SgcMalarigeno;
+use App\Models\SgcMalarigenoFoto;
+use App\Models\SgcMalarigenoAnexo;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class MalarigenoService
 {
-    public function store(array $data): SgcModuloCampanha
+    public function store(array $data): SgcMalarigeno
     {
         $arquivo = $data['arquivo'] ?? null;
         $fotos = $data['fotos'] ?? [];
@@ -28,15 +28,15 @@ class MalarigenoService
             $nomeArquivo = $arquivo->getClientOriginalName();
             $nomeUnico = uniqid() . '_' . $nomeArquivo;
             $caminho = $arquivo->storeAs('Malarigeno/Planilhas', $nomeUnico, 'public');
+            $this->sincronizarArquivoPublico($caminho);
 
             $data['planilha_nome'] = $nomeArquivo;
             $data['planilha_caminho'] = $caminho;
         }
 
         $data['status'] = $enviarAnalise ? 'Em análise' : 'Em elaboração';
-        $data['produto'] = $data['produto'] ?? 'malarigeno';
 
-        $malarigeno = SgcModuloCampanha::create($data);
+        $malarigeno = SgcMalarigeno::create($data);
 
         try {
             $this->gerenciarFotos($malarigeno, $fotos);
@@ -52,7 +52,7 @@ class MalarigenoService
         }
     }
 
-    private function gerenciarFotos(SgcModuloCampanha $malarigeno, array $fotos): void
+    private function gerenciarFotos(SgcMalarigeno $malarigeno, array $fotos): void
     {
         $idsFotos = [];
 
@@ -67,6 +67,7 @@ class MalarigenoService
                 $nomeArquivoF = $arquivoF->getClientOriginalName();
                 $nomeUnico = uniqid() . '_' . $nomeArquivoF;
                 $caminho = $arquivoF->storeAs('Malarigeno/Fotos', $nomeUnico, 'public');
+                $this->sincronizarArquivoPublico($caminho);
 
                 $dataF['nome_arquivo'] = $nomeArquivoF;
                 $dataF['caminho_arquivo'] = $caminho;
@@ -81,7 +82,7 @@ class MalarigenoService
                 : ($metadados['longitude'] ?? null);
 
             $dadosFoto = [
-                'campanha_id' => $malarigeno->id,
+                'sgc_malarigeno_id' => $malarigeno->id,
                 'latitude' => $latitude,
                 'longitude' => $longitude,
                 'descricao' => $f['descricao'] ?? null,
@@ -93,7 +94,7 @@ class MalarigenoService
                 $dadosFoto['metadados'] = $metadados['metadados_completos'] ?? null;
             }
 
-            $foto = SgcModuloCampanhaFoto::updateOrCreate(
+            $foto = SgcMalarigenoFoto::updateOrCreate(
                 ['id' => $f['id'] ?? null],
                 $dadosFoto
             );
@@ -101,14 +102,14 @@ class MalarigenoService
             $idsFotos[] = $foto->id;
         }
 
-        SgcModuloCampanhaFoto::query()
-            ->where('campanha_id', $malarigeno->id)
+        SgcMalarigenoFoto::query()
+            ->where('sgc_malarigeno_id', $malarigeno->id)
             ->when(count($idsFotos), fn($query) => $query->whereNotIn('id', $idsFotos))
             ->when(count($idsFotos) === 0, fn($query) => $query)
             ->delete();
     }
 
-    private function gerenciarAnexos(SgcModuloCampanha $malarigeno, array $anexos): void
+    private function gerenciarAnexos(SgcMalarigeno $malarigeno, array $anexos): void
     {
         $idsAnexos = [];
 
@@ -120,15 +121,16 @@ class MalarigenoService
                 $nomeArquivoA = $arquivoA->getClientOriginalName();
                 $nomeUnico = uniqid() . '_' . $nomeArquivoA;
                 $caminho = $arquivoA->storeAs('Malarigeno/Anexos', $nomeUnico, 'public');
+                $this->sincronizarArquivoPublico($caminho);
 
                 $dataA['nome_arquivo'] = $nomeArquivoA;
                 $dataA['caminho_arquivo'] = $caminho;
             }
 
-            $anexo = SgcModuloCampanhaAnexo::updateOrCreate(
+            $anexo = SgcMalarigenoAnexo::updateOrCreate(
                 ['id' => $a['id'] ?? null],
                 [
-                    'campanha_id' => $malarigeno->id,
+                    'sgc_malarigeno_id' => $malarigeno->id,
                     ...$dataA,
                 ]
             );
@@ -136,8 +138,8 @@ class MalarigenoService
             $idsAnexos[] = $anexo->id;
         }
 
-        SgcModuloCampanhaAnexo::query()
-            ->where('campanha_id', $malarigeno->id)
+        SgcMalarigenoAnexo::query()
+            ->where('sgc_malarigeno_id', $malarigeno->id)
             ->when(count($idsAnexos), fn($query) => $query->whereNotIn('id', $idsAnexos))
             ->when(count($idsAnexos) === 0, fn($query) => $query)
             ->delete();
@@ -259,5 +261,27 @@ class MalarigenoService
         }
 
         return (string) $dados;
+    }
+
+    private function sincronizarArquivoPublico(string $caminho): void
+    {
+        try {
+            $origem = storage_path('app/public/' . $caminho);
+
+            if (!is_file($origem)) {
+                return;
+            }
+
+            $destino = public_path('storage/' . $caminho);
+            $destinoDir = dirname($destino);
+
+            if (!is_dir($destinoDir)) {
+                @mkdir($destinoDir, 0777, true);
+            }
+
+            @copy($origem, $destino);
+        } catch (\Throwable $e) {
+            // Não interrompe o fluxo de gravação por falha de cópia auxiliar.
+        }
     }
 }
