@@ -43,14 +43,6 @@
                   >Metodologias</a
                 >
               </li>
-              <li class="nav-item" v-if="isProspeccao">
-                <a
-                  class="nav-link"
-                  :class="{ active: activeTab === 'resultados' }"
-                  @click.prevent="changeTab('resultados')"
-                  >Resultados</a
-                >
-              </li>
               <li class="nav-item">
                 <a
                   class="nav-link"
@@ -102,34 +94,6 @@
                   @update-metodologia="updateMetodologia"
                 />
               </div>
-              <div
-                v-if="activeTab === 'resultados' && isProspeccao"
-                class="tab-pane fade"
-                :class="{ 'show active': activeTab === 'resultados' }"
-              >
-                <ResultadosProspeccao
-                  v-if="isProspeccao"
-                  :empreendimentos="empreendimentos"
-                  :errors="errors"
-                  :campanha-id="campanhaId"
-                  :contrato="contrato"
-                  :resultados-anexos="form.resultados_anexos"
-                  @update-resultados-anexos="updateResultadosAnexos"
-                  :subprodutos-espeleologia="subprodutosEspeleologia"
-                  :estudos-posteriores="draftData.estudosPosteriores ?? []"
-                />
-                <!-- <Resultados
-                  v-else
-                  :empreendimentos="empreendimentos"
-                  :errors="errors"
-                  :campanha-id="campanhaId"
-                  :contrato="contrato"
-                  :resultados-anexos="form.resultados_anexos"
-                  @update-resultados-anexos="updateResultadosAnexos"
-                  :subprodutos-espeleologia="subprodutosEspeleologia"
-                  :estudos-posteriores="draftData.estudosPosteriores ?? []"
-                /> -->
-            </div>
             <div
               v-if="activeTab === 'resultadosgeo'"
               class="tab-pane fade"
@@ -202,8 +166,6 @@ import NavbarContrato from "@/Pages/Sgc/Contratada/NavbarContrato.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import Apresentacao from "./Apresentacao.vue";
 import Metodologias from "./Metodologias.vue";
-import Resultados from "./Resultados.vue";
-import ResultadosProspeccao from "./ResultadosProspeccao.vue";
 import Anexos from "./Anexos.vue";
 import { reactive, ref, onMounted } from "vue";
 import { useToast } from "vue-toastification";
@@ -508,32 +470,19 @@ const changeTab = (tab) => {
   );
 };
 
-// a aba resultados só aparece para subprodutos de prospecção, então o nextTab e previousTab precisam pular essa aba caso não seja de prospecção
+const tabOrder = ["apresentacao", "metodologias", "resultadosgeo", "anexos"];
+
 const nextTab = () => {
-  const order = [
-    "apresentacao",
-    "metodologias",
-    isProspeccao.value ? "resultados" : null,
-    "resultadosgeo",
-    "anexos",
-  ].filter(Boolean);
-  const i = order.indexOf(activeTab.value);
-  if (i < order.length - 1) {
-    changeTab(order[i + 1]);
+  const i = tabOrder.indexOf(activeTab.value);
+  if (i < tabOrder.length - 1) {
+    changeTab(tabOrder[i + 1]);
   }
 };
 
 const previousTab = () => {
-  const order = [
-    "apresentacao",
-    "metodologias",
-    isProspeccao.value ? "resultados" : null,
-    "resultadosgeo",
-    "anexos",
-  ].filter(Boolean);
-  const i = order.indexOf(activeTab.value);
+  const i = tabOrder.indexOf(activeTab.value);
   if (i > 0) {
-    changeTab(order[i - 1]);
+    changeTab(tabOrder[i - 1]);
   }
 };
 
