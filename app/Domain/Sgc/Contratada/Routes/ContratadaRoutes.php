@@ -194,7 +194,10 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
             Route::post('profissional/store', [EspeleoCampanhaController::class, 'storeProfissional'])->name('sgc.contratada.produtos.espeleo.profissional.store');
             Route::get('profissionais', [EspeleoCampanhaController::class, 'getProfissionais'])->name('sgc.contratada.produtos.espeleo.profissionais');
             Route::get('campanhas/{campanhaId}', [EspeleoCampanhaController::class, 'show'])->name('sgc.contratada.produtos.espeleo.show');
+            Route::get('campanhas/{campanhaId}/analise', [EspeleoCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.espeleo.analise');
             Route::post('campanhas/{campanhaId}/approve', [EspeleoCampanhaController::class, 'approve'])->name('sgc.contratada.produtos.espeleo.approve')->middleware('auth', 'role:analista');
+            Route::post('campanhas/{campanhaId}/aprovar-tudo', [EspeleoCampanhaController::class, 'aprovarTudo'])->name('sgc.contratada.produtos.espeleo.aprovarTudo');
+            Route::post('campanhas/{campanhaId}/reprovar-tudo', [EspeleoCampanhaController::class, 'reprovarTudo'])->name('sgc.contratada.produtos.espeleo.reprovarTudo');
             Route::post('resultados/upload', [EspeleoCampanhaController::class, 'uploadResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.upload');
             Route::post('planilha-feicoes/upload', [EspeleoCampanhaController::class, 'uploadPlanilhaFeicoes'])->name('sgc.contratada.produtos.espeleo.planilha_feicoes.upload');
             Route::post('resultados/{id}/update', [EspeleoCampanhaController::class, 'updateResultadoAnexo'])->name('sgc.contratada.produtos.espeleo.resultados.update');

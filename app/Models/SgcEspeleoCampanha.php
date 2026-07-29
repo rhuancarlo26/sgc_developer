@@ -16,6 +16,9 @@ class SgcEspeleoCampanha extends Model
         'id_campanha',
         'status',
         'versao_analise',
+        'observacoes_analise',
+        'aprovado_por',
+        'data_aprovacao',
         'cod_emp',
         'subproduto',
         'subtrecho',
@@ -29,6 +32,7 @@ class SgcEspeleoCampanha extends Model
     protected $casts = [
         'versao_analise' => 'integer',
         'extensao' => 'decimal:2',
+        'data_aprovacao' => 'datetime',
     ];
 
     public function contrato()

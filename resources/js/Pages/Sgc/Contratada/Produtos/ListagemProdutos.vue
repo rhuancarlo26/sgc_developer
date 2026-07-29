@@ -255,7 +255,10 @@ const confirmarReprovarTudo = () => {
 
   router.post(
     route(config.value.rotaNome.reprovarTudo, [props.contrato, selectedProduto.value, campanhaEmAnalise.value.id]),
-    { comentario: justificativaReprovacao.value },
+    {
+      comentario: justificativaReprovacao.value,
+      observacoes: justificativaReprovacao.value,
+    },
     {
       onSuccess: () => {
         showModalReprovarTudo.value = false;
@@ -263,7 +266,7 @@ const confirmarReprovarTudo = () => {
       },
       onError: (errors) => {
         console.error('Erro ao reprovar:', errors);
-        erroReprovacao.value = 'comentario' in errors ? errors.comentario : 'Erro ao reprovar campanha.';
+        erroReprovacao.value = errors.comentario || errors.observacoes || 'Erro ao reprovar campanha.';
       },
     }
   );
