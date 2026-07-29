@@ -128,7 +128,7 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
     Route::get('produtos/fauna/modelos/download', [CampanhaController::class, 'downloadModelos'])
     ->middleware('auth')
     ->name('sgc.contratada.produtos.fauna.modelos.download');
-    
+
     // PREFIX COM MIDDLEWARE route-permission
     Route::prefix('{contrato}/produtos/{produto}')->middleware(['auth'])->group(function () {
         Route::get('/', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
@@ -148,11 +148,11 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::get('campanhas/{campanhaId}/{modulo?}', [CampanhaController::class, 'show'])->name('sgc.contratada.produtos.show');
         Route::get('fauna/campanhas/{campanha}/analise', [CampanhaController::class, 'analise'])->name('sgc.contratada.produtos.analise');
         Route::post('fauna/campanhas/{campanha}/analise', [CampanhaController::class, 'salvarAnalise'])->name('sgc.contratada.produtos.salvarAnalise');
-                
+
         // Aprovar ou Reprovar tudo
         Route::post('fauna/campanhas/{campanha}/aprovar-tudo', [CampanhaController::class, 'aprovarTudo'])->name('sgc.contratada.produtos.aprovarTudo');
         Route::post('fauna/campanhas/{campanha}/reprovar-tudo', [CampanhaController::class, 'reprovarTudo'])->name('sgc.contratada.produtos.reprovarTudo');
-        
+
         Route::get('campanha/{campanha}/edit', [CampanhaController::class, 'edit'])->name('sgc.contratada.produtos.edit');
         Route::post('campanha/{campanha}/update', [CampanhaController::class, 'update'])->name('sgc.contratada.produtos.update');
 
@@ -165,7 +165,7 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
 
         Route::post('campanha/{campanha}/arquivar', [CampanhaController::class, 'arquivar'])->name('sgc.contratada.produtos.arquivar');
         Route::post('campanha/{campanha}/restaurar', [CampanhaController::class, 'restaurar'])->name('sgc.contratada.produtos.restaurar');
-        
+
         Route::post('/campanhas/{campanha}/finalizar-avaliacao', [CampanhaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.finalizarAvaliacao');
 
         // Rotas para Malarígeno - Análise e Aprovação
