@@ -299,6 +299,76 @@ const selecionarShapefile = (campo, arquivo) => {
 
 const getMapaId = (campo) => `mapa-shapefile-${campo.ordem}`;
 
+const getLayerBoundsFromCapabilities = async (qualifiedLayerName) => {
+  const params = new URLSearchParams({
+    service: 'WMS',
+    request: 'GetCapabilities',
+    version: '1.1.1',
+  });
+
+  const response = await fetch(`/sgc/contratada/mapa/wms?${params.toString()}`);
+  const xml = await response.text();
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+
+  const layers = Array.from(doc.getElementsByTagName('Layer'));
+  const layer = layers.find((node) => {
+    const name = node.getElementsByTagName('Name')[0]?.textContent?.trim();
+
+    return name === qualifiedLayerName || name === qualifiedLayerName.split(':').pop();
+  });
+
+  if (!layer) return null;
+
+  const latLonBox = layer.getElementsByTagName('LatLonBoundingBox')[0];
+
+  if (latLonBox) {
+    const west = Number(latLonBox.getAttribute('minx'));
+    const south = Number(latLonBox.getAttribute('miny'));
+    const east = Number(latLonBox.getAttribute('maxx'));
+    const north = Number(latLonBox.getAttribute('maxy'));
+
+    if ([west, south, east, north].every(Number.isFinite)) {
+      return L.latLngBounds([south, west], [north, east]);
+    }
+  }
+
+  const geographicBox = layer.getElementsByTagName('EX_GeographicBoundingBox')[0];
+
+  if (geographicBox) {
+    const getValue = (tagName) => Number(geographicBox.getElementsByTagName(tagName)[0]?.textContent);
+    const west = getValue('westBoundLongitude');
+    const south = getValue('southBoundLatitude');
+    const east = getValue('eastBoundLongitude');
+    const north = getValue('northBoundLatitude');
+
+    if ([west, south, east, north].every(Number.isFinite)) {
+      return L.latLngBounds([south, west], [north, east]);
+    }
+  }
+
+  return null;
+};
+
+const ajustarZoomCamadaWms = async (mapa, qualifiedLayerName) => {
+  try {
+    const bounds = await getLayerBoundsFromCapabilities(qualifiedLayerName);
+
+    if (!bounds?.isValid()) return;
+
+    if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
+      mapa.setView(bounds.getCenter(), 16);
+      return;
+    }
+
+    mapa.fitBounds(bounds.pad(0.1), {
+      padding: [24, 24],
+      maxZoom: 16,
+    });
+  } catch (error) {
+    console.warn('Não foi possível ajustar o zoom da camada WMS.', error);
+  }
+};
+
 const renderizarMapaWms = async (campo) => {
   const item = formMetodologia.value[campo.nome];
 
@@ -337,6 +407,8 @@ const renderizarMapaWms = async (campo) => {
   setTimeout(() => {
     mapasLeaflet.value[id].invalidateSize();
   }, 300);
+
+  await ajustarZoomCamadaWms(mapasLeaflet.value[id], `${item.workspace}:${item.layer_name}`);
 };
 
 const enviarShapefile = async (campo) => {

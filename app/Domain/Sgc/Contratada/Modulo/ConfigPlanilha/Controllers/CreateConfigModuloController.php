@@ -6,6 +6,7 @@ use App\Models\SgcModulo;
 use App\Shared\Http\Controllers\Controller;
 use App\Shared\Traits\ModulosHandler;
 use App\Shared\Traits\ProdutosReservados;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,11 +16,13 @@ class CreateConfigModuloController extends Controller
 
     public function index($contrato, $produto, SgcModulo $modulo): Response
     {
-        $produtosComModulo = SgcModulo::query()
-            ->whereNotNull('produto_slug')
-            ->select('produto_slug', 'produto_titulo')
-            ->distinct()
-            ->get();
+        $produtosComModulo = Schema::hasColumn('sgc_modulos', 'produto_slug')
+            ? SgcModulo::query()
+                ->whereNotNull('produto_slug')
+                ->select('produto_slug', 'produto_titulo')
+                ->distinct()
+                ->get()
+            : collect();
 
         $slugsComModulo = $produtosComModulo->pluck('produto_slug')->all();
 

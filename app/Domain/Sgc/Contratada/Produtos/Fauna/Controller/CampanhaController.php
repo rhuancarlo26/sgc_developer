@@ -20,6 +20,7 @@ use App\Models\SgcModuloCampanha;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -40,7 +41,7 @@ class CampanhaController extends Controller
 
     public function show($contrato, $produto, $campanhaId, $modulo = null)
     {
-        if ($produto === 'malarigeno' || SgcModulo::where('produto_slug', $produto)->exists()) {
+        if ($produto === 'malarigeno' || $this->isModuloProduto($produto)) {
             $campanha = SgcModuloCampanha::with(['modulo', 'fotos', 'anexos'])
                 ->where('id_contrato', $contrato)
                 ->where('produto', $produto)
@@ -675,4 +676,9 @@ class CampanhaController extends Controller
         }
     }
 
+    private function isModuloProduto(string $produto): bool
+    {
+        return Schema::hasColumn('sgc_modulos', 'produto_slug')
+            && SgcModulo::where('produto_slug', $produto)->exists();
+    }
 }

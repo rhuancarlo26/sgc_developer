@@ -168,7 +168,7 @@ defineExpose({ abrirModal });
                                 <td class="text-center">
                                     {{ ponto.tipo_ambiente }}
                                 </td>
-                                <td class="text-center">{{ ponto.UF }}</td>
+                                <td class="text-center">{{ ponto.uf ?? ponto.UF }}</td>
                                 <td class="text-center">
                                     {{ ponto.municipio }}
                                 </td>

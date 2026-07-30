@@ -36,6 +36,7 @@ use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -61,12 +62,13 @@ class ProdutosController extends Controller
         $contratoObj = Contrato::findOrFail($contrato);
         $mostrarArquivadas = $request->boolean('arquivadas');
 
-        $moduloProduto = SgcModulo::where('produto_slug', $produto)->exists();
+        $moduloProduto = $this->isModuloProduto($produto);
 
         $campanhas = match (true) {
             $produto === 'fauna'                       => $this->getCampanhasFauna($contrato, $mostrarArquivadas),
             in_array($produto, ['pmqa', 'eia'], true)   => $this->getCampanhasPmqa($contrato),
             $produto === 'espeleologia'                 => $this->getCampanhasEspeleologia($contrato),
+            $produto === 'patrimonio'                   => $this->getCampanhasPatrimonio($contrato),
             $produto === 'malarigeno'                   => $this->getCampanhasMalarigeno($contrato),
             $produto === 'rima'                         => $this->getCampanhasRima($contrato),
             $moduloProduto                              => $this->getCampanhasModulo($contrato, $produto),
@@ -95,6 +97,10 @@ class ProdutosController extends Controller
 
     private function produtosModuloDisponiveis()
     {
+        if (!Schema::hasColumn('sgc_modulos', 'produto_slug')) {
+            return collect();
+        }
+
         return SgcModulo::query()
             ->whereNotNull('produto_slug')
             ->select('produto_slug', 'produto_titulo')
@@ -111,7 +117,7 @@ class ProdutosController extends Controller
 
         // Produtos criados dinamicamente a partir de um módulo (exceto 'malarigeno' e 'rima', legados,
         // que continuam exigindo subproduto do catálogo externo normalmente) não dependem desse catálogo.
-        if (!in_array($produto, ['malarigeno', 'rima'], true) && SgcModulo::where('produto_slug', $produto)->exists()) {
+        if (!in_array($produto, ['malarigeno', 'rima'], true) && $this->isModuloProduto($produto)) {
             return $this->createModuloProduto($request, $contrato, $produto, $contratoObj, $subproduto);
         }
 
@@ -143,6 +149,9 @@ class ProdutosController extends Controller
 
         } elseif ($produto === 'rima') {
             return $this->createRima($request, $contrato, $produto, $contratoObj, $subproduto);
+
+        } elseif ($produto === 'patrimonio') {
+            return $this->createPatrimonio($request, $contrato, $produto, $contratoObj, $subproduto);
 
         } else {
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
@@ -235,7 +244,7 @@ class ProdutosController extends Controller
                 ->with('success', 'RIMA salvo com sucesso!');
         }
 
-        if (SgcModulo::where('produto_slug', $produto)->exists()) {
+        if ($this->isModuloProduto($produto)) {
             $validated = $request->validate([
                 'subproduto' => 'nullable|string',
                 'modulo_id' => [
@@ -268,6 +277,12 @@ class ProdutosController extends Controller
         }
 
         abort(404);
+    }
+
+    private function isModuloProduto(string $produto): bool
+    {
+        return Schema::hasColumn('sgc_modulos', 'produto_slug')
+            && SgcModulo::where('produto_slug', $produto)->exists();
     }
 
     private function createRima(
@@ -807,16 +822,12 @@ class ProdutosController extends Controller
         ->where('contrato_id', $contrato)
         ->with('equipe')
         ->firstOrFail()
-      : SgcPatrimonioPaipa::firstOrCreate(
-        [
-          'contrato_id' => $contrato,
-          'subproduto' => $subproduto,
-          'status' => 'Em elaboração',
-        ],
-        [
-          'versao' => 1,
-        ]
-      );
+      : SgcPatrimonioPaipa::create([
+        'contrato_id' => $contrato,
+        'subproduto' => $subproduto,
+        'status' => 'Em elaboração',
+        'versao' => 1,
+      ]);
 
     $paipa->load('equipe');
 

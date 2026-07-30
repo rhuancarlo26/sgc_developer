@@ -98,7 +98,7 @@ const normalizarTexto = (texto) => {
 
 const isSubprodutoPaipa = (subproduto) => {
   return normalizarTexto(subproduto)
-    ?.startsWith('elaboracao do projeto de avaliacao');
+    ?.startsWith('elaboracao do projeto');
 };
 
 // Lista única de descrições de subprodutos
@@ -213,6 +213,15 @@ const visualizarCampanha = (campanha, modulo = null) => {
         'espeleologia',
         campanha.id,
       ])
+    );
+    return;
+  }
+
+  if (selectedProduto.value === 'patrimonio') {
+    router.get(
+      route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
+      { subproduto: campanha.subproduto, paipa_id: campanha.id },
+      { preserveState: true, preserveScroll: true }
     );
     return;
   }
