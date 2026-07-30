@@ -26,7 +26,7 @@ const isPerfil3 = computed(() => (props.auth.user.perfis_id ?? 0) === 3);
 
 const previewModal = ref(null);
 
-// Lista de produtos disponíveis
+// Lista de produtos disponíveis: os fixos do sistema + os criados dinamicamente a partir de um módulo
 const produtosFixos = [
   { title: "Fauna", routeParam: "fauna" },
   { title: "Espeleologia", routeParam: "espeleologia" },
@@ -168,7 +168,6 @@ const goToCreate = () => {
     alert('Por favor, selecione um subproduto antes de cadastrar.');
     return;
   }
-
   const subproduto = selectedSubproduto.value;
 
   if (selectedProduto.value === 'patrimonio' && !isSubprodutoPaipa(subproduto)) {
@@ -204,15 +203,26 @@ const visualizarCampanha = (campanha, modulo = null) => {
     return;
   }
 
-  // Para Espeleologia, passar módulo como parâmetro
-  const parametroModulo = isEspeleologia.value ? 'espeleologia' : modulo;
+  // Espeleologia tem controller/rota dedicados, que carregam os relacionamentos
+  // (justificativas, metodologia, anexos, resultados, profissionais) — a rota
+  // genérica de Fauna não faz esse eager loading e devolve a campanha incompleta.
+  if (isEspeleologia.value) {
+    router.get(
+      route('sgc.contratada.produtos.espeleo.show', [
+        props.contrato,
+        'espeleologia',
+        campanha.id,
+      ])
+    );
+    return;
+  }
 
   router.get(
     route('sgc.contratada.produtos.show', [
       props.contrato,
       selectedProduto.value,
       campanha.id,
-      parametroModulo,
+      modulo,
     ])
   );
 };
@@ -549,43 +559,44 @@ const restaurarCampanha = (campanha) => {
                               @click="analisarCampanha(campanha.id)"
                             />
 
-                            <NavButton
-                              v-if="isPerfil3 && !props.mostrarArquivadas"
-                              type-button="secondary"
-                              title="Arquivar"
-                              @click="arquivarCampanha(campanha)"
-                            />
-                            <NavButton
-                              v-if="isPerfil3 && props.mostrarArquivadas"
-                              type-button="warning"
-                              title="Restaurar"
-                              @click="restaurarCampanha(campanha)"
-                            />
+                          <NavButton
+                            v-if="isPerfil3 && !props.mostrarArquivadas"
+                            type-button="secondary"
+                            title="Arquivar"
+                            @click="arquivarCampanha(campanha)"
+                          />
+                          <NavButton
+                            v-if="isPerfil3 && props.mostrarArquivadas"
+                            type-button="warning"
+                            title="Restaurar"
+                            @click="restaurarCampanha(campanha)"
+                          />
 
-                            <!-- Menu de Análise em Massa (dropdown) -->
-                            <div v-if="canApprove && campanha.status === 'Em análise'" class="dropdown d-inline-block">
-                              <button
-                                class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                type="button"
-                                :id="`dropdownMenu-${campanha.id}`"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                              >
-                                ⋮
-                              </button>
-                              <ul :aria-labelledby="`dropdownMenu-${campanha.id}`" class="dropdown-menu">
-                                <li>
-                                  <a class="dropdown-item text-success" href="#" @click.prevent="abrirModalAprovarTudo(campanha)">
-                                    <strong>✓ Aprovar</strong>
-                                  </a>
-                                </li>
-                                <li>
-                                  <a class="dropdown-item text-danger" href="#" @click.prevent="abrirModalReprovarTudo(campanha)">
-                                    <strong>✗ Reprovar</strong>
-                                  </a>
-                                </li>
-                              </ul>
-                            </div>
+                          <!-- Menu de Análise em Massa (dropdown) -->
+                          <div v-if="canApprove && campanha.status === 'Em análise'" class="dropdown d-inline-block">
+                            <button
+                              class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                              type="button"
+                              :id="`dropdownMenu-${campanha.id}`"
+                              data-bs-toggle="dropdown"
+                              aria-expanded="false"
+                            >
+                              ⋮
+                            </button>
+                            <ul :aria-labelledby="`dropdownMenu-${campanha.id}`" class="dropdown-menu">
+                              <li>
+                                <a class="dropdown-item text-success" href="#" @click.prevent="abrirModalAprovarTudo(campanha)">
+                                  <strong>✓ Aprovar</strong>
+                                </a>
+                              </li>
+                              <li>
+                                <a class="dropdown-item text-danger" href="#" @click.prevent="abrirModalReprovarTudo(campanha)">
+                                  <strong>✗ Reprovar</strong>
+                                </a>
+                              </li>
+                            </ul>
+
+                          </div>
 
                             <!-- Excluir (Em elaboração, não é perfil 4) -->
                             <NavButton

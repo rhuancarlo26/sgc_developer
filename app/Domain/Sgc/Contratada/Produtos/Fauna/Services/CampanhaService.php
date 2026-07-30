@@ -45,6 +45,7 @@ class CampanhaService
             'data_ini' => $data['data_campanha_inicial'] ?? null,
             'data_fim' => $data['data_campanha_final'] ?? null,
             'periodo' => $data['periodo'] ?? null,
+            'sei_dnit' => $data['sei_dnit'] ?? null,
             'observacoes' => $data['observacoes'] ?? null,
             'cod_emp' => $data['cod_emp'] ?? null,
             'subproduto' => $data['subproduto'] ?? null,

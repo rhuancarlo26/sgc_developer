@@ -441,7 +441,7 @@ const irParaEdicao = () => {
                   Metodologias
                 </a>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" v-if="false">
                 <a class="nav-link" :class="{ active: activeTab === 'resultados' }" @click.prevent="setActiveTab('resultados')">
                   Resultados
                 </a>

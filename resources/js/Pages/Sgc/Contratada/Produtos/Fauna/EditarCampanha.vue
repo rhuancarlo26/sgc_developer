@@ -146,9 +146,9 @@ const form = useForm({
   // data_campanha_final: formatDateForInput(props.campanha.data_fim),
 
   data_campanha_inicial: formatDateForInput(
-    props.campanha.data_ini ||
-    props.campanha.data_inicial ||
-    props.campanha.data_campanha_inicial
+  props.campanha.data_ini ||
+  props.campanha.data_inicial ||
+  props.campanha.data_campanha_inicial
   ),
 
   data_campanha_final: formatDateForInput(
@@ -158,6 +158,7 @@ const form = useForm({
   ),
 
   periodo: props.campanha.periodo || '',
+  sei_dnit: props.campanha.sei_dnit || '',
   obs: props.campanha.observacoes || '',
   abio: { id_abio: null },
   profissional: { profissional: null, grupo_faunistico: null },
@@ -617,6 +618,7 @@ const submitForm = () => {
   if (form.data_campanha_inicial) formData.append('data_campanha_inicial', form.data_campanha_inicial);
   if (form.data_campanha_final) formData.append('data_campanha_final', form.data_campanha_final);
   if (form.periodo) formData.append('periodo', form.periodo);
+  if (form.sei_dnit !== null && form.sei_dnit !== undefined && form.sei_dnit !== '') formData.append('sei_dnit', form.sei_dnit);
   if (form.obs) formData.append('observacoes', form.obs);
   if (form.nao_se_aplica) formData.append('nao_se_aplica', form.nao_se_aplica);
   if (form.consideracoes) formData.append('consideracoes', form.consideracoes);
@@ -866,7 +868,7 @@ const excluirAnexo = (anexoId) => {
                       <InputError :message="form.errors.cod_emp" />
                     </div>
                     <div class="mb-3">
-                      <label class="form-label">Família</label>
+                      <label class="form-label">Subproduto</label>
                       <input
                         v-model="form.subproduto"
                         type="text"
@@ -908,7 +910,7 @@ const excluirAnexo = (anexoId) => {
                   />
                   <!-- SubStep 3 fauna regular: Módulos amostrais -->
                   <ModulosAmostraisEditar
-                    v-if="subStep === 3"
+                    v-if="subStep === 3 && !isAtropelamento"
                     :form="form"
                     :modulo-records="form.modulos_amostrais"
                     :ufs="props.ufs"
@@ -936,7 +938,7 @@ const excluirAnexo = (anexoId) => {
                     </template>
                   </CampanhaAtropelamento>
                   <QueloniosCrocodilianosEditar
-                    v-if="subStep === 4"
+                    v-if="subStep === 4 && !isAtropelamento"
                     :form="form"
                     :ponto-records="form.pontos_quelo_crocod"
                     :sub-step="subStep"

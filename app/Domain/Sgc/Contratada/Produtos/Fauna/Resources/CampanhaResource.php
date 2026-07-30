@@ -21,6 +21,7 @@ class CampanhaResource
             'data_campanha_inicial'   => $campanha->data_ini,
             'data_campanha_final'     => $campanha->data_fim,
             'periodo'                 => $campanha->periodo,
+            'sei_dnit'                => $campanha->sei_dnit,
             'observacoes'             => $campanha->observacoes,
             'nao_se_aplica'           => $campanha->nao_se_aplica ?? false,
             'status'                  => $campanha->status,
@@ -31,7 +32,12 @@ class CampanhaResource
             'resultadosTerrestre'     => $campanha->resultadosTerrestre?->toArray() ?? [],
             'resultadosAquatica'      => $campanha->resultadosAquatica?->toArray() ?? [],
             'resultadosCavernicola'   => $campanha->resultadosCavernicola?->toArray() ?? [],
-            'consideracoes'           => $campanha->resultados_consideracoes?->consideracoes,
+            'consideracoes'                => $campanha->resultados_consideracoes?->consideracoes,
+            'planilha_atropelamento'       => $campanha->planilha_atropelamento
+                ? \App\Helpers\StorageHelper::publicUrl($campanha->planilha_atropelamento)
+                : null,
+            'consideracoes_atropelamento'  => $campanha->consideracoes_atropelamento,
+            'atropelamento_campanhas'      => self::mapAtropelamentoCampanhas($campanha),
             'abios'                   => self::mapAbios($campanha),
             'profissionais'           => self::mapProfissionais($campanha),
             'modulos_amostrais'       => self::mapModulosAmostrais($campanha),
@@ -254,7 +260,7 @@ class CampanhaResource
             'id'           => $anexo->id,
             'tipo_anexo'   => $anexo->tipo_anexo,
             'caminho'      => Storage::url($anexo->caminho),
-            'nome_arquivo' => $anexo->nome_arquivo ?? basename($anexo->caminho),
+            'nome_arquivo' => $anexo->nome ?? basename($anexo->caminho),
             'created_at'   => $anexo->created_at,
         ])->toArray();
     }

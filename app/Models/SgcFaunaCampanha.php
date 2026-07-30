@@ -14,6 +14,7 @@ class SgcFaunaCampanha extends Model
         'data_ini',
         'data_fim',
         'periodo',
+        'sei_dnit',
         'observacoes',
         'num_abio',
         'cod_emp',
@@ -28,6 +29,7 @@ class SgcFaunaCampanha extends Model
 
     protected $casts = [
         'id_campanha' => 'integer',
+        'sei_dnit' => 'integer',
         'arquivada_em' => 'datetime',
     ];
 

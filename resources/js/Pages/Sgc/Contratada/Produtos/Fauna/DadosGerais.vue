@@ -108,6 +108,20 @@ const statusOptions = [
                 </div>
             </div>
             <div class="row mb-3">
+                <div class="col-12 col-md-6">
+                    <InputLabel value="SEI DNIT" for="sei_dnit" />
+                    <input
+                        type="number"
+                        id="sei_dnit"
+                        class="form-control"
+                        min="0"
+                        step="1"
+                        v-model="formDadosGerais.sei_dnit"
+                    />
+                    <InputError :message="formDadosGerais.errors.sei_dnit" />
+                </div>
+            </div>
+            <div class="row mb-3">
                 <div class="col-12">
                     <InputLabel value="Observações" for="obs" />
                     <textarea id="obs" class="form-control" v-model="formDadosGerais.obs" rows="5"></textarea>

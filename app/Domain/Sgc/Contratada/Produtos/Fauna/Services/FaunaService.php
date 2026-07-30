@@ -32,6 +32,7 @@ class FaunaService
             'data_ini' => $data['data_campanha_inicial'] ?? null,
             'data_fim' => $data['data_campanha_final'] ?? null,
             'periodo' => $data['periodo'] ?? null,
+            'sei_dnit' => $data['sei_dnit'] ?? null,
             'observacoes' => $data['observacoes'] ?? null,
             'cod_emp' => $data['cod_emp'] ?? null,
             'subproduto' => $data['subproduto'] ?? null,
@@ -170,15 +171,6 @@ class FaunaService
             ]);
         }
 
-        // Salvar resultados e atualizar id_campanha
-        if (!empty($data['planilha']) && $data['planilha']->isValid()) {
-            $result = $this->salvarResultados($contratoId, $data['planilha'], null);
-            SgcFaunaResultados::where('id_contrato', $contratoId)
-                ->whereNull('id_campanha')
-                ->where('created_at', '>=', now()->subSeconds(30))
-                ->update(['id_campanha' => $campanha->id]);
-        }
-
         // Salvar anexos
         if (!empty($data['anexos'])) {
             foreach ($data['anexos'] as $tipo => $file) {
@@ -220,6 +212,7 @@ class FaunaService
                     'data_ini' => $data['data_campanha_inicial'] ?? null,
                     'data_fim' => $data['data_campanha_final'] ?? null,
                     'periodo' => $data['periodo'] ?? null,
+                    'sei_dnit' => $data['sei_dnit'] ?? null,
                     'observacoes' => $data['observacoes'] ?? null,
                     'cod_emp' => $data['cod_emp'] ?? null,
                     'nao_se_aplica_quelo' => $data['nao_se_aplica_quelo'] ?? false,
