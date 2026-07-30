@@ -44,6 +44,7 @@ class EspeleoCampanhaController extends Controller
             'resultadoAnexos',
             'anexos',
             'profissionais',
+            'fiscal',
         ])->findOrFail($campanhaId);
 
         if ((int) $campanha->id_contrato !== (int) $contrato) {
@@ -54,6 +55,21 @@ class EspeleoCampanhaController extends Controller
         $coordenadas = $empreendimento->coordenadas ?? null;
 
         $contratoObj = Contrato::find($campanha->id_contrato);
+
+        $analises = [];
+        if (!empty(trim((string) $campanha->observacoes_analise))) {
+            $analises[] = [
+                'id' => 'ultima',
+                'versao' => (int) ($campanha->versao_analise ?? 1),
+                'status' => $campanha->status,
+                'observacoes' => $campanha->observacoes_analise,
+                'fiscal' => $campanha->fiscal ? [
+                    'id' => $campanha->fiscal->id,
+                    'name' => $campanha->fiscal->name,
+                ] : null,
+                'created_at' => optional($campanha->updated_at)->format('d/m/Y H:i'),
+            ];
+        }
 
         $campanhaData = [
             'id' => $campanha->id,
@@ -67,6 +83,7 @@ class EspeleoCampanhaController extends Controller
             'descricao' => $campanha->descricao,
             'bioma' => $campanha->bioma,
             'status' => $campanha->status,
+            'observacoes_analise' => $campanha->observacoes_analise,
             'metodologia' => optional($campanha->metodologia)->metodologia,
             'justificativas' => $campanha->justificativas->map(function ($justificativa) {
                 return [
@@ -105,6 +122,7 @@ class EspeleoCampanhaController extends Controller
                     'funcao' => $profissional->funcao,
                 ];
             })->values(),
+            'analises' => $analises,
         ];
 
         return Inertia::render('Sgc/Contratada/Produtos/Espeleologia/VisualizarCampanha', [
@@ -113,19 +131,182 @@ class EspeleoCampanhaController extends Controller
             'contrato' => $campanha->id_contrato,
             'produto' => 'Espeleologia',
             'contratos' => $contratoObj,
-            'canApprove' => Auth::user()->perfis_id === 2 && $campanha->status === 'Em análise',
+            'canApprove' => Auth::user()->perfis_id === 3 && $campanha->status === 'Em análise',
             'coordenadas' => $coordenadas,
         ]);
     }
 
-    public function approve(Request $request, $contrato, $produto, $campanhaId)
+    public function analise($contrato, $produto, $campanhaId)
     {
+        if ((int) Auth::user()->perfis_id !== 3) {
+            return redirect()
+                ->route('sgc.contratada.produtos.espeleo.show', [$contrato, $produto, $campanhaId])
+                ->withErrors(['error' => 'Acesso negado. Apenas fiscais podem analisar campanhas.']);
+        }
+
+        if ($produto !== 'espeleologia') {
+            abort(404, 'Produto inválido');
+        }
+
+        $campanha = SgcEspeleoCampanha::with([
+            'justificativas',
+            'metodologia',
+            'resultadoAnexos',
+            'anexos',
+            'profissionais',
+            'fiscal',
+        ])->findOrFail($campanhaId);
+
+        if ((int) $campanha->id_contrato !== (int) $contrato) {
+            abort(403, 'Acesso negado');
+        }
+
+        if ($campanha->status !== 'Em análise') {
+            return redirect()
+                ->route('sgc.contratada.produtos.espeleo.show', [$contrato, $produto, $campanhaId])
+                ->withErrors(['error' => 'Campanha não está em análise.']);
+        }
+
+        $analises = [];
+        if (!empty(trim((string) $campanha->observacoes_analise))) {
+            $analises[] = [
+                'id' => 'ultima',
+                'versao' => (int) ($campanha->versao_analise ?? 1),
+                'status' => $campanha->status,
+                'observacoes' => $campanha->observacoes_analise,
+                'fiscal' => $campanha->fiscal ? [
+                    'id' => $campanha->fiscal->id,
+                    'name' => $campanha->fiscal->name,
+                ] : null,
+                'created_at' => optional($campanha->updated_at)->format('d/m/Y H:i'),
+            ];
+        }
+
+        return Inertia::render('Sgc/Contratada/Produtos/Espeleologia/AnaliseCampanha', [
+            'campanha' => [
+                'id' => $campanha->id,
+                'id_campanha' => $campanha->id_campanha,
+                'cod_emp' => $campanha->cod_emp,
+                'subproduto' => $campanha->subproduto,
+                'subtrecho' => $campanha->subtrecho,
+                'segmento' => $campanha->segmento,
+                'extensao' => $campanha->extensao,
+                'tipo_de_intervencao' => $campanha->tipo_de_intervencao,
+                'descricao' => $campanha->descricao,
+                'bioma' => $campanha->bioma,
+                'status' => $campanha->status,
+                'observacoes_analise' => $campanha->observacoes_analise,
+                'metodologia' => optional($campanha->metodologia)->metodologia,
+                'resultados_anexos' => $campanha->resultadoAnexos->map(function ($anexo) {
+                    return [
+                        'id' => $anexo->id,
+                        'nome_arquivo' => $anexo->nome_arquivo,
+                        'tipo' => $anexo->tipo,
+                        'comentario' => $anexo->comentario,
+                        'caminho' => \App\Helpers\StorageHelper::publicUrl($anexo->caminho),
+                    ];
+                })->values(),
+                'anexos' => $campanha->anexos->map(function ($anexo) {
+                    return [
+                        'id' => $anexo->id,
+                        'tipo_anexo' => $anexo->tipo,
+                        'nome_arquivo' => $anexo->nome,
+                        'legenda' => $anexo->legenda,
+                        'caminho' => \App\Helpers\StorageHelper::publicUrl($anexo->caminho),
+                    ];
+                })->values(),
+            ],
+            'campanha_id' => $campanha->id,
+            'contrato' => $campanha->id_contrato,
+            'produto' => 'espeleologia',
+            'contratos' => Contrato::find($campanha->id_contrato),
+            'canApprove' => true,
+            'analises' => $analises,
+        ]);
+    }
+
+    public function aprovarTudo($contrato, $produto, $campanhaId)
+    {
+        if ((int) Auth::user()->perfis_id !== 3) {
+            return redirect()->back()->withErrors(['error' => 'Acesso negado. Apenas fiscais podem aprovar.']);
+        }
+
+        if ($produto !== 'espeleologia') {
+            abort(404, 'Produto inválido');
+        }
+
+        $campanha = SgcEspeleoCampanha::findOrFail($campanhaId);
+
+        if ((int) $campanha->id_contrato !== (int) $contrato) {
+            abort(403, 'Acesso negado');
+        }
+
+        if ($campanha->status !== 'Em análise') {
+            return redirect()->back()->withErrors(['error' => 'Campanha não está em análise.']);
+        }
+
+        $campanha->status = 'Aprovada';
+        $campanha->observacoes_analise = null;
+        $campanha->fiscal_id = Auth::id();
+        $campanha->data_aprovacao = now();
+        $campanha->save();
+
+        return redirect()
+            ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+            ->with('success', 'Campanha aprovada com sucesso!');
+    }
+
+    public function reprovarTudo(Request $request, $contrato, $produto, $campanhaId)
+    {
+        if ((int) Auth::user()->perfis_id !== 3) {
+            return redirect()->back()->withErrors(['error' => 'Acesso negado. Apenas fiscais podem reprovar.']);
+        }
+
         if ($produto !== 'espeleologia') {
             abort(404, 'Produto inválido');
         }
 
         $validated = $request->validate([
-            'status' => 'required|string|in:Aprovada,Rejeitada',
+            'observacoes' => 'required|string|min:10',
+        ], [
+            'observacoes.required' => 'A justificativa é obrigatória.',
+            'observacoes.min' => 'A justificativa deve ter no mínimo 10 caracteres.',
+        ]);
+
+        $campanha = SgcEspeleoCampanha::findOrFail($campanhaId);
+
+        if ((int) $campanha->id_contrato !== (int) $contrato) {
+            abort(403, 'Acesso negado');
+        }
+
+        if ($campanha->status !== 'Em análise') {
+            return redirect()->back()->withErrors(['error' => 'Campanha não está em análise.']);
+        }
+
+        $campanha->status = 'Reprovada';
+        $campanha->versao_analise = ((int) $campanha->versao_analise) + 1;
+        $campanha->observacoes_analise = $validated['observacoes'];
+        $campanha->fiscal_id = Auth::id();
+        $campanha->data_aprovacao = null;
+        $campanha->save();
+
+        return redirect()
+            ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+            ->with('success', 'Campanha reprovada com sucesso!');
+    }
+
+    public function approve(Request $request, $contrato, $produto, $campanhaId)
+    {
+        if ((int) Auth::user()->perfis_id !== 3) {
+            return redirect()->back()->withErrors(['error' => 'Acesso negado. Apenas fiscais podem aprovar ou reprovar campanhas.']);
+        }
+
+        if ($produto !== 'espeleologia') {
+            abort(404, 'Produto inválido');
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|string|in:Aprovada,Reprovada,Rejeitada',
             'observacoes' => 'nullable|string|max:5000',
         ]);
 
@@ -134,7 +315,23 @@ class EspeleoCampanhaController extends Controller
             abort(403, 'Acesso negado');
         }
 
-        $campanha->status = $validated['status'];
+        if ($campanha->status !== 'Em análise') {
+            return redirect()->back()->withErrors(['error' => 'Campanha não está em análise.']);
+        }
+
+        $status = $validated['status'] === 'Rejeitada' ? 'Reprovada' : $validated['status'];
+
+        if ($status === 'Reprovada' && empty(trim((string) ($validated['observacoes'] ?? '')))) {
+            return redirect()->back()->withErrors(['observacoes' => 'A justificativa é obrigatória para reprovação.']);
+        }
+
+        $campanha->status = $status;
+        $campanha->observacoes_analise = $validated['observacoes'] ?? null;
+        $campanha->fiscal_id = Auth::id();
+        $campanha->data_aprovacao = $status === 'Aprovada' ? now() : null;
+        if ($status === 'Reprovada') {
+            $campanha->versao_analise = ((int) $campanha->versao_analise) + 1;
+        }
         $campanha->save();
 
         return back()->with('success', 'Campanha atualizada com sucesso.');

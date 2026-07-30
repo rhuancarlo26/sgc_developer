@@ -205,7 +205,7 @@ const excluirCampanha = (campanhaId) => {
 };
 
 const getStatusLabel = (status) => {
-  if (status === 'Rejeitada') return 'Em revisão';
+  if (status === 'Rejeitada' || status === 'Reprovada') return 'Em revisão';
   return status || 'N/A';
 };
 
@@ -255,7 +255,10 @@ const confirmarReprovarTudo = () => {
 
   router.post(
     route(config.value.rotaNome.reprovarTudo, [props.contrato, selectedProduto.value, campanhaEmAnalise.value.id]),
-    { comentario: justificativaReprovacao.value },
+    {
+      comentario: justificativaReprovacao.value,
+      observacoes: justificativaReprovacao.value,
+    },
     {
       onSuccess: () => {
         showModalReprovarTudo.value = false;
@@ -263,7 +266,7 @@ const confirmarReprovarTudo = () => {
       },
       onError: (errors) => {
         console.error('Erro ao reprovar:', errors);
-        erroReprovacao.value = 'comentario' in errors ? errors.comentario : 'Erro ao reprovar campanha.';
+        erroReprovacao.value = errors.comentario || errors.observacoes || 'Erro ao reprovar campanha.';
       },
     }
   );
@@ -460,7 +463,7 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
                               class="status-circle status-circle-approved"
                             ></span>
                             <span
-                              v-else-if="campanha.status === 'Rejeitada' || campanha.status_aprovacao === 'Rejeitada'"
+                              v-else-if="campanha.status === 'Rejeitada' || campanha.status_aprovacao === 'Rejeitada' || campanha.status === 'Reprovada' || campanha.status_aprovacao === 'Reprovada'"
                               class="status-circle status-circle-rejected"
                             ></span>
                             <span
@@ -558,9 +561,9 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
                               @click="excluirCampanha(campanha.id)"
                             />
 
-                            <!-- Editar Rejeitada (Rejeitada, não é perfil 3) -->
+                            <!-- Editar Rejeitada/Reprovada (não é perfil 3) -->
                             <NavButton
-                              v-if="deveExibirAcao('editar') && campanha.status === 'Rejeitada' && (props.auth.user.perfis_id ?? 0) !== 3"
+                              v-if="deveExibirAcao('editar') && ['Rejeitada', 'Reprovada'].includes(campanha.status) && (props.auth.user.perfis_id ?? 0) !== 3"
                               type-button="warning"
                               title="Editar"
                               @click="editarCampanha(campanha)"

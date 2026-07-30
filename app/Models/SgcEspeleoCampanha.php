@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class SgcEspeleoCampanha extends Model
 {
@@ -16,6 +17,9 @@ class SgcEspeleoCampanha extends Model
         'id_campanha',
         'status',
         'versao_analise',
+        'observacoes_analise',
+        'fiscal_id',
+        'data_aprovacao',
         'cod_emp',
         'subproduto',
         'subtrecho',
@@ -28,7 +32,9 @@ class SgcEspeleoCampanha extends Model
 
     protected $casts = [
         'versao_analise' => 'integer',
+        'fiscal_id' => 'integer',
         'extensao' => 'decimal:2',
+        'data_aprovacao' => 'datetime',
     ];
 
     public function contrato()
@@ -94,6 +100,11 @@ class SgcEspeleoCampanha extends Model
             'campanha_id',
             'map_layer_id'
         )->withPivot('tipo')->withTimestamps();
+    }
+
+    public function fiscal()
+    {
+        return $this->belongsTo(User::class, 'fiscal_id');
     }
 
 }

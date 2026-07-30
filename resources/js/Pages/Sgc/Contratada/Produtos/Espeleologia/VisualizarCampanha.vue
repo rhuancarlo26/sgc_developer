@@ -30,6 +30,30 @@ const isResumoView = computed(() => {
   return new URLSearchParams(window.location.search).get('modo') === 'resumo';
 });
 
+const showAnalysisModal = ref(false);
+
+const motivoReprovacao = computed(() => {
+  const status = props.campanha?.status;
+  const observacoes = (props.campanha?.observacoes_analise || '').trim();
+  const statusReprovado = status === 'Reprovada' || status === 'Rejeitada';
+
+  return statusReprovado && observacoes ? observacoes : '';
+});
+
+const statusClass = computed(() => ({
+  'bg-warning text-white': props.campanha.status === 'Em análise',
+  'bg-success text-white': props.campanha.status === 'Aprovada',
+  'bg-danger text-white': props.campanha.status === 'Reprovada' || props.campanha.status === 'Rejeitada',
+  'bg-secondary text-white': props.campanha.status === 'Em elaboração',
+}));
+
+const statusDisplay = computed(() => {
+  if (props.campanha.status === 'Reprovada' || props.campanha.status === 'Rejeitada') {
+    return 'Em revisão';
+  }
+  return props.campanha.status;
+});
+
 const activeTab = ref('apresentacao');
 const anexosLocais = ref(Array.isArray(props.campanha?.anexos) ? [...props.campanha.anexos] : []);
 const resultadosAnexosLocais = ref(Array.isArray(props.campanha?.resultados_anexos) ? [...props.campanha.resultados_anexos] : []);
@@ -252,7 +276,7 @@ const rejeitarCampanha = () => {
     formAprovacao.setError('observacoes', 'Observações são obrigatórias para rejeição.');
     return;
   }
-  formAprovacao.status = 'Rejeitada';
+  formAprovacao.status = 'Reprovada';
   salvarAprovacao();
 };
 
@@ -293,10 +317,23 @@ const irParaEdicao = () => {
       <template #body>
         <div class="card">
           <div class="card-body">
-            <h2 class="text-center mb-4">
-              {{ isResumoView ? 'RESUMO DA CAMPANHA: ESPELEOLOGIA' : 'EDITAR CAMPANHA: ESPELEOLOGIA' }}
-            </h2>
-            <h4 class="mb-3">Status: {{ campanha.status }}</h4>
+            <div v-if="campanha.analises && campanha.analises.length > 0" class="alert alert-info mb-3 d-flex justify-content-between align-items-center" style="cursor: pointer;" @click="showAnalysisModal = true">
+              <span>
+                <i class="bi bi-info-circle me-2"></i>
+                {{ campanha.analises.length }} análise{{ campanha.analises.length !== 1 ? 's' : '' }} registrada{{ campanha.analises.length !== 1 ? 's' : '' }}
+              </span>
+              <span class="badge bg-info text-white">Clique para visualizar</span>
+            </div>
+
+            <div class="text-center mb-4">
+              <h2 class="mb-2">
+                {{ isResumoView ? 'RESUMO DA CAMPANHA: ESPELEOLOGIA' : 'EDITAR CAMPANHA: ESPELEOLOGIA' }}
+              </h2>
+              <p class="text-muted mb-3 fs-5">{{ campanha.subproduto || 'Subproduto não informado' }}</p>
+              <div class="d-inline-block">
+                <span class="badge fs-4 px-3 py-2 fw-bold text-white" :class="statusClass">{{ statusDisplay || 'N/A' }}</span>
+              </div>
+            </div>
 
             <div class="d-flex justify-content-end gap-2 mb-4">
               <button v-if="isResumoView" class="btn btn-outline-warning" type="button" @click="irParaEdicao">
@@ -664,6 +701,34 @@ const irParaEdicao = () => {
             </template>
           </div>
         </div>
+
+        <div v-if="showAnalysisModal && campanha.analises && campanha.analises.length > 0" class="modal-backdrop-custom" @click.self="showAnalysisModal = false">
+          <div class="preview-modal" style="max-width: 600px;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0">Histórico de Análises</h5>
+              <button type="button" class="btn-close" @click="showAnalysisModal = false"></button>
+            </div>
+            <div class="modal-analysis-content">
+              <div v-for="analise in campanha.analises" :key="analise.id" class="card mb-2">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <strong>Versão {{ analise.versao }}</strong>
+                    </div>
+                    <small class="text-muted">{{ analise.created_at }}</small>
+                  </div>
+                  <p class="mb-2 small">
+                    <strong>Fiscal:</strong> {{ analise.fiscal?.name || 'N/A' }}
+                  </p>
+                  <div v-if="analise.observacoes" class="alert alert-info small mb-0">
+                    <strong>Observações:</strong>
+                    <p class="mb-0 mt-1">{{ analise.observacoes }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </template>
     </NavbarContrato>
   </AuthenticatedLayout>
@@ -728,5 +793,31 @@ const irParaEdicao = () => {
   font-size: 0.78rem;
   font-weight: 600;
   color: #4b5563;
+}
+
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.preview-modal {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-height: 85vh;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.modal-analysis-content {
+  max-height: 60vh;
+  overflow-y: auto;
 }
 </style>
