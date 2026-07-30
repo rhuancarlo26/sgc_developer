@@ -75,6 +75,19 @@ const updateProduto = () => {
   );
 };
 
+const normalizarTexto = (texto) => {
+  return texto
+    ?.trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+};
+
+const isSubprodutoPaipa = (subproduto) => {
+  return normalizarTexto(subproduto)
+    ?.startsWith('elaboracao do projeto');
+};
+
 // Lista única de descrições de subprodutos
 const uniqueSubprodutos = computed(() => {
   const descriptions = props.subprodutos.map(sub => sub.descricao_revisada).filter(desc => desc);
@@ -137,6 +150,12 @@ const goToCreate = () => {
     alert('Por favor, selecione um subproduto antes de cadastrar.');
     return;
   }
+
+  if (selectedProduto.value === 'patrimonio' && !isSubprodutoPaipa(selectedSubproduto.value)) {
+    alert('Este subproduto de patrimônio ainda não possui tela de cadastro implementada.');
+    return;
+  }
+
   const subproduto = selectedSubproduto.value;
   router.get(
     route(config.value.rotaNome.create, [props.contrato, selectedProduto.value]),
@@ -150,6 +169,15 @@ const goToCreate = () => {
 };
 
 const continuarCampanha = (campanha) => {
+    if (selectedProduto.value === 'patrimonio') {
+      router.get(
+        route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
+        { subproduto: campanha.subproduto, paipa_id: campanha.id },
+        { preserveState: true, preserveScroll: true }
+      );
+      return;
+    }
+
     router.get(
         route(config.value.rotaNome.create, [props.contrato, selectedProduto.value]),
         { subproduto: campanha.subproduto },
@@ -167,6 +195,15 @@ const visualizarCampanha = (campanha, modulo = null) => {
 
   // Para produtos que passam módulo como parâmetro
   const parametroModulo = config.value.passaModulo || modulo;
+
+  if (selectedProduto.value === 'patrimonio') {
+    router.get(
+      route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
+      { subproduto: campanha.subproduto, paipa_id: campanha.id },
+      { preserveState: true, preserveScroll: true }
+    );
+    return;
+  }
 
   const params = [props.contrato, selectedProduto.value, campanha.id];
   if (parametroModulo) {
@@ -192,6 +229,15 @@ const analisarCampanha = (campanhaId) => {
 };
 
 const editarCampanha = (campanha) => {
+  if (selectedProduto.value === 'patrimonio') {
+    router.get(
+      route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
+      { subproduto: campanha.subproduto, paipa_id: campanha.id },
+      { preserveState: true, preserveScroll: true }
+    );
+    return;
+  }
+
   router.get(
     route(config.value.rotaNome.edit, [props.contrato, selectedProduto.value, campanha.id]),
     { subproduto: campanha.subproduto },

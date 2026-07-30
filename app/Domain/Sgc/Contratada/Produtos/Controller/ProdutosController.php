@@ -90,6 +90,23 @@ class ProdutosController extends Controller
 
         if (!$subproduto) {
             Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
+
+            if ($produto === 'patrimonio') {
+                return inertia('Sgc/Contratada/Produtos/Patrimonio/Create', [
+                    'contrato' => $contrato,
+                    'produto' => ucfirst($produto),
+                    'contratos' => $contratoObj,
+                    'error' => 'Subproduto não selecionado. Por favor, selecione um subproduto.',
+                    'subproduto' => null,
+                    'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)
+                        ->get(['id', 'cod_emp', 'coordenadas', 'subtrecho_ini', 'subtrecho_fin', 'km_ini', 'km_fin', 'tipo_de_intervencao', 'descricao', 'bioma'])
+                        ->toArray(),
+                    'paipa' => null,
+                    'paipaId' => null,
+                    'profissionais' => [],
+                ]);
+            }
+
             return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
                 'contrato' => $contrato,
                 'produto' => ucfirst($produto),
@@ -117,6 +134,9 @@ class ProdutosController extends Controller
         } elseif ($produto === 'rima') {
             return $this->createRima($request, $contrato, $produto, $contratoObj, $subproduto);
 
+        } elseif ($produto === 'patrimonio') {
+            return $this->createPatrimonio($request, $contrato, $produto, $contratoObj, $subproduto);
+
         } else {
             return $this->createEspeleologia($request, $contrato, $produto, $contratoObj, $subproduto);
         }
@@ -127,6 +147,29 @@ class ProdutosController extends Controller
             'pmqa' => $this->getCampanhasPmqa($contrato),
             default => $this->getCampanhasEspeleologia($contrato)
         };
+    }
+
+    private function createPatrimonio(
+        Request $request,
+        $contrato,
+        $produto,
+        $contratoObj,
+        $subproduto
+    ): Response {
+        $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
+            ->get(['id', 'cod_emp', 'br', 'uf', 'coordenadas', 'subtrecho_ini', 'subtrecho_fin', 'subtrecho_ini2', 'subtrecho_fin3', 'subtrecho_ini3', 'subtrecho_fin32', 'km_ini', 'km_fin', 'km_ini2', 'km_fin2', 'km_ini3', 'km_fin3', 'extensao', 'tipo_de_intervencao', 'descricao', 'bioma'])
+            ->toArray();
+
+        return inertia('Sgc/Contratada/Produtos/Patrimonio/Create', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'empreendimentos' => $empreendimentos,
+            'paipa' => null,
+            'paipaId' => $request->query('paipa_id'),
+            'profissionais' => [],
+        ]);
     }
 
     private function createMalarigeno(
