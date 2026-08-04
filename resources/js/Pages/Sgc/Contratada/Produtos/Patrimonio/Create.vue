@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
+import axios from 'axios';
 import NavbarContrato from '@/Pages/Sgc/Contratada/NavbarContrato.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { ref, computed } from 'vue';
@@ -29,7 +30,14 @@ const empreendimentoSelecionado = computed(() => {
 });
 
 const avancar = async () => {
-  if (!empreendimentoSelecionado.value || !paipaAtualId.value) {
+  if (!empreendimentoSelecionado.value) {
+    return;
+  }
+
+  // No primeiro acesso ao Patrimonio, ainda nao existe paipa_id.
+  // Permitimos seguir para apresentacao e tentamos persistir quando houver ID.
+  if (!paipaAtualId.value) {
+    etapa.value = 'apresentacao';
     return;
   }
 
@@ -49,13 +57,17 @@ const avancar = async () => {
   }
 };
 const salvarApresentacao = async (payload) => {
-  await axios.post(route('patrimonio.store', {
-    contrato: props.contrato,
-    produto: 'patrimonio',
-  }), {
-    tipo: 'paipa',
-    ...payload,
-  });
+  try {
+    await axios.post(route('patrimonio.store', {
+      contrato: props.contrato,
+      produto: 'patrimonio',
+    }), {
+      tipo: 'paipa',
+      ...payload,
+    });
+  } catch (error) {
+    console.error('Erro ao salvar apresentacao do Patrimonio:', error);
+  }
 
   etapa.value = 'metodologia';
 };

@@ -88,7 +88,7 @@ export const produtoConfig = {
     passaModulo: null,
     rotaNome: {
       index: 'sgc.contratada.produtos.index',
-      create: null,
+      create: 'sgc.contratada.produtos.create',
       show: null,
       analise: null,
       edit: null,
@@ -137,7 +137,7 @@ export const produtoConfig = {
     passaModulo: null,
     rotaNome: {
       index: 'sgc.contratada.produtos.index',
-      create: null,
+      create: 'sgc.contratada.produtos.create',
       show: null,
       analise: null,
       edit: null,

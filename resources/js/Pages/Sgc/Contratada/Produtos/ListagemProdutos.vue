@@ -151,6 +151,12 @@ const goToCreate = () => {
     return;
   }
 
+  const createRoute = config.value?.rotaNome?.create;
+  if (!createRoute) {
+    alert('Rota de cadastro não configurada para este produto.');
+    return;
+  }
+
   if (selectedProduto.value === 'patrimonio' && !isSubprodutoPaipa(selectedSubproduto.value)) {
     alert('Este subproduto de patrimônio ainda não possui tela de cadastro implementada.');
     return;
@@ -158,7 +164,7 @@ const goToCreate = () => {
 
   const subproduto = selectedSubproduto.value;
   router.get(
-    route(config.value.rotaNome.create, [props.contrato, selectedProduto.value]),
+    route(createRoute, [props.contrato, selectedProduto.value]),
     { subproduto },
     {
       preserveState: true,
