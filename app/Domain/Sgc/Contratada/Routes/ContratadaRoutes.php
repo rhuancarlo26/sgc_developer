@@ -212,12 +212,12 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::patch('/pmqa/{pmqa}/aprovar',                              [ProdutosController::class,                              'aprovarPmqa'])->name('sgc.contratada.produtos.pmqa.aprovar');
 
         Route::prefix('/recursos-pmqa')->group(function () {
-            require __DIR__ . '/../../Contratada/Produtos/Pmqa/Configuracao/Ponto/Routes/PontoRoutes.php';
-            require __DIR__ . '/../../Contratada/Produtos/Pmqa/Configuracao/Parametro/Routes/ParametroRoutes.php';
-            require __DIR__ . '/../../Contratada/Produtos/Pmqa/Configuracao/VinculacaoPonto/Routes/VinculacaoPontoRoutes.php';
-            require __DIR__ . '/../../Contratada/Produtos/Pmqa/Execucao/app/Routes/ExecucaoRoutes.php';
-            require __DIR__ . '/../../Contratada/Produtos/Pmqa/Resultado/app/Routes/ResultadoRoutes.php';
-            require __DIR__ . '/../../Contratada/Produtos/Pmqa/Relatorio/app/Routes/RelatorioRoutes.php';
+            require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/Ponto/Routes/PontoRoutes.php';
+            require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/Parametro/Routes/ParametroRoutes.php';
+            require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/VinculacaoPonto/Routes/VinculacaoPontoRoutes.php';
+            require __DIR__ . '/../../Contratada/Produtos/PMQA/Execucao/app/Routes/ExecucaoRoutes.php';
+            require __DIR__ . '/../../Contratada/Produtos/PMQA/Resultado/app/Routes/ResultadoRoutes.php';
+            require __DIR__ . '/../../Contratada/Produtos/PMQA/Relatorio/app/Routes/RelatorioRoutes.php';
 
         });
 

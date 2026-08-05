@@ -63,14 +63,46 @@ public function store(Request $request, GeoServerService $geo)
 
     // Usamos o primeiro
     $shpPath = $shpFiles[0];
-    $layerName = pathinfo($shpPath, PATHINFO_FILENAME);
+    $originalName = pathinfo($shpPath, PATHINFO_FILENAME);
+
+    // Nome único por campanha: os shapefiles seguem nomes de template padronizados
+    // (ex.: "loteamento.shp") e campanhas diferentes podem enviar arquivos com o
+    // mesmo nome. Sem esse prefixo, a busca abaixo (workspace + layer_name) reaproveita
+    // a layer já publicada por OUTRA campanha, exibindo dados (e coordenadas) de um
+    // trecho errado.
+    $safeOriginalName = preg_replace('/[^A-Za-z0-9_]+/', '_', $originalName);
+    $layerName = 'campanha_' . $campanha->id . '_' . $safeOriginalName;
+
+    // Renomeia todos os componentes do shapefile (.shp, .shx, .dbf, .prj, .cpg, ...)
+    // para o novo nome único. Eles precisam manter o mesmo nome-base entre si, é
+    // assim que o formato shapefile funciona.
+    foreach (scandir($extractDir) as $file) {
+        $fullPath = $extractDir . '/' . $file;
+        if (is_file($fullPath) && pathinfo($file, PATHINFO_FILENAME) === $originalName) {
+            rename($fullPath, $extractDir . '/' . $layerName . '.' . pathinfo($file, PATHINFO_EXTENSION));
+        }
+    }
+    $shpPath = $extractDir . '/' . $layerName . '.shp';
+
+    // Recompacta só os arquivos renomeados num novo ZIP para publicar no GeoServer,
+    // que nomeia a layer a partir do nome do .shp encontrado dentro do ZIP.
+    $renamedZipPath = storage_path('app/shapes/' . $layerName . '.zip');
+    $renamedZip = new \ZipArchive();
+    if ($renamedZip->open($renamedZipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+        abort(500, 'Falha ao gerar ZIP renomeado');
+    }
+    foreach (glob($extractDir . '/' . $layerName . '.*') as $renamedFile) {
+        $renamedZip->addFile($renamedFile, basename($renamedFile));
+    }
+    $renamedZip->close();
 
     $tipo = $request->input('tipo');
     $workspace = 'ecossistema';
     $isNewLayer = false;
 
     // 5️⃣ Se já existir no banco (workspace + layer), reaproveita e só vincula campanha.
-    // Isso evita erro de unique key (map_layers.uniq_layer).
+    // Como o nome já é único por campanha, isso só reaproveita um reenvio do mesmo
+    // arquivo pela própria campanha, evitando erro de unique key (map_layers.uniq_layer).
     $layer = MapLayer::where('workspace', $workspace)
         ->where('layer_name', $layerName)
         ->first();
@@ -116,11 +148,10 @@ public function store(Request $request, GeoServerService $geo)
 
             // Usa upload direto via HTTP para funcionar com GeoServer remoto.
             // O GeoServer remoto não tem acesso ao filesystem local da aplicação.
-            $absoluteZipPath = storage_path("app/{$zipPath}");
             $geo->uploadShapefileDatastore(
                 $layer->workspace,
                 $layer->datastore,
-                $absoluteZipPath
+                $renamedZipPath
             );
 
             $layer->update([

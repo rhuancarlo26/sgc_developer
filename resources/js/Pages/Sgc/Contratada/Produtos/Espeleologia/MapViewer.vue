@@ -10,6 +10,14 @@ import "leaflet-draw";
 import "leaflet-measure";
 import axios from "axios";
 
+// Sobrescreve propriedades do ícone padrão - resolve erros do ícone no servidor
+L.Marker.prototype.options.icon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  shadowAnchor: [12, 22]
+});
+
 // receber dados do empreendimento
 const props = defineProps({
   campanha: Object,

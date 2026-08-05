@@ -29,12 +29,17 @@ class MapLayer extends Model
         'storage_path',
         'published_at',
 
-        'visible'
+        'visible',
+
+        // Mapa temático
+        'thematic_field',
+        'thematic_style',
     ];
 
     protected $casts = [
         'bbox' => 'array',
-        'visible' => 'boolean'
+        'visible' => 'boolean',
+        'thematic_style' => 'array',
     ];
 
     /**
