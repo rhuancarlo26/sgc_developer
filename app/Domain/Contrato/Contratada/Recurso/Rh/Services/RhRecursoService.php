@@ -48,31 +48,49 @@ class RhRecursoService extends BaseModelService
 
     public function salvarRh($request): array
     {
-        $response = $this->dataManagement->create(
-            entity: $this->modelClass,
-            infos: $this->filterRhFields($request)
-        );
+        $rh = RecursoRh::create($this->filterRhFields($request));
 
         return [
-            'rh' => $response['model']['id'],
-            'request' => $response['request']
+            'rh' => $rh->id,
+            'request' => [
+                'type' => 'success',
+                'content' => 'RH cadastrado com sucesso!',
+            ],
         ];
     }
 
     public function updateRh($request): array
     {
-        $response = $this->dataManagement->update(
-            entity: $this->modelClass,
-            infos: $this->filterRhFields($request),
-            id: $request['id']
-        );
+        
+        $rh = RecursoRh::findOrFail($request['id']);
 
-        return ['request' => $response['request']];
+        $rh->update($this->filterRhFields($request));
+
+        return [
+            'request' => [
+                'type' => 'success',
+                'content' => 'RH atualizado com sucesso!',
+            ],
+        ];
     }
 
     private function filterRhFields(array $request): array
     {
-        return array_intersect_key($request, array_flip(self::RH_FILLABLE));
+        $data = array_intersect_key($request, array_flip(self::RH_FILLABLE));
+
+        if (array_key_exists('status', $request)) {
+            $data['status'] = (int) $request['status'];
+        }
+
+        if (array_key_exists('conselho_classe', $request)) {
+            $data['conselho_classe'] = (int) $request['conselho_classe'];
+        }
+
+        if (($data['conselho_classe'] ?? null) === 0) {
+            $data['numero_registro'] = null;
+        }
+
+        return $data;
     }
 
     public function salvarDocumentoRh($request): array
