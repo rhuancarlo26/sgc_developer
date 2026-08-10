@@ -26,6 +26,8 @@ class UpdateImportadorRequest extends FormRequest
     {
         $rules = [
             'modulo_id' => 'required',
+            'licencas' => ['nullable', 'array'],
+            'licencas.*' => ['integer', 'exists:licencas,id'],
             'mes_ano_referencia' => 'required',
             'campanha' => 'required',
             'contrato_id' => 'required',

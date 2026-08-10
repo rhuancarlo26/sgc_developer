@@ -17,6 +17,7 @@ class ConfiguracoesModulosService extends BaseModelService
     {
         // $modulos = Modulo::paginate(10);
         $modulos = $this->searchAllColumns(...$searchParams)
+            ->with(['contrato:id,numero_contrato,contratada'])
             ->paginate(10)
             ->appends($searchParams);
 
@@ -28,21 +29,48 @@ class ConfiguracoesModulosService extends BaseModelService
 
     public function store(array $data): array
     {
-        if (!is_null($data['planilha_modelo'])) {
+        $data = $this->normalizarPmqa($data);
+
+        if (!empty($data['planilha_modelo'])) {
             $data = $this->addArquivo($data);
         }
 
-        return $this->dataManagement->create(entity: $this->modelClass, infos: $data);
+        $modulo = Modulo::create($data);
+
+        return [
+            'model' => $modulo,
+            'request' => [
+                'type' => 'success',
+                'content' => 'Módulo cadastrado com sucesso!',
+            ],
+        ];
     }
 
     public function update(Modulo $modulo, array $data): array
     {
-        if (!is_null($data['planilha_modelo'])) {
+        $data = $this->normalizarPmqa($data);
+
+        if (!empty($data['planilha_modelo'])) {
             $data = $this->addArquivo($data);
         }
 
-        $dataManagement = $this->dataManagement->update(entity: $this->modelClass, infos: $data, id: $modulo->id);
-        return $dataManagement['request'];
+        $modulo->update($data);
+
+        return [
+            'type' => 'success',
+            'content' => 'Módulo atualizado com sucesso!',
+        ];
+    }
+
+    private function normalizarPmqa(array $data): array
+    {
+        $data['pmqa'] = (int) ($data['pmqa'] ?? 0);
+
+        if ($data['pmqa'] !== 1) {
+            $data['contrato_id'] = null;
+        }
+
+        return $data;
     }
 
     private function addArquivo(array $data): array

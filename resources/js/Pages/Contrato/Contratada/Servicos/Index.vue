@@ -314,6 +314,30 @@ const temHistoricoRetorno = (item) => {
     return (item?.retornos_confeccao ?? []).length > 0;
 };
 
+const numeroContratoModulo = (modulo) => {
+    if (modulo?.contrato?.numero_contrato) {
+        return modulo.contrato.numero_contrato;
+    }
+
+    if (Number(modulo?.contrato_id) === Number(props.contrato?.id)) {
+        return props.contrato?.numero_contrato;
+    }
+
+    return null;
+};
+
+const nomeModuloFormatado = (modulo) => {
+    const nome = modulo?.nome ?? "-";
+
+    const ehPmqa = modulo?.pmqa === true || Number(modulo?.pmqa) === 1;
+
+    if (ehPmqa) {
+        return `${nome} | ${numeroContratoModulo(modulo) ?? "Contrato não informado"}`;
+    }
+
+    return nome;
+};
+
 const nomeServicoExibicao = (item) => {
     const possuiModuloImportado =
         item?.servico_mod_imp_id !== null
@@ -321,7 +345,7 @@ const nomeServicoExibicao = (item) => {
         && item?.servico_mod_imp_id !== "";
 
     if (possuiModuloImportado) {
-        return item?.modulo_importado?.nome ?? "-";
+        return nomeModuloFormatado(item?.modulo_importado);
     }
 
     if (

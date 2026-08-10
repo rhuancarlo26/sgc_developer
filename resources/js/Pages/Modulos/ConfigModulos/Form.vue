@@ -11,13 +11,21 @@ import { useToast } from "vue-toastification";
 const props = defineProps({
     modulo: { type: Object },
     tipos: { type: Array },
+    contratos: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const form = useForm({
     nome: null,
+    pmqa: 0,
+    contrato_id: null,
     planilha_modelo: null,
     campos: [],
-    ...props.modulo
+    ...props.modulo,
+    pmqa: props.modulo?.pmqa ? 1 : 0,
+    contrato_id: props.modulo?.contrato_id ?? null,
 });
 
 const toast = useToast();
@@ -25,12 +33,12 @@ const toast = useToast();
 const TabValidacoesRef = ref(null)
 const salvarModulo = () => {
 
-    if(!form.campos.length) {
+    if (!form.campos.length) {
         toast.error('Os campos para validação não foram preenchidos');
         return
     }
 
-    if(TabValidacoesRef.value.validaCampos()) {
+    if (TabValidacoesRef.value.validaCampos()) {
         toast.error('Preencha os campos obrigatórios da aba Validações');
         return
     }
@@ -69,11 +77,13 @@ const salvarModulo = () => {
                     <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <a href="#tabs-info-1" class="nav-link active" data-bs-toggle="tab" aria-selected="true"
-                                role="tab"> Informações Gerais </a>
+                                role="tab">
+                                Informações Gerais </a>
                         </li>
                         <li class="nav-item" role="presentation">
                             <a href="#tabs-validacoes-1" class="nav-link" data-bs-toggle="tab" aria-selected="true"
-                                role="tab"> Validações ({{form.campos.length}}) </a>
+                                role="tab">
+                                Validações ({{ form.campos.length }}) </a>
                         </li>
                     </ul>
                 </div>
@@ -81,7 +91,7 @@ const salvarModulo = () => {
                     <form @submit.prevent="salvarModulo()" :disabled="form.processing">
                         <div class="tab-content">
                             <div class="tab-pane active show" id="tabs-info-1" role="tabpanel">
-                                <TabInformacoesGerais :form="form" />
+                                <TabInformacoesGerais :form="form" :contratos="contratos" />
                             </div>
 
                             <div class="tab-pane" id="tabs-validacoes-1" role="tabpanel">
@@ -92,7 +102,7 @@ const salvarModulo = () => {
                         <div class="card-body">
                             <div class="d-flex justify-content-end">
                                 <button class="btn btn-success" :disabled="form.processing">
-                                    <IconDeviceFloppy class="me-2"/>
+                                    <IconDeviceFloppy class="me-2" />
                                     {{ form.id ? 'Editar' : 'Salvar' }}
                                 </button>
                             </div>
