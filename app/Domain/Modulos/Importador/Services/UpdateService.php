@@ -36,10 +36,12 @@ class UpdateService extends BaseModelService
 
         $enviarAnalise = filter_var($data['enviar_analise'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $updateModulo = filter_var($data['update_modulo'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $licencas = $data['licencas'] ?? [];
 
         unset(
             $data['fotos'],
             $data['anexos'],
+            $data['licencas'],
             $data['enviar_analise'],
             $data['update_modulo'],
             $data['arquivo']
@@ -63,6 +65,7 @@ class UpdateService extends BaseModelService
         }
 
         $importador->update($data);
+        $importador->licencas()->sync($licencas);
 
         $job = new ProcessarPlanilhaImportadorJob(
             importadorId: $importador->id,

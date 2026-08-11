@@ -24,6 +24,24 @@ const mostrarCampos = (modulo) => {
     ModalCamposModuloRef.value.abrirModal(modulo)
 }
 
+const nomeModuloFormatado = (item) => {
+    if (item?.pmqa) {
+        return `${item.nome} | ${item.contrato?.numero_contrato ?? 'Contrato não informado'}`;
+    }
+
+    return item?.nome ?? '-';
+};
+
+const nomeModeloFormatado = (item) => {
+    const nomeModelo = item?.nome_planilha_modelo || item?.nome || '-';
+
+    if (item?.pmqa) {
+        return `${nomeModelo} | ${item.contrato?.numero_contrato ?? 'Contrato não informado'}`;
+    }
+
+    return nomeModelo;
+};
+
 const excluir = (moduloId) => {
     Swal.fire({
         title: 'Tem certeza?',
@@ -71,7 +89,9 @@ const excluir = (moduloId) => {
                 table-class="table-hover">
                 <template #body="{ item }">
                     <tr class="cursor-pointer">
-                        <td class="text-center align-middle">{{ item.nome }}</td>
+                        <td class="text-center align-middle">
+                            {{ nomeModuloFormatado(item) }}
+                        </td>
                         <td class="text-center align-middle">
                             <button class="btn btn-sm btn-secondary" @click="mostrarCampos(item)">
                                 <IconEye />
@@ -79,15 +99,17 @@ const excluir = (moduloId) => {
                         </td>
 
                         <td class="text-center align-middle">
-                         <span><strong> Modelo </strong></span> - {{ item.nome_planilha_modelo || item.nome }}
+                            <span>
+                                <strong>Modelo</strong> - {{ nomeModeloFormatado(item) }}
+                            </span>
+
                             <a v-if="item.id && item.campos?.length"
                                 :href="route('modulos.config-modulos.gerar-planilha-modelo', [item.id])"
                                 class="btn btn-sm bg-gray-400 ms-2" target="_blank" title="Gerar Planilha Modelo">
                                 <IconDownload class="me-1" />
-
                             </a>
 
-                            <span v-else>-</span>
+                            <span v-else class="ms-2">-</span>
                         </td>
                         <td class="text-center align-middle">{{ dateTimeFormat(item.created_at) }}</td>
                         <td class="text-center">

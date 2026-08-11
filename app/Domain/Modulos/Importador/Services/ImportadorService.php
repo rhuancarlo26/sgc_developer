@@ -18,10 +18,27 @@ class ImportadorService extends BaseModelService
 
     public function buscarImportadores(array $searchParams, array $contexto = [], array $filtros = []): array
     {
-        $modulos = Modulo::all();
+        $modulos = Modulo::query()
+            ->with(['contrato:id,numero_contrato'])
+            ->whereNull('deleted_at')
+            ->orderBy('nome')
+            ->get([
+                'id',
+                'nome',
+                'pmqa',
+                'contrato_id',
+            ]);
+
+        $with = [
+            'modulo:id,nome,pmqa,contrato_id',
+            'modulo.contrato:id,numero_contrato',
+            'contrato:id,numero_contrato,contratada',
+            'servico.tema:id,nome_tema',
+            'licencas.tipo_rel:id,sigla',
+        ];
 
         $baseContextoQuery = ModuloImportador::query()
-            ->with(['modulo', 'contrato', 'servico.tema'])
+            ->with($with)
             ->when($contexto['contrato_id'] ?? null, function ($query, $contratoId) {
                 $query->where('contrato_id', $contratoId);
             })
@@ -33,7 +50,7 @@ class ImportadorService extends BaseModelService
             });
 
         $query = $this->searchAllColumns(...$searchParams)
-            ->with(['modulo', 'contrato', 'servico.tema'])
+            ->with($with)
             ->when($contexto['contrato_id'] ?? null, function ($query, $contratoId) {
                 $query->where('contrato_id', $contratoId);
             })
@@ -88,7 +105,17 @@ class ImportadorService extends BaseModelService
             ->pluck('servico.tema')
             ->filter()
             ->unique('id')
-            ->values()
+            ->values();
+
+        if (!empty($contexto['tema'])) {
+            $temasFiltro = $temasFiltro
+                ->push($contexto['tema'])
+                ->filter()
+                ->unique('id')
+                ->values();
+        }
+
+        $temasFiltro = $temasFiltro
             ->map(function ($tema) {
                 return [
                     'id' => $tema->id,
@@ -110,11 +137,27 @@ class ImportadorService extends BaseModelService
             ->pluck('modulo')
             ->filter()
             ->unique('id')
-            ->values()
+            ->values();
+
+        if (!empty($contexto['modulo'])) {
+            $modulosFiltro = $modulosFiltro
+                ->push($contexto['modulo'])
+                ->filter()
+                ->unique('id')
+                ->values();
+        }
+
+        $modulosFiltro = $modulosFiltro
             ->map(function ($modulo) {
                 return [
                     'id' => $modulo->id,
                     'nome' => $modulo->nome,
+                    'pmqa' => (bool) $modulo->pmqa,
+                    'contrato_id' => $modulo->contrato_id,
+                    'contrato' => $modulo->contrato ? [
+                        'id' => $modulo->contrato->id,
+                        'numero_contrato' => $modulo->contrato->numero_contrato,
+                    ] : null,
                 ];
             })
             ->values();
@@ -133,11 +176,27 @@ class ImportadorService extends BaseModelService
 
     public function buscarModulos(): Collection
     {
-        return Modulo::all();
+        return Modulo::query()
+            ->with(['contrato:id,numero_contrato'])
+            ->whereNull('deleted_at')
+            ->orderBy('nome')
+            ->get([
+                'id',
+                'nome',
+                'pmqa',
+                'contrato_id',
+                'campos',
+            ]);
     }
 
     public function buscarContratos(): Collection
     {
-        return Contrato::all();
+        return Contrato::query()
+            ->orderBy('numero_contrato')
+            ->get([
+                'id',
+                'numero_contrato',
+                'contratada',
+            ]);
     }
 }

@@ -31,7 +31,8 @@ class ServicoService extends BaseModelService
         $baseFiltroQuery = Servicos::query()
             ->with([
                 'tipo',
-                'moduloImportado',
+                'moduloImportado:id,nome,pmqa,contrato_id',
+                'moduloImportado.contrato:id,numero_contrato',
                 'tema',
             ])
             ->where('id_contrato', $contrato->id)
@@ -40,7 +41,8 @@ class ServicoService extends BaseModelService
         $query = $this->search(...$searchParams)
             ->with([
                 'tipo',
-                'moduloImportado',
+                'moduloImportado:id,nome,pmqa,contrato_id',
+                'moduloImportado.contrato:id,numero_contrato',
                 'tema',
                 'rhs',
                 'veiculos',
@@ -50,7 +52,8 @@ class ServicoService extends BaseModelService
                 'condicionantes.licenca',
                 'retornosConfeccao.usuario:id,name',
                 'retornosConfeccao.tema:id,nome_tema',
-                'retornosConfeccao.moduloImportado:id,nome',
+                'retornosConfeccao.moduloImportado:id,nome,pmqa,contrato_id',
+                'retornosConfeccao.moduloImportado.contrato:id,numero_contrato',
             ])
             ->where('id_contrato', $contrato->id)
             ->whereNull('deleted_at')
@@ -93,10 +96,16 @@ class ServicoService extends BaseModelService
             ->filter()
             ->unique('id')
             ->values()
-            ->map(function ($servico) {
+            ->map(function ($modulo) {
+                $nome = $modulo->nome;
+
+                if ($modulo->pmqa && $modulo->contrato) {
+                    $nome .= ' / ' . $modulo->contrato->numero_contrato;
+                }
+
                 return [
-                    'id' => $servico->id,
-                    'nome' => $servico->nome,
+                    'id' => $modulo->id,
+                    'nome' => $nome,
                 ];
             })
             ->values();
@@ -118,10 +127,27 @@ class ServicoService extends BaseModelService
         }
 
         $tipos = Modulo::query()
+            ->with(['contrato:id,numero_contrato'])
             ->whereNull('deleted_at')
+            ->where(function ($query) use ($contrato) {
+                $query
+                    ->where(function ($query) {
+                        $query->where('pmqa', false)
+                            ->orWhereNull('pmqa');
+                    })
+                    ->orWhere(function ($query) use ($contrato) {
+                        $query->where('pmqa', true)
+                            ->where('contrato_id', $contrato->id);
+                    });
+            })
             ->orderBy('nome')
-            ->get(['id', 'nome']);
-            
+            ->get([
+                'id',
+                'nome',
+                'pmqa',
+                'contrato_id',
+            ]);
+
         $temas = ServicoTema::all();
 
         $rhs = RecursoRh::where('id_contrato', $contrato->id)->get();
@@ -141,7 +167,7 @@ class ServicoService extends BaseModelService
             $servico->load([
                 'tipo',
                 'tema',
-                'moduloImportado',
+                'moduloImportado.contrato:id,numero_contrato',
                 'rhs',
                 'veiculos',
                 'veiculos.codigo',
@@ -150,7 +176,8 @@ class ServicoService extends BaseModelService
                 'condicionantes.licenca',
                 'retornosConfeccao.usuario:id,name',
                 'retornosConfeccao.tema:id,nome_tema',
-                'retornosConfeccao.moduloImportado:id,nome',
+                'retornosConfeccao.moduloImportado:id,nome,pmqa,contrato_id',
+                'retornosConfeccao.moduloImportado.contrato:id,numero_contrato',
             ]);
         }
 

@@ -33,12 +33,41 @@ const props = defineProps({
     },
 });
 
+const nomeModuloFormatado = (modulo) => {
+    const nome = modulo?.nome ?? "-";
+
+    if (modulo?.pmqa) {
+        return `${nome} | ${modulo?.contrato?.numero_contrato ?? "Contrato não informado"}`;
+    }
+
+    return nome;
+};
+
+const prepararModuloSelect = (modulo) => {
+    if (!modulo) {
+        return null;
+    }
+
+    return {
+        ...modulo,
+        nome_formatado: nomeModuloFormatado(modulo),
+    };
+};
+
+const moduloPertenceAoContratoAtual = (modulo) => {
+    if (!modulo?.pmqa) {
+        return true;
+    }
+
+    return Number(modulo?.contrato_id) === Number(props.contrato?.id);
+};
+
 const temaInicial = props.servico?.tema
     ?? props.temas.find((tema) => Number(tema.id) === Number(props.servico?.tema_servico))
     ?? null;
 
 const moduloImportadoInicial = props.servico?.servico_mod_imp_id
-    ? (
+    ? prepararModuloSelect(
         props.servico?.modulo_importado
         ?? props.tipos.find((tipo) => Number(tipo.id) === Number(props.servico?.servico_mod_imp_id))
         ?? null
@@ -126,15 +155,18 @@ const servicosDisponiveis = computed(() => {
 
     const servicoAtualId = Number(form.id ?? props.servico?.id);
 
-    return props.tipos.filter((tipo) => {
-        const tipoId = Number(tipo.id);
+    return props.tipos
+        .filter((tipo) => moduloPertenceAoContratoAtual(tipo))
+        .filter((tipo) => {
+            const tipoId = Number(tipo.id);
 
-        return !props.servicosUsados.some((usado) => {
-            return Number(usado.tema_servico) === temaId
-                && Number(usado.servico_mod_imp_id) === tipoId
-                && Number(usado.id) !== servicoAtualId;
-        });
-    });
+            return !props.servicosUsados.some((usado) => {
+                return Number(usado.tema_servico) === temaId
+                    && Number(usado.servico_mod_imp_id) === tipoId
+                    && Number(usado.id) !== servicoAtualId;
+            });
+        })
+        .map((tipo) => prepararModuloSelect(tipo));
 });
 
 const telaRetornoConfeccao = computed(() => {
@@ -155,9 +187,11 @@ const nomeTemaRetorno = computed(() => {
 });
 
 const nomeServicoRetorno = computed(() => {
-    return form.tipo?.nome
-        ?? props.servico?.modulo_importado?.nome
-        ?? "-";
+    return nomeModuloFormatado(
+        form.tipo
+        ?? props.servico?.modulo_importado
+        ?? null
+    );
 });
 
 const modalRetornoConfeccao = ref(null);
@@ -330,7 +364,7 @@ const salvarServico = () => {
                     <span>Serviço (módulo importado) <span class="text-danger">*</span></span>
                 </InputLabel>
 
-                <v-select :options="servicosDisponiveis" label="nome" v-model="form.tipo"
+                <v-select :options="servicosDisponiveis" label="nome_formatado" v-model="form.tipo"
                     :disabled="!temaSelecionado || form.processing || !podeEditarServico"
                     :placeholder="!temaSelecionado ? 'Selecione um tema para habilitar o campo de serviço' : 'Selecione o serviço'">
                     <template #no-options="{ }">

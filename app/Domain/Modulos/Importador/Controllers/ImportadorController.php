@@ -3,6 +3,8 @@
 namespace App\Domain\Modulos\Importador\Controllers;
 
 use App\Domain\Modulos\Importador\Services\ImportadorService;
+use App\Models\Modulo;
+use App\Models\ServicoTema;
 use App\Models\Servicos;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +31,39 @@ class ImportadorController extends Controller
             'tema_id',
             'origem_servico',
         ]);
+
+        if (!empty($contexto['servico_id'])) {
+            $servico = Servicos::query()
+                ->with([
+                    'tema:id,nome_tema',
+                    'moduloImportado:id,nome,pmqa,contrato_id',
+                    'moduloImportado.contrato:id,numero_contrato',
+                ])
+                ->find($contexto['servico_id']);
+
+            if ($servico) {
+                $contexto['contrato_id'] = $contexto['contrato_id'] ?? $servico->id_contrato;
+                $contexto['tema_id'] = $contexto['tema_id'] ?? $servico->tema_servico;
+                $contexto['modulo_id'] = $contexto['modulo_id'] ?? $servico->servico_mod_imp_id;
+                $contexto['origem_servico'] = true;
+
+                $contexto['tema'] = $servico->tema;
+                $contexto['modulo'] = $servico->moduloImportado;
+            }
+        }
+
+        if (empty($contexto['tema']) && !empty($contexto['tema_id'])) {
+            $contexto['tema'] = ServicoTema::query()
+                ->select(['id', 'nome_tema'])
+                ->find($contexto['tema_id']);
+        }
+
+        if (empty($contexto['modulo']) && !empty($contexto['modulo_id'])) {
+            $contexto['modulo'] = Modulo::query()
+                ->with(['contrato:id,numero_contrato'])
+                ->select(['id', 'nome', 'pmqa', 'contrato_id'])
+                ->find($contexto['modulo_id']);
+        }
 
         if (!$this->servicoAprovado($contexto['servico_id'] ?? null)) {
             return back()->with('message', [

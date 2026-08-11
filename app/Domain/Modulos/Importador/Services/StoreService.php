@@ -33,11 +33,13 @@ class StoreService extends BaseModelService
             $fotos = $data['fotos'] ?? [];
             $anexos = $data['anexos'] ?? [];
             $enviarAnalise = filter_var($data['enviar_analise'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $licencas = $data['licencas'] ?? [];
 
             unset(
                 $data['arquivo'],
                 $data['fotos'],
                 $data['anexos'],
+                $data['licencas'],
                 $data['enviar_analise'],
                 $data['continuar_formulario']
             );
@@ -52,6 +54,7 @@ class StoreService extends BaseModelService
             $data['status'] = ModuloImportador::RASCUNHO;
 
             $importador = ModuloImportador::create($data);
+            $importador->licencas()->sync($licencas);
 
             $job = new ProcessarPlanilhaImportadorJob(
                 importadorId: $importador->id,

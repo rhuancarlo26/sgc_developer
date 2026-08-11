@@ -35,6 +35,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    licencas: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const toNumberOrNull = (valor) => {
@@ -54,6 +58,7 @@ const form = useForm({
     parecer_analise: null,
     fotos: [],
     anexos: [],
+    licencas: props.moduloImportador?.licencas?.map((licenca) => licenca.id) ?? [],
     enviar_analise: null,
     update_modulo: null,
     continuar_formulario: null,
@@ -363,7 +368,7 @@ const importarSomentePlanilha = () => {
             <div class="d-flex flex-column">
                 <div class="d-flex flex-column gap-4 flex-grow-1 mb-4">
                     <CardInformacoesGerais ref="CardInformacoesGeraisRef" :form="form" :modulos="modulos"
-                        :contratos="contratos" :tem-dados-planilha="temDadosPlanilha"
+                        :contratos="contratos" :tem-dados-planilha="temDadosPlanilha" :licencas="licencas"
                         :contexto-importador="contextoImportador" :campanhas-disponiveis="campanhasDisponiveis"
                         @importar-planilha="importarSomentePlanilha" />
 
