@@ -187,7 +187,10 @@ const licencasVinculadas = computed(() => {
 const colunasFiltroLicenca = "tipo_rel.sigla,numero_licenca,empreendimento,data_emissao,status,vencimento,processo_dnit";
 
 const linkLicenca = (licenca) => {
-    return `/licenca?columns=${encodeURIComponent(colunasFiltroLicenca)}&value=${encodeURIComponent(licenca.numero_licenca)}`;
+    return route("licenca.index", {
+        columns: colunasFiltroLicenca,
+        value: licenca.numero_licenca,
+    });
 };
 
 const formatarData = (data) => {
