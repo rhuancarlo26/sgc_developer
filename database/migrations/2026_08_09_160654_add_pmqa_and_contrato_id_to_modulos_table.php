@@ -18,7 +18,7 @@ return new class extends Migration
             }
 
             if (!Schema::hasColumn('modulos', 'contrato_id')) {
-                $table->unsignedBigInteger('contrato_id')->nullable()->after('pmqa');
+                $table->integer('contrato_id')->nullable()->after('pmqa');
                 $table->foreign('contrato_id')->references('id')->on('contratos')->nullOnDelete();
             }
         });
