@@ -3,6 +3,14 @@ import Modal from "@/Components/Modal.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import { computed, ref } from "vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
+import { router } from "@inertiajs/vue3";
+
+const props = defineProps({
+    contratoId: {
+        type: [Number, String],
+        required: true,
+    },
+});
 
 const modalHistorico = ref(null);
 const detalhe = ref({});
@@ -51,6 +59,30 @@ const textoStatus = (status) => {
 
     return "-";
 };
+
+const editarServico = () => {
+    const url = route('contratos.contratada.servicos.create', {
+        contrato: props.contratoId,
+        servico: detalhe.value.id,
+    });
+
+    const modal = modalHistorico.value?.getBsModal?.();
+
+    if (!modal) {
+        router.visit(url);
+        return;
+    }
+
+    modal.hide();
+
+    setTimeout(() => {
+        router.visit(url);
+    }, 300);
+};
+
+const podeEditar = computed(() => {
+    return Number(detalhe.value?.status_aprovacao) === 1;
+});
 </script>
 
 <template>
@@ -98,6 +130,10 @@ const textoStatus = (status) => {
         </template>
 
         <template #footer>
+            <button v-if="podeEditar" type="button" class="btn btn-primary" @click="editarServico">
+                Editar serviço
+            </button>
+
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                 Fechar
             </button>
