@@ -189,7 +189,7 @@
 
         <ModalVisualizarLicenca ref="modalVisualizarLicenca" />
         <ModalVisualizarServico ref="modalVisualizarServico" />
-        <ModalHistoricoRetornoConfeccao ref="modalHistoricoRetorno" />
+        <ModalHistoricoRetornoConfeccao ref="modalHistoricoRetorno" :contrato-id="contrato.id"/>
     </AuthenticatedLayout>
 </template>
 
