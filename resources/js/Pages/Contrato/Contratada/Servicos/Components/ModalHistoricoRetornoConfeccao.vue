@@ -64,6 +64,7 @@ const editarServico = () => {
     const url = route('contratos.contratada.servicos.create', {
         contrato: props.contratoId,
         servico: detalhe.value.id,
+        acao: 'editar',
     });
 
     const modal = modalHistorico.value?.getBsModal?.();
