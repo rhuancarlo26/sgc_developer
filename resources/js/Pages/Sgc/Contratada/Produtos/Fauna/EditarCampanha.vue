@@ -6,6 +6,7 @@ import InputError from '@/Components/InputError.vue';
 import NavButton from '@/Components/NavButton.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useForm, router, usePage  } from '@inertiajs/vue3';
+import axios from 'axios';
 import DadosGeraisEditar from './Componentes/DadosGeraisEditar.vue';
 import ModulosAmostraisEditar from './Componentes/ModulosAmostraisEditar.vue';
 import CampanhaAtropelamento from './CampanhaAtropelamento.vue';
@@ -479,22 +480,14 @@ const salvarNovoProfissional = (novoProfissional) => {
     props.contrato,
     props.produto.toLowerCase(),
   ]);
- 
-  // Usar fetch para evitar problemas com Inertia
-  fetch(url, {
-    method: 'POST',
+
+  axios.post(url, novoProfissional, {
     headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
       'X-Inertia': 'false',
     },
-    body: JSON.stringify(novoProfissional),
   })
-  .then(response => response.json())
-  .then(data => {
-    console.log('Response:', data);
- 
+  .then(({ data }) => {
     if (data.success) {
       // Adicionar o novo profissional à lista
       props.profissionais.push({
@@ -502,17 +495,16 @@ const salvarNovoProfissional = (novoProfissional) => {
         profissional: data.profissional.profissional,
         formacao: data.profissional.formacao,
       });
- 
+
       alert('✅ Profissional cadastrado com sucesso!');
-      
-      
     } else {
       alert('❌ Erro: ' + (data.message || 'Tente novamente.'));
     }
   })
   .catch(error => {
     console.error('Erro ao salvar profissional:', error);
-    alert('❌ Erro de conexão. Tente novamente.');
+    const message = error.response?.data?.message;
+    alert(message ? `❌ Erro: ${message}` : '❌ Erro de conexão. Tente novamente.');
   });
 };
 

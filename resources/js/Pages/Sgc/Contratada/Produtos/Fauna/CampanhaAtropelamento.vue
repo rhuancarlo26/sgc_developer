@@ -10,6 +10,7 @@ import axios from 'axios';
 
 const props = defineProps({
     formCampanha: Object,
+    idCampanha: [String, Number],
     ufs: Array,
     campanhaRecords: Array,
 });
@@ -59,7 +60,7 @@ watch(() => props.formCampanha.uf_inicial, (newUf) => {
             <div class="row mb-4">
                 <div class="col-12 col-md-6">
                     <InputLabel value="ID Campanha" for="id_campanha" />
-                    <input disabled type="text" class="form-control" :value="formCampanha.id_campanha" />
+                    <input disabled type="text" class="form-control" :value="idCampanha" />
                     <InputError :message="formCampanha.errors.id_campanha" />
                 </div>
                 <div class="col-12 col-md-6">

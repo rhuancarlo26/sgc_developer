@@ -6,6 +6,7 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import InputError from '@/Components/InputError.vue';
 import NavButton from '@/Components/NavButton.vue';
 import { ref, reactive, onMounted, computed } from 'vue';
+import axios from 'axios';
 import DadosGerais from './DadosGerais.vue';
 import ModulosAmostragem from './ModulosAmostrais.vue';
 import CampanhaAtropelamento from './CampanhaAtropelamento.vue';
@@ -270,27 +271,19 @@ async function salvarEtapa(etapa, formData) {
             etapa,
         ]);
 
-        const response = await fetch(url, {
-            method: 'POST',  // ← POST em vez de PATCH
+        await axios.post(url, formData, {
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json',
                 'X-Inertia': 'false',
             },
-            body: formData,
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            erroSalvamento.value = data.message ?? 'Erro ao salvar.';
-            return false;
-        }
 
         return true;
 
     } catch (e) {
-        erroSalvamento.value = 'Erro de conexão.';
+        erroSalvamento.value = e.response
+            ? (e.response.data?.message ?? 'Erro ao salvar.')
+            : 'Erro de conexão.';
         return false;
     } finally {
         salvando.value = false;
@@ -319,31 +312,22 @@ const inicializarRascunho = async () => {
     erroSalvamento.value = null;
 
     try {
-        const response = await fetch(
+        const response = await axios.post(
             route('sgc.contratada.produtos.rascunho.inicializar', [
                 props.contrato,
                 props.produto.toLowerCase(),
             ]),
             {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    campanha_id: campanhaId.value,
-                    cod_emp:    form.cod_emp,
-                    subproduto: props.subproduto ?? form.subproduto ?? props.produto,
-                    id_campanha: form.id_campanha, 
-                }),
-            }
+                campanha_id: campanhaId.value,
+                cod_emp:    form.cod_emp,
+                subproduto: props.subproduto ?? form.subproduto ?? props.produto,
+                id_campanha: form.id_campanha,
+            },
+            { headers: { 'Accept': 'application/json' } }
         );
 
-        const data = await response.json();
-
-        if (data.campanha_id) {
-            campanhaId.value = data.campanha_id;
+        if (response.data.campanha_id) {
+            campanhaId.value = response.data.campanha_id;
             subStep.value    = 2;
         } else {
             erroSalvamento.value = 'Não foi possível inicializar o rascunho.';
@@ -459,48 +443,18 @@ const submeterCampanha = async () => {
             campanhaId.value,
         ]);
 
-        console.log('Submetendo campanha para:', url);
-
-        const response = await fetch(url, {
-            method: 'POST',
+        await axios.post(url, null, {
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json',
                 'X-Inertia': 'false',
             },
         });
 
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-
-        // Se a resposta for vazia (409 ou outra sem body)
-        if (!response.ok) {
-            const text = await response.text();
-            console.error('Response body:', text);
-            
-            if (response.status === 409) {
-                erroSalvamento.value = 'Conflito: Verifique se a campanha já foi submetida ou se há outro rascunho ativo.';
-            } else {
-                erroSalvamento.value = `Erro ${response.status}: ${text || 'Erro ao submeter campanha.'}`;
-            }
-            salvando.value = false;
-            return;
-        }
-
-        // Tenta parsear JSON apenas se houver conteúdo
-        let data = null;
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            const text = await response.text();
-            if (text) data = JSON.parse(text);
-        }
-
-        console.log('✅ Campanha submetida com sucesso!', data);
         salvando.value = false;
 
         // Mostrar sucesso e redirecionar
         alert('✅ Campanha enviada para análise com sucesso!');
-        
+
         router.visit(
             route('sgc.contratada.produtos.index', [
                 props.contrato,
@@ -509,8 +463,16 @@ const submeterCampanha = async () => {
         );
 
     } catch (e) {
-        console.error('❌ Erro ao submeter campanha:', e);
-        erroSalvamento.value = `Erro: ${e.message || 'Tente novamente.'}`;
+        const status = e.response?.status;
+        if (status === 409) {
+            erroSalvamento.value = 'Conflito: Verifique se a campanha já foi submetida ou se há outro rascunho ativo.';
+        } else if (status) {
+            const body = e.response.data;
+            const text = typeof body === 'string' ? body : (body?.message ?? JSON.stringify(body));
+            erroSalvamento.value = `Erro ${status}: ${text || 'Erro ao submeter campanha.'}`;
+        } else {
+            erroSalvamento.value = `Erro: ${e.message || 'Tente novamente.'}`;
+        }
         salvando.value = false;
     }
 };
@@ -611,7 +573,8 @@ const excluirPontoCavernicola = (id) => { pontoCavernicolaRecords.value = pontoC
 
 // ─── METODOLOGIA ─────────────────────────────────────────────────────────────
 const adicionarMetodologia = () => {
-    if (!formMetodologia.grupo_faunistico || !formMetodologia.metodologia) return;
+    if (!isAtropelamento.value && !formMetodologia.grupo_faunistico) return;
+    if (!formMetodologia.metodologia) return;
     metodologiaRecords.value.push({ id: Date.now(), ...formMetodologia });
     formMetodologia.grupo_faunistico = null;
     formMetodologia.metodologia      = '';
@@ -741,7 +704,7 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ totalSubSteps }}</h4>
                                     </template>
                                 </DadosGerais>
 
@@ -758,7 +721,7 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ totalSubSteps }}</h4>
                                     </template>
                                 </ModulosAmostragem>
 
@@ -766,6 +729,7 @@ const closePreview = () => {
                                 <CampanhaAtropelamento
                                     v-if="subStep === 3 && isAtropelamento"
                                     :form-campanha="formCampanha"
+                                    :id-campanha="form.id_campanha"
                                     :campanha-records="campanhaRecords"
                                     :ufs="props.ufs.map(uf => ({ uf }))"
                                     @adicionar-campanha="adicionarCampanha"
@@ -774,7 +738,7 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/3</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ totalSubSteps }}</h4>
                                     </template>
                                 </CampanhaAtropelamento>
 
@@ -789,7 +753,7 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ totalSubSteps }}</h4>
                                     </template>
                                 </QueloniosCrocodilian>
 
@@ -804,7 +768,7 @@ const closePreview = () => {
                                     @prev="prevSubStep"
                                 >
                                     <template #footer>
-                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/5</h4>
+                                        <h4 class="text-center mt-4" style="font-weight: bold; color: #6c757d;">{{ subStep }}/{{ totalSubSteps }}</h4>
                                     </template>
                                 </FaunaCavernic>
                             </div>
@@ -814,6 +778,7 @@ const closePreview = () => {
                                 <Metodologia
                                     :form-metodologia="formMetodologia"
                                     :metodologia-records="metodologiaRecords"
+                                    :is-atropelamento="isAtropelamento"
                                     @adicionar-metodologia="adicionarMetodologia"
                                     @excluir-metodologia="excluirMetodologia"
                                     @next="salvarMetodologia"

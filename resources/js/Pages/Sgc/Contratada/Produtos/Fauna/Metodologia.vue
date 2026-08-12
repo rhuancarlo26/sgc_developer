@@ -9,6 +9,7 @@ import 'vue-select/dist/vue-select.css';
 defineProps({
     formMetodologia: Object,
     metodologiaRecords: Array,
+    isAtropelamento: { type: Boolean, default: false },
 });
 
 defineEmits(['adicionar-metodologia', 'excluir-metodologia', 'prev', 'next']);
@@ -31,7 +32,7 @@ const grupoFaunisticoOptions = [
         <h4 class="mb-3" style="text-align: center;">METODOLOGIA</h4>
         <div class="mb-4">
             <div class="row mb-3">
-                <div class="col-12 col-md-8">
+                <div class="col-12 col-md-8" v-if="!isAtropelamento">
                     <InputLabel value="Grupo Faunístico" for="grupo_faunistico" />
                     <vSelect
                         v-model="formMetodologia.grupo_faunistico"
@@ -42,7 +43,7 @@ const grupoFaunisticoOptions = [
                     />
                     <InputError :message="formMetodologia.errors.grupo_faunistico" />
                 </div>
-                <div class="col-12 col-md-8" style="margin-top: 1.5rem;">
+                <div class="col-12 col-md-8" :style="!isAtropelamento ? 'margin-top: 1.5rem;' : ''">
                     <InputLabel value="Metodologia" for="metodologia" />
                     <textarea
                         v-model="formMetodologia.metodologia"
@@ -58,10 +59,22 @@ const grupoFaunisticoOptions = [
                 </div>
             </div>
             <div class="table-responsive">
-                <Table :columns="['Grupo Faunístico', 'Metodologia', 'Ação']" :records="{ data: metodologiaRecords, links: [] }">
+                <Table v-if="!isAtropelamento" :columns="['Grupo Faunístico', 'Metodologia', 'Ação']" :records="{ data: metodologiaRecords, links: [] }">
                     <template #body="{ item }">
                         <tr>
                             <td>{{ item.grupo_faunistico }}</td>
+                            <td>{{ item.metodologia }}</td>
+                            <td class="text-center" style="min-width: 100px;">
+                                <NavButton @click="$emit('excluir-metodologia', item.id)" type-button="danger" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </NavButton>
+                            </td>
+                        </tr>
+                    </template>
+                </Table>
+                <Table v-else :columns="['Metodologia', 'Ação']" :records="{ data: metodologiaRecords, links: [] }">
+                    <template #body="{ item }">
+                        <tr>
                             <td>{{ item.metodologia }}</td>
                             <td class="text-center" style="min-width: 100px;">
                                 <NavButton @click="$emit('excluir-metodologia', item.id)" type-button="danger" title="Excluir">
