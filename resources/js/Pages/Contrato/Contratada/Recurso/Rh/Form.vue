@@ -37,7 +37,7 @@ const form = useForm({
     ctf_validade: null,
     conselho_classe: null,
     numero_registro: null,
-    status: null,
+    status: 1,
     obs: null,
     curriculum_latte: null,
     curriculum_pdf: null,
@@ -144,8 +144,8 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                 ]
                     " />
                 <Link class="btn btn-info" :href="route('contratos.contratada.recurso.rh.index', contrato.id)">
-                <IconDoorExit class="me-2" />
-                Voltar
+                    <IconDoorExit class="me-2" />
+                    Voltar
                 </Link>
             </div>
         </template>
@@ -303,7 +303,7 @@ const destroyDocumentoBaixaRh = (documento_baixa_id) => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr v-for="documento in rh.documentos " :key="documento.id">
+                                                <tr v-for="documento in rh.documentos" :key="documento.id">
                                                     <td>{{ documento.nome_arquivo }}</td>
                                                     <td>
                                                         <button class="btn dropdown-toggle align-text-top"

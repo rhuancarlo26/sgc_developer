@@ -1,9 +1,10 @@
 <script setup>
 import InputLabel from "@/Components/InputLabel.vue";
-import { IconCamera, IconTrash, IconEye, IconDatabase } from "@tabler/icons-vue";
+import { IconCamera, IconTrash, IconEye, IconDatabase, IconFileTypeZip, IconPlaylistAdd } from "@tabler/icons-vue";
 import Modal from "@/Components/Modal.vue";
 import { ref } from "vue";
 import exifr from "exifr";
+import JSZip from "jszip";
 import { usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
@@ -13,6 +14,8 @@ const props = defineProps({
 const page = usePage();
 
 const inputFotosMultiplasRef = ref(null);
+const inputZipFotosRef = ref(null);
+const carregandoZip = ref(false);
 
 const modalMetadadosRef = ref(null);
 const fotoMetadadosSelecionada = ref(null);
@@ -37,6 +40,129 @@ const normalizarMetadados = (metadados) => {
     }
 
     return metadados;
+};
+
+const abrirSeletorZipFotos = () => {
+    inputZipFotosRef.value?.click();
+};
+
+const extensaoImagemValida = (nomeArquivo) => {
+    return /\.(jpe?g|png|webp|tiff?|heic|heif)$/i.test(nomeArquivo || "");
+};
+
+const nomeArquivoDoZip = (caminho) => {
+    return String(caminho || "")
+        .split("/")
+        .pop()
+        .split("\\")
+        .pop();
+};
+
+const mimePorExtensao = (nomeArquivo) => {
+    const nome = String(nomeArquivo || "").toLowerCase();
+
+    if (nome.endsWith(".jpg") || nome.endsWith(".jpeg")) {
+        return "image/jpeg";
+    }
+
+    if (nome.endsWith(".png")) {
+        return "image/png";
+    }
+
+    if (nome.endsWith(".webp")) {
+        return "image/webp";
+    }
+
+    if (nome.endsWith(".tif") || nome.endsWith(".tiff")) {
+        return "image/tiff";
+    }
+
+    if (nome.endsWith(".heic")) {
+        return "image/heic";
+    }
+
+    if (nome.endsWith(".heif")) {
+        return "image/heif";
+    }
+
+    return "image/jpeg";
+};
+
+const montarFotoParaFormulario = async (arquivo) => {
+    const dadosImagem = await extrairDadosDaImagem(arquivo);
+    const arquivoEnvio = await compactarImagem(arquivo);
+
+    return {
+        arquivo: arquivoEnvio,
+        latitude: dadosImagem.latitude,
+        longitude: dadosImagem.longitude,
+        data_captura: dadosImagem.data_captura,
+        metadados: dadosImagem.metadados,
+        descricao: null,
+        nome_original: arquivo.name,
+        compactada: arquivoEnvio.name !== arquivo.name,
+
+        tentouExtrairCoordenadas: true,
+        possuiCoordenadasExif: dadosImagem.possuiCoordenadas,
+        origem_zip: true,
+    };
+};
+
+const selecionarZipFotos = async ({ target }) => {
+    const arquivoZip = target.files?.[0];
+
+    if (!arquivoZip) {
+        return;
+    }
+
+    if (!String(arquivoZip.name).toLowerCase().endsWith(".zip")) {
+        alert("Selecione um arquivo .zip válido.");
+        target.value = "";
+        return;
+    }
+
+    carregandoZip.value = true;
+
+    try {
+        const zip = await JSZip.loadAsync(arquivoZip);
+
+        const entradasImagem = Object.values(zip.files).filter((entrada) => {
+            return !entrada.dir && extensaoImagemValida(entrada.name);
+        });
+
+        if (!entradasImagem.length) {
+            alert("Nenhuma imagem foi encontrada dentro do arquivo .zip.");
+            target.value = "";
+            return;
+        }
+
+        for (const entrada of entradasImagem) {
+            const nomeOriginal = nomeArquivoDoZip(entrada.name);
+
+            const blob = await entrada.async("blob");
+
+            const arquivoImagem = new File(
+                [blob],
+                nomeOriginal,
+                {
+                    type: mimePorExtensao(nomeOriginal),
+                    lastModified: arquivoZip.lastModified,
+                }
+            );
+
+            const foto = await montarFotoParaFormulario(arquivoImagem);
+
+            props.form.fotos.push(foto);
+        }
+
+        aplicarValoresPadraoNasFotos();
+    } catch (error) {
+        console.error("Erro ao processar ZIP de imagens:", error);
+        alert("Não foi possível processar o arquivo .zip. Verifique se ele contém imagens válidas.");
+    } finally {
+        carregandoZip.value = false;
+        target.value = "";
+    }
 };
 
 const temMetadados = (foto) => {
@@ -103,7 +229,17 @@ const abrirSeletorFotos = () => {
 };
 
 const campoVazio = (valor) => {
-    return valor === "" || valor === null || valor === undefined;
+    return (
+        valor === "" ||
+        valor === null ||
+        valor === undefined ||
+        Number.isNaN(valor) ||
+        String(valor).trim() === "NaN"
+    );
+};
+
+const primeiroValorPreenchido = (campo) => {
+    return props.form.fotos.find((foto) => !campoVazio(foto[campo]))?.[campo] ?? null;
 };
 
 const valorPadrao = (campo, key) => {
@@ -111,37 +247,34 @@ const valorPadrao = (campo, key) => {
         return "";
     }
 
-    const primeiraFoto = props.form.fotos?.[0];
-
-    if (!primeiraFoto || campoVazio(primeiraFoto[campo])) {
-        return "";
-    }
-
-    return primeiraFoto[campo];
+    return primeiroValorPreenchido(campo) ?? "";
 };
 
 const aplicarValoresPadraoNasFotos = () => {
-    const primeiraFoto = props.form.fotos?.[0];
+    const latitudePadrao = primeiroValorPreenchido("latitude");
+    const longitudePadrao = primeiroValorPreenchido("longitude");
+    const dataCapturaPadrao = primeiroValorPreenchido("data_captura");
+    const descricaoPadrao = primeiroValorPreenchido("descricao");
 
-    if (!primeiraFoto) {
-        return;
-    }
-
-    props.form.fotos.forEach((foto, key) => {
-        if (key === 0) {
-            return;
+    props.form.fotos.forEach((foto) => {
+        if (campoVazio(foto.latitude) && !campoVazio(latitudePadrao)) {
+            foto.latitude = latitudePadrao;
+            foto.latitude_preenchida_automaticamente = true;
         }
 
-        if (campoVazio(foto.latitude) && !campoVazio(primeiraFoto.latitude)) {
-            foto.latitude = primeiraFoto.latitude;
+        if (campoVazio(foto.longitude) && !campoVazio(longitudePadrao)) {
+            foto.longitude = longitudePadrao;
+            foto.longitude_preenchida_automaticamente = true;
         }
 
-        if (campoVazio(foto.longitude) && !campoVazio(primeiraFoto.longitude)) {
-            foto.longitude = primeiraFoto.longitude;
+        if (campoVazio(foto.data_captura) && !campoVazio(dataCapturaPadrao)) {
+            foto.data_captura = dataCapturaPadrao;
+            foto.data_preenchida_automaticamente = true;
         }
 
-        if (campoVazio(foto.descricao) && !campoVazio(primeiraFoto.descricao)) {
-            foto.descricao = primeiraFoto.descricao;
+        if (campoVazio(foto.descricao) && !campoVazio(descricaoPadrao)) {
+            foto.descricao = descricaoPadrao;
+            foto.descricao_preenchida_automaticamente = true;
         }
     });
 };
@@ -219,37 +352,95 @@ const compactarImagem = (arquivo) => {
     });
 };
 
+const limparMetadadosParaEnvio = (valor) => {
+    try {
+        return JSON.parse(JSON.stringify(valor, (chave, item) => {
+            if (item instanceof Date) {
+                return formatarDataExif(item);
+            }
+
+            if (typeof item === "bigint") {
+                return item.toString();
+            }
+
+            if (
+                item instanceof ArrayBuffer ||
+                item instanceof Uint8Array ||
+                item instanceof Int8Array ||
+                item instanceof Uint16Array ||
+                item instanceof Int16Array ||
+                item instanceof Uint32Array ||
+                item instanceof Int32Array
+            ) {
+                return "[dados binários]";
+            }
+
+            return item;
+        }));
+    } catch (e) {
+        return null;
+    }
+};
+
+const normalizarNumero = (valor) => {
+    const numero = Number(valor);
+
+    if (valor === null || valor === undefined || valor === "" || Number.isNaN(numero)) {
+        return null;
+    }
+
+    return numero;
+};
+
 const extrairDadosDaImagem = async (arquivo) => {
     try {
-        const metadados = await exifr.parse(arquivo, [
-            "latitude",
-            "longitude",
-            "DateTimeOriginal",
-            "DateTimeDigitized",
-            "DateTime",
-        ]);
+        const metadadosGerais = await exifr.parse(arquivo, {
+            tiff: true,
+            ifd0: true,
+            exif: true,
+            gps: true,
+            jfif: true,
+            ihdr: true,
+            xmp: true,
+            icc: true,
+            iptc: true,
+            mergeOutput: true,
+            reviveValues: true,
+        });
 
-        const latitude = metadados?.latitude ?? null;
-        const longitude = metadados?.longitude ?? null;
+        const gps = await exifr.gps(arquivo).catch(() => null);
+
+        const latitude = normalizarNumero(gps?.latitude ?? metadadosGerais?.latitude ?? null);
+        const longitude = normalizarNumero(gps?.longitude ?? metadadosGerais?.longitude ?? null);
 
         const dataCaptura = formatarDataExif(
-            metadados?.DateTimeOriginal
-            ?? metadados?.DateTimeDigitized
-            ?? metadados?.DateTime
+            metadadosGerais?.DateTimeOriginal
+            ?? metadadosGerais?.DateTimeDigitized
+            ?? metadadosGerais?.DateTime
+            ?? metadadosGerais?.CreateDate
             ?? null
         );
+
+        const metadados = limparMetadadosParaEnvio({
+            ...metadadosGerais,
+            latitude_extraida: latitude,
+            longitude_extraida: longitude,
+            data_captura_extraida: dataCaptura,
+        });
 
         return {
             latitude,
             longitude,
             data_captura: dataCaptura,
-            possuiCoordenadas: !!latitude && !!longitude,
+            metadados,
+            possuiCoordenadas: !campoVazio(latitude) && !campoVazio(longitude),
         };
     } catch (error) {
         return {
             latitude: null,
             longitude: null,
             data_captura: null,
+            metadados: null,
             possuiCoordenadas: false,
         };
     }
@@ -263,22 +454,13 @@ const selecionarMultiplosArquivos = async ({ target }) => {
     }
 
     for (const arquivo of arquivos) {
-        const dadosImagem = await extrairDadosDaImagem(arquivo);
-        const arquivoEnvio = await compactarImagem(arquivo);
+        const foto = await montarFotoParaFormulario(arquivo);
+        foto.origem_zip = false;
 
-        props.form.fotos.push({
-            arquivo: arquivoEnvio,
-            latitude: dadosImagem.latitude,
-            longitude: dadosImagem.longitude,
-            data_captura: dadosImagem.data_captura,
-            descricao: null,
-            nome_original: arquivo.name,
-            compactada: arquivoEnvio.name !== arquivo.name,
-
-            tentouExtrairCoordenadas: true,
-            possuiCoordenadasExif: dadosImagem.possuiCoordenadas,
-        });
+        props.form.fotos.push(foto);
     }
+
+    aplicarValoresPadraoNasFotos();
 
     target.value = "";
 };
@@ -297,6 +479,7 @@ const selecionarArquivo = async (key, { target }) => {
     props.form.fotos[key].latitude = dadosImagem.latitude;
     props.form.fotos[key].longitude = dadosImagem.longitude;
     props.form.fotos[key].data_captura = dadosImagem.data_captura;
+    props.form.fotos[key].metadados = dadosImagem.metadados;
     props.form.fotos[key].nome_original = arquivo.name;
     props.form.fotos[key].compactada = arquivoEnvio.name !== arquivo.name;
     props.form.fotos[key].tentouExtrairCoordenadas = true;
@@ -374,11 +557,6 @@ const validarCampos = () => {
             item.valida_longitude = true;
             erros.push(true);
         }
-
-        if (campoVazio(item.descricao)) {
-            item.valida_descricao = true;
-            erros.push(true);
-        }
     });
 
     return erros.length;
@@ -422,15 +600,24 @@ defineExpose({ validarCampos });
                 <input ref="inputFotosMultiplasRef" type="file" class="d-none" accept="image/*" multiple
                     @change="selecionarMultiplosArquivos" />
 
-                <button type="button" @click="abrirSeletorFotos" class="btn btn-light"
+                <input ref="inputZipFotosRef" type="file" class="d-none"
+                    accept=".zip,application/zip,application/x-zip-compressed" @change="selecionarZipFotos" />
+
+                <button type="button" @click="abrirSeletorFotos" class="btn btn-outline-primary"
                     :disabled="[2, 4].includes(form.status)">
                     <IconCamera class="me-2" />
                     Adicionar Fotos
                 </button>
 
+                <button type="button" @click="abrirSeletorZipFotos" class="btn btn-outline-warning"
+                    :disabled="[2, 4].includes(form.status) || carregandoZip">
+                    <IconFileZip class="me-2" />
+                 <IconFileTypeZip class="me-2"/>   {{ carregandoZip ? "Processando ZIP..." : "Importar ZIP de fotos" }}
+                </button>
+
                 <button type="button" @click="addFoto" class="btn btn-outline-secondary"
                     :disabled="[2, 4].includes(form.status)">
-                    Adicionar Linha
+                  <IconPlaylistAdd class="me-2" />  Adicionar Linha
                 </button>
             </div>
         </div>
@@ -524,7 +711,13 @@ defineExpose({ validarCampos });
                         <InputLabel :for="`data_captura_${key}`">Data/Hora </InputLabel>
 
                         <input type="text" :value="formatarDataHoraFoto(f.data_captura)" :id="`data_captura_${key}`"
-                            class="form-control" placeholder="Sem data no metadado" />
+                            class="form-control" :placeholder="key > 0 && valorPadrao('data_captura', key)
+                                ? formatarDataHoraFoto(valorPadrao('data_captura', key))
+                                : 'Sem data no metadado'" />
+                        <small v-if="key > 0 && campoVazio(f.data_captura) && valorPadrao('data_captura', key)"
+                            class="text-muted">
+                            Usará o valor da primeira foto.
+                        </small>
 
                         <small v-if="campoVazio(f.data_captura)" class="text-muted">
                             Não encontrada nos metadados.
@@ -536,9 +729,12 @@ defineExpose({ validarCampos });
                             <InputLabel :for="`descricao_${key}`">Descrição</InputLabel>
 
                             <input type="text" v-model="f.descricao" :id="`descricao_${key}`" class="form-control"
-                                :placeholder="valorPadrao('descricao', key)"
-                                :class="f.valida_descricao ? 'border-danger' : ''"
-                                :disabled="[2, 4].includes(form.status)" />
+                                :placeholder="valorPadrao('descricao', key)" :disabled="[2, 4].includes(form.status)"
+                                @blur="aplicarValoresPadraoNasFotos" />
+
+                            <small v-if="f.descricao_preenchida_automaticamente" class="text-success d-block">
+                                Preenchido automaticamente.
+                            </small>
 
                             <small v-if="key > 0 && campoVazio(f.descricao) && valorPadrao('descricao', key)"
                                 class="text-muted">
@@ -546,7 +742,7 @@ defineExpose({ validarCampos });
                             </small>
                         </div>
 
-                        <div v-if="[1, 3, null].includes(form.status)" class="d-flex gap-2 mb-2"
+                        <div v-if="[1, 3, null].includes(form.status)" class="d-flex gap-2 mb-4"
                             :class="f.nome_arquivo || f.arquivo ? 'align-self-center' : 'align-self-end'">
                             <button type="button" @click="removerFoto(key)" class="btn btn-sm btn-danger">
                                 <IconTrash />

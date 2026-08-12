@@ -2,6 +2,7 @@
 
 namespace App\Domain\Modulos\ConfiguracoesModulos\Controllers;
 
+use App\Models\Contrato;
 use App\Models\Modulo;
 use App\Shared\Http\Controllers\Controller;
 use App\Shared\Traits\ModulosHandler;
@@ -16,7 +17,14 @@ class CreateConfigModuloController extends Controller
     {
         return Inertia::render('Modulos/ConfigModulos/Form', [
             'modulo' => $modulo,
-            'tipos' => $this->buscarParams()
+            'tipos' => $this->buscarParams(),
+            'contratos' => Contrato::query()
+                ->orderBy('numero_contrato')
+                ->get([
+                    'id',
+                    'numero_contrato',
+                    'contratada',
+                ]),
         ]);
     }
 }

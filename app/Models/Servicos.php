@@ -27,10 +27,27 @@ class Servicos extends Model
         return $this->belongsTo(related: ServicoTema::class, foreignKey: 'tema_servico');
     }
 
-    // MODULO IMPORTADO 
+    // MODULO DE MODELOS PARA USAR NO IMPORTADOR
     public function tipo()
     {
         return $this->belongsTo(Modulo::class, 'servico');
+    }
+
+    // MODULO DE IMPORTADOR
+    public function moduloImportadores(): HasMany
+    {
+        return $this->hasMany(ModuloImportador::class, 'servico_id');
+    }
+
+    public function retornosConfeccao(): HasMany
+    {
+        return $this->hasMany(ServicoRetornoConfeccaoHistorico::class, 'servico_id')
+            ->latest();
+    }
+
+    public function moduloImportado(): BelongsTo
+    {
+        return $this->belongsTo(Modulo::class, 'servico_mod_imp_id');
     }
 
     public function servico_rhs()
@@ -231,10 +248,5 @@ class Servicos extends Model
     public function moduloImportador()
     {
         return $this->belongsTo(ModuloImportador::class, 'modulo_importador_id');
-    }
-
-    public function moduloImportadores(): HasMany
-    {
-        return $this->hasMany(ModuloImportador::class, 'servico_id');
     }
 }

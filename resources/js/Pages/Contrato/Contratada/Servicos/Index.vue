@@ -6,8 +6,14 @@
         <template #header>
             <div class="w-100 d-flex justify-content-between">
                 <Breadcrumb class="align-self-center" :links="[
-                    { route: route('contratos.gestao.listagem', contrato.tipo_contrato), label: `Gestão de Contratos` },
-                    { route: '#', label: contrato.contratada }
+                    {
+                        route: route('contratos.gestao.listagem', contrato.tipo_contrato),
+                        label: 'Gestão de Contratos',
+                    },
+                    {
+                        route: '#',
+                        label: contrato.contratada,
+                    },
                 ]" />
 
                 <div class="container-buttons">
@@ -72,35 +78,37 @@
                     :records="servicos" table-class="table-hover">
                     <template #body="{ item }">
                         <tr>
-                            <td class="text-center">{{ numeroRegistro(item) }}</td>
-
-                            <td class="text-center">{{ item.tema?.nome_tema }}</td>
-
-                            <td>{{ item.tipo?.nome }}</td>
-
-                            <td>{{ item.especificacao }}</td>
+                            <td class="text-center">
+                                {{ numeroRegistro(item) }}
+                            </td>
 
                             <td class="text-center">
-                                <span @click="abrirModalLicenca(item)" v-if="item.condicionantes.length">
-                                    {{ `${item.condicionantes[0]?.licenca?.numero_licenca ?? ''}` }}
+                                {{ item.tema?.nome_tema ?? '-' }}
+                            </td>
+
+                            <td>
+                                {{ nomeServicoExibicao(item) }}
+                            </td>
+
+                            <td>
+                                {{ item.especificacao }}
+                            </td>
+
+                            <td class="text-center">
+                                <span v-if="item.condicionantes?.length" class="cursor-pointer text-primary"
+                                    @click="abrirModalLicenca(item)">
+                                    {{ item.condicionantes[0]?.licenca?.numero_licenca ?? '' }}
                                 </span>
                             </td>
 
                             <td class="text-center">
-                                <span v-if="statusAprovacao(item) === 1" class="badge bg-azure-lt">
-                                    Em confecção
+                                <span class="badge" :class="classeStatus(statusAprovacao(item))">
+                                    {{ textoStatus(statusAprovacao(item)) }}
                                 </span>
 
-                                <span v-else-if="statusAprovacao(item) === 2" class="badge bg-yellow-lt">
-                                    Em análise
-                                </span>
-
-                                <span v-else-if="statusAprovacao(item) === 3" class="badge bg-blue-lt">
-                                    Aprovado
-                                </span>
-
-                                <span v-else-if="statusAprovacao(item) === 4" class="badge bg-red-lt">
-                                    Pendente
+                                <span v-if="temHistoricoRetorno(item)" class="badge bg-orange-lt text-orange ms-1"
+                                    title="Este serviço já retornou para em confecção">
+                                    Retornou
                                 </span>
                             </td>
 
@@ -112,46 +120,70 @@
                                     </button>
 
                                     <div class="dropdown-menu dropdown-menu-end">
-                                        <a @click="abrirModalServico(item)" class="dropdown-item"
-                                            href="javascript:void(0)">
+                                        <a class="dropdown-item" href="javascript:void(0)"
+                                            @click="abrirModalServico(item)">
                                             Visualizar
+                                        </a>
+
+                                        <a v-if="temHistoricoRetorno(item)" class="dropdown-item"
+                                            href="javascript:void(0)" @click="abrirModalHistoricoRetorno(item)">
+                                            Histórico de retorno
                                         </a>
 
                                         <a v-if="rotaGerenciar(item)" class="dropdown-item" :href="rotaGerenciar(item)">
                                             Gerenciar
                                         </a>
 
-                                        <a class="dropdown-item"
-                                            v-if="[1, 4].includes(statusAprovacao(item))"
-                                            :href="route('contratos.contratada.servicos.create', { contrato: contrato.id, servico: item.id })">
+                                        <a v-if="!item.servico_mod_imp_id" class="dropdown-item" :href="route('contratos.contratada.servicos.create', {
+                                            contrato: contrato.id,
+                                            servico: item.id,
+                                            acao: 'vincular-servico',
+                                        })">
+                                            Vincular serviço
+                                        </a>
+
+                                        <a v-if="[1, 4].includes(statusAprovacao(item))" class="dropdown-item" :href="route('contratos.contratada.servicos.create', {
+                                            contrato: contrato.id,
+                                            servico: item.id,
+                                            acao: 'editar',
+                                        })">
                                             Editar
                                         </a>
 
-                                        <a @click="deleteServico(item.id)" class="dropdown-item"
-                                            href="javascript:void(0)"
-                                            v-if="[1, 4].includes(statusAprovacao(item))">
+                                        <Link v-if="podeVoltarConfeccao && [3, 4].includes(statusAprovacao(item))"
+                                            class="dropdown-item" :href="route('contratos.contratada.servicos.create', {
+                                                contrato: contrato.id,
+                                                servico: item.id,
+                                                acao: 'voltar-confeccao',
+                                            })">
+                                            Voltar para confecção
+                                        </Link>
+
+                                        <a v-if="[1, 4].includes(statusAprovacao(item))"
+                                            class="dropdown-item text-danger" href="javascript:void(0)"
+                                            @click="deleteServico(item.id)">
                                             Excluir
                                         </a>
 
-                                        <a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
-                                            v-if="statusAprovacao(item) === 4">
+                                        <a v-if="statusAprovacao(item) === 4" class="dropdown-item"
+                                            href="javascript:void(0)" @click="enviaFiscal(item.id)">
                                             Parecer
                                         </a>
 
-                                        <a @click="enviaFiscal(item.id)" class="dropdown-item" href="javascript:void(0)"
-                                            v-if="[1, 4].includes(statusAprovacao(item))">
+                                        <a v-if="[1, 4].includes(statusAprovacao(item))" class="dropdown-item"
+                                            href="javascript:void(0)" @click="enviaFiscal(item.id)">
                                             Enviar para o fiscal
                                         </a>
                                     </div>
 
-                                    <Link v-if="statusAprovacao(item) === 3"
-                                        class="btn btn-icon btn-danger p-2" title="Importador do módulo"
-                                        target="_blank" rel="noopener" :href="route('modulos.importador.index', {
+                                    <Link v-if="statusAprovacao(item) === 3 && item.servico_mod_imp_id"
+                                        class="btn btn-icon btn-danger p-2" title="Importador do módulo" target="_blank"
+                                        rel="noopener" :href="route('modulos.importador.index', {
                                             contrato_id: contrato.id,
-                                            modulo_id: item.servico,
+                                            modulo_id: item.servico_mod_imp_id,
                                             servico_id: item.id,
                                             tema_id: item.tema_servico,
-                                            origem_servico: true
+                                            origem_servico: true,
                                         })">
                                         <IconFileImport />
                                     </Link>
@@ -165,6 +197,7 @@
 
         <ModalVisualizarLicenca ref="modalVisualizarLicenca" />
         <ModalVisualizarServico ref="modalVisualizarServico" />
+        <ModalHistoricoRetornoConfeccao ref="modalHistoricoRetorno" :contrato-id="contrato.id" />
     </AuthenticatedLayout>
 </template>
 
@@ -182,11 +215,8 @@ import {
 } from "@tabler/icons-vue";
 import ModalVisualizarLicenca from "./ModalVisualizarLicenca.vue";
 import ModalVisualizarServico from "./ModalVisualizarServico.vue";
-import ModalVisualizarParecerFiscal from "../../../Fiscal/Servico/ModalVisualizarParecerFiscal.vue";
-
-
+import ModalHistoricoRetornoConfeccao from "./Components/ModalHistoricoRetornoConfeccao.vue";
 import { ref } from "vue";
-import { can } from "@/Utils/PermissionUtils";
 
 const props = defineProps({
     contrato: Object,
@@ -202,6 +232,10 @@ const props = defineProps({
     filtros: {
         type: Object,
         default: () => ({}),
+    },
+    podeVoltarConfeccao: {
+        type: Boolean,
+        default: false,
     },
 });
 
@@ -225,7 +259,7 @@ const statusFiltro = [
 ];
 
 const numeroRegistro = (item) => {
-    const index = props.servicos?.data?.findIndex(servico => servico.id === item.id);
+    const index = props.servicos?.data?.findIndex((servico) => servico.id === item.id);
 
     if (index === undefined || index < 0) {
         return "-";
@@ -238,6 +272,99 @@ const numeroRegistro = (item) => {
 
 const statusAprovacao = (item) => {
     return Number(item?.status_aprovacao);
+};
+
+const textoStatus = (status) => {
+    const statusNumber = Number(status);
+
+    if (statusNumber === 1) {
+        return "Em confecção";
+    }
+
+    if (statusNumber === 2) {
+        return "Em análise";
+    }
+
+    if (statusNumber === 3) {
+        return "Aprovado";
+    }
+
+    if (statusNumber === 4) {
+        return "Pendente";
+    }
+
+    return "-";
+};
+
+const classeStatus = (status) => {
+    const statusNumber = Number(status);
+
+    if (statusNumber === 1) {
+        return "bg-azure-lt";
+    }
+
+    if (statusNumber === 2) {
+        return "bg-yellow-lt";
+    }
+
+    if (statusNumber === 3) {
+        return "bg-blue-lt";
+    }
+
+    if (statusNumber === 4) {
+        return "bg-red-lt";
+    }
+
+    return "bg-secondary-lt";
+};
+
+const temHistoricoRetorno = (item) => {
+    return (item?.retornos_confeccao ?? []).length > 0;
+};
+
+const numeroContratoModulo = (modulo) => {
+    if (modulo?.contrato?.numero_contrato) {
+        return modulo.contrato.numero_contrato;
+    }
+
+    if (Number(modulo?.contrato_id) === Number(props.contrato?.id)) {
+        return props.contrato?.numero_contrato;
+    }
+
+    return null;
+};
+
+const nomeModuloFormatado = (modulo) => {
+    const nome = modulo?.nome ?? "-";
+
+    const ehPmqa = modulo?.pmqa === true || Number(modulo?.pmqa) === 1;
+
+    if (ehPmqa) {
+        return `${nome} | ${numeroContratoModulo(modulo) ?? "Contrato não informado"}`;
+    }
+
+    return nome;
+};
+
+const nomeServicoExibicao = (item) => {
+    const possuiModuloImportado =
+        item?.servico_mod_imp_id !== null
+        && item?.servico_mod_imp_id !== undefined
+        && item?.servico_mod_imp_id !== "";
+
+    if (possuiModuloImportado) {
+        return nomeModuloFormatado(item?.modulo_importado);
+    }
+
+    if (
+        item?.servico !== null
+        && item?.servico !== undefined
+        && item?.servico !== ""
+    ) {
+        return String(item.servico);
+    }
+
+    return "-";
 };
 
 const servicoTipoId = (item) => {
@@ -317,23 +444,27 @@ const limparFiltros = () => {
     );
 };
 
-const modalVisualizarLicenca = ref();
-const modalVisualizarServico = ref();
-const modalVisualizarParecerFiscal = ref();
+const modalVisualizarLicenca = ref(null);
+const modalVisualizarServico = ref(null);
+const modalHistoricoRetorno = ref(null);
 
 const abrirModalLicenca = (servico) => {
-    modalVisualizarLicenca.value.abrirModal(servico);
+    modalVisualizarLicenca.value?.abrirModal?.(servico);
 };
 
 const abrirModalServico = (servico) => {
-    modalVisualizarServico.value.abrirModal(servico);
+    modalVisualizarServico.value?.abrirModal?.(servico);
 };
 
-const deleteServico = (servico_id) => {
-    router.delete(route("contratos.contratada.servicos.delete", servico_id));
+const abrirModalHistoricoRetorno = (servico) => {
+    modalHistoricoRetorno.value?.abrirModal?.(servico);
 };
 
-const enviaFiscal = (servico_id) => {
-    router.post(route("contratos.contratada.servicos.envia-fiscal", servico_id));
+const deleteServico = (servicoId) => {
+    router.delete(route("contratos.contratada.servicos.delete", servicoId));
+};
+
+const enviaFiscal = (servicoId) => {
+    router.post(route("contratos.contratada.servicos.envia-fiscal", servicoId));
 };
 </script>

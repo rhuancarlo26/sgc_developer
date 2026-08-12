@@ -25,6 +25,14 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    modoVoltarConfeccao: {
+        type: Boolean,
+        default: false,
+    },
+    podeVoltarConfeccao: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 </script>
@@ -77,7 +85,8 @@ const props = defineProps({
                     <div class="tab-content">
                         <div class="tab-pane active show" id="dadosGerais" role="tabpanel">
                             <TabDadosGerais :contrato="contrato" :servico="servico" :temas="temas" :tipos="tipos"
-                                :servicos-usados="servicosUsados" />
+                                :servicos-usados="servicosUsados" :modo-voltar-confeccao="modoVoltarConfeccao"
+                                :pode-voltar-confeccao="podeVoltarConfeccao" />
                         </div>
 
                         <div class="tab-pane" id="vincularRecursos" role="tabpanel">

@@ -19,7 +19,7 @@ defineExpose({ abrirModal });
     <template #body>
       <div class="mb-4">
         <div class="card-header">
-          <h3 class="my-0">Licenças</h3>
+          <h3 class="my-0 mb-3">Licenças</h3>
         </div>
         <div class="card-body">
           <div class="table-responsive">

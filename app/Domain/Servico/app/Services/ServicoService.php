@@ -25,9 +25,14 @@ class ServicoService extends BaseModelService
 
     public function listarServicos(Contrato $contrato, array $searchParams, array $filtros = []): array
     {
+
+        $this->limparVinculosModulosExcluidos($contrato->id);
+
         $baseFiltroQuery = Servicos::query()
             ->with([
                 'tipo',
+                'moduloImportado:id,nome,pmqa,contrato_id',
+                'moduloImportado.contrato:id,numero_contrato',
                 'tema',
             ])
             ->where('id_contrato', $contrato->id)
@@ -36,14 +41,19 @@ class ServicoService extends BaseModelService
         $query = $this->search(...$searchParams)
             ->with([
                 'tipo',
+                'moduloImportado:id,nome,pmqa,contrato_id',
+                'moduloImportado.contrato:id,numero_contrato',
                 'tema',
-                // 'status',
                 'rhs',
                 'veiculos',
                 'veiculos.codigo',
                 'equipamentos',
                 'condicionantes',
                 'condicionantes.licenca',
+                'retornosConfeccao.usuario:id,name',
+                'retornosConfeccao.tema:id,nome_tema',
+                'retornosConfeccao.moduloImportado:id,nome,pmqa,contrato_id',
+                'retornosConfeccao.moduloImportado.contrato:id,numero_contrato',
             ])
             ->where('id_contrato', $contrato->id)
             ->whereNull('deleted_at')
@@ -51,7 +61,7 @@ class ServicoService extends BaseModelService
                 $query->where('tema_servico', $temaId);
             })
             ->when($filtros['filtro_servico_id'] ?? null, function ($query, $servicoId) {
-                $query->where('servico', $servicoId);
+                $query->where('servico_mod_imp_id', $servicoId);
             })
             ->when($filtros['filtro_status_aprovacao'] ?? null, function ($query, $status) {
                 $query->where('status_aprovacao', $status);
@@ -82,14 +92,20 @@ class ServicoService extends BaseModelService
 
         $servicosFiltro = (clone $baseFiltroQuery)
             ->get()
-            ->pluck('tipo')
+            ->pluck('moduloImportado')
             ->filter()
             ->unique('id')
             ->values()
-            ->map(function ($servico) {
+            ->map(function ($modulo) {
+                $nome = $modulo->nome;
+
+                if ($modulo->pmqa && $modulo->contrato) {
+                    $nome .= ' / ' . $modulo->contrato->numero_contrato;
+                }
+
                 return [
-                    'id' => $servico->id,
-                    'nome' => $servico->nome,
+                    'id' => $modulo->id,
+                    'nome' => $nome,
                 ];
             })
             ->values();
@@ -104,7 +120,34 @@ class ServicoService extends BaseModelService
 
     public function createServicos($contrato, $servico): array
     {
-        $tipos = Modulo::orderBy('nome')->get(['id', 'nome']);
+        $this->limparVinculosModulosExcluidos($contrato->id);
+
+        if ($servico?->exists) {
+            $servico->refresh();
+        }
+
+        $tipos = Modulo::query()
+            ->with(['contrato:id,numero_contrato'])
+            ->whereNull('deleted_at')
+            ->where(function ($query) use ($contrato) {
+                $query
+                    ->where(function ($query) {
+                        $query->where('pmqa', false)
+                            ->orWhereNull('pmqa');
+                    })
+                    ->orWhere(function ($query) use ($contrato) {
+                        $query->where('pmqa', true)
+                            ->where('contrato_id', $contrato->id);
+                    });
+            })
+            ->orderBy('nome')
+            ->get([
+                'id',
+                'nome',
+                'pmqa',
+                'contrato_id',
+            ]);
+
         $temas = ServicoTema::all();
 
         $rhs = RecursoRh::where('id_contrato', $contrato->id)->get();
@@ -120,22 +163,29 @@ class ServicoService extends BaseModelService
             ->where('tipo', 6)
             ->get();
 
-        if ($servico) {
+        if ($servico?->exists) {
             $servico->load([
                 'tipo',
                 'tema',
+                'moduloImportado.contrato:id,numero_contrato',
                 'rhs',
                 'veiculos',
                 'veiculos.codigo',
                 'equipamentos',
                 'condicionantes',
                 'condicionantes.licenca',
+                'retornosConfeccao.usuario:id,name',
+                'retornosConfeccao.tema:id,nome_tema',
+                'retornosConfeccao.moduloImportado:id,nome,pmqa,contrato_id',
+                'retornosConfeccao.moduloImportado.contrato:id,numero_contrato',
             ]);
         }
 
         $servicosUsados = Servicos::query()
             ->where('id_contrato', $contrato->id)
             ->whereNull('deleted_at')
+            ->whereNotNull('servico_mod_imp_id')
+            ->whereHas('moduloImportado')
             ->when($servico?->id, function ($query) use ($servico) {
                 $query->where('id', '!=', $servico->id);
             })
@@ -143,7 +193,7 @@ class ServicoService extends BaseModelService
                 'id',
                 'id_contrato',
                 'tema_servico',
-                'servico',
+                'servico_mod_imp_id',
             ]);
 
         return [
@@ -251,5 +301,23 @@ class ServicoService extends BaseModelService
     public function buscarContratos(): Collection
     {
         return Contrato::all();
+    }
+
+    private function limparVinculosModulosExcluidos(?int $contratoId = null): void
+    {
+        DB::table('servicos as s')
+            ->leftJoin('modulos as m', 'm.id', '=', 's.servico_mod_imp_id')
+            ->whereNotNull('s.servico_mod_imp_id')
+            ->when($contratoId, function ($query) use ($contratoId) {
+                $query->where('s.id_contrato', $contratoId);
+            })
+            ->where(function ($query) {
+                $query->whereNull('m.id')
+                    ->orWhereNotNull('m.deleted_at');
+            })
+            ->update([
+                's.servico_mod_imp_id' => null,
+                's.updated_at' => now(),
+            ]);
     }
 }

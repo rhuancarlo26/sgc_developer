@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ModuloImportador extends Model
@@ -83,5 +84,15 @@ class ModuloImportador extends Model
     public function servico()
     {
         return $this->belongsTo(Servicos::class, 'servico_id');
+    }
+
+    public function licencas(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Licenca::class,
+            'modulo_importador_licencas',
+            'modulo_importador_id',
+            'licenca_id'
+        )->withTimestamps();
     }
 }

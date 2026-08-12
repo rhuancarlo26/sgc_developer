@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Modulo;
 use App\Models\Contrato;
+use App\Models\Licenca;
 use App\Models\Servicos;
 
 class CreateImportadorController extends Controller
@@ -32,7 +33,13 @@ class CreateImportadorController extends Controller
         ]);
 
         if ($importador->exists) {
-            $importador->load(['fotos', 'anexos', 'modulo', 'contrato']);
+            $importador->load([
+                'fotos',
+                'anexos',
+                'modulo.contrato:id,numero_contrato',
+                'contrato',
+                'licencas.tipo_rel:id,sigla',
+            ]);
             $importador->append('status_formatado');
 
             if (empty($contexto['contrato_id'])) {
@@ -101,6 +108,42 @@ class CreateImportadorController extends Controller
             'contratos' => $this->service->buscarContratos(),
             'contextoImportador' => $contexto,
             'campanhasDisponiveis' => $campanhasDisponiveis,
+            'licencas' => Licenca::query()
+                ->with(['tipo_rel:id,sigla'])
+                ->orderBy('numero_licenca')
+                ->get()
+                ->map(function ($licenca) {
+                    $empreendimento = $licenca->empreendimento
+                        ?? collect([
+                            $licenca->inicio_subtrecho,
+                            $licenca->fim_subtrecho,
+                        ])
+                        ->filter()
+                        ->implode(' a ');
+
+                    return [
+                        'id' => $licenca->id,
+                        'numero_licenca' => $licenca->numero_licenca,
+
+                        'tipo' => $licenca->tipo,
+                        'tipo_rel' => $licenca->tipo_rel ? [
+                            'id' => $licenca->tipo_rel->id,
+                            'sigla' => $licenca->tipo_rel->sigla,
+                        ] : null,
+
+                        'empreendimento' => $empreendimento ?: null,
+                        'emissor' => $licenca->emissor ?? null,
+                        'data_emissao' => $licenca->data_emissao,
+                        'status' => $licenca->status,
+                        'status_formatado' => $licenca->status_formatado ?? null,
+                        'vencimento' => $licenca->vencimento,
+                        'processo_dnit' => $licenca->processo_dnit,
+
+                        'inicio_subtrecho' => $licenca->inicio_subtrecho,
+                        'fim_subtrecho' => $licenca->fim_subtrecho,
+                    ];
+                })
+                ->values(),
         ]);
     }
 
