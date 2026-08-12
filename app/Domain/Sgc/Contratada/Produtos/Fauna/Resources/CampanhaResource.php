@@ -33,6 +33,8 @@ class CampanhaResource
             'resultadosAquatica'      => $campanha->resultadosAquatica?->toArray() ?? [],
             'resultadosCavernicola'   => $campanha->resultadosCavernicola?->toArray() ?? [],
             'consideracoes'           => $campanha->resultados_consideracoes?->consideracoes,
+            'planilha_atropelamento'      => $campanha->planilha_atropelamento ? Storage::disk('public')->url($campanha->planilha_atropelamento) : null,
+            'consideracoes_atropelamento' => $campanha->consideracoes_atropelamento,
             'abios'                   => self::mapAbios($campanha),
             'profissionais'           => self::mapProfissionais($campanha),
             'modulos_amostrais'       => self::mapModulosAmostrais($campanha),
