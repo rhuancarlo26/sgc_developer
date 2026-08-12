@@ -134,12 +134,20 @@
                                             Gerenciar
                                         </a>
 
-                                        <a v-if="[1, 4].includes(statusAprovacao(item)) || !item.servico_mod_imp_id"
-                                            class="dropdown-item" :href="route('contratos.contratada.servicos.create', {
-                                                contrato: contrato.id,
-                                                servico: item.id,
-                                            })">
-                                            {{ !item.servico_mod_imp_id ? 'Vincular serviço' : 'Editar' }}
+                                        <a v-if="!item.servico_mod_imp_id" class="dropdown-item" :href="route('contratos.contratada.servicos.create', {
+                                            contrato: contrato.id,
+                                            servico: item.id,
+                                            acao: 'vincular-servico',
+                                        })">
+                                            Vincular serviço
+                                        </a>
+
+                                        <a v-if="[1, 4].includes(statusAprovacao(item))" class="dropdown-item" :href="route('contratos.contratada.servicos.create', {
+                                            contrato: contrato.id,
+                                            servico: item.id,
+                                            acao: 'editar',
+                                        })">
+                                            Editar
                                         </a>
 
                                         <Link v-if="podeVoltarConfeccao && [3, 4].includes(statusAprovacao(item))"
@@ -189,7 +197,7 @@
 
         <ModalVisualizarLicenca ref="modalVisualizarLicenca" />
         <ModalVisualizarServico ref="modalVisualizarServico" />
-        <ModalHistoricoRetornoConfeccao ref="modalHistoricoRetorno" :contrato-id="contrato.id"/>
+        <ModalHistoricoRetornoConfeccao ref="modalHistoricoRetorno" :contrato-id="contrato.id" />
     </AuthenticatedLayout>
 </template>
 

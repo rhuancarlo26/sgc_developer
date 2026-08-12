@@ -14,41 +14,81 @@ class UpdateServicosContratadaController extends Controller
 
     public function index(Request $request)
     {
-        $servicoModImpId = data_get($request->input('tipo'), 'id', $request->input('tipo'));
-        $temaId = data_get($request->input('tema'), 'id', $request->input('tema'));
+        $servicoAtual = Servicos::query()
+            ->where('id', $request->id)
+            ->whereNull('deleted_at')
+            ->firstOrFail();
 
-        if (!$servicoModImpId || !$temaId) {
+        $acao = $request->input('acao');
+        $temaId = $servicoAtual->tema_servico;
+        $servicoModImpId = $servicoAtual->servico_mod_imp_id;
+        $registroLegado = empty($servicoAtual->servico_mod_imp_id);
+        $modoVincularServico =
+            $registroLegado &&
+            $acao === 'vincular-servico';
+
+        if ($modoVincularServico) {
+            $servicoModImpId = data_get(
+                $request->input('tipo'),
+                'id',
+                $request->input('tipo')
+            );
+
+            $servicoModImpId = $servicoModImpId
+                ?: $request->input('servico_mod_imp_id');
+
+            if (!$servicoModImpId) {
+                throw ValidationException::withMessages([
+                    'tipo' => 'O campo Serviço é obrigatório.',
+                ]);
+            }
+        }
+
+        if (!$temaId) {
             throw ValidationException::withMessages([
-                'tipo' => 'O campo Serviço é obrigatório.',
-                'tema' => 'O campo Tema é obrigatório.',
+                'tema' => 'O registro não possui Tema vinculado.',
             ]);
         }
 
-        $duplicado = Servicos::query()
-            ->where('id_contrato', $request->id_contrato)
-            ->where('tema_servico', $temaId)
-            ->where('servico_mod_imp_id', $servicoModImpId)
-            ->where('id', '!=', $request->id)
-            ->whereNull('deleted_at')
-            ->exists();
+        if ($servicoModImpId) {
+            $duplicado = Servicos::query()
+                ->where('id_contrato', $servicoAtual->id_contrato)
+                ->where('tema_servico', $temaId)
+                ->where('servico_mod_imp_id', $servicoModImpId)
+                ->where('id', '!=', $servicoAtual->id)
+                ->whereNull('deleted_at')
+                ->exists();
 
-        if ($duplicado) {
-            throw ValidationException::withMessages([
-                'tipo' => 'Já existe um registro com este contrato, tema e serviço.',
-            ]);
+            if ($duplicado) {
+                throw ValidationException::withMessages([
+                    'tipo' => 'Já existe um registro com este contrato, tema e serviço.',
+                ]);
+            }
         }
 
         $post = [
             ...$request->all(),
+
+            'id_contrato' => $servicoAtual->id_contrato,
             'tema_servico' => $temaId,
             'servico_mod_imp_id' => $servicoModImpId,
+            'servico' => $servicoAtual->servico,
         ];
 
         $response = $this->servicoService->updateServico($post);
 
-        return to_route('contratos.contratada.servicos.create', [
-            'contrato' => $request->id_contrato,
-            'servico' => $request->id
-        ])->with('message', $response['request']);
+        $parameters = [
+            'contrato' => $servicoAtual->id_contrato,
+            'servico' => $servicoAtual->id,
+        ];
+
+        if ($acao === 'editar') {
+            $parameters['acao'] = 'editar';
+        }
+
+        return to_route(
+            'contratos.contratada.servicos.create',
+            $parameters
+        )->with('message', $response['request']);
     }
 }

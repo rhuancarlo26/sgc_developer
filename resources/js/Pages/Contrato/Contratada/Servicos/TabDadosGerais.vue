@@ -1,7 +1,7 @@
 <script setup>
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
-import { useForm } from "@inertiajs/vue3";
+import { useForm, usePage } from "@inertiajs/vue3";
 import { computed, watch, ref } from "vue";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
 import Modal from "@/Components/Modal.vue";
@@ -31,6 +31,15 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+});
+
+const page = usePage();
+
+const acaoTela = computed(() => {
+    const query = page.url.split("?")[1] ?? "";
+    const params = new URLSearchParams(query);
+
+    return params.get("acao");
 });
 
 const nomeModuloFormatado = (modulo) => {
@@ -90,6 +99,7 @@ const form = useForm({
 
     tema: temaInicial,
     tipo: moduloImportadoInicial,
+    acao: acaoTela.value,
 });
 
 const temaSelecionado = computed(() => {
@@ -112,12 +122,30 @@ const registroLegadoSemModuloImportado = computed(() => {
     return registroExistente.value && !possuiModuloImportadoVinculadoOriginal.value;
 });
 
+const modoVincularServico = computed(() => {
+    return registroLegadoSemModuloImportado.value
+        && acaoTela.value === "vincular-servico";
+});
+
+const modoEditarServico = computed(() => {
+    return registroExistente.value
+        && acaoTela.value === "editar";
+});
+
 const podeEditarServico = computed(() => {
     if (telaRetornoConfeccao.value) {
         return false;
     }
 
-    return !registroExistente.value || registroLegadoSemModuloImportado.value;
+    if (!registroExistente.value) {
+        return true;
+    }
+
+    if (modoVincularServico.value) {
+        return true;
+    }
+
+    return false;
 });
 
 const podeEditarTema = computed(() => {
@@ -129,11 +157,24 @@ const podeEditarTema = computed(() => {
 });
 
 const modoSomenteVinculo = computed(() => {
-    return !telaRetornoConfeccao.value && registroLegadoSemModuloImportado.value;
+    return !telaRetornoConfeccao.value
+        && modoVincularServico.value;
 });
 
 const podeSalvar = computed(() => {
-    return temaSelecionado.value && servicoSelecionado.value && !form.processing;
+    if (!temaSelecionado.value || form.processing) {
+        return false;
+    }
+
+    if (modoVincularServico.value) {
+        return servicoSelecionado.value;
+    }
+
+    if (registroLegadoSemModuloImportado.value && modoEditarServico.value) {
+        return true;
+    }
+
+    return servicoSelecionado.value;
 });
 
 const modalHistoricoRetornoRef = ref(null);
@@ -317,6 +358,8 @@ const salvarServico = () => {
         return;
     }
 
+    form.acao = acaoTela.value;
+
     form.id_contrato = props.contrato?.id;
     form.tema_servico = form.tema?.id ?? form.tema ?? form.tema_servico;
     form.servico_mod_imp_id = form.tipo?.id ?? form.tipo ?? form.servico_mod_imp_id;
@@ -446,8 +489,12 @@ const salvarServico = () => {
                     Voltar para em confecção
                 </button>
 
-                <button v-else type="submit" class="btn btn-success" :disabled="!podeSalvar"
-                    :title="!podeSalvar ? 'Selecione o tema e o serviço para salvar' : 'Salvar'">
+                <button v-else type="submit" class="btn btn-success" :disabled="!podeSalvar" :title="!podeSalvar
+                    ? (modoVincularServico
+                        ? 'Selecione o serviço para realizar o vínculo'
+                        : 'Preencha os campos obrigatórios para salvar')
+                    : 'Salvar'
+                    ">
                     <IconDeviceFloppy class="me-2" />
                     Salvar
                 </button>
@@ -525,6 +572,6 @@ const salvarServico = () => {
         </template>
     </Modal>
 
-    <ModalHistoricoRetornoConfeccao ref="modalHistoricoRetornoRef" />
+    <ModalHistoricoRetornoConfeccao ref="modalHistoricoRetornoRef" :contrato-id="contrato.id" />
 
 </template>
