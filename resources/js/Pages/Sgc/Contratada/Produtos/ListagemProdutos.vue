@@ -25,6 +25,7 @@ const props = defineProps({
 const config = computed(() => getConfig(props.produto));
 
 const isPerfil3 = computed(() => (props.auth.user.perfis_id ?? 0) === 3);
+const isFiscal = computed(() => isPerfil3.value);
 
 const previewModal = ref(null);
 
@@ -58,6 +59,7 @@ const showModalReprovarTudo = ref(false);
 const campanhaEmAnalise = ref(null);
 const justificativaReprovacao = ref('');
 const erroReprovacao = ref('');
+const mostrarPendencias = ref(false);
 
 // Atualizar a rota quando o produto mudar
 const updateProduto = () => {
@@ -101,6 +103,99 @@ const campanhasFiltradas = computed(() => {
 
   return props.campanhas.filter(campanha => campanha.subproduto === selectedSubproduto.value);
 });
+
+const getCampanhaStatus = (campanha) => campanha.status || campanha.status_aprovacao || '';
+
+const statusPendenteContratada = ['Em elaboração', 'Reprovada', 'Rejeitada'];
+
+const campanhasPendentes = computed(() => {
+  return campanhasFiltradas.value.filter((campanha) => {
+    const status = getCampanhaStatus(campanha);
+
+    if (isFiscal.value) {
+      return status === 'Em análise';
+    }
+
+    return statusPendenteContratada.includes(status);
+  });
+});
+
+const resumoPendencias = computed(() => {
+  return campanhasPendentes.value.reduce((acc, campanha) => {
+    const status = getCampanhaStatus(campanha) || 'Sem status';
+    acc[status] = (acc[status] ?? 0) + 1;
+    return acc;
+  }, {});
+});
+
+const totalPendencias = computed(() => campanhasPendentes.value.length);
+
+const tituloPainelPendencias = computed(() => {
+  return isFiscal.value
+    ? 'Campanhas pendentes de análise'
+    : 'Campanhas pendentes de ação';
+});
+
+const descricaoPainelPendencias = computed(() => {
+  return isFiscal.value
+    ? 'Campanhas em análise aguardando atuação do fiscal.'
+    : 'Campanhas em elaboração ou devolvidas para ajuste da contratada.';
+});
+
+const getAcaoPendente = (campanha) => {
+  const status = getCampanhaStatus(campanha);
+
+  if (status === 'Em análise' && deveExibirAcao('analisar') && canApprove) {
+    return {
+      label: 'Analisar',
+      type: 'success',
+      handler: () => analisarCampanha(campanha.id),
+    };
+  }
+
+  if (status === 'Em elaboração') {
+    if (deveExibirAcao('gerenciar')) {
+      return {
+        label: 'Gerenciar',
+        type: 'primary',
+        handler: () => gerenciarCampanha(campanha.id),
+      };
+    }
+
+    if (deveExibirAcao('editar') && (props.auth.user.perfis_id ?? 0) !== 3) {
+      return {
+        label: 'Continuar',
+        type: 'warning',
+        handler: () => continuarCampanha(campanha),
+      };
+    }
+  }
+
+  if (['Reprovada', 'Rejeitada'].includes(status) && deveExibirAcao('editar') && (props.auth.user.perfis_id ?? 0) !== 3) {
+    return {
+      label: 'Editar',
+      type: 'warning',
+      handler: () => editarCampanha(campanha),
+    };
+  }
+
+  if (deveExibirAcao('visualizar')) {
+    return {
+      label: 'Visualizar',
+      type: 'info',
+      handler: () => visualizarCampanha(campanha),
+    };
+  }
+
+  return null;
+};
+
+const getPendenciaBadgeClass = (status) => {
+  if (status === 'Em análise') return 'badge-em-analise';
+  if (status === 'Em elaboração') return 'badge-em-elaboracao';
+  if (status === 'Reprovada' || status === 'Rejeitada') return 'badge-reprovada';
+  return 'badge-status-neutro';
+};
 
 // Função para alternar ordenação
 const toggleSort = (column) => {
@@ -393,6 +488,76 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
               Nenhum dado encontrado para {{ config.nome }}.
             </div>
             <div v-else class="row">
+              <div class="col-md-12 mb-4">
+                <div class="pending-panel">
+                  <div class="pending-panel-header">
+                    <button
+                      type="button"
+                      class="pending-panel-heading"
+                      @click="mostrarPendencias = !mostrarPendencias"
+                      :aria-expanded="mostrarPendencias"
+                    >
+                      <span class="pending-chevron">{{ mostrarPendencias ? '▾' : '▸' }}</span>
+                      <span>
+                        <h4 class="pending-panel-title">{{ tituloPainelPendencias }}</h4>
+                        <p class="pending-panel-subtitle mb-0">{{ descricaoPainelPendencias }}</p>
+                      </span>
+                    </button>
+                    <div class="pending-panel-total">
+                      <span class="pending-total-label">Total</span>
+                      <strong class="pending-total-value">{{ totalPendencias }}</strong>
+                    </div>
+                  </div>
+
+                  <div v-if="totalPendencias" class="pending-status-row">
+                    <div
+                      v-for="(total, status) in resumoPendencias"
+                      :key="status"
+                      class="pending-status-card"
+                    >
+                      <span class="pending-status-name">{{ status }}</span>
+                      <strong class="pending-status-count">{{ total }}</strong>
+                    </div>
+                  </div>
+
+                  <div v-if="totalPendencias && mostrarPendencias" class="pending-campaign-list">
+                    <div
+                      v-for="campanha in campanhasPendentes"
+                      :key="`pendencia-${campanha.id}`"
+                      class="pending-campaign-card"
+                    >
+                      <div class="pending-campaign-main">
+                        <div class="pending-campaign-title-row">
+                          <strong class="pending-campaign-title">
+                            {{ campanha.id_campanha || campanha.tema || campanha.cod_emp || campanha.empreendimento || `Campanha ${campanha.id}` }}
+                          </strong>
+                          <span class="pending-badge" :class="getPendenciaBadgeClass(getCampanhaStatus(campanha))">
+                            {{ getCampanhaStatus(campanha) }}
+                          </span>
+                        </div>
+                        <div class="pending-campaign-meta">
+                          <span v-if="campanha.subproduto">{{ campanha.subproduto }}</span>
+                          <span v-if="campanha.tema">{{ campanha.tema }}</span>
+                          <span v-if="campanha.empreendimento">{{ campanha.empreendimento }}</span>
+                          <span v-if="campanha.cod_emp">{{ campanha.cod_emp }}</span>
+                        </div>
+                      </div>
+                      <div v-if="getAcaoPendente(campanha)" class="pending-campaign-action">
+                        <NavButton
+                          :type-button="getAcaoPendente(campanha).type"
+                          :title="getAcaoPendente(campanha).label"
+                          @click="getAcaoPendente(campanha).handler()"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-else-if="!totalPendencias" class="pending-empty-state">
+                    Nenhuma campanha pendente para o perfil atual.
+                  </div>
+                </div>
+              </div>
+
               <div class="col-md-12">
                 <div class="row">
                   <!-- Filtro de Produto -->
@@ -721,6 +886,199 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
 .block-card-short {
   min-height: 100px;
   padding: 10px;
+}
+
+.pending-panel {
+  background: linear-gradient(135deg, #f7faf8 0%, #edf6f1 100%);
+  border: 1px solid #d7e9dd;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.pending-panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.pending-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+  flex: 1;
+}
+
+.pending-panel-title {
+  margin-bottom: 4px;
+  color: #123524;
+}
+
+.pending-panel-subtitle {
+  color: #476353;
+}
+
+.pending-panel-total {
+  min-width: 96px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #d7e9dd;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.pending-total-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5b7465;
+}
+
+.pending-total-value {
+  font-size: 1.5rem;
+  color: #123524;
+}
+
+.pending-status-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pending-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #d7e9dd;
+  color: #2f4d3d;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.pending-status-card {
+  background: #fff;
+  border: 1px solid #d7e9dd;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.pending-status-name {
+  display: block;
+  color: #5b7465;
+  font-size: 0.85rem;
+}
+
+.pending-status-count {
+  color: #123524;
+  font-size: 1.25rem;
+}
+
+.pending-campaign-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pending-campaign-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid #d7e9dd;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.pending-campaign-main {
+  min-width: 0;
+}
+
+.pending-campaign-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.pending-campaign-title {
+  color: #123524;
+}
+
+.pending-campaign-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: #5b7465;
+  font-size: 0.9rem;
+}
+
+.pending-campaign-action {
+  flex-shrink: 0;
+}
+
+.pending-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.badge-em-analise {
+  background: #e9f2ff;
+  color: #1d5fd0;
+}
+
+.badge-em-elaboracao {
+  background: #fff3d6;
+  color: #9a6400;
+}
+
+.badge-reprovada {
+  background: #fde2e1;
+  color: #c23832;
+}
+
+.badge-status-neutro {
+  background: #eef1f4;
+  color: #51606f;
+}
+
+.pending-empty-state {
+  padding: 18px;
+  border: 1px dashed #bfd7c7;
+  border-radius: 10px;
+  color: #5b7465;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+@media (max-width: 767px) {
+  .pending-panel-header,
+  .pending-campaign-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pending-panel-total,
+  .pending-campaign-action {
+    width: 100%;
+  }
 }
 
 .bg-primary {
