@@ -132,7 +132,7 @@ export const produtoConfig = {
     temVinculacoes: true,
     colunas: ['id_campanha', 'tema', 'cod_emp', 'status_aprovacao', 'status', 'subproduto'],
     acoes: ['gerenciar', 'visualizar'],
-    modalPreview: false,
+    modalPreview: true,
     showModulo: false,
     passaModulo: null,
     rotaNome: {

@@ -104,7 +104,7 @@ const isReadonly = computed(() => !form.id);
             <button
                 type="submit"
                 class="btn btn-success"
-                :disabled="processing"
+                :disabled="form.processing"
             >
                 <IconDeviceFloppy class="me-2" />
                 Salvar

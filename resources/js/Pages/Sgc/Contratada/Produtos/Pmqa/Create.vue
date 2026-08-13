@@ -75,6 +75,26 @@ const salvarApresentacao = () => {
     );
 };
 
+const produtoParam = computed(() =>
+    typeof props.produto === "string" ? props.produto.toLowerCase() : (props.produto?.slug ?? "pmqa")
+);
+
+const pmqaEditavel = computed(() =>
+    ["Em elaboração", "Rejeitada"].includes(props.pmqa?.status_aprovacao)
+);
+
+const submeterPmqa = () => {
+    if (!confirm("Submeter PMQA para análise?")) return;
+
+    router.post(
+        route("sgc.contratada.produtos.pmqa.submeter", [
+            props.contratos.id,
+            produtoParam.value,
+            props.pmqa.id,
+        ])
+    );
+};
+
 const hasPontosImportados = computed(() => {
     if (Array.isArray(props.pontos)) return props.pontos.length > 0;
     if (props.pontos?.data) return props.pontos.data.length > 0;
@@ -127,7 +147,7 @@ watch(activeTab, (tab) => {
         router.visit(
             route("contratos.contratada.sgc.pmqa.execucao.index", [
                 props.contratos.id,
-                props.produto.slug,
+                produtoParam.value,
                 props.pmqa.id,
             ]),
             {
@@ -136,7 +156,7 @@ watch(activeTab, (tab) => {
             },
         );
     }
-});
+}, { immediate: true });
 
 </script>
 
@@ -145,6 +165,7 @@ watch(activeTab, (tab) => {
         :contratos="contratos"
         :title="'PMQA - EIA'"
         :pmqa="pmqa"
+        :produto="produto"
         v-model:activeTab="activeTab"
     >
         <template #apresentacao>
@@ -154,7 +175,7 @@ watch(activeTab, (tab) => {
                 :produto="produto"
                 :temas="temas"
                 :empreendimentos="empreendimentos"
-                @saved="subStep = 1"
+                @saved="activeTab = 'apresentacao'"
             />
         </template>
 
@@ -191,6 +212,15 @@ watch(activeTab, (tab) => {
                 @next="nextSubStepFromConfiguracao"
                 @prev="prevSubStepFromConfiguracao"
             />
+
+            <div
+                v-if="pmqaEditavel && subStep === 4"
+                class="d-flex justify-content-end mt-4"
+            >
+                <button class="btn btn-success" @click="submeterPmqa">
+                    Submeter para análise
+                </button>
+            </div>
         </template>
 
         <!-- <template #resultados>

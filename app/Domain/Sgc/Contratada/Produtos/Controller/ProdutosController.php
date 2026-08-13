@@ -19,12 +19,14 @@ use App\Models\SgcEspeleoEstudosPosteriores;
 use App\Models\SgcModulo;
 use App\Models\SgcMalarigeno;
 use App\Models\SgcRima;
+use App\Models\SgcPmqaExecCampanha;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
 use App\Domain\Sgc\Contratada\Produtos\Rima\Requests\StoreRimaRequest;
 use App\Domain\Sgc\Contratada\Produtos\Rima\Services\RimaService;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
@@ -78,7 +80,8 @@ class ProdutosController extends Controller
             'campanhas' => $campanhas,
             'mostrarArquivadas' => $mostrarArquivadas,
             'totalArquivadas' => $totalArquivadas,
-            'canApprove' => Auth::user()->perfis_id === 3 && count(array_filter($campanhas->toArray(), fn($c) => $c['status'] === 'Em análise')) > 0,
+            'canApprove' => $this->usuarioPodeAprovarPmqa()
+                && count(array_filter($campanhas->toArray(), fn($c) => $c['status'] === 'Em análise')) > 0,
         ]);
     }
 
@@ -129,7 +132,7 @@ class ProdutosController extends Controller
             return $this->createPmqa($request, $contrato, $produto, $contratoObj, $subproduto);
 
         } elseif ($produto === 'malarigeno') {
-            return $this->createMalarigeno($request,$contrato,$produto,$contratoObj,$subproduto);    
+            return $this->createMalarigeno($request,$contrato,$produto,$contratoObj,$subproduto);
 
         } elseif ($produto === 'rima') {
             return $this->createRima($request, $contrato, $produto, $contratoObj, $subproduto);
@@ -419,15 +422,15 @@ class ProdutosController extends Controller
         $subprodutosEspeleologia = SgcvwSubprodutos::where('familia', 'Espeleologia')
             ->where('contrato_id', $contrato)
             ->orderBy('descricao_revisada')
-            ->get(['id', 'descricao_revisada']) 
+            ->get(['id', 'descricao_revisada'])
             ->map(function ($s) {
                 return [
                     'id' => $s->id,
                     'descricao_revisada' => $s->descricao_revisada
                 ];
             })
-            ->values() 
-            ->toArray(); 
+            ->values()
+            ->toArray();
 
 
         return inertia('Sgc/Contratada/Produtos/Espeleologia/Create', [
@@ -439,7 +442,7 @@ class ProdutosController extends Controller
             'campanhaId' => $draft->id,
             'draftData' => $draft->toArray(),
             'profissionais' => $profissionais,
-            'justificativas' => $justificativas, 
+            'justificativas' => $justificativas,
             'metodologia' => $metodologia,
             'resultados_anexos' => $resultadosAnexos,
             'subprodutosEspeleologia' => $subprodutosEspeleologia,
@@ -500,11 +503,19 @@ class ProdutosController extends Controller
     private function createPmqa(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
 
-        $pmqa = SgcPmqa::create([
-            'id_contrato'      => $contrato,
-            'status_aprovacao' => 'Em analise',
-            'subproduto'       => $subproduto,
-        ]);
+        $pmqa = SgcPmqa::where('id_contrato', $contrato)
+            ->where('subproduto', $subproduto)
+            ->whereIn('status_aprovacao', ['Em análise', 'Em elaboração'])
+            ->latest()
+            ->first();
+
+        if (!$pmqa) {
+            $pmqa = SgcPmqa::create([
+                'id_contrato'  => $contrato,
+                'subproduto'   => $subproduto,
+                'status_aprovacao' => 'Em análise',
+            ]);
+        }
 
         $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
             ->pluck('cod_emp')
@@ -520,23 +531,61 @@ class ProdutosController extends Controller
         ]);
     }
 
+    public function submeterPmqa(Request $request, $contrato, $produto, SgcPmqa $pmqa)
+    {
+        abort_if((int) $pmqa->id_contrato !== (int) $contrato, 404);
+
+        if (!in_array($pmqa->status_aprovacao, ['Rascunho', 'Em elaboração', 'Rejeitada'])) {
+            return back()->withErrors(['error' => 'Apenas estudos editáveis podem ser submetidos.']);
+        }
+
+        $pmqa->update([
+            'status_aprovacao' => 'Em análise',
+        ]);
+
+        return redirect()
+            ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+            ->with('success', 'PMQA submetido para análise.');
+    }
+
     public function aprovarPmqa(Request $request, $contrato, $produto, $pmqa): RedirectResponse
     {
+        abort_unless($this->usuarioPodeAprovarPmqa(), 403, 'Usuário sem autorização');
+
         $pmqaModel = SgcPmqa::where('id', $pmqa)
             ->where('id_contrato', $contrato)
             ->firstOrFail();
 
+        abort_unless($pmqaModel->status_aprovacao === 'Em análise', 422, 'Este PMQA não está em análise.');
+
         $pmqaModel->update([
             'status_aprovacao' => 'Em elaboração',
-            'aprovado_por'     => Auth::getName(),
+            'aprovado_por'     => Auth::user()?->name,
             'aprovado_em'      => now(),
         ]);
 
         return back()->with('success', 'Campanha aprovada com sucesso!');
     }
 
+    public function reprovarPmqa(Request $request, $contrato, $produto, $pmqa): RedirectResponse
+    {
+        abort_unless($this->usuarioPodeAprovarPmqa(), 403, 'Usuário sem autorização');
 
-    public function updatePmqa(Request $request, $contrato)
+        $pmqaModel = SgcPmqa::where('id', $pmqa)
+            ->where('id_contrato', $contrato)
+            ->firstOrFail();
+
+        abort_unless($pmqaModel->status_aprovacao === 'Em análise', 422, 'Este PMQA não está em análise.');
+
+        $pmqaModel->update([
+            'status_aprovacao' => 'Rejeitada',
+        ]);
+
+        return back()->with('success', 'Campanha reprovada com sucesso!');
+    }
+
+
+    public function updatePmqa(Request $request, $contrato, $produto = 'eia')
     {
         $data = $request->validate([
             'id'            => 'required|exists:sgc_pmqa,id',
@@ -561,14 +610,16 @@ class ProdutosController extends Controller
             'objetivos'     => $data['objetivos'],
             'metodologia'   => $data['metodologia'],
             'publico_alvo'  => $data['publico_alvo'],
+            'status_aprovacao' => 'Em análise',
         ]);
 
         return redirect()
             ->route('sgc.contratada.produtos.index', [
-                'contrato' => $contrato,
-                'produto'  => 'eia',
+                'contrato'   => $contrato,
+                'produto'    => $produto,
+                'subproduto' => $pmqa->subproduto,
             ])
-            ->with('success', 'Campanha de Fauna salva com sucesso!');
+            ->with('success', 'Apresentação do PMQA submetida para análise.');
     }
 
 
@@ -576,10 +627,12 @@ class ProdutosController extends Controller
     private function getCampanhasPmqa($contrato)
     {
         $pmqas = SgcPmqa::where('id_contrato', $contrato)->get();
+        $pmqaIds = $pmqas->pluck('id')->all();
 
-        $resumoVinc = $this->getResumoVinculacoesPmqa($pmqas->pluck('id')->all());
+        $resumoVinc = $this->getResumoVinculacoesPmqa($pmqaIds);
+        $configuracoes = $this->getConfiguracoesPmqa($pmqaIds);
 
-        return $pmqas->map(function ($pmqa) use ($resumoVinc) {
+        return $pmqas->map(function ($pmqa) use ($resumoVinc, $configuracoes) {
             return [
                 'id'             => $pmqa->id,
                 'id_campanha'    => $pmqa->id,
@@ -588,7 +641,7 @@ class ProdutosController extends Controller
                 'tipo'           => $pmqa->tipo ?? 'PMQA',
 
                 'empreendimento' => $pmqa->cod_emp ?? 'N/A',
-                'subproduto'     => $pmqa->tipo ?? 'PMQA',
+                'subproduto'     => $pmqa->subproduto ?? $pmqa->tipo ?? 'PMQA',
                 'data_inicial'   => $pmqa->created_at ? $pmqa->created_at->format('d/m/Y') : 'N/A',
                 'data_final'     => 'N/A',
                 'status'         => $pmqa->status_aprovacao ?? 'rascunho',
@@ -597,6 +650,10 @@ class ProdutosController extends Controller
                     'total_listas' => 0,
                     'total_pontos' => 0,
                     'total_pontos_vinculados' => 0,
+                ],
+                'configuracao' => $configuracoes[$pmqa->id] ?? [
+                    'listas' => [],
+                    'pontos_sem_lista' => [],
                 ],
 
                 'tema'           => $pmqa->tema,
@@ -616,53 +673,45 @@ class ProdutosController extends Controller
         });
     }
 
+    private function getTabRascunhoPmqa(SgcPmqa $pmqa, Request $request, int $subStep): string
+    {
+        if ($request->has('tab')) {
+            return (string) $request->query('tab');
+        }
 
-    private function createPmqaByCampanha(
-        Request $request,
-        $contrato,
-        $produto,
-        $contratoObj,
-        $campanhaId
-    ): Response {
-        $pmqa = SgcPmqa::where('id', $campanhaId)
-            ->where('id_contrato', $contrato)
-            ->firstOrFail();
+        if (!in_array($pmqa->status_aprovacao, ['Em elaboração', 'Rejeitada'])) {
+            return 'apresentacao';
+        }
 
-        $empreendimentos = SgcvwEmpreendimentos::where('contrato_id', $contrato)
-            ->pluck('cod_emp')
-            ->toArray();
+        $temCampanhaExecucao = SgcPmqaExecCampanha::where('pmqa_id', $pmqa->id)->exists();
+        if ($temCampanhaExecucao) {
+            return 'execucao';
+        }
 
-        $searchParams = $request->only(['columns', 'value']);
-        $tabParametros = $this->parametroService->index($pmqa, $searchParams);
-        $listasVinculacoes = SgcPmqaParametroLista::with(['pontos'])
-            ->where('pmqa_id', $pmqa->id)
-            ->get();
+        return $subStep >= 2 ? 'configuracao' : 'apresentacao';
+    }
 
-        $vinculacoes = SgcPmqaPonto::with(['lista', 'vinculacao'])
-            ->where('pmqa_id', $pmqa->id)
-            ->get();
-        Log::info('Create PMQA payload', [
-            'pmqa_id' => $pmqa->id,
-            'vinculacoes_count' => $vinculacoes->count(),
-            'component' => 'Sgc/Contratada/Produtos/Pmqa/Create',
-        ]);
+    private function getSubStepRascunhoPmqa(SgcPmqa $pmqa, Request $request): int
+    {
+        if ($request->has('subStep')) {
+            return max(1, min(4, (int) $request->query('subStep')));
+        }
 
-        $searchExec = $request->only(['columns', 'value']);
-        $execucao = $this->execucaoCampanhaService->index($pmqa, $searchExec);
+        if (!in_array($pmqa->status_aprovacao, ['Em elaboração', 'Rejeitada'])) {
+            return 1;
+        }
 
-        return inertia('Sgc/Contratada/Produtos/Pmqa/Create', [
-            'contrato'        => $contrato,
-            'produto'         => ucfirst($produto),
-            'contratos'       => $contratoObj,
-            'subproduto'      => $pmqa->subproduto,
-            'empreendimentos' => $empreendimentos,
-            'pmqa'            => $pmqa,
-            'subStep'         => (int) $request->query('subStep', 1),
-            ...$tabParametros,
-            'vinculacoes' => $vinculacoes,
-            'listasVinculacoes' => $listasVinculacoes,
-            ...$execucao,
-        ]);
+        $temPontos = SgcPmqaPonto::where('pmqa_id', $pmqa->id)->exists();
+        if (!$temPontos) {
+            return 2;
+        }
+
+        $temListas = SgcPmqaParametroLista::where('pmqa_id', $pmqa->id)->exists();
+        if (!$temListas) {
+            return 3;
+        }
+
+        return 4;
     }
 
     private function getResumoVinculacoesPmqa(array $pmqaIds): array
@@ -702,45 +751,121 @@ class ProdutosController extends Controller
         return $map;
     }
 
-    private function getVinculacoesParaTabela(int $pmqaId): array
+    private function getConfiguracoesPmqa(array $pmqaIds): array
     {
-        $rows = DB::table('sgc_pmqa_parametros_lista as l')
-            ->leftJoin('sgc_pmqa_config_ponto_lista as pl', 'pl.lista_id', '=', 'l.id')
-            ->leftJoin('sgc_pmqa_pontos as p', 'p.id', '=', 'pl.ponto_id')
-            ->where('l.pmqa_id', $pmqaId)
+        if (empty($pmqaIds)) return [];
+
+        $map = [];
+        foreach ($pmqaIds as $pmqaId) {
+            $map[$pmqaId] = [
+                'listas' => [],
+                'pontos_sem_lista' => [],
+            ];
+        }
+
+        $parametros = DB::table('sgc_pmqa_parametros_lista as l')
+            ->leftJoin('sgc_pmqa_config_parametros as cp', 'cp.parametro_lista_id', '=', 'l.id')
+            ->leftJoin('parametros as p', 'p.id', '=', 'cp.parametro_id')
+            ->whereIn('l.pmqa_id', $pmqaIds)
             ->orderBy('l.id')
-            ->orderBy('p.id')
+            ->orderBy('p.parametro')
             ->get([
+                'l.pmqa_id',
                 'l.id as lista_id',
                 'l.nome as lista_nome',
-                'p.id as ponto_id',
-                'p.nome_ponto_coleta',
+                'l.medir_iqa',
+                'p.id as parametro_id',
+                'p.parametro as parametro_nome',
             ]);
 
-        $grouped = [];
+        foreach ($parametros as $parametro) {
+            $pmqaId = (int) $parametro->pmqa_id;
+            $listaId = (int) $parametro->lista_id;
 
-        foreach ($rows as $r) {
-            if (!isset($grouped[$r->lista_id])) {
-                $grouped[$r->lista_id] = [
-                    'id' => (int) $r->lista_id,
-                    'nome' => $r->lista_nome,
+            if (!isset($map[$pmqaId]['listas'][$listaId])) {
+                $map[$pmqaId]['listas'][$listaId] = [
+                    'id' => $listaId,
+                    'nome' => $parametro->lista_nome,
+                    'medir_iqa' => (bool) $parametro->medir_iqa,
+                    'parametros' => [],
                     'pontos' => [],
                 ];
             }
 
-            if ($r->ponto_id) {
-                $grouped[$r->lista_id]['pontos'][] = [
-                    'id' => (int) $r->ponto_id,
-                    'nome_ponto_coleta' => $r->nome_ponto_coleta,
+            if ($parametro->parametro_id) {
+                $map[$pmqaId]['listas'][$listaId]['parametros'][] = [
+                    'id' => (int) $parametro->parametro_id,
+                    'nome' => $parametro->parametro_nome,
                 ];
             }
         }
 
-        return [
-            'data' => array_values($grouped),
-            'links' => [],
-        ];
+        $pontos = DB::table('sgc_pmqa_pontos as p')
+            ->leftJoin('sgc_pmqa_config_ponto_lista as pl', function ($join) {
+                $join->on('pl.ponto_id', '=', 'p.id')
+                    ->on('pl.pmqa_id', '=', 'p.pmqa_id');
+            })
+            ->leftJoin('sgc_pmqa_parametros_lista as l', 'l.id', '=', 'pl.lista_id')
+            ->whereIn('p.pmqa_id', $pmqaIds)
+            ->orderBy('l.id')
+            ->orderBy('p.id')
+            ->get([
+                'p.pmqa_id',
+                'l.id as lista_id',
+                'p.id',
+                'p.nome_ponto_coleta',
+                'p.classe',
+                'p.tipo_ambiente',
+                'p.uf',
+                'p.municipio',
+                'p.bacia_hidrografica',
+                'p.km_rodovia',
+                'p.estaca',
+                'p.lat_x',
+                'p.long_y',
+            ]);
+
+        foreach ($pontos as $ponto) { 
+            $pmqaId = (int) $ponto->pmqa_id;
+            $listaId = $ponto->lista_id ? (int) $ponto->lista_id : null;
+
+            $pontoData = [
+                'id' => (int) $ponto->id,
+                'nome_ponto_coleta' => $ponto->nome_ponto_coleta,
+                'classe' => $ponto->classe,
+                'tipo_ambiente' => $ponto->tipo_ambiente,
+                'uf' => $ponto->uf,
+                'municipio' => $ponto->municipio,
+                'bacia_hidrografica' => $ponto->bacia_hidrografica,
+                'km_rodovia' => $ponto->km_rodovia,
+                'estaca' => $ponto->estaca,
+                'lat_x' => $ponto->lat_x,
+                'long_y' => $ponto->long_y,
+            ];
+
+            if ($listaId && isset($map[$pmqaId]['listas'][$listaId])) {
+                $map[$pmqaId]['listas'][$listaId]['pontos'][] = $pontoData;
+                continue;
+            }
+
+            $map[$pmqaId]['pontos_sem_lista'][] = $pontoData;
+        }
+
+        foreach ($map as $pmqaId => $configuracao) {
+            $map[$pmqaId]['listas'] = array_values($configuracao['listas']);
+        }
+
+        return $map;
     }
 
+    private function usuarioPodeAprovarPmqa(): bool
+    {
+        $user = Auth::user();
 
+        if ($user instanceof \App\Models\User) {
+            return $user->hasAnyRole(['Administrador', 'Fiscal']);
+        }
+
+        return false;
+    }
 }
