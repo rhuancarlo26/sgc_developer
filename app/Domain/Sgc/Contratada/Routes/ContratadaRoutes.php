@@ -223,6 +223,10 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
 
         });
 
+        Route::prefix('/ptr')->group(function () {
+            require __DIR__ . '/../../Contratada/Produtos/Patrimonio/App/Routes/PatrimonioRoutes.php';
+        });
+
         Route::prefix('modulos/configuracoes')
             ->name('sgc.contratada.produtos.modulos.configuracoes.')
             ->group(function () {
