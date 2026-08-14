@@ -24,6 +24,7 @@ class StorePatrimonioShapefileController extends Controller
 
   public function __invoke(StorePatrimonioShapefileRequest $request): JsonResponse
   {
+    \Illuminate\Support\Facades\Log::info('CHEGOU NA CONTROLLER DO SHAPEFILE');
     try {
       $file = $request->file('shapefile');
       $paipaId = $request->integer('patrimonio_paipa_id');
@@ -51,8 +52,10 @@ class StorePatrimonioShapefileController extends Controller
 
       return response()->json(['success' => true, 'data' => $shapefile]);
     } catch (\RuntimeException $e) {
+      \Illuminate\Support\Facades\Log::error('Erro ao salvar shapefile: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
       return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
     } catch (\Throwable $e) {
+      \Illuminate\Support\Facades\Log::error('Throwable ao salvar shapefile: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
       return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
     }
   }

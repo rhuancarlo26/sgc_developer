@@ -20,6 +20,7 @@ class PatrimonioController extends Controller
     public function store(PatrimonioRequest $request): JsonResponse
     {
         $validated = $request->validated();
+        $validated['contrato_id'] = $request->route('contrato');
 
         try {
             $subproduto = $this->patrimonioService->createSubProdutos(
@@ -38,6 +39,7 @@ class PatrimonioController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Erro Fatal em PatrimonioController@store: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json([
                 'success' => false,
                 'message' => 'Erro ao criar subproduto',

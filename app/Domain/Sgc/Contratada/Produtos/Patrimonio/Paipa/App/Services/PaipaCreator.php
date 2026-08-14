@@ -15,6 +15,7 @@ class PaipaCreator implements SubprodutoCreatorInterface
         $paipa = isset($data['paipa_id'])
           ? SgcPatrimonioPaipa::findOrFail($data['paipa_id'])
           : new SgcPatrimonioPaipa();
+        $paipa->contrato_id = $data['contrato_id'] ?? null;
         $paipa->empreendimento_id = $data['empreendimento_id'] ?? $data['empreendimento'] ?? null;
         $paipa->justificativa_sei = $data['justificativa_sei'] ?? null;
         $paipa->justificativa_titulo = $data['justificativa_titulo'] ?? null;
