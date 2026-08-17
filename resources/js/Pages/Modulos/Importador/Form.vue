@@ -31,10 +31,6 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
-    campanhasDisponiveis: {
-        type: Array,
-        default: () => [],
-    },
     licencas: {
         type: Array,
         default: () => [],
@@ -58,16 +54,30 @@ const form = useForm({
     parecer_analise: null,
     fotos: [],
     anexos: [],
-    licencas: props.moduloImportador?.licencas?.map((licenca) => licenca.id) ?? [],
     enviar_analise: null,
     update_modulo: null,
     continuar_formulario: null,
 
     ...props.moduloImportador,
 
-    modulo_id: toNumberOrNull(props.moduloImportador?.modulo_id ?? props.contextoImportador?.modulo_id),
-    contrato_id: toNumberOrNull(props.moduloImportador?.contrato_id ?? props.contextoImportador?.contrato_id),
-    servico_id: toNumberOrNull(props.moduloImportador?.servico_id ?? props.contextoImportador?.servico_id),
+    licencas: props.moduloImportador?.licencas?.map((licenca) =>
+        Number(licenca.id)
+    ) ?? [],
+
+    modulo_id: toNumberOrNull(
+        props.moduloImportador?.modulo_id ??
+        props.contextoImportador?.modulo_id
+    ),
+
+    contrato_id: toNumberOrNull(
+        props.moduloImportador?.contrato_id ??
+        props.contextoImportador?.contrato_id
+    ),
+
+    servico_id: toNumberOrNull(
+        props.moduloImportador?.servico_id ??
+        props.contextoImportador?.servico_id
+    ),
 });
 
 const CardFotosRef = ref(null);
@@ -188,6 +198,13 @@ const importar = async (enviarAnalise = false) => {
         }
     }
 
+    if (
+        form.id &&
+        Number(form.modulo_id) === Number(props.moduloImportador?.modulo_id)
+    ) {
+        form.update_modulo = null;
+    }
+
     form.enviar_analise = enviarAnalise;
 
     const method = form.id ? "update" : "store";
@@ -214,7 +231,12 @@ const importar = async (enviarAnalise = false) => {
 
         onError: (errors) => {
             limparArquivoSelecionado();
-            tratarErroImportacao(errors);
+            tratarErroImportacao(
+                errors,
+                enviarAnalise
+                    ? "Erro ao enviar para análise"
+                    : "Erro ao salvar rascunho"
+            );
         },
 
         onFinish: () => {
@@ -244,9 +266,13 @@ const aprovReprovImportacao = (status) => {
     });
 };
 
-const tratarErroImportacao = (errors = {}) => {
+const tratarErroImportacao = (errors = {}, titulo = "Erro ao importar") => {
     const erroFoto = Object.entries(errors)
         .find(([campo]) => campo.startsWith("fotos."))?.[1];
+
+    const primeiroErro = Object.values(errors)
+        .flat()
+        .find(Boolean);
 
     const mensagem =
         errors.arquivo
@@ -254,10 +280,15 @@ const tratarErroImportacao = (errors = {}) => {
         ?? errors.campanha
         ?? errors.modulo_id
         ?? errors.contrato_id
-        ?? "Não foi possível importar a planilha. Verifique se o arquivo está no modelo correto.";
+        ?? errors.mes_ano_referencia
+        ?? errors.servico_id
+        ?? errors.parecer_tecnico
+        ?? errors.enviar_analise
+        ?? primeiroErro
+        ?? "Não foi possível concluir a operação.";
 
     Swal.fire({
-        title: "Erro ao importar",
+        title: titulo,
         text: mensagem,
         icon: "error",
         confirmButtonText: "OK",
@@ -369,8 +400,7 @@ const importarSomentePlanilha = () => {
                 <div class="d-flex flex-column gap-4 flex-grow-1 mb-4">
                     <CardInformacoesGerais ref="CardInformacoesGeraisRef" :form="form" :modulos="modulos"
                         :contratos="contratos" :tem-dados-planilha="temDadosPlanilha" :licencas="licencas"
-                        :contexto-importador="contextoImportador" :campanhas-disponiveis="campanhasDisponiveis"
-                        @importar-planilha="importarSomentePlanilha" />
+                        :contexto-importador="contextoImportador" @importar-planilha="importarSomentePlanilha" />
 
                     <CardDadosPlanilha v-if="form.id" ref="CardDadosPlanilhaRef" :form="form"
                         @tem-dados-changed="temDadosPlanilha = $event" />

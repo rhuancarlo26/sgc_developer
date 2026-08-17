@@ -29,11 +29,13 @@ class UpdateImportadorRequest extends FormRequest
             'licencas' => ['nullable', 'array'],
             'licencas.*' => ['integer', 'exists:licencas,id'],
             'mes_ano_referencia' => 'required',
-            'campanha' => 'required',
+            'campanha' => ['required', 'integer', 'min:1'],
             'contrato_id' => 'required',
             'servico_id' => ['nullable', 'exists:servicos,id'],
             'arquivo' => 'nullable|mimes:xlsx,csv',
-            'parecer_tecnico' => $this->boolean('enviar_analise') ? 'required' : 'nullable',
+            'parecer_tecnico' => $this->boolean('enviar_analise')
+                ? 'required'
+                : 'nullable',
             'parecer_analise' => 'nullable',
             'fotos' => ['nullable', 'array'],
             'fotos.*.id' => ['nullable'],
@@ -58,7 +60,7 @@ class UpdateImportadorRequest extends FormRequest
             'update_modulo' => ['nullable', 'boolean'],
         ];
 
-        if ($this->input('update_modulo')) {
+        if ($this->boolean('update_modulo')) {
             $rules['arquivo'] = 'required|mimes:xlsx,csv';
         }
 
@@ -71,6 +73,8 @@ class UpdateImportadorRequest extends FormRequest
             'modulo_id.required' => 'O campo Módulo é obrigatório',
             'mes_ano_referencia.required' => 'O campo Referência (Mês/Ano) é obrigatório',
             'campanha.required' => 'O campo Campanha é obrigatório',
+            'campanha.integer' => 'O campo Campanha deve ser um número inteiro.',
+            'campanha.min' => 'O campo Campanha deve ser maior ou igual a 1.',
             'contrato_id.required' => 'O campo Contrato é obrigatório',
             'arquivo.required' => 'O campo planilha é obrigatório',
             'arquivo.mimes' => 'A planilha precisa ter as extensões .xlsx OU .csv',
@@ -116,18 +120,29 @@ class UpdateImportadorRequest extends FormRequest
                 return;
             }
 
-            $jaExiste = ModuloImportador::query()
+            $campanhasUsadas = ModuloImportador::query()
                 ->where('servico_id', $this->input('servico_id'))
-                ->where('campanha', $this->input('campanha'))
                 ->when($importadorAtual, function ($query) use ($importadorAtual) {
                     $query->where('id', '!=', $importadorAtual->id);
                 })
-                ->exists();
+                ->pluck('campanha')
+                ->map(fn($campanha) => (int) $campanha)
+                ->values()
+                ->all();
 
-            if ($jaExiste) {
+            $campanhaInformada = (int) $this->input('campanha');
+
+            if (in_array($campanhaInformada, $campanhasUsadas, true)) {
+
+                $proximaCampanha = 1;
+
+                while (in_array($proximaCampanha, $campanhasUsadas, true)) {
+                    $proximaCampanha++;
+                }
+
                 $validator->errors()->add(
                     'campanha',
-                    'Essa campanha já foi cadastrada para este serviço. Selecione outra campanha.'
+                    "A campanha {$campanhaInformada} já foi cadastrada para este serviço. A próxima campanha disponível é a {$proximaCampanha}."
                 );
             }
         });

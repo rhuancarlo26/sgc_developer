@@ -2,15 +2,23 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
-import { ref, watch, computed } from "vue";
+import { ref } from "vue";
 import { IconDoorExit, IconDeviceFloppy } from "@tabler/icons-vue";
 import TabInformacoesGerais from "./TabInformacoesGerais.vue"
 import TabValidacoes from "./TabValidacoes.vue"
 import { useToast } from "vue-toastification";
 
 const props = defineProps({
-    modulo: { type: Object },
-    tipos: { type: Array },
+    modulo: {
+        type: Object,
+        default: () => ({}),
+    },
+
+    tipos: {
+        type: Array,
+        default: () => [],
+    },
+
     contratos: {
         type: Array,
         default: () => [],
@@ -31,26 +39,37 @@ const form = useForm({
 const toast = useToast();
 
 const TabValidacoesRef = ref(null)
-const salvarModulo = () => {
 
+const salvarModulo = () => {
     if (!form.campos.length) {
-        toast.error('Os campos para validação não foram preenchidos');
+        toast.error('Os campos para validação não foram preenchidos')
         return
     }
 
-    if (TabValidacoesRef.value.validaCampos()) {
-        toast.error('Preencha os campos obrigatórios da aba Validações');
+    const possuiErroValidacao =
+        TabValidacoesRef.value?.validaCampos?.() ?? false
+
+    if (possuiErroValidacao) {
+        toast.error(
+            'Existem campos obrigatórios não preenchidos na aba Validações'
+        )
         return
     }
 
     form.clearErrors()
 
-    const url = props.modulo.id ? 'update' : 'store'
-    form.post(route(`modulos.config-modulos.${url}`, [props.modulo?.id]), {
-        preserveState: false
-    });
-}
+    const rota = form.id
+        ? route('modulos.config-modulos.update', form.id)
+        : route('modulos.config-modulos.store')
 
+    form.post(rota, {
+        preserveState: false,
+
+        onError: () => {
+            toast.error('Não foi possível salvar o módulo. Verifique os campos preenchidos.')
+        },
+    })
+}
 </script>
 
 <template>
@@ -88,7 +107,7 @@ const salvarModulo = () => {
                     </ul>
                 </div>
                 <div class="card-body">
-                    <form @submit.prevent="salvarModulo()" :disabled="form.processing">
+                    <form @submit.prevent="salvarModulo" novalidate>
                         <div class="tab-content">
                             <div class="tab-pane active show" id="tabs-info-1" role="tabpanel">
                                 <TabInformacoesGerais :form="form" :contratos="contratos" />
@@ -101,7 +120,7 @@ const salvarModulo = () => {
 
                         <div class="card-body">
                             <div class="d-flex justify-content-end">
-                                <button class="btn btn-success" :disabled="form.processing">
+                                <button type="submit" class="btn btn-success" :disabled="form.processing">
                                     <IconDeviceFloppy class="me-2" />
                                     {{ form.id ? 'Editar' : 'Salvar' }}
                                 </button>

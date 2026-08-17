@@ -146,34 +146,72 @@ class ProcessarPlanilhaImportadorJob implements ShouldQueue
 
             $camposVal = $camposValidacao[$key];
 
+            if ($this->ehCampoHora($key)) {
+
+                if (
+                    $valor !== null &&
+                    !(is_string($valor) && trim($valor) === '')
+                ) {
+                    $hora = $this->normalizarHora($valor);
+
+                    if (!$hora) {
+                        $errosRow[] =
+                            "Campo $key / Linha: $linha na planilha '{$this->importador->nome_arquivo}' possui uma hora inválida.";
+
+                        continue;
+                    }
+
+                    $valor = $hora;
+                    $dadosFormatados[$key] = $hora;
+                }
+            }
+
             if (
                 $camposVal['obrigatorio'] &&
-                ((is_string($valor) && trim($valor) === '') || $valor === null)
+                (
+                    (is_string($valor) && trim($valor) === '') ||
+                    $valor === null
+                )
             ) {
-                $errosRow[] = "Campo $key / Linha: $linha na planilha '{$this->importador->nome_arquivo}' é um campo obrigatório.";
+                $errosRow[] =
+                    "Campo $key / Linha: $linha na planilha '{$this->importador->nome_arquivo}' é um campo obrigatório.";
+
                 continue;
             }
 
             if ($camposVal['obrigatorio'] && $camposVal['regra']) {
+
                 if (
                     $camposVal['tipo'] === 'texto' &&
-                    strlen($valor) > $camposVal['max_caracteres']
+                    strlen((string) $valor) > $camposVal['max_caracteres']
                 ) {
-                    $errosRow[] = "Campo $key / Linha: $linha na planilha '{$this->importador->nome_arquivo}' precisa ter no máximo {$camposVal['max_caracteres']} caracteres.";
+                    $errosRow[] =
+                        "Campo $key / Linha: $linha na planilha '{$this->importador->nome_arquivo}' precisa ter no máximo {$camposVal['max_caracteres']} caracteres.";
+
                     continue;
                 }
 
                 if (in_array($camposVal['tipo'], ['inteiro', 'decimal'])) {
 
                     $msgCustom = match (true) {
-                        !is_numeric($valor) => "precisa ser um valor numérico.",
-                        $camposVal['tipo'] === 'inteiro' && floor($valor) != $valor => "precisa ser um valor inteiro.",
-                        $valor < $camposVal['valor_min'] || $valor > $camposVal['valor_max'] => "precisa estar no intervalor entre {$camposVal['valor_min']} e {$camposVal['valor_max']}.",
+                        !is_numeric($valor) =>
+                        "precisa ser um valor numérico.",
+
+                        $camposVal['tipo'] === 'inteiro' &&
+                            floor((float) $valor) != (float) $valor =>
+                        "precisa ser um valor inteiro.",
+
+                        $valor < $camposVal['valor_min'] ||
+                            $valor > $camposVal['valor_max'] =>
+                        "precisa estar no intervalo entre {$camposVal['valor_min']} e {$camposVal['valor_max']}.",
+
                         default => ''
                     };
 
                     if (strlen($msgCustom)) {
-                        $errosRow[] = "Campo $key / Linha: $linha na planilha '{$this->importador->nome_arquivo}' {$msgCustom}";
+                        $errosRow[] =
+                            "Campo $key / Linha: $linha na planilha '{$this->importador->nome_arquivo}' {$msgCustom}";
+
                         continue;
                     }
                 }
@@ -184,7 +222,9 @@ class ProcessarPlanilhaImportadorJob implements ShouldQueue
                 $data = $this->normalizarData($valor);
 
                 if (!$data) {
-                    $errosRow[] = "Campo $key / Linha: $linha na planilha '{$this->importador->nome_arquivo}' possui uma data inválida ({$valor}).";
+                    $errosRow[] =
+                        "Campo $key / Linha: $linha na planilha '{$this->importador->nome_arquivo}' possui uma data inválida.";
+
                     continue;
                 }
 
@@ -259,6 +299,65 @@ class ProcessarPlanilhaImportadorJob implements ShouldQueue
                 return (new DateTimeImmutable($valor))->format($formatoSaida);
             } catch (\Throwable $e) {
                 return null;
+            }
+        }
+
+        return null;
+    }
+
+    private function ehCampoHora(string $nomeCampo): bool
+    {
+        $nomeCampo = mb_strtolower(trim($nomeCampo));
+
+        return str_contains($nomeCampo, 'hora');
+    }
+
+    private function normalizarHora(mixed $valor): ?string
+    {
+        if ($valor === null) {
+            return null;
+        }
+
+        if (is_string($valor)) {
+            $valor = trim($valor);
+
+            if ($valor === '') {
+                return null;
+            }
+        }
+
+        if ($valor instanceof DateTimeInterface) {
+            return $valor->format('H:i:s');
+        }
+
+        if (is_numeric($valor)) {
+            $numero = (float) $valor;
+
+            if ($numero >= 0 && $numero < 1) {
+                try {
+                    return ExcelDate::excelToDateTimeObject($numero)
+                        ->format('H:i:s');
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            }
+        }
+
+        if (is_string($valor)) {
+            $formatos = [
+                'H:i:s',
+                'H:i',
+            ];
+
+            foreach ($formatos as $formato) {
+                $hora = DateTimeImmutable::createFromFormat(
+                    '!' . $formato,
+                    $valor
+                );
+
+                if ($hora !== false) {
+                    return $hora->format('H:i:s');
+                }
             }
         }
 

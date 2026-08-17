@@ -29,7 +29,7 @@ class StoreImportadorRequest extends FormRequest
             'licencas' => ['nullable', 'array'],
             'licencas.*' => ['integer', 'exists:licencas,id'],
             'mes_ano_referencia' => 'required',
-            'campanha' => 'required',
+            'campanha' => ['required', 'integer', 'min:1'],
             'contrato_id' => 'required',
             'servico_id' => ['nullable', 'exists:servicos,id'],
             'arquivo' => 'required|mimes:xlsx,csv',
@@ -94,15 +94,26 @@ class StoreImportadorRequest extends FormRequest
                 return;
             }
 
-            $jaExiste = ModuloImportador::query()
+            $campanhasUsadas = ModuloImportador::query()
                 ->where('servico_id', $this->input('servico_id'))
-                ->where('campanha', $this->input('campanha'))
-                ->exists();
+                ->pluck('campanha')
+                ->map(fn($campanha) => (int) $campanha)
+                ->values()
+                ->all();
 
-            if ($jaExiste) {
+            $campanhaInformada = (int) $this->input('campanha');
+
+            if (in_array($campanhaInformada, $campanhasUsadas, true)) {
+
+                $proximaCampanha = 1;
+
+                while (in_array($proximaCampanha, $campanhasUsadas, true)) {
+                    $proximaCampanha++;
+                }
+
                 $validator->errors()->add(
                     'campanha',
-                    'Essa campanha já foi cadastrada para este serviço. Selecione outra campanha.'
+                    "A campanha {$campanhaInformada} já foi cadastrada para este serviço. A próxima campanha disponível é a {$proximaCampanha}."
                 );
             }
         });

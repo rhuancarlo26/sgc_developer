@@ -13,10 +13,6 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
-    campanhasDisponiveis: {
-        type: Array,
-        default: () => [],
-    },
     licencas: {
         type: Array,
         default: () => [],
@@ -24,12 +20,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["importar-planilha"]);
-
-const campanhas = computed(() => {
-    return props.campanhasDisponiveis?.length
-        ? props.campanhasDisponiveis
-        : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-});
 
 const veioDoServico = computed(() => {
     return !!props.contextoImportador?.origem_servico;
@@ -176,7 +166,8 @@ defineExpose({
                     <InputLabel for="campanha">
                         <span>Campanha <span class="text-danger">*</span></span>
                     </InputLabel>
-                    <v-select v-model="form.campanha" :options="campanhas" :disabled="[2, 4].includes(form.status)" />
+                    <input id="campanha" v-model.number="form.campanha" type="number" min="1" step="1"
+                        class="form-control" :disabled="[2, 4].includes(form.status)" />
                     <InputError :message="form.errors.campanha" />
                 </div>
                 <div class="col-lg-4 mb-4">
