@@ -9,8 +9,7 @@ const props = defineProps({
   contratos: { type: Object, required: true },
   title: { type: String, required: true },
   activeTab: { type: String, required: true },
-  pmqa: { type: Object },
-  produto: { type: [String, Object], default: 'eia' }
+  pmqa: { type: Object }
 });
 
 const emit = defineEmits(["update:activeTab"]);
@@ -21,25 +20,8 @@ const pmqaId = computed(() => {
   return props.pmqa?.id ?? page.props.ziggy.query?.pmqa ?? route().params?.pmqa
 })
 
-const produtoParam = computed(() =>
-  typeof props.produto === "string" ? props.produto.toLowerCase() : (props.produto?.slug ?? "eia")
-)
-
-const podeGerenciarPmqa = computed(() =>
-  ['Em elaboração', 'Rejeitada'].includes(props.pmqa?.status_aprovacao)
-)
-
 const setTab = (tab) => {
-  if (tab === "apresentacao") {
-    emit("update:activeTab", "apresentacao");
-    return;
-  }
-
-  if (!podeGerenciarPmqa.value) {
-    return;
-  }
-
-  const baseParams = [props.contratos.id, produtoParam.value, pmqaId.value];
+  const baseParams = [props.contratos.id, 'eia', pmqaId.value];
 
   if (tab === "configuracao") {
     router.visit(
@@ -91,37 +73,28 @@ const setTab = (tab) => {
 
             <ul class="nav nav-tabs mb-4">
               <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'apresentacao' }" @click.prevent="setTab('apresentacao')">
-                  Apresentação
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'configuracao', disabled: !podeGerenciarPmqa }" @click.prevent="setTab('configuracao')">
+                <a class="nav-link" :class="{ active: activeTab === 'configuracao' }" @click.prevent="setTab('configuracao')">
                   Configuração
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'execucao', disabled: !podeGerenciarPmqa }" @click.prevent="setTab('execucao')">
+                <a class="nav-link" :class="{ active: activeTab === 'execucao' }" @click.prevent="setTab('execucao')">
                   Execução
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'resultados', disabled: !podeGerenciarPmqa }" @click.prevent="setTab('resultados')">
+                <a class="nav-link" :class="{ active: activeTab === 'resultados' }" @click.prevent="setTab('resultados')">
                   Resultados
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'relatorio', disabled: !podeGerenciarPmqa }" @click.prevent="setTab('relatorio')">
+                <a class="nav-link" :class="{ active: activeTab === 'relatorio' }" @click.prevent="setTab('relatorio')">
                   Relatório
                 </a>
               </li>
             </ul>
 
             <div class="tab-content">
-              <div v-show="activeTab === 'apresentacao'">
-                <slot name="apresentacao" />
-              </div>
-
               <div v-show="activeTab === 'relatorio'">
                 <slot name="relatorio" />
               </div>

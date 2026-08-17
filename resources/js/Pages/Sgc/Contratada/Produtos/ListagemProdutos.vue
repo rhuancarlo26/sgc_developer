@@ -90,12 +90,6 @@ const isSubprodutoPaipa = (subproduto) => {
     ?.startsWith('elaboracao do projeto');
 };
 
-const isProdutoPmqa = computed(() => ['pmqa', 'eia'].includes(selectedProduto.value));
-
-const isSubprodutoRelatorioQualidadeAgua = (subproduto) => {
-  return normalizarTexto(subproduto) === 'relatorio da analise da qualidade da agua';
-};
-
 // Lista única de descrições de subprodutos
 const uniqueSubprodutos = computed(() => {
   const descriptions = props.subprodutos.map(sub => sub.descricao_revisada).filter(desc => desc);
@@ -103,10 +97,6 @@ const uniqueSubprodutos = computed(() => {
 });
 
 const campanhasFiltradas = computed(() => {
-  if (isProdutoPmqa.value && !isSubprodutoRelatorioQualidadeAgua(selectedSubproduto.value)) {
-    return [];
-  }
-
   if (!selectedSubproduto.value) {
     return props.campanhas;
   }
@@ -264,11 +254,6 @@ const goToCreate = () => {
 
   if (selectedProduto.value === 'patrimonio' && !isSubprodutoPaipa(selectedSubproduto.value)) {
     alert('Este subproduto de patrimônio ainda não possui tela de cadastro implementada.');
-    return;
-  }
-
-  if (isProdutoPmqa.value && !isSubprodutoRelatorioQualidadeAgua(selectedSubproduto.value)) {
-    alert('Para PMQA, selecione o subproduto "Relatório da Análise da Qualidade da Água".');
     return;
   }
 
@@ -699,8 +684,8 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
                               class="status-circle status-circle-rejected"
                             ></span>
                             <span
-                              v-else-if="campanha.status === 'rascunho' || campanha.status === 'Rascunho'"
-                              class="status-circle status-circle-draft"
+                              v-else-if="campanha.status === 'rascunho'"
+                              class="status-circle status-circle-rejected"
                             ></span>
                             <span
                               v-else-if="campanha.status === 'Em análise'"

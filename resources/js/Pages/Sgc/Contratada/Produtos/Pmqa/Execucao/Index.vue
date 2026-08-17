@@ -29,8 +29,6 @@ const abrirModalCampanha = (item = null) => {
   <ProdutoTabsLayout
     :contratos="contrato"
     :title="'PMQA - EIA'"
-    :pmqa="pmqa"
-    :produto="produto"
     v-model:activeTab="activeTab"
   >
     <template #execucao>
