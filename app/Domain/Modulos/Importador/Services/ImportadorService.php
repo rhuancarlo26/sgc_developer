@@ -90,16 +90,6 @@ class ImportadorService extends BaseModelService
             $item->append('revisao');
         });
 
-        $campanhasUsadas = (clone $baseContextoQuery)
-            ->pluck('campanha')
-            ->map(fn($campanha) => (int) $campanha)
-            ->toArray();
-
-        $campanhasDisponiveis = collect(range(1, 10))
-            ->reject(fn($campanha) => in_array($campanha, $campanhasUsadas))
-            ->values()
-            ->all();
-
         $temasFiltro = (clone $baseContextoQuery)
             ->get()
             ->pluck('servico.tema')
@@ -166,7 +156,6 @@ class ImportadorService extends BaseModelService
             'modulos' => $modulos,
             'importadores' => $importadores,
             'contextoImportador' => $contexto,
-            'campanhasDisponiveis' => $campanhasDisponiveis,
             'modulosFiltro' => $modulosFiltro,
             'temasFiltro' => $temasFiltro,
             'campanhasFiltro' => $campanhasFiltro,

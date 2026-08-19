@@ -12,8 +12,8 @@ const adicionarCampo = () => {
     props.form.campos.push({
         nome_campo: null,
         tipo: null,
-        obrigatorio: null,
-        regra: null,
+        obrigatorio: false,
+        regra: false,
         valor_min: null,
         valor_max: null,
         max_caracteres: null,
@@ -23,14 +23,14 @@ const adicionarCampo = () => {
 
 const verificarCamposTipo = (key) => {
     const campo = props.form.campos[key]
-    if(!campo) return
+    if (!campo) return
 
     const regrasPorTipo = {
         inteiro: ['max_caracteres'],
         decimal: ['max_caracteres'],
         texto: ['valor_min', 'valor_max'],
     }
-    
+
     const todosCampos = ['max_caracteres', 'valor_min', 'valor_max']
     const camposParaResetar = regrasPorTipo[campo.tipo] || todosCampos
 
@@ -42,47 +42,85 @@ const verificarCamposTipo = (key) => {
 }
 
 const removeCampo = (key) => {
-    if(!props.form.campos[key]) return
+    if (!props.form.campos[key]) return
 
     props.form.campos.splice(key, 1)
 }
 
 const validaCampos = () => {
+    let possuiErro = false
 
-    let validacoesNulos = false
+    props.form.campos.forEach(campo => {
 
-    props.form.campos.forEach(campos => {
-
-        const keys = Object.keys(campos)
-        keys.forEach(key => {
-
-            delete campos[`validaCampo_${key}`]
-
-            if(key === 'obrigatorio') return
-            if(key === 'regra') return
-
-            if(['valor_min', 'valor_max'].includes(key)) {
-
-                if(!campos.regra) return
-
-                if(!['inteiro', 'decimal'].includes(campos.tipo)) return
-            }
-
-            if(['max_caracteres'].includes(key)) {
-
-                if(!campos.regra) return
-
-                if(!['texto'].includes(campos.tipo)) return
-            }
-
-            if(campos[key] === null || campos[key] === '') {
-                campos[`validaCampo_${key}`] = true
-                validacoesNulos = true
+        Object.keys(campo).forEach(key => {
+            if (key.startsWith('validaCampo_')) {
+                delete campo[key]
             }
         })
+
+        if (
+            campo.nome_campo === null ||
+            campo.nome_campo === undefined ||
+            String(campo.nome_campo).trim() === ''
+        ) {
+            campo.validaCampo_nome_campo = true
+            possuiErro = true
+        }
+
+        if (
+            campo.tipo === null ||
+            campo.tipo === undefined ||
+            campo.tipo === ''
+        ) {
+            campo.validaCampo_tipo = true
+            possuiErro = true
+        }
+
+        if (
+            campo.valor_exemplo === null ||
+            campo.valor_exemplo === undefined ||
+            campo.valor_exemplo === ''
+        ) {
+            campo.validaCampo_valor_exemplo = true
+            possuiErro = true
+        }
+
+        if (
+            campo.regra &&
+            ['inteiro', 'decimal'].includes(campo.tipo)
+        ) {
+            if (
+                campo.valor_min === null ||
+                campo.valor_min === ''
+            ) {
+                campo.validaCampo_valor_min = true
+                possuiErro = true
+            }
+
+            if (
+                campo.valor_max === null ||
+                campo.valor_max === ''
+            ) {
+                campo.validaCampo_valor_max = true
+                possuiErro = true
+            }
+        }
+
+        if (
+            campo.regra &&
+            campo.tipo === 'texto'
+        ) {
+            if (
+                campo.max_caracteres === null ||
+                campo.max_caracteres === ''
+            ) {
+                campo.validaCampo_max_caracteres = true
+                possuiErro = true
+            }
+        }
     })
 
-    return validacoesNulos
+    return possuiErro
 }
 
 const defineTipoCampo = (tipo) => {
@@ -101,16 +139,19 @@ defineExpose({ validaCampos })
     <div class="card-header justify-content-between">
         <h3 class="my-0">Campos e Validações</h3>
         <div class="d-flex gap-2">
-            <a v-if="form.id && form.campos.length" :href="route('modulos.config-modulos.gerar-planilha-modelo', [form.id])" 
-                class="btn bg-gray-700" target="_blank"> 
+            <a v-if="form.id && form.campos.length"
+                :href="route('modulos.config-modulos.gerar-planilha-modelo', [form.id])" class="btn bg-gray-700"
+                target="_blank">
                 <IconDownload class="me-2" /> Gerar Planilha Modelo
             </a>
-            <button type="button" @click="adicionarCampo" class="btn btn-secondary"> <IconCirclePlus class="me-2" /> Adicionar Campo</button>
+            <button type="button" @click="adicionarCampo" class="btn btn-secondary">
+                <IconCirclePlus class="me-2" /> Adicionar Campo
+            </button>
         </div>
     </div>
     <div class="card-body">
 
-        <InputError class="mb-2" :message="form.errors.campos"/>
+        <InputError class="mb-2" :message="form.errors.campos" />
 
         <div class="table-responsive">
             <table class="table table-bordered">
@@ -131,35 +172,49 @@ defineExpose({ validaCampos })
                     <tr v-for="(c, key) in form.campos" :key="key">
                         <td class="text-center">
                             <input type="text" v-model="c.nome_campo" placeholder="Nome do campo" class="form-control"
-                                :class="c.validaCampo_nome_campo ? 'border-danger' : ''"/>
+                                :class="c.validaCampo_nome_campo ? 'border-danger' : ''" />
                         </td>
                         <td class="text-center">
                             <select @change="verificarCamposTipo(key)" v-model="c.tipo" class="form-select"
                                 :class="c.validaCampo_tipo ? 'border-danger' : ''">
-                                <option v-for="t in tipos" :key="t.value" :value="t.value">{{t.label}}</option>
+                                <option :value="null">
+                                    Selecione
+                                </option>
+
+                                <option v-for="t in tipos" :key="t.value" :value="t.value">
+                                    {{ t.label }}
+                                </option>
                             </select>
                         </td>
                         <td class="text-center align-middle">
-                            <input type="checkbox" @change="selecionarCheckbox(c, 'obrigatorio', $event)" :checked="c.obrigatorio ? true : false" class="form-checkbox"/>
+                            <input type="checkbox" @change="selecionarCheckbox(c, 'obrigatorio', $event)"
+                                :checked="c.obrigatorio ? true : false" class="form-checkbox" />
                         </td>
                         <td class="text-center align-middle">
-                            <input type="checkbox" @change="selecionarCheckbox(c, 'regra', $event)" :checked="c.regra" class="form-checkbox"/>
+                            <input type="checkbox" @change="selecionarCheckbox(c, 'regra', $event)" :checked="c.regra"
+                                class="form-checkbox" />
                         </td>
                         <td class="text-center">
-                            <input type="number" v-model="c.valor_min" :disabled="!c.regra || !['inteiro', 'decimal'].includes(c.tipo)" class="form-control" 
-                                :class="c.validaCampo_valor_min ? 'border-danger' : ''" :step="c.tipo === 'decimal' ? 'any' : '0'"/>
+                            <input type="number" v-model="c.valor_min"
+                                :disabled="!c.regra || !['inteiro', 'decimal'].includes(c.tipo)" class="form-control"
+                                :class="c.validaCampo_valor_min ? 'border-danger' : ''"
+                                :step="c.tipo === 'decimal' ? 'any' : '1'" />
                         </td>
                         <td class="text-center">
-                            <input type="number" v-model="c.valor_max" :disabled="!c.regra || !['inteiro', 'decimal'].includes(c.tipo)" class="form-control" 
-                                :class="c.validaCampo_valor_max ? 'border-danger' : ''" :step="c.tipo === 'decimal' ? 'any' : '0'"/>
+                            <input type="number" v-model="c.valor_max"
+                                :disabled="!c.regra || !['inteiro', 'decimal'].includes(c.tipo)" class="form-control"
+                                :class="c.validaCampo_valor_max ? 'border-danger' : ''"
+                                :step="c.tipo === 'decimal' ? 'any' : '1'" />
                         </td>
                         <td class="text-center">
-                            <input type="number" v-model="c.max_caracteres" :disabled="!c.regra || !['texto'].includes(c.tipo)" class="form-control" 
-                                :class="c.validaCampo_max_caracteres ? 'border-danger' : ''"/>
+                            <input type="number" v-model="c.max_caracteres"
+                                :disabled="!c.regra || !['texto'].includes(c.tipo)" class="form-control"
+                                :class="c.validaCampo_max_caracteres ? 'border-danger' : ''" />
                         </td>
                         <td class="text-center">
-                            <input :type="defineTipoCampo(c.tipo)" v-model="c.valor_exemplo" class="form-control" 
-                                :class="c.validaCampo_valor_exemplo ? 'border-danger' : ''"/>
+                            <input :type="defineTipoCampo(c.tipo)" v-model="c.valor_exemplo" class="form-control"
+                                :class="c.validaCampo_valor_exemplo ? 'border-danger' : ''"
+                                :step="c.tipo === 'decimal' ? 'any' : c.tipo === 'inteiro' ? '1' : undefined" />
                         </td>
                         <td class="text-center">
                             <button type="button" @click="removeCampo(key)" class="btn btn-sm btn-danger">
@@ -175,7 +230,7 @@ defineExpose({ validaCampos })
 
 <style scoped>
 input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+    width: 20px;
+    height: 20px;
 }
 </style>

@@ -47,49 +47,64 @@ const importarPlanilhaModelo = async ({ target }) => {
         return
     }
 
-    processarCamposPlanilha(arquivo)
+    await processarCamposPlanilha(arquivo)
 }
 
 const processarCamposPlanilha = async (arquivo) => {
     props.form.planilha_modelo = arquivo
 
-    const headers = { 'Content-Type': 'multipart/form-data' }
     const formData = new FormData()
-    formData.append('arquivo', props.form.planilha_modelo)
+    formData.append('arquivo', arquivo)
 
     delete props.form.errors.planilha_modelo
 
     loadPlanilhaModelo.value = true
 
-    await axios.post(route('modulos.config-modulos.processar-campos-planilha'), formData, { headers })
-        .then(resp => {
-            let campos = resp.data
+    try {
 
-            if (!Array.isArray(campos)) {
-                campos = Object.values(campos)
-            }
-
-            props.form.campos = campos.map(campo => {
-                return {
-                    nome_campo: campo,
-                    tipo: 'texto',
-                    obrigatorio: null,
-                    regra: null,
-                    valor_min: null,
-                    valor_max: null,
-                    max_caracteres: null,
-                    valor_exemplo: null,
+        const resp = await axios.post(
+            route('modulos.config-modulos.processar-campos-planilha'),
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
                 }
-            })
-        })
-        .catch(err => {
-            props.form.errors.planilha_modelo = err.response.data?.message
-            props.form.planilha_modelo = null
+            }
+        )
 
-            document.getElementById('planilha_modelo').value = ''
+        const campos = resp.data.colunas ?? []
+
+        props.form.campos = campos.map(campo => {
+            return {
+                nome_campo: campo,
+                tipo: null,
+                obrigatorio: false,
+                regra: false,
+                valor_min: null,
+                valor_max: null,
+                max_caracteres: null,
+                valor_exemplo: null,
+            }
         })
 
-    loadPlanilhaModelo.value = false
+    } catch (err) {
+
+        props.form.errors.planilha_modelo =
+            err.response?.data?.message ??
+            'Erro ao processar a planilha.'
+
+        props.form.planilha_modelo = null
+
+        const input = document.getElementById('planilha_modelo')
+
+        if (input) {
+            input.value = ''
+        }
+
+    } finally {
+
+        loadPlanilhaModelo.value = false
+    }
 }
 </script>
 <template>
@@ -165,7 +180,8 @@ const processarCamposPlanilha = async (arquivo) => {
                 <InputError :message="form.errors.planilha_modelo" />
 
                 <small class="text-secondary">
-                    Envie uma planilha modelo. Se contiver dados de exemplo, os tipos serão detectados automaticamente.
+                    Envie uma planilha modelo. Os títulos das colunas serão importados
+                    automaticamente e as validações poderão ser configuradas manualmente.
                 </small>
             </div>
         </div>

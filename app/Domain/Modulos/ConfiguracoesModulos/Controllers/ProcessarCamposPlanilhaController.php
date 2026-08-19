@@ -12,7 +12,7 @@ class ProcessarCamposPlanilhaController extends Controller
     public function __construct(
         private ProcessarCamposPlanilhaService $service
     ) {
-        // 
+        //
     }
 
     public function processarCamposPlanilha(ProcessarCamposPlanilhaRequest $request): JsonResponse
@@ -23,6 +23,8 @@ class ProcessarCamposPlanilhaController extends Controller
             return response()->json(['message' => $data['message']], 422);
         }
 
-        return response()->json($data['colunas']);
+        return response()->json([
+            'colunas' => $data['colunas'],
+        ]);
     }
 }
