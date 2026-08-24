@@ -24,13 +24,19 @@ class ImportadorController extends Controller
     {
         $searchParams = $request->all('columns', 'value');
 
-        $contexto = $request->only([
-            'contrato_id',
-            'modulo_id',
-            'servico_id',
-            'tema_id',
-            'origem_servico',
-        ]);
+        $contexto = [
+            'contrato_id' => $request->input('contrato_id'),
+            'modulo_id' => $request->input('modulo_id'),
+            'servico_id' => $request->input('servico_id'),
+            'tema_id' => $request->input('tema_id'),
+            'origem_servico' => $request->boolean('origem_servico'),
+            'origem_fiscal' => $request->boolean('origem_fiscal'),
+            'modo_fiscal' => $request->boolean('modo_fiscal') || $request->boolean('origem_fiscal'),
+        ];
+
+        $contexto = array_filter($contexto, function ($valor) {
+            return $valor !== null && $valor !== '';
+        });
 
         if (!empty($contexto['servico_id'])) {
             $servico = Servicos::query()

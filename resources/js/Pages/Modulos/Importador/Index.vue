@@ -79,6 +79,10 @@ const servicosUrl = computed(() => {
         return route("modulos.importador.index");
     }
 
+    if (modoFiscal.value) {
+        return route("fiscal.dados.servicos.index", props.contextoImportador.contrato_id);
+    }
+
     return route("contratos.contratada.servicos.index", props.contextoImportador.contrato_id);
 });
 
@@ -88,10 +92,21 @@ const contextoFormulario = computed(() => ({
     servico_id: props.contextoImportador.servico_id,
     tema_id: props.contextoImportador.tema_id,
     origem_servico: props.contextoImportador.origem_servico,
+    origem_fiscal: props.contextoImportador.origem_fiscal,
+    modo_fiscal: props.contextoImportador.modo_fiscal,
 }));
 
 const veioDoServico = computed(() => {
     return !!props.contextoImportador?.origem_servico;
+});
+
+const modoFiscal = computed(() => {
+    return props.contextoImportador?.modo_fiscal === true
+        || props.contextoImportador?.modo_fiscal === "true"
+        || Number(props.contextoImportador?.modo_fiscal) === 1
+        || props.contextoImportador?.origem_fiscal === true
+        || props.contextoImportador?.origem_fiscal === "true"
+        || Number(props.contextoImportador?.origem_fiscal) === 1;
 });
 
 const filtroTemaBloqueado = computed(() => {
@@ -394,13 +409,14 @@ const removerImportacao = (id) => {
             </div>
             <div class="row mb-3">
                 <div class="col-lg-auto ms-auto d-flex justify-content-end gap-2">
-                    <a v-if="podeBaixarModeloVinculado" :href="linkModeloPlanilha" class="btn btn-info" target="_blank"
-                        title="Baixar modelo da planilha vinculada ao serviço">
+                    <a v-if="podeBaixarModeloVinculado && !modoFiscal" :href="linkModeloPlanilha" class="btn btn-info"
+                        target="_blank" title="Baixar modelo da planilha vinculada ao serviço">
                         <IconDownload class="me-2" />
                         Baixar modelo
                     </a>
 
-                    <Link :href="route('modulos.importador.formulario', contextoFormulario)" class="btn btn-success">
+                    <Link v-if="!modoFiscal" :href="route('modulos.importador.formulario', contextoFormulario)"
+                        class="btn btn-success">
                         <IconCirclePlus class="me-2" />
                         {{ veioDoServico ? 'Importar planilha' : 'Nova Importação' }}
                     </Link>
@@ -478,6 +494,8 @@ const removerImportacao = (id) => {
                                         servico_id: contextoImportador.servico_id ?? item.servico_id,
                                         tema_id: contextoImportador.tema_id ?? item.servico?.tema_servico,
                                         origem_servico: contextoImportador.origem_servico ?? !!item.servico_id,
+                                        origem_fiscal: contextoImportador.origem_fiscal,
+                                        modo_fiscal: contextoImportador.modo_fiscal,
                                     })" type="button" class="btn btn-sm btn-info" title="Abrir importação">
                                         <IconEye />
                                     </Link>
@@ -487,8 +505,8 @@ const removerImportacao = (id) => {
                                         <IconFileCertificate />
                                     </button>
 
-                                    <button v-if="item.status == 1" @click="removerImportacao(item.id)" type="button"
-                                        class="btn btn-sm btn-danger" title="Excluir importação">
+                                    <button v-if="item.status == 1 && !modoFiscal" @click="removerImportacao(item.id)"
+                                        type="button" class="btn btn-sm btn-danger" title="Excluir importação">
                                         <IconTrash />
                                     </button>
                                 </template>

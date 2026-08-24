@@ -45,6 +45,15 @@ const toNumberOrNull = (valor) => {
 
 const labelBreadcrumb = computed(() => props.moduloImportador?.id ? "Importação" : "Nova Importação");
 
+const modoFiscal = computed(() => {
+    return props.contextoImportador?.modo_fiscal === true
+        || props.contextoImportador?.modo_fiscal === "true"
+        || Number(props.contextoImportador?.modo_fiscal) === 1
+        || props.contextoImportador?.origem_fiscal === true
+        || props.contextoImportador?.origem_fiscal === "true"
+        || Number(props.contextoImportador?.origem_fiscal) === 1;
+});
+
 const form = useForm({
     mes_ano_referencia: null,
     campanha: null,
@@ -96,6 +105,8 @@ const montarContextoIndex = () => {
     const servicoId = form.servico_id ?? props.contextoImportador?.servico_id;
     const temaId = props.contextoImportador?.tema_id;
     const origemServico = props.contextoImportador?.origem_servico;
+    const origemFiscal = props.contextoImportador?.origem_fiscal;
+    const modoFiscalContexto = props.contextoImportador?.modo_fiscal;
 
     if (contratoId) {
         params.contrato_id = contratoId;
@@ -115,6 +126,14 @@ const montarContextoIndex = () => {
 
     if (origemServico) {
         params.origem_servico = origemServico;
+    }
+
+    if (origemFiscal) {
+        params.origem_fiscal = origemFiscal;
+    }
+
+    if (modoFiscalContexto) {
+        params.modo_fiscal = modoFiscalContexto;
     }
 
     return params;
@@ -165,6 +184,11 @@ const atualizarTabelaPlanilha = async () => {
 };
 
 const importar = async (enviarAnalise = false) => {
+
+    if (modoFiscal.value) {
+        return;
+    }
+
     if (form.fotos.length && CardFotosRef.value?.validarCampos?.()) {
         return;
     }
@@ -296,6 +320,11 @@ const tratarErroImportacao = (errors = {}, titulo = "Erro ao importar") => {
 };
 
 const importarSomentePlanilha = () => {
+
+    if (modoFiscal.value) {
+        return;
+    }
+
     if (form.processing || importandoPlanilha.value) {
         return;
     }
@@ -400,21 +429,22 @@ const importarSomentePlanilha = () => {
                 <div class="d-flex flex-column gap-4 flex-grow-1 mb-4">
                     <CardInformacoesGerais ref="CardInformacoesGeraisRef" :form="form" :modulos="modulos"
                         :contratos="contratos" :tem-dados-planilha="temDadosPlanilha" :licencas="licencas"
-                        :contexto-importador="contextoImportador" @importar-planilha="importarSomentePlanilha" />
+                        :contexto-importador="contextoImportador" :modo-fiscal="modoFiscal"
+                        @importar-planilha="importarSomentePlanilha" />
 
-                    <CardDadosPlanilha v-if="form.id" ref="CardDadosPlanilhaRef" :form="form"
+                    <CardDadosPlanilha v-if="form.id" ref="CardDadosPlanilhaRef" :form="form" :modo-fiscal="modoFiscal"
                         @tem-dados-changed="temDadosPlanilha = $event" />
 
-                    <CardPareceres :form="form" />
+                    <CardPareceres :form="form" :modo-fiscal="modoFiscal" />
 
-                    <CardFotos :form="form" ref="CardFotosRef" />
+                    <CardFotos :form="form" :modo-fiscal="modoFiscal" ref="CardFotosRef" />
 
-                    <CardAnexos :form="form" ref="CardAnexosRef" />
+                    <CardAnexos :form="form" :modo-fiscal="modoFiscal" ref="CardAnexosRef" />
                 </div>
 
                 <div class="card-body">
                     <div class="d-flex justify-content-end gap-2">
-                        <template v-if="[1, 3, null].includes(form.status)">
+                        <template v-if="!modoFiscal && [1, 3, null].includes(form.status)">
                             <button type="button" class="btn btn-light"
                                 :disabled="form.processing || importandoPlanilha || arquivoPendenteEmNovoRegistro"
                                 @click="importar(false)"

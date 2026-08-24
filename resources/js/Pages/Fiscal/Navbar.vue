@@ -32,9 +32,9 @@ const props = defineProps({
                                 <div class="col">
                                     <ul class="navbar-nav">
                                         <NavLink route-name="fiscal.dados.servicos.index" :param="contrato.id"
-                                            title="Serviços" :icon="IconLayoutDashboard" />
+                                            title="Módulo de Serviços" :icon="IconLayoutDashboard" />
 
-                                        <NavDropdown prefix="fiscal.configuracoes*" title="Configurações"
+                                        <!-- <NavDropdown prefix="fiscal.configuracoes*" title="Configurações"
                                             :icon="IconLayoutDashboard">
                                             <NavDropdownLink route-name="fiscal.configuracoes.afugentamento.index"
                                                 :route-param="{ contrato: contrato.id }"
@@ -60,12 +60,12 @@ const props = defineProps({
                                                 :route-param="{ contrato: contrato.id }"
                                                 active-on-route-prefix="fiscal.configuracoes.atropelamento*"
                                                 title="Fauna - Atropelamento da Fauna" />
-                                        </NavDropdown>
+                                        </NavDropdown> -->
 
-                                        <NavLink route-name="fiscal.rnc.index" :param="contrato.id" title="RNC"
-                                            active-on-route-prefix="fiscal.rnc*" :icon="IconLayoutDashboard" />
+                                        <!-- <NavLink route-name="fiscal.rnc.index" :param="contrato.id" title="RNC"
+                                            active-on-route-prefix="fiscal.rnc*" :icon="IconLayoutDashboard" /> -->
 
-                                        <NavDropdown prefix="fiscal.relatorio*" title="Relatórios"
+                                        <!-- <NavDropdown prefix="fiscal.relatorio*" title="Relatórios"
                                             :icon="IconLayoutDashboard">
 
                                             <NavDropdownLink route-name="fiscal.relatorio.afugentamento.index"
@@ -92,7 +92,7 @@ const props = defineProps({
                                                 :route-param="{ contrato: contrato.id }"
                                                 active-on-route-prefix="fiscal.relatorio.atropelamento*"
                                                 title="Fauna - Atropelamento da Fauna" />
-                                        </NavDropdown>
+                                        </NavDropdown> -->
 
                                         <!-- <NavLink route-name="contratos.contratada.dados_gerais.index"
                                             :param="contrato.id" title="Acompanhamentos" :icon="IconLayoutDashboard" /> -->
