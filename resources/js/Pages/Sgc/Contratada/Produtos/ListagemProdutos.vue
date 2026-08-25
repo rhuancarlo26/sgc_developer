@@ -275,7 +275,7 @@ const goToCreate = () => {
   const subproduto = selectedSubproduto.value;
   router.get(
     route(createRoute, [props.contrato, selectedProduto.value]),
-    { subproduto },
+    { subproduto, novo: true },
     {
       preserveState: true,
       preserveScroll: true,
@@ -296,7 +296,7 @@ const continuarCampanha = (campanha) => {
 
     router.get(
         route(config.value.rotaNome.create, [props.contrato, selectedProduto.value]),
-        { subproduto: campanha.subproduto },
+        { subproduto: campanha.subproduto, id: campanha.id },
         { preserveState: true, preserveScroll: true }
     );
 };
@@ -316,6 +316,43 @@ const visualizarCampanha = (campanha, modulo = null) => {
     router.get(
       route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
       { subproduto: campanha.subproduto, paipa_id: campanha.id },
+      { preserveState: true, preserveScroll: true }
+    );
+    return;
+  }
+
+  if (isProdutoPmqa.value) {
+    let targetRoute = 'sgc.contratada.produtos.create';
+    let paramsObj = { subproduto: campanha.subproduto, id: campanha.id };
+
+    if (campanha.status_apresentacao === 'Aprovada') {
+      if (campanha.status_configuracao === 'Aprovada') {
+        if (campanha.status_execucao === 'Aprovada') {
+          if (campanha.status_resultado === 'Aprovada') {
+             targetRoute = 'contratos.contratada.relatorio.pmqa.relatorio.index';
+             paramsObj = { pmqa: campanha.id };
+          } else {
+             targetRoute = 'contratos.contratada.sgc.pmqa.resultado.index';
+             paramsObj = { pmqa: campanha.id };
+          }
+        } else {
+           targetRoute = 'contratos.contratada.sgc.pmqa.execucao.index';
+           paramsObj = { pmqa: campanha.id };
+        }
+      } else {
+         targetRoute = 'contratos.contratada.sgc.pmqa.configuracao.ponto.index';
+         paramsObj = { pmqa: campanha.id };
+      }
+    }
+
+    let routeParams = [props.contrato, selectedProduto.value];
+    if (targetRoute !== 'sgc.contratada.produtos.create') {
+        routeParams.push(campanha.id);
+    }
+
+    router.get(
+      route(targetRoute, routeParams),
+      paramsObj,
       { preserveState: true, preserveScroll: true }
     );
     return;
@@ -726,7 +763,7 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
                               v-if="deveExibirAcao('gerenciar') && campanha.status?.trim() === 'Em elaboração'"
                               type-button="primary"
                               title="Gerenciar"
-                              @click="gerenciarCampanha(campanha.id)"
+                              @click="visualizarCampanha(campanha)"
                             />
 
                             <!-- Continuar (Em elaboração, não é perfil 3) -->

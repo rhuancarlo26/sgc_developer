@@ -25,6 +25,7 @@ class ResultadoController extends Controller
       'contrato' => $contrato,
       'produto' => $produto,
       'pmqa' => $pmqa,
+      'canApprove' => auth()->user()->hasAnyRole(['Administrador', 'Fiscal']),
       ...$response
     ]);
   }

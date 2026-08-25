@@ -10,18 +10,18 @@ const props = defineProps({
 const parametrosVinculados = computed(() => {
     let parametrosUnicos = new Array();
 
-    parametrosUnicos = props.relatorio?.resultado?.campanhas.flatMap(campanha => campanha.pontos.flatMap(ponto => ponto.lista?.parametros).filter(parametro => parametro !== null && parametro !== undefined).reduce((acc, curr) => {
+    parametrosUnicos = props.relatorio?.resultado?.campanhas?.flatMap(campanha => campanha.pontos?.flatMap(ponto => ponto.lista?.parametros).filter(parametro => parametro !== null && parametro !== undefined).reduce((acc, curr) => {
         if (curr && !acc.some(item => item.id === curr.id)) {
             acc.push(curr);
         }
         return acc;
-    }, []));
+    }, [])) ?? [];
 
     let parametrosCompletos = [];
 
     if (parametrosUnicos) {
         parametrosCompletos = parametrosUnicos.map(parametro => {
-            let analise = props.relatorio.resultado?.analises.find(analise => analise.parametro_id === parametro.id);
+            let analise = props.relatorio.resultado?.analises?.find(analise => analise.parametro_id === parametro.id);
             if (analise) {
                 return {
                     ...parametro,
@@ -52,7 +52,7 @@ const chartDataIqa = computed(() => {
             }
 
             if (medicao?.iqa !== null && medicao?.iqa !== undefined) {
-                data.push(medicao.iqa);
+                data.push(Number(medicao.iqa));
             }
         });
 
@@ -80,7 +80,7 @@ const chartDataParametro = (parametroId) => {
             const ponto = campanhaPonto.ponto;
             const medicoes = campanhaPonto.medicao?.parametros
                 ?.filter(medicaoParametro => Number(medicaoParametro.parametro_id) === Number(parametroId))
-                ?.map(medicaoParametro => medicaoParametro.medicao) ?? [];
+                ?.map(medicaoParametro => Number(medicaoParametro.medicao)) ?? [];
 
             if (medicoes.length) {
                 maxSize = Math.max(maxSize, medicoes.length);

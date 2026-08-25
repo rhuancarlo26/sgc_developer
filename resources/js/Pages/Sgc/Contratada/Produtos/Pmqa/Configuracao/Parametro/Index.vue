@@ -18,6 +18,7 @@ const props = defineProps({
     listas: { type: Object },
     aprovacao: { type: Object },
     produto: { type: Object },
+    canApprove: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["next", "prev"]);
@@ -41,7 +42,7 @@ const ap = (ap) => {
 <template #body>
     <ModelSearchFormAllColumns
         :columns="['nome', 'parametros?.nome']"
-        v-if="ap(aprovacao)"
+        v-if="!canApprove && ap(aprovacao)"
     >
         <template #action>
             <NavButton
@@ -53,7 +54,7 @@ const ap = (ap) => {
     </ModelSearchFormAllColumns>
 
     <Table
-        :columns="['Nome', 'Parâmetros', 'Ação']"
+        :columns="!canApprove && ap(aprovacao) ? ['Nome', 'Parâmetros', 'Ação'] : ['Nome', 'Parâmetros']"
         :records="listas"
         table-class="table-hover"
     >
@@ -71,7 +72,7 @@ const ap = (ap) => {
                         </span>
                     </p>
                 </td>
-                <td v-if="ap(aprovacao)">
+                <td v-if="!canApprove && ap(aprovacao)">
                     <div class="d-flex">
                         <NavButton
                             :icon="IconPencil"

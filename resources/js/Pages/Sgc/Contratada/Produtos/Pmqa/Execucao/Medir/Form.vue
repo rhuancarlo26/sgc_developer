@@ -5,7 +5,7 @@ import { IconDeviceFloppy } from "@tabler/icons-vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import { onMounted, ref } from "vue";
-import ProdutoTabsLayout from "../../../ProdutoTabsLayout.vue";
+import ProdutoTabsLayout from "../../ProdutoTabsLayout.vue";
 
 const props = defineProps({
     contrato: { type: Object },
@@ -13,7 +13,11 @@ const props = defineProps({
     pmqa:     { type: Object },
     campanha: { type: Object },
     ponto:    { type: Object },
+    canApprove: { type: Boolean, default: false },
 });
+
+import { computed } from "vue";
+const isReadonly = computed(() => props.canApprove || (!props.canApprove && props.pmqa?.status_execucao !== 'Em elaboração' && props.pmqa?.status_execucao !== 'Reprovada'));
 
 const form = useForm({
     id:               null,
@@ -99,7 +103,7 @@ const activeTab = ref("execucao");
             <div class="row mb-4">
                 <div class="col d-flex align-self-end">
                     <label class="form-check">
-                        <input class="form-check-input" type="checkbox" v-model="form.medido" />
+                        <input class="form-check-input" type="checkbox" v-model="form.medido" :disabled="isReadonly" />
                         <span class="form-check-label">Não foi possível realizar a medição</span>
                     </label>
                     <InputError :message="form.errors.medido" />
@@ -129,7 +133,7 @@ const activeTab = ref("execucao");
                                     <input
                                         type="text"
                                         class="form-control"
-                                        v-model="form.iqa"
+                                        v-model="form.iqa" :disabled="isReadonly"
                                         placeholder="Informe o valor do IQA"
                                     />
                                 </td>
@@ -153,7 +157,7 @@ const activeTab = ref("execucao");
                                     <input
                                         type="text"
                                         class="form-control"
-                                        v-model="form.parametros[vinculado.parametro.id]"
+                                        v-model="form.parametros[vinculado.parametro.id]" :disabled="isReadonly"
                                     />
                                 </td>
                             </tr>
@@ -172,7 +176,7 @@ const activeTab = ref("execucao");
                         name="observacao"
                         id="observacao"
                         rows="5"
-                        v-model="form.observacao"
+                        v-model="form.observacao" :disabled="isReadonly"
                     ></textarea>
                     <InputError :message="form.errors.observacao" />
                 </div>
@@ -182,7 +186,8 @@ const activeTab = ref("execucao");
             <div class="d-flex justify-content-between mt-4">
                 <NavButton @click="voltar" type-button="secondary" title="Voltar" />
                 <NavButton
-                    @click="saveMedicao()"
+                    v-if="!isReadonly"
+                                        @click="saveMedicao()"
                     type-button="success"
                     :icon="IconDeviceFloppy"
                     :title="form.id ? 'Alterar' : 'Salvar'"
@@ -207,7 +212,8 @@ const activeTab = ref("execucao");
                                     />
                                 </div>
                                 <div class="col-auto">
-                                    <NavButton @click="saveArquivo()" type-button="success" title="Salvar" />
+                                    <NavButton v-if="!isReadonly"
+                                        @click="saveArquivo()" type-button="success" title="Salvar" />
                                 </div>
                             </div>
                             <InputError :message="form.errors.arquivo" />

@@ -17,6 +17,7 @@ const props = defineProps({
     produto: { type: [Object, String] },
     contratos: { type: Object },
     pmqa: { type: Object },
+    canApprove: { type: Boolean, default: false },
 });
 
 
@@ -62,7 +63,7 @@ const atualizarListaDePontos = () => {
     <div class="card">
         <div class="card-body">
             <h2>Pontos de coleta</h2>
-            <div class="d-flex justify-content-end mb-3">
+            <div class="d-flex justify-content-end mb-3" v-if="!canApprove">
                 <a class="btn btn-info me-1" target="_blank"
                 :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.download_modelo')">Modelo</a>
                 <NavButton
@@ -86,7 +87,7 @@ const atualizarListaDePontos = () => {
                     'Bacia hidrografica',
                     'Km rodovia',
                     'Estaca',
-                    'Ação',
+                    ...(canApprove ? [] : ['Ação']),
                 ]"
                 :records="pontosTable"
                 table-class="table-hover"
@@ -119,7 +120,7 @@ const atualizarListaDePontos = () => {
                         <td class="text-center">
                             {{ item.estaca }}
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" v-if="!canApprove">
                             <div class="acao-btns">
                                 <NavButton
                                     type-button="info"
@@ -129,6 +130,7 @@ const atualizarListaDePontos = () => {
                                 />
 
                                 <NavButton
+                                    v-if="!canApprove"
                                     type-button="primary"
                                     class="btn-icon"
                                     :icon="IconPencil"
@@ -136,6 +138,7 @@ const atualizarListaDePontos = () => {
                                 />
 
                                 <SgcLinkConfirmation
+                                    v-if="!canApprove"
                                     v-slot="confirmation"
                                     :options="{
                                         text: 'A remoção de um ponto será permanente.',
@@ -146,16 +149,11 @@ const atualizarListaDePontos = () => {
                                         :href="
                                             route(
                                                 'contratos.contratada.sgc.pmqa.configuracao.ponto.delete',
-                                                {
-                                                    contrato: contratoId,
-                                                    produto: props.produto.slug,
-                                                    pmqa: props.pmqa?.id,
-                                                    ponto: item.id,
-                                                },
+                                                [props.contratos.id, typeof props.produto === 'string' ? props.produto.toLowerCase() : props.produto.slug, props.pmqa.id, item.id],
                                             )
                                         "
-                                        as="button"
                                         method="delete"
+                                        as="button"
                                         type="button"
                                         class="btn btn-icon btn-danger"
                                     >

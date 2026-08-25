@@ -76,6 +76,7 @@ class IndexController extends Controller
             'vinculacoes' => $vinculacoes,
             'pontosVinculados' => $pontosVinculados,
             'campanhas' => $campanhas,
+            'canApprove' => auth()->user()->hasAnyRole(['Administrador', 'Fiscal']),
         ]);
     }
 

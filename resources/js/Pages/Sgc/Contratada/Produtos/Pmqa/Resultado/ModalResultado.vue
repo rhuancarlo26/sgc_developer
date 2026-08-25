@@ -15,7 +15,10 @@ const props = defineProps({
     campanhas: { type: Array },
     pmqa: { type: Object },
     produto: { type: Object },
+    canApprove: { type: Boolean, default: false },
 });
+
+const isReadonly = computed(() => props.canApprove || (!props.canApprove && props.pmqa?.status_resultado !== 'Em elaboração' && props.pmqa?.status_resultado !== 'Reprovada'));
 
 const modalResultado = ref();
 let message = ref(null);
@@ -126,7 +129,7 @@ defineExpose({ abrirModal });
                             name="nome"
                             id="nome"
                             class="form-control"
-                            v-model="form.nome"
+                            v-model="form.nome" :disabled="isReadonly"
                         />
                         <InputError :message="form.errors.justificativa" />
                     </div>
@@ -137,7 +140,7 @@ defineExpose({ abrirModal });
                                 <v-select
                                     :options="campanhas"
                                     label="nome_campanha"
-                                    v-model="form.campanha"
+                                    v-model="form.campanha" :disabled="isReadonly"
                                 >
                                     <template #no-options="{}">
                                         Nenhum registro encontrado.
@@ -146,6 +149,7 @@ defineExpose({ abrirModal });
                             </div>
                             <div class="col-auto">
                                 <NavButton
+                                    v-if="!isReadonly"
                                     @click="adicionarCampanha()"
                                     type-button="success"
                                     title="Salvar"
@@ -181,6 +185,7 @@ defineExpose({ abrirModal });
                                     <td>{{ campanha.nome_campanha }}</td>
                                     <td>
                                         <NavButton
+                                            v-if="!isReadonly"
                                             @click="removerCampanha(index)"
                                             :icon="IconTrash"
                                             class="btn-icon"
@@ -196,6 +201,7 @@ defineExpose({ abrirModal });
         </template>
         <template #footer>
             <NavButton
+                v-if="!isReadonly"
                 @click="salvarResultado()"
                 type-button="success"
                 :icon="IconDeviceFloppy"

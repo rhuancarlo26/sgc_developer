@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
 import { Head, router, usePage } from "@inertiajs/vue3";
-import NavbarContrato from "../NavbarContrato.vue";
+import NavbarContrato from "../../NavbarContrato.vue";
 import { computed } from "vue";
 
 const props = defineProps({
@@ -31,21 +31,19 @@ const podeGerenciarPmqa = computed(() =>
 
 const setTab = (tab) => {
   if (tab === "apresentacao") {
-    emit("update:activeTab", "apresentacao");
+    router.visit(
+      route("sgc.contratada.produtos.create", [props.contratos.id, produtoParam.value]),
+      { data: { id: pmqaId.value, tab: "apresentacao", subStep: 1 }, preserveScroll: true }
+    );
     return;
   }
 
-  if (!podeGerenciarPmqa.value) {
-    return;
-  }
+  // Navigation allowed in all statuses
 
   const baseParams = [props.contratos.id, produtoParam.value, pmqaId.value];
 
   if (tab === "configuracao") {
-    router.visit(
-      route("contratos.contratada.sgc.pmqa.configuracao.ponto.index", baseParams),
-      { data: { tab: "configuracao", subStep: 2 }, preserveScroll: true }
-    );
+    router.visit(route("contratos.contratada.sgc.pmqa.configuracao.ponto.index", baseParams));
     return;
   }
 
@@ -90,28 +88,45 @@ const setTab = (tab) => {
             <h2 class="text-center mb-4">{{ title }}</h2>
 
             <ul class="nav nav-tabs mb-4">
+              <!-- Apresentação: Sempre livre, ou segue própria regra -->
               <li class="nav-item">
                 <a class="nav-link" :class="{ active: activeTab === 'apresentacao' }" @click.prevent="setTab('apresentacao')">
                   Apresentação
                 </a>
               </li>
+
+              <!-- Configuração: Liberada se Apresentação for Aprovada -->
               <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'configuracao', disabled: !podeGerenciarPmqa }" @click.prevent="setTab('configuracao')">
+                <a class="nav-link"
+                   :class="{ active: activeTab === 'configuracao', disabled: pmqa?.status_apresentacao !== 'Aprovada' }"
+                   @click.prevent="pmqa?.status_apresentacao === 'Aprovada' && setTab('configuracao')">
                   Configuração
                 </a>
               </li>
+
+              <!-- Execução: Liberada se Configuração for Aprovada -->
               <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'execucao', disabled: !podeGerenciarPmqa }" @click.prevent="setTab('execucao')">
+                <a class="nav-link"
+                   :class="{ active: activeTab === 'execucao', disabled: pmqa?.status_configuracao !== 'Aprovada' }"
+                   @click.prevent="pmqa?.status_configuracao === 'Aprovada' && setTab('execucao')">
                   Execução
                 </a>
               </li>
+
+              <!-- Resultados: Liberada se Execução for Aprovada -->
               <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'resultados', disabled: !podeGerenciarPmqa }" @click.prevent="setTab('resultados')">
+                <a class="nav-link"
+                   :class="{ active: activeTab === 'resultados', disabled: pmqa?.status_execucao !== 'Aprovada' }"
+                   @click.prevent="pmqa?.status_execucao === 'Aprovada' && setTab('resultados')">
                   Resultados
                 </a>
               </li>
+
+              <!-- Relatório: Liberada se Resultados for Aprovada -->
               <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'relatorio', disabled: !podeGerenciarPmqa }" @click.prevent="setTab('relatorio')">
+                <a class="nav-link"
+                   :class="{ active: activeTab === 'relatorio', disabled: pmqa?.status_resultado !== 'Aprovada' }"
+                   @click.prevent="pmqa?.status_resultado === 'Aprovada' && setTab('relatorio')">
                   Relatório
                 </a>
               </li>

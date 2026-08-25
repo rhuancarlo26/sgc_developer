@@ -25,6 +25,7 @@ class IndexController extends Controller
             'pmqa' => $pmqa,
             'produto' => $produto,
             'tab' => 'resultados',
+            'canApprove' => auth()->user()->hasAnyRole(['Administrador', 'Fiscal']),
             ...$response
         ]);
     }
