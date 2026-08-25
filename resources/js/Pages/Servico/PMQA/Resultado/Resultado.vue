@@ -245,7 +245,7 @@ const horizontalLine = ref({
                                 }}</a>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <a href="#tabs-parametro-iqa" class="nav-link active" data-bs-toggle="tab" aria-selected="true"
+                            <a href="#tabs-parametro-iqa" class="nav-link" data-bs-toggle="tab" aria-selected="false"
                                tabindex="-1"
                                role="tab">IQA</a>
                         </li>
@@ -313,7 +313,7 @@ const horizontalLine = ref({
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-pane active show" id="tabs-parametro-iqa" role="tabpanel">
+                        <div class="tab-pane" id="tabs-parametro-iqa" role="tabpanel">
                             <BarChart id="div-parametro-iqa" :style="{
                 height: '70px',
                 position: 'relative'
