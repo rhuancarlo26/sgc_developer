@@ -22,10 +22,11 @@ class IndexController extends Controller
         $response = $this->campanhaService->index($pmqa, $searchParams);
 
         return Inertia::render('Sgc/Contratada/Produtos/Pmqa/Execucao/Index', [
-            'contrato' => $contrato,
+            'contrato'  => $contrato,
             'produto'   => $produto,
             'pmqa'      => $pmqa,
-            'tab' => 'execucao',
+            'tab'       => 'execucao',
+            'canApprove' => auth()->user()->hasAnyRole(['Administrador', 'Fiscal']),
             ...$response
         ]);
     }

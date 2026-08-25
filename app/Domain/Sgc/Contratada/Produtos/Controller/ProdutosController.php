@@ -91,7 +91,7 @@ class ProdutosController extends Controller
         $contratoObj = Contrato::findOrFail($contrato);
         $subproduto = $request->query('subproduto');
 
-        if (!$subproduto) {
+        if (!$subproduto && !in_array($produto, ['pmqa', 'eia', 'fauna', 'malarigeno', 'rima'])) {
             Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
 
             if ($produto === 'patrimonio') {
@@ -502,18 +502,25 @@ class ProdutosController extends Controller
 
     private function createPmqa(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
+        $id = $request->query('id');
 
-        $pmqa = SgcPmqa::where('id_contrato', $contrato)
-            ->where('subproduto', $subproduto)
-            ->whereIn('status_aprovacao', ['Em análise', 'Em elaboração'])
-            ->latest()
-            ->first();
+        if ($id) {
+            $pmqa = SgcPmqa::where('id', $id)
+                ->where('id_contrato', $contrato)
+                ->first();
+        } else {
+            $pmqa = SgcPmqa::where('id_contrato', $contrato)
+                ->where('subproduto', $subproduto)
+                ->whereIn('status_aprovacao', ['Em análise', 'Em elaboração'])
+                ->latest()
+                ->first();
+        }
 
         if (!$pmqa) {
-            $pmqa = SgcPmqa::create([
+            $pmqa = new SgcPmqa([
                 'id_contrato'  => $contrato,
                 'subproduto'   => $subproduto,
-                'status_aprovacao' => 'Em análise',
+                'status_aprovacao' => 'Em elaboração',
             ]);
         }
 
@@ -528,6 +535,7 @@ class ProdutosController extends Controller
             'subproduto'      => $subproduto,
             'empreendimentos' => $empreendimentos,
             'pmqa'            => $pmqa,
+            'canApprove'      => $this->usuarioPodeAprovarPmqa(),
         ]);
     }
 
@@ -567,6 +575,65 @@ class ProdutosController extends Controller
         return back()->with('success', 'Campanha aprovada com sucesso!');
     }
 
+        public function enviarAnaliseFasePmqa(Request $request, $contrato, $produto, $pmqa): RedirectResponse
+    {
+        $data = $request->validate([
+            'fase' => 'required|in:apresentacao,configuracao,execucao,resultado,relatorio'
+        ]);
+
+        $pmqaModel = SgcPmqa::where('id', $pmqa)
+            ->where('id_contrato', $contrato)
+            ->firstOrFail();
+
+        $campo = 'status_' . $data['fase'];
+        
+        abort_unless($pmqaModel->{$campo} === 'Em elaboração' || $pmqaModel->{$campo} === 'Reprovada' || $pmqaModel->{$campo} === 'Bloqueado' || empty($pmqaModel->{$campo}), 422, 'Esta fase não está em elaboração.');
+
+        $pmqaModel->update([
+            $campo => 'Em análise',
+            'status_aprovacao' => 'Em análise'
+        ]);
+
+        return back()->with('success', 'Fase ' . ucfirst($data['fase']) . ' enviada para análise com sucesso!');
+    }
+
+    public function aprovarFasePmqa(Request $request, $contrato, $produto, $pmqa): RedirectResponse
+    {
+        abort_unless($this->usuarioPodeAprovarPmqa(), 403, 'Usuário sem autorização');
+
+        $data = $request->validate([
+            'fase' => 'required|in:apresentacao,configuracao,execucao,resultado,relatorio'
+        ]);
+
+        $pmqaModel = SgcPmqa::where('id', $pmqa)
+            ->where('id_contrato', $contrato)
+            ->firstOrFail();
+
+        $campo = 'status_' . $data['fase'];
+        
+        abort_unless($pmqaModel->{$campo} === 'Em análise', 422, 'Esta fase não está em análise.');
+
+        $pmqaModel->update([
+            $campo => 'Aprovada',
+            'status_aprovacao' => $data['fase'] === 'relatorio' ? 'Aprovada' : 'Em elaboração'
+        ]);
+
+        $fases = ['apresentacao', 'configuracao', 'execucao', 'resultado', 'relatorio'];
+        $index = array_search($data['fase'], $fases);
+
+        if ($index !== false && $index < count($fases) - 1) {
+            $proximaFase = $fases[$index + 1];
+            $campoProxima = 'status_' . $proximaFase;
+            if ($pmqaModel->{$campoProxima} === 'Bloqueado' || empty($pmqaModel->{$campoProxima})) {
+                $pmqaModel->update([
+                    $campoProxima => 'Em elaboração'
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Fase ' . ucfirst($data['fase']) . ' aprovada com sucesso!');
+    }
+
     public function reprovarPmqa(Request $request, $contrato, $produto, $pmqa): RedirectResponse
     {
         abort_unless($this->usuarioPodeAprovarPmqa(), 403, 'Usuário sem autorização');
@@ -577,9 +644,16 @@ class ProdutosController extends Controller
 
         abort_unless($pmqaModel->status_aprovacao === 'Em análise', 422, 'Este PMQA não está em análise.');
 
-        $pmqaModel->update([
-            'status_aprovacao' => 'Rejeitada',
-        ]);
+        $updateData = ['status_aprovacao' => 'Rejeitada'];
+
+        $fases = ['apresentacao', 'configuracao', 'execucao', 'resultado', 'relatorio'];
+        foreach ($fases as $fase) {
+            if ($pmqaModel->{"status_{$fase}"} === 'Em análise') {
+                $updateData["status_{$fase}"] = 'Reprovada';
+            }
+        }
+
+        $pmqaModel->update($updateData);
 
         return back()->with('success', 'Campanha reprovada com sucesso!');
     }
@@ -588,8 +662,8 @@ class ProdutosController extends Controller
     public function updatePmqa(Request $request, $contrato, $produto = 'eia')
     {
         $data = $request->validate([
-            'id'            => 'required|exists:sgc_pmqa,id',
-            'cod_emp'       => 'nullable|string',
+            'id'            => 'nullable|exists:sgc_pmqa,id',
+            'cod_emp'       => 'nullable',
             'tema'          => 'nullable',
             'especificacao' => 'nullable|string',
             'introducao'    => 'nullable|string',
@@ -599,27 +673,41 @@ class ProdutosController extends Controller
             'publico_alvo'  => 'nullable|string',
         ]);
 
-        $pmqa = SgcPmqa::findOrFail($data['id']);
-
-        $pmqa->update([
-            'cod_emp'       => $data['cod_emp'],
-            'tema'          => is_array($data['tema']) ? $data['tema']['id'] : $data['tema'],
-            'especificacao' => $data['especificacao'],
-            'introducao'    => $data['introducao'],
-            'justificativa' => $data['justificativa'],
-            'objetivos'     => $data['objetivos'],
-            'metodologia'   => $data['metodologia'],
-            'publico_alvo'  => $data['publico_alvo'],
-            'status_aprovacao' => 'Em análise',
-        ]);
+        if (isset($data['id'])) {
+            $pmqa = SgcPmqa::findOrFail($data['id']);
+            $pmqa->update([
+                'cod_emp'       => $data['cod_emp'] ?? null,
+                'tema'          => is_array($data['tema'] ?? null) ? $data['tema']['id'] : ($data['tema'] ?? null),
+                'especificacao' => $data['especificacao'] ?? null,
+                'introducao'    => $data['introducao'] ?? null,
+                'justificativa' => $data['justificativa'] ?? null,
+                'objetivos'     => $data['objetivos'] ?? null,
+                'metodologia'   => $data['metodologia'] ?? null,
+                'publico_alvo'  => $data['publico_alvo'] ?? null,
+            ]);
+        } else {
+            SgcPmqa::create([
+                'id_contrato'   => $contrato,
+                'subproduto'    => $request->input('subproduto') ?? 'EIA',
+                'status_aprovacao' => 'Em elaboração',
+                'cod_emp'       => $data['cod_emp'] ?? null,
+                'tema'          => is_array($data['tema'] ?? null) ? $data['tema']['id'] : ($data['tema'] ?? null),
+                'especificacao' => $data['especificacao'] ?? null,
+                'introducao'    => $data['introducao'] ?? null,
+                'justificativa' => $data['justificativa'] ?? null,
+                'objetivos'     => $data['objetivos'] ?? null,
+                'metodologia'   => $data['metodologia'] ?? null,
+                'publico_alvo'  => $data['publico_alvo'] ?? null,
+            ]);
+        }
 
         return redirect()
             ->route('sgc.contratada.produtos.index', [
                 'contrato'   => $contrato,
-                'produto'    => $produto,
-                'subproduto' => $pmqa->subproduto,
+                'produto'    => strtolower($produto),
+                'subproduto' => isset($pmqa) ? $pmqa->subproduto : ($request->input('subproduto') ?? 'EIA')
             ])
-            ->with('success', 'Apresentação do PMQA submetida para análise.');
+            ->with('success', 'Apresentação do PMQA salva com sucesso.');
     }
 
 
@@ -645,6 +733,11 @@ class ProdutosController extends Controller
                 'data_inicial'   => $pmqa->created_at ? $pmqa->created_at->format('d/m/Y') : 'N/A',
                 'data_final'     => 'N/A',
                 'status'         => $pmqa->status_aprovacao ?? 'rascunho',
+                'status_apresentacao' => $pmqa->status_apresentacao,
+                'status_configuracao' => $pmqa->status_configuracao,
+                'status_execucao'     => $pmqa->status_execucao,
+                'status_resultado'    => $pmqa->status_resultado,
+                'status_relatorio'    => $pmqa->status_relatorio,
 
                 'vinculacoesResumo' => $resumoVinc[$pmqa->id] ?? [
                     'total_listas' => 0,

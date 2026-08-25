@@ -9,9 +9,9 @@ import { IconEye } from "@tabler/icons-vue";
 import { IconRulerMeasure } from "@tabler/icons-vue";
 import { IconChartHistogram } from "@tabler/icons-vue";
 import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { IconSquareCheck } from "@tabler/icons-vue";
-import ProdutoTabsLayout from "../../ProdutoTabsLayout.vue";
+import ProdutoTabsLayout from "../ProdutoTabsLayout.vue";
 
 const modalVisualizarPonto = ref({});
 
@@ -21,6 +21,11 @@ const props = defineProps({
     pmqa: { type: Object },
     campanha: { type: Object },
     pontos: { type: Object },
+    canApprove: { type: Boolean, default: false },
+});
+
+const podeGerenciarExecucao = computed(() => {
+    return ['Em elaboração', 'Reprovada'].includes(props.pmqa?.status_execucao);
 });
 
 const abrirModalVisualizarPonto = (item) => {
@@ -34,7 +39,9 @@ const activeTab = ref("execucao");
     <ProdutoTabsLayout
         :contratos="contrato"
         :title="'PMQA - EIA'"
-        :active-tab="activeTab"
+        :pmqa="pmqa"
+        :produto="produto"
+        v-model:active-tab="activeTab"
     >
         <template #execucao>
             <Table
@@ -94,11 +101,12 @@ const activeTab = ref("execucao");
                             <NavButton
                                 @click="abrirModalVisualizarPonto(item)"
                                 :icon="IconEye"
-                                class="btn-icon"
+                                class="btn-icon me-1"
                                 type-button="info"
                             />
 
                             <Link
+                                v-if="!canApprove && podeGerenciarExecucao"
                                 class="btn btn-icon btn-primary me-1"
                                 :href="
                                     route(
@@ -117,7 +125,7 @@ const activeTab = ref("execucao");
                             </Link>
 
                             <Link
-                                v-if="item.ponto"
+                                v-if="item.ponto && !canApprove && podeGerenciarExecucao"
                                 class="btn btn-icon btn-primary me-1"
                                 :href="
                                     route(
@@ -136,7 +144,7 @@ const activeTab = ref("execucao");
                             </Link>
 
                             <NavButton
-                                v-else
+                                v-else-if="!item.ponto && !canApprove && podeGerenciarExecucao"
                                 type-button="primary"
                                 class="btn-icon"
                                 disabled
@@ -146,6 +154,19 @@ const activeTab = ref("execucao");
                     </tr>
                 </template>
             </Table>
+
+            <div class="d-flex justify-content-between my-4 px-1">
+                <Link
+                    class="btn btn-secondary"
+                    :href="route('contratos.contratada.sgc.pmqa.execucao.index', {
+                        contrato: props.contrato.id,
+                        produto: typeof props.produto === 'string' ? props.produto : props.produto.slug,
+                        pmqa: props.pmqa.id
+                    })"
+                >
+                    Voltar
+                </Link>
+            </div>
 
             <ModalVisualizarPonto
                 :campanha="campanha"

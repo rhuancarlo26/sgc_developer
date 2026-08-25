@@ -14,7 +14,10 @@ const props = defineProps({
     pmqa: { type: Object },
     pontos: { type: Array },
     produto: { type: [String, Object], required: true },
+    canApprove: { type: Boolean, default: false },
 });
+
+const isReadonly = computed(() => props.canApprove || (!props.canApprove && props.pmqa?.status_execucao !== 'Em elaboração' && props.pmqa?.status_execucao !== 'Reprovada'));
 
 const modalCampanha = ref();
 
@@ -104,6 +107,7 @@ defineExpose({ abrirModal });
                             name="nome_campanha"
                             id="nome_campanha"
                             v-model="form.nome_campanha"
+                            :disabled="isReadonly"
                         />
                         <InputError :message="form.errors.nome_campanha" />
                     </div>
@@ -115,6 +119,7 @@ defineExpose({ abrirModal });
                             name="dt_inicio"
                             id="dt_inicio"
                             v-model="form.dt_inicio"
+                            :disabled="isReadonly"
                         />
                         <InputError :message="form.errors.dt_inicio" />
                     </div>
@@ -126,6 +131,7 @@ defineExpose({ abrirModal });
                             name="dt_fim"
                             id="dt_fim"
                             v-model="form.dt_fim"
+                            :disabled="isReadonly"
                         />
                         <InputError :message="form.errors.dt_fim" />
                     </div>
@@ -158,6 +164,7 @@ defineExpose({ abrirModal });
                                             type="checkbox"
                                             :value="ponto.id"
                                             v-model="form.pontos"
+                                            :disabled="isReadonly"
                                         />
                                         <span class="form-check-label">{{
                                             ponto.id
@@ -187,6 +194,7 @@ defineExpose({ abrirModal });
         </template>
         <template #footer>
             <NavButton
+                v-if="!isReadonly"
                 @click="saveCampanha()"
                 type-button="success"
                 :icon="IconDeviceFloppy"

@@ -396,13 +396,69 @@ const renderizarMapaWms = async (campo) => {
 
   wmsLayers.value[id] = L.tileLayer.wms('/sgc/contratada/mapa/wms', {
     layers: `${item.workspace}:${item.layer_name}`,
-    format: 'image/png',
+    format: 'image/png8',
     transparent: true,
     version: '1.1.1',
     srs: 'EPSG:3857',
     tiled: true,
     opacity: 0.7,
+    updateWhenIdle: true,
+    updateWhemZooming: false,
+    keepBuffer: 2
   }).addTo(mapasLeaflet.value[id]);
+
+  mapasLeaflet.value[id].off('click');
+  mapasLeaflet.value[id].on('click', async (e) => {
+
+    const point = mapasLeaflet.value[id].latLngToContainerPoint(e.latlng, mapasLeaflet.value[id].getZoom());
+    const size = mapasLeaflet.value[id].getSize();
+    const bounds = mapasLeaflet.value[id].getBounds();
+
+    const params = new URLSearchParams({
+        request: 'GetFeatureInfo',
+        service: 'WMS',
+        srs: 'EPSG:4326',
+        styles: '',
+        transparent: true,
+        version: '1.1.1',
+        bbox: `${bounds.getSouthWest().lng},${bounds.getSouthWest().lat},${bounds.getNorthEast().lng},${bounds.getNorthEast().lat}`,
+        height: size.y,
+        width: size.x,
+        layers: `${item.workspace}:${item.layer_name}`,
+        query_layers: `${item.workspace}:${item.layer_name}`,
+        info_format: 'application/json',
+        x: Math.round(point.x),
+        y: Math.round(point.y),
+    });
+
+    try {
+        const response = await fetch(`/sgc/contratada/mapa/wms?${params.toString()}`);
+        const data = await response.json();
+
+        if (data.features && data.features.length > 0) {
+            const propriedades = data.features[0].properties;
+
+            let htmlInfo = '<div style="max-height: 250px; overflow-y: auto;">';
+            htmlInfo += '<h6 class="border-bottom pb-1 mb-2">Informações do Elemento</h6>';
+            htmlInfo += '<ul class="list-unstyled mb-0" style="font-size: 13px;">';
+
+            for (const [key, value] of Object.entries(propriedades)) {
+              if (value && key !== 'bbox' && !key.includes('geom')) {
+                htmlInfo += `<li class="mb-1"><strong>${key}:</strong> ${value}</li>`;
+              }
+            }
+            htmlInfo += '</ul></div>';
+
+            L.popup()
+              .setLatLng(e.latlng)
+              .setContent(htmlInfo)
+              .openOn(mapasLeaflet.value[id]);
+
+        }
+    } catch (err) {
+        console.warn('Não foi possivel buscar as propriedades do shapefile ou o clique foi fora do elemento.')
+    }
+  })
 
   setTimeout(() => {
     mapasLeaflet.value[id].invalidateSize();
@@ -582,10 +638,21 @@ defineEmits(['voltar']);
                   v-if="formMetodologia[campo.nome].workspace && formMetodologia[campo.nome].layer_name"
                   class="mt-3"
                 >
-                  <div
-                    :id="getMapaId(campo)"
-                    class="mapa-shapefile"
-                  />
+                    <div
+                        v-if="formMetodologia[campo.nome].workspace && formMetodologia[campo.nome].layer_name"
+                        class="mt-3"
+                    >
+                        <div :id="getMapaId(campo)" class="mapa-shapefile" />
+
+                        <div class="mt-2 p-2 border rounded bg-light text-center">
+                            <span class="d-block mb-1 text-muted small fw-bold">Legenda do Mapa</span>
+                                    <img
+                                    :src="`/sgc/contratada/mapa/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=${formMetodologia[campo.nome].
+                            workspace}:${formMetodologia[campo.nome].layer_name}`"
+                                    alt="Carregando Legenda..."
+                                    />
+                        </div>
+                    </div>
                 </div>
               </div>
 

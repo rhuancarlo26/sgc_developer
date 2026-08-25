@@ -26,7 +26,8 @@ class CreateController extends Controller
                 'ponto.lista.parametros_vinculados.parametro',
                 'medicao.arquivos',
                 'medicao.parametros'
-            ])
+            ]),
+            'canApprove' => auth()->user()->hasAnyRole(['Administrador', 'Fiscal'])
         ]);
     }
 }
