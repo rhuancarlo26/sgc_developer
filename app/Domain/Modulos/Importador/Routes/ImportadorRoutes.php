@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Modulos\Importador\Controllers\ImportadorController;
+use App\Domain\Modulos\Importador\Controllers\ArquivoImportadorController;
 use App\Domain\Modulos\Importador\Controllers\CreateImportadorController;
 use App\Domain\Modulos\Importador\Controllers\DadosImportadorController;
 use App\Domain\Modulos\Importador\Controllers\DestroyImportadorController;
@@ -28,4 +29,7 @@ Route::prefix('importador-modulo')->group(function () {
     Route::delete('/excluir-dados/{importador}', [DadosImportadorController::class, 'excluirDados'])->name('importador.excluirDados');
 
     Route::get('/buscar-historico/{importador}', [HistoricoImportadorController::class, 'buscarHistorico'])->name('importador.buscarHistorico');
+
+    Route::get('/foto/{foto}', [ArquivoImportadorController::class, 'foto'])->name('importador.visualizarFoto');
+    Route::get('/anexo/{anexo}', [ArquivoImportadorController::class, 'anexo'])->name('importador.visualizarAnexo');
 });
