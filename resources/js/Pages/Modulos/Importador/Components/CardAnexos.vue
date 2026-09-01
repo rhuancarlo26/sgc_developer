@@ -3,13 +3,10 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import { IconPaperclip, IconTrash, IconDownload } from "@tabler/icons-vue";
 import { ref } from "vue";
-import { usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
     form: { type: Object }
 });
-
-const page = usePage()
 
 const selecionarArquivo = (key, {target}) => {
     props.form.anexos[key].arquivo = target.files?.[0]
@@ -73,8 +70,8 @@ defineExpose({ validarCampos })
                                 :class="a.valida_arquivo ? 'border-danger' : ''" :disabled="[2, 4].includes(form.status)"/>
                             <small v-if="a.nome_arquivo">
                                 Arquivo original: <strong>{{a.nome_arquivo}}</strong>
-                                <a :href="`${page.props.app_url}/storage/${a.caminho_arquivo}`" 
-                                    title="Ver Foto" class="btn btn-sm btn-ligth ms-1 border-0" target="_blank">
+                                <a v-if="a.id" :href="route('modulos.importador.visualizarAnexo', { anexo: a.id })"
+                                    title="Baixar anexo" class="btn btn-sm btn-light ms-1 border-0" target="_blank">
                                     <IconDownload class="text-info" />
                                 </a>
                             </small>

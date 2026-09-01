@@ -5,13 +5,10 @@ import Modal from "@/Components/Modal.vue";
 import { ref } from "vue";
 import exifr from "exifr";
 import JSZip from "jszip";
-import { usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
     form: { type: Object }
 });
-
-const page = usePage();
 
 const inputFotosMultiplasRef = ref(null);
 const inputZipFotosRef = ref(null);
@@ -653,7 +650,7 @@ defineExpose({ validarCampos });
                             Arquivo original:
                             <strong>{{ f.nome_arquivo }}</strong>
 
-                            <a :href="`${page.props.app_url}/storage/${String(f.caminho_arquivo).replace(/\\/g, '/')}`"
+                            <a v-if="f.id" :href="route('modulos.importador.visualizarFoto', { foto: f.id })"
                                 title="Ver Foto" class="btn btn-sm btn-light ms-1 border-0" target="_blank">
                                 <IconEye class="text-warning" />
                             </a>
