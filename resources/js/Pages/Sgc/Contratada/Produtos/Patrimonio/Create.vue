@@ -58,13 +58,16 @@ const avancar = async () => {
 };
 const salvarApresentacao = async (payload) => {
   try {
-    await axios.post(route('patrimonio.store', {
+    const response = await axios.post(route('patrimonio.store', {
       contrato: props.contrato,
       produto: 'patrimonio',
     }), {
       tipo: 'paipa',
       ...payload,
     });
+    if (response.data?.data?.id) {
+      paipaAtualId.value = response.data.data.id;
+    }
   } catch (error) {
     console.error('Erro ao salvar apresentacao do Patrimonio:', error);
   }

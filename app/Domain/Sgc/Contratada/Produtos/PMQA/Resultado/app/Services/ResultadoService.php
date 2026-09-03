@@ -209,7 +209,7 @@ class ResultadoService extends BaseModelService
 
             foreach ($campanha->campanha_pontos as $campanhaPonto) {
                 $chartDataIqa['labels'][] = $campanhaPonto->ponto->nome_ponto_coleta;
-                if ($campanhaPonto->medicao->medido) {
+                if (isset($campanhaPonto->medicao) && $campanhaPonto->medicao->medido) {
                     $medicao = false;
                     $justificativa = $campanhaPonto->medicao->observacao;
                 }
@@ -220,7 +220,7 @@ class ResultadoService extends BaseModelService
 
                     if (!isset($iqas[$id])) {
                         if ($iqa) {
-                            $iqas[$id] = $iqa;
+                            $iqas[$id] = (float) $iqa;
                         }
                     }
                 }
@@ -234,9 +234,10 @@ class ResultadoService extends BaseModelService
 
         $parametrosIds = collect($resultado->campanhas)->flatMap(function ($campanha) {
             return collect($campanha->campanha_pontos)->flatMap(function ($campanhaPonto) {
-                if (isset($campanhaPonto->medicao)) {
-                    return collect($campanhaPonto->medicao->parametros)->pluck('parametro_id');
+                if (isset($campanhaPonto->ponto) && isset($campanhaPonto->ponto->lista)) {
+                    return collect($campanhaPonto->ponto->lista->parametros)->pluck('id');
                 }
+                return collect();
             });
         })->unique()->toArray();
 
@@ -252,6 +253,7 @@ class ResultadoService extends BaseModelService
                                             return $medicaoParametro->parametro_id == $parametro->id;
                                         })
                                         ->pluck('medicao')
+                                        ->map(function($val) { return (float) $val; })
                                         ->toArray();
                                 }
                                 return [

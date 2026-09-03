@@ -22,6 +22,7 @@ const props = defineProps({
     pmqa: { type: Object },
     aprovacao: { type: Object },
     produto: { type: Object },
+    canApprove: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['next', 'prev'])
@@ -59,15 +60,35 @@ const enviaFiscal = (aprovacao) => {
         ),
     );
 };
+
+const aprovarFase = () => {
+    if (!confirm("Confirmar a aprovação desta fase de Configuração?")) return;
+    router.post(route('sgc.contratada.produtos.pmqa.aprovarFase', [props.contrato.id, typeof props.produto === 'string' ? props.produto.toLowerCase() : props.produto.slug, props.pmqa.id]), {
+        fase: 'configuracao'
+    }, { preserveScroll: true });
+};
+
+const enviarParaAnalise = () => {
+    if (!confirm("Tem certeza que deseja enviar a Configuração para análise?")) return;
+    router.post(route('sgc.contratada.produtos.pmqa.enviarAnaliseFase', [props.contrato.id, typeof props.produto === 'string' ? props.produto.toLowerCase() : props.produto.slug, props.pmqa.id]), {
+        fase: 'configuracao'
+    }, { preserveScroll: true });
+};
 </script>
 <template #body>
-    <ModelSearchFormAllColumns :columns="['nome']">
+    <ModelSearchFormAllColumns
+        v-if="!canApprove && ap(aprovacao)"
+        :columns="[
+            'nome',
+            'pontos?.nome_ponto_coleta',
+        ]"
+    >
         <template #action>
             <NavButton
+                v-if="!canApprove && (pmqa?.status_configuracao === 'Em elaboração' || pmqa?.status_configuracao === 'Reprovada' || pmqa?.status_configuracao === 'Bloqueado' || !pmqa?.status_configuracao)"
                 type-button="primary"
-                title="Enviar ao fiscal"
-                @click="enviaFiscal(aprovacao)"
-                v-if="ap(aprovacao)"
+                title="Submeter para análise"
+                @click="enviarParaAnalise"
             />
             <NavButton
                 @click="abrirModalVincularPonto()"
@@ -78,7 +99,7 @@ const enviaFiscal = (aprovacao) => {
         </template>
     </ModelSearchFormAllColumns>
     <Table
-        :columns="['Nome da lista', 'Qtd. pontos', 'Ação']"
+        :columns="!canApprove && ap(aprovacao) ? ['Nome da lista', 'Qtd. pontos', 'Ação'] : ['Nome da lista', 'Qtd. pontos']"
         :records="vinculacoes"
         table-class="table-hover"
     >
@@ -94,12 +115,14 @@ const enviaFiscal = (aprovacao) => {
                         @click="abrirModalVisualizarPonto(item)"
                     />
                     <NavButton
+                        v-if="!canApprove && ap(aprovacao)"
                         :icon="IconPencil"
                         class="btn-icon"
                         type-button="primary"
                         @click="abrirModalVincularPonto(item)"
                     />
                     <LinkConfirmation
+                        v-if="!canApprove && ap(aprovacao)"
                         v-slot="confirmation"
                         :options="{
                             text: 'A remoção de um ponto será permanente.',
@@ -137,6 +160,15 @@ const enviaFiscal = (aprovacao) => {
             title="Voltar"
             @click="$emit('prev')"
         />
+
+        <div class="d-flex gap-2">
+            <NavButton
+                v-if="canApprove && pmqa?.status_configuracao === 'Em análise'"
+                type-button="primary"
+                title="✓ Aprovar Configuração"
+                @click="aprovarFase"
+            />
+        </div>
     </div>
 
     <ModalVincularPonto

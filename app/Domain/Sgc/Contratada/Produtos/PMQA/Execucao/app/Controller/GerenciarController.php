@@ -33,6 +33,7 @@ class GerenciarController extends Controller
             'produto'   => ['slug' => request()->route('produto')], // ou $produto se estiver na assinatura
             'pmqa'      => $pmqa,
             'campanha'  => $campanha,
+            'canApprove' => auth()->user()->hasAnyRole(['Administrador', 'Fiscal']),
             ...$response
         ]);
     }

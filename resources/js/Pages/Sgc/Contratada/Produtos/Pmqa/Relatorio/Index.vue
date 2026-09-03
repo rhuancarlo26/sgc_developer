@@ -8,13 +8,14 @@ import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconDots } from "@tabler/icons-vue";
 import ModalFormRelatorio from "./ModalFormRelatorio.vue";
 import ModalVisualizarRelatorio from "./ModalVisualizarRelatorio.vue";
-import ProdutoTabsLayout from "../../ProdutoTabsLayout.vue";
+import ProdutoTabsLayout from "../ProdutoTabsLayout.vue";
 
 const modalFormRelatorio = ref({});
 const modalVisualizarRelatorio = ref({});
 
 const props = defineProps({
     contrato: { type: Object },
+    produto: { type: [String, Object] },
     pmqa: { type: Object },
     relatorios: { type: Object },
     resultados: { type: Array },
@@ -43,7 +44,9 @@ const activeTab = ref("relatorio");
     <ProdutoTabsLayout
         :contratos="contrato"
         :title="'PMQA - EIA'"
-        :active-tab="activeTab"
+        :pmqa="pmqa"
+        :produto="produto"
+        v-model:active-tab="activeTab"
     >
         <template #relatorio>
             <ModelSearchFormAllColumns :columns="['nome']">

@@ -209,16 +209,29 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         });
 
         Route::patch('/pmqa-update',                                      [ProdutosController::class,                              'updatePmqa'])->name('sgc.contratada.produtos.pmqa.update');
+        Route::post('/{pmqa}/aprovar-fase',                               [ProdutosController::class,                              'aprovarFasePmqa'])
+            ->withoutMiddleware('route-permission')
+            ->name('sgc.contratada.produtos.pmqa.aprovarFase');
+        Route::post('/{pmqa}/enviar-analise-fase',                        [ProdutosController::class,                              'enviarAnaliseFasePmqa'])
+            ->withoutMiddleware('route-permission')
+            ->name('sgc.contratada.produtos.pmqa.enviarAnaliseFase');
         Route::patch('/pmqa/{pmqa}/aprovar',                              [ProdutosController::class,                              'aprovarPmqa'])->name('sgc.contratada.produtos.pmqa.aprovar');
+        Route::patch('/pmqa/{pmqa}/reprovar',                             [ProdutosController::class,                              'reprovarPmqa'])->name('sgc.contratada.produtos.pmqa.reprovar');
+        Route::post('/pmqa/{pmqa}/submeter',                              [ProdutosController::class,                              'submeterPmqa'])->name('sgc.contratada.produtos.pmqa.submeter');
 
-        Route::prefix('/recursos-pmqa')->group(function () {
+        Route::prefix('/recursos-pmqa')
+            ->withoutMiddleware('route-permission')
+            ->group(function () {
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/Ponto/Routes/PontoRoutes.php';
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/Parametro/Routes/ParametroRoutes.php';
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Configuracao/VinculacaoPonto/Routes/VinculacaoPontoRoutes.php';
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Execucao/app/Routes/ExecucaoRoutes.php';
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Resultado/app/Routes/ResultadoRoutes.php';
             require __DIR__ . '/../../Contratada/Produtos/PMQA/Relatorio/app/Routes/RelatorioRoutes.php';
+        });
 
+        Route::prefix('/ptr')->group(function () {
+            require __DIR__ . '/../../Contratada/Produtos/Patrimonio/App/Routes/PatrimonioRoutes.php';
         });
 
         Route::prefix('modulos/configuracoes')

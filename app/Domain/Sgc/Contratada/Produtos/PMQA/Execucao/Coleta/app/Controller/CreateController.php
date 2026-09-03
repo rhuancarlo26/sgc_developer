@@ -25,7 +25,8 @@ class CreateController extends Controller
             'pmqa' => $pmqa,
             'campanha' => $campanha,
             'ponto' => $ponto->load(['ponto', 'coleta.arquivos']),
-            'produto' => $produto
+            'produto' => $produto,
+            'canApprove' => auth()->user()->hasAnyRole(['Administrador', 'Fiscal'])
         ]);
     }
 }

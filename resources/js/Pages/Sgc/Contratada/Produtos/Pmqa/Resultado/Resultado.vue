@@ -14,16 +14,21 @@ import BarChart from "@/Components/BarChart.vue";
 import DivTabelaParametro from "../Configuracao/Parametro/DivTabelaParametro.vue";
 import DivTabelaMedirIqaVue from "../Configuracao/Parametro/DivTabelaMedirIqa.vue";
 import html2canvas from "html2canvas";
-import ProdutoTabsLayout from "../../ProdutoTabsLayout.vue";
+import ProdutoTabsLayout from "../ProdutoTabsLayout.vue";
 
 const props = defineProps({
     contrato: {type: Object},
-    servico: {type: Object},
+    pmqa: {type: Object},
+    produto: {type: Object},
     resultado: {type: Object},
     parametros: {type: Array},
     uniqueParametros: {type: Object},
     chartDataIqa: {type: Object},
+    canApprove: { type: Boolean, default: false },
 });
+
+import { computed } from "vue";
+const isReadonly = computed(() => props.canApprove || (!props.canApprove && props.pmqa?.status_resultado !== 'Em elaboração' && props.pmqa?.status_resultado !== 'Reprovada'));
 
 const form = useForm({
     fk_resultado: props.resultado.id,
@@ -215,9 +220,24 @@ const activeTab = ref("resultados");
   <ProdutoTabsLayout
     :contratos="contrato"
     :title="'PMQA - EIA'"
-    :active-tab="activeTab"
+    :pmqa="pmqa"
+    :produto="produto"
+    :active-tab="'resultados'"
   >
     <template #resultados>
+      <div class="mb-4">
+          <Link
+              class="btn btn-secondary"
+              :href="route('contratos.contratada.sgc.pmqa.resultado.index', {
+                  contrato: contrato.id,
+                  produto: typeof produto === 'string' ? produto : produto.slug,
+                  pmqa: pmqa.id
+              })"
+          >
+              Voltar
+          </Link>
+      </div>
+
       <div class="card-header">
         <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
           <li
@@ -243,9 +263,9 @@ const activeTab = ref("resultados");
           <li class="nav-item" role="presentation">
             <a
               href="#tabs-parametro-iqa"
-              class="nav-link"
+              class="nav-link active"
               data-bs-toggle="tab"
-              aria-selected="false"
+              aria-selected="true"
               tabindex="-1"
               role="tab"
             >
@@ -313,7 +333,7 @@ const activeTab = ref("resultados");
                     :id="'analise-' + parametro.id"
                     class="form-control"
                     rows="6"
-                    v-model="form.analises[parametro.id]"
+                    v-model="form.analises[parametro.id]" :disabled="isReadonly"
                   ></textarea>
                   <InputError :message="form.errors.analise" />
                 </div>
@@ -322,6 +342,7 @@ const activeTab = ref("resultados");
               <div class="row">
                 <div class="col form-group d-flex justify-content-end">
                   <NavButton
+                    v-if="!isReadonly"
                     @click="captureChart(1, parametro.id)"
                     type-button="success"
                     :icon="IconDeviceFloppy"
@@ -332,7 +353,7 @@ const activeTab = ref("resultados");
             </div>
           </div>
 
-          <div class="tab-pane" id="tabs-parametro-iqa" role="tabpanel">
+          <div class="tab-pane active show" id="tabs-parametro-iqa" role="tabpanel">
             <BarChart
               id="div-parametro-iqa"
               :style="{ height: '70px', position: 'relative' }"
@@ -353,7 +374,7 @@ const activeTab = ref("resultados");
                     id="analise-iqa"
                     class="form-control"
                     rows="6"
-                    v-model="form_iqa.analise_iqa"
+                    v-model="form_iqa.analise_iqa" :disabled="isReadonly"
                   ></textarea>
                   <InputError :message="form.errors.analise" />
                 </div>
@@ -362,6 +383,7 @@ const activeTab = ref("resultados");
               <div class="row">
                 <div class="col form-group d-flex justify-content-end">
                   <NavButton
+                    v-if="!isReadonly"
                     @click="captureChart(2)"
                     type-button="success"
                     :icon="IconDeviceFloppy"
@@ -382,7 +404,7 @@ const activeTab = ref("resultados");
                     name="nome"
                     id="nome"
                     class="form-control"
-                    v-model="form_outra_analise.nome"
+                    v-model="form_outra_analise.nome" :disabled="isReadonly"
                   />
                   <InputError :message="form.errors.analise" />
                 </div>
@@ -393,7 +415,7 @@ const activeTab = ref("resultados");
                   <InputLabel value="Buscar arquivo" for="arquivo" />
                   <input
                     @input="form_outra_analise.arquivo = $event.target.files[0]"
-                    type="file"
+                    type="file" :disabled="isReadonly"
                     name="arquivo"
                     id="arquivo"
                     class="form-control"
@@ -410,7 +432,7 @@ const activeTab = ref("resultados");
                     id="analise"
                     rows="6"
                     class="form-control"
-                    v-model="form_outra_analise.analise"
+                    v-model="form_outra_analise.analise" :disabled="isReadonly"
                   ></textarea>
                   <InputError :message="form_outra_analise.errors.analise" />
                 </div>
@@ -425,6 +447,7 @@ const activeTab = ref("resultados");
                     :icon="IconX"
                   />
                   <NavButton
+                    v-if="!isReadonly"
                     @click="salvarOutraAnalise()"
                     type-button="success"
                     :icon="IconDeviceFloppy"
@@ -474,7 +497,7 @@ const activeTab = ref("resultados");
                               class="btn btn-icon"
                             />
 
-                            <LinkConfirmation
+                            <LinkConfirmation v-if="!isReadonly"
                               v-slot="confirmation"
                               :options="{ text: 'A remoção da campanha será permanente.' }"
                             >

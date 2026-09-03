@@ -10,7 +10,7 @@ import { IconTrash } from "@tabler/icons-vue";
 import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
 import NavbarContrato from "@/Pages/Sgc/Contratada/NavbarContrato.vue";
-import ProdutoTabsLayout from "../../../ProdutoTabsLayout.vue";
+import ProdutoTabsLayout from "../../ProdutoTabsLayout.vue";
 import { ref } from "vue";
 import { computed } from "vue";
 
@@ -20,7 +20,10 @@ const props = defineProps({
     campanha: { type: Object },
     ponto: { type: Object },
     produto: { type: [String, Object] },
+    canApprove: { type: Boolean, default: false },
 });
+
+const isReadonly = computed(() => props.canApprove || (!props.canApprove && props.pmqa?.status_execucao !== 'Em elaboração' && props.pmqa?.status_execucao !== 'Reprovada'));
 
 const produtoSlug = computed(() =>
     typeof props.produto === "string" ? props.produto : props.produto.slug,
@@ -105,7 +108,7 @@ const activeTab = ref("execucao");
                         class="form-control"
                         name="dt_coleta"
                         id="dt_coleta"
-                        v-model="form.dt_coleta"
+                        v-model="form.dt_coleta" :disabled="isReadonly"
                     />
                     <InputError :message="form.errors.dt_coleta" />
                 </div>
@@ -116,7 +119,7 @@ const activeTab = ref("execucao");
                         <input
                             class="form-check-input"
                             type="checkbox"
-                            v-model="form.coleta"
+                            v-model="form.coleta" :disabled="isReadonly"
                         />
                         <span class="form-check-label"
                             >Não foi possível realizar a coleta</span
@@ -137,7 +140,7 @@ const activeTab = ref("execucao");
                             class="form-control"
                             name="numero_amostra"
                             id="numero_amostra"
-                            v-model="form.numero_amostra"
+                            v-model="form.numero_amostra" :disabled="isReadonly"
                         />
                         <InputError :message="form.errors.numero_amostra" />
                     </div>
@@ -151,7 +154,7 @@ const activeTab = ref("execucao");
                             class="form-control"
                             name="preservacao_amostra"
                             id="preservacao_amostra"
-                            v-model="form.preservacao_amostra"
+                            v-model="form.preservacao_amostra" :disabled="isReadonly"
                         />
                         <InputError
                             :message="form.errors.preservacao_amostra"
@@ -169,7 +172,7 @@ const activeTab = ref("execucao");
                             class="form-control"
                             name="acondicionamento_amostra"
                             id="acondicionamento_amostra"
-                            v-model="form.acondicionamento_amostra"
+                            v-model="form.acondicionamento_amostra" :disabled="isReadonly"
                         />
                         <InputError
                             :message="form.errors.acondicionamento_amostra"
@@ -185,7 +188,7 @@ const activeTab = ref("execucao");
                             class="form-control"
                             name="transporte_amostra"
                             id="transporte_amostra"
-                            v-model="form.transporte_amostra"
+                            v-model="form.transporte_amostra" :disabled="isReadonly"
                         />
                         <InputError :message="form.errors.transporte_amostra" />
                     </div>
@@ -203,7 +206,7 @@ const activeTab = ref("execucao");
                             name="observacao"
                             id="observacao"
                             rows="5"
-                            v-model="form.observacao"
+                            v-model="form.observacao" :disabled="isReadonly"
                         ></textarea>
                         <InputError :message="form.errors.observacao" />
                     </div>
@@ -217,6 +220,7 @@ const activeTab = ref("execucao");
                         title="Voltar"
                     />
                     <NavButton
+                        v-if="!isReadonly"
                         @click="saveColetaPonto()"
                         type-button="success"
                         :icon="IconDeviceFloppy"
@@ -245,6 +249,7 @@ const activeTab = ref("execucao");
                                 </div>
                                 <div class="col-auto">
                                     <NavButton
+                                        v-if="!isReadonly"
                                         @click="saveArquivo()"
                                         type-button="success"
                                         title="Salvar"
