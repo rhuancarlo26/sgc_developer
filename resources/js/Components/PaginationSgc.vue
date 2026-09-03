@@ -37,7 +37,7 @@ const changeItemsPerPage = (event) => {
 </script>
 
 <template>
-    <div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2">
       <!-- Opção de selecionar o número de itens por página -->
       <div class="d-flex align-items-center ms-3">
           <label for="itemsPerPage">Itens por página: </label>
@@ -95,6 +95,7 @@ const changeItemsPerPage = (event) => {
 
 .pagination {
   display: flex;
+  flex-wrap: wrap;
   padding-left: 0;
   list-style: none;
   margin: 0;

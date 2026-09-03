@@ -30,7 +30,7 @@ const formatDate = (date) => {
       <h4 class="mb-3" style="text-align: center;">MÓDULOS AMOSTRAIS</h4>
 
       <!-- Tabela de Módulos Amostrais -->
-      <div v-if="formModuloAmostral && formModuloAmostral.length > 0" class="overflow-x-auto mb-6">
+      <div v-if="formModuloAmostral && formModuloAmostral.length > 0" class="table-responsive mb-6">
         <table class="min-w-full bg-white border border-gray-300">
           <thead>
             <tr class="bg-gray-100">

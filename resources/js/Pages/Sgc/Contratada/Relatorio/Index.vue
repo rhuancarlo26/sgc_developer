@@ -271,6 +271,7 @@ onMounted(() => {
             </div>
             <div class="row">
               <div class="col-12">
+                <div class="table-responsive">
                 <table class="table table-striped">
                   <thead>
                     <tr style="background-color: #237D9E; text-align: left;">
@@ -333,6 +334,7 @@ onMounted(() => {
                     </tr>
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           </div>

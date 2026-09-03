@@ -1036,7 +1036,7 @@ const excluirAnexo = (anexoId) => {
                       </div>
                       <!-- Tabela para anexos temporários -->
                       {{ console.log('Anexos temporários:', form.anexos) }}
-                      <div v-if="Object.keys(form.anexos).some(tipo => form.anexos[tipo])" class="overflow-x-auto mb-6">
+                      <div v-if="Object.keys(form.anexos).some(tipo => form.anexos[tipo])" class="table-responsive mb-6">
                           <table class="min-w-full bg-white border border-gray-300">
                               <thead>
                                   <tr class="bg-gray-100">
@@ -1061,7 +1061,7 @@ const excluirAnexo = (anexoId) => {
                           Nenhum anexo temporário selecionado.
                       </div>
                       <!-- Tabela para anexos salvos -->
-                      <div v-if="props.campanha.anexos?.length" class="overflow-x-auto mb-6">
+                      <div v-if="props.campanha.anexos?.length" class="table-responsive mb-6">
                           <table class="min-w-full bg-white border border-gray-300">
                               <thead>
                                   <tr class="bg-gray-100">

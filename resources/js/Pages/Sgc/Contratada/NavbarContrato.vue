@@ -32,8 +32,8 @@ const handleClick = (routeName) => {
 
 <template>
   <div class="card card-body space-y-3">
-    <div class="d-flex">
-      <div class="col-1">
+    <div class="d-flex flex-column flex-md-row">
+      <div class="col-12 col-md-1">
         <ul class="navbar-nav">
           <NavLink
             @click="handleClick('Relatórios')"
@@ -84,7 +84,7 @@ const handleClick = (routeName) => {
           />
         </ul>
       </div>
-      <div class="col-11">
+      <div class="col-12 col-md-11">
         <slot name="body" />
       </div>
     </div>

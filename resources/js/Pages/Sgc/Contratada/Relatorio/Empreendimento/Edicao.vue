@@ -195,6 +195,7 @@
       </button>
     </div>
 
+    <div class="table-responsive">
     <table
       class="table table-striped table-hover table-light"
     >
@@ -300,6 +301,7 @@
         </tr>
       </tbody>
     </table>
+    </div>
       </div>
     </AuthenticatedLayout>
   </div>

@@ -49,6 +49,7 @@ const aprovarDav = (id) => {
         <template #body>
           <div>
             <h1>Histórico de DAVs reprovadas</h1>
+            <div class="table-responsive">
             <table>
               <thead>
                 <tr>
@@ -80,6 +81,7 @@ const aprovarDav = (id) => {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
         </template>
       </Navbar>

@@ -163,6 +163,7 @@ const getVisualizarRoute = (campanha) => {
             {{ grupo.produto }}
           </div>
 
+        <div class="table-responsive">
         <table class="table table-sm table-bordered tabela-campanhas mb-0">
             <colgroup>
                 <col style="width: 10%">
@@ -228,6 +229,7 @@ const getVisualizarRoute = (campanha) => {
               </tr>
             </tbody>
           </table>
+        </div>
         </div>
       </div>
 

@@ -47,6 +47,7 @@
             <div class="card-body">
               <h5 class="card-title">Informações do Empreendimento</h5>
               <div class="table-container">
+                <div class="table-responsive">
                 <table class="table table-bordered">
                   <tbody>
                     <tr>
@@ -79,6 +80,7 @@
                     </tr>
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           </div>
@@ -98,6 +100,7 @@
             </select>
             <button @click.prevent="showModal = true" class="btn btn-secondary mt-2">Cadastrar Novo Profissional</button>
           </div>
+          <div class="table-responsive">
           <table class="table">
             <thead>
               <tr>
@@ -114,6 +117,7 @@
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 

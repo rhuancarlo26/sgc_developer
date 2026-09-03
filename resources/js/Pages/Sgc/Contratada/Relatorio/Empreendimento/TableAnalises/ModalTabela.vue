@@ -248,6 +248,7 @@ onMounted(() => {
             Tabela de Subprodutos
           </div>
           <div class="card-body">
+            <div class="table-responsive">
             <table class="table table-bordered">
               <thead>
                 <tr>
@@ -284,6 +285,7 @@ onMounted(() => {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </div>
@@ -298,6 +300,7 @@ onMounted(() => {
             <button type="button" class="btn-close" @click="showModal = false"></button>
           </div>
           <div class="modal-body">
+            <div class="table-responsive">
             <table class="table table-bordered">
               <thead>
                 <tr>
@@ -524,6 +527,7 @@ onMounted(() => {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click="showModal = false">Fechar</button>
