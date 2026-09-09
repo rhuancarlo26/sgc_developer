@@ -24,6 +24,8 @@ use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoReques
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
 use App\Domain\Sgc\Contratada\Produtos\Rima\Requests\StoreRimaRequest;
 use App\Domain\Sgc\Contratada\Produtos\Rima\Services\RimaService;
+use App\Domain\Sgc\Contratada\Produtos\Fauna\Requests\StoreEntregaSimplificadaFaunaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\SgcFaunaEntregaSimplificadaService;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -203,6 +205,20 @@ class ProdutosController extends Controller
 
     public function store(Request $request, $contrato, $produto)
     {
+        if ($produto === 'fauna') {
+            $validated = $request->validate(
+                (new StoreEntregaSimplificadaFaunaRequest())->rules(),
+                (new StoreEntregaSimplificadaFaunaRequest())->messages()
+            );
+            $validated['contrato_id'] = $contrato;
+
+            (new SgcFaunaEntregaSimplificadaService())->criar($validated);
+
+            return redirect()
+                ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+                ->with('success', 'Campanha simplificada de fauna salva com sucesso.');
+        }
+
         if ($produto === 'malarigeno') {
             $validated = $request->validate(
                 (new StoreMalarigenoRequest())->rules(),
@@ -263,6 +279,23 @@ class ProdutosController extends Controller
 
     private function createFauna(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
+        $modo = $request->query('modo');
+
+        if (!$modo) {
+            return inertia('Sgc/Contratada/Produtos/Fauna/SelecionarModalidade', [
+                'contrato' => $contrato,
+                'produto' => ucfirst($produto),
+                'contratos' => $contratoObj,
+                'subproduto' => $subproduto,
+            ]);
+        }
+
+        if ($modo === 'simplificado') {
+            return $this->createFaunaSimplificada($contrato, $produto, $contratoObj, $subproduto);
+        }
+
+        abort_unless($modo === 'completo', 404);
+
         // Busca rascunho aberto para este contrato/subproduto
         $draft = SgcFaunaCampanha::where('id_contrato', $contrato)
             ->where('subproduto', $subproduto)
@@ -329,6 +362,18 @@ class ProdutosController extends Controller
         ]);
     }
 
+    private function createFaunaSimplificada($contrato, $produto, $contratoObj, $subproduto): Response
+    {
+        return inertia('Sgc/Contratada/Produtos/Fauna/Simplificada/CreateSimplificada', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->pluck('cod_emp')->toArray(),
+            'modulos' => SgcModulo::query()->select(['id', 'nome', 'nome_planilha_modelo'])->get(),
+        ]);
+    }
+
     // --------------------------------------------------------------------------
     // Método 2: getCampanhasFauna
     // Mudança: exclui rascunhos da listagem — o usuário não deve ver rascunhos
@@ -343,7 +388,7 @@ class ProdutosController extends Controller
                 fn($query) => $query->whereNotNull('arquivada_em'),
                 fn($query) => $query->whereNull('arquivada_em')
             )
-            ->get(['id', 'id_campanha', 'cod_emp', 'data_ini', 'data_fim', 'status', 'subproduto'])
+            ->get(['id', 'id_campanha', 'cod_emp', 'data_ini', 'data_fim', 'status', 'subproduto', 'modo_preenchimento'])
             ->map(fn($campanha) => [
                 'id'           => $campanha->id,
                 'id_campanha'  => $campanha->id_campanha ?? 'N/A',
@@ -352,6 +397,7 @@ class ProdutosController extends Controller
                 'data_final'   => $campanha->data_fim ?? 'N/A',
                 'status'       => $campanha->status ?? 'Em análise',
                 'subproduto'   => $campanha->subproduto ?? 'N/A',
+                'modo_preenchimento' => $campanha->modo_preenchimento ?? 'completo',
             ]);
     }
 

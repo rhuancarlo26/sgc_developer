@@ -35,6 +35,14 @@ const statusClass = computed(() => ({
     'bg-secondary text-white': props.campanha.status === 'Em elaboração',
 }));
 
+const rotaAprovar = computed(() => props.produto === 'fauna'
+    ? 'sgc.contratada.produtos.fauna.simplificada.aprovar'
+    : 'sgc.contratada.produtos.rima.aprovarTudo');
+
+const rotaReprovar = computed(() => props.produto === 'fauna'
+    ? 'sgc.contratada.produtos.fauna.simplificada.reprovar'
+    : 'sgc.contratada.produtos.rima.reprovarTudo');
+
 const fotos = computed(() => Array.isArray(props.campanha.fotos) ? props.campanha.fotos : []);
 const anexos = computed(() => Array.isArray(props.campanha.anexos) ? props.campanha.anexos : []);
 const totalPages = computed(() => Math.max(1, Math.ceil(planilhaRows.value.length / rowsPerPage)));
@@ -98,7 +106,7 @@ const nextPage = () => {
 };
 
 const aprovar = () => {
-    form.post(route('sgc.contratada.produtos.rima.aprovarTudo', [props.contrato, props.produto, props.campanha.id]), {
+    form.post(route(rotaAprovar.value, [props.contrato, props.produto, props.campanha.id]), {
         onFinish: () => form.reset(),
     });
 };
@@ -109,7 +117,7 @@ const reprovar = () => {
         return;
     }
 
-    form.post(route('sgc.contratada.produtos.rima.reprovarTudo', [props.contrato, props.produto, props.campanha.id]), {
+    form.post(route(rotaReprovar.value, [props.contrato, props.produto, props.campanha.id]), {
         onFinish: () => {
             form.reset();
             showRejectForm.value = false;
@@ -144,7 +152,7 @@ onMounted(loadPlanilha);
                         </div>
 
                         <div class="text-center mb-4">
-                            <h2 class="mb-2">ANÁLISE CAMPANHA RIMA</h2>
+                            <h2 class="mb-2">ANÁLISE CAMPANHA {{ props.produto.toUpperCase() }}</h2>
                             <p class="text-muted mb-3 fs-5">{{ props.campanha.subproduto || 'Subproduto não informado' }}</p>
                             <div class="d-inline-block">
                                 <span class="badge fs-4 px-3 py-2 fw-bold text-white" :class="statusClass">{{ props.campanha.status || 'N/A' }}</span>

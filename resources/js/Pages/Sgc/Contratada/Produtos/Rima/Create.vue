@@ -260,7 +260,7 @@ const handleFileChange = (event) => {
             <div class="flex-fill content-column">
                 <div class="card mb-3">
                     <div class="card-body text-center">
-                        <h2 class="mb-2">CADASTRAR CAMPANHA RIMA</h2>
+                        <h2 class="mb-2">CADASTRAR CAMPANHA {{ props.produto.toUpperCase() }}</h2>
                         <p class="text-muted mb-0 fs-5">{{ form.subproduto || 'Subproduto não informado' }}</p>
                     </div>
                 </div>
@@ -407,4 +407,3 @@ const handleFileChange = (event) => {
     color: #6c757d;
 }
 </style>
-

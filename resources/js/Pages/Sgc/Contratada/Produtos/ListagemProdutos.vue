@@ -155,11 +155,11 @@ const descricaoPainelPendencias = computed(() => {
 const getAcaoPendente = (campanha) => {
   const status = getCampanhaStatus(campanha);
 
-  if (status === 'Em análise' && deveExibirAcao('analisar') && canApprove) {
+  if (status === 'Em análise' && deveExibirAcao('analisar')) {
     return {
       label: 'Analisar',
       type: 'success',
-      handler: () => analisarCampanha(campanha.id),
+      handler: () => analisarCampanha(campanha),
     };
   }
 
@@ -285,6 +285,10 @@ const goToCreate = () => {
 };
 
 const continuarCampanha = (campanha) => {
+    if (selectedProduto.value === 'fauna' && campanha.modo_preenchimento === 'simplificado') {
+      visualizarCampanha(campanha);
+      return;
+    }
     if (selectedProduto.value === 'patrimonio') {
       router.get(
         route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
@@ -303,6 +307,10 @@ const continuarCampanha = (campanha) => {
 
 // Redirecionar para visualização
 const visualizarCampanha = (campanha, modulo = null) => {
+  if (selectedProduto.value === 'fauna' && campanha.modo_preenchimento === 'simplificado') {
+    router.get(route('sgc.contratada.produtos.fauna.simplificada.show', [props.contrato, 'fauna', campanha.id]));
+    return;
+  }
   // Para produtos com modal preview
   if (config.value.modalPreview) {
     previewModal.value.abrirModal(campanha);
@@ -377,11 +385,22 @@ const gerenciarCampanha = (pmqaId) => {
 };
 
 // Redirecionar para análise
-const analisarCampanha = (campanhaId) => {
+const analisarCampanha = (campanha) => {
+  if (selectedProduto.value === 'fauna' && campanha.modo_preenchimento === 'simplificado') {
+    router.get(route('sgc.contratada.produtos.fauna.simplificada.analise', [props.contrato, 'fauna', campanha.id]));
+    return;
+  }
+
+  const campanhaId = typeof campanha === 'object' ? campanha.id : campanha;
   router.get(route(config.value.rotaNome.analise, [props.contrato, selectedProduto.value, campanhaId]));
 };
 
 const editarCampanha = (campanha) => {
+  if (selectedProduto.value === 'fauna' && campanha.modo_preenchimento === 'simplificado') {
+    router.get(route('sgc.contratada.produtos.fauna.simplificada.edit', [props.contrato, 'fauna', campanha.id]));
+    return;
+  }
+
   if (selectedProduto.value === 'patrimonio') {
     router.get(
       route('sgc.contratada.produtos.create', [props.contrato, selectedProduto.value]),
@@ -779,7 +798,7 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
                               v-if="deveExibirAcao('analisar') && canApprove && campanha.status === 'Em análise'"
                               type-button="success"
                               title="Analisar"
-                              @click="analisarCampanha(campanha.id)"
+                              @click="analisarCampanha(campanha)"
                             />
 
                             <!-- Arquivar (apenas perfil 3) -->

@@ -172,14 +172,12 @@ const salvar = () => {
 const submitForm = () => {
     const url = route('sgc.contratada.produtos.malarigeno.update', [props.contrato, props.produto, props.campanha.id]);
 
-    const fotosRemovidas = [];
     const fotosNovas = [];
     const fotosAtualizadas = [];
 
     form.fotos.forEach(foto => {
         if (foto.arquivo && foto.id) {
             // Foto existente com novo arquivo = deletar antiga + adicionar nova
-            fotosRemovidas.push(foto.id);
             fotosNovas.push(foto);
         } else if (foto.arquivo && !foto.id) {
             // Foto nova (sem ID)
@@ -193,14 +191,12 @@ const submitForm = () => {
     // IDs deletados = originais - atualizadas
     const fotos_remover = fotosOriginais.filter(id => !fotosAtualizadas.includes(id));
 
-    const anexosRemovidos = [];
     const anexosNovos = [];
     const anexosAtualizados = [];
 
     form.anexos.forEach(anexo => {
         if (anexo.arquivo && anexo.id) {
             // Anexo existente com novo arquivo = deletar antigo + adicionar novo
-            anexosRemovidos.push(anexo.id);
             anexosNovos.push(anexo);
         } else if (anexo.arquivo && !anexo.id) {
             // Anexo novo (sem ID)
@@ -227,23 +223,37 @@ const submitForm = () => {
         fd.append(`fotos_remover[${i}]`, id);
     });
 
+    // Fotos mantidas podem ter coordenadas ou descrição alteradas.
+    form.fotos
+        .filter(foto => foto.id && !foto.arquivo && foto.nome_arquivo)
+        .forEach((foto, i) => {
+            fd.append(`fotos_atualizadas[${i}][id]`, foto.id);
+            fd.append(`fotos_atualizadas[${i}][latitude]`, foto.latitude ?? '');
+            fd.append(`fotos_atualizadas[${i}][longitude]`, foto.longitude ?? '');
+            fd.append(`fotos_atualizadas[${i}][descricao]`, foto.descricao ?? '');
+        });
+
     anexos_remover.forEach((id, i) => {
         fd.append(`anexos_remover[${i}]`, id);
     });
 
     fotosNovas.forEach((foto, i) => {
-        if (foto.arquivo) fd.append(`novas_fotos[${i}]`, foto.arquivo);
+        if (!foto.arquivo) return;
+
+        fd.append(`novas_fotos[${i}][arquivo]`, foto.arquivo);
+        fd.append(`novas_fotos[${i}][latitude]`, foto.latitude ?? '');
+        fd.append(`novas_fotos[${i}][longitude]`, foto.longitude ?? '');
+        fd.append(`novas_fotos[${i}][data_captura]`, foto.data_captura ?? '');
+        fd.append(`novas_fotos[${i}][descricao]`, foto.descricao ?? '');
     });
 
     anexosNovos.forEach((anexo, i) => {
-        if (anexo.arquivo) fd.append(`novos_anexos[${i}]`, anexo.arquivo);
+        if (anexo.arquivo) fd.append(`novos_anexos[${i}][arquivo]`, anexo.arquivo);
     });
 
-    form.post(url, {
-        data: fd,
+    form.transform(() => fd).post(url, {
         preserveScroll: true,
-        preserveState: true,
-        forceFormData: true,
+        preserveState: false,
         onSuccess: () => {
             console.log('Campanha atualizada com sucesso');
         },

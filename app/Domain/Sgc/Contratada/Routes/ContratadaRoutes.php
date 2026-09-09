@@ -27,6 +27,7 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\AnexoController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\CampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ComentarioController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ProfissionalController;
+use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\FaunaSimplificadaAnaliseController;
 use App\Domain\Sgc\Contratada\Produtos\Pmqa\Controller\PmqaCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\DestroyCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\InitializarRascunhoCampanhaController;
@@ -136,6 +137,13 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('/', [ProdutosController::class, 'store'])->name('sgc.contratada.produtos.store');
         Route::post('abio/store', [StoreProdutoAbioController::class, 'store'])->name('sgc.contratada.produtos.abio.store');
         Route::delete('abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.destroy');
+
+        Route::get('fauna/campanhas/{campanha}/simplificada', [FaunaSimplificadaAnaliseController::class, 'show'])->name('sgc.contratada.produtos.fauna.simplificada.show');
+        Route::get('fauna/campanhas/{campanha}/simplificada/edit', [FaunaSimplificadaAnaliseController::class, 'edit'])->name('sgc.contratada.produtos.fauna.simplificada.edit');
+        Route::post('fauna/campanhas/{campanha}/simplificada', [FaunaSimplificadaAnaliseController::class, 'update'])->name('sgc.contratada.produtos.fauna.simplificada.update');
+        Route::get('fauna/campanhas/{campanha}/simplificada/analise', [FaunaSimplificadaAnaliseController::class, 'analise'])->name('sgc.contratada.produtos.fauna.simplificada.analise');
+        Route::post('fauna/campanhas/{campanha}/simplificada/aprovar', [FaunaSimplificadaAnaliseController::class, 'aprovar'])->name('sgc.contratada.produtos.fauna.simplificada.aprovar');
+        Route::post('fauna/campanhas/{campanha}/simplificada/reprovar', [FaunaSimplificadaAnaliseController::class, 'reprovar'])->name('sgc.contratada.produtos.fauna.simplificada.reprovar');
 
         // Draft progressivo
         Route::post('rascunho/inicializar', InitializarRascunhoCampanhaController::class)->name('sgc.contratada.produtos.rascunho.inicializar');

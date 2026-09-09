@@ -39,8 +39,12 @@ const statusDisplay = computed(() => {
 });
 
 const canEdit = computed(() => {
-    return ['Rejeitada', 'Em elaboração'].includes(props.campanha.status);
+    return props.produto === 'rima' && ['Rejeitada', 'Em elaboração'].includes(props.campanha.status);
 });
+
+const rotaAnalise = computed(() => props.produto === 'fauna'
+    ? 'sgc.contratada.produtos.fauna.simplificada.analise'
+    : 'sgc.contratada.produtos.rima.analise');
 
 const fotos = computed(() => Array.isArray(props.campanha.fotos) ? props.campanha.fotos : []);
 const anexos = computed(() => Array.isArray(props.campanha.anexos) ? props.campanha.anexos : []);
@@ -155,7 +159,7 @@ onMounted(loadPlanilha);
                         </div>
 
                         <div class="text-center mb-4">
-                            <h2 class="mb-2">VISUALIZAR CAMPANHA RIMA</h2>
+                            <h2 class="mb-2">VISUALIZAR CAMPANHA {{ props.produto.toUpperCase() }}</h2>
                             <p class="text-muted mb-3 fs-5">{{ props.campanha.subproduto || 'Subproduto não informado' }}</p>
                             <div class="d-inline-block">
                                 <span class="badge fs-4 px-3 py-2 fw-bold text-white" :class="statusClass">{{ statusDisplay || 'N/A' }}</span>
@@ -302,7 +306,7 @@ onMounted(loadPlanilha);
                             <h4 class="section-title">Análise da Campanha</h4>
                             <p class="text-muted mb-3">Como fiscal, você pode analisar e aprovar ou reprovar esta campanha.</p>
                             <Link
-                                :href="route('sgc.contratada.produtos.rima.analise', [props.contrato, props.produto, props.campanha.id])"
+                                :href="route(rotaAnalise, [props.contrato, props.produto, props.campanha.id])"
                                 class="btn btn-primary"
                             >
                                 <i class="bi bi-check2-square"></i> Ir para Análise
