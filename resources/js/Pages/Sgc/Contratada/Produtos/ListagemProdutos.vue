@@ -293,8 +293,8 @@ const continuarCampanha = (campanha) => {
       visualizarCampanha(campanha);
       return;
     }
-    if (selectedProduto.value === 'asv') {
-      router.get(route('sgc.contratada.produtos.asv.edit', [props.contrato, 'asv', campanha.id]));
+    if (['asv', 'indigena'].includes(selectedProduto.value)) {
+      router.get(route(`sgc.contratada.produtos.${selectedProduto.value}.edit`, [props.contrato, selectedProduto.value, campanha.id]));
       return;
     }
     if (selectedProduto.value === 'patrimonio') {

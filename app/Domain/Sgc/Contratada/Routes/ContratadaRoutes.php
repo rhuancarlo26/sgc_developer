@@ -36,6 +36,7 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SubmeterCampanhaControll
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Controller\MalarigenoCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Rima\Controller\RimaCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Asv\Controller\AsvCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Indigena\Controller\IndigenaCampanhaController;
 
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\ConfiguracoesModulosController;
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\CreateConfigModuloController;
@@ -203,6 +204,13 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('asv/campanhas/{campanha}/update', [AsvCampanhaController::class, 'update'])->name('sgc.contratada.produtos.asv.update');
         Route::post('asv/campanhas/{campanha}/aprovar', [AsvCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.asv.aprovar');
         Route::post('asv/campanhas/{campanha}/reprovar', [AsvCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.asv.reprovar');
+
+        Route::get('indigena/campanhas/{campanha}', [IndigenaCampanhaController::class, 'show'])->name('sgc.contratada.produtos.indigena.show');
+        Route::get('indigena/campanhas/{campanha}/analise', [IndigenaCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.indigena.analise');
+        Route::get('indigena/campanhas/{campanha}/edit', [IndigenaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.indigena.edit');
+        Route::post('indigena/campanhas/{campanha}/update', [IndigenaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.indigena.update');
+        Route::post('indigena/campanhas/{campanha}/aprovar', [IndigenaCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.indigena.aprovar');
+        Route::post('indigena/campanhas/{campanha}/reprovar', [IndigenaCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.indigena.reprovar');
 
         // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {

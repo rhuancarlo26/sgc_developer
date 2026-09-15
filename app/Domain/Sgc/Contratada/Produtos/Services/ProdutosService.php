@@ -12,8 +12,10 @@ class ProdutosService
 {
     public function getSubprodutosByContrato($contrato, $produto)
     {
+        $familia = strtolower($produto) === 'indigena' ? 'Indígena' : ucfirst($produto);
+
         return SgcvwSubprodutos::where('contrato_id', $contrato)
-            ->where('familia', ucfirst($produto))
+            ->where('familia', $familia)
             ->get()
             ->toArray();
     }

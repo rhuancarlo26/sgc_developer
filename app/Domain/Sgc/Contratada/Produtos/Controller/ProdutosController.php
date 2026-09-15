@@ -20,6 +20,7 @@ use App\Models\SgcModulo;
 use App\Models\SgcMalarigeno;
 use App\Models\SgcRima;
 use App\Models\SgcAsvCampanha;
+use App\Models\SgcIndigenaCampanha;
 use App\Models\SgcPmqaExecCampanha;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
@@ -27,6 +28,8 @@ use App\Domain\Sgc\Contratada\Produtos\Rima\Requests\StoreRimaRequest;
 use App\Domain\Sgc\Contratada\Produtos\Rima\Services\RimaService;
 use App\Domain\Sgc\Contratada\Produtos\Asv\Requests\StoreAsvSimplificadaRequest;
 use App\Domain\Sgc\Contratada\Produtos\Asv\Services\AsvEntregaSimplificadaService;
+use App\Domain\Sgc\Contratada\Produtos\Indigena\Requests\StoreIndigenaSimplificadaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Indigena\Services\IndigenaEntregaSimplificadaService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Requests\StoreEntregaSimplificadaFaunaRequest;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\SgcFaunaEntregaSimplificadaService;
 
@@ -39,6 +42,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ProdutosController extends Controller
 {
@@ -69,6 +73,7 @@ class ProdutosController extends Controller
             'malarigeno'   => $this->getCampanhasMalarigeno($contrato),
             'rima'         => $this->getCampanhasRima($contrato),
             'asv'          => $this->getCampanhasAsv($contrato),
+            'indigena'     => $this->getCampanhasIndigena($contrato),
              default        => collect(),
         };
 
@@ -103,6 +108,7 @@ class ProdutosController extends Controller
             'malarigeno' => $this->getCampanhasMalarigeno($contrato),
             'rima' => $this->getCampanhasRima($contrato),
             'asv' => $this->getCampanhasAsv($contrato),
+            'indigena' => $this->getCampanhasIndigena($contrato),
         ];
 
         return collect($campanhasPorProduto)
@@ -139,6 +145,7 @@ class ProdutosController extends Controller
                 'malarigeno' => 'Malarígeno',
                 'rima' => 'RIMA',
                 'asv' => 'ASV',
+                'indigena' => 'Indígena',
                 default => ucfirst($produto),
             },
             'subproduto' => $campanha['subproduto'] ?? null,
@@ -167,6 +174,7 @@ class ProdutosController extends Controller
                 'malarigeno' => 'sgc.contratada.produtos.malarigeno.analise',
                 'rima' => 'sgc.contratada.produtos.rima.analise',
                 'asv' => 'sgc.contratada.produtos.asv.analise',
+                'indigena' => 'sgc.contratada.produtos.indigena.analise',
                 default => null,
             };
 
@@ -186,6 +194,7 @@ class ProdutosController extends Controller
                 'malarigeno' => 'sgc.contratada.produtos.malarigeno.edit',
                 'rima' => 'sgc.contratada.produtos.rima.edit',
                 'asv' => 'sgc.contratada.produtos.asv.edit',
+                'indigena' => 'sgc.contratada.produtos.indigena.edit',
                 default => null,
             };
 
@@ -205,11 +214,11 @@ class ProdutosController extends Controller
                 ];
             }
 
-            if ($produto === 'asv') {
+            if (in_array($produto, ['asv', 'indigena'], true)) {
                 return [
                     'label' => 'Continuar',
                     'type' => 'warning',
-                    'url' => route('sgc.contratada.produtos.asv.edit', [$contrato, $produto, $id]),
+                    'url' => route("sgc.contratada.produtos.{$produto}.edit", [$contrato, $produto, $id]),
                 ];
             }
 
@@ -232,7 +241,7 @@ class ProdutosController extends Controller
         $contratoObj = Contrato::findOrFail($contrato);
         $subproduto = $request->query('subproduto');
 
-        if (!$subproduto && !in_array($produto, ['pmqa', 'eia', 'fauna', 'malarigeno', 'rima', 'asv'])) {
+        if (!$subproduto && !in_array($produto, ['pmqa', 'eia', 'fauna', 'malarigeno', 'rima', 'asv', 'indigena'])) {
             Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
 
             if ($produto === 'patrimonio') {
@@ -280,6 +289,9 @@ class ProdutosController extends Controller
 
         } elseif ($produto === 'asv') {
             return $this->createAsv($contrato, $produto, $contratoObj, $subproduto);
+
+        } elseif ($produto === 'indigena') {
+            return $this->createIndigena($contrato, $produto, $contratoObj, $subproduto);
 
         } elseif ($produto === 'patrimonio') {
             return $this->createPatrimonio($request, $contrato, $produto, $contratoObj, $subproduto);
@@ -399,6 +411,28 @@ class ProdutosController extends Controller
                 ->with('success', 'Campanha ASV salva com sucesso.');
         }
 
+        if ($produto === 'indigena') {
+            $validated = $request->validate((new StoreIndigenaSimplificadaRequest())->rules());
+            $validated['contrato_id'] = $contrato;
+
+            $jaExiste = SgcIndigenaCampanha::where('id_contrato', $contrato)
+                ->where('id_campanha', $validated['id_campanha'])
+                ->where('subproduto', $validated['subproduto'])
+                ->exists();
+
+            if ($jaExiste) {
+                throw ValidationException::withMessages([
+                    'id_campanha' => 'Já existe uma campanha Indígena com este ID para o subproduto selecionado. Abra a campanha existente para visualizá-la ou editá-la.',
+                ]);
+            }
+
+            $indigena = (new IndigenaEntregaSimplificadaService())->criar($validated);
+
+            return redirect()
+                ->route('sgc.contratada.produtos.indigena.show', [$contrato, 'indigena', $indigena->id])
+                ->with('success', 'Campanha Indígena salva com sucesso.');
+        }
+
         abort(404);
     }
 
@@ -407,6 +441,18 @@ class ProdutosController extends Controller
         return inertia('Sgc/Contratada/Produtos/Asv/Create', [
             'contrato' => $contrato,
             'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->pluck('cod_emp')->toArray(),
+        ]);
+    }
+
+    private function createIndigena($contrato, $produto, $contratoObj, $subproduto): Response
+    {
+        return inertia('Sgc/Contratada/Produtos/Indigena/Create', [
+            'contrato' => $contrato,
+            'produto' => 'Indígena',
             'contratos' => $contratoObj,
             'subproduto' => $subproduto,
             'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
@@ -713,6 +759,22 @@ class ProdutosController extends Controller
     private function getCampanhasAsv($contrato)
     {
         return SgcAsvCampanha::where('id_contrato', $contrato)
+            ->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn ($campanha) => [
+                'id' => $campanha->id,
+                'id_campanha' => $campanha->id_campanha ?? 'N/A',
+                'empreendimento' => $campanha->cod_emp ?? 'N/A',
+                'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A',
+                'data_final' => 'N/A',
+                'status' => $campanha->status ?? 'Em elaboração',
+                'subproduto' => $campanha->subproduto ?? 'N/A',
+            ]);
+    }
+
+    private function getCampanhasIndigena($contrato)
+    {
+        return SgcIndigenaCampanha::where('id_contrato', $contrato)
             ->latest()
             ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
             ->map(fn ($campanha) => [
