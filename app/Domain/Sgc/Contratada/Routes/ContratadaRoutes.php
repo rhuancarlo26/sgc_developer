@@ -37,6 +37,7 @@ use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Controller\MalarigenoCampanhaC
 use App\Domain\Sgc\Contratada\Produtos\Rima\Controller\RimaCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Asv\Controller\AsvCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Indigena\Controller\IndigenaCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Quilombola\Controller\QuilombolaCampanhaController;
 
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\ConfiguracoesModulosController;
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\CreateConfigModuloController;
@@ -211,6 +212,13 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('indigena/campanhas/{campanha}/update', [IndigenaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.indigena.update');
         Route::post('indigena/campanhas/{campanha}/aprovar', [IndigenaCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.indigena.aprovar');
         Route::post('indigena/campanhas/{campanha}/reprovar', [IndigenaCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.indigena.reprovar');
+
+        Route::get('quilombola/campanhas/{campanha}', [QuilombolaCampanhaController::class, 'show'])->name('sgc.contratada.produtos.quilombola.show');
+        Route::get('quilombola/campanhas/{campanha}/analise', [QuilombolaCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.quilombola.analise');
+        Route::get('quilombola/campanhas/{campanha}/edit', [QuilombolaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.quilombola.edit');
+        Route::post('quilombola/campanhas/{campanha}/update', [QuilombolaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.quilombola.update');
+        Route::post('quilombola/campanhas/{campanha}/aprovar', [QuilombolaCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.quilombola.aprovar');
+        Route::post('quilombola/campanhas/{campanha}/reprovar', [QuilombolaCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.quilombola.reprovar');
 
         // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {

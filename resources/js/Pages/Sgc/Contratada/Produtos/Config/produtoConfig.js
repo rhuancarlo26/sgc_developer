@@ -124,6 +124,30 @@ export const produtoConfig = {
     }
   },
 
+  quilombola: {
+    nome: 'Quilombola',
+    temEtapas: false,
+    temArquivo: false,
+    temVinculacoes: false,
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
+    acoes: ['visualizar', 'editar', 'analisar'],
+    modalPreview: false,
+    showModulo: false,
+    passaModulo: null,
+    rotaNome: {
+      index: 'sgc.contratada.produtos.index',
+      create: 'sgc.contratada.produtos.create',
+      show: 'sgc.contratada.produtos.quilombola.show',
+      analise: 'sgc.contratada.produtos.quilombola.analise',
+      edit: 'sgc.contratada.produtos.quilombola.edit',
+      destroy: null,
+      aprovarTudo: null,
+      reprovarTudo: null,
+      arquivar: null,
+      restaurar: null,
+    }
+  },
+
   eia: {
     nome: 'EIA',
     temEtapas: false,
