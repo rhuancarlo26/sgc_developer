@@ -15,6 +15,7 @@ class ProdutosService
         $familia = match (strtolower($produto)) {
             'indigena' => 'Indígena',
             'quilombola' => 'Quilombolas',
+            'audiencia' => 'Audiência',
             default => ucfirst($produto),
         };
 

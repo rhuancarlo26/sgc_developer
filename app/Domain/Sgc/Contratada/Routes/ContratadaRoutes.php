@@ -38,6 +38,7 @@ use App\Domain\Sgc\Contratada\Produtos\Rima\Controller\RimaCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Asv\Controller\AsvCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Indigena\Controller\IndigenaCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Quilombola\Controller\QuilombolaCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Audiencia\Controller\AudienciaCampanhaController;
 
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\ConfiguracoesModulosController;
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\CreateConfigModuloController;
@@ -219,6 +220,13 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('quilombola/campanhas/{campanha}/update', [QuilombolaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.quilombola.update');
         Route::post('quilombola/campanhas/{campanha}/aprovar', [QuilombolaCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.quilombola.aprovar');
         Route::post('quilombola/campanhas/{campanha}/reprovar', [QuilombolaCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.quilombola.reprovar');
+
+        Route::get('audiencia/campanhas/{campanha}', [AudienciaCampanhaController::class, 'show'])->name('sgc.contratada.produtos.audiencia.show');
+        Route::get('audiencia/campanhas/{campanha}/analise', [AudienciaCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.audiencia.analise');
+        Route::get('audiencia/campanhas/{campanha}/edit', [AudienciaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.audiencia.edit');
+        Route::post('audiencia/campanhas/{campanha}/update', [AudienciaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.audiencia.update');
+        Route::post('audiencia/campanhas/{campanha}/aprovar', [AudienciaCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.audiencia.aprovar');
+        Route::post('audiencia/campanhas/{campanha}/reprovar', [AudienciaCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.audiencia.reprovar');
 
         // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {

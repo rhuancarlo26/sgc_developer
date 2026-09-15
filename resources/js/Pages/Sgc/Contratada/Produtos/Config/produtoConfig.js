@@ -148,6 +148,13 @@ export const produtoConfig = {
     }
   },
 
+  audiencia: {
+    nome: 'Audiência', temEtapas: false, temArquivo: false, temVinculacoes: false,
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
+    acoes: ['visualizar', 'editar', 'analisar'], modalPreview: false, showModulo: false, passaModulo: null,
+    rotaNome: { index: 'sgc.contratada.produtos.index', create: 'sgc.contratada.produtos.create', show: 'sgc.contratada.produtos.audiencia.show', analise: 'sgc.contratada.produtos.audiencia.analise', edit: 'sgc.contratada.produtos.audiencia.edit', destroy: null, aprovarTudo: null, reprovarTudo: null, arquivar: null, restaurar: null }
+  },
+
   eia: {
     nome: 'EIA',
     temEtapas: false,

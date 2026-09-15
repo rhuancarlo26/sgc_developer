@@ -22,6 +22,7 @@ use App\Models\SgcRima;
 use App\Models\SgcAsvCampanha;
 use App\Models\SgcIndigenaCampanha;
 use App\Models\SgcQuilombolaCampanha;
+use App\Models\SgcAudienciaCampanha;
 use App\Models\SgcPmqaExecCampanha;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
@@ -33,6 +34,8 @@ use App\Domain\Sgc\Contratada\Produtos\Indigena\Requests\StoreIndigenaSimplifica
 use App\Domain\Sgc\Contratada\Produtos\Indigena\Services\IndigenaEntregaSimplificadaService;
 use App\Domain\Sgc\Contratada\Produtos\Quilombola\Requests\StoreQuilombolaSimplificadaRequest;
 use App\Domain\Sgc\Contratada\Produtos\Quilombola\Services\QuilombolaEntregaSimplificadaService;
+use App\Domain\Sgc\Contratada\Produtos\Audiencia\Requests\StoreAudienciaSimplificadaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Audiencia\Services\AudienciaEntregaSimplificadaService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Requests\StoreEntregaSimplificadaFaunaRequest;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\SgcFaunaEntregaSimplificadaService;
 
@@ -78,6 +81,7 @@ class ProdutosController extends Controller
             'asv'          => $this->getCampanhasAsv($contrato),
             'indigena'     => $this->getCampanhasIndigena($contrato),
             'quilombola'   => $this->getCampanhasQuilombola($contrato),
+            'audiencia'    => $this->getCampanhasAudiencia($contrato),
              default        => collect(),
         };
 
@@ -114,6 +118,7 @@ class ProdutosController extends Controller
             'asv' => $this->getCampanhasAsv($contrato),
             'indigena' => $this->getCampanhasIndigena($contrato),
             'quilombola' => $this->getCampanhasQuilombola($contrato),
+            'audiencia' => $this->getCampanhasAudiencia($contrato),
         ];
 
         return collect($campanhasPorProduto)
@@ -152,6 +157,7 @@ class ProdutosController extends Controller
                 'asv' => 'ASV',
                 'indigena' => 'Indígena',
                 'quilombola' => 'Quilombola',
+                'audiencia' => 'Audiência',
                 default => ucfirst($produto),
             },
             'subproduto' => $campanha['subproduto'] ?? null,
@@ -182,6 +188,7 @@ class ProdutosController extends Controller
                 'asv' => 'sgc.contratada.produtos.asv.analise',
                 'indigena' => 'sgc.contratada.produtos.indigena.analise',
                 'quilombola' => 'sgc.contratada.produtos.quilombola.analise',
+                'audiencia' => 'sgc.contratada.produtos.audiencia.analise',
                 default => null,
             };
 
@@ -203,6 +210,7 @@ class ProdutosController extends Controller
                 'asv' => 'sgc.contratada.produtos.asv.edit',
                 'indigena' => 'sgc.contratada.produtos.indigena.edit',
                 'quilombola' => 'sgc.contratada.produtos.quilombola.edit',
+                'audiencia' => 'sgc.contratada.produtos.audiencia.edit',
                 default => null,
             };
 
@@ -222,7 +230,7 @@ class ProdutosController extends Controller
                 ];
             }
 
-            if (in_array($produto, ['asv', 'indigena', 'quilombola'], true)) {
+            if (in_array($produto, ['asv', 'indigena', 'quilombola', 'audiencia'], true)) {
                 return [
                     'label' => 'Continuar',
                     'type' => 'warning',
@@ -249,7 +257,7 @@ class ProdutosController extends Controller
         $contratoObj = Contrato::findOrFail($contrato);
         $subproduto = $request->query('subproduto');
 
-        if (!$subproduto && !in_array($produto, ['pmqa', 'eia', 'fauna', 'malarigeno', 'rima', 'asv', 'indigena', 'quilombola'])) {
+        if (!$subproduto && !in_array($produto, ['pmqa', 'eia', 'fauna', 'malarigeno', 'rima', 'asv', 'indigena', 'quilombola', 'audiencia'])) {
             Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
 
             if ($produto === 'patrimonio') {
@@ -303,6 +311,9 @@ class ProdutosController extends Controller
 
         } elseif ($produto === 'quilombola') {
             return $this->createQuilombola($contrato, $produto, $contratoObj, $subproduto);
+
+        } elseif ($produto === 'audiencia') {
+            return $this->createAudiencia($contrato, $produto, $contratoObj, $subproduto);
 
         } elseif ($produto === 'patrimonio') {
             return $this->createPatrimonio($request, $contrato, $produto, $contratoObj, $subproduto);
@@ -459,6 +470,16 @@ class ProdutosController extends Controller
                 ->with('success', 'Campanha Quilombola salva com sucesso.');
         }
 
+        if ($produto === 'audiencia') {
+            $validated = $request->validate((new StoreAudienciaSimplificadaRequest())->rules());
+            $validated['contrato_id'] = $contrato;
+            if (SgcAudienciaCampanha::where('id_contrato', $contrato)->where('id_campanha', $validated['id_campanha'])->where('subproduto', $validated['subproduto'])->exists()) {
+                throw ValidationException::withMessages(['id_campanha' => 'Já existe uma campanha de Audiência com este ID para o subproduto selecionado. Abra a campanha existente para visualizá-la ou editá-la.']);
+            }
+            $audiencia = (new AudienciaEntregaSimplificadaService())->criar($validated);
+            return redirect()->route('sgc.contratada.produtos.audiencia.show', [$contrato, 'audiencia', $audiencia->id])->with('success', 'Campanha de Audiência salva com sucesso.');
+        }
+
         abort(404);
     }
 
@@ -491,6 +512,18 @@ class ProdutosController extends Controller
         return inertia('Sgc/Contratada/Produtos/Quilombola/Create', [
             'contrato' => $contrato,
             'produto' => 'Quilombola',
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->pluck('cod_emp')->toArray(),
+        ]);
+    }
+
+    private function createAudiencia($contrato, $produto, $contratoObj, $subproduto): Response
+    {
+        return inertia('Sgc/Contratada/Produtos/Audiencia/Create', [
+            'contrato' => $contrato,
+            'produto' => 'Audiência',
             'contratos' => $contratoObj,
             'subproduto' => $subproduto,
             'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
@@ -840,6 +873,13 @@ class ProdutosController extends Controller
                 'status' => $campanha->status ?? 'Em elaboração',
                 'subproduto' => $campanha->subproduto ?? 'N/A',
             ]);
+    }
+
+    private function getCampanhasAudiencia($contrato)
+    {
+        return SgcAudienciaCampanha::where('id_contrato', $contrato)->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn ($campanha) => ['id' => $campanha->id, 'id_campanha' => $campanha->id_campanha ?? 'N/A', 'empreendimento' => $campanha->cod_emp ?? 'N/A', 'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A', 'data_final' => 'N/A', 'status' => $campanha->status ?? 'Em elaboração', 'subproduto' => $campanha->subproduto ?? 'N/A']);
     }
 
     private function createPmqa(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response

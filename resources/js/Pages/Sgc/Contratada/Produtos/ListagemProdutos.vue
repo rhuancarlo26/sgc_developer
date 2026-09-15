@@ -293,7 +293,7 @@ const continuarCampanha = (campanha) => {
       visualizarCampanha(campanha);
       return;
     }
-    if (['asv', 'indigena', 'quilombola'].includes(selectedProduto.value)) {
+    if (['asv', 'indigena', 'quilombola', 'audiencia'].includes(selectedProduto.value)) {
       router.get(route(`sgc.contratada.produtos.${selectedProduto.value}.edit`, [props.contrato, selectedProduto.value, campanha.id]));
       return;
     }
