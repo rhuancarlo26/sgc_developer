@@ -76,6 +76,30 @@ export const produtoConfig = {
     }
   },
 
+  asv: {
+    nome: 'ASV',
+    temEtapas: false,
+    temArquivo: false,
+    temVinculacoes: false,
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
+    acoes: ['visualizar', 'editar', 'analisar', 'excluir'],
+    modalPreview: false,
+    showModulo: false,
+    passaModulo: null,
+    rotaNome: {
+      index: 'sgc.contratada.produtos.index',
+      create: 'sgc.contratada.produtos.create',
+      show: 'sgc.contratada.produtos.asv.show',
+      analise: 'sgc.contratada.produtos.asv.analise',
+      edit: 'sgc.contratada.produtos.asv.edit',
+      destroy: null,
+      aprovarTudo: null,
+      reprovarTudo: null,
+      arquivar: null,
+      restaurar: null,
+    }
+  },
+
   eia: {
     nome: 'EIA',
     temEtapas: false,

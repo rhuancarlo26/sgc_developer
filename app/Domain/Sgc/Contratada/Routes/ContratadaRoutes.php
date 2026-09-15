@@ -35,6 +35,7 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SalvarEtapaCampanhaContr
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SubmeterCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Controller\MalarigenoCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Rima\Controller\RimaCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Asv\Controller\AsvCampanhaController;
 
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\ConfiguracoesModulosController;
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\CreateConfigModuloController;
@@ -195,6 +196,13 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('rima/campanhas/{campanha}/finalizar-avaliacao', [RimaCampanhaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.rima.finalizarAvaliacao');
         Route::get('rima/campanhas/{campanha}/edit', [RimaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.rima.edit');
         Route::post('rima/campanhas/{campanha}/update', [RimaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.rima.update');
+
+        Route::get('asv/campanhas/{campanha}', [AsvCampanhaController::class, 'show'])->name('sgc.contratada.produtos.asv.show');
+        Route::get('asv/campanhas/{campanha}/analise', [AsvCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.asv.analise');
+        Route::get('asv/campanhas/{campanha}/edit', [AsvCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.asv.edit');
+        Route::post('asv/campanhas/{campanha}/update', [AsvCampanhaController::class, 'update'])->name('sgc.contratada.produtos.asv.update');
+        Route::post('asv/campanhas/{campanha}/aprovar', [AsvCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.asv.aprovar');
+        Route::post('asv/campanhas/{campanha}/reprovar', [AsvCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.asv.reprovar');
 
         // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {

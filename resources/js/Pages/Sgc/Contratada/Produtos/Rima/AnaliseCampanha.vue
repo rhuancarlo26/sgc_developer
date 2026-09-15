@@ -148,7 +148,7 @@ onMounted(loadPlanilha);
                                 <i class="bi bi-info-circle me-2"></i>
                                 {{ props.analises.length }} análise{{ props.analises.length !== 1 ? 's' : '' }} anterior{{ props.analises.length !== 1 ? 's' : '' }}
                             </span>
-                            <span class="badge bg-info">Clique para visualizar</span>
+                            <span class="badge bg-info text-white">Clique para visualizar</span>
                         </div>
 
                         <div class="text-center mb-4">

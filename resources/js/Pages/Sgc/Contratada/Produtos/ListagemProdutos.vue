@@ -14,6 +14,7 @@ const props = defineProps({
     produto: { type: String, required: true },
     contratos: { type: Object, required: true },
     campanhas: { type: Array, default: () => [] },
+    pendenciasContrato: { type: Array, default: () => [] },
     canApprove: { type: Boolean, default: false },
     auth: { type: Object, required: true },
     vinculacoes: { type: Object },
@@ -60,6 +61,7 @@ const campanhaEmAnalise = ref(null);
 const justificativaReprovacao = ref('');
 const erroReprovacao = ref('');
 const mostrarPendencias = ref(false);
+const mostrarTodasPendencias = ref(false);
 
 // Atualizar a rota quando o produto mudar
 const updateProduto = () => {
@@ -119,26 +121,22 @@ const getCampanhaStatus = (campanha) => campanha.status || campanha.status_aprov
 const statusPendenteContratada = ['Em elaboração', 'Reprovada', 'Rejeitada'];
 
 const campanhasPendentes = computed(() => {
-  return campanhasFiltradas.value.filter((campanha) => {
-    const status = getCampanhaStatus(campanha);
-
-    if (isFiscal.value) {
-      return status === 'Em análise';
-    }
-
-    return statusPendenteContratada.includes(status);
-  });
+  return props.pendenciasContrato;
 });
 
 const resumoPendencias = computed(() => {
   return campanhasPendentes.value.reduce((acc, campanha) => {
-    const status = getCampanhaStatus(campanha) || 'Sem status';
-    acc[status] = (acc[status] ?? 0) + 1;
+    const produto = campanha.produto_nome || campanha.produto || 'Outro';
+    acc[produto] = (acc[produto] ?? 0) + 1;
     return acc;
   }, {});
 });
 
 const totalPendencias = computed(() => campanhasPendentes.value.length);
+const pendenciasExibidas = computed(() => mostrarTodasPendencias.value
+  ? campanhasPendentes.value
+  : campanhasPendentes.value.slice(0, 5));
+const haMaisPendencias = computed(() => campanhasPendentes.value.length > 5);
 
 const tituloPainelPendencias = computed(() => {
   return isFiscal.value
@@ -148,9 +146,15 @@ const tituloPainelPendencias = computed(() => {
 
 const descricaoPainelPendencias = computed(() => {
   return isFiscal.value
-    ? 'Campanhas em análise aguardando atuação do fiscal.'
-    : 'Campanhas em elaboração ou devolvidas para ajuste da contratada.';
+    ? 'Todas as campanhas do contrato que aguardam análise do fiscal.'
+    : 'Todas as campanhas do contrato que precisam de uma ação da contratada.';
 });
+
+const abrirPendencia = (pendencia) => {
+  if (pendencia.url_acao) {
+    router.get(pendencia.url_acao);
+  }
+};
 
 const getAcaoPendente = (campanha) => {
   const status = getCampanhaStatus(campanha);
@@ -287,6 +291,10 @@ const goToCreate = () => {
 const continuarCampanha = (campanha) => {
     if (selectedProduto.value === 'fauna' && campanha.modo_preenchimento === 'simplificado') {
       visualizarCampanha(campanha);
+      return;
+    }
+    if (selectedProduto.value === 'asv') {
+      router.get(route('sgc.contratada.produtos.asv.edit', [props.contrato, 'asv', campanha.id]));
       return;
     }
     if (selectedProduto.value === 'patrimonio') {
@@ -562,18 +570,13 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
               <div class="col-md-12 mb-4">
                 <div class="pending-panel">
                   <div class="pending-panel-header">
-                    <button
-                      type="button"
-                      class="pending-panel-heading"
-                      @click="mostrarPendencias = !mostrarPendencias"
-                      :aria-expanded="mostrarPendencias"
-                    >
-                      <span class="pending-chevron">{{ mostrarPendencias ? '▾' : '▸' }}</span>
+                    <div class="pending-panel-heading">
+                      <span class="pending-panel-alert" aria-hidden="true">!</span>
                       <span>
                         <h4 class="pending-panel-title">{{ tituloPainelPendencias }}</h4>
                         <p class="pending-panel-subtitle mb-0">{{ descricaoPainelPendencias }}</p>
                       </span>
-                    </button>
+                    </div>
                     <div class="pending-panel-total">
                       <span class="pending-total-label">Total</span>
                       <strong class="pending-total-value">{{ totalPendencias }}</strong>
@@ -582,49 +585,73 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
 
                   <div v-if="totalPendencias" class="pending-status-row">
                     <div
-                      v-for="(total, status) in resumoPendencias"
-                      :key="status"
+                      v-for="(total, produto) in resumoPendencias"
+                      :key="produto"
                       class="pending-status-card"
                     >
-                      <span class="pending-status-name">{{ status }}</span>
+                      <span class="pending-status-name">{{ produto }}</span>
                       <strong class="pending-status-count">{{ total }}</strong>
                     </div>
                   </div>
 
                   <div v-if="totalPendencias && mostrarPendencias" class="pending-campaign-list">
                     <div
-                      v-for="campanha in campanhasPendentes"
-                      :key="`pendencia-${campanha.id}`"
+                      v-for="campanha in pendenciasExibidas"
+                      :key="`pendencia-${campanha.produto}-${campanha.id}`"
                       class="pending-campaign-card"
                     >
                       <div class="pending-campaign-main">
                         <div class="pending-campaign-title-row">
                           <strong class="pending-campaign-title">
-                            {{ campanha.id_campanha || campanha.tema || campanha.cod_emp || campanha.empreendimento || `Campanha ${campanha.id}` }}
+                            {{ campanha.titulo }}
                           </strong>
-                          <span class="pending-badge" :class="getPendenciaBadgeClass(getCampanhaStatus(campanha))">
-                            {{ getCampanhaStatus(campanha) }}
+                          <span class="pending-product-badge">{{ campanha.produto_nome }}</span>
+                          <span class="pending-badge" :class="getPendenciaBadgeClass(campanha.status)">
+                            {{ campanha.status_exibicao }}
                           </span>
                         </div>
                         <div class="pending-campaign-meta">
                           <span v-if="campanha.subproduto">{{ campanha.subproduto }}</span>
-                          <span v-if="campanha.tema">{{ campanha.tema }}</span>
                           <span v-if="campanha.empreendimento">{{ campanha.empreendimento }}</span>
-                          <span v-if="campanha.cod_emp">{{ campanha.cod_emp }}</span>
                         </div>
                       </div>
-                      <div v-if="getAcaoPendente(campanha)" class="pending-campaign-action">
+                      <div v-if="campanha.url_acao" class="pending-campaign-action">
                         <NavButton
-                          :type-button="getAcaoPendente(campanha).type"
-                          :title="getAcaoPendente(campanha).label"
-                          @click="getAcaoPendente(campanha).handler()"
+                          :type-button="campanha.tipo_acao"
+                          :title="campanha.acao"
+                          @click="abrirPendencia(campanha)"
                         />
                       </div>
                     </div>
+
+                    <button
+                      v-if="haMaisPendencias"
+                      type="button"
+                      class="pending-show-more"
+                      @click="mostrarTodasPendencias = !mostrarTodasPendencias"
+                    >
+                      {{ mostrarTodasPendencias ? 'Mostrar menos' : `Ver todas as ${totalPendencias} pendências` }}
+                    </button>
                   </div>
 
                   <div v-else-if="!totalPendencias" class="pending-empty-state">
                     Nenhuma campanha pendente para o perfil atual.
+                  </div>
+
+                  <div v-if="totalPendencias" class="pending-toggle-area">
+                    <button
+                      type="button"
+                      class="pending-toggle-button"
+                      @click="mostrarPendencias = !mostrarPendencias"
+                      :aria-expanded="mostrarPendencias"
+                    >
+                      <span
+                        class="pending-toggle-icon"
+                        :class="{ 'is-open': mostrarPendencias }"
+                        aria-hidden="true"
+                      ></span>
+                      {{ mostrarPendencias ? 'Ocultar campanhas pendentes' : 'Ver campanhas pendentes' }}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -978,10 +1005,6 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  cursor: pointer;
-  border: 0;
-  background: transparent;
-  padding: 0;
   text-align: left;
   width: 100%;
   flex: 1;
@@ -990,6 +1013,22 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
 .pending-panel-title {
   margin-bottom: 4px;
   color: #123524;
+}
+
+.pending-panel-alert {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 21px;
+  height: 21px;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: #d99500;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .pending-panel-subtitle {
@@ -1025,19 +1064,45 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
   margin-bottom: 16px;
 }
 
-.pending-chevron {
+.pending-toggle-area {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #d7e9dd;
+}
+
+.pending-toggle-button {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin-top: 2px;
-  border-radius: 999px;
-  background: #ffffff;
-  border: 1px solid #d7e9dd;
-  color: #2f4d3d;
-  font-size: 0.95rem;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  color: #24633d;
+  font-size: 0.9rem;
+  font-weight: 700;
   line-height: 1;
+  padding: 4px 10px;
+}
+
+.pending-toggle-button:hover {
+  color: #123524;
+  text-decoration: underline;
+}
+
+.pending-toggle-icon {
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.pending-toggle-icon.is-open {
+  margin-top: 4px;
+  transform: rotate(225deg);
 }
 
 .pending-status-card {
@@ -1109,6 +1174,27 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
   padding: 4px 10px;
   font-size: 0.78rem;
   font-weight: 600;
+}
+
+.pending-product-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: #e4f1e8;
+  color: #24633d;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.pending-show-more {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  padding: 4px 2px;
+  color: #24633d;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .badge-em-analise {
