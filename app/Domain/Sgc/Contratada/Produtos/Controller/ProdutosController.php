@@ -23,6 +23,7 @@ use App\Models\SgcAsvCampanha;
 use App\Models\SgcIndigenaCampanha;
 use App\Models\SgcQuilombolaCampanha;
 use App\Models\SgcAudienciaCampanha;
+use App\Models\SgcPbaCampanha;
 use App\Models\SgcPmqaExecCampanha;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
@@ -36,6 +37,8 @@ use App\Domain\Sgc\Contratada\Produtos\Quilombola\Requests\StoreQuilombolaSimpli
 use App\Domain\Sgc\Contratada\Produtos\Quilombola\Services\QuilombolaEntregaSimplificadaService;
 use App\Domain\Sgc\Contratada\Produtos\Audiencia\Requests\StoreAudienciaSimplificadaRequest;
 use App\Domain\Sgc\Contratada\Produtos\Audiencia\Services\AudienciaEntregaSimplificadaService;
+use App\Domain\Sgc\Contratada\Produtos\Pba\Requests\StorePbaSimplificadaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Pba\Services\PbaEntregaSimplificadaService;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Requests\StoreEntregaSimplificadaFaunaRequest;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\SgcFaunaEntregaSimplificadaService;
 
@@ -82,6 +85,7 @@ class ProdutosController extends Controller
             'indigena'     => $this->getCampanhasIndigena($contrato),
             'quilombola'   => $this->getCampanhasQuilombola($contrato),
             'audiencia'    => $this->getCampanhasAudiencia($contrato),
+            'pba'          => $this->getCampanhasPba($contrato),
              default        => collect(),
         };
 
@@ -94,7 +98,7 @@ class ProdutosController extends Controller
         return inertia('Sgc/Contratada/Produtos/ListagemProdutos', [
             'subprodutos' => $subprodutos,
             'contrato' => $contrato,
-            'produto' => ucfirst($produto),
+            'produto' => $produto === 'pba' ? 'PBA' : ucfirst($produto),
             'contratos' => $contratoObj,
             'campanhas' => $campanhas,
             // O painel superior não depende do produto aberto. Mantemos a lista
@@ -119,6 +123,7 @@ class ProdutosController extends Controller
             'indigena' => $this->getCampanhasIndigena($contrato),
             'quilombola' => $this->getCampanhasQuilombola($contrato),
             'audiencia' => $this->getCampanhasAudiencia($contrato),
+            'pba' => $this->getCampanhasPba($contrato),
         ];
 
         return collect($campanhasPorProduto)
@@ -158,6 +163,7 @@ class ProdutosController extends Controller
                 'indigena' => 'Indígena',
                 'quilombola' => 'Quilombola',
                 'audiencia' => 'Audiência',
+                'pba' => 'PBA',
                 default => ucfirst($produto),
             },
             'subproduto' => $campanha['subproduto'] ?? null,
@@ -189,6 +195,7 @@ class ProdutosController extends Controller
                 'indigena' => 'sgc.contratada.produtos.indigena.analise',
                 'quilombola' => 'sgc.contratada.produtos.quilombola.analise',
                 'audiencia' => 'sgc.contratada.produtos.audiencia.analise',
+                'pba' => 'sgc.contratada.produtos.pba.analise',
                 default => null,
             };
 
@@ -211,6 +218,7 @@ class ProdutosController extends Controller
                 'indigena' => 'sgc.contratada.produtos.indigena.edit',
                 'quilombola' => 'sgc.contratada.produtos.quilombola.edit',
                 'audiencia' => 'sgc.contratada.produtos.audiencia.edit',
+                'pba' => 'sgc.contratada.produtos.pba.edit',
                 default => null,
             };
 
@@ -230,7 +238,7 @@ class ProdutosController extends Controller
                 ];
             }
 
-            if (in_array($produto, ['asv', 'indigena', 'quilombola', 'audiencia'], true)) {
+            if (in_array($produto, ['asv', 'indigena', 'quilombola', 'audiencia', 'pba'], true)) {
                 return [
                     'label' => 'Continuar',
                     'type' => 'warning',
@@ -257,7 +265,7 @@ class ProdutosController extends Controller
         $contratoObj = Contrato::findOrFail($contrato);
         $subproduto = $request->query('subproduto');
 
-        if (!$subproduto && !in_array($produto, ['pmqa', 'eia', 'fauna', 'malarigeno', 'rima', 'asv', 'indigena', 'quilombola', 'audiencia'])) {
+        if (!$subproduto && !in_array($produto, ['pmqa', 'eia', 'fauna', 'malarigeno', 'rima', 'asv', 'indigena', 'quilombola', 'audiencia', 'pba'])) {
             Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
 
             if ($produto === 'patrimonio') {
@@ -314,6 +322,9 @@ class ProdutosController extends Controller
 
         } elseif ($produto === 'audiencia') {
             return $this->createAudiencia($contrato, $produto, $contratoObj, $subproduto);
+
+        } elseif ($produto === 'pba') {
+            return $this->createPba($contrato, $produto, $contratoObj, $subproduto);
 
         } elseif ($produto === 'patrimonio') {
             return $this->createPatrimonio($request, $contrato, $produto, $contratoObj, $subproduto);
@@ -480,6 +491,16 @@ class ProdutosController extends Controller
             return redirect()->route('sgc.contratada.produtos.audiencia.show', [$contrato, 'audiencia', $audiencia->id])->with('success', 'Campanha de Audiência salva com sucesso.');
         }
 
+        if ($produto === 'pba') {
+            $validated = $request->validate((new StorePbaSimplificadaRequest())->rules());
+            $validated['contrato_id'] = $contrato;
+            if (SgcPbaCampanha::where('id_contrato', $contrato)->where('id_campanha', $validated['id_campanha'])->where('subproduto', $validated['subproduto'])->exists()) {
+                throw ValidationException::withMessages(['id_campanha' => 'Já existe uma campanha PBA com este ID para o subproduto selecionado. Abra a campanha existente para visualizá-la ou editá-la.']);
+            }
+            $pba = (new PbaEntregaSimplificadaService())->criar($validated);
+            return redirect()->route('sgc.contratada.produtos.pba.show', [$contrato, 'pba', $pba->id])->with('success', 'Campanha PBA salva com sucesso.');
+        }
+
         abort(404);
     }
 
@@ -524,6 +545,18 @@ class ProdutosController extends Controller
         return inertia('Sgc/Contratada/Produtos/Audiencia/Create', [
             'contrato' => $contrato,
             'produto' => 'Audiência',
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->pluck('cod_emp')->toArray(),
+        ]);
+    }
+
+    private function createPba($contrato, $produto, $contratoObj, $subproduto): Response
+    {
+        return inertia('Sgc/Contratada/Produtos/Pba/Create', [
+            'contrato' => $contrato,
+            'produto' => 'PBA',
             'contratos' => $contratoObj,
             'subproduto' => $subproduto,
             'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
@@ -878,6 +911,13 @@ class ProdutosController extends Controller
     private function getCampanhasAudiencia($contrato)
     {
         return SgcAudienciaCampanha::where('id_contrato', $contrato)->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn ($campanha) => ['id' => $campanha->id, 'id_campanha' => $campanha->id_campanha ?? 'N/A', 'empreendimento' => $campanha->cod_emp ?? 'N/A', 'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A', 'data_final' => 'N/A', 'status' => $campanha->status ?? 'Em elaboração', 'subproduto' => $campanha->subproduto ?? 'N/A']);
+    }
+
+    private function getCampanhasPba($contrato)
+    {
+        return SgcPbaCampanha::where('id_contrato', $contrato)->latest()
             ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
             ->map(fn ($campanha) => ['id' => $campanha->id, 'id_campanha' => $campanha->id_campanha ?? 'N/A', 'empreendimento' => $campanha->cod_emp ?? 'N/A', 'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A', 'data_final' => 'N/A', 'status' => $campanha->status ?? 'Em elaboração', 'subproduto' => $campanha->subproduto ?? 'N/A']);
     }

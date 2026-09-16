@@ -155,6 +155,13 @@ export const produtoConfig = {
     rotaNome: { index: 'sgc.contratada.produtos.index', create: 'sgc.contratada.produtos.create', show: 'sgc.contratada.produtos.audiencia.show', analise: 'sgc.contratada.produtos.audiencia.analise', edit: 'sgc.contratada.produtos.audiencia.edit', destroy: null, aprovarTudo: null, reprovarTudo: null, arquivar: null, restaurar: null }
   },
 
+  pba: {
+    nome: 'PBA', temEtapas: false, temArquivo: false, temVinculacoes: false,
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
+    acoes: ['visualizar', 'editar', 'analisar'], modalPreview: false, showModulo: false, passaModulo: null,
+    rotaNome: { index: 'sgc.contratada.produtos.index', create: 'sgc.contratada.produtos.create', show: 'sgc.contratada.produtos.pba.show', analise: 'sgc.contratada.produtos.pba.analise', edit: 'sgc.contratada.produtos.pba.edit', destroy: null, aprovarTudo: null, reprovarTudo: null, arquivar: null, restaurar: null }
+  },
+
   eia: {
     nome: 'EIA',
     temEtapas: false,

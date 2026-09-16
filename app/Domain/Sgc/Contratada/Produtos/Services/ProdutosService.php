@@ -16,6 +16,7 @@ class ProdutosService
             'indigena' => 'Indígena',
             'quilombola' => 'Quilombolas',
             'audiencia' => 'Audiência',
+            'pba' => 'PBA',
             default => ucfirst($produto),
         };
 
