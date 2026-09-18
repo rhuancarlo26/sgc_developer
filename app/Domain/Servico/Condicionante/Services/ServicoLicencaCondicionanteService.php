@@ -9,42 +9,42 @@ use App\Shared\Traits\Searchable;
 
 class ServicoLicencaCondicionanteService extends BaseModelService
 {
-  use Searchable, Deletable;
+    use Searchable, Deletable;
 
-  protected string $modelClass = ServicoLicencaCondicionante::class;
+    protected string $modelClass = ServicoLicencaCondicionante::class;
 
-  public function storeServicoLicencaCondicionte($request): array
-  {
-    $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
+    public function storeServicoLicencaCondicionte($request): array
+    {
+        $response = $this->dataManagement->create(entity: $this->modelClass, infos: $request);
 
-    return [
-      'request' => $response['request']
-    ];
-  }
-
-  public function deleteServicoLicencaCondicionte($request): array
-  {
-    try {
-      $this->modelClass::Where('id_condicionante', $request['condicionante_id'])
-        ->where('id_servico', $request['servico_id'])
-        ->where('id_licenca', $request['licenca_id'])
-        ->firstOrFail()->delete();
-
-      $response = [
-        'type' => 'success',
-        'content' => 'Condicionante deletado com sucesso!'
-      ];
-    } catch (\Exception $e) {
-      $response = [
-        'type' => 'error',
-        'content' => $e->getMessage()
-      ];
+        return [
+            'request' => $response['request']
+        ];
     }
 
-    return [
-      'request' => $response
-    ];
-  }
+    public function deleteServicoLicencaCondicionte($request): array
+    {
+        try {
+            $this->modelClass::Where('id_condicionante', $request['condicionante_id'])
+                ->where('id_servico', $request['servico_id'])
+                ->where('id_licenca', $request['licenca_id'])
+                ->firstOrFail()->delete();
+
+            $response = [
+                'type' => 'success',
+                'content' => 'Condicionante deletado com sucesso!'
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'type' => 'error',
+                'content' => $e->getMessage()
+            ];
+        }
+
+        return [
+            'request' => $response
+        ];
+    }
 
     public function getLicencaMalhaViariaVigente($servicoId)
     {
@@ -64,11 +64,13 @@ class ServicoLicencaCondicionanteService extends BaseModelService
             ])
             ->join('licencas', 'licencas.id', '=', 'servico_licenca_condicionante.id_licenca')
             ->leftJoin('licencas_br', 'licencas_br.licenca_id', '=', 'licencas.id')
-            ->join('base_rodovia AS br', 'br.id', '=', 'licencas_br.rodovia')
+            ->join('base_rodovia AS br', function ($join) {
+                $join->on('br.rodovia', '=', 'licencas_br.rodovia')
+                    ->on('br.estados_id', '=', 'licencas_br.uf_inicial');
+            })
             ->join('estados', 'estados.id', '=', 'licencas_br.uf_inicial')
             ->where('servico_licenca_condicionante.vigente', 1)
             ->where('id_servico', $servicoId)
-            ->whereRaw('br.estados_id = licencas_br.uf_inicial')
             ->get();
     }
 

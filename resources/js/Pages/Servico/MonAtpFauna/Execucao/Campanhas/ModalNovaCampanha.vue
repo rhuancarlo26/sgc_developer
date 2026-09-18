@@ -1,6 +1,6 @@
 <script setup>
 
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, computed } from "vue";
 import { Link, router, useForm } from "@inertiajs/vue3";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
@@ -12,7 +12,6 @@ import LinkConfirmation from "@/Components/LinkConfirmation.vue";
 import { dateTimeFormat } from "../../../../../Utils/DateTimeUtils.js";
 import NavButton from "@/Components/NavButton.vue";
 import { useToast } from "vue-toastification";
-import { computed } from "vue";
 
 const toast = useToast();
 
@@ -97,6 +96,30 @@ const abrirModal = (item = null) => {
     modalRef.value.getBsModal().show();
     tab.value = 'campanhas';
 }
+
+const ufsVigentes = computed(() => {
+    const unicas = new Map();
+
+    (props.licencasVigente ?? []).forEach((item) => {
+        if (!unicas.has(item.id_estados)) {
+            unicas.set(item.id_estados, item);
+        }
+    });
+
+    return Array.from(unicas.values());
+});
+
+const rodoviasVigentes = computed(() => {
+    const unicas = new Map();
+
+    (props.licencasVigente ?? []).forEach((item) => {
+        if (!unicas.has(item.id_rodovia)) {
+            unicas.set(item.id_rodovia, item);
+        }
+    });
+
+    return Array.from(unicas.values());
+});
 
 const relationships = ref({});
 const getRelationship = () => {
@@ -311,10 +334,10 @@ defineExpose({ abrirModal });
                                 <div class="row row-gap-2 mb-2">
                                     <div class="col-lg-3">
                                         <InputLabel value="UF inicial" for="uf_inicial" />
-                                        <v-select :options="licencasVigente" v-model="form.uf_inicial"
+                                        <v-select :options="ufsVigentes" v-model="form.uf_inicial"
                                             :get-option-label="(item) => `${item.uf} - ${item.nome_estado}`"
                                             :reduce="t => t.id_estados" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -349,10 +372,10 @@ defineExpose({ abrirModal });
                                 <div class="row row-gap-2 mb-2">
                                     <div class="col-lg-3">
                                         <InputLabel value="UF final" for="uf_final" />
-                                        <v-select :options="licencasVigente" v-model="form.uf_final"
+                                        <v-select :options="ufsVigentes" v-model="form.uf_final"
                                             :get-option-label="(item) => `${item.uf} - ${item.nome_estado}`"
                                             :reduce="t => t.id_estados" :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -600,7 +623,7 @@ defineExpose({ abrirModal });
                                         <InputLabel value="UF inicial" for="uf_inicial" />
                                         <select name="uf_inicial" id="uf_inicial" class="form-select"
                                             v-model="form_trecho.uf_inicial">
-                                            <option v-for="uf in licencasVigente" :key="uf.id_estados"
+                                            <option v-for="uf in ufsVigentes" :key="uf.id_estados"
                                                 :value="uf.nome_estado">{{ `${uf.uf} -
                                                 ${uf.nome_estado}` }}
                                             </option>
@@ -610,7 +633,7 @@ defineExpose({ abrirModal });
                                         <InputLabel value="UF final" for="uf_final" />
                                         <select name="uf_final" id="uf_final" class="form-select"
                                             v-model="form_trecho.uf_final">
-                                            <option v-for="uf in licencasVigente" :key="uf.id_estados"
+                                            <option v-for="uf in ufsVigentes" :key="uf.id_estados"
                                                 :value="uf.nome_estado">{{ `${uf.uf} -
                                                 ${uf.nome_estado}` }}
                                             </option>
@@ -620,10 +643,9 @@ defineExpose({ abrirModal });
                                         <InputLabel value="Rodovia" for="rodovia" />
                                         <select name="rodovia" id="rodovia" class="form-select"
                                             v-model="form_trecho.rodovia">
-                                            <option v-for="rodovia in licencasVigente" :key="rodovia.id_estados"
-                                                :value="rodovia.rodovia">{{
-                                                    rodovia.rodovia
-                                                }}
+                                            <option v-for="rodovia in rodoviasVigentes" :key="rodovia.id_rodovia"
+                                                :value="rodovia.rodovia">
+                                                {{ rodovia.rodovia }}
                                             </option>
                                         </select>
                                     </div>
@@ -710,7 +732,7 @@ defineExpose({ abrirModal });
                                         <v-select v-if="showAction" @option:selected="saveCampanhaAbio"
                                             :options="configVinculacao" label="numero_licenca" :reduce="t => t.id"
                                             :disabled="!showAction">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -740,7 +762,7 @@ defineExpose({ abrirModal });
                                                             })" :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete-abio', item.id)"
                                                                 as="button" method="delete" type="button"
                                                                 class="btn btn-icon btn-danger">
-                                                            <IconTrash />
+                                                                <IconTrash />
                                                             </Link>
                                                         </LinkConfirmation>
                                                     </td>
@@ -758,7 +780,7 @@ defineExpose({ abrirModal });
                                             :options="retsVinculacao"
                                             :get-option-label="(item) => `${item.numero_licenca} - ${item.nome_arquivo}`"
                                             :reduce="t => t.id">
-                                            <template #no-options="{}">
+                                            <template #no-options="{ }">
                                                 Nenhum registro encontrado.
                                             </template>
                                         </v-select>
@@ -783,7 +805,7 @@ defineExpose({ abrirModal });
                                                             })" :href="route('contratos.contratada.servicos.mon_atp_fauna.execucao.campanhas.delete-ret', item.id)"
                                                                 as="button" method="delete" type="button"
                                                                 class="btn btn-icon btn-danger">
-                                                            <IconTrash />
+                                                                <IconTrash />
                                                             </Link>
                                                         </LinkConfirmation>
                                                     </td>
