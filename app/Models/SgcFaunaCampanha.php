@@ -25,6 +25,7 @@ class SgcFaunaCampanha extends Model
         'versao_analise',
         'planilha_atropelamento',
         'consideracoes_atropelamento'
+        ,'modo_preenchimento'
     ];
 
     protected $casts = [
@@ -106,6 +107,13 @@ class SgcFaunaCampanha extends Model
     public function atropelamento_campanhas()
     {
         return $this->hasMany(SgcFaunaAtropelamentoCampanha::class, 'campanha_id', 'id');
+    }
+
+    public function entregaSimplificada()
+    {
+        return $this->hasOne(SgcEntregaSimplificada::class, 'entidade_id')
+            ->where('entidade_tipo', 'fauna_campanha')
+            ->where('produto_tipo', 'fauna');
     }
 
 

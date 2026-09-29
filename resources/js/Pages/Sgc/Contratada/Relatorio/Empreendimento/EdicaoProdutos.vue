@@ -146,6 +146,7 @@
         >
             Exportar Excel <i class="bi bi-file-earmark-excel"></i>
         </button>
+      <div class="table-responsive">
       <table
         class="table table-striped table-hover table-light"
       >
@@ -208,6 +209,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <!-- Paginação -->
       <div class="pagination">
         <button class="page-link" v-for="link in links" :key="link.label" :disabled="!link.url" @click="mudarPagina(link.url)">

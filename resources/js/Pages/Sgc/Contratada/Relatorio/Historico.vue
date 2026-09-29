@@ -14,6 +14,7 @@
       <div class="container mt-4">
         <h1>Relatório {{ historico[0].relatorio_num }} - Versão {{ historico[0].versao }}</h1>
         
+        <div class="table-responsive">
         <table class="table table-striped">
           <thead>
             <tr>
@@ -34,6 +35,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
 
         <!-- Modal para abrir o documento -->
         <DocxHistorico ref="docxModal"

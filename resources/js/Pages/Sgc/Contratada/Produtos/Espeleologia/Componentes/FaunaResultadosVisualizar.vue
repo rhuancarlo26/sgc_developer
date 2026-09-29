@@ -42,7 +42,7 @@ const subtab = ref('terrestre');
 <div v-if="subtab==='terrestre'">
 <h5 class="text-center mb-3">Fauna Terrestre</h5>
 
-<div v-if="resultadosTerrestre.length" class="overflow-x-auto">
+<div v-if="resultadosTerrestre.length" class="table-responsive">
 <table class="min-w-full bg-white border border-gray-300">
 <thead>
 <tr class="bg-gray-100">
@@ -151,7 +151,7 @@ const subtab = ref('terrestre');
 <div v-if="subtab==='aquatica'">
 <h5 class="text-center mb-3">Fauna Aquática</h5>
 
-<div v-if="resultadosAquatica.length" class="overflow-x-auto">
+<div v-if="resultadosAquatica.length" class="table-responsive">
 <table class="min-w-full bg-white border border-gray-300">
 <thead>
 <tr class="bg-gray-100">
@@ -267,7 +267,7 @@ const subtab = ref('terrestre');
 <div v-if="subtab==='cavernicola'">
 <h5 class="text-center mb-3">Fauna Cavernícola</h5>
 
-<div v-if="resultadosCavernicola.length" class="overflow-x-auto">
+<div v-if="resultadosCavernicola.length" class="table-responsive">
 <table class="min-w-full bg-white border border-gray-300">
 <thead>
 <tr class="bg-gray-100">

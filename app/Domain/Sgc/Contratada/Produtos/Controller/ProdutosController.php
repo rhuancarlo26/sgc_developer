@@ -19,11 +19,28 @@ use App\Models\SgcEspeleoEstudosPosteriores;
 use App\Models\SgcModulo;
 use App\Models\SgcMalarigeno;
 use App\Models\SgcRima;
+use App\Models\SgcAsvCampanha;
+use App\Models\SgcIndigenaCampanha;
+use App\Models\SgcQuilombolaCampanha;
+use App\Models\SgcAudienciaCampanha;
+use App\Models\SgcPbaCampanha;
 use App\Models\SgcPmqaExecCampanha;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Requests\StoreMalarigenoRequest;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Services\MalarigenoService;
 use App\Domain\Sgc\Contratada\Produtos\Rima\Requests\StoreRimaRequest;
 use App\Domain\Sgc\Contratada\Produtos\Rima\Services\RimaService;
+use App\Domain\Sgc\Contratada\Produtos\Asv\Requests\StoreAsvSimplificadaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Asv\Services\AsvEntregaSimplificadaService;
+use App\Domain\Sgc\Contratada\Produtos\Indigena\Requests\StoreIndigenaSimplificadaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Indigena\Services\IndigenaEntregaSimplificadaService;
+use App\Domain\Sgc\Contratada\Produtos\Quilombola\Requests\StoreQuilombolaSimplificadaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Quilombola\Services\QuilombolaEntregaSimplificadaService;
+use App\Domain\Sgc\Contratada\Produtos\Audiencia\Requests\StoreAudienciaSimplificadaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Audiencia\Services\AudienciaEntregaSimplificadaService;
+use App\Domain\Sgc\Contratada\Produtos\Pba\Requests\StorePbaSimplificadaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Pba\Services\PbaEntregaSimplificadaService;
+use App\Domain\Sgc\Contratada\Produtos\Fauna\Requests\StoreEntregaSimplificadaFaunaRequest;
+use App\Domain\Sgc\Contratada\Produtos\Fauna\Services\SgcFaunaEntregaSimplificadaService;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +51,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ProdutosController extends Controller
 {
@@ -63,6 +81,11 @@ class ProdutosController extends Controller
             'espeleologia' => $this->getCampanhasEspeleologia($contrato),
             'malarigeno'   => $this->getCampanhasMalarigeno($contrato),
             'rima'         => $this->getCampanhasRima($contrato),
+            'asv'          => $this->getCampanhasAsv($contrato),
+            'indigena'     => $this->getCampanhasIndigena($contrato),
+            'quilombola'   => $this->getCampanhasQuilombola($contrato),
+            'audiencia'    => $this->getCampanhasAudiencia($contrato),
+            'pba'          => $this->getCampanhasPba($contrato),
              default        => collect(),
         };
 
@@ -75,14 +98,165 @@ class ProdutosController extends Controller
         return inertia('Sgc/Contratada/Produtos/ListagemProdutos', [
             'subprodutos' => $subprodutos,
             'contrato' => $contrato,
-            'produto' => ucfirst($produto),
+            'produto' => $produto === 'pba' ? 'PBA' : ucfirst($produto),
             'contratos' => $contratoObj,
             'campanhas' => $campanhas,
+            // O painel superior não depende do produto aberto. Mantemos a lista
+            // de campanhas acima para a tabela atual e enviamos, separadamente,
+            // apenas as pendências acionáveis de todo o contrato.
+            'pendenciasContrato' => $this->getPendenciasContrato($contrato),
             'mostrarArquivadas' => $mostrarArquivadas,
             'totalArquivadas' => $totalArquivadas,
             'canApprove' => $this->usuarioPodeAprovarPmqa()
                 && count(array_filter($campanhas->toArray(), fn($c) => $c['status'] === 'Em análise')) > 0,
         ]);
+    }
+
+    private function getPendenciasContrato($contrato)
+    {
+        $campanhasPorProduto = [
+            'fauna' => $this->getCampanhasFauna($contrato),
+            'espeleologia' => $this->getCampanhasEspeleologia($contrato),
+            'malarigeno' => $this->getCampanhasMalarigeno($contrato),
+            'rima' => $this->getCampanhasRima($contrato),
+            'asv' => $this->getCampanhasAsv($contrato),
+            'indigena' => $this->getCampanhasIndigena($contrato),
+            'quilombola' => $this->getCampanhasQuilombola($contrato),
+            'audiencia' => $this->getCampanhasAudiencia($contrato),
+            'pba' => $this->getCampanhasPba($contrato),
+        ];
+
+        return collect($campanhasPorProduto)
+            ->flatMap(fn ($campanhas, $produto) => $campanhas->map(
+                fn ($campanha) => $this->normalizarPendenciaContrato($campanha, $produto, $contrato)
+            ))
+            ->filter()
+            ->sortBy([
+                ['prioridade', 'asc'],
+                ['produto_nome', 'asc'],
+                ['titulo', 'asc'],
+            ])
+            ->values();
+    }
+
+    private function normalizarPendenciaContrato(array $campanha, string $produto, $contrato): ?array
+    {
+        $status = $campanha['status'] ?? $campanha['status_aprovacao'] ?? '';
+        $isFiscal = (int) (Auth::user()?->perfis_id ?? 0) === 3;
+
+        if ($isFiscal ? $status !== 'Em análise' : !in_array($status, ['Em elaboração', 'Reprovada', 'Rejeitada'], true)) {
+            return null;
+        }
+
+        $acao = $this->acaoPendenciaContrato($campanha, $produto, $contrato, $isFiscal);
+        if (!$acao) {
+            return null;
+        }
+
+        return [
+            'id' => $campanha['id'],
+            'produto' => $produto,
+            'produto_nome' => match ($produto) {
+                'malarigeno' => 'Malarígeno',
+                'rima' => 'RIMA',
+                'asv' => 'ASV',
+                'indigena' => 'Indígena',
+                'quilombola' => 'Quilombola',
+                'audiencia' => 'Audiência',
+                'pba' => 'PBA',
+                default => ucfirst($produto),
+            },
+            'subproduto' => $campanha['subproduto'] ?? null,
+            'titulo' => $campanha['id_campanha'] ?? "Campanha {$campanha['id']}",
+            'empreendimento' => $campanha['empreendimento'] ?? null,
+            'status' => $status,
+            'status_exibicao' => in_array($status, ['Reprovada', 'Rejeitada'], true) ? 'Reprovada' : $status,
+            'acao' => $acao['label'],
+            'url_acao' => $acao['url'],
+            'tipo_acao' => $acao['type'],
+            'prioridade' => $status === 'Em análise' ? 1 : ($status === 'Rejeitada' || $status === 'Reprovada' ? 2 : 3),
+        ];
+    }
+
+    private function acaoPendenciaContrato(array $campanha, string $produto, $contrato, bool $isFiscal): ?array
+    {
+        $id = $campanha['id'];
+        $simplificada = $produto === 'fauna' && ($campanha['modo_preenchimento'] ?? null) === 'simplificado';
+
+        if ($isFiscal) {
+            $rota = match ($produto) {
+                'fauna' => $simplificada
+                    ? 'sgc.contratada.produtos.fauna.simplificada.analise'
+                    : 'sgc.contratada.produtos.analise',
+                'espeleologia' => 'sgc.contratada.produtos.espeleo.analise',
+                'malarigeno' => 'sgc.contratada.produtos.malarigeno.analise',
+                'rima' => 'sgc.contratada.produtos.rima.analise',
+                'asv' => 'sgc.contratada.produtos.asv.analise',
+                'indigena' => 'sgc.contratada.produtos.indigena.analise',
+                'quilombola' => 'sgc.contratada.produtos.quilombola.analise',
+                'audiencia' => 'sgc.contratada.produtos.audiencia.analise',
+                'pba' => 'sgc.contratada.produtos.pba.analise',
+                default => null,
+            };
+
+            return $rota ? [
+                'label' => 'Analisar',
+                'type' => 'success',
+                'url' => route($rota, [$contrato, $produto, $id]),
+            ] : null;
+        }
+
+        if (in_array($campanha['status'] ?? '', ['Reprovada', 'Rejeitada'], true)) {
+            $rota = match ($produto) {
+                'fauna' => $simplificada
+                    ? 'sgc.contratada.produtos.fauna.simplificada.edit'
+                    : 'sgc.contratada.produtos.edit',
+                'espeleologia' => 'sgc.contratada.produtos.espeleo.show',
+                'malarigeno' => 'sgc.contratada.produtos.malarigeno.edit',
+                'rima' => 'sgc.contratada.produtos.rima.edit',
+                'asv' => 'sgc.contratada.produtos.asv.edit',
+                'indigena' => 'sgc.contratada.produtos.indigena.edit',
+                'quilombola' => 'sgc.contratada.produtos.quilombola.edit',
+                'audiencia' => 'sgc.contratada.produtos.audiencia.edit',
+                'pba' => 'sgc.contratada.produtos.pba.edit',
+                default => null,
+            };
+
+            return $rota ? [
+                'label' => 'Editar',
+                'type' => 'warning',
+                'url' => route($rota, [$contrato, $produto, $id]),
+            ] : null;
+        }
+
+        if (($campanha['status'] ?? '') === 'Em elaboração') {
+            if ($simplificada) {
+                return [
+                    'label' => 'Continuar',
+                    'type' => 'warning',
+                    'url' => route('sgc.contratada.produtos.fauna.simplificada.show', [$contrato, $produto, $id]),
+                ];
+            }
+
+            if (in_array($produto, ['asv', 'indigena', 'quilombola', 'audiencia', 'pba'], true)) {
+                return [
+                    'label' => 'Continuar',
+                    'type' => 'warning',
+                    'url' => route("sgc.contratada.produtos.{$produto}.edit", [$contrato, $produto, $id]),
+                ];
+            }
+
+            return [
+                'label' => 'Continuar',
+                'type' => 'warning',
+                'url' => route('sgc.contratada.produtos.create', [$contrato, $produto]) . '?' . http_build_query([
+                    'subproduto' => $campanha['subproduto'] ?? null,
+                    'id' => $id,
+                ]),
+            ];
+        }
+
+        return null;
     }
 
     public function create(Request $request, $contrato, $produto): Response
@@ -91,7 +265,7 @@ class ProdutosController extends Controller
         $contratoObj = Contrato::findOrFail($contrato);
         $subproduto = $request->query('subproduto');
 
-        if (!$subproduto && !in_array($produto, ['pmqa', 'eia', 'fauna', 'malarigeno', 'rima'])) {
+        if (!$subproduto && !in_array($produto, ['pmqa', 'eia', 'fauna', 'malarigeno', 'rima', 'asv', 'indigena', 'quilombola', 'audiencia', 'pba'])) {
             Log::warning('Subproduto não selecionado', ['contrato' => $contrato, 'produto' => $produto]);
 
             if ($produto === 'patrimonio') {
@@ -136,6 +310,21 @@ class ProdutosController extends Controller
 
         } elseif ($produto === 'rima') {
             return $this->createRima($request, $contrato, $produto, $contratoObj, $subproduto);
+
+        } elseif ($produto === 'asv') {
+            return $this->createAsv($contrato, $produto, $contratoObj, $subproduto);
+
+        } elseif ($produto === 'indigena') {
+            return $this->createIndigena($contrato, $produto, $contratoObj, $subproduto);
+
+        } elseif ($produto === 'quilombola') {
+            return $this->createQuilombola($contrato, $produto, $contratoObj, $subproduto);
+
+        } elseif ($produto === 'audiencia') {
+            return $this->createAudiencia($contrato, $produto, $contratoObj, $subproduto);
+
+        } elseif ($produto === 'pba') {
+            return $this->createPba($contrato, $produto, $contratoObj, $subproduto);
 
         } elseif ($produto === 'patrimonio') {
             return $this->createPatrimonio($request, $contrato, $produto, $contratoObj, $subproduto);
@@ -203,6 +392,20 @@ class ProdutosController extends Controller
 
     public function store(Request $request, $contrato, $produto)
     {
+        if ($produto === 'fauna') {
+            $validated = $request->validate(
+                (new StoreEntregaSimplificadaFaunaRequest())->rules(),
+                (new StoreEntregaSimplificadaFaunaRequest())->messages()
+            );
+            $validated['contrato_id'] = $contrato;
+
+            (new SgcFaunaEntregaSimplificadaService())->criar($validated);
+
+            return redirect()
+                ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+                ->with('success', 'Campanha simplificada de fauna salva com sucesso.');
+        }
+
         if ($produto === 'malarigeno') {
             $validated = $request->validate(
                 (new StoreMalarigenoRequest())->rules(),
@@ -231,7 +434,134 @@ class ProdutosController extends Controller
                 ->with('success', 'RIMA salvo com sucesso!');
         }
 
+        if ($produto === 'asv') {
+            $validated = $request->validate((new StoreAsvSimplificadaRequest())->rules());
+            $validated['contrato_id'] = $contrato;
+            $asv = (new AsvEntregaSimplificadaService())->criar($validated);
+
+            return redirect()
+                ->route('sgc.contratada.produtos.asv.show', [$contrato, 'asv', $asv->id])
+                ->with('success', 'Campanha ASV salva com sucesso.');
+        }
+
+        if ($produto === 'indigena') {
+            $validated = $request->validate((new StoreIndigenaSimplificadaRequest())->rules());
+            $validated['contrato_id'] = $contrato;
+
+            $jaExiste = SgcIndigenaCampanha::where('id_contrato', $contrato)
+                ->where('id_campanha', $validated['id_campanha'])
+                ->where('subproduto', $validated['subproduto'])
+                ->exists();
+
+            if ($jaExiste) {
+                throw ValidationException::withMessages([
+                    'id_campanha' => 'Já existe uma campanha Indígena com este ID para o subproduto selecionado. Abra a campanha existente para visualizá-la ou editá-la.',
+                ]);
+            }
+
+            $indigena = (new IndigenaEntregaSimplificadaService())->criar($validated);
+
+            return redirect()
+                ->route('sgc.contratada.produtos.indigena.show', [$contrato, 'indigena', $indigena->id])
+                ->with('success', 'Campanha Indígena salva com sucesso.');
+        }
+
+        if ($produto === 'quilombola') {
+            $validated = $request->validate((new StoreQuilombolaSimplificadaRequest())->rules());
+            $validated['contrato_id'] = $contrato;
+
+            if (SgcQuilombolaCampanha::where('id_contrato', $contrato)->where('id_campanha', $validated['id_campanha'])->where('subproduto', $validated['subproduto'])->exists()) {
+                throw ValidationException::withMessages(['id_campanha' => 'Já existe uma campanha Quilombola com este ID para o subproduto selecionado. Abra a campanha existente para visualizá-la ou editá-la.']);
+            }
+
+            $quilombola = (new QuilombolaEntregaSimplificadaService())->criar($validated);
+
+            return redirect()
+                ->route('sgc.contratada.produtos.quilombola.show', [$contrato, 'quilombola', $quilombola->id])
+                ->with('success', 'Campanha Quilombola salva com sucesso.');
+        }
+
+        if ($produto === 'audiencia') {
+            $validated = $request->validate((new StoreAudienciaSimplificadaRequest())->rules());
+            $validated['contrato_id'] = $contrato;
+            if (SgcAudienciaCampanha::where('id_contrato', $contrato)->where('id_campanha', $validated['id_campanha'])->where('subproduto', $validated['subproduto'])->exists()) {
+                throw ValidationException::withMessages(['id_campanha' => 'Já existe uma campanha de Audiência com este ID para o subproduto selecionado. Abra a campanha existente para visualizá-la ou editá-la.']);
+            }
+            $audiencia = (new AudienciaEntregaSimplificadaService())->criar($validated);
+            return redirect()->route('sgc.contratada.produtos.audiencia.show', [$contrato, 'audiencia', $audiencia->id])->with('success', 'Campanha de Audiência salva com sucesso.');
+        }
+
+        if ($produto === 'pba') {
+            $validated = $request->validate((new StorePbaSimplificadaRequest())->rules());
+            $validated['contrato_id'] = $contrato;
+            if (SgcPbaCampanha::where('id_contrato', $contrato)->where('id_campanha', $validated['id_campanha'])->where('subproduto', $validated['subproduto'])->exists()) {
+                throw ValidationException::withMessages(['id_campanha' => 'Já existe uma campanha PBA com este ID para o subproduto selecionado. Abra a campanha existente para visualizá-la ou editá-la.']);
+            }
+            $pba = (new PbaEntregaSimplificadaService())->criar($validated);
+            return redirect()->route('sgc.contratada.produtos.pba.show', [$contrato, 'pba', $pba->id])->with('success', 'Campanha PBA salva com sucesso.');
+        }
+
         abort(404);
+    }
+
+    private function createAsv($contrato, $produto, $contratoObj, $subproduto): Response
+    {
+        return inertia('Sgc/Contratada/Produtos/Asv/Create', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->pluck('cod_emp')->toArray(),
+        ]);
+    }
+
+    private function createIndigena($contrato, $produto, $contratoObj, $subproduto): Response
+    {
+        return inertia('Sgc/Contratada/Produtos/Indigena/Create', [
+            'contrato' => $contrato,
+            'produto' => 'Indígena',
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->pluck('cod_emp')->toArray(),
+        ]);
+    }
+
+    private function createQuilombola($contrato, $produto, $contratoObj, $subproduto): Response
+    {
+        return inertia('Sgc/Contratada/Produtos/Quilombola/Create', [
+            'contrato' => $contrato,
+            'produto' => 'Quilombola',
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->pluck('cod_emp')->toArray(),
+        ]);
+    }
+
+    private function createAudiencia($contrato, $produto, $contratoObj, $subproduto): Response
+    {
+        return inertia('Sgc/Contratada/Produtos/Audiencia/Create', [
+            'contrato' => $contrato,
+            'produto' => 'Audiência',
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->pluck('cod_emp')->toArray(),
+        ]);
+    }
+
+    private function createPba($contrato, $produto, $contratoObj, $subproduto): Response
+    {
+        return inertia('Sgc/Contratada/Produtos/Pba/Create', [
+            'contrato' => $contrato,
+            'produto' => 'PBA',
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'modulos' => SgcModulo::select(['id', 'nome', 'nome_planilha_modelo'])->get(),
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->pluck('cod_emp')->toArray(),
+        ]);
     }
 
     private function createRima(
@@ -263,6 +593,23 @@ class ProdutosController extends Controller
 
     private function createFauna(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response
     {
+        $modo = $request->query('modo');
+
+        if (!$modo) {
+            return inertia('Sgc/Contratada/Produtos/Fauna/SelecionarModalidade', [
+                'contrato' => $contrato,
+                'produto' => ucfirst($produto),
+                'contratos' => $contratoObj,
+                'subproduto' => $subproduto,
+            ]);
+        }
+
+        if ($modo === 'simplificado') {
+            return $this->createFaunaSimplificada($contrato, $produto, $contratoObj, $subproduto);
+        }
+
+        abort_unless($modo === 'completo', 404);
+
         // Busca rascunho aberto para este contrato/subproduto
         $draft = SgcFaunaCampanha::where('id_contrato', $contrato)
             ->where('subproduto', $subproduto)
@@ -329,6 +676,18 @@ class ProdutosController extends Controller
         ]);
     }
 
+    private function createFaunaSimplificada($contrato, $produto, $contratoObj, $subproduto): Response
+    {
+        return inertia('Sgc/Contratada/Produtos/Fauna/Simplificada/CreateSimplificada', [
+            'contrato' => $contrato,
+            'produto' => ucfirst($produto),
+            'contratos' => $contratoObj,
+            'subproduto' => $subproduto,
+            'empreendimentos' => SgcvwEmpreendimentos::where('contrato_id', $contrato)->pluck('cod_emp')->toArray(),
+            'modulos' => SgcModulo::query()->select(['id', 'nome', 'nome_planilha_modelo'])->get(),
+        ]);
+    }
+
     // --------------------------------------------------------------------------
     // Método 2: getCampanhasFauna
     // Mudança: exclui rascunhos da listagem — o usuário não deve ver rascunhos
@@ -343,7 +702,7 @@ class ProdutosController extends Controller
                 fn($query) => $query->whereNotNull('arquivada_em'),
                 fn($query) => $query->whereNull('arquivada_em')
             )
-            ->get(['id', 'id_campanha', 'cod_emp', 'data_ini', 'data_fim', 'status', 'subproduto'])
+            ->get(['id', 'id_campanha', 'cod_emp', 'data_ini', 'data_fim', 'status', 'subproduto', 'modo_preenchimento'])
             ->map(fn($campanha) => [
                 'id'           => $campanha->id,
                 'id_campanha'  => $campanha->id_campanha ?? 'N/A',
@@ -352,6 +711,7 @@ class ProdutosController extends Controller
                 'data_final'   => $campanha->data_fim ?? 'N/A',
                 'status'       => $campanha->status ?? 'Em análise',
                 'subproduto'   => $campanha->subproduto ?? 'N/A',
+                'modo_preenchimento' => $campanha->modo_preenchimento ?? 'completo',
             ]);
     }
 
@@ -498,6 +858,68 @@ class ProdutosController extends Controller
                 'status' => $campanha->status ?? 'Em elaboração',
                 'subproduto' => $campanha->subproduto ?? 'N/A',
             ]);
+    }
+
+    private function getCampanhasAsv($contrato)
+    {
+        return SgcAsvCampanha::where('id_contrato', $contrato)
+            ->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn ($campanha) => [
+                'id' => $campanha->id,
+                'id_campanha' => $campanha->id_campanha ?? 'N/A',
+                'empreendimento' => $campanha->cod_emp ?? 'N/A',
+                'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A',
+                'data_final' => 'N/A',
+                'status' => $campanha->status ?? 'Em elaboração',
+                'subproduto' => $campanha->subproduto ?? 'N/A',
+            ]);
+    }
+
+    private function getCampanhasIndigena($contrato)
+    {
+        return SgcIndigenaCampanha::where('id_contrato', $contrato)
+            ->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn ($campanha) => [
+                'id' => $campanha->id,
+                'id_campanha' => $campanha->id_campanha ?? 'N/A',
+                'empreendimento' => $campanha->cod_emp ?? 'N/A',
+                'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A',
+                'data_final' => 'N/A',
+                'status' => $campanha->status ?? 'Em elaboração',
+                'subproduto' => $campanha->subproduto ?? 'N/A',
+            ]);
+    }
+
+    private function getCampanhasQuilombola($contrato)
+    {
+        return SgcQuilombolaCampanha::where('id_contrato', $contrato)
+            ->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn ($campanha) => [
+                'id' => $campanha->id,
+                'id_campanha' => $campanha->id_campanha ?? 'N/A',
+                'empreendimento' => $campanha->cod_emp ?? 'N/A',
+                'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A',
+                'data_final' => 'N/A',
+                'status' => $campanha->status ?? 'Em elaboração',
+                'subproduto' => $campanha->subproduto ?? 'N/A',
+            ]);
+    }
+
+    private function getCampanhasAudiencia($contrato)
+    {
+        return SgcAudienciaCampanha::where('id_contrato', $contrato)->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn ($campanha) => ['id' => $campanha->id, 'id_campanha' => $campanha->id_campanha ?? 'N/A', 'empreendimento' => $campanha->cod_emp ?? 'N/A', 'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A', 'data_final' => 'N/A', 'status' => $campanha->status ?? 'Em elaboração', 'subproduto' => $campanha->subproduto ?? 'N/A']);
+    }
+
+    private function getCampanhasPba($contrato)
+    {
+        return SgcPbaCampanha::where('id_contrato', $contrato)->latest()
+            ->get(['id', 'id_campanha', 'cod_emp', 'subproduto', 'status', 'created_at'])
+            ->map(fn ($campanha) => ['id' => $campanha->id, 'id_campanha' => $campanha->id_campanha ?? 'N/A', 'empreendimento' => $campanha->cod_emp ?? 'N/A', 'data_inicial' => $campanha->created_at ? $campanha->created_at->format('d/m/Y') : 'N/A', 'data_final' => 'N/A', 'status' => $campanha->status ?? 'Em elaboração', 'subproduto' => $campanha->subproduto ?? 'N/A']);
     }
 
     private function createPmqa(Request $request, $contrato, $produto, $contratoObj, $subproduto): Response

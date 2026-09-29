@@ -292,11 +292,11 @@ const addTag = (newTag) => {
                 <div class="row my-5">
 
                   <div class="col-md-12 mb-3" v-show="mostraTable">
-                    <div class="d-flex">
-                      <div>
-                        <DashboardMap ref="mapaVisualizarTrecho" height="600px" width="1300px" :manual-render="true" />
+                    <div class="d-flex flex-column flex-md-row">
+                      <div style="width: 100%; max-width: 1300px;">
+                        <DashboardMap ref="mapaVisualizarTrecho" height="600px" :manual-render="true" />
                       </div>
-                      <div class="ms-3" style="flex: 1;">
+                      <div class="ms-md-3 mt-3 mt-md-0" style="flex: 1;">
                         <div class="col-md-12 mb-3" style="text-align: center;">
                           <h2>Layers</h2>
                         </div>

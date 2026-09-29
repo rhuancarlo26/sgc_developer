@@ -27,6 +27,7 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\AnexoController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\CampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ComentarioController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\ProfissionalController;
+use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\FaunaSimplificadaAnaliseController;
 use App\Domain\Sgc\Contratada\Produtos\Pmqa\Controller\PmqaCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\DestroyCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\InitializarRascunhoCampanhaController;
@@ -34,6 +35,11 @@ use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SalvarEtapaCampanhaContr
 use App\Domain\Sgc\Contratada\Produtos\Fauna\Controller\SubmeterCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Malarigeno\Controller\MalarigenoCampanhaController;
 use App\Domain\Sgc\Contratada\Produtos\Rima\Controller\RimaCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Asv\Controller\AsvCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Indigena\Controller\IndigenaCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Quilombola\Controller\QuilombolaCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Audiencia\Controller\AudienciaCampanhaController;
+use App\Domain\Sgc\Contratada\Produtos\Pba\Controller\PbaCampanhaController;
 
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\ConfiguracoesModulosController;
 use App\Domain\Sgc\Contratada\Modulo\ConfigPlanilha\Controllers\CreateConfigModuloController;
@@ -137,6 +143,13 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('abio/store', [StoreProdutoAbioController::class, 'store'])->name('sgc.contratada.produtos.abio.store');
         Route::delete('abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.destroy');
 
+        Route::get('fauna/campanhas/{campanha}/simplificada', [FaunaSimplificadaAnaliseController::class, 'show'])->name('sgc.contratada.produtos.fauna.simplificada.show');
+        Route::get('fauna/campanhas/{campanha}/simplificada/edit', [FaunaSimplificadaAnaliseController::class, 'edit'])->name('sgc.contratada.produtos.fauna.simplificada.edit');
+        Route::post('fauna/campanhas/{campanha}/simplificada', [FaunaSimplificadaAnaliseController::class, 'update'])->name('sgc.contratada.produtos.fauna.simplificada.update');
+        Route::get('fauna/campanhas/{campanha}/simplificada/analise', [FaunaSimplificadaAnaliseController::class, 'analise'])->name('sgc.contratada.produtos.fauna.simplificada.analise');
+        Route::post('fauna/campanhas/{campanha}/simplificada/aprovar', [FaunaSimplificadaAnaliseController::class, 'aprovar'])->name('sgc.contratada.produtos.fauna.simplificada.aprovar');
+        Route::post('fauna/campanhas/{campanha}/simplificada/reprovar', [FaunaSimplificadaAnaliseController::class, 'reprovar'])->name('sgc.contratada.produtos.fauna.simplificada.reprovar');
+
         // Draft progressivo
         Route::post('rascunho/inicializar', InitializarRascunhoCampanhaController::class)->name('sgc.contratada.produtos.rascunho.inicializar');
         Route::post('rascunho/{campanhaId}/etapa/{etapa}', SalvarEtapaCampanhaController::class)->name('sgc.contratada.produtos.rascunho.etapa');
@@ -187,6 +200,41 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::post('rima/campanhas/{campanha}/finalizar-avaliacao', [RimaCampanhaController::class, 'finalizarAvaliacao'])->name('sgc.contratada.produtos.rima.finalizarAvaliacao');
         Route::get('rima/campanhas/{campanha}/edit', [RimaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.rima.edit');
         Route::post('rima/campanhas/{campanha}/update', [RimaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.rima.update');
+
+        Route::get('asv/campanhas/{campanha}', [AsvCampanhaController::class, 'show'])->name('sgc.contratada.produtos.asv.show');
+        Route::get('asv/campanhas/{campanha}/analise', [AsvCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.asv.analise');
+        Route::get('asv/campanhas/{campanha}/edit', [AsvCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.asv.edit');
+        Route::post('asv/campanhas/{campanha}/update', [AsvCampanhaController::class, 'update'])->name('sgc.contratada.produtos.asv.update');
+        Route::post('asv/campanhas/{campanha}/aprovar', [AsvCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.asv.aprovar');
+        Route::post('asv/campanhas/{campanha}/reprovar', [AsvCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.asv.reprovar');
+
+        Route::get('indigena/campanhas/{campanha}', [IndigenaCampanhaController::class, 'show'])->name('sgc.contratada.produtos.indigena.show');
+        Route::get('indigena/campanhas/{campanha}/analise', [IndigenaCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.indigena.analise');
+        Route::get('indigena/campanhas/{campanha}/edit', [IndigenaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.indigena.edit');
+        Route::post('indigena/campanhas/{campanha}/update', [IndigenaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.indigena.update');
+        Route::post('indigena/campanhas/{campanha}/aprovar', [IndigenaCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.indigena.aprovar');
+        Route::post('indigena/campanhas/{campanha}/reprovar', [IndigenaCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.indigena.reprovar');
+
+        Route::get('quilombola/campanhas/{campanha}', [QuilombolaCampanhaController::class, 'show'])->name('sgc.contratada.produtos.quilombola.show');
+        Route::get('quilombola/campanhas/{campanha}/analise', [QuilombolaCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.quilombola.analise');
+        Route::get('quilombola/campanhas/{campanha}/edit', [QuilombolaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.quilombola.edit');
+        Route::post('quilombola/campanhas/{campanha}/update', [QuilombolaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.quilombola.update');
+        Route::post('quilombola/campanhas/{campanha}/aprovar', [QuilombolaCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.quilombola.aprovar');
+        Route::post('quilombola/campanhas/{campanha}/reprovar', [QuilombolaCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.quilombola.reprovar');
+
+        Route::get('audiencia/campanhas/{campanha}', [AudienciaCampanhaController::class, 'show'])->name('sgc.contratada.produtos.audiencia.show');
+        Route::get('audiencia/campanhas/{campanha}/analise', [AudienciaCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.audiencia.analise');
+        Route::get('audiencia/campanhas/{campanha}/edit', [AudienciaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.audiencia.edit');
+        Route::post('audiencia/campanhas/{campanha}/update', [AudienciaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.audiencia.update');
+        Route::post('audiencia/campanhas/{campanha}/aprovar', [AudienciaCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.audiencia.aprovar');
+        Route::post('audiencia/campanhas/{campanha}/reprovar', [AudienciaCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.audiencia.reprovar');
+
+        Route::get('pba/campanhas/{campanha}', [PbaCampanhaController::class, 'show'])->name('sgc.contratada.produtos.pba.show');
+        Route::get('pba/campanhas/{campanha}/analise', [PbaCampanhaController::class, 'analise'])->name('sgc.contratada.produtos.pba.analise');
+        Route::get('pba/campanhas/{campanha}/edit', [PbaCampanhaController::class, 'edit'])->name('sgc.contratada.produtos.pba.edit');
+        Route::post('pba/campanhas/{campanha}/update', [PbaCampanhaController::class, 'update'])->name('sgc.contratada.produtos.pba.update');
+        Route::post('pba/campanhas/{campanha}/aprovar', [PbaCampanhaController::class, 'aprovar'])->name('sgc.contratada.produtos.pba.aprovar');
+        Route::post('pba/campanhas/{campanha}/reprovar', [PbaCampanhaController::class, 'reprovar'])->name('sgc.contratada.produtos.pba.reprovar');
 
         // Grupo específico para Espeleologia
         Route::prefix('espeleologia')->group(function () {

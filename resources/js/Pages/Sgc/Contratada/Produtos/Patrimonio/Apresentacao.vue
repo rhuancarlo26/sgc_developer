@@ -303,7 +303,8 @@ const emit = defineEmits(['voltar', 'salvar-apresentacao']);
 
       </div>
 
-      <table class="table table-hover mt-4" v-if="equipe.length">
+      <div class="table-responsive" v-if="equipe.length">
+      <table class="table table-hover mt-4">
         <thead>
         <tr>
           <th>Nome</th>
@@ -330,6 +331,7 @@ const emit = defineEmits(['voltar', 'salvar-apresentacao']);
         </tr>
         </tbody>
       </table>
+      </div>
 
       <div class="mt-4">
         <h4>1.3. Justificativa</h4>

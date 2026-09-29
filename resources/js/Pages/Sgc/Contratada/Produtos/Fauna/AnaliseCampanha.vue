@@ -675,7 +675,7 @@ const finalizarAvaliacao = () => {
                                 <div v-else class="status-container">
                                     <span class="badge bg-warning text-white">Pendente</span>
                                 </div>
-                                <div v-if="props.campanha?.anexos && props.campanha.anexos.length > 0" class="overflow-x-auto mb-6">
+                                <div v-if="props.campanha?.anexos && props.campanha.anexos.length > 0" class="table-responsive mb-6">
                                     <table class="min-w-full bg-white border border-gray-300">
                                         <thead>
                                             <tr class="bg-gray-100">
@@ -750,7 +750,7 @@ const finalizarAvaliacao = () => {
                         <!-- Tabela de Análises Realizadas -->
                         <div class="mt-6">
                             <h4 class="mb-3" style="text-align: center;">ANÁLISES REALIZADAS</h4>
-                            <div v-if="props.analises && props.analises.length > 0" class="overflow-x-auto">
+                            <div v-if="props.analises && props.analises.length > 0" class="table-responsive">
                                 <table class="min-w-full bg-white border border-gray-300">
                                     <thead>
                                         <tr class="bg-gray-100">

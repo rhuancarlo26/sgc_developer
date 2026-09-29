@@ -20,6 +20,7 @@ const props = defineProps({
     campanha: Object,
     modulos: Array,
     empreendimentos: { type: Array, default: () => [] },
+    subprodutos: { type: Array, default: () => [] },
     contrato: [String, Number],
     produto: String,
     contratos: { type: Object, default: () => ({ contratada: 'Contratada', tipo_contrato: null }) },
@@ -27,6 +28,7 @@ const props = defineProps({
 
 const menuWidth = ref(200);
 const inputArquivoRef = ref(null);
+const showAnalysisModal = ref(false);
 const CardFotosRef = ref(null);
 const CardAnexosRef = ref(null);
 const selectedFileName = ref(props.campanha?.planilha_nome);
@@ -43,6 +45,8 @@ const form = useForm({
     arquivo: null,
     fotos: props.campanha?.fotos || [],
     anexos: props.campanha?.anexos || [],
+    // Os componentes de fotos/anexos liberam a lixeira para estado nulo.
+    status: null,
 });
 
 const planilhaColumns = ref([]);
@@ -170,16 +174,17 @@ const salvar = () => {
 };
 
 const submitForm = () => {
-    const url = route('sgc.contratada.produtos.rima.update', [props.contrato, props.produto, props.campanha.id]);
+    const rotaAtualizacao = props.produto?.toLowerCase() === 'asv'
+        ? 'sgc.contratada.produtos.asv.update'
+        : 'sgc.contratada.produtos.rima.update';
+    const url = route(rotaAtualizacao, [props.contrato, props.produto, props.campanha.id]);
 
-    const fotosRemovidas = [];
     const fotosNovas = [];
     const fotosAtualizadas = [];
 
     form.fotos.forEach(foto => {
         if (foto.arquivo && foto.id) {
             // Foto existente com novo arquivo = deletar antiga + adicionar nova
-            fotosRemovidas.push(foto.id);
             fotosNovas.push(foto);
         } else if (foto.arquivo && !foto.id) {
             // Foto nova (sem ID)
@@ -193,14 +198,12 @@ const submitForm = () => {
     // IDs deletados = originais - atualizadas
     const fotos_remover = fotosOriginais.filter(id => !fotosAtualizadas.includes(id));
 
-    const anexosRemovidos = [];
     const anexosNovos = [];
     const anexosAtualizados = [];
 
     form.anexos.forEach(anexo => {
         if (anexo.arquivo && anexo.id) {
             // Anexo existente com novo arquivo = deletar antigo + adicionar novo
-            anexosRemovidos.push(anexo.id);
             anexosNovos.push(anexo);
         } else if (anexo.arquivo && !anexo.id) {
             // Anexo novo (sem ID)
@@ -227,23 +230,37 @@ const submitForm = () => {
         fd.append(`fotos_remover[${i}]`, id);
     });
 
+    // Fotos mantidas podem ter coordenadas ou descrição alteradas.
+    form.fotos
+        .filter(foto => foto.id && !foto.arquivo && foto.nome_arquivo)
+        .forEach((foto, i) => {
+            fd.append(`fotos_atualizadas[${i}][id]`, foto.id);
+            fd.append(`fotos_atualizadas[${i}][latitude]`, foto.latitude ?? '');
+            fd.append(`fotos_atualizadas[${i}][longitude]`, foto.longitude ?? '');
+            fd.append(`fotos_atualizadas[${i}][descricao]`, foto.descricao ?? '');
+        });
+
     anexos_remover.forEach((id, i) => {
         fd.append(`anexos_remover[${i}]`, id);
     });
 
     fotosNovas.forEach((foto, i) => {
-        if (foto.arquivo) fd.append(`novas_fotos[${i}]`, foto.arquivo);
+        if (!foto.arquivo) return;
+
+        fd.append(`novas_fotos[${i}][arquivo]`, foto.arquivo);
+        fd.append(`novas_fotos[${i}][latitude]`, foto.latitude ?? '');
+        fd.append(`novas_fotos[${i}][longitude]`, foto.longitude ?? '');
+        fd.append(`novas_fotos[${i}][data_captura]`, foto.data_captura ?? '');
+        fd.append(`novas_fotos[${i}][descricao]`, foto.descricao ?? '');
     });
 
     anexosNovos.forEach((anexo, i) => {
-        if (anexo.arquivo) fd.append(`novos_anexos[${i}]`, anexo.arquivo);
+        if (anexo.arquivo) fd.append(`novos_anexos[${i}][arquivo]`, anexo.arquivo);
     });
 
-    form.post(url, {
-        data: fd,
+    form.transform(() => fd).post(url, {
         preserveScroll: true,
-        preserveState: true,
-        forceFormData: true,
+        preserveState: false,
         onSuccess: () => {
             console.log('Campanha atualizada com sucesso');
         },
@@ -300,6 +317,25 @@ const voltar = () => {
 
             <div class="flex-fill content-column">
                 <div class="card mb-3">
+                    <div class="card-body text-center py-3">
+                        <h2 class="mb-1">EDITAR CAMPANHA {{ props.produto?.toUpperCase() }}</h2>
+                        <p v-if="props.campanha?.subproduto" class="text-muted mb-0">{{ props.campanha.subproduto }}</p>
+                    </div>
+                </div>
+                <div v-if="props.campanha?.analises?.length" class="alert alert-info mb-3 d-flex justify-content-between align-items-center" style="cursor: pointer" @click="showAnalysisModal = true">
+                    <span><i class="bi bi-info-circle me-2"></i>{{ props.campanha.analises.length }} análise{{ props.campanha.analises.length !== 1 ? 's' : '' }} registrada{{ props.campanha.analises.length !== 1 ? 's' : '' }}</span>
+                    <span class="badge bg-info text-white">Clique para visualizar</span>
+                </div>
+                <div v-if="showAnalysisModal" class="modal-backdrop-custom" @click.self="showAnalysisModal = false">
+                    <div class="preview-modal">
+                        <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="mb-0">Histórico de análises</h5><button type="button" class="btn-close" @click="showAnalysisModal = false"></button></div>
+                        <div v-for="analise in props.campanha.analises" :key="analise.id" class="border rounded p-3 mb-2" :class="analise.status === 'Rejeitada' ? 'border-danger bg-light' : 'border-success bg-light'">
+                            <div class="d-flex justify-content-between gap-3"><strong>Versão {{ analise.versao_analise }} — {{ analise.status === 'Rejeitada' ? 'Reprovada' : analise.status }}</strong><small>{{ analise.created_at }}</small></div>
+                            <small v-if="analise.fiscal?.name" class="d-block mt-1">Fiscal: {{ analise.fiscal.name }}</small><p v-if="analise.observacoes" class="mb-0 mt-2">{{ analise.observacoes }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
                     <div class="card-header">
                         <h3 class="my-0">Informações Gerais</h3>
                     </div>
@@ -340,7 +376,11 @@ const voltar = () => {
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">Subproduto <span class="text-danger">*</span></label>
-                                <input
+                                <select v-if="props.produto?.toLowerCase() === 'asv'" v-model="form.subproduto" class="form-select" required>
+                                    <option value="">Selecione um subproduto</option>
+                                    <option v-for="subproduto in props.subprodutos" :key="subproduto.id" :value="subproduto.descricao_revisada">{{ subproduto.descricao_revisada }}</option>
+                                </select>
+                                <input v-else
                                     v-model="form.subproduto"
                                     type="text"
                                     class="form-control"
@@ -508,4 +548,9 @@ const voltar = () => {
     overflow-wrap: break-word;
     vertical-align: top;
 }
+</style>
+
+<style scoped>
+.modal-backdrop-custom { position: fixed; inset: 0; z-index: 1055; background: rgba(0, 0, 0, .65); display: grid; place-items: center; padding: 24px; }
+.preview-modal { width: min(760px, 100%); max-height: 90vh; overflow: auto; background: #fff; border-radius: 8px; padding: 20px; }
 </style>

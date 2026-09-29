@@ -76,6 +76,92 @@ export const produtoConfig = {
     }
   },
 
+  asv: {
+    nome: 'ASV',
+    temEtapas: false,
+    temArquivo: false,
+    temVinculacoes: false,
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
+    acoes: ['visualizar', 'editar', 'analisar', 'excluir'],
+    modalPreview: false,
+    showModulo: false,
+    passaModulo: null,
+    rotaNome: {
+      index: 'sgc.contratada.produtos.index',
+      create: 'sgc.contratada.produtos.create',
+      show: 'sgc.contratada.produtos.asv.show',
+      analise: 'sgc.contratada.produtos.asv.analise',
+      edit: 'sgc.contratada.produtos.asv.edit',
+      destroy: null,
+      aprovarTudo: null,
+      reprovarTudo: null,
+      arquivar: null,
+      restaurar: null,
+    }
+  },
+
+  indigena: {
+    nome: 'Indígena',
+    temEtapas: false,
+    temArquivo: false,
+    temVinculacoes: false,
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
+    acoes: ['visualizar', 'editar', 'analisar'],
+    modalPreview: false,
+    showModulo: false,
+    passaModulo: null,
+    rotaNome: {
+      index: 'sgc.contratada.produtos.index',
+      create: 'sgc.contratada.produtos.create',
+      show: 'sgc.contratada.produtos.indigena.show',
+      analise: 'sgc.contratada.produtos.indigena.analise',
+      edit: 'sgc.contratada.produtos.indigena.edit',
+      destroy: null,
+      aprovarTudo: null,
+      reprovarTudo: null,
+      arquivar: null,
+      restaurar: null,
+    }
+  },
+
+  quilombola: {
+    nome: 'Quilombola',
+    temEtapas: false,
+    temArquivo: false,
+    temVinculacoes: false,
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
+    acoes: ['visualizar', 'editar', 'analisar'],
+    modalPreview: false,
+    showModulo: false,
+    passaModulo: null,
+    rotaNome: {
+      index: 'sgc.contratada.produtos.index',
+      create: 'sgc.contratada.produtos.create',
+      show: 'sgc.contratada.produtos.quilombola.show',
+      analise: 'sgc.contratada.produtos.quilombola.analise',
+      edit: 'sgc.contratada.produtos.quilombola.edit',
+      destroy: null,
+      aprovarTudo: null,
+      reprovarTudo: null,
+      arquivar: null,
+      restaurar: null,
+    }
+  },
+
+  audiencia: {
+    nome: 'Audiência', temEtapas: false, temArquivo: false, temVinculacoes: false,
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
+    acoes: ['visualizar', 'editar', 'analisar'], modalPreview: false, showModulo: false, passaModulo: null,
+    rotaNome: { index: 'sgc.contratada.produtos.index', create: 'sgc.contratada.produtos.create', show: 'sgc.contratada.produtos.audiencia.show', analise: 'sgc.contratada.produtos.audiencia.analise', edit: 'sgc.contratada.produtos.audiencia.edit', destroy: null, aprovarTudo: null, reprovarTudo: null, arquivar: null, restaurar: null }
+  },
+
+  pba: {
+    nome: 'PBA', temEtapas: false, temArquivo: false, temVinculacoes: false,
+    colunas: ['id_campanha', 'empreendimento', 'data_inicial', 'status', 'subproduto'],
+    acoes: ['visualizar', 'editar', 'analisar'], modalPreview: false, showModulo: false, passaModulo: null,
+    rotaNome: { index: 'sgc.contratada.produtos.index', create: 'sgc.contratada.produtos.create', show: 'sgc.contratada.produtos.pba.show', analise: 'sgc.contratada.produtos.pba.analise', edit: 'sgc.contratada.produtos.pba.edit', destroy: null, aprovarTudo: null, reprovarTudo: null, arquivar: null, restaurar: null }
+  },
+
   eia: {
     nome: 'EIA',
     temEtapas: false,

@@ -29,7 +29,7 @@ defineEmits(['next', 'prev']);
       <div v-if="naoSeAplica" class="alert alert-info text-center">
         Não se aplica.
       </div>
-      <div v-else-if="formPontosCavernicola && formPontosCavernicola.length" class="overflow-x-auto mb-6">
+      <div v-else-if="formPontosCavernicola && formPontosCavernicola.length" class="table-responsive mb-6">
         <table class="min-w-full bg-white border border-gray-300">
           <thead>
             <tr class="bg-gray-100">

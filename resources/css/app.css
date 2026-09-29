@@ -45,3 +45,23 @@
 .dropdown-menu {
   z-index: 1050 !important;
 }
+
+/*
+    Indica visualmente que uma .table-responsive (Bootstrap) tem mais
+    conteúdo pra rolar horizontalmente - essencial em telas estreitas,
+    onde tabelas largas ficam cortadas sem nenhuma pista visual de scroll.
+    Some sozinho quando não há overflow (background-attachment: local
+    só aparece quando o conteúdo scrollável ultrapassa o container).
+*/
+.table-responsive {
+    background:
+        linear-gradient(to right, var(--tblr-card-bg) 30%, rgba(255, 255, 255, 0)),
+        linear-gradient(to right, rgba(255, 255, 255, 0), var(--tblr-card-bg) 70%) 100% 0,
+        linear-gradient(to right, rgba(0, 0, 0, .15), rgba(0, 0, 0, 0)),
+        linear-gradient(to left, rgba(0, 0, 0, .15), rgba(0, 0, 0, 0)) 100% 0;
+    background-repeat: no-repeat;
+    background-color: var(--tblr-card-bg);
+    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+    background-position: 0 0, 100% 0, 0 0, 100% 0;
+    background-attachment: local, local, scroll, scroll;
+}

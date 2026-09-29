@@ -86,7 +86,7 @@ class MalarigenoCampanhaController extends Controller
     {
         if (Auth::user()->perfis_id !== 3) {
             return redirect()
-                ->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanha])
+                ->route('sgc.contratada.produtos.malarigeno.show', [$contrato, 'malarigeno', $campanha])
                 ->withErrors(['error' => 'Acesso negado. Apenas fiscais podem analisar campanhas.']);
         }
 
@@ -95,7 +95,7 @@ class MalarigenoCampanhaController extends Controller
 
         if ($campanhaObj->status !== 'Em análise') {
             return redirect()
-                ->route('sgc.contratada.produtos.show', [$contrato, $produto, $campanha])
+                ->route('sgc.contratada.produtos.malarigeno.show', [$contrato, 'malarigeno', $campanha])
                 ->withErrors(['error' => 'Campanha não está em análise.']);
         }
 
@@ -130,7 +130,7 @@ class MalarigenoCampanhaController extends Controller
         return Inertia::render('Sgc/Contratada/Produtos/Malarigeno/AnaliseCampanha', [
             'campanha' => $campanhaData,
             'contrato' => $campanhaObj->id_contrato,
-            'produto' => $campanhaObj->subproduto,
+            'produto' => 'malarigeno',
             'contratos' => ['contratada' => 'Nome da Contratada', 'tipo_contrato' => 'Tipo'],
             'canApprove' => Auth::user()->perfis_id === 3 && $campanhaObj->status === 'Em análise',
             'analises' => $this->malarigenoFiscalService->getAnalisesByCampanha($contrato, $campanha) ?? [],
@@ -149,7 +149,7 @@ class MalarigenoCampanhaController extends Controller
             $this->malarigenoFiscalService->salvarAnalise($contrato, $campanha, $validated);
 
             return redirect()
-                ->route('sgc.contratada.produtos.analise', [$contrato, $produto, $campanha])
+                ->route('sgc.contratada.produtos.malarigeno.analise', [$contrato, 'malarigeno', $campanha])
                 ->with('success', 'Análise salva com sucesso!');
 
         } catch (\Exception $e) {
@@ -198,7 +198,7 @@ class MalarigenoCampanhaController extends Controller
 
             if ($campanhaObj->status !== 'Em análise') {
                 return redirect()
-                    ->route('sgc.contratada.produtos.analise', [$contrato, $produto, $campanha])
+                    ->route('sgc.contratada.produtos.malarigeno.analise', [$contrato, 'malarigeno', $campanha])
                     ->withErrors(['error' => 'Campanha não está em análise.']);
             }
 
@@ -210,7 +210,7 @@ class MalarigenoCampanhaController extends Controller
             $this->malarigenoFiscalService->finalizarAvaliacaoCampanha($contrato, $campanha);
 
             return redirect()
-                ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+                ->route('sgc.contratada.produtos.index', [$contrato, 'malarigeno'])
                 ->with('success', 'Campanha aprovada com sucesso!');
 
         } catch (\Exception $e) {
@@ -242,7 +242,7 @@ class MalarigenoCampanhaController extends Controller
 
             if ($campanhaObj->status !== 'Em análise') {
                 return redirect()
-                    ->route('sgc.contratada.produtos.analise', [$contrato, $produto, $campanha])
+                    ->route('sgc.contratada.produtos.malarigeno.analise', [$contrato, 'malarigeno', $campanha])
                     ->withErrors(['error' => 'Campanha não está em análise.']);
             }
 
@@ -254,7 +254,7 @@ class MalarigenoCampanhaController extends Controller
             $this->malarigenoFiscalService->finalizarAvaliacaoCampanha($contrato, $campanha);
 
             return redirect()
-                ->route('sgc.contratada.produtos.index', [$contrato, $produto])
+                ->route('sgc.contratada.produtos.index', [$contrato, 'malarigeno'])
                 ->with('success', 'Campanha rejeitada com sucesso!');
 
         } catch (\Exception $e) {
@@ -353,7 +353,18 @@ class MalarigenoCampanhaController extends Controller
             'fotos_remover' => 'nullable|array',
             'anexos_remover' => 'nullable|array',
             'novas_fotos' => 'nullable|array',
+            'novas_fotos.*.arquivo' => 'nullable|image',
+            'novas_fotos.*.latitude' => 'nullable|numeric',
+            'novas_fotos.*.longitude' => 'nullable|numeric',
+            'novas_fotos.*.data_captura' => 'nullable|date',
+            'novas_fotos.*.descricao' => 'nullable|string',
+            'fotos_atualizadas' => 'nullable|array',
+            'fotos_atualizadas.*.id' => 'required|integer',
+            'fotos_atualizadas.*.latitude' => 'nullable|numeric',
+            'fotos_atualizadas.*.longitude' => 'nullable|numeric',
+            'fotos_atualizadas.*.descricao' => 'nullable|string',
             'novos_anexos' => 'nullable|array',
+            'novos_anexos.*.arquivo' => 'nullable|file',
         ]);
 
         try {
@@ -364,7 +375,7 @@ class MalarigenoCampanhaController extends Controller
                 'id_campanha' => $validated['id_campanha'],
                 'sei_dnit' => $validated['sei_dnit'] ?? null,
                 'subproduto' => $validated['subproduto'],
-                'modulo_id' => $validated['modulo_id'],
+                'modulo_id' => $validated['modulo_id'] ?? null,
             ];
 
             if (isset($validated['arquivo'])) {
@@ -408,9 +419,29 @@ class MalarigenoCampanhaController extends Controller
                 }
             }
 
+            // Atualizar os dados descritivos das fotos que permaneceram na campanha.
+            foreach ($validated['fotos_atualizadas'] ?? [] as $dadosFoto) {
+                $foto = $campanha->fotos()->find($dadosFoto['id']);
+
+                if ($foto) {
+                    $foto->update([
+                        'latitude' => $dadosFoto['latitude'] ?? null,
+                        'longitude' => $dadosFoto['longitude'] ?? null,
+                        'descricao' => $dadosFoto['descricao'] ?? null,
+                    ]);
+                }
+            }
+
             // Adicionar novas fotos
             if (!empty(request()->file('novas_fotos'))) {
-                foreach (request()->file('novas_fotos') as $fotoFile) {
+                foreach (request()->file('novas_fotos') as $indice => $dadosUploadFoto) {
+                    $fotoFile = $dadosUploadFoto['arquivo'] ?? null;
+
+                    if (!$fotoFile) {
+                        continue;
+                    }
+
+                    $dadosFoto = $validated['novas_fotos'][$indice] ?? [];
                     $nomeArquivoF = $fotoFile->getClientOriginalName();
                     $nomeUnico = uniqid() . '_' . $nomeArquivoF;
                     $caminho = $fotoFile->storeAs('Malarigeno/Fotos', $nomeUnico, 'public');
@@ -419,16 +450,23 @@ class MalarigenoCampanhaController extends Controller
                     $campanha->fotos()->create([
                         'nome_arquivo' => $nomeArquivoF,
                         'caminho_arquivo' => $caminho,
-                        'latitude' => null,
-                        'longitude' => null,
-                        'descricao' => null,
+                        'latitude' => $dadosFoto['latitude'] ?? null,
+                        'longitude' => $dadosFoto['longitude'] ?? null,
+                        'data_captura' => $dadosFoto['data_captura'] ?? null,
+                        'descricao' => $dadosFoto['descricao'] ?? null,
                     ]);
                 }
             }
 
             // Adicionar novos anexos
             if (!empty(request()->file('novos_anexos'))) {
-                foreach (request()->file('novos_anexos') as $anexoFile) {
+                foreach (request()->file('novos_anexos') as $dadosUploadAnexo) {
+                    $anexoFile = $dadosUploadAnexo['arquivo'] ?? null;
+
+                    if (!$anexoFile) {
+                        continue;
+                    }
+
                     $nomeArquivoA = $anexoFile->getClientOriginalName();
                     $nomeUnico = uniqid() . '_' . $nomeArquivoA;
                     $caminho = $anexoFile->storeAs('Malarigeno/Anexos', $nomeUnico, 'public');
