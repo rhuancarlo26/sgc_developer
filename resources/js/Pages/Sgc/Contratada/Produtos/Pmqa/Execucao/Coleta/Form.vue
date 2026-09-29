@@ -23,7 +23,8 @@ const props = defineProps({
     canApprove: { type: Boolean, default: false },
 });
 
-const isReadonly = computed(() => props.canApprove || (!props.canApprove && props.pmqa?.status_execucao !== 'Em elaboração' && props.pmqa?.status_execucao !== 'Reprovada'));
+import { usePmqaPermissions } from '../../Composables/usePmqaPermissions';
+const { isReadonlyForm: isReadonly } = usePmqaPermissions(props, 'execucao');
 
 const produtoSlug = computed(() =>
     typeof props.produto === "string" ? props.produto : props.produto.slug,

@@ -48,7 +48,7 @@ const renderMapa = () => {
       id: "mapbox.streets",
       fadeAnimation: true,
     }).addTo(map);
-    
+
     // Força o mapa a recalcular o tamanho do container
     map.invalidateSize();
   }
@@ -77,7 +77,7 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
               <strong>KM Inicial:</strong> ${properties.kmi || 'N/A'}<br>
               <strong>KM Final:</strong> ${properties.kmf || 'N/A'}
             `;
-            
+
             L.popup()
               .setLatLng(e.latlng)
               .setContent(info || 'Sem informações')
@@ -88,7 +88,7 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
           }
         });
       }
-      
+
       // Itera sobre coordenadas e adiciona na layer
       linestring_array.forEach(geojson_linestring => {
         let geojson = JSON.parse(geojson_linestring[0]);
@@ -118,7 +118,7 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
 
     } catch (e) {
       if (linestring_array && linestring_array.length) {
-        console.log(e);
+        console.erro(e);
         toast.error('GeoJSON inválido.');
       }
     }
@@ -145,7 +145,7 @@ const setGeoJson = (geojson_linestring) => {
 
   try {
     const geojson = JSON.parse(geojson_linestring);
-    
+
     // Adiciona nova Layer com dados do GeoJSON Parseado
     geojson_layer = L.geoJSON().addTo(map);
     geojson_layer.addData(geojson);

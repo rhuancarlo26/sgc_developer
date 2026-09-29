@@ -1,4 +1,5 @@
 <script setup>
+import { usePmqaPermissions } from "@/Pages/Sgc/Contratada/Produtos/Pmqa/Composables/usePmqaPermissions";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
@@ -10,6 +11,7 @@ import { IconEye } from "@tabler/icons-vue";
 import { IconPencil } from "@tabler/icons-vue";
 import ModalVisualizarPonto from "./ModalVisualizarPonto.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
+import { computed } from "vue";
 
 const modalVincularPonto = ref(null);
 const modalVisualizarPonto = ref(null);
@@ -26,6 +28,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['next', 'prev'])
+const { podeGerenciar, reprovarFase } = usePmqaPermissions(props, "configuracao");
 
 const abrirModalVincularPonto = (item = null) => {
     if (!modalVincularPonto.value?.abrirModal) return;
@@ -47,19 +50,13 @@ const form = useForm({
     id: null,
     fk_status: null,
 });
-const enviaFiscal = (aprovacao) => {
-    form.fk_status = 1;
-    form.id = aprovacao?.id;
-    form.post(
-        route(
-            "contratos.contratada.servicos.pmqa.configuracao.envia-fiscal-pmqa",
-            {
-                contrato: props.contrato.id,
-                servico: props.servico.id,
-            },
-        ),
-    );
-};
+
+const podeEnviarAoFiscal = computed(() => {
+    const listas = props.vinculacoes?.data ?? props.vinculacoes ?? [];
+    if (listas.length === 0) return false;
+
+    return listas.some(lista => lista.pontos && lista.pontos.length > 0);
+})
 
 const aprovarFase = () => {
     if (!confirm("Confirmar a aprovação desta fase de Configuração?")) return;
@@ -77,7 +74,7 @@ const enviarParaAnalise = () => {
 </script>
 <template #body>
     <ModelSearchFormAllColumns
-        v-if="!canApprove && ap(aprovacao)"
+        v-if="!canApprove && ap(aprovacao) && podeGerenciar"
         :columns="[
             'nome',
             'pontos?.nome_ponto_coleta',
@@ -85,16 +82,17 @@ const enviarParaAnalise = () => {
     >
         <template #action>
             <NavButton
-                v-if="!canApprove && (pmqa?.status_configuracao === 'Em elaboração' || pmqa?.status_configuracao === 'Reprovada' || pmqa?.status_configuracao === 'Bloqueado' || !pmqa?.status_configuracao)"
+                v-if="!canApprove && podeGerenciar"
                 type-button="primary"
-                title="Submeter para análise"
+                title="Enviar ao fiscal"
                 @click="enviarParaAnalise"
+                :disable="!podeEnviarAoFiscal"
             />
             <NavButton
                 @click="abrirModalVincularPonto()"
                 type-button="success"
                 title="Vincular"
-                v-if="ap(aprovacao)"
+                v-if="ap(aprovacao) && podeGerenciar"
             />
         </template>
     </ModelSearchFormAllColumns>
@@ -115,14 +113,14 @@ const enviarParaAnalise = () => {
                         @click="abrirModalVisualizarPonto(item)"
                     />
                     <NavButton
-                        v-if="!canApprove && ap(aprovacao)"
+                        v-if="!canApprove && ap(aprovacao) && podeGerenciar"
                         :icon="IconPencil"
                         class="btn-icon"
                         type-button="primary"
                         @click="abrirModalVincularPonto(item)"
                     />
                     <LinkConfirmation
-                        v-if="!canApprove && ap(aprovacao)"
+                        v-if="!canApprove && ap(aprovacao) && podeGerenciar"
                         v-slot="confirmation"
                         :options="{
                             text: 'A remoção de um ponto será permanente.',
@@ -163,7 +161,13 @@ const enviarParaAnalise = () => {
 
         <div class="d-flex gap-2">
             <NavButton
-                v-if="canApprove && pmqa?.status_configuracao === 'Em análise'"
+                v-if="canApprove && podeGerenciar"
+                type-button="danger"
+                title="✖ Reprovar Configuração"
+                @click="reprovarFase"
+            />
+            <NavButton
+                v-if="canApprove && podeGerenciar"
                 type-button="primary"
                 title="✓ Aprovar Configuração"
                 @click="aprovarFase"

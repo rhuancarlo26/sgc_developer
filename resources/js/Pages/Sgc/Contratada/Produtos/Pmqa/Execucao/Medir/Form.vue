@@ -17,7 +17,8 @@ const props = defineProps({
 });
 
 import { computed } from "vue";
-const isReadonly = computed(() => props.canApprove || (!props.canApprove && props.pmqa?.status_execucao !== 'Em elaboração' && props.pmqa?.status_execucao !== 'Reprovada'));
+import { usePmqaPermissions } from '../../Composables/usePmqaPermissions';
+const { isReadonlyForm: isReadonly } = usePmqaPermissions(props, 'execucao');
 
 const form = useForm({
     id:               null,

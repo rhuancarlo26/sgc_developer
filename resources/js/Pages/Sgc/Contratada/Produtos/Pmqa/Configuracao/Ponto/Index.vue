@@ -1,4 +1,5 @@
 <script setup>
+import { usePmqaPermissions } from "@/Pages/Sgc/Contratada/Produtos/Pmqa/Composables/usePmqaPermissions";
 import { ref, computed } from "vue";
 import { Link, router } from "@inertiajs/vue3";
 import NavButton from "@/Components/NavButton.vue";
@@ -57,13 +58,14 @@ const atualizarListaDePontos = () => {
         only: ["pontos"],
     });
 };
+const { podeGerenciar } = usePmqaPermissions(props, "configuracao");
 </script>
 
 <template #body>
     <div class="card">
         <div class="card-body">
             <h2>Pontos de coleta</h2>
-            <div class="d-flex justify-content-end mb-3" v-if="!canApprove">
+            <div class="d-flex justify-content-end mb-3" v-if="!canApprove && podeGerenciar">
                 <a class="btn btn-info me-1" target="_blank"
                 :href="route('contratos.contratada.servicos.pmqa.configuracao.ponto.download_modelo')">Modelo</a>
                 <NavButton
@@ -120,7 +122,7 @@ const atualizarListaDePontos = () => {
                         <td class="text-center">
                             {{ item.estaca }}
                         </td>
-                        <td class="text-center" v-if="!canApprove">
+                        <td class="text-center" v-if="!canApprove && podeGerenciar">
                             <div class="acao-btns">
                                 <NavButton
                                     type-button="info"
@@ -130,7 +132,7 @@ const atualizarListaDePontos = () => {
                                 />
 
                                 <NavButton
-                                    v-if="!canApprove"
+                                    v-if="!canApprove && podeGerenciar"
                                     type-button="primary"
                                     class="btn-icon"
                                     :icon="IconPencil"
@@ -138,7 +140,7 @@ const atualizarListaDePontos = () => {
                                 />
 
                                 <SgcLinkConfirmation
-                                    v-if="!canApprove"
+                                    v-if="!canApprove && podeGerenciar"
                                     v-slot="confirmation"
                                     :options="{
                                         text: 'A remoção de um ponto será permanente.',

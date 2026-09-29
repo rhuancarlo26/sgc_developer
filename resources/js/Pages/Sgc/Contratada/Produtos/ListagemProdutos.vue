@@ -167,12 +167,12 @@ const getAcaoPendente = (campanha) => {
     };
   }
 
-  if (status === 'Em elaboração') {
+  if (status === 'Em elaboração' && !canApprove && !isFiscal.value) {
     if (deveExibirAcao('gerenciar')) {
       return {
         label: 'Gerenciar',
         type: 'primary',
-        handler: () => gerenciarCampanha(campanha.id),
+        handler: () => isProdutoPmqa.value ? visualizarCampanha(campanha) : gerenciarCampanha(campanha.id),
       };
     }
 
@@ -277,13 +277,23 @@ const goToCreate = () => {
   }
 
   const subproduto = selectedSubproduto.value;
+  const subObj = props.subprodutos.find(s => s.descricao_revisada === subproduto);
+
+  const params = { novo: true };
+
+  if (subObj && subObj.id) {
+    params.subproduto_id = subObj.id;
+  }
+
+  params.subproduto = subproduto;
+
   router.get(
     route(createRoute, [props.contrato, selectedProduto.value]),
-    { subproduto, novo: true },
+    params,
     {
-      preserveState: true,
-      preserveScroll: true,
-      onError: (errors) => console.error('Erro ao redirecionar:', errors),
+        preserveState: true,
+        preserveScroll: true,
+        onError: (errors) => console.error('Erro ao redirecionar', errors),
     }
   );
 };
@@ -314,7 +324,7 @@ const continuarCampanha = (campanha) => {
 };
 
 // Redirecionar para visualização
-const visualizarCampanha = (campanha, modulo = null) => {
+const visualizarCampanha = (campanha, modulo = null, forceVisualizar = false) => {
   if (selectedProduto.value === 'fauna' && campanha.modo_preenchimento === 'simplificado') {
     router.get(route('sgc.contratada.produtos.fauna.simplificada.show', [props.contrato, 'fauna', campanha.id]));
     return;
@@ -361,6 +371,11 @@ const visualizarCampanha = (campanha, modulo = null) => {
       }
     }
 
+    // Apenas agora nós injetamos o forceVisualizar, senão o paramsObj é sobrescrito pelos blocos if/else acima
+    if (forceVisualizar) {
+      paramsObj.visualizar = true;
+    }
+
     let routeParams = [props.contrato, selectedProduto.value];
     if (targetRoute !== 'sgc.contratada.produtos.create') {
         routeParams.push(campanha.id);
@@ -394,6 +409,11 @@ const gerenciarCampanha = (pmqaId) => {
 
 // Redirecionar para análise
 const analisarCampanha = (campanha) => {
+  if (isProdutoPmqa.value) {
+    visualizarCampanha(campanha);
+    return;
+  }
+
   if (selectedProduto.value === 'fauna' && campanha.modo_preenchimento === 'simplificado') {
     router.get(route('sgc.contratada.produtos.fauna.simplificada.analise', [props.contrato, 'fauna', campanha.id]));
     return;
@@ -801,12 +821,12 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
                               v-if="deveExibirAcao('visualizar')"
                               type-button="info"
                               title="Visualizar"
-                              @click="visualizarCampanha(campanha)"
+                              @click="visualizarCampanha(campanha, null, true)"
                             />
 
                             <!-- Gerenciar (EIA/PMQA) -->
                             <NavButton
-                              v-if="deveExibirAcao('gerenciar') && campanha.status?.trim() === 'Em elaboração'"
+                              v-if="deveExibirAcao('gerenciar') && (!canApprove && !isFiscal && ['Em elaboração', 'Rejeitada', 'Reprovada'].includes(campanha.status?.trim() || campanha.status_aprovacao?.trim()))"
                               type-button="primary"
                               title="Gerenciar"
                               @click="visualizarCampanha(campanha)"

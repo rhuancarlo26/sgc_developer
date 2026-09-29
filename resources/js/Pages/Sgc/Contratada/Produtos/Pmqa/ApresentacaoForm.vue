@@ -1,7 +1,7 @@
 <script setup>
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
-import { useForm, router } from "@inertiajs/vue3";
+import { useForm, router, usePage } from "@inertiajs/vue3";
 import { IconDeviceFloppy } from "@tabler/icons-vue";
 import { computed } from "vue";
 import NavButton from "@/Components/NavButton.vue";
@@ -17,6 +17,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["saved"]);
+const page = usePage();
 
 const form = useForm({
     id: props.pmqa?.id ?? null,
@@ -58,15 +59,9 @@ const enviarParaAnalise = () => {
     }, { preserveScroll: true });
 };
 
-const isFormReadonly = computed(() => {
-    if (props.canApprove) return true;
-    if (!props.pmqa || !props.pmqa.id) return false;
-    
-    const status = props.pmqa.status_apresentacao;
-    if (!status) return false; // If status is null/undefined, it's a new record in draft
+import { usePmqaPermissions } from './Composables/usePmqaPermissions';
 
-    return status !== 'Em elaboração' && status !== 'Reprovada';
-});
+const { isReadonlyForm: isFormReadonly, podeGerenciar, reprovarFase } = usePmqaPermissions(props, 'apresentacao');
 </script>
 
 <template #body>
@@ -130,7 +125,7 @@ const isFormReadonly = computed(() => {
 
         <div class="col-auto d-flex gap-2">
             <NavButton
-                v-if="!canApprove && pmqa?.status_apresentacao !== 'Em análise' && pmqa?.status_apresentacao !== 'Aprovada' && pmqa?.id"
+                v-if="!canApprove && podeGerenciar"
                 type-button="warning"
                 title="Enviar para análise"
                 @click="enviarParaAnalise"
@@ -139,11 +134,18 @@ const isFormReadonly = computed(() => {
                 v-if="!isFormReadonly"
                 @click="salvar()"
                 type-button="success"
+                title="Salvar Apresentação"
                 :icon="IconDeviceFloppy"
-                title="Salvar"
             />
             <NavButton
-                v-if="canApprove && pmqa?.status_apresentacao === 'Em análise'"
+                v-if="canApprove && podeGerenciar"
+                type-button="danger"
+                title="✖ Reprovar Apresentação"
+                @click="reprovarFase"
+                class="me-2"
+            />
+            <NavButton
+                v-if="canApprove && podeGerenciar"
                 type-button="primary"
                 title="✓ Aprovar Apresentação"
                 @click="aprovarFase"

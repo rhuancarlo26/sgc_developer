@@ -249,7 +249,6 @@ const setGeoJson = async (geojson_linestring, weight, filterOSE = null) => {
 const mapHasLayer = (layerName) => {
 
   const layers = featureGroup.getLayers();
-  const foundLayer = layers.find(l => console.log(l))
 
   return layerName;
 }

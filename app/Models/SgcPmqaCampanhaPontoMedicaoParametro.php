@@ -12,6 +12,9 @@ class SgcPmqaCampanhaPontoMedicaoParametro extends Model
 
     protected $table = 'sgc_ponto_medicao_parametro';
     protected $guarded = ['id', 'created_at'];
+    protected $casts = [
+        'medicao' => 'float',
+    ];
 
     public function lista_parametro()
     {

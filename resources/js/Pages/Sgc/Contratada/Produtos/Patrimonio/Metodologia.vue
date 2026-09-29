@@ -6,6 +6,8 @@ const props = defineProps({
   contrato: [Number, String],
 });
 
+const emit = defineEmits(['voltar', 'avancar']);
+
 const NivelEmpreendimento = {
   NIVEL_I: 'NIVEL_I',
   NIVEL_II: 'NIVEL_II',
@@ -507,7 +509,6 @@ const enviarShapefile = async (campo) => {
   }
 };
 
-defineEmits(['voltar']);
 </script>
 
 <template>
@@ -723,7 +724,7 @@ defineEmits(['voltar']);
         Voltar
       </button>
 
-      <button type="button" class="btn btn-primary" :disabled="!nivelSelecionado">
+      <button type="button" class="btn btn-primary" :disabled="!nivelSelecionado" @click="$emit('avancar')">
         Avançar
       </button>
     </div>

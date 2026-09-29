@@ -1059,6 +1059,10 @@ class ProdutosController extends Controller
     public function reprovarPmqa(Request $request, $contrato, $produto, $pmqa): RedirectResponse
     {
         abort_unless($this->usuarioPodeAprovarPmqa(), 403, 'Usuário sem autorização');
+        
+        $request->validate([
+            'motivo' => 'nullable|string'
+        ]);
 
         $pmqaModel = SgcPmqa::where('id', $pmqa)
             ->where('id_contrato', $contrato)
@@ -1066,7 +1070,10 @@ class ProdutosController extends Controller
 
         abort_unless($pmqaModel->status_aprovacao === 'Em análise', 422, 'Este PMQA não está em análise.');
 
-        $updateData = ['status_aprovacao' => 'Rejeitada'];
+        $updateData = [
+            'status_aprovacao' => 'Rejeitada',
+            'motivo_reprovacao' => $request->input('motivo')
+        ];
 
         $fases = ['apresentacao', 'configuracao', 'execucao', 'resultado', 'relatorio'];
         foreach ($fases as $fase) {
@@ -1076,6 +1083,18 @@ class ProdutosController extends Controller
         }
 
         $pmqaModel->update($updateData);
+
+        if ($request->filled('motivo')) {
+            \App\Models\ChangeLog::create([
+                'user_id' => auth()->id(),
+                'table_name' => 'sgc_pmqa',
+                'record_id' => $pmqaModel->id,
+                'field' => 'motivo_reprovacao',
+                'old_value' => null,
+                'new_value' => $request->input('motivo'),
+                'status' => 'Rejeitada'
+            ]);
+        }
 
         return back()->with('success', 'Campanha reprovada com sucesso!');
     }
@@ -1378,7 +1397,7 @@ class ProdutosController extends Controller
         $user = Auth::user();
 
         if ($user instanceof \App\Models\User) {
-            return $user->hasAnyRole(['Administrador', 'Fiscal']);
+            return $user->hasAnyRole(['Administrador', 'Fiscal']) || $user->perfis_id == 3;
         }
 
         return false;
