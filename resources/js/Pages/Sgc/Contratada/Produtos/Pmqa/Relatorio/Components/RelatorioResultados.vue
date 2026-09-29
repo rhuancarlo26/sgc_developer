@@ -39,34 +39,47 @@ const parametrosVinculados = computed(() => {
 const chartDataIqa = computed(() => {
     const labels = [];
     const datasets = [];
+    const pontosMap = new Map();
 
+    // Eixo X: Nomes das Campanhas
     props.relatorio?.resultado?.campanhas?.forEach(campanha => {
-        const data = [];
+        labels.push(campanha.nome_campanha ?? campanha.nome ?? 'Campanha');
+    });
 
+    // Encontrar todos os pontos únicos
+    props.relatorio?.resultado?.campanhas?.forEach(campanha => {
         campanha.campanha_pontos?.forEach(campanhaPonto => {
             const ponto = campanhaPonto.ponto;
-            const medicao = campanhaPonto.medicao;
-
-            if (ponto?.nome_ponto_coleta || ponto?.nomepontocoleta) {
-                labels.push(ponto.nome_ponto_coleta ?? ponto.nomepontocoleta);
+            if (!ponto) return;
+            const nomePonto = ponto.nome_ponto_coleta ?? ponto.nomepontocoleta ?? `Ponto ${ponto.id}`;
+            if (!pontosMap.has(ponto.id)) {
+                pontosMap.set(ponto.id, { id: ponto.id, nome: nomePonto });
             }
+        });
+    });
 
-            if (medicao?.iqa !== null && medicao?.iqa !== undefined) {
-                data.push(Number(medicao.iqa));
+    // Construir os datasets (cada ponto é um dataset)
+    pontosMap.forEach(pontoInfo => {
+        const data = [];
+
+        props.relatorio?.resultado?.campanhas?.forEach(campanha => {
+            const cp = campanha.campanha_pontos?.find(cp => cp.ponto?.id === pontoInfo.id);
+            if (cp && cp.medicao && cp.medicao.iqa !== null && cp.medicao.iqa !== undefined) {
+                data.push(Number(cp.medicao.iqa));
+            } else {
+                data.push(0);
             }
         });
 
-        if (data.length) {
-            datasets.push({
-                label: campanha.nome_campanha ?? campanha.nome,
-                backgroundColor: colorFromString(campanha.nome_campanha ?? campanha.nome),
-                data,
-            });
-        }
+        datasets.push({
+            label: pontoInfo.nome,
+            backgroundColor: colorFromString(pontoInfo.nome),
+            data,
+        });
     });
 
     return {
-        labels: [...new Set(labels)],
+        labels,
         datasets,
     };
 });
@@ -126,6 +139,15 @@ const baseChartOptions = {
         },
         tooltip: {
             enabled: false,
+        },
+        datalabels: {
+            display: true,
+            color: 'white',
+            font: {
+                weight: 'bold',
+                size: 8,
+            },
+            formatter: (value) => value !== null ? parseFloat(value) : ''
         },
     },
     scales: {

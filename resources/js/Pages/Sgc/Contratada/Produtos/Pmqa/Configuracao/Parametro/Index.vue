@@ -1,4 +1,5 @@
 <script setup>
+import { usePmqaPermissions } from "@/Pages/Sgc/Contratada/Produtos/Pmqa/Composables/usePmqaPermissions";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
 import NavButton from "@/Components/NavButton.vue";
@@ -37,12 +38,13 @@ const ap = (ap) => {
     }
     return ap?.fk_status === 2;
 };
+const { podeGerenciar } = usePmqaPermissions(props, "configuracao");
 </script>
 
 <template #body>
     <ModelSearchFormAllColumns
         :columns="['nome', 'parametros?.nome']"
-        v-if="!canApprove && ap(aprovacao)"
+        v-if="!canApprove && ap(aprovacao) && podeGerenciar"
     >
         <template #action>
             <NavButton
@@ -72,7 +74,7 @@ const ap = (ap) => {
                         </span>
                     </p>
                 </td>
-                <td v-if="!canApprove && ap(aprovacao)">
+                <td v-if="!canApprove && ap(aprovacao) && podeGerenciar">
                     <div class="d-flex">
                         <NavButton
                             :icon="IconPencil"

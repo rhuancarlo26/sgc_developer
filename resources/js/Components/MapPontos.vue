@@ -42,7 +42,7 @@ const renderMapa = () => {
         // shadowAnchor: [12, 22]
     });
 
-    
+
     // Renderiza Mapa vazio
     map = L.map(mapContainer.value, { renderer: L.canvas() }).setView(
       ["-10.6007767", "-63.6037797"],
@@ -116,7 +116,7 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
           let geojson = JSON.parse(geojson_linestring[0]);
           geojson.properties = geojson_linestring[2];
           geojson.properties.popup = geojson_linestring[1];
-          
+
           geojson_layer.addData(geojson).setStyle(function (feature) {
 
             let style = {
@@ -141,7 +141,7 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
 
     } catch (e) {
       if (linestring_array && linestring_array.length) {
-        console.log(e);
+        console.error(e);
         toast.error('GeoJSON inválido.');
       }
     }
@@ -179,7 +179,7 @@ const zoomToLinestring = (geojson_linestring) => {
 
   } catch (e) {
     if (geojson_linestring) {
-      console.log(e);
+      console.erro(e);
       toast.error('GeoJSON inválido.');
     }
   }

@@ -138,7 +138,7 @@ const setLinestrings = (linestring_array, popupAndEvent = false, cleanPrevious =
 
         } catch (e) {
             if (linestring_array && linestring_array.length) {
-                console.log(e);
+                console.error(e);
                 toast.error('GeoJSON inválido.');
             }
         }
@@ -180,7 +180,7 @@ const zoomToLinestring = (geojson_linestring) => {
 
     } catch (e) {
         if (geojson_linestring) {
-            console.log(e);
+            console.error(e);
             toast.error('GeoJSON inválido.');
         }
     }

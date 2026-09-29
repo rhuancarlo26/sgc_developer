@@ -3,8 +3,6 @@
 namespace App\Domain\Sgc\Contratada\Produtos\PMQA\Execucao\app\Services;
 
 use App\Models\ServicoPmqaCampanha;
-use App\Models\ServicoPmqaPonto;
-use App\Models\Servicos;
 use App\Models\SgcPmqa;
 use App\Models\SgcPmqaExecCampanha;
 use App\Models\SgcPmqaPonto;
@@ -22,7 +20,7 @@ class CampanhaService extends BaseModelService
     public function index(SgcPmqa $pmqa, $searchParams): array
     {
         $campanhas = $this->searchAllColumns(...$searchParams)
-            ->with(['pontos'])
+            ->with(['pontos', 'campanha_pontos.coleta', 'campanha_pontos.medicao'])
             ->where('pmqa_id', $pmqa->id)
             ->paginate()
             ->appends($searchParams);

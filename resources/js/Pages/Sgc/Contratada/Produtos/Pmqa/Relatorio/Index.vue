@@ -1,4 +1,5 @@
 <script setup>
+import { usePmqaPermissions } from "@/Pages/Sgc/Contratada/Produtos/Pmqa/Composables/usePmqaPermissions";
 import { Head, Link, router } from "@inertiajs/vue3";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
@@ -39,6 +40,7 @@ const excluirRelatorio = (item) => {
     );
 };
 const activeTab = ref("relatorio");
+const { podeGerenciar } = usePmqaPermissions(props, "relatorio");
 </script>
 <template>
     <ProdutoTabsLayout
@@ -51,7 +53,7 @@ const activeTab = ref("relatorio");
         <template #relatorio>
             <ModelSearchFormAllColumns :columns="['nome']">
                 <template #action>
-                    <NavButton
+                    <NavButton v-if="!canApprove && podeGerenciar"
                         @click="abrirModalFormRelatorio()"
                         type-button="success"
                         title="Novo relatório"

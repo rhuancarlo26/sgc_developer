@@ -204,31 +204,36 @@ class ResultadoService extends BaseModelService
 
         $medicao       = true;
         $justificativa = '';
+
+        // Coletar todos os pontos únicos desta campanha
+        $pontos = collect($resultado->campanhas)
+            ->flatMap(function($c) { return $c->campanha_pontos; })
+            ->map(function($cp) { return $cp->ponto; })
+            ->unique('id');
+
         foreach ($resultado->campanhas as $campanha) {
-            $iqas = [];
+            $chartDataIqa['labels'][] = $campanha->nome_campanha;
+        }
 
-            foreach ($campanha->campanha_pontos as $campanhaPonto) {
-                $chartDataIqa['labels'][] = $campanhaPonto->ponto->nome_ponto_coleta;
-                if (isset($campanhaPonto->medicao) && $campanhaPonto->medicao->medido) {
-                    $medicao = false;
-                    $justificativa = $campanhaPonto->medicao->observacao;
-                }
-
-                if (isset($campanhaPonto->medicao)) {
-                    $id = $campanhaPonto->medicao->id;
-                    $iqa = $campanhaPonto->medicao->iqa;
-
-                    if (!isset($iqas[$id])) {
-                        if ($iqa) {
-                            $iqas[$id] = (float) $iqa;
-                        }
+        foreach ($pontos as $ponto) {
+            $data = [];
+            foreach ($resultado->campanhas as $campanha) {
+                $cp = collect($campanha->campanha_pontos)->firstWhere('ponto_id', $ponto->id);
+                
+                if ($cp && isset($cp->medicao)) {
+                    if ($cp->medicao->medido) {
+                        $medicao = false;
+                        $justificativa = $cp->medicao->observacao;
                     }
+                    $data[] = $cp->medicao->iqa ? (float) $cp->medicao->iqa : 0;
+                } else {
+                    $data[] = 0;
                 }
             }
             $chartDataIqa['datasets'][] = [
-                'label' => $campanha->nome_campanha,
-                'backgroundColor' => '#' . substr(md5($campanha->nome_campanha), 0, 6),
-                'data' => array_values($iqas)
+                'label' => $ponto->nome_ponto_coleta,
+                'backgroundColor' => '#' . substr(md5($ponto->nome_ponto_coleta), 0, 6),
+                'data' => $data
             ];
         }
 

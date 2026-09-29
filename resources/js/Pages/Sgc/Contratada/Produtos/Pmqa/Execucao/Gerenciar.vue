@@ -24,9 +24,9 @@ const props = defineProps({
     canApprove: { type: Boolean, default: false },
 });
 
-const podeGerenciarExecucao = computed(() => {
-    return ['Em elaboração', 'Reprovada'].includes(props.pmqa?.status_execucao);
-});
+import { usePmqaPermissions } from '../Composables/usePmqaPermissions';
+
+const { podeGerenciar: podeGerenciarExecucao } = usePmqaPermissions(props, 'execucao');
 
 const abrirModalVisualizarPonto = (item) => {
     modalVisualizarPonto.value.abrirModal(item);

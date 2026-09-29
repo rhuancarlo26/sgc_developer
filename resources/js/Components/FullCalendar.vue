@@ -61,7 +61,6 @@ const calendarOptions = ref({
 });
 
 watchEffect(() => {
-  console.log("Atualizando calendário com eventos do backend:", props.events);
   calendarOptions.value.events = [...props.events];
 });
 

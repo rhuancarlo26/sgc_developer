@@ -11,6 +11,11 @@ import { IconPencil } from "@tabler/icons-vue";
 import { IconSettings } from "@tabler/icons-vue";
 import ModalResultado from "./ModalResultado.vue";
 import ProdutoTabsLayout from "../ProdutoTabsLayout.vue";
+import { usePmqaPermissions } from '../Composables/usePmqaPermissions';
+import { router } from "@inertiajs/vue3";
+import { IconEye, IconListDetails } from "@tabler/icons-vue";
+import { Link } from "@inertiajs/vue3";
+import { computed } from "vue";
 
 const refModalResultado = ref({});
 
@@ -23,25 +28,17 @@ const props = defineProps({
     canApprove: { type: Boolean, default: false },
 });
 
-import { computed } from "vue";
-
-const podeGerenciarResultado = computed(() => {
-    if (props.canApprove) {
-        return props.pmqa?.status_resultado === 'Em análise';
-    } else {
-        const s = props.pmqa?.status_resultado;
-        return s === 'Em elaboração' || s === 'Reprovada' || s === 'Bloqueado' || !s;
-    }
-});
+const { podeGerenciar: podeGerenciarResultado, reprovarFase } = usePmqaPermissions(props, 'resultado');
 
 const abrirModalResultado = (item) => {
     refModalResultado.value.abrirModal(item);
 };
 const activeTab = ref("resultados");
 
-import { router } from "@inertiajs/vue3";
-import { IconEye, IconListDetails } from "@tabler/icons-vue";
-import { Link } from "@inertiajs/vue3";
+const podeEnviarAoFiscal = computed(() => {
+    const listaResultados = props.resultados?.data ?? props.resultados ?? [];
+    return listaResultados.length > 0;
+})
 
 const enviarParaAnalise = () => {
     if (!confirm("Tem certeza que deseja enviar o Resultado para análise?")) return;
@@ -72,14 +69,22 @@ const aprovarFase = () => {
                     <NavButton
                         v-if="!canApprove && podeGerenciarResultado"
                         type-button="primary"
-                        title="Submeter para análise"
+                        title="Enviar ao fiscal"
                         @click="enviarParaAnalise"
+                        class="me-2"
+                        :disabled="!podeEnviarAoFiscal"
+                    />
+                    <NavButton
+                        v-if="canApprove && podeGerenciarResultado"
+                        type-button="danger"
+                        title="✖ Reprovar Resultados"
+                        @click="reprovarFase"
                         class="me-2"
                     />
                     <NavButton
-                        v-if="canApprove && pmqa?.status_resultado === 'Em análise'"
+                        v-if="canApprove && podeGerenciarResultado"
                         type-button="success"
-                        title="✓ Aprovar Resultado"
+                        title="✓ Aprovar Resultados"
                         @click="aprovarFase"
                         class="me-2"
                     />
@@ -126,9 +131,9 @@ const aprovarFase = () => {
                                     resultado: item.id,
                                 })"
                                 class="btn btn-icon btn-info me-1"
-                                :title="podeGerenciarResultado ? 'Gerenciar Detalhes' : 'Visualizar Detalhes'"
+                                :title="(!canApprove && podeGerenciarResultado) ? 'Gerenciar Detalhes' : 'Visualizar Detalhes'"
                             >
-                                <IconSettings v-if="podeGerenciarResultado" />
+                                <IconSettings v-if="!canApprove && podeGerenciarResultado" />
                                 <IconListDetails v-else />
                             </Link>
                             <LinkConfirmation v-if="!canApprove && podeGerenciarResultado"

@@ -92,13 +92,6 @@
         },
         cutout: '75%',
     };
-
-    onMounted(() => {
-        console.log('Dados dos quantitativos:', data.value);
-        console.log('Totais calculados:', totais.value);
-        console.log('Contrato no Quantitativos:', props.contrato);
-    });
-
 </script>
 
 <template>

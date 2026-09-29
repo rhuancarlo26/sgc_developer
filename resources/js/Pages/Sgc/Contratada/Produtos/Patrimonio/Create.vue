@@ -7,6 +7,7 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { ref, computed } from 'vue';
 import Apresentacao from "@/Pages/Sgc/Contratada/Produtos/Patrimonio/Apresentacao.vue";
 import Metodologia from "@/Pages/Sgc/Contratada/Produtos/Patrimonio/Metodologia.vue";
+import Anexos from "@/Pages/Sgc/Contratada/Produtos/Patrimonio/Anexos.vue";
 
 const props = defineProps({
   contrato: { type: [Number, String], required: true },
@@ -146,6 +147,13 @@ const voltar = () => {
               :paipa-id="paipaAtualId"
               :contrato="contrato"
               @voltar="etapa = 'apresentacao'"
+              @avancar="etapa = 'anexos'"
+            />
+            <Anexos
+              v-else-if="etapa === 'anexos'"
+              :paipa-id="paipaAtualId"
+              :contrato="contrato"
+              @voltar="etapa = 'metodologia'"
             />
           </div>
         </div>

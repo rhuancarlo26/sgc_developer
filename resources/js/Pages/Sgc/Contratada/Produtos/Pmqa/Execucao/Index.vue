@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
+import { router } from "@inertiajs/vue3";
 import ProdutoTabsLayout from "../ProdutoTabsLayout.vue";
 import ModelSearchFormAllColumns from "@/Components/ModelSearchFormAllColumns.vue";
 import Table from "@/Components/Table.vue";
@@ -7,8 +8,8 @@ import NavButton from "@/Components/NavButton.vue";
 import ModalCampanha from "./ModalCampanha.vue";
 import { dateTimeFormat } from "@/Utils/DateTimeUtils";
 import { IconSettings, IconPencil, IconEye, IconListDetails } from "@tabler/icons-vue";
-import NavLink from "@/Components/NavLink.vue";
 import { Link } from "@inertiajs/vue3";
+import { usePmqaPermissions } from '../Composables/usePmqaPermissions';
 
 const props = defineProps({
   contrato: Object,
@@ -23,20 +24,22 @@ const props = defineProps({
 const activeTab = ref("execucao");
 const modalCampanha = ref(null);
 
-const podeGerenciarExecucao = computed(() => {
-    if (props.canApprove) {
-        return props.pmqa?.status_execucao === 'Em análise';
-    } else {
-        const s = props.pmqa?.status_execucao;
-        return s === 'Em elaboração' || s === 'Reprovada' || s === 'Bloqueado' || !s;
-    }
-});
+const { podeGerenciar: podeGerenciarExecucao, reprovarFase } = usePmqaPermissions(props, 'execucao');
 
 const abrirModalCampanha = (item = null) => {
   modalCampanha.value?.abrirModal(item);
 };
 
-import { router } from "@inertiajs/vue3";
+
+const podeEnviarAoFiscal = computed(() => {
+    const listaCampanhas = props.campanhas?.data ?? props.campanhas ?? [];
+
+    return listaCampanhas.some(campanha => {
+        if (!campanha.campanha_pontos) return false;
+
+        return campanha.campanha_pontos.some(cp => cp.coleta && cp.medicao);
+    });
+});
 
 const enviarParaAnalise = () => {
     if (!confirm("Tem certeza que deseja enviar a Execução para análise?")) return;
@@ -65,20 +68,28 @@ const aprovarFase = () => {
       <ModelSearchFormAllColumns :columns="['Nome da campanha', 'Data de início', 'Data de término', 'Pontos', 'Ação']">
         <template #action>
           <NavButton
-              v-if="!canApprove && (pmqa?.status_execucao === 'Em elaboração' || pmqa?.status_execucao === 'Reprovada')"
+              v-if="!canApprove && podeGerenciarExecucao"
               type-button="primary"
-              title="Submeter para análise"
+              title="Enviar ao fiscal"
               @click="enviarParaAnalise"
+              class="me-2"
+              :disabled="!podeEnviarAoFiscal"
+          />
+          <NavButton
+              v-if="canApprove && podeGerenciarExecucao"
+              type-button="danger"
+              title="✖ Reprovar Execução"
+              @click="reprovarFase"
               class="me-2"
           />
           <NavButton
-              v-if="canApprove && pmqa?.status_execucao === 'Em análise'"
+              v-if="canApprove && podeGerenciarExecucao"
               type-button="success"
               title="✓ Aprovar Execução"
               @click="aprovarFase"
               class="me-2"
           />
-          <NavButton v-if="!canApprove && (pmqa?.status_execucao === 'Em elaboração' || pmqa?.status_execucao === 'Reprovada')" @click="abrirModalCampanha()" type-button="success" title="Nova campanha" />
+          <NavButton v-if="!canApprove && podeGerenciarExecucao" @click="abrirModalCampanha()" type-button="success" title="Nova campanha" />
         </template>
       </ModelSearchFormAllColumns>
 
@@ -98,13 +109,13 @@ const aprovarFase = () => {
                 @click="abrirModalCampanha(item)"
                 :icon="(!canApprove && podeGerenciarExecucao) ? IconPencil : IconEye"
                 class="btn-icon me-1"
-                :type-button="(!canApprove && podeGerenciarExecucao) ? 'primary' : 'info'" 
+                :type-button="(!canApprove && podeGerenciarExecucao) ? 'primary' : 'info'"
               />
 
               <Link :href="route('contratos.contratada.sgc.pmqa.execucao.gerenciar', { contrato: contrato.id, produto: produto, pmqa: pmqa.id, campanha: item.id })"
                   class="btn btn-icon btn-info me-1"
-                  :title="podeGerenciarExecucao ? 'Gerenciar Medições' : 'Visualizar Medições'">
-                  <IconSettings v-if="podeGerenciarExecucao" />
+                  :title="(!canApprove && podeGerenciarExecucao) ? 'Gerenciar Medições' : 'Visualizar Medições'">
+                  <IconSettings v-if="!canApprove && podeGerenciarExecucao" />
                   <IconListDetails v-else />
               </Link>
             </td>

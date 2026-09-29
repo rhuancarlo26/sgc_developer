@@ -21,13 +21,13 @@ const pmqaId = computed(() => {
   return props.pmqa?.id ?? page.props.ziggy.query?.pmqa ?? route().params?.pmqa
 })
 
+import { usePmqaPermissions } from './Composables/usePmqaPermissions';
+
 const produtoParam = computed(() =>
   typeof props.produto === "string" ? props.produto.toLowerCase() : (props.produto?.slug ?? "eia")
 )
 
-const podeGerenciarPmqa = computed(() =>
-  ['Em elaboração', 'Rejeitada'].includes(props.pmqa?.status_aprovacao)
-)
+const { podeGerenciar: podeGerenciarPmqa } = usePmqaPermissions(props, 'pmqa');
 
 const setTab = (tab) => {
   if (tab === "apresentacao") {
@@ -132,7 +132,14 @@ const setTab = (tab) => {
               </li>
             </ul>
 
-            <div class="tab-content">
+            <div v-if="pmqa?.status_aprovacao === 'Rejeitada' && pmqa?.motivo_reprovacao" class="alert alert-danger mt-3 d-flex align-items-center shadow-sm">
+                <div>
+                    <h5 class="alert-heading mb-1 fw-bold">Campanha Reprovada</h5>
+                    <p class="mb-0"><strong>Motivo da reprovação:</strong> {{ pmqa.motivo_reprovacao }}</p>
+                </div>
+            </div>
+
+            <div class="tab-content mt-3">
               <div v-show="activeTab === 'apresentacao'">
                 <slot name="apresentacao" />
               </div>
