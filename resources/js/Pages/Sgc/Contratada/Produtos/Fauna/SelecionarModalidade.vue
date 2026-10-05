@@ -30,18 +30,18 @@ const selecionar = (modo) => router.get(
                 <p class="text-muted mb-4">Escolha a modalidade de preenchimento para <strong>{{ subproduto }}</strong>.</p>
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <button class="card h-100 w-100 text-start modalidade" @click="selecionar('completo')">
-                            <div class="card-body p-4">
-                                <h3>Campanha completa</h3>
-                                <p class="mb-0 text-muted">Preencha todas as etapas, módulos amostrais, metodologias, resultados e anexos do módulo de Fauna.</p>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-md-6">
                         <button class="card h-100 w-100 text-start modalidade" @click="selecionar('simplificado')">
                             <div class="card-body p-4">
                                 <h3>Campanha simplificada</h3>
                                 <p class="mb-0 text-muted">Envie a planilha do modelo, fotos e anexos, no mesmo fluxo enxuto usado pelos produtos simplificados.</p>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="card h-100 w-100 text-start modalidade" @click="selecionar('completo')">
+                            <div class="card-body p-4">
+                                <h3>Campanha completa</h3>
+                                <p class="mb-0 text-muted">Preencha todas as etapas, módulos amostrais, metodologias, resultados e anexos do módulo de Fauna.</p>
                             </div>
                         </button>
                     </div>

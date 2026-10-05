@@ -626,13 +626,17 @@ class CampanhaController extends Controller
     // ─────────────────────────────────────────────────────────────────────
     public function aprovarTudo($contrato, $produto, $campanha)
     {
+        abort_unless($produto === 'fauna', 404);
         if (Auth::user()->perfis_id !== 3) {
             return redirect()->back()->withErrors(['error' => 'Acesso negado. Apenas fiscais podem aprovar.']);
         }
 
-        try {
-            $campanhaObj = SgcFaunaCampanha::findOrFail($campanha);
+        $campanhaObj = SgcFaunaCampanha::where('id_contrato', $contrato)->findOrFail($campanha);
+        if ($campanhaObj->modo_preenchimento === 'simplificado') {
+            return app(FaunaSimplificadaAnaliseController::class)->aprovar((int) $contrato, 'fauna', (int) $campanha);
+        }
 
+        try {
             if ($campanhaObj->status !== 'Em análise') {
                 return redirect()
                     ->route('sgc.contratada.produtos.analise', [$contrato, $produto, $campanha])
@@ -683,8 +687,14 @@ class CampanhaController extends Controller
     // ─────────────────────────────────────────────────────────────────────
     public function reprovarTudo(Request $request, $contrato, $produto, $campanha)
     {
+        abort_unless($produto === 'fauna', 404);
         if (Auth::user()->perfis_id !== 3) {
             return redirect()->back()->withErrors(['error' => 'Acesso negado. Apenas fiscais podem reprovar.']);
+        }
+
+        $campanhaObj = SgcFaunaCampanha::where('id_contrato', $contrato)->findOrFail($campanha);
+        if ($campanhaObj->modo_preenchimento === 'simplificado') {
+            return app(FaunaSimplificadaAnaliseController::class)->reprovar($request, (int) $contrato, 'fauna', (int) $campanha);
         }
 
         try {
@@ -694,8 +704,6 @@ class CampanhaController extends Controller
                 'comentario.required' => 'A justificativa é obrigatória.',
                 'comentario.min' => 'A justificativa deve ter no mínimo 10 caracteres.',
             ]);
-
-            $campanhaObj = SgcFaunaCampanha::findOrFail($campanha);
 
             if ($campanhaObj->status !== 'Em análise') {
                 return redirect()
