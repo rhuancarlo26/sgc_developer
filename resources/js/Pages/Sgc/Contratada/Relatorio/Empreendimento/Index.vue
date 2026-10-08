@@ -146,18 +146,27 @@ function getEmpreendimentoRoute(emp) {
 				</div>
 			</template>
 
-			<Navbar :tipo="tipo">
+			<Navbar :tipo="tipo" class="empreendimento-layout">
 				<template #body>
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
-                        <!-- Filtro "Escolher Empreendimento" -->
-                        <div class="filters-container">
-                            <div class="p-3 mb-3 border rounded bg-light" style="width: 220px; cursor: pointer;" @click="exibiremps()">
-                                <label for="select-empreendimentos" class="form-label text-center w-100" style="cursor: pointer;">
-                                    Escolher Empreendimento
-                                </label>
-                            </div>
-                            <div v-show="mostralista" class="dropdown-list" style="position: absolute; z-index: 10000; background-color: white;">
-								<input type="text" v-model="searchTerm" placeholder="Buscar..." class="search-input" />
+                    <div class="card card-body empreendimento-conteudo">
+                    <Timelinex
+                        organizada
+                        :empreendimentos="empreendimentos"
+                        :empreendimentos2="empreendimentos2"
+                        :fm_eia_estudos_empreendimento="fm_eia_estudos_empreendimento"
+                        :fm_pba_estudos_empreendimento="fm_pba_estudos_empreendimento"
+                        :abio_emp_estudos_311="abio_emp_estudos_311"
+                        :asv_emp_estudos="asv_emp_estudos"
+                        :iphan_emp_estudos_521="iphan_emp_estudos_521"
+                        :iphan_emp_estudos_531="iphan_emp_estudos_531"
+                    >
+                        <template #seletor>
+<div class="filters-container">
+                            <button type="button" class="btn btn-outline-secondary seletor-empreendimento" :aria-expanded="mostralista" aria-controls="lista-empreendimentos" @click="exibiremps()" @keydown.esc="mostralista = false">
+                                Trocar empreendimento <span aria-hidden="true" class="ms-2">&#9662;</span>
+                            </button>
+                            <div v-if="mostralista" id="lista-empreendimentos" class="dropdown-list" @keydown.esc="mostralista = false">
+								<input type="text" v-model="searchTerm" placeholder="Buscar empreendimento..." aria-label="Buscar empreendimento" class="search-input" />
 								<ul style="background: white; padding: 0; list-style: none; border-radius: 4px;">
 									<li v-if="filteredPosts.length === 0" style="padding: 10px; text-align: center;">
 									Nenhum empreendimento encontrado.
@@ -180,18 +189,8 @@ function getEmpreendimentoRoute(emp) {
 							</div>
 
                         </div>
-
-                    </div>
-                    <Timelinex
-                        :empreendimentos="empreendimentos"
-                        :empreendimentos2="empreendimentos2"
-                        :fm_eia_estudos_empreendimento="fm_eia_estudos_empreendimento"
-                        :fm_pba_estudos_empreendimento="fm_pba_estudos_empreendimento"
-                        :abio_emp_estudos_311="abio_emp_estudos_311"
-                        :asv_emp_estudos="asv_emp_estudos"
-                        :iphan_emp_estudos_521="iphan_emp_estudos_521"
-                        :iphan_emp_estudos_531="iphan_emp_estudos_531"
-                    />
+                        </template>
+                    </Timelinex>
 
                     <div class="row"  style=" margin-top: 1.5%;">
 							<div class="col-md-12">
@@ -334,6 +333,7 @@ function getEmpreendimentoRoute(emp) {
 								</div>
 							</div>
 						</div>
+                    </div>
 				</template>
 			</Navbar>
 		</AuthenticatedLayout>
@@ -341,6 +341,27 @@ function getEmpreendimentoRoute(emp) {
 </template>
 
 <style scoped>
+.empreendimento-conteudo :deep(.timeline-organizada > .row > .col-md-2),
+.empreendimento-conteudo :deep(.timeline-organizada > .row > .col-md-10) { width: 100%; }
+.empreendimento-conteudo :deep(.timeline-organizada .col-md-2 > .p-3) { width: 100% !important; border-radius: 8px; background: #f8fafc !important; padding: 12px 16px !important; }
+.empreendimento-conteudo :deep(.timeline-organizada .etapas-container) { flex-direction: row !important; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px !important; }
+.empreendimento-conteudo :deep(.timeline-organizada .etapa-btn) { width: auto; min-width: 80px; margin: 0 !important; }
+.empreendimento-conteudo :deep(.timeline-organizada .etapa-btn.etapa-ativa) { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
+.empreendimento-layout.card { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.empreendimento-layout :deep(> .d-flex) { display: grid !important; grid-template-columns: 190px minmax(0, 1fr); gap: 20px; align-items: start; }
+.empreendimento-layout :deep(> .d-flex > .col-md-1) { width: auto; padding: 12px 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+.empreendimento-layout :deep(> .d-flex > .col-md-11) { width: auto; min-width: 0; }
+.empreendimento-layout :deep(.navbar-nav .nav-link) { padding: 12px 10px; border-radius: 6px; }
+.empreendimento-layout :deep(.navbar-nav .nav-item.active > .nav-link) { background: #eff6ff; color: #1d4ed8; }
+.empreendimento-conteudo { min-width: 0; border-color: #e2e8f0; border-radius: 8px; padding: 20px; }
+@media (max-width: 1199px) {
+  .empreendimento-layout :deep(> .d-flex) { grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 767px) {
+  .empreendimento-layout :deep(> .d-flex) { grid-template-columns: 1fr; }
+  .empreendimento-layout :deep(.navbar-nav) { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .empreendimento-conteudo { padding: 16px; }
+}
 
 /* Estilo principal de fundo das abas e das abas */
 	.nav-tabs .nav-link {
@@ -491,4 +512,11 @@ h1 {
 }
 
 
+</style>
+<style scoped>
+.filters-container { position: relative; }
+.seletor-empreendimento { width: 100%; white-space: nowrap; }
+.filters-container .dropdown-list { position: absolute; top: calc(100% + 8px); right: 0; width: 300px; max-width: calc(100vw - 48px); max-height: 340px; overflow-y: auto; padding: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 8px 24px rgba(15, 23, 42, .12); z-index: 1050; }
+.filters-container .search-input { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 8px; }
+.filters-container .empreendimento-link { display: block; width: 100%; color: #334155; text-decoration: none; }
 </style>

@@ -140,6 +140,10 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
         Route::get('/', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
         Route::get('create', [ProdutosController::class, 'create'])->name('sgc.contratada.produtos.create');
         Route::post('/', [ProdutosController::class, 'store'])->name('sgc.contratada.produtos.store');
+        Route::post('fauna/simplificada/anexos/upload', [FaunaSimplificadaAnaliseController::class, 'uploadAnexo'])
+            ->withoutMiddleware('route-permission')
+            ->middleware('throttle:120,1')
+            ->name('sgc.contratada.produtos.fauna.simplificada.anexos.upload');
         Route::post('abio/store', [StoreProdutoAbioController::class, 'store'])->name('sgc.contratada.produtos.abio.store');
         Route::delete('abio/{produto_abio}', [StoreProdutoAbioController::class, 'destroy'])->name('sgc.contratada.produtos.abio.destroy');
 

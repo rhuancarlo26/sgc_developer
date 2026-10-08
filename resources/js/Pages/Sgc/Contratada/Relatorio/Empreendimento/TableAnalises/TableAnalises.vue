@@ -1043,6 +1043,12 @@ onMounted(() => {
   mediasTemposExpedicoes.value = calcularTemposMediosExpedicoes(props.empreendimentos);
   tabelaItens.value = criarTabelaItens(props.empreendimentos);
 });
+const formatarInteiro = (valor) => {
+  if (valor === null || valor === undefined || valor === '') return '-';
+  const numero = Number(valor);
+  return Number.isFinite(numero) ? Math.round(numero) : '-';
+};
+
 </script>
 
 <template>
@@ -1057,7 +1063,7 @@ onMounted(() => {
           </div>
           <div class="card-body d-flex flex-column justify-content-between" style="height: 120px;">
             <div v-if="mediasAtrasos.mediaGeral" class="d-flex justify-content-center align-items-center" style="flex-grow: 1;">
-              <h3 style="font-size: 24px; text-align: center;">{{ mediasAtrasos.mediaGeral }} dias</h3>
+              <h3 style="font-size: 24px; text-align: center;">{{ formatarInteiro(mediasAtrasos.mediaGeral) }} dias</h3>
             </div>
             <button class="btn btn-sm btn-info mt-2 mx-auto" @click="abrirModalAnalises('atrasos', 'Detalhamento de Atrasos')">Detalhes</button>
           </div>
@@ -1077,7 +1083,7 @@ onMounted(() => {
             <tr v-for="(atraso, index) in mediasAtrasos.mediasItemEdital" :key="index">
               <td class="text-center">{{ atraso.item_edital }}</td>
               <td class="subproduto-col" :title="atraso.subproduto">{{ atraso.subproduto }}</td>
-              <td class="text-center">{{ atraso.mediaDias }} dias</td>
+              <td class="text-center">{{ formatarInteiro(atraso.mediaDias) }} dias</td>
             </tr>
           </tbody>
         </table>
@@ -1092,7 +1098,7 @@ onMounted(() => {
           </div>
           <div class="card-body d-flex flex-column justify-content-between" style="height: 120px;">
             <div v-if="mediasTemposAnalises.mediaGeral" class="d-flex justify-content-center align-items-center" style="flex-grow: 1;">
-              <h3 style="font-size: 24px; text-align: center;">{{ mediasTemposAnalises.mediaGeral }} dias</h3>
+              <h3 style="font-size: 24px; text-align: center;">{{ formatarInteiro(mediasTemposAnalises.mediaGeral) }} dias</h3>
             </div>
             <button class="btn btn-sm btn-info mt-2 mx-auto" @click="abrirModalAnalises('temposAnalises', 'Detalhamento de Tempos Médios de Análises Internas')">Detalhes</button>
           </div>
@@ -1116,15 +1122,15 @@ onMounted(() => {
             <tr v-for="(media, index) in mediasTemposAnalises.mediasTemposAnalises" :key="index">
               <td>{{ media.item_edital }}</td>
               <td class="subproduto-col" :title="media.subproduto">{{ media.subproduto }}</td>
-              <td v-if="media.mediaAnalise0">{{ media.mediaAnalise0 }} dias</td>
+              <td v-if="media.mediaAnalise0">{{ formatarInteiro(media.mediaAnalise0) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaAnalise1">{{ media.mediaAnalise1 }} dias</td>
+              <td v-if="media.mediaAnalise1">{{ formatarInteiro(media.mediaAnalise1) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaAnalise2">{{ media.mediaAnalise2 }} dias</td>
+              <td v-if="media.mediaAnalise2">{{ formatarInteiro(media.mediaAnalise2) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaAnalise3">{{ media.mediaAnalise3 }} dias</td>
+              <td v-if="media.mediaAnalise3">{{ formatarInteiro(media.mediaAnalise3) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaAnalise4">{{ media.mediaAnalise4 }} dias</td>
+              <td v-if="media.mediaAnalise4">{{ formatarInteiro(media.mediaAnalise4) }} dias</td>
               <td v-else>-</td>
             </tr>
           </tbody>
@@ -1140,7 +1146,7 @@ onMounted(() => {
           </div>
           <div class="card-body d-flex flex-column justify-content-between" style="height: 120px;">
             <div v-if="temposMediosRevisoes.mediaGeral" class="d-flex justify-content-center align-items-center" style="flex-grow: 1;">
-              <h3 style="font-size: 24px; text-align: center;">{{ temposMediosRevisoes.mediaGeral }} dias</h3>
+              <h3 style="font-size: 24px; text-align: center;">{{ formatarInteiro(temposMediosRevisoes.mediaGeral) }} dias</h3>
             </div>
             <button class="btn btn-sm btn-info mt-2 mx-auto" @click="abrirModalAnalises('temposRevisoes', 'Detalhamento de Tempos Médios de Revisão')">Detalhes</button>
           </div>
@@ -1163,13 +1169,13 @@ onMounted(() => {
             <tr v-for="(media, index) in temposMediosRevisoes.mediasTempos" :key="index">
               <td>{{ media.item_edital }}</td>
               <td class="subproduto-col" :title="media.subproduto">{{ media.subproduto }}</td>
-              <td v-if="media.mediaRevisao1">{{ media.mediaRevisao1 }} dias</td>
+              <td v-if="media.mediaRevisao1">{{ formatarInteiro(media.mediaRevisao1) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaRevisao2">{{ media.mediaRevisao2 }} dias</td>
+              <td v-if="media.mediaRevisao2">{{ formatarInteiro(media.mediaRevisao2) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaRevisao3">{{ media.mediaRevisao3 }} dias</td>
+              <td v-if="media.mediaRevisao3">{{ formatarInteiro(media.mediaRevisao3) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaRevisao4">{{ media.mediaRevisao4 }} dias</td>
+              <td v-if="media.mediaRevisao4">{{ formatarInteiro(media.mediaRevisao4) }} dias</td>
               <td v-else>-</td>
             </tr>
           </tbody>
@@ -1185,7 +1191,7 @@ onMounted(() => {
           </div>
           <div class="card-body d-flex flex-column justify-content-between" style="height: 120px;">
             <div v-if="mediasRevisoesInternas.mediaGeral" class="d-flex justify-content-center align-items-center" style="flex-grow: 1;">
-              <h3 style="font-size: 24px; text-align: center;">{{ mediasRevisoesInternas.mediaGeral }} rev</h3>
+              <h3 style="font-size: 24px; text-align: center;">{{ formatarInteiro(mediasRevisoesInternas.mediaGeral) }} rev</h3>
             </div>
             <button class="btn btn-sm btn-info mt-2 mx-auto" @click="abrirModalAnalises('revisoesInternas', 'Detalhamento de Revisões Internas')">Detalhes</button>
           </div>
@@ -1205,7 +1211,7 @@ onMounted(() => {
             <tr v-for="(revisao, index) in mediasRevisoesInternas.mediasItemEdital" :key="index">
               <td>{{ revisao.itemEdital }}</td>
               <td class="subproduto-col" :title="revisao.subproduto">{{ revisao.subproduto }}</td>
-              <td>{{ revisao.mediaRevisoes }} rev</td>
+              <td>{{ formatarInteiro(revisao.mediaRevisoes) }} rev</td>
             </tr>
           </tbody>
         </table>
@@ -1220,7 +1226,7 @@ onMounted(() => {
           </div>
           <div class="card-body d-flex flex-column justify-content-between" style="height: 120px;">
             <div v-if="mediasTemposExpedicoes.mediaGeral" class="d-flex justify-content-center align-items-center" style="flex-grow: 1;">
-              <h3 style="font-size: 24px; text-align: center;">{{ mediasTemposExpedicoes.mediaGeral }} dias</h3>
+              <h3 style="font-size: 24px; text-align: center;">{{ formatarInteiro(mediasTemposExpedicoes.mediaGeral) }} dias</h3>
             </div>
             <button class="btn btn-sm btn-info mt-2 mx-auto" @click="abrirModalAnalises('temposExpedicoes', 'Detalhamento de Tempos Médios de Expedições')">Detalhes</button>
           </div>
@@ -1244,15 +1250,15 @@ onMounted(() => {
             <tr v-for="(media, index) in mediasTemposExpedicoes.mediasTemposExpedicoes" :key="index">
               <td>{{ media.item_edital }}</td>
               <td class="subproduto-col" :title="media.subproduto">{{ media.subproduto }}</td>
-              <td v-if="media.mediaExpedicao0">{{ media.mediaExpedicao0 }} dias</td>
+              <td v-if="media.mediaExpedicao0">{{ formatarInteiro(media.mediaExpedicao0) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaExpedicao1">{{ media.mediaExpedicao1 }} dias</td>
+              <td v-if="media.mediaExpedicao1">{{ formatarInteiro(media.mediaExpedicao1) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaExpedicao2">{{ media.mediaExpedicao2 }} dias</td>
+              <td v-if="media.mediaExpedicao2">{{ formatarInteiro(media.mediaExpedicao2) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaExpedicao3">{{ media.mediaExpedicao3 }} dias</td>
+              <td v-if="media.mediaExpedicao3">{{ formatarInteiro(media.mediaExpedicao3) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaExpedicao4">{{ media.mediaExpedicao4 }} dias</td>
+              <td v-if="media.mediaExpedicao4">{{ formatarInteiro(media.mediaExpedicao4) }} dias</td>
               <td v-else>-</td>
             </tr>
           </tbody>
@@ -1268,7 +1274,7 @@ onMounted(() => {
           </div>
           <div class="card-body d-flex flex-column justify-content-between" style="height: 120px;">
             <div v-if="mediasTemposAnalisesExternas.mediaGeral" class="d-flex justify-content-center align-items-center" style="flex-grow: 1;">
-              <h3 style="font-size: 24px; text-align: center;">{{ mediasTemposAnalisesExternas.mediaGeral }} dias</h3>
+              <h3 style="font-size: 24px; text-align: center;">{{ formatarInteiro(mediasTemposAnalisesExternas.mediaGeral) }} dias</h3>
             </div>
             <button class="btn btn-sm btn-info mt-2 mx-auto" @click="abrirModalAnalises('temposAnalisesExternas', 'Detalhamento de Tempos Médios de Análises Externas')">Detalhes</button>
           </div>
@@ -1292,15 +1298,15 @@ onMounted(() => {
             <tr v-for="(media, index) in mediasTemposAnalisesExternas.mediasTemposAnalisesExternas" :key="index">
               <td>{{ media.item_edital }}</td>
               <td class="subproduto-col" :title="media.subproduto">{{ media.subproduto }}</td>
-              <td v-if="media.mediaAnaliseExt0">{{ media.mediaAnaliseExt0 }} dias</td>
+              <td v-if="media.mediaAnaliseExt0">{{ formatarInteiro(media.mediaAnaliseExt0) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaAnaliseExt1">{{ media.mediaAnaliseExt1 }} dias</td>
+              <td v-if="media.mediaAnaliseExt1">{{ formatarInteiro(media.mediaAnaliseExt1) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaAnaliseExt2">{{ media.mediaAnaliseExt2 }} dias</td>
+              <td v-if="media.mediaAnaliseExt2">{{ formatarInteiro(media.mediaAnaliseExt2) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaAnaliseExt3">{{ media.mediaAnaliseExt3 }} dias</td>
+              <td v-if="media.mediaAnaliseExt3">{{ formatarInteiro(media.mediaAnaliseExt3) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaAnaliseExt4">{{ media.mediaAnaliseExt4 }} dias</td>
+              <td v-if="media.mediaAnaliseExt4">{{ formatarInteiro(media.mediaAnaliseExt4) }} dias</td>
               <td v-else>-</td>
             </tr>
           </tbody>
@@ -1318,7 +1324,7 @@ onMounted(() => {
           </div>
           <div class="card-body d-flex flex-column justify-content-between" style="height: 120px;">
             <div v-if="temposMediosRevisoesExternas.mediaGeral" class="d-flex justify-content-center align-items-center" style="flex-grow: 1;">
-              <h3 style="font-size: 24px; text-align: center;">{{ temposMediosRevisoesExternas.mediaGeral }} dias</h3>
+              <h3 style="font-size: 24px; text-align: center;">{{ formatarInteiro(temposMediosRevisoesExternas.mediaGeral) }} dias</h3>
             </div>
             <button class="btn btn-sm btn-info mt-2 mx-auto" @click="abrirModalAnalises('temposRevisoesExternas', 'Detalhamento do Tempo Médio de Revisão Externa')">Detalhes</button>
           </div>
@@ -1341,13 +1347,13 @@ onMounted(() => {
             <tr v-for="(media, index) in temposMediosRevisoesExternas.mediasTemposExternos" :key="index">
               <td>{{ media.item_edital }}</td>
               <td class="subproduto-col" :title="media.subproduto">{{ media.subproduto }}</td>
-              <td v-if="media.mediaRevisao1">{{ media.mediaRevisao1 }} dias</td>
+              <td v-if="media.mediaRevisao1">{{ formatarInteiro(media.mediaRevisao1) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaRevisao2">{{ media.mediaRevisao2 }} dias</td>
+              <td v-if="media.mediaRevisao2">{{ formatarInteiro(media.mediaRevisao2) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaRevisao3">{{ media.mediaRevisao3 }} dias</td>
+              <td v-if="media.mediaRevisao3">{{ formatarInteiro(media.mediaRevisao3) }} dias</td>
               <td v-else>-</td>
-              <td v-if="media.mediaRevisao4">{{ media.mediaRevisao4 }} dias</td>
+              <td v-if="media.mediaRevisao4">{{ formatarInteiro(media.mediaRevisao4) }} dias</td>
               <td v-else>-</td>
             </tr>
           </tbody>
@@ -1363,7 +1369,7 @@ onMounted(() => {
           </div>
           <div class="card-body d-flex flex-column justify-content-between" style="height: 120px;">
             <div v-if="mediasRevisoesExternas.mediaGeral" class="d-flex justify-content-center align-items-center" style="flex-grow: 1;">
-              <h3 style="font-size: 24px; text-align: center;">{{ mediasRevisoesExternas.mediaGeral }} rev</h3>
+              <h3 style="font-size: 24px; text-align: center;">{{ formatarInteiro(mediasRevisoesExternas.mediaGeral) }} rev</h3>
             </div>
             <button class="btn btn-sm btn-info mt-2 mx-auto" @click="abrirModalAnalises('revisoesExternas', 'Detalhamento de Revisões Externas')">Detalhes</button>
           </div>
@@ -1383,7 +1389,7 @@ onMounted(() => {
             <tr v-for="(revisao, index) in mediasRevisoesExternas.mediasItemEdital" :key="index">
               <td>{{ revisao.itemEdital }}</td>
               <td class="subproduto-col" :title="revisao.subproduto">{{ revisao.subproduto }}</td>
-              <td>{{ revisao.mediaRevisoes }} rev</td>
+              <td>{{ formatarInteiro(revisao.mediaRevisoes) }} rev</td>
             </tr>
           </tbody>
         </table>
@@ -1398,7 +1404,7 @@ onMounted(() => {
           </div>
           <div class="card-body d-flex flex-column justify-content-between" style="height: 120px;">
             <div v-if="calcularDiferencaDiasOse(props.empreendimentos)" class="d-flex justify-content-center align-items-center" style="flex-grow: 1;">
-              <h3 style="font-size: 24px; text-align: center;">{{ calcularDiferencaDiasOse(props.empreendimentos) }} dias</h3>
+              <h3 style="font-size: 24px; text-align: center;">{{ formatarInteiro(calcularDiferencaDiasOse(props.empreendimentos)) }} dias</h3>
             </div>
           </div>
         </div>
@@ -1413,7 +1419,7 @@ onMounted(() => {
             <h3>SUBPRODUTOS</h3>
           </div>
           <div class="card-body">
-            <div class="scrollbar-top1" ref="scrollbarTop1" style="overflow-x: auto; height: 15px; position: sticky; top: 0; background-color: white; z-index: 1000;">
+            <div class="scrollbar-top1" ref="scrollbarTop1" style="overflow-x: auto; height: 20px; position: sticky; top: 0; background-color: white; z-index: 1000;">
               <div style="width: 3000px; height: 1px;"></div>
             </div>
             <div class="table-responsive" ref="tableWrapper" style="overflow-x: auto; background-color: white;">
@@ -1537,15 +1543,6 @@ onMounted(() => {
 <style scoped>
 .modal.fade.show {
   background-color: rgba(0, 0, 0, 0.5);
-}
-
-.scrollbar-top1::-webkit-scrollbar {
-  height: 4px;
-}
-
-.scrollbar-top1::-webkit-scrollbar-thumb {
-  background-color: #cccccc;
-  border-radius: 4px;
 }
 
 /* Coluna Subproduto */

@@ -171,7 +171,7 @@ const updateDisplayedItems = () => {
 
   <div class="col-md-12">
     <!-- Barra de rolagem superior -->
-    <div class="scrollbar-top" ref="scrollbarTop" style="overflow-x: auto; height: 15px; position: sticky; top: 0; background-color: white; z-index: 1000;">
+    <div class="scrollbar-top" ref="scrollbarTop" style="overflow-x: auto; height: 20px; position: sticky; top: 0; background-color: white; z-index: 1000;">
       <div style="width: 2800px; height: 1px;"></div>
     </div>
 
@@ -243,14 +243,6 @@ const updateDisplayedItems = () => {
 
 <style scoped>
   /* Barra de rolagem na parte superior*/
-  .scrollbar-top::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  .scrollbar-top::-webkit-scrollbar-thumb {
-    background-color: #cccccc;
-    border-radius: 4px;
-  }
 
   /* Defina a largura da coluna Subproduto */
   .subproduto-col {

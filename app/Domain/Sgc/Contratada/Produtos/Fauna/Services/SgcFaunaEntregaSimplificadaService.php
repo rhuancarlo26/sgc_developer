@@ -47,13 +47,7 @@ class SgcFaunaEntregaSimplificadaService
                 }
             }
 
-            if (!empty($data['anexos'])) {
-                foreach ($data['anexos'] as $anexo) {
-                    if (!empty($anexo['arquivo']) && $anexo['arquivo'] instanceof UploadedFile) {
-                        $this->salvarArquivo($entrega, $anexo['arquivo'], 'anexo');
-                    }
-                }
-            }
+            $this->salvarAnexos($entrega, $data['anexos'] ?? []);
 
             return $entrega->load(['planilhasFauna.modulo', 'fotos', 'anexos', 'analises']);
         });
@@ -141,14 +135,62 @@ class SgcFaunaEntregaSimplificadaService
                 }
             }
 
-            foreach ($data['anexos'] ?? [] as $anexo) {
-                if (!empty($anexo['arquivo']) && $anexo['arquivo'] instanceof UploadedFile) {
-                    $this->salvarArquivo($entrega, $anexo['arquivo'], 'anexo');
-                }
-            }
+            $this->salvarAnexos($entrega, $data['anexos'] ?? []);
 
             return $entrega->fresh(['planilhasFauna.modulo', 'fotos', 'anexos', 'analises']);
         });
+    }
+
+    private function salvarAnexos(SgcEntregaSimplificada $entrega, array $anexos): void
+    {
+        $removidos = collect($anexos)->filter(fn ($anexo) => !empty($anexo['remover']))->pluck('id')->filter()->all();
+        $novos = collect($anexos)->filter(fn ($anexo) => empty($anexo['remover']) && empty($anexo['id'])
+            && (($anexo['arquivo'] ?? null) instanceof UploadedFile || !empty($anexo['upload_token'])));
+        if ($entrega->anexos()->whereNotIn('id', $removidos)->count() + $novos->count() > 100) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['anexos' => 'O limite é de 100 anexos por campanha.']);
+        }
+
+        foreach ($anexos as $anexo) {
+            // Todo acesso a um arquivo existente é limitado à entrega atual.
+            $existente = !empty($anexo['id']) ? $entrega->anexos()->findOrFail($anexo['id']) : null;
+            if (!empty($anexo['remover'])) {
+                if ($existente) {
+                    $caminho = $existente->caminho_arquivo;
+                    $existente->delete();
+                    DB::afterCommit(fn () => $this->removerArquivo($caminho));
+                }
+                continue;
+            }
+
+            $metadados = [
+                'classe' => $anexo['classe'] ?? 'outros',
+                'titulo_bloco' => $anexo['titulo_bloco'] ?? 'Outros',
+            ];
+            if ($existente) {
+                $existente->update(['metadados' => array_merge($existente->metadados ?? [], $metadados)]);
+            } elseif (($anexo['arquivo'] ?? null) instanceof UploadedFile) {
+                $this->salvarArquivo($entrega, $anexo['arquivo'], 'anexo', metadados: $metadados);
+            } elseif (!empty($anexo['upload_token'])) {
+                $temporario = (new AnexoTemporarioService())->consultar($anexo['upload_token'], (int) $entrega->id_contrato, (int) auth()->id());
+                $caminho = "entrega_simplificada/fauna/{$entrega->entidade_id}/anexos/" . basename($temporario['caminho']);
+                $origem = \Illuminate\Support\Facades\Storage::disk('local')->readStream($temporario['caminho']);
+                try {
+                    $gravado = \Illuminate\Support\Facades\Storage::disk('public')->put($caminho, $origem);
+                } finally {
+                    if (is_resource($origem)) fclose($origem);
+                }
+                if (!$gravado) throw \Illuminate\Validation\ValidationException::withMessages(['anexos' => 'Não foi possível salvar o anexo. Tente novamente.']);
+                SgcEntregaSimplificadaArquivo::create([
+                    'entrega_simplificada_id' => $entrega->id, 'tipo' => 'anexo',
+                    'nome_arquivo' => $temporario['nome'], 'caminho_arquivo' => $caminho,
+                    'mime_type' => $temporario['mime'], 'tamanho_bytes' => $temporario['tamanho'], 'metadados' => $metadados,
+                ]);
+                DB::afterCommit(function () use ($temporario, $caminho) {
+                    $this->sincronizarArquivoPublico($caminho);
+                    \Illuminate\Support\Facades\Storage::disk('local')->delete($temporario['caminho']);
+                });
+            }
+        }
     }
 
     private function salvarPlanilhas(SgcEntregaSimplificada $entrega, SgcFaunaCampanha $campanha, array $planilhas): void
@@ -215,7 +257,8 @@ class SgcFaunaEntregaSimplificadaService
         ?string $descricao = null,
         $latitude = null,
         $longitude = null,
-        $dataCaptura = null
+        $dataCaptura = null,
+        array $metadados = []
     ): SgcEntregaSimplificadaArquivo {
         $caminho = $arquivo->store("entrega_simplificada/fauna/{$entrega->entidade_id}/{$tipo}s", 'public');
         $this->sincronizarArquivoPublico($caminho);
@@ -231,6 +274,7 @@ class SgcFaunaEntregaSimplificadaService
             'latitude' => $latitude,
             'longitude' => $longitude,
             'data_captura' => $dataCaptura,
+            'metadados' => $metadados,
         ]);
     }
 

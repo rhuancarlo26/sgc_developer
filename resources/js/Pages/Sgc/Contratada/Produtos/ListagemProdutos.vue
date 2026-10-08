@@ -578,7 +578,7 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
       </div>
     </template>
 
-    <NavbarContrato :tipo="{ id: contrato }">
+    <NavbarContrato :tipo="{ id: contrato }" class="produtos-layout">
       <template #body>
         <div class="card">
           <div class="card-body">
@@ -988,6 +988,19 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
 </template>
 
 <style scoped>
+.produtos-layout.card { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.produtos-layout :deep(> .d-flex) { display: grid !important; grid-template-columns: 190px minmax(0, 1fr); gap: 20px; align-items: start; }
+.produtos-layout :deep(> .d-flex > .col-md-1) { width: auto; padding: 12px 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+.produtos-layout :deep(> .d-flex > .col-md-11) { width: auto; min-width: 0; }
+.produtos-layout :deep(.navbar-nav .nav-link) { padding: 12px 10px; border-radius: 6px; }
+.produtos-layout :deep(.navbar-nav .nav-item.active > .nav-link) { background: #eff6ff; color: #1d4ed8; }
+@media (max-width: 1199px) {
+  .produtos-layout :deep(> .d-flex) { grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 767px) {
+  .produtos-layout :deep(> .d-flex) { grid-template-columns: 1fr; }
+  .produtos-layout :deep(.navbar-nav) { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+}
 .block-card {
   background-color: #fffffff3;
   border: 1px solid #e2e4e6;

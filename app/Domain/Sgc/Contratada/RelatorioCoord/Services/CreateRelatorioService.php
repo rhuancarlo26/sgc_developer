@@ -2,15 +2,18 @@
 
 namespace App\Domain\Sgc\Contratada\RelatorioCoord\Services;
 
-use App\Models\SgcRelatorioUpload;
+use Carbon\CarbonImmutable;
 use App\Models\SgcRelatorioCoordenacao;
 use Illuminate\Support\Facades\DB;
 
 class CreateRelatorioService
 {
-    public function iniciarNovoRelatorio($contrato)
+    public function iniciarNovoRelatorio($contrato, string $dataInicio, string $dataFim)
     {
-        DB::transaction(function () use ($contrato) {
+        $periodo = CarbonImmutable::parse($dataInicio)->format('d/m/Y')
+            . ' a ' . CarbonImmutable::parse($dataFim)->format('d/m/Y');
+
+        DB::transaction(function () use ($contrato, $periodo) {
             // Acesse o ID do contrato
             $contratoId = $contrato['id'];
 
@@ -52,7 +55,7 @@ class CreateRelatorioService
                     'nome_topico' => $item['nome_topico'],
                     'status' => 'Em Elaboração',
                     'aprovado' => 2,
-                    'periodo' => '01/01/2000 a 01/01/2000',
+                    'periodo' => $periodo,
                     'contrato_id' => $contratoId,
                     'versao' => 0,
                     'created_at' => now()->format('Y-m-d H:i:s'),
@@ -62,9 +65,6 @@ class CreateRelatorioService
                 SgcRelatorioCoordenacao::create($dados);
             }
         });
-
-
-        return response()->json(['message' => 'Relatório criado com sucesso!'], 201);
 
     }
 }

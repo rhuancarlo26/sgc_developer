@@ -3,6 +3,8 @@ import { Head } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Breadcrumb from "@/Components/Breadcrumb.vue";
+import Modal from '@/Components/Modal.vue';
+import { sugerirPeriodoRelatorio } from './periodoRelatorio';
 import NavbarContrato from "../NavbarContrato.vue";
 import NavLink from '@/Components/NavLink.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
@@ -21,6 +23,24 @@ const form = ref({
   contrato_id: props.contrato.id,
   item_id: null
 });
+
+const modalPeriodo = ref(null);
+const novoRelatorio = useForm({ contrato: { id: props.contrato.id }, data_inicio: '', data_fim: '' });
+const iniciarNovoRelatorio = () => {
+  novoRelatorio.clearErrors();
+  Object.assign(novoRelatorio, sugerirPeriodoRelatorio(props.dadosrelat));
+  modalPeriodo.value.getBsModal().show();
+};
+const gerarRelatorio = () => {
+  if (novoRelatorio.processing) return;
+  novoRelatorio.post(route('sgc.contratada.relatorio.iniciar'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      modalPeriodo.value.getBsModal().hide();
+      filtrarRelatorios();
+    },
+  });
+};
 
 // Método para verificar se há históricos para o contrato atual
 const hasHistoricosForContrato = (relatorio) => {
@@ -75,6 +95,32 @@ onMounted(() => {
 <template>
   <div>
     <Head :title="`${contrato.contratada.slice(0, 10)}...`" />
+    <Modal ref="modalPeriodo" title="Gerar novo relatório" modalDialogClass="modal-dialog-centered">
+      <template #body>
+        <p class="text-muted mb-3">Confira o próximo período bimestral sugerido. Você pode ajustar as datas antes de gerar.</p>
+        <form id="form-novo-relatorio" @submit.prevent="gerarRelatorio">
+          <fieldset :disabled="novoRelatorio.processing" class="border-0 p-0 m-0">
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <label for="relatorio-inicio" class="form-label">Data inicial</label>
+                <input id="relatorio-inicio" v-model="novoRelatorio.data_inicio" type="date" class="form-control" :class="{ 'is-invalid': novoRelatorio.errors.data_inicio }" required />
+                <div v-if="novoRelatorio.errors.data_inicio" class="invalid-feedback">{{ novoRelatorio.errors.data_inicio }}</div>
+              </div>
+              <div class="col-sm-6">
+                <label for="relatorio-fim" class="form-label">Data final</label>
+                <input id="relatorio-fim" v-model="novoRelatorio.data_fim" type="date" class="form-control" :class="{ 'is-invalid': novoRelatorio.errors.data_fim }" :min="novoRelatorio.data_inicio || undefined" required />
+                <div v-if="novoRelatorio.errors.data_fim" class="invalid-feedback">{{ novoRelatorio.errors.data_fim }}</div>
+              </div>
+            </div>
+            <p v-if="novoRelatorio.errors['contrato.id']" class="text-danger mt-3 mb-0">{{ novoRelatorio.errors['contrato.id'] }}</p>
+          </fieldset>
+        </form>
+      </template>
+      <template #footer>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="novoRelatorio.processing">Cancelar</button>
+        <button type="submit" form="form-novo-relatorio" class="btn btn-info" :disabled="novoRelatorio.processing">{{ novoRelatorio.processing ? 'Gerando...' : 'Gerar relatório' }}</button>
+      </template>
+    </Modal>
     <AuthenticatedLayout>
       <template #header>
         <div class="w-100 d-flex justify-content-between">
@@ -93,9 +139,9 @@ onMounted(() => {
         </div>
       </template>
 
-      <NavbarContrato :tipo="contrato">
+      <NavbarContrato :tipo="contrato" class="relatorios-layout">
         <template #body>
-          <div class="container mt-4">
+          <div class="card card-body relatorios-conteudo">
             <div class="row mb-3">
               <div class="col-12 text-center">
                 <h3 class="titulo-relatorio">
@@ -162,6 +208,24 @@ onMounted(() => {
   </div>
 </template>
 
+<style scoped>
+.relatorios-layout.card { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.relatorios-layout :deep(> .d-flex) { display: grid !important; grid-template-columns: 190px minmax(0, 1fr); gap: 20px; align-items: start; }
+.relatorios-layout :deep(> .d-flex > .col-md-1) { width: auto; padding: 12px 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+.relatorios-layout :deep(> .d-flex > .col-md-11) { width: auto; min-width: 0; }
+.relatorios-layout :deep(.navbar-nav .nav-link) { padding: 12px 10px; border-radius: 6px; }
+.relatorios-layout :deep(.navbar-nav .nav-item.active > .nav-link) { background: #eff6ff; color: #1d4ed8; }
+.relatorios-conteudo { min-width: 0; border-color: #e2e8f0; border-radius: 8px; padding: 20px; }
+@media (max-width: 1199px) {
+  .relatorios-layout :deep(> .d-flex) { grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 767px) {
+  .relatorios-layout :deep(> .d-flex) { grid-template-columns: 1fr; }
+  .relatorios-layout :deep(.navbar-nav) { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .relatorios-conteudo { padding: 16px; }
+}
+</style>
+
 <script>
 export default {
   methods: {
@@ -185,19 +249,6 @@ export default {
       }
     },
     // Método para iniciar um novo relatório
-    async iniciarNovoRelatorio() {
-      try {
-        // Pega o contrato da página atual
-        const contrato = this.$page.props.contrato || 1;
-
-        await this.$inertia.post(route('sgc.contratada.relatorio.iniciar'), { contrato });
-        alert('Relatório criado com sucesso!');
-        window.location.reload();
-      } catch (error) {
-        console.error('Erro ao iniciar novo relatório:', error);
-        alert('Erro ao criar o relatório.');
-      }
-    },
   },
 };
 </script>

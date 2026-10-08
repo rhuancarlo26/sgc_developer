@@ -55,8 +55,8 @@ const chartOptions_emp1 = reactive({
     {
       name: 'Valores',
       data: [
-        { y: 0, color: '#679eaa' }, // Inicializa com zero, atualizado posteriormente
-        { y: 0, color: '#45818e' } 
+        { y: 0, color: '#64748b' }, // Inicializa com zero, atualizado posteriormente
+        { y: 0, color: '#3b82f6' }
       ],
     },
   ]
@@ -98,12 +98,12 @@ const chartOptions_radio = reactive({
         {
           name: 'SALDO A MEDIR DA OSE:',
           y: 0, 
-          color: '#8cbbc4'
+          color: '#3b82f6'
         },
         {
           name: 'VALOR MEDIDO',
           y: 0, 
-          color: 'green'
+          color: '#16a34a'
         }
       ],
     },
@@ -135,6 +135,31 @@ const chartOptions_radio = reactive({
   ]
 });
 
+const moeda = valor => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+const tooltipFinanceiro = { formatter() { return this.point.name || this.key ? String(this.point.name || this.key) + ': <b>' + moeda(this.y) + '</b>' : moeda(this.y); } };
+chartOptions_emp1.title = { text: null };
+chartOptions_emp1.chart.height = 280;
+chartOptions_emp1.legend = { enabled: false };
+chartOptions_emp1.credits = { enabled: false };
+chartOptions_emp1.tooltip = tooltipFinanceiro;
+chartOptions_emp1.xAxis.categories = ['Saldo de empenho', 'Saldo a medir da OSE'];
+chartOptions_emp1.yAxis.title = { text: null };
+chartOptions_emp1.yAxis.tickAmount = 4;
+chartOptions_emp1.yAxis.gridLineColor = '#e2e8f0';
+chartOptions_emp1.yAxis.labels = { formatter() { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(this.value); } };
+chartOptions_emp1.plotOptions.series.dataLabels = { enabled: false };
+chartOptions_emp1.plotOptions.series.borderRadius = 4;
+chartOptions_emp1.plotOptions.series.pointWidth = 24;
+chartOptions_radio.title = { text: null };
+chartOptions_radio.chart.height = 260;
+chartOptions_radio.credits = { enabled: false };
+chartOptions_radio.plotOptions.pie.innerSize = '72%';
+chartOptions_radio.plotOptions.pie.dataLabels = { enabled: false };
+chartOptions_radio.series[0].data[0].name = 'Saldo a medir da OSE';
+chartOptions_radio.series[0].data[1].name = 'Valor medido';
+chartOptions_radio.tooltip = tooltipFinanceiro;
+delete chartOptions_radio.annotations;
+
 let totalR_ose = reactive({ value: 0 });
 let saldoMedir = reactive({ value: 0 });
 let diferenca = reactive({ value: 0 });
@@ -162,8 +187,8 @@ const fetchSaldoEmpenho = async (numeroContrato) => {
         {
           name: 'Valores',
           data: [
-            { y: valorEmpenhado - valorMedicao, color: '#679eaa' },
-            { y: chartOptions_emp1.series[0].data[1].y, color: '#45818e' }
+            { y: valorEmpenhado - valorMedicao, color: '#64748b' },
+            { y: chartOptions_emp1.series[0].data[1].y, color: '#3b82f6' }
           ],
         },
       ];
@@ -224,8 +249,6 @@ const empreendimentoTable = (emp) => {
     chartOptions_radio.series[0].data[1].y = soma_medidas;
 
     chartOptions_emp1.series[0].data[1].y = saldoAMedirOSE;
-
-    chartOptions_radio.annotations[0].labels[0].text = `R$ ${soma_ose.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   });
 };
 
@@ -247,38 +270,41 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="clearfix"><br/><br/></div>
-  
-  <div class="col-md-12">
-    <div class="d-flex justify-content-between">
-      <div class="card ms-3" style="flex: 1;">
-        <Chart :options="chartOptions_emp1"></Chart>
-      </div>
-      
-      <div class="card ms-3" style="flex: 1; margin-right: 20px; position: relative;">
-        <Chart :options="chartOptions_radio"></Chart>
-        
-        <div 
-          style="
-            position: absolute; 
-            top: 57.5%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            text-align: center; 
-            font-size: 20px; 
-            color: #333; 
-            pointer-events: none;
-          "
-        >
-          R$ {{ totalR_ose.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}
-          <div style="font-size: 14px; color: #555;">
-            Saldo Total de OSE
-          </div>
+  <div class="financeiro-grid">
+    <section class="card financeiro-card">
+      <h3>Saldo de empenho e a medir</h3>
+      <Chart :options="chartOptions_emp1" />
+      <div class="financeiro-valores">
+        <div v-for="(item, indice) in chartOptions_emp1.series[0].data" :key="indice">
+          <span><i :style="{ backgroundColor: item.color }" aria-hidden="true"></i>{{ chartOptions_emp1.xAxis.categories[indice] }}</span>
+          <strong>{{ moeda(item.y) }}</strong>
         </div>
-        
       </div>
-    </div>
+    </section>
+    <section class="card financeiro-card">
+      <h3>Execução do estudo ambiental</h3>
+      <div class="financeiro-total"><span>Total da OSE</span><strong>{{ moeda(totalR_ose.value) }}</strong></div>
+      <Chart :options="chartOptions_radio" />
+      <div class="financeiro-valores">
+        <div v-for="item in chartOptions_radio.series[0].data" :key="item.name">
+          <span><i :style="{ backgroundColor: item.color }" aria-hidden="true"></i>{{ item.name }}</span>
+          <strong>{{ moeda(item.y) }}</strong>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
-
-    
+<style scoped>
+.financeiro-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding-top: 20px; }
+.financeiro-card { min-width: 0; padding: 18px; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: none; }
+.financeiro-card h3 { font-size: 1rem; font-weight: 600; text-align: center; color: #334155; margin: 0 0 18px; }
+.financeiro-total { text-align: center; }
+.financeiro-total span { display: block; font-size: .85rem; color: #64748b; }
+.financeiro-total strong { display: block; font-size: 1.35rem; color: #0f172a; margin-top: 4px; }
+.financeiro-valores { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: auto; }
+.financeiro-valores span { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: #475569; }
+.financeiro-valores i { width: 10px; height: 10px; flex-shrink: 0; border-radius: 3px; }
+.financeiro-valores strong { display: block; margin-top: 6px; color: #334155; font-weight: 600; overflow-wrap: anywhere; }
+@media (max-width: 991px) { .financeiro-grid { grid-template-columns: 1fr; } }
+@media (max-width: 575px) { .financeiro-valores { grid-template-columns: 1fr; } }
+</style>

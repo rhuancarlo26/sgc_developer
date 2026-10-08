@@ -7,6 +7,7 @@ import { onMounted, reactive } from "vue";
 import Timeline from "@/Components/Timeline.vue";
 
 const props = defineProps({
+  organizada: { type: Boolean, default: false },
   empreendimentos: Object,
   empreendimentos2: Object,
   fm_eia_estudos_empreendimento: Object,
@@ -921,7 +922,11 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="">
+  <div :class="{ 'timeline-organizada': organizada }">
+    <div v-if="organizada" class="timeline-cabecalho">
+      <h1 class="titulo-empreendimento">Empreendimento · {{ empreendimentos2.cod_emp }}</h1>
+      <div class="timeline-seletor"><slot name="seletor" /></div>
+    </div>
     <!-- Filtro "Escolher Etapa" -->
     <div class="row">
       <div class="col-md-2">
@@ -932,7 +937,7 @@ onMounted(() => {
               class="etapas-container mt-4 d-flex flex-column align-items-center"
             >
               <button
-                class="etapa-btn my-2"
+                class="etapa-btn my-2" :class="{ 'etapa-ativa': exibelp }"
                 @click="
                   exibelp = true;
                   exibeli = false;
@@ -944,7 +949,7 @@ onMounted(() => {
                 LP
               </button>
               <button
-                class="etapa-btn my-2"
+                class="etapa-btn my-2" :class="{ 'etapa-ativa': exibeli }"
                 @click="
                   exibelp = false;
                   exibeli = true;
@@ -956,7 +961,7 @@ onMounted(() => {
                 LI
               </button>
               <button
-                class="etapa-btn my-2"
+                class="etapa-btn my-2" :class="{ 'etapa-ativa': exibeab }"
                 @click="
                   exibelp = false;
                   exibeli = false;
@@ -968,7 +973,7 @@ onMounted(() => {
                 ABIO
               </button>
               <button
-                class="etapa-btn my-2"
+                class="etapa-btn my-2" :class="{ 'etapa-ativa': exibeasv }"
                 @click="
                   exibelp = false;
                   exibeli = false;
@@ -980,7 +985,7 @@ onMounted(() => {
                 ASV
               </button>
               <button
-                class="etapa-btn my-2"
+                class="etapa-btn my-2" :class="{ 'etapa-ativa': exibeiphan }"
                 @click="
                   exibelp = false;
                   exibeli = false;
@@ -997,11 +1002,12 @@ onMounted(() => {
       </div>
       <div class="col-md-10">
         <!-- Conteúdo do Empreendimento -->
-          <h1 class="text-center">
+          <h1 v-if="!organizada" class="text-center">
             EMPREENDIMENTO - {{ empreendimentos2.cod_emp }}
           </h1>
 
           <Timeline
+            :organizada="organizada"
             class="my-4"
             :licenciamento="'LP: fases'"
             :fases="fases_lp"
@@ -1009,6 +1015,7 @@ onMounted(() => {
             v-show="exibelp"
           />
           <Timeline
+            :organizada="organizada"
             class="my-4"
             :licenciamento="'LI: fases'"
             :fases="fases_li"
@@ -1016,6 +1023,7 @@ onMounted(() => {
             v-show="exibeli"
           />
           <Timeline
+            :organizada="organizada"
             class="my-4"
             :licenciamento="'ABIO: fases'"
             :fases="fases_abio"
@@ -1023,6 +1031,7 @@ onMounted(() => {
             v-show="exibeab"
           />
           <Timeline
+            :organizada="organizada"
             class="my-4"
             :licenciamento="'ASV: fases'"
             :fases="fases_asv"
@@ -1030,6 +1039,7 @@ onMounted(() => {
             v-show="exibeasv"
           />
           <Timeline
+            :organizada="organizada"
             class="my-4"
             :licenciamento="'IPHAN: fases'"
             :fases="fases_iphan"
@@ -1041,6 +1051,13 @@ onMounted(() => {
   </div>
 </template>
 <style scoped>
+.timeline-cabecalho { display: grid; grid-template-columns: 210px minmax(0, 1fr) 210px; align-items: center; gap: 16px; margin-bottom: 20px; }
+.titulo-empreendimento { grid-column: 2; text-align: center; font-size: 1.5rem; font-weight: 600; margin: 0; }
+.timeline-seletor { grid-column: 3; min-width: 0; }
+@media (max-width: 991px) {
+  .timeline-cabecalho { grid-template-columns: 1fr; justify-items: center; }
+  .titulo-empreendimento, .timeline-seletor { grid-column: 1; }
+}
 /* Estilo principal de fundo das abas e das abas */
 .nav-tabs .nav-link {
   background-color: #fffefe; /* Cor de fundo leve para as abas inativas */

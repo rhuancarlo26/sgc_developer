@@ -5,6 +5,8 @@ import Breadcrumb from "@/Components/Breadcrumb.vue";
 import { ref, computed, onMounted, reactive, watch } from "vue";
 import axios from "axios";
 import Navbar from "../Navbar.vue";
+import Tabs from "./Tabs.vue";
+import ListaModal from "./ListaModal.vue";
 import DashboardMap from "@/Components/DashboardMap.vue";
 import NavLink from "@/Components/NavLink.vue";
 import { IconPencil, IconPlus, IconTrash, IconZoomCheck } from "@tabler/icons-vue";
@@ -12,6 +14,7 @@ import SgcLinkConfirmation from "@/Components/SgcLinkConfirmation.vue";
 import PaginationSgc from '@/Components/PaginationSgc.vue';
 import Multiselect from 'vue-multiselect'
 
+const listaModal = ref();
 
 // Variáveis para ordenação
 const sortColumn = ref("");
@@ -105,6 +108,28 @@ const visualizarTrecho = () => {
   }, 500);
 };
 
+const submitForm = () => {
+  const file = listaModal.value?.$refs?.fileInput?.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("excel_file", file);
+  formData.append("contrato", 1);
+
+  axios.post(route("sgc.gestao.dashboard.import", { contrato: 1 }), formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  })
+    .then((response) => {
+      console.log(response.data);
+      location.reload();
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
+
 // Valores únicos de contrato_est_ambiental para o dropdown
 const valoresContratoEstAmbiental = computed(() => {
   const valores = props.empreendimentos
@@ -186,7 +211,6 @@ const updateDisplayedItems = () => {
 };
 
 const filtrarempreendimentos = () => {
-  currentPage.value = 1;
   const formData = new FormData();
   formData.append("contrato", 1);
   formData.append("cod_emp", filtersEmp.empreendimento);
@@ -232,13 +256,6 @@ const addTag = (newTag) => {
     contratoEstAmbientalSelecionado.value.push(tag);
 }
 
-const limparFiltros = () => {
-  Object.assign(filtersEmp, { empreendimento: '', criticidade: '', prioridade: '', ose_sei: '' });
-  currentFilter.value = null;
-  contratoEstAmbientalSelecionado.value = [];
-  filtrarempreendimentos();
-};
-
 </script>
 
 <template>
@@ -252,37 +269,47 @@ const limparFiltros = () => {
           ]" />
         </div>
       </template>
-      <Navbar :tipo="tipo" class="painel-layout">
+      <Navbar :tipo="tipo">
         <template #body>
-          <div class="card card-body painel-conteudo">
-            <div class="painel-cabecalho">
-              <h3 class="mb-0">Empreendimentos</h3>
-              <Link class="btn btn-info" :href="route('sgc.gestao.dashboard.empreendimento.create', { tipo: props.tipo.id })">
-                Inserir empreendimento <IconPlus />
-              </Link>
-            </div>
-                <div class="row painel-secoes">
+          <div class="space-y-3 card card-body" style="width: 100%; height: auto">
+            <Tabs :tabs="[
+              { label: 'Empreendimentos', name: 'tab2' },
+              { label: 'Upload da Planilha', name: 'tab1' }
+            ]">
+              <template #tab1>
+                <div class="row">
+                  <div class="my-3 col-12">
+                    <form @submit.prevent="submitForm">
+                      <h3>Enviar planilha Excel Atualizada</h3>
+                      <h5 class="text-warning">Apenas arquivos *.xlsx</h5>
+                      <input type="file" ref="fileInput" accept=".xlsx" class="btn" />
+                      <button type="submit" class="m-2 btn btn-secondary">Enviar</button>
+                    </form>
+                  </div>
+                </div>
+              </template>
+              <template #tab2>
+                <div class="row my-5">
 
                   <div class="col-md-12 mb-3" v-show="mostraTable">
-                    <div class="painel-visao-geral">
-                      <div class="painel-mapa">
-                        <DashboardMap ref="mapaVisualizarTrecho" height="480px" :manual-render="true" />
+                    <div class="d-flex flex-column flex-md-row">
+                      <div style="width: 100%; max-width: 1300px;">
+                        <DashboardMap ref="mapaVisualizarTrecho" height="600px" :manual-render="true" />
                       </div>
-                      <div class="painel-controles">
-                        <div class="mb-3">
-                          <h3 class="painel-subtitulo">Camadas do mapa</h3>
+                      <div class="ms-md-3 mt-3 mt-md-0" style="flex: 1;">
+                        <div class="col-md-12 mb-3" style="text-align: center;">
+                          <h2>Layers</h2>
                         </div>
-                        <div class="painel-ose">
-                          <button type="button" class="btn btn-outline-success" :class="{ 'ose-active': currentFilter === 'ose' }" :aria-pressed="currentFilter === 'ose'" @click="toggleFilter('ose')">
-                            Com OSE
+                        <div style="text-align: center;">
+                          <button type="button" class="btn strong btn-outline-success col-4 mb-2 me-3" :class="{ 'ose-active': currentFilter === 'ose' }" @click="toggleFilter('ose')">
+                            OSE
                           </button>
-                          <button type="button" class="btn btn-outline-danger" :class="{ 'nao-ose-active': currentFilter === 's/ose' }" :aria-pressed="currentFilter === 's/ose'" @click="toggleFilter('s/ose')">
-                            Sem OSE
+                          <button type="button" class="btn strong btn-outline-danger col-4 mb-2" :class="{ 'nao-ose-active': currentFilter === 's/ose' }" @click="toggleFilter('s/ose')">
+                            Não tem OSE
                           </button>
                         </div>
                         <!-- Dropdown para filtro de contrato_est_ambiental -->
-                        <div class="painel-contratos">
-                            <label class="form-label">Contrato de estudo ambiental</label>
+                        <div style="text-align: center; margin-top: 20px;" >
                             <multiselect
                             v-model="contratoEstAmbientalSelecionado"
                             :options="valoresContratoEstAmbiental"
@@ -296,14 +323,18 @@ const limparFiltros = () => {
                             />
                         </div>
 
-                        <div class="painel-indicadores">
-                          <div class="painel-indicador">
-                            <span>Estudos em andamento</span>
-                            <strong>{{ estudosEmAndamento }}</strong>
+                        <div style="text-align: center; margin-top: 50px;">
+                          <div class="card text-black bg-light mb-3" style="max-width: 18rem; margin: 0 auto;">
+                            <div class="card-header">Número de Estudos em Andamento</div>
+                            <div class="card-body">
+                              <h3 class="card-text">{{ estudosEmAndamento }}</h3>
+                            </div>
                           </div>
-                          <div class="painel-indicador">
-                            <span>Total de estudos</span>
-                            <strong>{{ estudosTotal }}</strong>
+                          <div class="card text-gray bg-light mb-3" style="max-width: 18rem; margin: 0 auto;">
+                            <div class="card-header">Número de Estudos no Total</div>
+                            <div class="card-body">
+                              <h3 class="card-text">{{ estudosTotal }}</h3>
+                            </div>
                           </div>
                         </div>
 
@@ -311,33 +342,37 @@ const limparFiltros = () => {
                     </div>
                   </div>
 
-                  <div class="col-md-12"><hr class="painel-divisor" /></div>
+                  <div class="col-md-12"><hr /></div>
                   <div class="col-md-12" v-show="mostraTable">
-                    <div class="my-4 row painel-filtros">
-                      <form @submit.prevent="filtrarempreendimentos" class="painel-filtros-form">
-                        <div>
+                    <div>
+                    <Link class="btn btn-info me-2 w-500" :href="route('sgc.gestao.dashboard.empreendimento.create', { tipo: props.tipo.id })">
+                      Inserir empreendimento <IconPlus />
+                    </Link>
+                  </div>
+                    <div class="my-4 bg-light row">
+                      <form @submit.prevent="filtrarempreendimentos" class="row g-3">
+                        <div class="mx-3 col">
                           <label class="form-label">Empreendimento</label>
                           <input class="form-control" v-model="filtersEmp.empreendimento" placeholder="Empreendimento" />
                         </div>
-                        <div>
+                        <div class="mx-3 col">
                           <label class="form-label">Criticidade</label>
                           <select class="form-control form-select" v-model="filtersEmp.criticidade">
-                            <option value="">Todas</option>
                             <option class="form-option" value="criticidade_ibama_oema">IBAMA/OEMA</option>
                             <option class="form-option" value="criticidade_funai">FUNAI</option>
                             <option class="form-option" value="criticidade_iphan">IPHAN</option>
                             <option class="form-option" value="criticidade_incra">INCRA</option>
                           </select>
                         </div>
-                        <div>
+                        <div class="mx-3 col">
                           <label class="form-label">Prioridade</label>
                           <select class="form-control form-select" v-model="filtersEmp.prioridade">
-                            <option class="form-option" value="">Todas as opções</option>
+                            <option class="form-option" value="Normal">Todas as opções</option>
                             <option class="form-option" value="Normal">Normal</option>
                             <option class="form-option" value="Alta">Alta</option>
                           </select>
                         </div>
-                        <div>
+                        <div class="mx-3 col">
                           <label class="form-label">OSE</label>
                           <select class="form-control form-select" v-model="filtersEmp.ose_sei">
                             <option value="">Todos</option>
@@ -345,11 +380,11 @@ const limparFiltros = () => {
                             <option value="sem_ose">Não tem OSE</option>
                           </select>
                         </div>
-                        <div class="painel-filtros-acoes">
+                        <div class="mx-3 col-12">
                           <button class="btn btn-secondary" type="submit">Pesquisar</button>
-                          <button class="btn btn-outline-secondary" type="button" @click="limparFiltros">Limpar filtros</button>
                         </div>
                       </form>
+                      <div class="clearfix"><br /></div>
                     </div>
                     <div class="table-responsive mb-4">
                       <table class="table card-table table-bordered">
@@ -440,9 +475,10 @@ const limparFiltros = () => {
                     />
                   </div>
                 </div>
-
+              </template>
+            </Tabs>
           </div>
-
+          <ListaModal ref="listaModal" href="javascript:void(0)" />
         </template>
       </Navbar>
     </AuthenticatedLayout>
@@ -450,59 +486,6 @@ const limparFiltros = () => {
 </template>
 
 <style scoped>
-.painel-conteudo .table thead th {
-  font-size: .8rem;
-  font-weight: 600;
-  color: #334155;
-  text-align: center;
-  vertical-align: middle;
-  background-color: #f1f5f9;
-  border: 1px solid #cbd5e1;
-}
-.painel-cabecalho { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; }
-.painel-cabecalho h3 { font-size: 1rem; font-weight: 600; }
-.painel-layout.card { background: transparent; border: 0; box-shadow: none; padding: 0; }
-.painel-layout :deep(> .d-flex) { display: grid !important; grid-template-columns: 190px minmax(0, 1fr); gap: 20px; align-items: start; }
-.painel-layout :deep(> .d-flex > .col-md-1) { width: auto; padding: 12px 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
-.painel-layout :deep(> .d-flex > .col-md-11) { width: auto; min-width: 0; }
-.painel-layout :deep(.navbar-nav .nav-link) { padding: 12px 10px; border-radius: 6px; }
-.painel-layout :deep(.navbar-nav .nav-item.active > .nav-link) { background: #eff6ff; color: #1d4ed8; }
-.painel-conteudo { width: 100%; border-color: #e2e8f0; border-radius: 8px; padding: 20px; }
-.painel-secoes { margin-top: 24px; margin-bottom: 0; }
-.painel-visao-geral { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
-.painel-mapa { min-width: 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
-.painel-controles { padding: 4px 0; min-width: 0; }
-.painel-subtitulo { font-size: 1rem; font-weight: 600; margin: 0; text-align: center; }
-.painel-ose { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.painel-ose .btn { width: 100%; }
-.painel-contratos { margin-top: 20px; }
-.painel-contratos .form-label { display: block; text-align: center; color: #475569; }
-.painel-indicadores { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
-.painel-indicador { padding: 16px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; text-align: center; }
-.painel-indicador span { display: block; font-size: .875rem; line-height: 1.4; color: #475569; min-height: 2.8em; }
-.painel-indicador strong { display: block; margin-top: 8px; font-size: 1.75rem; font-weight: 600; line-height: 1.2; color: #0f172a; }
-.painel-divisor { margin: 12px 0 24px; border-color: #e2e8f0; }
-.painel-filtros { margin-left: 0; margin-right: 0; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
-.painel-filtros-form { display: grid; grid-template-columns: minmax(150px, 1.2fr) repeat(3, minmax(120px, 1fr)) auto; gap: 12px; align-items: end; width: 100%; padding: 0; }
-.painel-filtros-form > div { min-width: 0; }
-.painel-filtros-acoes { display: flex; gap: 8px; }
-.painel-filtros-acoes .btn { white-space: nowrap; }
-.painel-filtros .form-label { color: #475569; }
-@media (max-width: 1199px) {
-  .painel-filtros-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .painel-filtros-acoes { grid-column: 1 / -1; }
-  .painel-visao-geral { grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; }
-  .painel-layout :deep(> .d-flex) { grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
-}
-@media (max-width: 991px) {
-  .painel-visao-geral { grid-template-columns: 1fr; }
-}
-@media (max-width: 767px) {
-  .painel-layout :deep(> .d-flex) { grid-template-columns: 1fr; }
-  .painel-layout :deep(.navbar-nav) { flex-direction: row; flex-wrap: wrap; gap: 4px; }
-  .painel-conteudo { padding: 16px; }
-  .painel-filtros-form { grid-template-columns: 1fr; }
-}
 .bg-light {
   background-color: rgba(0, 0, 0, 0.05) !important;
 }

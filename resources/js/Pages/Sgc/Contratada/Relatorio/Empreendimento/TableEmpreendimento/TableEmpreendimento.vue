@@ -90,8 +90,6 @@
 
       chartOptionsRadio.series[0].data[0].y = saldoAMedirOSE;
       chartOptionsRadio.series[0].data[1].y = soma_medidas;
-
-      chartOptionsRadio.annotations[0].labels[0].text = `R$ ${soma_ose.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
     });
   };
   
@@ -102,79 +100,20 @@
   let saldoMedir = reactive({ value: 0 });
   let diferenca = reactive({ value: 0 });
 
+  const formatarMoeda = valor => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
   const chartOptionsRadio = reactive({
-    chart: {
-      type: "pie",
-      backgroundColor: "transparent",
-      height: 400,
-      legend: { enabled: true },
-    },
-    title: {
-      text: "R$ OSE x Medido",
-      align: "left",
-      color: "white",
-      margin: 40,
-    },
-    plotOptions: {
-      pie: {
-        innerSize: '80%', 
-        startAngle: 20,
-        dataLabels: {
-          enabled: true,
-          distance: 30, 
-          format: '{point.name}: R$ {point.y:,.2f}', 
-          style: {
-            fontSize: "12px",
-            fontFamily: 'Arial, sans-serif',
-            color: "#000",
-            fontWeight: 'normal'
-          }
-        }
-      },
-    },
-    series: [
-      {
-        data: [
-          {
-            name: 'SALDO A MEDIR DA OSE:',
-            y: 0, 
-            color: '#8cbbc4'
-          },
-          {
-            name: 'VALOR MEDIDO',
-            y: 0, 
-            color: 'green'
-          }
-        ],
-      },
-    ],
-    tooltip: {
-      enabled: false 
-    },
-    annotations: [
-      {
-        labels: [{
-          point: {
-            xAxis: 0,
-            yAxis: 0,
-            x: 0,
-            y: 0
-          },
-          text: 'R$ 0,00', 
-          style: {
-            fontSize: '16px',
-            color: '#000',
-            fontWeight: 'bold'
-          },
-          align: 'center',
-          verticalAlign: 'middle',
-          x: 0,
-          y: 0
-        }]
-      }
-    ]
+    chart: { type: 'pie', backgroundColor: 'transparent', height: 250, spacing: [8, 8, 8, 8] },
+    title: { text: null },
+    credits: { enabled: false },
+    accessibility: { enabled: false },
+    plotOptions: { pie: { innerSize: '72%', dataLabels: { enabled: false }, borderWidth: 2, showInLegend: false } },
+    series: [{ name: 'Valor', data: [
+      { name: 'Saldo a medir da OSE', y: 0, color: '#3b82f6' },
+      { name: 'Valor medido', y: 0, color: '#16a34a' },
+    ] }],
+    tooltip: { formatter() { return this.point.name + ': <b>' + formatarMoeda(this.y) + '</b>'; } },
   });
-  
+
   const visualizarTrecho = () => {
     mapaVisualizarTrecho.value.renderMapa();
     setTimeout(() => {
@@ -198,11 +137,11 @@
 <template>
   <div class="col-md-12">
     <div class="clearfix mb-4"></div>
-    <div class="d-flex justify-content-between">
-      <div class="card me-3" style="flex: 1;">
+    <div class="empreendimento-resumo-grid">
+      <div class="card resumo-card">
         <Map ref="mapaVisualizarTrecho" height="450px" width="100%"/>
       </div>
-      <div class="card ms-3" style="flex: 1;">
+      <div class="card resumo-card">
         <div v-for="empreendimento in empreendimentos" :key="empreendimento.id">
           <ul class="list-group list-group-flush">
             <li class="list-group-item"><strong>BR/UF:</strong> {{ empreendimento.br }}/{{ empreendimento.uf }}</li>
@@ -215,57 +154,38 @@
           </ul>
         </div>
       </div>
-      <div v-for="empreendimento in empreendimentos" :key="empreendimento.id" class="card ms-3" style="flex: 1;">
-        <h3 class="ms-3">LP</h3>
-        <div class="progress mx-3" role="progressbar" aria-label="Progress LP" :aria-valuenow="empreendimento.lp_avanco != '#DIV/0!' ? Number(empreendimento.lp_avanco) * 100 : 0" aria-valuemin="0" aria-valuemax="100">
-          <div class="progress-bar progress-bar-striped progress-bar-animated" :style="{ width: (empreendimento.lp_avanco != '#DIV/0!' ? Number(empreendimento.lp_avanco) * 100 : 0) + '%' }">
-            {{ empreendimento.lp_avanco != '#DIV/0!' ? (Number(empreendimento.lp_avanco) * 100).toFixed(0) + ' %' : '' }}
-          </div>
-        </div>
-        <h3 class="ms-3">LI</h3>
-        <div class="progress mx-3" role="progressbar" aria-label="Progress LI" :aria-valuenow="empreendimento.li_avanco != '#DIV/0!' ? Number(empreendimento.li_avanco) * 100 : 0" aria-valuemin="0" aria-valuemax="100">
-          <div class="progress-bar progress-bar-striped progress-bar-animated" :style="{ width: (empreendimento.li_avanco != '#DIV/0!' ? Number(empreendimento.li_avanco) * 100 : 0) + '%' }">
-            {{ empreendimento.li_avanco != '#DIV/0!' ? (Number(empreendimento.li_avanco) * 100).toFixed(0) + ' %' : '' }}
-          </div>
-        </div>
-        <div style="position: relative;">
-          <Chart :options="chartOptionsRadio"></Chart>
-          <div 
-            style="
-              position: absolute; 
-              top: 57.5%; 
-              left: 50%; 
-              transform: translate(-50%, -50%); 
-              text-align: center; 
-              font-size: 20px; 
-              color: #333; 
-              pointer-events: none;
-            "
-          >
-            R$ {{ totalR_ose.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}
-            <div style="font-size: 14px; color: #555;">
-              Saldo Total de OSE
+      <div v-for="empreendimento in empreendimentos" :key="empreendimento.id" class="card resumo-card">
+        <section class="financeiro-resumo">
+          <h3 class="financeiro-titulo">R$ OSE x Medido</h3>
+          <div class="financeiro-total"><span>Total da OSE</span><strong>{{ formatarMoeda(totalR_ose.value) }}</strong></div>
+          <Chart v-if="totalR_ose.value > 0" :options="chartOptionsRadio" />
+          <p v-else class="financeiro-vazio">Sem valores de OSE para exibir.</p>
+          <div class="financeiro-legenda">
+            <div v-for="item in chartOptionsRadio.series[0].data" :key="item.name" class="financeiro-item">
+              <span class="financeiro-rotulo"><i :style="{ backgroundColor: item.color }" aria-hidden="true"></i>{{ item.name }}</span>
+              <strong>{{ formatarMoeda(item.y) }}</strong>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
     <br>
   </div>
 </template>
   
-<style>
-.progress {
-    height: 30px;
-    width: 70%;
-    margin: 10px 20px;
-}
-
-.progress-bar {
-    font-size: 1rem;
-}
-
-h3 {
-    margin: 0 20px;
-}
+<style scoped>
+.empreendimento-resumo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.resumo-card { min-width: 0; border-color: #e2e8f0; border-radius: 8px; overflow: hidden; }
+.financeiro-resumo { padding: 18px; }
+.financeiro-titulo { margin: 0 0 16px; font-size: 1rem; font-weight: 600; text-align: center; color: #334155; }
+.financeiro-total { text-align: center; }
+.financeiro-total span { display: block; color: #64748b; font-size: .85rem; }
+.financeiro-total strong { display: block; margin-top: 4px; font-size: 1.35rem; color: #0f172a; overflow-wrap: anywhere; }
+.financeiro-legenda { border-top: 1px solid #e2e8f0; padding-top: 12px; }
+.financeiro-item { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; }
+.financeiro-rotulo { display: flex; align-items: center; gap: 8px; color: #475569; font-size: .85rem; }
+.financeiro-rotulo i { width: 10px; height: 10px; flex-shrink: 0; border-radius: 3px; }
+.financeiro-item strong { padding-left: 18px; color: #334155; font-weight: 600; }
+.financeiro-vazio { padding: 40px 0; text-align: center; color: #64748b; }
+@media (max-width: 991px) { .empreendimento-resumo-grid { grid-template-columns: 1fr; } }
 </style>

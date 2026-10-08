@@ -87,9 +87,9 @@ onMounted(() => {
             </div>
         </template>
 
-        <NavbarContrato :tipo="contrato">
+        <NavbarContrato :tipo="contrato" class="ficha-layout">
             <template #body>
-                <div class="card">
+                <div class="card ficha-conteudo">
                     <div class="card-body">
                         <div v-if="data.error" class="alert alert-danger">
                             {{ data.error }}
@@ -170,6 +170,20 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.ficha-layout.card { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.card.ficha-conteudo { margin-top: 0; }
+.ficha-layout :deep(> .d-flex) { display: grid !important; grid-template-columns: 190px minmax(0, 1fr); gap: 20px; align-items: start; }
+.ficha-layout :deep(> .d-flex > .col-md-1) { width: auto; padding: 12px 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+.ficha-layout :deep(> .d-flex > .col-md-11) { width: auto; min-width: 0; }
+.ficha-layout :deep(.navbar-nav .nav-link) { padding: 12px 10px; border-radius: 6px; }
+.ficha-layout :deep(.navbar-nav .nav-item.active > .nav-link) { background: #eff6ff; color: #1d4ed8; }
+@media (max-width: 1199px) {
+  .ficha-layout :deep(> .d-flex) { grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 767px) {
+  .ficha-layout :deep(> .d-flex) { grid-template-columns: 1fr; }
+  .ficha-layout :deep(.navbar-nav) { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+}
 .card {
     margin-top: px;
 }

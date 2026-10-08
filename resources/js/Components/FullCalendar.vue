@@ -18,6 +18,8 @@ const emit = defineEmits(['event-click']); // Removido 'add-event'
 
 // Função para gerar cores com base no source e, opcionalmente, no title
 const getEventColor = (event) => {
+  if (event.backgroundColor) return event.backgroundColor;
+
   // Se for evento auxiliar, retorna verde fixo
   if (event.extendedProps?.source === 'auxiliar') {
     return '#28a745'; // Verde fixo para eventos auxiliares

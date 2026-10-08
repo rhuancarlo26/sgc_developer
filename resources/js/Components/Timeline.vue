@@ -6,6 +6,7 @@ import axios from "axios";
 import { reactive } from "vue";
 
 const props = defineProps({
+  organizada: { type: Boolean, default: false },
   evolucao: Array,
   empreendimento_id: Number,
   fases: Array,
@@ -106,7 +107,7 @@ const evolucaoComStatusAjustado = computed(() =>
 );
 </script>
 <template>
-  <div class="container">
+  <div class="container" :class="{ 'fases-organizadas': organizada }">
     <div class="row text-center justify-content-center mb-5">
       <div class="col-md-12 my-2">
         <hr>
@@ -182,7 +183,17 @@ const evolucaoComStatusAjustado = computed(() =>
           </div>
         </div>
       </div>
-      <div class="col-md-12">
+      <div v-if="organizada" class="col-md-12">
+        <ol class="fases-lista">
+          <li v-for="item in evolucaoComStatusAjustado" :key="item.id" class="fase-card" :class="{ 'fase-concluida': item.status == 'ativo' || item.status == 1, 'fase-andamento': item.status == 2 }">
+            <div class="fase-nome">{{ item.fase }}</div>
+            <div class="fase-status"><span class="fase-marcador" aria-hidden="true">{{ item.status == 'ativo' || item.status == 1 ? '✓' : item.status == 2 ? '◷' : '•' }}</span>{{ item.status == 'ativo' || item.status == 1 ? 'Concluído' : item.status == 2 ? 'Em andamento' : 'Não iniciado' }}</div>
+            <div class="fase-periodo">{{ item.periodo || 'A definir' }}</div>
+            <div v-if="(item.status == 'ativo' || item.status == 1) && item.numero_sei" class="fase-sei">SEI: {{ item.numero_sei }}</div>
+          </li>
+        </ol>
+      </div>
+      <div v-else class="col-md-12">
         <div class="timeline-steps aos-init aos-animate" data-aos="fade-up">
           <!-- Empreendimento ID: {{ empreendimento_id }} -->
           <div
@@ -305,6 +316,23 @@ const evolucaoComStatusAjustado = computed(() =>
   </div>
 </template>
 <style scoped>
+.fases-organizadas { max-width: none; padding: 0; }
+.fases-organizadas > .row:first-child { margin-bottom: 16px !important; }
+.fases-organizadas > .row:first-child hr { display: none; }
+.fases-organizadas > .row:first-child h2 { font-size: 1rem; color: #475569; }
+.fases-lista { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; list-style: none; padding: 0; margin: 0 0 16px; }
+.fase-card { min-width: 0; padding: 16px 12px; border: 1px solid #e2e8f0; border-top: 3px solid #94a3b8; border-radius: 8px; background: #fff; text-align: center; }
+.fase-card.fase-concluida { border-top-color: #16a34a; }
+.fase-card.fase-andamento { border-top-color: #0891b2; }
+.fase-nome { min-height: 3em; font-weight: 600; line-height: 1.5; color: #334155; }
+.fase-status { display: flex; gap: 6px; align-items: center; justify-content: center; margin: 12px 0; color: #64748b; font-size: .8rem; }
+.fase-marcador { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #f1f5f9; }
+.fase-concluida .fase-status { color: #15803d; }
+.fase-concluida .fase-marcador { background: #dcfce7; }
+.fase-andamento .fase-status { color: #0e7490; }
+.fase-andamento .fase-marcador { background: #cffafe; }
+.fase-periodo, .fase-sei { font-size: .8rem; color: #475569; overflow-wrap: anywhere; }
+.fase-sei { margin-top: 6px; }
 /* body{margin-top:20px;} */
 .timeline-steps {
   display: flex;

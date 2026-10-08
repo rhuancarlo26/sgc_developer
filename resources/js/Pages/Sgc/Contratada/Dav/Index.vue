@@ -238,7 +238,7 @@ updateReminders();
             </div>
         </template>
 
-        <NavbarContrato :tipo="contrato">
+        <NavbarContrato :tipo="contrato" class="dav-layout">
             <template #body>
                 <div class="d-flex align-items-stretch">
                     <!-- Quadro de DAV (50%) -->
@@ -379,6 +379,19 @@ updateReminders();
 </template>
 
 <style scoped>
+.dav-layout.card { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.dav-layout :deep(> .d-flex) { display: grid !important; grid-template-columns: 190px minmax(0, 1fr); gap: 20px; align-items: start; }
+.dav-layout :deep(> .d-flex > .col-md-1) { width: auto; padding: 12px 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+.dav-layout :deep(> .d-flex > .col-md-11) { width: auto; min-width: 0; }
+.dav-layout :deep(.navbar-nav .nav-link) { padding: 12px 10px; border-radius: 6px; }
+.dav-layout :deep(.navbar-nav .nav-item.active > .nav-link) { background: #eff6ff; color: #1d4ed8; }
+@media (max-width: 1199px) {
+  .dav-layout :deep(> .d-flex) { grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 767px) {
+  .dav-layout :deep(> .d-flex) { grid-template-columns: 1fr; }
+  .dav-layout :deep(.navbar-nav) { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+}
 .custom-vdatepicker {
     width: 100%;
     height: auto;

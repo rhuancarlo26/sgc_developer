@@ -5,6 +5,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Calendar from "@/Components/FullCalendar.vue";
 import NavbarContrato from "../NavbarContrato.vue";
 import axios from 'axios';
+import { situacoes, obterSituacao, formatarData, fimExclusivo } from './situacao';
 
 const page = usePage();
 const eventos = ref([]);
@@ -58,13 +59,20 @@ const ufsUnicas = computed(() => {
 });
 
 const eventosFiltrados = computed(() => {
-  let filtered = eventos.value.map(evento => ({
-    ...evento,
-    backgroundColor: evento.source === 'auxiliar' ? '#28a745' : '#3788d8', 
-  }));
-
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
+  let filtered = eventos.value.map(evento => {
+    const situacao = obterSituacao(evento);
+    return {
+      ...evento,
+      inicioPrevisto: evento.start,
+      entregaPrevista: evento.end,
+      end: fimExclusivo(evento.end),
+      allDay: true,
+      situacao,
+      backgroundColor: situacoes[situacao].cor,
+      borderColor: situacoes[situacao].cor,
+      textColor: '#ffffff',
+    };
+  });
 
   if (filtroItemEdital.value.length > 0) {
     filtered = filtered.filter((evento) => filtroItemEdital.value.includes(evento.title));
@@ -79,34 +87,7 @@ const eventosFiltrados = computed(() => {
   }
 
   if (filtroSituacao.value) {
-    filtered = filtered.filter((evento) => {
-      const dataEntregaPrevista = new Date(evento.end);
-      dataEntregaPrevista.setHours(0, 0, 0, 0);
-      const versao00Data = evento.versao_00_data_de_entrega ? new Date(evento.versao_00_data_de_entrega) : null;
-      if (versao00Data) versao00Data.setHours(0, 0, 0, 0);
-
-      if (filtroSituacao.value === "atrasada") {
-        return (
-          dataEntregaPrevista < hoje &&
-          (!versao00Data || versao00Data === "")
-        );
-      } else if (filtroSituacao.value === "no_prazo") {
-        return (
-          versao00Data &&
-          versao00Data <= dataEntregaPrevista
-        );
-      } else if (filtroSituacao.value === "entrega_atrasada") {
-        return (
-          versao00Data &&
-          dataEntregaPrevista < versao00Data
-        );
-      } else if (filtroSituacao.value === "prevista") {
-        return (
-          dataEntregaPrevista > hoje
-        );
-      }
-      return true;
-    });
+    filtered = filtered.filter((evento) => evento.situacao === filtroSituacao.value);
   }
 
   return filtered;
@@ -114,10 +95,10 @@ const eventosFiltrados = computed(() => {
 
 const handleEventClick = (eventInfo) => {
   selectedEvent.value = {
-    ...eventInfo.event._def.extendedProps,
-    title: eventInfo.event._def.title,
-    start: eventInfo.event._instance.range.start,
-    end: eventInfo.event._instance.range.end,
+    ...eventInfo.event.extendedProps,
+    title: eventInfo.event.title,
+    start: eventInfo.event.extendedProps.inicioPrevisto,
+    end: eventInfo.event.extendedProps.entregaPrevista,
   };
   showModal.value = true;
 };
@@ -159,9 +140,9 @@ const saveNewEvent = async () => {
 
 <template>
   <AuthenticatedLayout>
-    <NavbarContrato :tipo="contrato"> 
+    <NavbarContrato :tipo="contrato" class="cronograma-layout">
       <template #body>
-        <div class="container mt-4">
+        <div class="card card-body cronograma-conteudo">
           <h3 class="title-cronograma">CRONOGRAMA FÍSICO</h3>
           <div class="filter-container mb-3">
             <div class="filter-item">
@@ -182,14 +163,21 @@ const saveNewEvent = async () => {
               <label for="filtroSituacao" class="form-label">Filtrar Situação:</label>
               <select id="filtroSituacao" v-model="filtroSituacao" class="form-select filter-select">
                 <option value="">Todos</option>
-                <option value="atrasada">Atrasada</option>
-                <option value="no_prazo">Entrega no Prazo</option>
-                <option value="entrega_atrasada">Entrega Atrasada</option>
-                <option value="prevista">Prevista</option>
+                <option v-for="(situacao, chave) in situacoes" :key="chave" :value="chave">
+                  {{ situacao.label }}
+                </option>
               </select>
             </div>
-            <div class="filter-item">
+            <div class="filter-item filter-button">
               <button class="btn btn-outline-info" @click="openCreateModal">+ Novo Evento</button>
+            </div>
+          </div>
+          <div class="situacao-legenda mb-3" aria-label="Legenda das situações">
+            <div v-for="(situacao, chave) in situacoes" :key="chave" class="situacao-legenda-item" :title="situacao.descricao" tabindex="0" :aria-label="`${situacao.label}: ${situacao.descricao}`">
+              <span class="situacao-cor" :style="{ backgroundColor: situacao.cor }" aria-hidden="true"></span>
+              <div>
+                <strong>{{ situacao.label }}</strong>
+              </div>
             </div>
           </div>
           <div class="custom-calendar p-2">
@@ -206,12 +194,12 @@ const saveNewEvent = async () => {
                 <p><strong>Etapa:</strong> {{ selectedEvent.etapa || 'N/A' }}</p>
                 <p><strong>Item Edital:</strong> {{ selectedEvent.item_edital || 'N/A' }}</p>
                 <p><strong>Subproduto:</strong> {{ selectedEvent.title || 'N/A' }}</p>
-                <p><strong>Data de Início Previsto:</strong> {{ selectedEvent.start ? new Date(selectedEvent.start).toLocaleDateString('pt-BR') : 'N/A' }}</p>
-                <p><strong>Data de Entrega Prevista:</strong> {{ selectedEvent.end ? new Date(selectedEvent.end).toLocaleDateString('pt-BR') : 'N/A' }}</p>
-                <p><strong>Versão 00 Data de Entrega:</strong> {{ selectedEvent.versao_00_data_de_entrega ? new Date(selectedEvent.versao_00_data_de_entrega).toLocaleDateString('pt-BR') : 'N/A' }}</p>
-                <p><strong>Versão Aceita Data:</strong> {{ selectedEvent.versao_aceita_data ? new Date(selectedEvent.versao_aceita_data).toLocaleDateString('pt-BR') : 'N/A' }}</p>
-                <p><strong>Requisição Externa Data:</strong> {{ selectedEvent.req_ext_data ? new Date(selectedEvent.req_ext_data).toLocaleDateString('pt-BR') : 'N/A' }}</p>
-                <p><strong>Autorização Externa Data:</strong> {{ selectedEvent.aut_ext_data ? new Date(selectedEvent.aut_ext_data).toLocaleDateString('pt-BR') : 'N/A' }}</p>
+                <p><strong>Data de Início Previsto:</strong> {{ formatarData(selectedEvent.start) }}</p>
+                <p><strong>Data de Entrega Prevista:</strong> {{ formatarData(selectedEvent.end) }}</p>
+                <p><strong>Versão 00 Data de Entrega:</strong> {{ formatarData(selectedEvent.versao_00_data_de_entrega) }}</p>
+                <p><strong>Versão Aceita Data:</strong> {{ formatarData(selectedEvent.versao_aceita_data) }}</p>
+                <p><strong>Requisição Externa Data:</strong> {{ formatarData(selectedEvent.req_ext_data) }}</p>
+                <p><strong>Autorização Externa Data:</strong> {{ formatarData(selectedEvent.aut_ext_data) }}</p>
               </div>
               <button class="btn btn-secondary mt-3" @click="closeModal">Fechar</button>
             </div>
@@ -259,14 +247,39 @@ const saveNewEvent = async () => {
 </template>
 
 <style scoped>
+.cronograma-layout.card { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.cronograma-layout :deep(> .d-flex) { display: grid !important; grid-template-columns: 190px minmax(0, 1fr); gap: 20px; align-items: start; }
+.cronograma-layout :deep(> .d-flex > .col-md-1) { width: auto; padding: 12px 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+.cronograma-layout :deep(> .d-flex > .col-md-11) { width: auto; min-width: 0; }
+.cronograma-layout :deep(.navbar-nav .nav-link) { padding: 12px 10px; border-radius: 6px; }
+.cronograma-conteudo { min-width: 0; border-color: #e2e8f0; border-radius: 8px; padding: 20px; }
+@media (max-width: 1199px) {
+  .cronograma-layout :deep(> .d-flex) { grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 767px) {
+  .cronograma-layout :deep(> .d-flex) { grid-template-columns: 1fr; }
+  .cronograma-layout :deep(.navbar-nav) { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .cronograma-conteudo { padding: 16px; }
+}
+.situacao-legenda { display: flex; flex-wrap: wrap; gap: 10px 24px; padding: 10px 0; }
+.situacao-legenda-item { display: flex; align-items: center; gap: 8px; color: #475569; cursor: help; font-size: 0.875rem; }
+.situacao-legenda-item strong { font-weight: 500; }
+.situacao-legenda-item:focus-visible { outline: 2px solid #93c5fd; outline-offset: 4px; border-radius: 3px; }
+.situacao-cor { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
 .title-cronograma { font-size: 2rem; text-align: center; margin: 1.5rem 0; }
-.filter-container { display: flex; gap: 20px; flex-wrap: wrap; }
-.filter-item { flex: 1; min-width: 250px; }
-.filter-select { width: 100%; border-radius: 8px; border: 1px solid #007bff; padding: 8px; }
-.custom-calendar { background-color: #f8f9fa; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); padding: 15px; }
-.fc-multimonth-month { border: 1px solid #e0e0e0; border-radius: 5px; background-color: #ffffff; }
-.fc-button { background-color: #007bff; border: none; border-radius: 5px; padding: 6px 12px; }
-.fc-button:hover { background-color: #0056b3; }
+.filter-item { flex: 1 1 220px; min-width: 0; }
+.filter-item .form-label { margin-bottom: 6px; color: #475569; }
+.filter-item .filter-select { width: 100%; height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; padding: 8px 32px 8px 10px; }
+.filter-item .filter-select:focus { border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
+.filter-button .btn { height: 38px; border-radius: 6px; white-space: nowrap; }
+.custom-calendar { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04); }
+.custom-calendar :deep(.fc) { --fc-border-color: #e2e8f0; --fc-neutral-bg-color: #f8fafc; --fc-today-bg-color: #eff6ff; }
+.custom-calendar :deep(.fc-multimonth) { border-radius: 6px; }
+.custom-calendar :deep(.fc-multimonth-month) { background-color: #ffffff; }
+.custom-calendar :deep(.fc-col-header-cell-cushion),
+.custom-calendar :deep(.fc-daygrid-day-number) { color: #475569; text-decoration: none; }
+.custom-calendar :deep(.fc-multimonth-title) { color: #334155; font-weight: 600; }
+.cronograma-layout :deep(.navbar-nav .nav-item.active > .nav-link) { background-color: #eff6ff; color: #1d4ed8; border-radius: 6px; }
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
 .modal-content { background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
 .modal-content h4 { margin-bottom: 15px; color: #007bff; }
@@ -276,14 +289,14 @@ const saveNewEvent = async () => {
 /* Button Inserir Evento */
 .filter-container {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   flex-wrap: wrap;
   justify-content: space-between; 
   align-items: flex-end; 
 }
 
 .filter-button {
-  flex: 0 0 auto; 
+  flex: 0 0 auto;
   display: flex;
   align-items: flex-end;
 }

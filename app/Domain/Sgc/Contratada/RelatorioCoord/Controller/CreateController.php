@@ -3,7 +3,7 @@
 namespace App\Domain\Sgc\Contratada\RelatorioCoord\Controller;
 
 use App\Domain\Sgc\Contratada\RelatorioCoord\Services\CreateRelatorioService;
-use Illuminate\Http\Request;
+use App\Domain\Sgc\Contratada\RelatorioCoord\Requests\CreateRelatorioRequest;
 
 class CreateController
 {
@@ -14,13 +14,13 @@ class CreateController
         $this->createRelatorioService = $createRelatorioService;
     }
 
-    public function index(Request $request)
+    public function index(CreateRelatorioRequest $request)
     {
-        // Receba o contrato do request
-        $contrato = $request->input('contrato');
+        $dados = $request->validated();
+        $this->createRelatorioService->iniciarNovoRelatorio(
+            $dados['contrato'], $dados['data_inicio'], $dados['data_fim']
+        );
 
-        // Passe o contrato para o service
-        $this->createRelatorioService->iniciarNovoRelatorio($contrato);
-                  
+        return back()->with('success', 'Relatório criado com sucesso!');
     }
 }

@@ -35,6 +35,32 @@ class FaunaSimplificadaAnaliseController extends Controller
         ]);
     }
 
+    public function uploadAnexo(Request $request, int $contrato, string $produto)
+    {
+        abort_unless($produto === 'fauna', 404);
+        $usuario = $request->user();
+        $permissao = $request->filled('campanha_id')
+            ? 'sgc.contratada.produtos.fauna.simplificada.update'
+            : 'sgc.contratada.produtos.store';
+        abort_unless($usuario->hasRole('Super Admin') || $usuario->can($permissao), 403);
+        abort_if($usuario->perfis_id === 3, 403, 'Fiscais não podem editar campanhas.');
+        $request->validate([
+            'arquivo' => 'required|file|max:20480',
+            'campanha_id' => 'nullable|integer',
+        ], [
+            'arquivo.max' => 'Cada anexo deve ter no máximo 20 MB.',
+            'arquivo.uploaded' => 'O servidor não recebeu o arquivo. Verifique o limite por arquivo do servidor.',
+        ]);
+        \App\Models\Contrato::findOrFail($contrato);
+        if ($request->filled('campanha_id')) {
+            [$campanha] = $this->buscarEntrega($contrato, $request->integer('campanha_id'));
+            abort_unless(in_array($campanha->status, ['Em elaboração', 'Rejeitada']), 422, 'Esta campanha não pode ser editada.');
+        }
+        $token = (new \App\Domain\Sgc\Contratada\Produtos\Fauna\Services\AnexoTemporarioService())
+            ->receber($request->file('arquivo'), $contrato, $usuario->id);
+        return response()->json(['upload_token' => $token]);
+    }
+
     public function analise(int $contrato, string $produto, int $campanha)
     {
         abort_unless($produto === 'fauna', 404);
@@ -88,7 +114,8 @@ class FaunaSimplificadaAnaliseController extends Controller
         abort_unless($produto === 'fauna', 404);
         abort_if(Auth::user()?->perfis_id === 3, 403, 'Fiscais não podem editar campanhas.');
 
-        $dados = $request->validate((new \App\Domain\Sgc\Contratada\Produtos\Fauna\Requests\StoreEntregaSimplificadaFaunaRequest())->rules());
+        $validacao = new \App\Domain\Sgc\Contratada\Produtos\Fauna\Requests\StoreEntregaSimplificadaFaunaRequest();
+        $dados = $request->validate($validacao->rules(), $validacao->messages());
         [$campanhaFauna, $entrega] = $this->buscarEntrega($contrato, $campanha);
         abort_unless(in_array($campanhaFauna->status, ['Em elaboração', 'Rejeitada']), 422, 'Esta campanha não pode ser editada.');
 
@@ -176,6 +203,9 @@ class FaunaSimplificadaAnaliseController extends Controller
             'anexos' => $entrega->anexos->map(fn ($anexo) => [
                 'id' => $anexo->id,
                 'nome_arquivo' => $anexo->nome_arquivo,
+                'mime_type' => $anexo->mime_type,
+                'classe' => $anexo->metadados['classe'] ?? 'outros',
+                'titulo_bloco' => $anexo->metadados['titulo_bloco'] ?? 'Outros',
                 'url' => $anexo->caminho_arquivo ? Storage::url($anexo->caminho_arquivo) : null,
             ])->values(),
             'analises' => $entrega->analises->map(fn ($analise) => [
