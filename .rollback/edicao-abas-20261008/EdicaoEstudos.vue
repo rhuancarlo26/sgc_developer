@@ -2,7 +2,6 @@
   <div>
     <Head :title="'Empreendimentos - ESTUDOS: edição'" />
     <AuthenticatedLayout>
-      <div class="content-card">
       <H3>Módulo de EDIÇÃO</H3>
       <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -15,7 +14,6 @@
             <Link class="nav-link" :href="route('sgc.contratada.edicaoprodutos')"> Subprodutos</Link>
           </li>
       </ul>
-      <br>
       <br>
       <p>
         <a
@@ -79,128 +77,109 @@
           </div>
         </div>
       </div>
-      <div class="mb-4 p-3">
-        <div class="row align-items-end">
-          <div class="col-md-8">
-            <label for="filtroContrato" class="form-label fw-bold">Filtrar por Contrato Ambiental:</label>
-            <select id="filtroContrato" v-model="filtroContrato" class="form-select" @change="aplicarFiltro">
-              <option value="">-- Todos os Contratos --</option>
-              <option v-for="contrato in props.contratosDisponiveis" :key="contrato" :value="contrato">{{ contrato }}</option>
-            </select>
-          </div>
-          <div class="col-md-4"><button v-if="filtroContrato" @click="limparFiltros" class="btn btn-outline-secondary w-100"><i class="bi bi-x-circle me-2"></i>Limpar Filtro</button></div>
-        </div>
-      </div>
-      </div>
-      <div class="content-card">
-
-    <div class="modal fade" id="detalhesModal" tabindex="-1" aria-labelledby="detalhesModalLabel" aria-hidden="true" ref="modalRef">
-      <div class="modal-dialog modal-lg">
+      <div class="my-3"><hr></div>
+      <div class="modal fade" id="detalhesModal" tabindex="-1" aria-labelledby="detalhesModalLabel" aria-hidden="true" ref="modalRef">
+      <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 v-if="registroSelecionado" class="modal-title" id="detalhesModalLabel">Registro: <b class="text-uppercase">{{ registroSelecionado.nome }}</b></h5>
+            <h5 v-if="registroSelecionado" class="modal-title" id="detalhesModalLabel">Alteração em <b class="text-uppercase">{{ registroSelecionado.nome }}</b></h5>
             <h5 v-else class="modal-title" id="detalhesModalLabel">Alteração no Empreendimento</h5>
             <button type="button" class="btn-close" @click="fecharModal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div v-if="registroSelecionado">
-              <!-- TIMELINE -->
-              <div class="mt-4">
-                <h4 class="fw-bold mb-3">Histórico de alterações:</h4>
-                <ul class="timeline">
-                  <li v-for="(log, index) in registroSelecionado.changelogs" :key="index" class="mb-4">
-                    <div class="d-flex">
-                      <div class="me-3">
-                        <span class="badge bg-primary rounded-pill text-white">
-                          {{ formatarData(log.created_at) }}
-                        </span>
-                      </div>
-                      <div class="flex-grow-1">
-                        <p class="mb-2">
-                          <strong>{{ log.user?.name || 'Usuário desconhecido' }}</strong>
-                          alterou <strong>{{ log.field }}</strong>
-                        </p>
+            <!-- MODAL BODY -->
+            <div class="modal-body">
+              <div v-if="registroSelecionado">
+                <p><strong>Nome:</strong> {{ registroSelecionado.nome }}</p>
+                <p><strong>Descrição:</strong> {{ registroSelecionado.descricao }}</p>
 
-                        <!-- Separação DE/PARA com visual melhorado -->
-                        <div class="row g-2">
-                          <div class="col-md-6">
-                            <div class="change-box">
-                              <label class="change-label">De:</label>
-                              <div class="change-value">
-                                {{ log.old_value || '(vazio)' }}
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="change-box change-box-new">
-                              <label class="change-label">Para:</label>
-                              <div class="change-value">
-                                {{ log.new_value || '(vazio)' }}
-                              </div>
-                            </div>
-                          </div>
+                <!-- TIMELINE -->
+                <div class="mt-4">
+                  <h6 class="fw-bold mb-3">Histórico de alterações:</h6>
+                  <ul class="timeline">
+                    <li v-for="(log, index) in registroSelecionado.changelogs" :key="index" class="mb-4">
+                      <div class="d-flex">
+                        <div class="me-3">
+                          <span class="badge bg-primary rounded-pill text-white">
+                            <!-- {{ log.user?.name || 'Usuário desconhecido' }} -->
+                            {{ new Date(log.created_at).toLocaleDateString() }}
+                          </span>
+                        </div>
+                        <div>
+                          <p class="mb-1">
+                            <strong>{{ log.user?.name || 'Usuário desconhecido' }}</strong>
+                            alterou <strong>{{ log.field }}</strong>
+                          </p>
+                          <p class="mb-0">
+                            <span class="text-muted">De:</span> {{ log.old_value }} <br>
+                            <span class="text-muted">Para:</span> {{ log.new_value }}
+                          </p>
                         </div>
                       </div>
-                    </div>
-                  </li>
-                </ul>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-            <div v-else>
-                Carregando...
-            </div>
+                <div v-else>
+                    cerregando...
+                </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click="fecharModal">Fechar</button>
           </div>
         </div>
       </div>
-    </div>
-
-      <div class="d-flex justify-content-between align-items-center mb-3 gap-3 flex-wrap">
-        <span class="text-muted small">Total de registros: <strong>{{ props.empreendimentos.total }}</strong></span>
-        <button @click="exportExcel" class="btn btn-success text-white"><i class="bi bi-file-earmark-excel me-2"></i>Exportar Excel</button>
       </div>
+      </div>
+
+      <!-- Botões de controle -->
+       <!-- <button @click="ordenar('id', 'asc')" class="btn" :class="{ 'btn-primary': ordenacao === '', 'btn-outline-primary': ordenacao !== '' }"> -->
+       <button @click="ordenar('id', 'asc')" :class="'mx-2 btn ' + ordemid_ativo" title="Ordem Padrão - ID">
+            🔝 Ordem Padrão
+        </button>
+
+        <!-- <button @click="ordenacao = 'created_at'" class="btn mx-2" :class="{ 'btn-primary': ordenacao === 'created_at', 'btn-outline-primary': ordenacao !== 'created_at' }"> -->
+        <!-- <button @click="ordenacao = 'created_at'" class="btn mx-2 btn-primary btn-outline-primary">
+            🔝 Mais Recentes: página <strong class="mx-2">{{ paginaAtual }}</strong>
+        </button> -->
+
+        <button @click="ordenar('updated_at', 'desc')" :class="'mx-2 btn ' + ordemup_ativo" title="Ordem GERAL - Últimos Alterados">
+            🔝 Alterados Recentes
+        </button>
+
+        <button @click="ordenar('cod_emp', 'asc')" title="" :class="'mx-2 btn ' + ordememp_ativo">
+            🔝 Por Empreendimento
+        </button>
+
+        <button
+            @click="exportExcel"
+            class="px-4 py-2 btn btn-success text-white rounded float-end mb-3 mb-5"
+        >
+            Exportar Excel <i class="bi bi-file-earmark-excel"></i>
+        </button>
+
       <div class="table-responsive">
       <table
         class="table table-striped table-hover table-light"
       >
         <thead class="table-dark">
           <tr>
-            <th
-            v-for="coluna in todasColunas"
-            :key="coluna"
-            v-show="colunasVisiveis.includes(coluna) && !camposocultos.includes(coluna)"
-            class="fw-bolder fs-5 cursor-pointer-header sortable-header"
-            @click="ordenarPorColuna(coluna)"
-            :class="{
-              'header-ativo': colunaOrdenacao === coluna,
-              'header-hover': true
-            }"
-            :title="`Clique para ordenar por ${coluna}`"
-          >
-            <div class="d-flex align-items-center justify-content-between">
-              <span>{{ coluna }}</span>
-              <span v-if="colunaOrdenacao === coluna" class="ms-2">
-                <i v-if="direcaoOrdenacao === 'asc'" class="bi bi-sort-up text-warning"></i>
-                <i v-else class="bi bi-sort-down text-warning"></i>
-              </span>
-              <span v-else class="ms-2 opacity-50">
-                <i class="bi bi-arrow-down-up"></i>
-              </span>
-            </div>
-          </th>
+            <th class="fw-bolder fs-5"
+              v-for="coluna in todasColunas"
+              :key="coluna"
+              v-show="colunasVisiveis.includes(coluna) && !camposocultos.includes(coluna)"
+            >
+              {{ coluna }}
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="!dadosFiltrados.length"><td :colspan="Math.max(1, colunasVisiveis.filter(coluna => !camposocultos.includes(coluna)).length)" class="text-center text-muted py-4">Nenhum registro encontrado para este contrato.</td></tr>
           <tr v-for="(linha, index) in dadosFiltrados" :key="index">
             <td
               v-for="coluna in todasColunas"
               :key="coluna"
               v-show="colunasVisiveis.includes(coluna) && !camposocultos.includes(coluna)"
             >
-              <div class="position-relative">
               <!-- {{ linha[coluna] }} -->
               <span
                 v-if="campoFoiEditado(linha, coluna)"
@@ -208,7 +187,7 @@
                 role="button"
                 style="float: right;"
                 @click="abrirModal({
-                  nome: linha['cod_emp'] || linha['subproduto'] || linha['cod_siac'] || linha.id,
+                  nome: linha['cod_emp'],
                   changelogs: linha['changelogs'].filter(
                     (log) => log.field === coluna
                   ),
@@ -229,29 +208,14 @@
                   campoEditando.id === linha.id &&
                   campoEditando.campo === coluna
                 "
-                class="edit-popup"
+                class="absolute bg-white shadow-lg p-2 border rounded"
               >
-                <textarea
+                <input
                   v-model="empreendimentoEdit.valor"
-                  class="edit-textarea"
-                ></textarea>
-
-                <div class="mt-2 text-end">
-                  <button
-                    class="btn btn-sm btn-success me-2"
-                    @click="salvarEdicao"
-                  >
-                    Salvar
-                  </button>
-
-                  <button
-                    class="btn btn-sm btn-secondary"
-                    @click="fecharEdicao"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
+                  class="border p-1"
+                  @keyup.enter="salvarEdicao"
+                  @blur="fecharEdicao"
+                />
               </div>
             </td>
           </tr>
@@ -260,10 +224,9 @@
       </div>
       <!-- Paginação -->
       <div class="pagination">
-        <button class="page-link" v-for="link in links" :key="link.label" :disabled="!link.url || link.active" :class="{ active: link.active }" :aria-current="link.active ? 'page' : undefined" @click="mudarPagina(link.url)">
-          <span v-html="link.label"></span>
+        <button class="page-link" v-for="link in links" :key="link.label" :disabled="!link.url" @click="mudarPagina(link.url)">
+          {{link.label}}
         </button>
-      </div>
       </div>
     </AuthenticatedLayout>
   </div>
@@ -317,27 +280,11 @@ const ordenar = (campo, ordem = 'asc') => {
 
 // -------------------------------------------------------------------- reload com ordenamento
 
-const props = defineProps({ empreendimentos: Object, contratosDisponiveis: { type: Array, default: () => [] }, filtros: { type: Object, default: () => ({}) } });
-const filtroContrato = ref(props.filtros.contrato || '');
-const colunaOrdenacao = ref(props.filtros.ordenarPor || '');
-const direcaoOrdenacao = ref(props.filtros.ordem || 'asc');
-function aplicarFiltro() {
-  campoEditando.value = { id: null, campo: null };
-  router.get(route('sgc.contratada.edicaoestudos'), { contrato: filtroContrato.value, ordenarPor: colunaOrdenacao.value, ordem: direcaoOrdenacao.value }, { preserveState: true, preserveScroll: true });
-}
-function limparFiltros() { filtroContrato.value = ''; aplicarFiltro(); }
-function ordenarPorColuna(coluna) {
-  if (colunaOrdenacao.value === coluna && direcaoOrdenacao.value === 'desc') { colunaOrdenacao.value = ''; direcaoOrdenacao.value = 'asc'; }
-  else if (colunaOrdenacao.value === coluna) direcaoOrdenacao.value = 'desc';
-  else { colunaOrdenacao.value = coluna; direcaoOrdenacao.value = 'asc'; }
-  aplicarFiltro();
-}
-watch(() => props.filtros, filtros => { filtroContrato.value = filtros.contrato || ''; colunaOrdenacao.value = filtros.ordenarPor || ''; direcaoOrdenacao.value = filtros.ordem || 'asc'; });
+const props = defineProps({ empreendimentos: Array });
 const campoEditando = ref({ id: null, campo: null });
 const empreendimentoEdit = ref({ id: null, campo: "", valor: "" });
 
 const abrirEdicao = (empreendimento, campo) => {
-  if (campo === 'id') return;
   empreendimentoEdit.value = {
     id: empreendimento.id,
     campo,
@@ -375,7 +322,7 @@ watch(
 const todasColunas = Object.keys(dados.value[0] || {});
 const mudarPagina = (url) => {
     if (url) {
-        router.get(url, {}, { preserveState: true, preserveScroll: true }); // Faz a requisição para a nova página
+        router.get(url); // Faz a requisição para a nova página
     }
 };
 // const paginaAtual = computed(() => page.props.empreendimentos.current_page);
@@ -412,7 +359,6 @@ const salvarEdicao = () => {
     route('sgc.contratada.updatecampoestudos', empreendimentoEdit.value.id),
     { [empreendimentoEdit.value.campo]: empreendimentoEdit.value.valor },
     {
-      preserveScroll: true,
       onSuccess: () => {
         campoEditando.value = { id: null, campo: null };
         dados.value = [...page.props.empreendimentos.data];
@@ -421,22 +367,53 @@ const salvarEdicao = () => {
   );
 };
 
-// Campos selecionados inicialmente na aba Estudos
-const colunasVisiveis = ref([
-  'id', 'cod_emp', 'br', 'uf', 'contrato', 'produto', 'item_edital',
-  'subproduto', 'relatorio', 'medicao_40', 'medicao_60',
-]);
+// Definir visíveis apenas as 15 primeiras colunas no carregamento
+const colunasVisiveis = ref(todasColunas.slice(0, 10));
+colunasVisiveis.value.push(todasColunas[todasColunas.length - 1]);
 
 const ordenacao = ref('');
 
-const dadosFiltrados = computed(() => dados.value.map(item => {
-  const filtrado = Object.fromEntries(todasColunas.map(coluna => [coluna, colunasVisiveis.value.includes(coluna) ? item[coluna] : null]));
-  filtrado.id = item.id;
-  filtrado.changelogs = item.changelogs;
-  return filtrado;
-}));//-------------------------------------------------------------------- 29/09/2023
+const dadosFiltrados = computed(() => {
+  const lista = [...dados.value];
+
+  if (ordenacao.value === 'alterados_cima') {
+    lista.sort((a, b) => {
+      const aTem = temAlteracao(a.changelogs);
+      const bTem = temAlteracao(b.changelogs);
+
+      if (aTem && !bTem) return -1;
+      if (!aTem && bTem) return 1;
+      return 0;
+    });
+  }
+
+  if (ordenacao.value === 'created_at') {
+    lista.sort((a, b) => {
+      const dataA = extrairDataAlteracao(a.changelogs);
+      const dataB = extrairDataAlteracao(b.changelogs);
+
+      if (dataA && dataB) return new Date(dataB) - new Date(dataA);
+      if (dataA) return -1;
+      if (dataB) return 1;
+      return 0;
+    });
+  }
+
+  // Faz o filtro das colunas
+  return lista.map((item) => {
+    let filtrado = {};
+    todasColunas.forEach((coluna) => {
+      if (colunasVisiveis.value.includes(coluna)) {
+        filtrado[coluna] = item[coluna];
+      } else {
+        filtrado[coluna] = null;
+      }
+    });
+    return filtrado;
+  });
+});
+//-------------------------------------------------------------------- 29/09/2023
 // Campo foi editado
-function formatarData(valor) { return valor ? new Date(valor).toLocaleString('pt-BR') : ''; }
 function campoFoiEditado(linha, campo) {
   return linha.changelogs?.some(change => change.field === campo)
 }
@@ -482,7 +459,7 @@ function toggleSelecionarTodos(event) {
   if (checked) {
     colunasVisiveis.value = [...colunasFiltradas, ...atuais]
   } else {
-    colunasVisiveis.value = ['id', ...atuais]
+    colunasVisiveis.value = [...atuais]
   }
 }
 // ------------------------------------------------------------------------- Exportar para Excel
@@ -490,9 +467,8 @@ function exportExcel() {
     const camposvalidos = colunasVisiveis.value.filter(coluna => !camposocultos.includes(coluna));
     const params = new URLSearchParams({
         campos: camposvalidos.join(','),
-        ordenarpor: colunaOrdenacao.value || 'id',
-        contrato: filtroContrato.value,
-        ordem: direcaoOrdenacao.value,
+        ordenarpor: ordenarpor.value,
+        ordem: ordem_importacao.value,
         // status: 'ativo',
         // cidade: 'Caxias'
     })
@@ -544,210 +520,7 @@ onMounted(() => {
   }
 })
 </script>
-<style scoped>
-
-.cursor-pointer {
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.cursor-pointer:hover {
-  color: #0d6efd;
-}
-
-.cursor-pointer-header {
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-}
-
-.sortable-header {
-  padding: 1rem 0.75rem !important;
-  background-color: #f8f9fa !important;
-  border-bottom: 2px solid #0d6efd !important;
-  font-weight: 600;
-  color: #212529 !important;
-}
-
-.sortable-header:hover {
-  background-color: #e9ecef !important;
-}
-
-.header-ativo {
-  background-color: rgba(173, 216, 230, 0.25) !important;
-  color: #0d6efd;
-  font-weight: 700;
-}
-
-.header-hover:hover {
-  transform: translateY(-2px);
-}
-
-.position-relative {
-  position: relative;
-}
-
-.d-block {
-  display: block;
-}
-
-.d-flex {
-  display: flex;
-}
-
-.mt-1 {
-  margin-top: 0.25rem;
-}
-
-.align-items-center {
-  align-items: center;
-}
-
-.justify-content-between {
-  justify-content: space-between;
-}
-
-.ms-2 {
-  margin-left: 0.5rem;
-}
-
-.opacity-50 {
-  opacity: 0.5;
-}
-
-.timeline {
-  list-style: none;
-  padding-left: 0;
-  position: relative;
-}
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 12px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: #dee2e6;
-}
-
-.timeline li {
-  position: relative;
-  padding-left: 2rem;
-}
-
-.timeline li::before {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 6px;
-  width: 12px;
-  height: 12px;
-  background-color: #0d6efd;
-  border-radius: 50%;
-  z-index: 1;
-}
-
-.badge {
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.badge:hover {
-  opacity: 0.9;
-}
-
-.edit-textarea:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13,110,253,0.2);
-}
-
-.edit-popup {
-  position: absolute;
-  z-index: 1000;
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
-
-.edit-textarea {
-  width: 670px;
-  min-height: 220px;
-  resize: vertical;
-  padding: 8px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-}
-
-/* Modal mais largo */
-.modal-dialog.modal-lg {
-  max-width: 1200px !important;
-}
-
-.modal-dialog.modal-lg .modal-content {
-  width: 100%;
-}
-
-/* Estilos para boxes DE/PARA no modal */
-.change-box {
-  padding: 0.75rem;
-  background-color: #f8f9fa;
-  border-left: 3px solid #dee2e6;
-  border-radius: 4px;
-}
-
-.change-box-new {
-  border-left-color: #0d6efd;
-  background-color: rgba(13, 110, 253, 0.05);
-}
-
-.change-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #6c757d;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.change-value {
-  color: #212529;
-  word-break: break-word;
-  line-height: 1.5;
-}
-
-/* Container Card Branco Padrão */
-.content-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-}
-
-/* Campo desabilitado (ID) */
-.disabled-field {
-  cursor: not-allowed !important;
-  opacity: 0.6;
-  color: #6c757d !important;
-}
-
-/* Header fixo/sticky na tabela */
-.table thead {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 11;
-}
-
+<style>
 .cursor-pointer {
   cursor: pointer;
 }

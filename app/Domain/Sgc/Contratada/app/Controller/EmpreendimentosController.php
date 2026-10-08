@@ -59,11 +59,19 @@ class EmpreendimentosController extends Controller
     }
     public function editavelestudos(Request $request): Response
     {
-        $query = SgcvwEstudos::query();
+        $query = SgcvwEstudos::with(['changelogs.user']);
+        if ($request->filled('contrato')) {
+            $query->where('contrato', $request->input('contrato'));
+        }
+        $dadosFiltros = [
+            'contratosDisponiveis' => SgcvwEstudos::query()->whereNotNull('contrato')->where('contrato', '!=', '')->distinct()->orderBy('contrato')->pluck('contrato'),
+            'filtros' => $request->only(['contrato', 'ordenarPor', 'ordem']),
+        ];
 
         if ($request->filled('ordenarPor')) {
             $coluna = $request->get('ordenarPor');
             $ordem = $request->get('ordem', 'asc');
+            abort_unless(in_array($ordem, ['asc', 'desc'], true) && ($coluna === 'data_ultima_alteracao' || Schema::hasColumn('sgcvw_estudos', $coluna)), 422);
 
             if ($coluna === 'data_ultima_alteracao') {
                 // Para campo computado, você pode usar Collection ou subquery
@@ -77,6 +85,7 @@ class EmpreendimentosController extends Controller
                 $paginado = $registros->forPage($pagina, $porPagina);
 
                 return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
+                    ...$dadosFiltros,
                     'empreendimentos' => new LengthAwarePaginator(
                         $paginado->values(),
                         $registros->count(),
@@ -90,23 +99,28 @@ class EmpreendimentosController extends Controller
             }
         }
 
-        $empreendimentos = $query->paginate(50)->withQueryString();
+        $empreendimentos = $query->paginate(50)->appends($request->query());
 
         return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
+            ...$dadosFiltros,
             'empreendimentos' => $empreendimentos,
         ]);
-        // $empreendimentos = SgcvwEstudos::with(['changelogs'])->paginate(50);
-        // return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoEstudos', [
-        //     'empreendimentos' => $empreendimentos,
-        // ]);
     }
     public function editavelprodutos(Request $request): Response
     {
-        $query = SgcvwSubprodutos::query();
+        $query = SgcvwSubprodutos::with(['changelogs.user']);
+        if ($request->filled('contrato')) {
+            $query->where('contrato', $request->input('contrato'));
+        }
+        $dadosFiltros = [
+            'contratosDisponiveis' => SgcvwSubprodutos::query()->whereNotNull('contrato')->where('contrato', '!=', '')->distinct()->orderBy('contrato')->pluck('contrato'),
+            'filtros' => $request->only(['contrato', 'ordenarPor', 'ordem']),
+        ];
 
         if ($request->filled('ordenarPor')) {
             $coluna = $request->get('ordenarPor');
             $ordem = $request->get('ordem', 'asc');
+            abort_unless(in_array($ordem, ['asc', 'desc'], true) && ($coluna === 'data_ultima_alteracao' || Schema::hasColumn('sgcvw_subprodutos', $coluna)), 422);
 
             if ($coluna === 'data_ultima_alteracao') {
                 // Para campo computado, você pode usar Collection ou subquery
@@ -120,6 +134,7 @@ class EmpreendimentosController extends Controller
                 $paginado = $registros->forPage($pagina, $porPagina);
 
                 return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
+                    ...$dadosFiltros,
                     'empreendimentos' => new LengthAwarePaginator(
                         $paginado->values(),
                         $registros->count(),
@@ -133,15 +148,12 @@ class EmpreendimentosController extends Controller
             }
         }
 
-        $empreendimentos = $query->paginate(50)->withQueryString();
+        $empreendimentos = $query->paginate(50)->appends($request->query());
 
         return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
+            ...$dadosFiltros,
             'empreendimentos' => $empreendimentos,
         ]);
-        // $empreendimentos = SgcvwSubprodutos::with(['changelogs'])->paginate(50);
-        // return Inertia::render('Sgc/Contratada/Relatorio/Empreendimento/EdicaoProdutos', [
-        //     'empreendimentos' => $empreendimentos,
-        // ]);
     }
     public function updatecampo(Request $request, $id)
     {
@@ -281,9 +293,10 @@ class EmpreendimentosController extends Controller
             $campanhasFauna = SgcFaunaCampanha::where('cod_emp', $empreendimentos2->cod_emp)
                 ->where('id_contrato', $empreendimentos2->contrato_id)
                 ->where('status', 'Aprovada')
-                ->get(['id', 'id_contrato', 'id_campanha', 'subproduto', 'status', 'data_ini', 'data_fim', 'sei_dnit'])
+                ->get(['id', 'id_contrato', 'id_campanha', 'subproduto', 'status', 'data_ini', 'data_fim', 'sei_dnit', 'modo_preenchimento'])
                 ->map(fn ($campanha) => [
                     'produto' => 'Fauna',
+                    'modo_preenchimento' => $campanha->modo_preenchimento,
                     'contrato_id' => $campanha->id_contrato,
                     'campanha_id' => $campanha->id,
                     'identificador' => $campanha->id_campanha ?? $campanha->id,
@@ -538,13 +551,13 @@ class EmpreendimentosController extends Controller
         $campos = explode(',', $request->input('campos', 'id,cod_emp'));
         $ordenarpor = $request->input('ordenarpor', 'id');
         $ordem = $request->input('ordem', 'desc');
-        return Excel::download(new EmpreendimentoExport($campos, 'sgcvw_estudos', $ordenarpor, $ordem), 'empreendimentos_estudos.xlsx');
+        return Excel::download(new EmpreendimentoExport($campos, 'sgcvw_estudos', $ordenarpor, $ordem, $request->input('contrato')), 'empreendimentos_estudos.xlsx');
     }
     public function subprodutosexport(Request $request){
         $campos = explode(',', $request->input('campos', 'id'));
         $ordenarpor = $request->input('ordenarpor', 'id');
         $ordem = $request->input('ordem', 'desc');
-        return Excel::download(new EmpreendimentoExport($campos, 'sgcvw_subprodutos', $ordenarpor, $ordem), 'empreendimentos_subprodutos.xlsx');
+        return Excel::download(new EmpreendimentoExport($campos, 'sgcvw_subprodutos', $ordenarpor, $ordem, $request->input('contrato')), 'empreendimentos_subprodutos.xlsx');
     }
 
 }

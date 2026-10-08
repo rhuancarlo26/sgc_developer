@@ -319,6 +319,14 @@ function getEmpreendimentoRoute(emp) {
 										:estudos="estudos"
 										:subprodutos/>
 									</div>
+									<div class="tab-pane" id="foruns" role="tabpanel">
+										<TableForuns
+											:contrato="contratos.data[0]"
+											:empreendimentos="empreendimentos"
+											:estudos="estudos"
+											:empreendimentos2="empreendimentos2"
+											:subprodutos/>
+									</div>
 									<div class="tab-pane" id="informacoesgerais" role="tabpanel">
 									<TableInfoGerais
 										:contrato="contratos.data[0]"

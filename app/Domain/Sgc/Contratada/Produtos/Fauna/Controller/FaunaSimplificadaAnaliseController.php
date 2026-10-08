@@ -115,6 +115,7 @@ class FaunaSimplificadaAnaliseController extends Controller
         abort_if(Auth::user()?->perfis_id === 3, 403, 'Fiscais não podem editar campanhas.');
 
         $validacao = new \App\Domain\Sgc\Contratada\Produtos\Fauna\Requests\StoreEntregaSimplificadaFaunaRequest();
+        $validacao->merge(['subproduto' => $request->input('subproduto')]);
         $dados = $request->validate($validacao->rules(), $validacao->messages());
         [$campanhaFauna, $entrega] = $this->buscarEntrega($contrato, $campanha);
         abort_unless(in_array($campanhaFauna->status, ['Em elaboração', 'Rejeitada']), 422, 'Esta campanha não pode ser editada.');
@@ -175,6 +176,8 @@ class FaunaSimplificadaAnaliseController extends Controller
             'id_campanha' => $campanha->id_campanha,
             'cod_emp' => $campanha->cod_emp,
             'sei_dnit' => $campanha->sei_dnit,
+            'data_ini' => $campanha->data_ini,
+            'data_fim' => $campanha->data_fim,
             'subproduto' => $campanha->subproduto,
             'status' => $campanha->status,
             'versao_analise' => $entrega->versao_analise,

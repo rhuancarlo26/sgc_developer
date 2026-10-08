@@ -2,9 +2,10 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import * as XLSX from 'xlsx';
 import Highcharts from 'highcharts';
+import { tiposPlanilhaFauna } from './tiposPlanilha';
 
-const props = defineProps({ planilhas: { type: Object, default: () => ({}) } });
-const tipos = [{ key: 'terrestre', label: 'Fauna Terrestre' }, { key: 'aquatica', label: 'Fauna Aquática' }, { key: 'cavernicola', label: 'Fauna Cavernícola' }];
+const props = defineProps({ planilhas: { type: Object, default: () => ({}) }, subproduto: { type: [String, Number], default: null } });
+const tipos = computed(() => tiposPlanilhaFauna(props.subproduto));
 const ativo = ref('terrestre');
 const dados = ref({ columns: [], rows: [], loading: false, error: null });
 const chartRiquezaRef = ref(null);
@@ -51,7 +52,7 @@ const destruirGraficos = () => { chartRiqueza?.destroy(); chartAbundancia?.destr
 const renderizarGraficos = () => nextTick(() => {
     destruirGraficos();
     if (!temDadosGraficos.value) return;
-    const opcoes = (titulo, itens, sufixo) => ({ chart: { type: 'pie' }, title: { text: titulo }, subtitle: { text: tipos.find((tipo) => tipo.key === ativo.value)?.label }, tooltip: { pointFormat: `<b>{point.percentage:.1f}%</b> ({point.y} ${sufixo})` }, plotOptions: { pie: { allowPointSelect: true, dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.percentage:.1f}%' } } }, credits: { enabled: false }, series: [{ name: titulo, data: serie(itens) }] });
+    const opcoes = (titulo, itens, sufixo) => ({ chart: { type: 'pie' }, title: { text: titulo }, subtitle: { text: tipos.value.find((tipo) => tipo.key === ativo.value)?.label }, tooltip: { pointFormat: `<b>{point.percentage:.1f}%</b> ({point.y} ${sufixo})` }, plotOptions: { pie: { allowPointSelect: true, dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.percentage:.1f}%' } } }, credits: { enabled: false }, series: [{ name: titulo, data: serie(itens) }] });
     if (chartRiquezaRef.value && estatisticas.value.riqueza.length) chartRiqueza = Highcharts.chart(chartRiquezaRef.value, opcoes('Riqueza', estatisticas.value.riqueza, 'espécies'));
     if (chartAbundanciaRef.value && estatisticas.value.abundancia.length) chartAbundancia = Highcharts.chart(chartAbundanciaRef.value, opcoes('Abundância', estatisticas.value.abundancia, 'registros'));
 });
@@ -71,6 +72,9 @@ const carregar = async () => {
     } catch (error) { dados.value = { columns: [], rows: [], loading: false, error: error.message || 'Erro ao carregar a planilha.' }; }
 };
 
+watch(tipos, permitidos => {
+    if (!permitidos.some(tipo => tipo.key === ativo.value)) ativo.value = permitidos[0].key;
+});
 watch([ativo, () => props.planilhas], carregar, { deep: true });
 watch([registros, ativo], renderizarGraficos, { deep: true });
 onMounted(carregar);
@@ -95,4 +99,6 @@ onBeforeUnmount(destruirGraficos);
     </section>
 </template>
 
-<style scoped>.preview { max-height: 520px; overflow: auto; }.preview table { min-width: 900px; }.chart { width: 100%; height: 390px; }</style>
+<style scoped>.preview { max-height: 520px; overflow: auto; }.preview table { min-width: 900px; }
+.preview thead th { position: sticky; top: 0; z-index: 2; background-color: #f1f5f9; color: #334155; box-shadow: inset 0 -1px 0 #cbd5e1; }
+.chart { width: 100%; height: 390px; }</style>

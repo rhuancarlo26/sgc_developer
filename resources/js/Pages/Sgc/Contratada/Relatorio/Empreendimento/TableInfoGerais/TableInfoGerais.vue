@@ -71,6 +71,9 @@ const getVisualizarRoute = (campanha) => {
   if (!contratoId || !campanha?.campanha_id) return '#';
 
   if (campanha.produto === 'Fauna') {
+    if (campanha.modo_preenchimento === 'simplificado') {
+      return route('sgc.contratada.produtos.fauna.simplificada.show', [contratoId, 'fauna', campanha.campanha_id]);
+    }
     return route('sgc.contratada.produtos.show', [contratoId, 'fauna', campanha.campanha_id]);
   }
 

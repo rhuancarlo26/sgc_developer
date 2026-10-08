@@ -22,6 +22,8 @@ class SgcFaunaEntregaSimplificadaService
                 'id_campanha' => $data['id_campanha'],
                 'subproduto' => $data['subproduto'],
                 'sei_dnit' => $data['sei_dnit'] ?? null,
+                'data_ini' => $data['data_ini'] ?? null,
+                'data_fim' => $data['data_fim'] ?? null,
                 'modo_preenchimento' => 'simplificado',
                 'status' => $data['enviar_analise'] ? 'Em análise' : 'Em elaboração',
                 'etapa_atual' => 'entrega_simplificada',
@@ -121,6 +123,8 @@ class SgcFaunaEntregaSimplificadaService
                 'cod_emp' => $data['cod_emp'],
                 'id_campanha' => $data['id_campanha'],
                 'sei_dnit' => $data['sei_dnit'] ?? null,
+                'data_ini' => array_key_exists('data_ini', $data) ? $data['data_ini'] : $campanha->data_ini,
+                'data_fim' => array_key_exists('data_fim', $data) ? $data['data_fim'] : $campanha->data_fim,
                 'subproduto' => $data['subproduto'],
                 'status' => $status,
             ]);

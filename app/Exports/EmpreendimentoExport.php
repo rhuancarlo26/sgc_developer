@@ -13,13 +13,15 @@ class EmpreendimentoExport implements FromCollection, WithHeadings
     protected $tabela;
     protected $ordenarpor;
     protected $ordem;
+    protected $contrato;
 
-    public function __construct(array $campos, $tabela = 'sgcvw_empreendimentos', $ordenarpor = null, $ordem = 'asc')
+    public function __construct(array $campos, $tabela = 'sgcvw_empreendimentos', $ordenarpor = null, $ordem = 'asc', $contrato = null)
     {
         $this->campos = $campos;
         $this->tabela = $tabela;
         $this->ordenarpor = $ordenarpor;
         $this->ordem = $ordem;
+        $this->contrato = $contrato;
     }
 
     public function collection()
@@ -34,6 +36,10 @@ class EmpreendimentoExport implements FromCollection, WithHeadings
                 $query = SgcvwSubprodutos::select($this->campos); break;
             default:
                 throw new \Exception("Tabela inválida: {$this->tabela}");
+        }
+
+        if ($this->contrato !== null && $this->contrato !== '' && in_array($this->tabela, ['sgcvw_estudos', 'sgcvw_subprodutos'], true)) {
+            $query->where('contrato', $this->contrato);
         }
 
         if ($this->ordenarpor) {

@@ -13,12 +13,16 @@ class StoreEntregaSimplificadaFaunaRequest extends FormRequest
 
     public function rules(): array
     {
+        $somenteTerrestre = str_contains(mb_strtolower((string) $this->input('subproduto', '')), 'atropelamento');
+
         return [
             'cod_emp' => 'required|string|max:255',
             'id_campanha' => 'required|integer|between:1,12',
+            'data_ini' => 'nullable|date_format:Y-m-d|required_with:data_fim',
+            'data_fim' => 'nullable|date_format:Y-m-d|required_with:data_ini|after_or_equal:data_ini',
             'sei_dnit' => 'nullable|string|max:255',
             'subproduto' => 'required|string',
-            'planilhas' => 'nullable|array',
+            'planilhas' => $somenteTerrestre ? 'nullable|array:terrestre' : 'nullable|array',
             'planilhas.terrestre' => 'nullable|array',
             'planilhas.aquatica' => 'nullable|array',
             'planilhas.cavernicola' => 'nullable|array',
@@ -48,8 +52,14 @@ class StoreEntregaSimplificadaFaunaRequest extends FormRequest
     {
         return [
             'contrato_id.required' => 'O contrato é obrigatório.',
+            'data_ini.required_with' => 'Informe a data inicial da campanha.',
+            'data_fim.required_with' => 'Informe a data final da campanha.',
+            'data_ini.date_format' => 'Informe uma data inicial válida.',
+            'data_fim.date_format' => 'Informe uma data final válida.',
+            'data_fim.after_or_equal' => 'A data final deve ser igual ou posterior à data inicial.',
             'cod_emp.required' => 'O empreendimento é obrigatório.',
             'id_campanha.required' => 'O ID da campanha é obrigatório.',
+            'planilhas.array' => 'Campanhas de atropelamento permitem somente a planilha de Fauna Terrestre.',
             'arquivo.mimes' => 'A planilha precisa ser .xlsx ou .csv.',
             'anexos.*.arquivo.max' => 'Cada anexo deve ter no máximo 20 MB.',
             'anexos.*.arquivo.uploaded' => 'Não foi possível receber o anexo. Confira o tamanho do arquivo e os limites de upload do servidor.',

@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { tiposPlanilhaFauna } from './tiposPlanilha';
 import * as XLSX from 'xlsx';
 
 const props = defineProps({
@@ -8,11 +9,7 @@ const props = defineProps({
     contrato: { type: [Number, String], required: true },
 });
 
-const tipos = [
-    { key: 'terrestre', label: 'Fauna Terrestre' },
-    { key: 'aquatica', label: 'Fauna Aquática' },
-    { key: 'cavernicola', label: 'Fauna Cavernícola' },
-];
+const tipos = computed(() => tiposPlanilhaFauna(props.form.subproduto));
 
 const previews = ref({});
 const erros = ref({});
@@ -64,7 +61,7 @@ const removerPlanilha = (tipo) => {
 const validarCampos = () => {
     const novosErros = {};
 
-    tipos.forEach(({ key, label }) => {
+    tipos.value.forEach(({ key, label }) => {
         const planilha = dados(key);
         if (planilha.remover) return;
 
@@ -88,7 +85,7 @@ defineExpose({ validarCampos });
     <div class="card">
         <div class="card-header"><h3 class="my-0">Planilhas de Resultados</h3></div>
         <div class="card-body">
-            <p class="text-muted">Envie somente as modalidades aplicáveis à campanha. Cada planilha utiliza o modelo configurado para ela.</p>
+            <p class="text-muted">{{ tipos.length === 1 ? 'Para campanhas de atropelamento, envie somente a planilha de Fauna Terrestre.' : 'Envie somente as modalidades aplicáveis à campanha. Cada planilha utiliza o modelo configurado para ela.' }}</p>
 
             <div v-for="tipo in tipos" :key="tipo.key" class="border rounded p-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3 gap-2">

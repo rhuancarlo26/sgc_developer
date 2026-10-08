@@ -100,8 +100,15 @@ const isSubprodutoRelatorioQualidadeAgua = (subproduto) => {
 
 // Lista única de descrições de subprodutos
 const uniqueSubprodutos = computed(() => {
-  const descriptions = props.subprodutos.map(sub => sub.descricao_revisada).filter(desc => desc);
-  return [...new Set(descriptions)];
+  const descricoes = new Set();
+  return props.subprodutos.filter(sub => {
+    if (!sub.descricao_revisada || descricoes.has(sub.descricao_revisada)) return false;
+    descricoes.add(sub.descricao_revisada);
+    return true;
+  }).map(sub => ({
+    descricao: sub.descricao_revisada,
+    rotulo: sub.subproduto ? `${sub.subproduto} - ${sub.descricao_revisada}` : sub.descricao_revisada,
+  }));
 });
 
 const campanhasFiltradas = computed(() => {
@@ -695,8 +702,8 @@ const deveExibirColuna = (coluna) => config.value.colunas.includes(coluna);
                       <h4 class="text-center mb-2">ESCOLHER SUBPRODUTO</h4>
                       <select v-model="selectedSubproduto" class="form-select">
                         <option value="">Todos</option>
-                        <option v-for="desc in uniqueSubprodutos" :key="desc" :value="desc">
-                          {{ desc }}
+                        <option v-for="sub in uniqueSubprodutos" :key="sub.descricao" :value="sub.descricao">
+                          {{ sub.rotulo }}
                         </option>
                       </select>
                     </div>
