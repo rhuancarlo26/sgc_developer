@@ -24,5 +24,13 @@ class SgcRelatorioCoordenacao extends Model
 
     
 
+    public function aprovacao()
+    {
+        return $this->hasOne(ChangeLog::class, 'record_id')
+            ->where('table_name', 'sgc_relatorio_coordenacao')
+            ->where('field', 'status')
+            ->where('new_value', 'Relatório Aprovado')
+            ->latest('id');
+    }
 }
 

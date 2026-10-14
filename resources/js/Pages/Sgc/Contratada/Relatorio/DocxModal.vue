@@ -1,7 +1,7 @@
 <script setup>
 import Modal from '@/Components/Modal.vue';
 import { renderAsync } from 'docx-preview';
-import { onMounted, ref } from "vue";
+import { onMounted, ref, nextTick } from "vue";
 import Comment from '@/Components/Comment.vue';
 import { IconMessageDots } from "@tabler/icons-vue";
 import { usePage } from '@inertiajs/vue3'; 
@@ -29,64 +29,31 @@ const isCounting = ref(false);
 const page = usePage();
 const appUrl = page.props.app_url; 
 
+const erroDocumento = ref('');
+let aberturaAtual = 0;
+
 const abrirModal = async (idItem, contratoId, versao) => {
+    const abertura = ++aberturaAtual;
     modalKey.value += 1;
+    erroDocumento.value = '';
+    wordDocument.value = null;
     modalDetalhes.value.getBsModal().show();
-    const caminhoDocumento = await fetchDocumentos(idItem, contratoId, versao);
+    await nextTick();
     loadComments(idItem, contratoId);
-    if (caminhoDocumento) {
-        
-        filePath = route('sgc.contratada.get_docx', {
-            itemId: idItem,
-            contratoId: contratoId,
-            versao: versao,
-            numRelatorio: props.numRelatorio
-        });
-        console.log('URL gerada:', filePath); 
-        try {
-            const response = await fetch(filePath);
-            if (!response.ok) {
-                throw new Error('Erro ao carregar o documento do Word: ' + response.statusText);
-            }
-            const wordBlob = await response.blob({ type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-            wordDocument.value = wordBlob;
-            renderAsync(wordDocument.value, docModal.value);
-        } catch (error) {
-            console.error('Erro ao carregar o documento do Word:', error);
-        }
-    } else {
-        console.log('Documento não encontrado para o item:', idItem);
-    }
-};
 
-const fetchDocumentos = async (itemId, contratoId, versao) => {
     try {
-        const response = await fetch(route('sgc.relatorio_coordenacao_upload.index'), {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        const data = await response.json();
-        console.log('Dados localizados:', data);
-
-        const docModal = data.find(doc => 
-            doc.item_id === itemId && 
-            doc.contrato_id === contratoId && 
-            doc.num_relatorio === props.numRelatorio && 
-            doc.versao === versao
-        );
-        console.log('Documento encontrado:', docModal);
-
-        if (docModal) {
-            return docModal.caminho;
-        } else {
-            console.log('Documento não encontrado para:', { itemId, contratoId, numRelatorio: props.numRelatorio, versao });
-            return null;
-        }
+        const response = await fetch(route('sgc.contratada.get_docx', {
+            itemId: idItem, contratoId, versao, numRelatorio: props.numRelatorio,
+        }));
+        if (!response.ok) throw new Error('Documento indisponivel para esta revisao.');
+        const blob = await response.blob();
+        if (abertura !== aberturaAtual) return;
+        wordDocument.value = blob;
+        await renderAsync(blob, docModal.value);
     } catch (error) {
-        console.error('Erro ao buscar documentos:', error);
-        return null;
+        if (abertura !== aberturaAtual) return;
+        erroDocumento.value = 'N\u00e3o foi poss\u00edvel abrir o documento desta revis\u00e3o.';
+        console.error(error);
     }
 };
 
@@ -162,6 +129,7 @@ defineExpose({ abrirModal });
                         </div>  
                     </div>
                 </div>
+                <p v-if="erroDocumento" class="alert alert-warning m-3" role="alert">{{ erroDocumento }}</p>
                 <div class="card-body" ref="docModal" :key="modalKey" @mousemove="addNote" :class="{ 'comment-enabled': isCounting }" />
                 <Comment v-for="(note, index) in notes"
                     :note="note"

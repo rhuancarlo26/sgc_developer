@@ -7,7 +7,7 @@ use App\Models\SgcRelatorioCoordenacao;
 use App\Shared\Abstract\BaseModelService;
 use App\Shared\Traits\Deletable;
 use App\Shared\Traits\Searchable;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class UploadService extends BaseModelService
 {
@@ -22,41 +22,30 @@ class UploadService extends BaseModelService
   
   public function salvarAnexo($request)
   {
-      // Verifica se já existe um anexo com os mesmos parâmetros
-      $arquivoExistente = SgcRelatorioUpload::where('item_id', $request['item_id'])
-          ->where('contrato_id', $request['contrato_id'])
-          ->where('num_relatorio', $request['relatorio_num'])
-          ->orderByDesc('versao')
-          ->first();
-  
-      // Salva o novo arquivo no sistema
-      $arquivo = $this->storageAnexo($request['arquivo']);
-  
-      if ($arquivoExistente) {
-          // Se já existir, atualiza o registro existente com o novo arquivo
-          $arquivoExistente->update([
-              'nome' => $arquivo['nome'],
-              'tipo' => $arquivo['tipo'],
-              'caminho' => $arquivo['caminho']
-          ]);
-  
-          $response = ['request' => $arquivoExistente];
-      } else {
-          // Se não existir, cria um novo registro
-          $form = [
-              ...$arquivo,
-              'contrato_id' => $request['contrato_id'],
-              'item_id' => $request['item_id'],
-              'num_relatorio' => $request['relatorio_num'],
-              'versao' => 0, 
-          ];
-  
-          $response = $this->dataManagement->create(entity: $this->modelClass, infos: $form);
-      }
-  
-      return [
-          'request' => $response['request']
-      ];
+      return DB::transaction(function () use ($request) {
+          // Serializa uploads e mudancas de revisao para este relatorio.
+          SgcRelatorioCoordenacao::where('contrato_id', $request['contrato_id'])
+              ->where('relatorio_num', $request['relatorio_num'])->lockForUpdate()->get();
+
+          $versao = AnexosRelatorioService::versaoAtual($request['contrato_id'], $request['relatorio_num']);
+          $existente = AnexosRelatorioService::consulta($request['contrato_id'], $request['relatorio_num'], $versao)
+              ->where('item_id', $request['item_id'])->first();
+          $arquivo = $this->storageAnexo($request['arquivo']);
+
+          if ($existente) {
+              $existente->update($arquivo);
+          } else {
+              $existente = SgcRelatorioUpload::create([
+                  ...$arquivo,
+                  'contrato_id' => $request['contrato_id'],
+                  'item_id' => $request['item_id'],
+                  'num_relatorio' => $request['relatorio_num'],
+                  'versao' => $versao,
+              ]);
+          }
+
+          return ['request' => $existente];
+      });
   }
 
 //   public function storageAnexo($arquivo)
@@ -90,10 +79,8 @@ class UploadService extends BaseModelService
 
   public function obterCaminhoAnexo($idItem, $contratoId, $relatorioNum)
   {
-      $arquivo = SgcRelatorioUpload::where('item_id', $idItem)
-          ->where('contrato_id', $contratoId)
-          ->where('num_relatorio', $relatorioNum)
-          ->first();
+      $arquivo = AnexosRelatorioService::consulta($contratoId, $relatorioNum)
+          ->where('item_id', $idItem)->first();
 
       return $arquivo ? $arquivo->caminho : null;
   }
