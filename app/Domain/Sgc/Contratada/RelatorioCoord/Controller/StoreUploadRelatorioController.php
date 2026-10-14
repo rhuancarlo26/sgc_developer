@@ -6,7 +6,7 @@ use App\Domain\Sgc\Contratada\RelatorioCoord\Services\UploadService;
 use App\Shared\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Models\SgcRelatorioUpload;
+use App\Domain\Sgc\Contratada\RelatorioCoord\Services\AnexosRelatorioService;
 
 class StoreUploadRelatorioController extends Controller
 {
@@ -24,11 +24,11 @@ class StoreUploadRelatorioController extends Controller
         ])->with('message', $response['request']);
     }
 
-    public function downloadAnexo($contratoId, $itemId, $relatorioNum)
+    public function downloadAnexo($contratoId, $itemId, $relatorioNum, Request $request)
     {
-        $arquivo = SgcRelatorioUpload::where('item_id', $itemId)
-            ->where('contrato_id', $contratoId)
-            ->where('num_relatorio', $relatorioNum)
+        $dados = $request->validate(['versao' => 'sometimes|required|integer|min:0']);
+        $arquivo = AnexosRelatorioService::consulta($contratoId, $relatorioNum, $dados['versao'] ?? null)
+            ->where('item_id', $itemId)
             ->firstOrFail();
 
         // Ajustar o caminho para storage/app/public/
@@ -38,7 +38,7 @@ class StoreUploadRelatorioController extends Controller
             abort(404, 'Arquivo não encontrado.');
         }
 
-        $filePath = storage_path('app/' . $caminhoCorrigido);
+        $filePath = Storage::path($caminhoCorrigido);
         $fileName = basename($filePath);
         $fileMimeType = mime_content_type($filePath);
 
