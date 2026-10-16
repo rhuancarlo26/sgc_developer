@@ -73,7 +73,10 @@ class CampanhasService extends BaseModelService
             ->join('servico_licenca_condicionante AS slc', 'slc.id', '=', 'at_fauna_execucao_campanhas.fk_servico_licenca')
             ->join('licencas', 'licencas.id', '=', 'slc.id_licenca')
             ->leftJoin('licencas_br', 'licencas_br.licenca_id', '=', 'licencas.id')
-            ->leftJoin('base_rodovia', 'base_rodovia.id', '=', 'licencas_br.rodovia')
+            ->leftJoin('base_rodovia', function ($join) {
+                $join->on('base_rodovia.rodovia', '=', 'licencas_br.rodovia')
+                    ->on('base_rodovia.estados_id', '=', 'licencas_br.uf_inicial');
+            })
             ->join('estados AS estado_inicial', 'estado_inicial.id', '=', 'at_fauna_execucao_campanhas.uf_inicial')
             ->join('estados AS estado_final', 'estado_final.id', '=', 'at_fauna_execucao_campanhas.uf_final')
             ->where('slc.id_servico', $servicoId)

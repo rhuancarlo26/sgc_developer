@@ -44,10 +44,12 @@ class MalhaViariaService extends BaseModelService
             ->join('tipo_licencas', 'licencas.tipo', '=', 'tipo_licencas.id')
             ->leftJoin('at_malha_viaria_shapefile AS amvs', 'amvs.fk_servico_licenca', '=', 'servico_licenca_condicionante.id')
             ->leftJoin('licencas_br', 'licencas_br.licenca_id', '=', 'licencas.id')
-            ->join('base_rodovia AS br', 'br.id', '=', 'licencas_br.rodovia')
+            ->join('base_rodovia AS br', function ($join) {
+                $join->on('br.rodovia', '=', 'licencas_br.rodovia')
+                    ->on('br.estados_id', '=', 'licencas_br.uf_inicial');
+            })
             ->join('estados', 'estados.id', '=', 'licencas_br.uf_inicial')
             ->where('id_servico', $servico->id)
-            ->whereRaw('br.estados_id = licencas_br.uf_inicial')
             ->paginate();
     }
 
