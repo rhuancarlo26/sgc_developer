@@ -33,6 +33,7 @@ const handleClick = (routeName) => {
           <NavLink
             @click="handleClick('Relatórios')"
             :route-name="'sgc.contratada.relatorios.index'"
+            active-on-route-prefix="sgc.contratada.relatorio*"
             :param="contratoId"
             title="Relatório de Coordenação"
             :icon="IconClipboardList"

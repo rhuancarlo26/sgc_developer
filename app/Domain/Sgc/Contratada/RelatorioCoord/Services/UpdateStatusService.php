@@ -6,6 +6,8 @@ use App\Models\SgcRelatorioCoordenacao;
 use App\Models\SgcHistoricoRelatorio;
 use App\Models\SgcRelatorioUpload;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ChangeLog;
 
 class UpdateStatusService
 {
@@ -29,7 +31,7 @@ class UpdateStatusService
             
             $relatorios = SgcRelatorioCoordenacao::where('contrato_id', $contrato_id)
                 ->where('relatorio_num', $relatorio_num)
-                ->get();
+                ->lockForUpdate()->get();
 
             $ultimaVersaoHistorico = SgcHistoricoRelatorio::where('relatorio_num', $relatorio_num)
                 ->where('contrato_id', $contrato_id)
@@ -57,13 +59,10 @@ class UpdateStatusService
                     'data_atualizacao' => $relatorio->data_atualizacao,
                 ]);
 
-                $arquivos = SgcRelatorioUpload::where('contrato_id', $contrato_id)
-                    ->where('num_relatorio', $relatorio_num)
-                    ->where('item_id', $relatorio->id_item)
-                    // ->where('versao', $ultimaVersaoHistorico)
-                    ->get();
+                $arquivo = AnexosRelatorioService::consulta($contrato_id, $relatorio_num, $novaVersao)
+                    ->where('item_id', $relatorio->id_item)->first();
 
-                foreach ($arquivos as $arquivo) {
+                if ($arquivo) {
                     SgcRelatorioUpload::create([
                         'contrato_id' => $arquivo->contrato_id,
                         'nome' => $arquivo->nome,
@@ -81,9 +80,23 @@ class UpdateStatusService
     
     public function aprovadoStatus($contrato_id, $relatorio_num)
     {
-        SgcRelatorioCoordenacao::where('contrato_id', $contrato_id)
-            ->where('relatorio_num', $relatorio_num) 
-            ->update(['status' => 'Relatório Aprovado']);
+        DB::transaction(function () use ($contrato_id, $relatorio_num) {
+            $relatorios = SgcRelatorioCoordenacao::where('contrato_id', $contrato_id)
+                ->where('relatorio_num', $relatorio_num)->lockForUpdate()->get();
+            foreach ($relatorios as $relatorio) {
+                if ($relatorio->status === 'Relatório Aprovado') continue;
+                $anterior = $relatorio->status;
+                $relatorio->update(['status' => 'Relatório Aprovado']);
+                ChangeLog::create([
+                    'user_id' => Auth::id(),
+                    'table_name' => 'sgc_relatorio_coordenacao',
+                    'record_id' => $relatorio->id,
+                    'field' => 'status',
+                    'old_value' => $anterior,
+                    'new_value' => 'Relatório Aprovado',
+                ]);
+            }
+        });
     }
 
     public function consultoriaStatus($contrato_id, $relatorio_num)

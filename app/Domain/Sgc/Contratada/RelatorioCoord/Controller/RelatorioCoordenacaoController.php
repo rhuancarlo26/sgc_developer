@@ -4,9 +4,11 @@ namespace App\Domain\Sgc\Contratada\RelatorioCoord\Controller;
 
 use App\Domain\Sgc\Contratada\RelatorioCoord\Services\RelatorioService;
 use App\Models\Contrato;
+use App\Domain\Sgc\Contratada\RelatorioCoord\Requests\UpdatePeriodoRelatorioRequest;
+use App\Domain\Sgc\Contratada\RelatorioCoord\Services\UpdatePeriodoRelatorioService;
+use App\Domain\Sgc\Contratada\RelatorioCoord\Services\AnexosRelatorioService;
 use App\Models\SgcComentario;
 use App\Models\SgcRelatorioCoordenacao;
-use App\Models\SgcRelatorioUpload;
 use App\Models\SgcHistoricoRelatorio;
 use App\Shared\Http\Controllers\Controller;
 use Inertia\Inertia;
@@ -32,13 +34,12 @@ class RelatorioCoordenacaoController extends Controller
         ->where('contrato_id', $contrato->id)
         ->get();
 
-        $dadosrelat = SgcRelatorioCoordenacao::where('contrato_id', $contrato->id)
+        $dadosrelat = SgcRelatorioCoordenacao::with('aprovacao.user:id,name')->where('contrato_id', $contrato->id)
             ->where('relatorio_num', $relatorioNum)
             ->get();
             
-        $update_anexo = SgcRelatorioUpload::where('contrato_id', $contrato->id)
-            ->where('num_relatorio', $relatorioNum)
-            ->get()->keyBy('item_id'); 
+        $update_anexo = AnexosRelatorioService::consulta($contrato->id, $relatorioNum)
+            ->get()->unique('item_id')->keyBy('item_id');
 
         return Inertia::render('Sgc/Contratada/Relatorio/Index', [
             'contrato' => $contrato,
@@ -51,21 +52,30 @@ class RelatorioCoordenacaoController extends Controller
 
     public function relatorios(Contrato $contrato): Response
     {
-        $dadosrelat = SgcRelatorioCoordenacao::where('contrato_id', $contrato->id)
-            ->with(['historicos' => function($query) {
-                $query->select('relatorio_num', 'versao', 'contrato_id');
+        $dadosrelat = SgcRelatorioCoordenacao::with('aprovacao.user:id,name')->where('contrato_id', $contrato->id)
+            ->with(['historicos' => function($query) use ($contrato) {
+                $query->where('contrato_id', $contrato->id)->select('relatorio_num', 'versao', 'contrato_id');
             }])
             ->get();
 
         return Inertia::render('Sgc/Contratada/Relatorio/Relatorios', [
+            'pode_editar_periodo' => auth()->user()?->hasRole('Super Admin') ?? false,
             'contrato' => $contrato,
             'dadosrelat' => $dadosrelat
         ]);
     }
 
+    public function atualizarPeriodo(UpdatePeriodoRelatorioRequest $request, Contrato $contrato, $relatorio_num, UpdatePeriodoRelatorioService $service)
+    {
+        $dados = $request->validated();
+        $service->atualizar($contrato->id, $relatorio_num, $dados['data_inicio'], $dados['data_fim'], $request->user()->id);
+        return back()->with('success', 'Período do relatório atualizado.');
+    }
+
     public function showHistorico($contrato_id, $relatorio_num, $versao): Response
     {
-        $historico = SgcHistoricoRelatorio::where('relatorio_num', $relatorio_num)
+        $historico = SgcHistoricoRelatorio::where('contrato_id', $contrato_id)
+            ->where('relatorio_num', $relatorio_num)
             ->where('versao', $versao)
             ->get(); 
 
@@ -95,10 +105,8 @@ class RelatorioCoordenacaoController extends Controller
     
     public function getDocx($itemId, $contratoId, $versao, $numRelatorio)
     {
-        $documento = SgcRelatorioUpload::where('item_id', $itemId)
-            ->where('contrato_id', $contratoId)
-            ->where('versao', $versao)
-            ->where('num_relatorio', $numRelatorio)
+        $documento = AnexosRelatorioService::consulta($contratoId, $numRelatorio, $versao)
+            ->where('item_id', $itemId)
             ->firstOrFail();
 
         $caminhoCorrigido = 'public/' . str_replace('\\', '/', $documento->caminho);
@@ -107,7 +115,7 @@ class RelatorioCoordenacaoController extends Controller
             abort(404, 'Arquivo não encontrado.');
         }
 
-        $filePath = storage_path('app/' . $caminhoCorrigido);
+        $filePath = Storage::path($caminhoCorrigido);
         $fileName = basename($filePath);
         $fileMimeType = mime_content_type($filePath);
 
@@ -130,9 +138,8 @@ class RelatorioCoordenacaoController extends Controller
     public function downloadPdfConsolidado($contratoId, $relatorioNum)
     {
         // Busca todos os documentos relacionados ao contrato e relatório
-        $documentos = SgcRelatorioUpload::where('contrato_id', $contratoId)
-            ->where('num_relatorio', $relatorioNum)
-            ->get();
+        $documentos = AnexosRelatorioService::consulta($contratoId, $relatorioNum)
+            ->get()->unique('item_id')->sortBy('item_id');
 
         if ($documentos->isEmpty()) {
             abort(404, 'Nenhum documento encontrado para consolidar.');
@@ -152,7 +159,7 @@ class RelatorioCoordenacaoController extends Controller
         foreach ($documentos as $documento) {
             $caminhoCorrigido = 'public/' . str_replace('\\', '/', $documento->caminho);
             if (Storage::exists($caminhoCorrigido)) {
-                $filePath = storage_path('app/' . $caminhoCorrigido);
+                $filePath = Storage::path($caminhoCorrigido);
                 try {
                     // Carrega o arquivo .docx usando PHPWord
                     $phpWord = IOFactory::load($filePath);

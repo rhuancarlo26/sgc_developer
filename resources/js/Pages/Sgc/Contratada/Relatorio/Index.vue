@@ -1,4 +1,6 @@
 <script setup>
+import InformacaoAprovacao from './InformacaoAprovacao.vue';
+import { formatarDataRelatorio } from './dataRelatorio';
 import { Head } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
@@ -57,9 +59,7 @@ const abrirDoc = (idItem) => {
 };
 
 
-const getUpdatedAt = (idItem) => {
-  return props.update_anexo[idItem]?.updated_at || 'Não Inserido';
-};
+const getUpdatedAt = (idItem) => formatarDataRelatorio(props.update_anexo[idItem]?.updated_at, 'Não inserido');
 
 const obterItens = async () => {
   try {
@@ -151,15 +151,6 @@ const downloadFile = (itemId) => {
   window.location.href = url;
 };
 
-const downloadPdfConsolidado = () => {
-    const url = route('sgc.contratada.download_pdf_consolidado', {
-        contratoId: props.contrato.id,
-        relatorioNum: form.relatorio_num
-    });
-    console.log('URL PDF Consolidado:', url); // Depuração
-    window.location.href = url;
-};
-
 const filteredRelatorios = ref([]);
 
 const filtrarRelatorios = () => {
@@ -215,9 +206,9 @@ onMounted(() => {
         </div>
       </template>
 
-      <NavbarContrato :tipo="contrato">
+      <NavbarContrato :tipo="contrato" class="relatorios-layout">
         <template #body>
-          <div class="container mt-4">
+          <div class="card card-body relatorios-conteudo">
             <div class="row mb-3">
               <div class="col-12 text-center">
                 <div class="titulo-relatorio">
@@ -230,6 +221,7 @@ onMounted(() => {
                 <div v-if="itens.length > 0" class="status-relatorio btn btn-light p-2">
                   STATUS DO RELATÓRIO - {{ obterStatusRelatorio(form.item_id, form.relatorio_num) }}
                 </div>
+                <InformacaoAprovacao v-if="dadosrelat[0]?.status === 'Relatório Aprovado'" :aprovacao="dadosrelat[0]?.aprovacao" />
               </div>
             </div>
             <div class="row mb-4">
@@ -260,12 +252,6 @@ onMounted(() => {
                     @click="aprovarRelatorio"
                     :disabled="isDisabledAprovarRelatorio()"
                   />
-                </div>
-                <!-- Botão para Download de PDF Consolidado -->
-                <div class="button-wrapper">
-                  <button @click="downloadPdfConsolidado" class="btn btn-outline-info" :disabled="props.dadosrelat.length === 0">
-                    Download PDF Consolidado
-                  </button>
                 </div>
               </div>
             </div>
@@ -314,9 +300,7 @@ onMounted(() => {
                       <td class="align-middle">
                         <button v-if="item.id_item >= 17" @click="downloadFile(item.id_item)" class="bg-blue-500 text-black px-4 py-2 rounded">Anexo</button>
                         <button v-else @click="abrirDoc(item.id_item)" class="btn btn-success mr-2">Abrir</button>
-                      </td>
 
-                      <td class="align-middle">
                         <template v-if="user.roles.some(role => role.name === 'Fiscal') && item.status === 'Análise DNIT'">
                             <button @click="aprovarItem(item, props.contrato.id, form.relatorio_num)" 
                                     class="btn btn-sm btn-success me-1" 
@@ -352,6 +336,22 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.relatorios-layout.card { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.relatorios-layout :deep(> .d-flex) { display: grid !important; grid-template-columns: 190px minmax(0, 1fr); gap: 20px; align-items: start; }
+.relatorios-layout :deep(> .d-flex > .col-md-1) { width: auto; padding: 12px 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+.relatorios-layout :deep(> .d-flex > .col-md-11) { width: auto; min-width: 0; }
+.relatorios-layout :deep(.navbar-nav .nav-link) { padding: 12px 10px; border-radius: 6px; }
+.relatorios-layout :deep(.navbar-nav .nav-item.active > .nav-link) { background: #eff6ff; color: #1d4ed8; }
+.relatorios-conteudo { min-width: 0; border-color: #e2e8f0; border-radius: 8px; padding: 20px; }
+@media (max-width: 1199px) {
+  .relatorios-layout :deep(> .d-flex) { grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 767px) {
+  .relatorios-layout :deep(> .d-flex) { grid-template-columns: 1fr; }
+  .relatorios-layout :deep(.navbar-nav) { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .relatorios-conteudo { padding: 16px; }
+}
+
 .titulo-relatorio {
   background-color: #fcfcfc;
   padding: 10px 20px;

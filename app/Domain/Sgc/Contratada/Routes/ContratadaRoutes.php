@@ -59,6 +59,8 @@ Route::prefix('/contratada')->middleware(['route-permission'])->group(function (
     Route::get('{contrato}/relatorio/{relatorio_num}',                    [RelatorioCoordenacaoController::class,                  'index'])->name('sgc.contratada.relatorio.detalhes');
     Route::get('{contrato}/relatorio/{relatorio_num}/historico/{versao}', [RelatorioCoordenacaoController::class,                  'showHistorico'])->name('sgc.contratada.relatorio.historico');
 
+    Route::patch('{contrato}/relatorio/{relatorio_num}/periodo', [RelatorioCoordenacaoController::class, 'atualizarPeriodo'])->name('sgc.contratada.relatorio.periodo.update');
+
     // Download anexo
     Route::get('/sgc/contratada/download-anexo/{contratoId}/{itemId}/{relatorioNum}', [StoreUploadRelatorioController::class, 'downloadAnexo'])->name('sgc.contratada.download_anexo');
 
