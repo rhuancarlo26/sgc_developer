@@ -6,7 +6,8 @@ import {
     IconLayoutDashboard,
     IconFileCheck,
     IconFileCertificate,
-    IconWorld
+    IconWorld,
+    IconCalendarDue
 } from "@tabler/icons-vue"
 
 import NavLink from "@/Components/NavLink.vue";
@@ -48,6 +49,16 @@ import NavDropdownLink from "@/Components/NavDropdownLink.vue";
 
                                 <!-- Licenças -->
                                 <NavLink route-name="licenca.index" title="Licenças" :icon="IconFileCheck" />
+
+                                <!-- Gestão de prazos de licenças e autorizações (sgc_licencas) -->
+                                <NavDropdown prefix="sgc.licencas.*" title="Gestão de Prazos" :icon="IconCalendarDue">
+                                    <NavDropdownLink route-name="sgc.licencas.painel"
+                                        active-on-route-prefix="sgc.licencas.painel" title="Painel de prazos" />
+                                    <NavDropdownLink route-name="sgc.licencas.index"
+                                        active-on-route-prefix="sgc.licencas.index" title="Licenças e autorizações" />
+                                    <NavDropdownLink route-name="sgc.licencas.regularizacao"
+                                        active-on-route-prefix="sgc.licencas.regularizacao" title="Regularização (AO, RCOI, RARA)" />
+                                </NavDropdown>
 
                                 <!-- Ambiente Geo -->
 <!--                                <NavLink route-name="ambienteGeo" title="Ambiente Geo" :icon="IconWorld" />-->

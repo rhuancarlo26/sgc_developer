@@ -12,4 +12,7 @@ Route::prefix('sgc')->group(function () {
     require __DIR__ . '/../GestaoContrato/Routes/GestaoContratosRoutes.php';
 
     require __DIR__ . '/../Contratada/Routes/ContratadaRoutes.php';
+
+    // Gestão de prazos de licenças e autorizações ambientais
+    require __DIR__ . '/../Licencas/Routes/LicencasRoutes.php';
 });
