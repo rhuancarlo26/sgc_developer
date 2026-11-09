@@ -37,8 +37,8 @@ const handleClick = (routeName) => {
 
 <template>
   <div class="card card-body space-y-3">
-    <div class="d-flex">
-      <div class="col-1">
+    <div class="d-flex flex-column flex-md-row">
+      <div class="col-12 col-md-1">
         <ul class="navbar-nav">
           <NavLink
             @click="handleClick('Relatórios')"
@@ -49,16 +49,13 @@ const handleClick = (routeName) => {
             :icon="IconClipboardList"
           />
 
-          <NavExpandable title="Produtos" :icon="IconLayoutDashboard">
-            <li v-for="(item, index) in produtos" :key="index">
-              <NavLink
-                @click="handleClick(item.title)"
-                :route-name="'sgc.contratada.produtos.index'"
-                :param="[contratoId, item.routeParam]"
-                :title="`- ${item.title}`"
-              />
-            </li>
-          </NavExpandable>
+          <NavLink
+            :route-name="'sgc.contratada.produtos.index'"
+            active-on-route-prefix="sgc.contratada.produtos.*"
+            :param="[contratoId, 'fauna']"
+            title="Produtos"
+            :icon="IconLayoutDashboard"
+          />
 
           <NavLink
             @click="handleClick('Cronograma')"
@@ -93,7 +90,7 @@ const handleClick = (routeName) => {
           />
         </ul>
       </div>
-      <div class="col-11">
+      <div class="col-12 col-md-11">
         <slot name="body" />
       </div>
     </div>

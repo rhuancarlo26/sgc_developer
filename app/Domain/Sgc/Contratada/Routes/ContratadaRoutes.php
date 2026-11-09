@@ -90,7 +90,7 @@ Route::prefix('/contratada')->group(function () {
     Route::get('{contrato}/quantitativos', [QuantitativosController::class, 'index'])->name('sgc.contratada.quantitativos.index');
 
     // Produtos
-    Route::get('/sgc/contratada/{contrato}/produtos/{produto}', [ProdutosController::class, 'index'])->name('sgc.contratada.produtos.index');
+    require __DIR__ . '/../Produtos/Routes/ProdutosFaunaRoutes.php';
 
     // DocxModal - Novo método
     Route::get('/sgc/contratada/get_docx/{itemId}/{contratoId}/{versao}/{numRelatorio}', [RelatorioCoordenacaoController::class, 'getDocx'])->name('sgc.contratada.get_docx');
