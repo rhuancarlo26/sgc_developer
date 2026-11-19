@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Tabelas de campanha dos produtos com entrega simplificada.
-     * Estrutura espelhada de sgc_asv_campanhas (dump em database/ajustes/asv_campanhas.sql).
+     * Estrutura espelhada de sgc_asv_campanhas (2026_10_19_100000_create_sgc_asv_campanhas_table).
      */
     private array $tabelas = [
         'indigena'   => 'sgc_indigena_campanhas',
